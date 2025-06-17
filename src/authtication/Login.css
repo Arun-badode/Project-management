@@ -2,6 +2,8 @@
   background: linear-gradient(to bottom right, #6a11cb, #2575fc);
   text-align: center;
   padding: 2rem;
+  border-top-right-radius:65px;
+  border-bottom-right-radius: 65px;
 }
 
 .login-right {
@@ -28,4 +30,20 @@
 
 .login-form input {
   padding-left: 45px !important;
+}
+
+.form-control {
+  border-radius: 30px; /* Makes the input field rounded */
+  border: 1px solid #ccc; /* Lighter, thinner border */
+  padding-left: 2rem; /* Adds padding for icon alignment */
+ 
+  box-shadow: #fff;
+}
+.btn-pri{
+   border-radius: 30px; /* Makes the input field rounded */
+  border: 1px solid #ccc; /* Lighter, thinner border */
+  padding-left: 2rem; /* Adds padding for icon alignment */
+ background-color: #6a11cb;
+ color: white;
+  box-shadow: hsl(248, 95%, 48%);
 }

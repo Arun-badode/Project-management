@@ -44,18 +44,18 @@ const Sidebar = ({ collapsed , }) => {
               <span className="menu-text">Project Management</span>
             </div>
           </li>
-           <li className={`menu-item ${isActive("/ad") ? "active" : ""}`}>
+           <li className={`menu-item ${isActive("/taskmanagement") ? "active" : ""}`}>
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/ad"); menuItemClick();} } >
+              onClick={() => {navigate("/taskmanagement"); menuItemClick();} } >
               <i className="fa-solid fa-cubes"></i>
               <span className="menu-text">Task Management</span>
             </div>
           </li>
-           <li className={`menu-item ${isActive("/ad") ? "active" : ""}`}>
+           <li className={`menu-item ${isActive("/usermanage") ? "active" : ""}`}>
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/ad"); menuItemClick();} } >
+              onClick={() => {navigate("/usermanage"); menuItemClick();} } >
               <i className="fa-solid fa-cubes"></i>
               <span className="menu-text"> User Management</span>
             </div>

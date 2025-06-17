@@ -13,6 +13,7 @@
     "bootstrap": "^5.3.3",
     "build": "^0.1.4",
     "chart.js": "^4.4.7",
+    "lucide-react": "^0.516.0",
     "primeicons": "^7.0.0",
     "primereact": "^10.9.1",
     "react": "^18.3.1",

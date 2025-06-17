@@ -27,34 +27,34 @@ const LoginPage = () => {
             className="login-form p-4 rounded w-100"
             style={{ maxWidth: "400px" }}
           >
-            <h4 className="mb-4">
+            <h4 className="mb-4 text-center">
               Hello!
               <br />
               <span className="text-muted small">Sign in to your account</span>
             </h4>
 
             <div className="form-group mb-3 position-relative">
-              <i className="bi bi-envelope-fill icon-left"></i>
+              <i class="fa-solid fa-envelope icon-left"></i>
               <input
                 type="email"
-                className="form-control ps-5"
+                className="form-control ps-5 "
                 placeholder="E-mail"
                 required
               />
             </div>
 
-            <div className="form-group mb-3 position-relative">
-              <i className="bi bi-lock-fill icon-left"></i>
+            <div className="form-group mb-3 position-relative ">
+              <i class="fa-solid fa-lock icon-left"></i>
               <input
                 type="password"
                 className="form-control ps-5"
                 placeholder="Password"
                 required
               />
-              <i className="bi bi-eye eye-icon"></i>
+            <i class="fa-solid fa-eye eye-icon "></i>
             </div>
             <Link to="/admin">
-              <button type="submit" className="btn btn-primary w-100">
+              <button type="submit" className="btn w-100 btn-pri">
                 SIGN IN
               </button>
             </Link>
