@@ -10,18 +10,18 @@ const LeadDashboard = () => {
   const handleClose = () => setShowModal(false);
 
   return (
-    <div className="lead-dashboard text-white p-4" style={{ background: 'linear-gradient(to bottom right, #1d2671, #c33764)', minHeight: '100vh' }}>
+    <div className="lead-dashboard text-white p-4 bg-main" >
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-bold">Project Manager Dashboard</h2>
-        <Button variant="outline-light" className="rounded-pill px-4" onClick={handleShow}>
-          <FaPlus className="me-2" /> Create New Project
+        <h2 className="gradient-heading ">Project Manager Dashboard</h2>
+        <Button variant="outline-light" className="gradient-button" onClick={handleShow}>
+          <FaPlus className="me-2 " /> Create New Project
         </Button>
       </div>
 
       {/* Top KPIs */}
       <div className="row mb-4">
         <div className="col-md-4">
-          <Card className="bg-dark text-white p-3">
+          <Card className="bg-card text-white p-3">
             <Card.Body>
               <Card.Title>Active Projects</Card.Title>
               <h3>4</h3>
@@ -29,7 +29,7 @@ const LeadDashboard = () => {
           </Card>
         </div>
         <div className="col-md-4">
-          <Card className="bg-dark text-white p-3">
+          <Card className="bg-card text-white p-3">
             <Card.Body>
               <Card.Title>Tasks Due Soon</Card.Title>
               <h3>7</h3>
@@ -37,7 +37,7 @@ const LeadDashboard = () => {
           </Card>
         </div>
         <div className="col-md-4">
-          <Card className="bg-dark text-white p-3">
+          <Card className="bg-card text-white p-3">
             <Card.Body>
               <Card.Title>Team Availability</Card.Title>
               <h3>3 Available</h3>
@@ -47,9 +47,9 @@ const LeadDashboard = () => {
       </div>
 
       {/* Main Section - Project Table */}
-      <Card className="bg-dark text-white p-4 mb-4">
+      <Card className="table-gradient-bg text-white p-4 mb-4">
         <h4 className="mb-3">Assigned Projects Overview</h4>
-        <Table variant="dark" hover responsive className="table-borderless">
+        <Table  hover responsive className="table-borderless table-gradient-bg">
           <thead>
             <tr>
               <th>Project Name</th>
@@ -81,7 +81,7 @@ const LeadDashboard = () => {
       <div className="row">
         {/* Resource Workload Panel */}
         <div className="col-md-6 mb-4">
-          <Card className="bg-dark text-white p-3">
+          <Card className="bg-card text-white p-3">
             <h5 className="mb-3">Resource Workload</h5>
             <div className="d-flex justify-content-between mb-2">
               <span>John Doe (I'm In)</span>
@@ -100,7 +100,7 @@ const LeadDashboard = () => {
 
         {/* Task Requests Panel */}
         <div className="col-md-6 mb-4">
-          <Card className="bg-dark text-white p-3">
+          <Card className="bg-card text-white p-3">
             <h5 className="mb-3">Task Requests Management</h5>
             <div className="mb-2">
               <strong>Request:</strong> Reassign Task "#2341"
@@ -115,7 +115,7 @@ const LeadDashboard = () => {
       </div>
 
       {/* Collaboration Section */}
-      <Card className="bg-dark text-white p-3">
+      <Card className="bg-card text-white p-3">
         <h5 className="mb-3">Collaboration</h5>
         <div className="d-flex justify-content-between">
           <span><FaUsers className="me-2" />#UI-567 - Jane commented on "Color Scheme Options"</span>

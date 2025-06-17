@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 const Navbar = ({ toggleSidebar }) => {
   return (
     <>
-      <nav className="navbar navbar-light">
+      <nav className="navbar navbar-light bg-card">
         <div className="container-fluid nav-conte">
           <div className="nav-content">
             <div className="nav-bran">

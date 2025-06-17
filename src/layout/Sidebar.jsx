@@ -25,7 +25,7 @@ const Sidebar = ({ collapsed , }) => {
   return (
     <div className={`sidebar-container ${collapsed ? "collapsed" : ""}`}>
       {/* <div className={`sidebar-container ${collapsed ? "collapsed" : ""}`}></div> */}
-      <div className="sidebar">
+      <div className="sidebar bg-card">
         <ul className="menu">
           {/* Dashboard Section */}
           <li className={`menu-item ${isActive("/admin") ? "active" : ""}`}>
@@ -40,7 +40,7 @@ const Sidebar = ({ collapsed , }) => {
             <div
               className="menu-link menu-i"
               onClick={() => {navigate("/LeadDashboard"); menuItemClick();} } >
-              <i className="fa-solid fa-cubes"></i>
+              <i class="fa-brands fa-square-letterboxd"></i>
               <span className="menu-text">Project Management</span>
             </div>
           </li>
@@ -48,7 +48,7 @@ const Sidebar = ({ collapsed , }) => {
             <div
               className="menu-link menu-i"
               onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i className="fa-solid fa-cubes"></i>
+              <i class="fa-solid fa-list-check"></i>
               <span className="menu-text">Task Management</span>
             </div>
           </li>
@@ -56,7 +56,7 @@ const Sidebar = ({ collapsed , }) => {
             <div
               className="menu-link menu-i"
               onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i className="fa-solid fa-cubes"></i>
+              <i class="fa-solid fa-user"></i>
               <span className="menu-text"> User Management</span>
             </div>
           </li>
@@ -64,7 +64,7 @@ const Sidebar = ({ collapsed , }) => {
             <div
               className="menu-link menu-i"
               onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i className="fa-solid fa-cubes"></i>
+              <i class="fa-solid fa-folder-open"></i>
               <span className="menu-text">Resource Management</span>
             </div>
           </li>
@@ -72,7 +72,7 @@ const Sidebar = ({ collapsed , }) => {
             <div
               className="menu-link menu-i"
               onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i className="fa-solid fa-cubes"></i>
+              <i class="fa-solid fa-clock-rotate-left"></i>
               <span className="menu-text">Time Tracking</span>
             </div>
           </li>
@@ -80,7 +80,7 @@ const Sidebar = ({ collapsed , }) => {
             <div
               className="menu-link menu-i"
               onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i className="fa-solid fa-cubes"></i>
+              <i class="fa-solid fa-file"></i>
               <span className="menu-text">File Management</span>
             </div>
           </li>
@@ -88,7 +88,7 @@ const Sidebar = ({ collapsed , }) => {
             <div
               className="menu-link menu-i"
               onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i className="fa-solid fa-cubes"></i>
+              <i class="fa-solid fa-pen-to-square"></i>
               <span className="menu-text">QA Management</span>
             </div>
           </li>
@@ -96,7 +96,7 @@ const Sidebar = ({ collapsed , }) => {
             <div
               className="menu-link menu-i"
               onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i className="fa-solid fa-cubes"></i>
+              <i class="fa-solid fa-satellite-dish"></i>
               <span className="menu-text"> Reporting & Analytics</span>
             </div>
           </li>
@@ -104,7 +104,7 @@ const Sidebar = ({ collapsed , }) => {
             <div
               className="menu-link menu-i"
               onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i className="fa-solid fa-cubes"></i>
+              <i class="fa-solid fa-gear"></i>
               <span className="menu-text"> Settings</span>
             </div>
           </li>
@@ -112,7 +112,7 @@ const Sidebar = ({ collapsed , }) => {
             <div
               className="menu-link menu-i"
               onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i className="fa-solid fa-cubes"></i>
+              <i class="fa-solid fa-chart-simple"></i>
               <span className="menu-text">Audit Logs</span>
             </div>
           </li>
@@ -120,7 +120,7 @@ const Sidebar = ({ collapsed , }) => {
             <div
               className="menu-link menu-i"
               onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i className="fa-solid fa-cubes"></i>
+             <i class="fa-solid fa-user"></i>
               <span className="menu-text">Profile & Account</span>
             </div>
           </li>
@@ -128,7 +128,7 @@ const Sidebar = ({ collapsed , }) => {
             <div
               className="menu-link menu-i"
               onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i className="fa-solid fa-cubes"></i>
+             <i class="fa-solid fa-envelope-open-text"></i>
               <span className="menu-text">Support</span>
             </div>
           </li>
