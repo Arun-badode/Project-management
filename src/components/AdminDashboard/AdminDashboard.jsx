@@ -105,7 +105,7 @@ const AdminDashboard = () => {
         <Col md={3}>
           <Card className="bg-card  text-white p-3">
             <Card.Body>
-              <Card.Title>Projects Nearing Deadline</Card.Title>
+              <Card.Title>Projects Deadline</Card.Title>
               <h4>4</h4>
             </Card.Body>
           </Card>

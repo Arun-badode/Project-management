@@ -23,7 +23,7 @@ const Navbar = ({ toggleSidebar }) => {
                 type="text" 
                 placeholder="Search..." 
                 className="form-control"
-                style={{width: "600px", borderRadius:"30px"}}
+                style={{width: "500px", borderRadius:"30px"}}
               />
             </div>
             
