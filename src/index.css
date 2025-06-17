@@ -1,0 +1,33 @@
+.bg-main{
+    background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e)!important;
+
+}
+
+.bg-card{
+    background: linear-gradient(to bottom right, #141c3a, #1b2f6e)!important;
+
+}
+
+.gradient-heading {
+  background: linear-gradient(to right, #4dc3ff, #b86bff); /* Blue to Purple */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight:bold;
+}
+
+.gradient-button {
+  background: linear-gradient(to right, #4dc3ff, #b86bff); /* blue to purple */
+  color: #1d1b1f; /* dark text for contrast */
+  border: none;
+  padding: 0.5rem 1.25rem;
+  font-weight: 600;
+  border-radius: 999px; /* pill-shaped */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gradient-button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+

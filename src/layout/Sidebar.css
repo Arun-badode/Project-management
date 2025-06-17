@@ -1,6 +1,6 @@
 .sidebar-container {
   width: 295px;
-  background-color: #3b62ce;
+ background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e)!important;
   height: 89vh;
   overflow-y: auto;
   transition: width 0.3s ease;
@@ -13,10 +13,10 @@
   width: 80px;
 }
 
-.sidebar-container.collapsed .submenu .submenu-item {
-  /* opacity: 0; */
+/* .sidebar-container.collapsed .submenu .submenu-item {
+  
   visibility: hidden;
-}
+} */
 .sidebar-container.collapsed .menu .menu-text {
   opacity: 0;
   visibility: hidden;
