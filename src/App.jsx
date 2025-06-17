@@ -6,6 +6,9 @@ import Sidebar from "./layout/Sidebar";
 import { useState } from "react";
 import LoginPage from "./authtication/Login";
 
+import LeadDashboard from "./components/Lead/LeadDashboard";
+import AdminDashboard from "./components/AdminDashboard/AdminDashboard";
+
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -43,8 +46,10 @@ function App() {
           className={`right-side-content ${isSidebarCollapsed && !hideLayout ? "collapsed" : ""}`}
         >
           <Routes>
-            <Route path="/" element={<LoginPage/>} />
-            
+            <Route path="/" element={<LoginPage />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/LeadDashboard" element={<LeadDashboard />} />
+            {/* Add your other routes here */}
           </Routes>
         </div>
       </div>

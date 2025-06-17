@@ -170,7 +170,7 @@ select.form-input {
   gap: 15px;
 }
 
-.siignup-button,
+.siignup-button,  
 .loogin-button {
   flex: 1;
   padding: 10px;
@@ -186,7 +186,7 @@ select.form-input {
 
 .loogin-button {
   background-color: #fff;
-  color: #4a766e;
+  color: #ffffff;
   border: 1px solid gray;
   margin-right: 380px;
 
@@ -266,7 +266,7 @@ select.form-input {
   border-bottom: 1px solid #949494;
   position: fixed;
   z-index: 5;
-  background-color: white;
+  background-color: #3b62ce;
   width: 100%;
 }
 
@@ -275,9 +275,9 @@ select.form-input {
 }
 
 .nav-brand {
-  color: #578E7E;
+  color: white;
   line-height: 54.46px;
-  font-size: 45px;
+  font-size: 30px;
   font-weight: 700;
   font-family: inter;
 }
@@ -297,7 +297,7 @@ select.form-input {
 }
 
 .nav-brand:hover {
-  color: #578E7E;
+  color: #9ac0fa;
 }
 
 .nav-content {
@@ -346,12 +346,12 @@ select.form-input {
 }
 
 .user-icon {
-  color: #578E7E;
+  color: white;
 }
 
-.user-icon:hover {
-  color: #578E7E;
-}
+/* .user-icon:hover {
+  color: #0b0bdc;
+} */
 
 /* navbar end  */
 /* right-side-content start*/

@@ -8,22 +8,22 @@ const Navbar = ({ toggleSidebar }) => {
           <div className="nav-content">
             <div className="nav-bran">
               <a className="nav-brand" href="#">
-                ProcXa-AI
+               P.M.
               </a>
-              <div className="nav-taggle-icon" onClick={toggleSidebar}>
+              <div className="nav-taggle-icon" style={{fontSize:"25px",}} onClick={toggleSidebar}>
                 <a href="#">
-                  <i className="fa fa-bars" aria-hidden="true"></i>
+                  <i className="fa fa-bars" aria-hidden="true" style={{color:"white"}}></i>
                 </a>
               </div>
             </div>
             <div className="nav-main-icon">
-              <a className="bell-icon" href="#">
+              <a className="bell-icon" href="#" style={{fontSize:"25px"}}>
                 <i className="fa-regular fa-bell"></i>
               </a>
               <div className="dropdown profile-elemen">
                 <div
                   className="me-2 fw-bold p-1 rounded-4 profile d-flex align-items-center"
-                  style={{ cursor: "pointer" }}
+                  style={{ cursor: "pointer", fontSize:"25px" }}
                   data-bs-toggle="dropdown"
                   aria-expanded="false">
                   <div className="profile-element">
