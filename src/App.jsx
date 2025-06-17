@@ -11,6 +11,7 @@ import AdminDashboard from "./components/AdminDashboard/AdminDashboard";
 import TaskManagementPage from "./components/AdminDashboard/TaskManagement/TaskManagemnet";
 import TaskManagement from "./components/AdminDashboard/TaskManagement/TaskManagemnet";
 import UserManagement from "./components/AdminDashboard/UserManagement/UserManagement";
+import ResourceManagement from "./components/AdminDashboard/ResourceManagement/ResourceManagement";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -55,6 +56,7 @@ function App() {
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/taskmanagement" element={<TaskManagement/>}/>
             <Route path='/usermanage' element={<UserManagement/>}/>
+            <Route path="/resourcemanagement" element={<ResourceManagement/>}/>
 
             {/*Admin End */}
 
