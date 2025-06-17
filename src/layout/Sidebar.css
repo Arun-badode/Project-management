@@ -1,6 +1,6 @@
 .sidebar-container {
-  width: 320px;
-  background-color: white;
+  width: 295px;
+  background-color: #3b62ce;
   height: 89vh;
   overflow-y: auto;
   transition: width 0.3s ease;
@@ -43,10 +43,12 @@
   align-items: center;
   padding: 10px;
   text-decoration: none;
-  color: #578E7E;
+  color: white;
   cursor: pointer;
   transition: background 0.3s ease;
 }
+
+
 
 .menu-text {
   margin-left: 10px;
@@ -94,10 +96,17 @@
   transform: rotate(360deg);
 }
 .menu-item.active .menu-link {
-  background-color: #578E7E; /* Highlight active menu item */
+  background-color: #133eb3; /* Highlight active menu item */
   color: white; /* Active text color */
   border-radius: 12px;
 }
+
+.menu-item:hover .menu-link {
+  background-color: #133eb3; /* Highlight active menu item */
+  color: white; /* Active text color */
+  border-radius: 12px;
+}
+
 .sidebar-container.collapsed .submenu .submenu-item i{
   visibility: visible !important;
   opacity: 1 !important;

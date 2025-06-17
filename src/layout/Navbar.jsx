@@ -10,9 +10,9 @@ const Navbar = ({ toggleSidebar }) => {
               <a className="nav-brand" href="#">
                P.M.
               </a>
-              <div className="nav-taggle-icon" style={{fontSize:"25px"}} onClick={toggleSidebar}>
+              <div className="nav-taggle-icon" style={{fontSize:"25px",}} onClick={toggleSidebar}>
                 <a href="#">
-                  <i className="fa fa-bars" aria-hidden="true"></i>
+                  <i className="fa fa-bars" aria-hidden="true" style={{color:"white"}}></i>
                 </a>
               </div>
             </div>
