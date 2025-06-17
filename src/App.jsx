@@ -15,6 +15,11 @@ import ResourceManagement from "./components/AdminDashboard/ResourceManagement/R
 import ProjectSupportPortal from "./components/ProjectSupport/ProjectSupport";
 import SettingsPage from "./components/AdminDashboard/Setting/Setting";
 import ProfileAcc from "./components/AdminDashboard/ProfileAcc/ProfileAcc";
+import AuditLog from "./components/AuthLog/AuditLog";
+import QAManagement from "./components/QAManagement/QAManagement";
+import TimeTracker from "./components/AdminDashboard/TimeTracker/TimeTracker";
+import ReportingAnalytics from "./components/ReportingAnalytics/ReportingAnalytics";
+import FileManagementSystem from "./components/FileManagementSystem/FileManagementSystem";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -63,6 +68,13 @@ function App() {
              <Route path="/projectsupport" element={<ProjectSupportPortal/>}/>
               <Route path="/settingpage" element={<SettingsPage/>}/>
                <Route path="/profile" element={<ProfileAcc/>}/>
+                 <Route path="/auditlog" element={<AuditLog/>}/>
+                   <Route path="/timetracker" element={<TimeTracker/>}/>
+                     <Route path="/reportinganalytics" element={<ReportingAnalytics/>}/>
+                     <Route path="/filemanagementsystem" element={<FileManagementSystem/>}/>
+                      <Route path="/qamanagement" element={<QAManagement/>}/>
+
+
 
             {/*Admin End */}
 

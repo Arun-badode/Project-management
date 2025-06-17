@@ -812,39 +812,42 @@ function UserGuideSection() {
   );
 }
 
+// --- Responsive Tabs ---
+function ResponsiveTabs({ tab, setTab }) {
+  const tabs = [
+    { key: "ticket", label: "Raise Ticket", icon: "bi-flag-fill" },
+    { key: "help", label: "Help Center", icon: "bi-life-preserver" },
+    { key: "guide", label: "User Guide", icon: "bi-journal-bookmark-fill" },
+  ];
+  return (
+    <ul className="nav nav-tabs justify-content-center mb-3 flex-nowrap overflow-auto">
+      {tabs.map((t) => (
+        <li className="nav-item" key={t.key}>
+          <button
+            className={`nav-link d-flex align-items-center ${tab === t.key ? "active" : ""}`}
+            style={{ minWidth: 120 }}
+            onClick={() => setTab(t.key)}
+          >
+            <i className={`bi ${t.icon} me-2`}></i>
+            {t.label}
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 // --- Main App ---
 export default function ProjectSupportPortal() {
   const [tab, setTab] = useState("ticket");
   return (
-    <div>
-      <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div className="container">
-          <a className="navbar-brand fw-bold" href="#">
-            <i className="bi bi-tools me-2"></i>
-            Project Support Portal
-          </a>
-          <ul className="navbar-nav ms-auto">
-            <li className="nav-item">
-              <button className={`btn btn-link nav-link text-white ${tab === "ticket" ? "fw-bold" : ""}`} onClick={() => setTab("ticket")}>
-                Raise Ticket
-              </button>
-            </li>
-            <li className="nav-item">
-              <button className={`btn btn-link nav-link text-white ${tab === "help" ? "fw-bold" : ""}`} onClick={() => setTab("help")}>
-                Help Center
-              </button>
-            </li>
-            <li className="nav-item">
-              <button className={`btn btn-link nav-link text-white ${tab === "guide" ? "fw-bold" : ""}`} onClick={() => setTab("guide")}>
-                User Guide
-              </button>
-            </li>
-          </ul>
-        </div>
-      </nav>
-      {tab === "ticket" && <RaiseTicketSection />}
-      {tab === "help" && <HelpCenterSection />}
-      {tab === "guide" && <UserGuideSection />}
+    <div className="bg-light min-vh-100">
+      <div className="container-fluid px-2 px-md-4">
+        <ResponsiveTabs tab={tab} setTab={setTab} />
+        {tab === "ticket" && <RaiseTicketSection />}
+        {tab === "help" && <HelpCenterSection />}
+        {tab === "guide" && <UserGuideSection />}
+      </div>
     </div>
   );
 }
