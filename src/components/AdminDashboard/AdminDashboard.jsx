@@ -74,10 +74,10 @@ const AdminDashboard = () => {
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <h2 className="gradient-heading">Admin Dashboard</h2>
         <div className="d-flex flex-column flex-sm-row gap-2">
-          <Button variant="outline-light" className="gradient-button" onClick={handleShow}>
+          <Button  className="gradient-button" onClick={handleShow}>
             <FaPlus className="me-2" /> Create New Project
           </Button>
-          <Button variant="outline-light" className="gradient-button">
+          <Button  className="gradient-button">
             <FaFileExport className="me-2" /> Export Data
           </Button>
         </div>
@@ -173,7 +173,7 @@ const AdminDashboard = () => {
       <Card className="table-gradient-bg text-white p-3 mb-5">
         <h4 className="mb-3">Project List</h4>
         <div className="table-responsive">
-          <Table hover className="table table-gradient-bg align-middle mb-0">
+          <Table  className="table bg-card align-middle mb-0">
             <thead>
               <tr>
                 <th>ID</th>

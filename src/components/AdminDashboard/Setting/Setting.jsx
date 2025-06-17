@@ -95,20 +95,20 @@ export default function SettingsPage() {
 
   return (
     <div className="container-fluid settings-main-unique py-4">
-      <h2 className="mb-4 fw-bold">Settings</h2>
-      <div className="row g-4">
+      <h2 className="gradient-heading">Settings</h2>
+      <div className="row g-4 ">
         {/* App Configurations */}
         <div className="col-12 col-lg-6">
-          <div className="card shadow-sm settings-card-unique">
-            <div className="card-header bg-light settings-card-header-unique">
-              <h5 className="mb-0">App Configurations</h5>
+          <div className="card shadow-sm settings-card-unique bg-card">
+            <div className="card-header bg-light settings-card-header-unique bg-card">
+              <h5 className="mb-0 ">App Configurations</h5>
             </div>
             <div className="card-body">
               <div className="mb-3">
                 <label className="form-label fw-semibold">Application Name</label>
                 <input
                   type="text"
-                  className="form-control settings-input-unique"
+                  className="form-control settings-input-unique bg-card"
                   value={appName}
                   onChange={(e) => setAppName(e.target.value)}
                 />
@@ -117,7 +117,7 @@ export default function SettingsPage() {
                 <label className="form-label fw-semibold">Logo</label>
                 <input
                   type="file"
-                  className="form-control settings-logo-input-unique"
+                  className="form-control settings-logo-input-unique bg-card"
                   accept="image/*"
                   onChange={handleLogoChange}
                 />
@@ -125,7 +125,7 @@ export default function SettingsPage() {
                   <img
                     src={logoPreview}
                     alt="Logo Preview"
-                    className="img-thumbnail mt-2 settings-logo-preview-unique"
+                    className="img-thumbnail mt-2 settings-logo-preview-unique "
                     style={{ maxWidth: 100, maxHeight: 100 }}
                   />
                 )}
@@ -134,7 +134,7 @@ export default function SettingsPage() {
                 <div className="col">
                   <label className="form-label fw-semibold">Default Language</label>
                   <select
-                    className="form-select settings-select-unique"
+                    className="form-select settings-select-unique bg-card"
                     value={language}
                     onChange={(e) => setLanguage(e.target.value)}
                   >
@@ -146,7 +146,7 @@ export default function SettingsPage() {
                 <div className="col">
                   <label className="form-label fw-semibold">Timezone</label>
                   <select
-                    className="form-select settings-select-unique"
+                    className="form-select settings-select-unique bg-card"
                     value={timezone}
                     onChange={(e) => setTimezone(e.target.value)}
                   >
@@ -174,17 +174,17 @@ export default function SettingsPage() {
 
         {/* Role & Permission Control */}
         <div className="col-12 col-lg-6">
-          <div className="card shadow-sm settings-card-unique">
-            <div className="card-header bg-light settings-card-header-unique d-flex justify-content-between align-items-center">
+          <div className="card shadow-sm settings-card-unique bg-card ">
+            <div className="card-header  settings-card-header-unique d-flex justify-content-between align-items-center">
               <h5 className="mb-0">Role & Permission Control</h5>
-              <button className="btn btn-primary btn-sm settings-add-role-btn-unique" onClick={handleAddRole}>
+              <button className="gradient-button" onClick={handleAddRole}>
                 Add Role
               </button>
             </div>
             <div className="card-body">
-              <div className="table-responsive">
-                <table className="table table-bordered align-middle settings-table-unique">
-                  <thead className="table-light">
+              <div className="table-responsive ">
+                <table className="table table-bordered align-middle table-gradient-bg ">
+                  <thead className="table-gradient-bg">
                     <tr>
                       <th>Role</th>
                       <th>Create</th>
@@ -208,7 +208,7 @@ export default function SettingsPage() {
                         </td>
                         <td>
                           <button
-                            className="btn btn-outline-secondary btn-sm settings-edit-role-btn-unique"
+                            className="btn btn-outline-light btn-sm settings-edit-role-btn-unique"
                             onClick={() => handleRoleEdit(idx)}
                           >
                             Edit
@@ -221,7 +221,7 @@ export default function SettingsPage() {
               </div>
               {/* Role Modal */}
               {showRoleModal && (
-                <div className="modal show d-block" tabIndex="-1" role="dialog">
+                <div className="modal show d-block custom-modal-dark" tabIndex="-1" role="dialog">
                   <div className="modal-dialog" role="document">
                     <div className="modal-content">
                       <div className="modal-header">
@@ -281,10 +281,10 @@ export default function SettingsPage() {
                         </div>
                       </div>
                       <div className="modal-footer">
-                        <button type="button" className="btn btn-secondary" onClick={() => setShowRoleModal(false)}>
+                        <button type="button" className="btn btn-danger rounded-pill " onClick={() => setShowRoleModal(false)}>
                           Cancel
                         </button>
-                        <button type="button" className="btn btn-primary" onClick={handleRoleSave}>
+                        <button type="button" className="gradient-button" onClick={handleRoleSave}>
                           Save
                         </button>
                       </div>
@@ -298,15 +298,15 @@ export default function SettingsPage() {
 
         {/* Excel Template Management */}
         <div className="col-12 col-lg-6">
-          <div className="card shadow-sm settings-card-unique">
-            <div className="card-header bg-light settings-card-header-unique">
+          <div className="card shadow-sm settings-card-unique bg-card">
+            <div className="card-header bg-light settings-card-header-unique bg-card">
               <h5 className="mb-0">Excel Template Management</h5>
             </div>
             <div className="card-body">
               <div className="mb-3">
-                <label className="form-label fw-semibold">Upload Type</label>
+                <label className="form-label fw-semibold ">Upload Type</label>
                 <select
-                  className="form-select settings-select-unique"
+                  className="form-select settings-select-unique bg-card"
                   value={uploadType}
                   onChange={(e) => setUploadType(e.target.value)}
                 >
@@ -317,7 +317,7 @@ export default function SettingsPage() {
               <div className="mb-3">
                 <label className="form-label fw-semibold">Upload Template</label>
                 <div
-                  className="border rounded p-3 text-center settings-drag-drop-unique"
+                  className="border rounded p-3 text-center settings-drag-drop-unique bg-card"
                   style={{ background: "#f8f9fa", cursor: "pointer" }}
                   onClick={() => document.getElementById("templateUploadInput").click()}
                 >
@@ -338,7 +338,7 @@ export default function SettingsPage() {
                 <label className="form-label fw-semibold">Templates</label>
                 <ul className="list-group settings-template-list-unique">
                   {templates.map((tpl) => (
-                    <li key={tpl.name} className="list-group-item d-flex justify-content-between align-items-center">
+                    <li key={tpl.name} className="list-group-item d-flex justify-content-between align-items-center bg-card border">
                       {tpl.name}
                       <button className="btn btn-outline-success btn-sm settings-download-btn-unique">
                         Download
@@ -353,9 +353,9 @@ export default function SettingsPage() {
 
         {/* Notification Settings */}
         <div className="col-12 col-lg-6">
-          <div className="card shadow-sm settings-card-unique">
-            <div className="card-header bg-light settings-card-header-unique">
-              <h5 className="mb-0">Notification Settings</h5>
+          <div className="card shadow-sm settings-card-unique bg-card">
+            <div className="card-header bg-light settings-card-header-unique bg-card">
+              <h5 className="mb-0 ">Notification Settings</h5>
             </div>
             <div className="card-body">
               <div className="mb-3">
@@ -399,7 +399,7 @@ export default function SettingsPage() {
               <div>
                 <label className="form-label fw-semibold">Notification Frequency</label>
                 <select
-                  className="form-select settings-select-unique"
+                  className="form-select settings-select-unique bg-card"
                   value={notifications.frequency}
                   onChange={(e) => setNotifications((n) => ({ ...n, frequency: e.target.value }))}
                 >
@@ -414,8 +414,8 @@ export default function SettingsPage() {
 
         {/* Backup & Recovery Settings */}
         <div className="col-12">
-          <div className="card shadow-sm settings-card-unique">
-            <div className="card-header bg-light settings-card-header-unique">
+          <div className="card shadow-sm settings-card-unique bg-card">
+            <div className="card-header bg-light settings-card-header-unique bg-card">
               <h5 className="mb-0">Backup & Recovery Settings</h5>
             </div>
             <div className="card-body">
@@ -423,7 +423,7 @@ export default function SettingsPage() {
                 <div className="col-md-4">
                   <label className="form-label fw-semibold">Backup Frequency</label>
                   <select
-                    className="form-select settings-select-unique"
+                    className="form-select settings-select-unique bg-card"
                     value={backupFrequency}
                     onChange={(e) => setBackupFrequency(e.target.value)}
                   >
@@ -467,8 +467,8 @@ export default function SettingsPage() {
               <div>
                 <label className="form-label fw-semibold">Past Backups</label>
                 <div className="table-responsive">
-                  <table className="table table-bordered align-middle settings-table-unique">
-                    <thead className="table-light">
+                  <table className="table table-bordered align-middle settings-table-unique table-gradient-bg">
+                    <thead className="table-light text-light">
                       <tr>
                         <th>#</th>
                         <th>Timestamp</th>
