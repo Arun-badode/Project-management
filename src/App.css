@@ -309,7 +309,9 @@ select.form-input {
   .nav-brand {
     font-size: 23px;
   }
-
+.search-bar{
+  font-size: 50px;
+}
   .nav-taggle-icon {
     margin-left: 15px !important;
   }

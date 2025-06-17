@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 const Navbar = ({ toggleSidebar }) => {
   return (
     <>
-      <nav className="navbar navbar-light">
+      <nav className="navbar navbar-light bg-card">
         <div className="container-fluid nav-conte">
           <div className="nav-content">
             <div className="nav-bran">
@@ -23,7 +23,7 @@ const Navbar = ({ toggleSidebar }) => {
                 type="text" 
                 placeholder="Search..." 
                 className="form-control"
-                style={{width: "600px", borderRadius:"30px"}}
+                style={{width: "500px", borderRadius:"30px"}}
               />
             </div>
             
