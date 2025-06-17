@@ -5,7 +5,9 @@ import Navbar from "./layout/Navbar";
 import Sidebar from "./layout/Sidebar";
 import { useState } from "react";
 import LoginPage from "./authtication/Login";
-import AdminDashboard from "./components/Admin/Dashboard/AdminDashboard";
+
+import LeadDashboard from "./components/Lead/LeadDashboard";
+import AdminDashboard from "./components/AdminDashboard/AdminDashboard";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -45,6 +47,7 @@ function App() {
           <Routes>
             <Route path="/" element={<LoginPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/LeadDashboard" element={<LeadDashboard />} />
             {/* Add your other routes here */}
           </Routes>
         </div>
