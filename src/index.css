@@ -5,8 +5,20 @@
 
 .bg-card{
     background: linear-gradient(to bottom right, #141c3a, #1b2f6e)!important;
+    color: white!important;
 
 }
+
+.table-gradient-bg {
+  background: linear-gradient(to bottom right, #141c3a, #1b2f6e) !important;
+  color: #ffffff !important;
+}
+
+.table-gradient-bg tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important; /* Light hover for contrast */
+  color: #ffffff !important; /* Ensure text stays white */
+}
+
 
 .gradient-heading {
   background: linear-gradient(to right, #4dc3ff, #b86bff); /* Blue to Purple */
@@ -31,3 +43,9 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+
+
+table tr td, 
+table tr th {
+  white-space: nowrap !important;
+}

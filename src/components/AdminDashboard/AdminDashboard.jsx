@@ -71,15 +71,15 @@ const AdminDashboard = () => {
   const projects = generateRandomProjects(15);
 
   return (
-    <div className="admin-dashboard text-white p-4" style={{ background: 'linear-gradient(to bottom right, #1d2671, #c33764)', minHeight: '100vh' }}>
+    <div className="admin-dashboard text-white p-4 bg-main">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="fw-bold">Admin Dashboard</h2>
+        <h2 className="gradient-heading">Admin Dashboard</h2>
         <div>
-          <Button variant="outline-light" className="rounded-pill px-4 me-2" onClick={handleShow}>
+          <Button variant="outline-light" className="gradient-button me-2" onClick={handleShow}>
             <FaPlus className="me-2" /> Create New Project
           </Button>
-          <Button variant="outline-light" className="rounded-pill px-4">
-            <FaFileExport className="me-2" /> Export Data
+          <Button variant="outline-light" className="gradient-button">
+            <FaFileExport className="me-2 " /> Export Data
           </Button>
         </div>
       </div>
@@ -87,7 +87,7 @@ const AdminDashboard = () => {
       {/* KPIs */}
       <Row className="mb-4">
         <Col md={3}>
-          <Card className="bg-dark text-white p-3">
+          <Card className="bg-card text-white p-3">
             <Card.Body>
               <Card.Title>Total Active Projects</Card.Title>
               <h4>{projects.length}</h4>
@@ -95,7 +95,7 @@ const AdminDashboard = () => {
           </Card>
         </Col>
         <Col md={3}>
-          <Card className="bg-dark text-white p-3">
+          <Card className="bg-card  text-white p-3">
             <Card.Body>
               <Card.Title>Total Resources</Card.Title>
               <h4>27</h4>
@@ -103,7 +103,7 @@ const AdminDashboard = () => {
           </Card>
         </Col>
         <Col md={3}>
-          <Card className="bg-dark text-white p-3">
+          <Card className="bg-card  text-white p-3">
             <Card.Body>
               <Card.Title>Projects Nearing Deadline</Card.Title>
               <h4>4</h4>
@@ -111,7 +111,7 @@ const AdminDashboard = () => {
           </Card>
         </Col>
         <Col md={3}>
-          <Card className="bg-dark text-white p-3">
+          <Card className="bg-card  text-white p-3">
             <Card.Body>
               <Card.Title>Overdue Projects</Card.Title>
               <h4>2</h4>
@@ -121,7 +121,7 @@ const AdminDashboard = () => {
       </Row>
 
       {/* Filters */}
-      <Card className="bg-dark text-white p-3 mb-4">
+      <Card className="bg-card  text-white p-3 mb-4">
         <h5>Filters</h5>
         <Row className="gy-3">
           <Col md={2}>
@@ -171,9 +171,9 @@ const AdminDashboard = () => {
       </Card>
 
       {/* Main Table */}
-      <Card className="bg-dark text-white p-3">
+      <Card className="table-gradient-bg text-white p-3">
         <h4>Project List</h4>
-        <Table variant="dark" responsive hover className="mt-3">
+        <Table  responsive hover className="mt-3 table-gradient-bg">
           <thead>
             <tr>
               <th>ID</th>

@@ -23,7 +23,7 @@ const Sidebar = ({ collapsed , menuItemClick}) => {
 
   return (
     <div className={`sidebar-container ${collapsed ? "collapsed" : ""}`}>
-      <div className="sidebar">
+      <div className="sidebar bg-card">
         <ul className="menu">
           {/* Dashboard Section */}
           <li className={`menu-item ${isActive("/admin") ? "active" : ""}`}>
