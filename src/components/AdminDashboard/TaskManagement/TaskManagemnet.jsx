@@ -578,7 +578,7 @@ const TaskManagement = () => {
         {/* Header */}
         <div className="mb-4">
           <h2  className="gradient-heading">Task Management</h2>
-          <p className="text-muted">Manage tasks, track time, and monitor progress</p>
+          <p className="text-light">Manage tasks, track time, and monitor progress</p>
         </div>
 
         {/* Navigation Tabs */}
