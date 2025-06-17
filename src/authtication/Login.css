@@ -1,0 +1,31 @@
+.login-left {
+  background: linear-gradient(to bottom right, #6a11cb, #2575fc);
+  text-align: center;
+  padding: 2rem;
+}
+
+.login-right {
+  background: #fff;
+  padding: 2rem;
+}
+
+.icon-left {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  color: #6a11cb;
+}
+
+.eye-icon {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #6a11cb;
+}
+
+.login-form input {
+  padding-left: 45px !important;
+}
