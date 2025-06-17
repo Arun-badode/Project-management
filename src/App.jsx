@@ -8,6 +8,9 @@ import LoginPage from "./authtication/Login";
 
 import LeadDashboard from "./components/Lead/LeadDashboard";
 import AdminDashboard from "./components/AdminDashboard/AdminDashboard";
+import TaskManagementPage from "./components/AdminDashboard/TaskManagement/TaskManagemnet";
+import TaskManagement from "./components/AdminDashboard/TaskManagement/TaskManagemnet";
+import UserManagement from "./components/AdminDashboard/UserManagement/UserManagement";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -47,8 +50,17 @@ function App() {
         >
           <Routes>
             <Route path="/" element={<LoginPage />} />
+            {/*Admin Start */}
+
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/taskmanagement" element={<TaskManagement/>}/>
+            <Route path='/usermanage' element={<UserManagement/>}/>
+
+            {/*Admin End */}
+
+
             <Route path="/LeadDashboard" element={<LeadDashboard />} />
+
             {/* Add your other routes here */}
           </Routes>
         </div>

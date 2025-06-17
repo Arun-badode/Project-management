@@ -16,6 +16,17 @@ const Navbar = ({ toggleSidebar }) => {
                 </a>
               </div>
             </div>
+            
+            {/* Added search bar in the center */}
+            <div className="search-bar">
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                className="form-control"
+                style={{width: "600px", borderRadius:"30px"}}
+              />
+            </div>
+            
             <div className="nav-main-icon">
               <a className="bell-icon" href="#" style={{fontSize:"25px"}}>
                 <i className="fa-regular fa-bell"></i>
