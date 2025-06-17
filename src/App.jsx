@@ -8,6 +8,7 @@ import LoginPage from "./authtication/Login";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
   const menusidebarcollaps = () => {
     setIsSidebarCollapsed(true);
   };
@@ -15,19 +16,21 @@ function App() {
   const toggleSidebar = () => {
     setIsSidebarCollapsed((prev) => !prev);
   };
+
   const location = useLocation();
 
-  // Check if current path is exactly "/" (login page)
-  const hideLayout = location.pathname === "/";
+  // Check if current path is exactly "/" (login page) or "/signup" (sign up page)
+  const hideLayout = location.pathname === "/" || location.pathname === "/signup";
 
   return (
     <>
-      {/* navbar - hidden on login page */}
+      {/* navbar - hidden on login/signup page */}
       {!hideLayout && <Navbar toggleSidebar={toggleSidebar} />}
       
       {/* main content area */}
       <div className={`main-content ${hideLayout ? "full-width" : ""}`}>
-        {/* sidebar - hidden on login page */}
+        {/* sidebar - hidden on login/signup page */}
+         {/* sidebar - hidden on login/signup page */}
         {!hideLayout && (
           <Sidebar
             collapsed={isSidebarCollapsed}
@@ -37,13 +40,11 @@ function App() {
         
         {/* right side content */}
         <div
-          className={`right-side-content ${
-            isSidebarCollapsed && !hideLayout ? "collapsed" : ""
-          }`}
+          className={`right-side-content ${isSidebarCollapsed && !hideLayout ? "collapsed" : ""}`}
         >
           <Routes>
-            <Route path="/" element={<LoginPage />} />
-            {/* Add your other routes here */}
+            <Route path="/" element={<LoginPage/>} />
+            
           </Routes>
         </div>
       </div>
