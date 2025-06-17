@@ -60,10 +60,10 @@ const Sidebar = ({ collapsed , }) => {
               <span className="menu-text"> User Management</span>
             </div>
           </li>
-           <li className={`menu-item ${isActive("/ad") ? "active" : ""}`}>
+           <li className={`menu-item ${isActive("/resourcemanagement ") ? "active" : ""}`}>
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/ad"); menuItemClick();} } >
+              onClick={() => {navigate("/resourcemanagement"); menuItemClick();} } >
               <i className="fa-solid fa-cubes"></i>
               <span className="menu-text">Resource Management</span>
             </div>
