@@ -1,29 +1,17 @@
-import React from 'react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
-
-
+import React, { useState } from 'react';
+import { BarChart, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { 
   BarChart2,
-  PieChart,
   Calendar as CalendarIcon,
   Users,
-  Clock,
   CheckCircle,
   XCircle,
-  Search,
-  Filter,
-  ChevronDown,
-  ChevronUp,
   Plus,
   Settings,
-  Loader,
-  Pie,
-  
+  Loader
 } from 'lucide-react';
-
 import moment from 'moment';
-import { momentLocalizer } from 'react-big-calendar'; // Importing momentLocalizer
+import { Calendar, momentLocalizer } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 // Initialize calendar localizer
