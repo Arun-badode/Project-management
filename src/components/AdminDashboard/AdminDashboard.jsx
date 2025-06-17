@@ -246,7 +246,7 @@ const AdminDashboard = () => {
       </Card>
 
       {/* Create Project Modal */}
-      <Modal show={showModal} onHide={handleClose} centered>
+      <Modal show={showModal} onHide={handleClose} centered  className='custom-modal-dark'>
         <Modal.Header closeButton className="bg-dark text-white">
           <Modal.Title>Create New Project</Modal.Title>
         </Modal.Header>
@@ -296,7 +296,7 @@ const AdminDashboard = () => {
                 <option>On Hold</option>
               </Form.Select>
             </Form.Group>
-            <Button variant="primary" type="submit" className="w-100">Create Project</Button>
+            <Button variant="primary" type="submit" className="w-100 gradient-button">Create Project</Button>
           </Form>
         </Modal.Body>
       </Modal>

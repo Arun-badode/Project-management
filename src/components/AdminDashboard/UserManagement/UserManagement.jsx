@@ -182,7 +182,7 @@ const UserManagement = () => {
 
   // Render create user form
   const renderCreateForm = () => (
-    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+    <div className="modal show d-block custom-modal-dark" >
       <div className="modal-dialog">
         <div className="modal-content">
           <div className="modal-header">
@@ -245,13 +245,13 @@ const UserManagement = () => {
           
           <div className="modal-footer">
             <button
-              className="btn btn-secondary"
+              className="btn btn-danger rounded-pill"
               onClick={() => setShowCreateForm(false)}
             >
               Cancel
             </button>
             <button
-              className="btn btn-primary"
+              className="gradient-button"
               onClick={handleCreateUser}
             >
               Create User
@@ -264,7 +264,7 @@ const UserManagement = () => {
 
   // Render edit user form
   const renderEditForm = () => (
-    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+    <div className="modal show d-block custom-modal-dark">
       <div className="modal-dialog">
         <div className="modal-content">
           <div className="modal-header">
@@ -325,13 +325,13 @@ const UserManagement = () => {
           
           <div className="modal-footer">
             <button
-              className="btn btn-secondary"
+              className="btn btn-danger rounded-pill"
               onClick={() => setEditingUser(null)}
             >
               Cancel
             </button>
             <button
-              className="btn btn-primary"
+              className="gradient-button"
               onClick={handleUpdateUser}
             >
               Save Changes
@@ -344,7 +344,7 @@ const UserManagement = () => {
 
   // Render user activity modal
   const renderUserActivity = () => (
-    <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+    <div className="modal show d-block custom-modal-dark" >
       <div className="modal-dialog modal-lg">
         <div className="modal-content">
           <div className="modal-header">
@@ -360,7 +360,7 @@ const UserManagement = () => {
             <div className="row mb-4">
               <div className="col-md-6">
                 <div className="card">
-                  <div className="card-body">
+                  <div className="card-body bg-card">
                     <h6 className="card-title">User Information</h6>
                     <div className="mb-2"><strong>Email:</strong> {showUserActivity.email}</div>
                     <div className="mb-2"><strong>Role:</strong> <span className={`badge ${getRoleClass(showUserActivity.role)}`}>{showUserActivity.role}</span></div>
@@ -371,7 +371,7 @@ const UserManagement = () => {
               </div>
               <div className="col-md-6">
                 <div className="card">
-                  <div className="card-body">
+                  <div className="card-body bg-card">
                     <h6 className="card-title">Recent Activity</h6>
                     <div className="activity-timeline">
                       <div className="activity-item">
@@ -404,11 +404,11 @@ const UserManagement = () => {
               </div>
             </div>
             
-            <div className="card">
-              <div className="card-body">
+            <div className="card ">
+              <div className="card-body table-gradient-bg">
                 <h6 className="card-title">Detailed Activity Log</h6>
                 <div className="table-responsive">
-                  <table className="table table-sm">
+                  <table className="table table-sm table-gradient-bg">
                     <thead>
                       <tr>
                         <th>Date</th>
@@ -446,7 +446,7 @@ const UserManagement = () => {
           
           <div className="modal-footer">
             <button
-              className="btn btn-secondary"
+              className="btn btn-danger rounded-pill"
               onClick={() => setShowUserActivity(null)}
             >
               Close
@@ -466,11 +466,11 @@ const UserManagement = () => {
   };
 
   return (
-    <div className="container-fluid py-4">
+    <div className="container-fluid py-4 bg-main">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>User Management</h2>
+        <h2 className='gradient-heading'>User Management</h2>
         <button 
-          className="btn btn-primary"
+          className="gradient-button"
           onClick={() => setShowCreateForm(true)}
         >
           <UserPlus size={18} className="me-2" />
@@ -479,7 +479,7 @@ const UserManagement = () => {
       </div>
 
       {/* Filters and Search */}
-      <div className="card mb-4">
+      <div className="card mb-4 bg-card">
         <div className="card-body">
           <div className="row g-3">
             <div className="col-md-6">
@@ -525,9 +525,9 @@ const UserManagement = () => {
 
       {/* User List */}
       <div className="card">
-        <div className="card-body">
+        <div className="card-body bg-card">
           <div className="table-responsive">
-            <table className="table table-hover">
+            <table className="table table-gradient-bg">
               <thead>
                 <tr>
                   <th onClick={() => requestSort('name')} style={{ cursor: 'pointer' }}>

@@ -12,7 +12,7 @@ const LeadDashboard = () => {
     <div className="lead-dashboard text-white p-3 p-md-4 bg-main">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <h2 className="gradient-heading m-0">Project Manager Dashboard</h2>
-        <Button variant="outline-light" className="gradient-button w-100 w-md-auto" onClick={handleShow}>
+        <Button variant="outline-light" className="gradient-button " onClick={handleShow}>
           <FaPlus className="me-2" /> Create New Project
         </Button>
       </div>
@@ -130,7 +130,7 @@ const LeadDashboard = () => {
       </Card>
 
       {/* Create New Project Modal */}
-      <Modal show={showModal} onHide={handleClose} centered>
+      <Modal show={showModal} onHide={handleClose} centered className='custom-modal-dark'>
         <Modal.Header closeButton className="bg-dark text-white">
           <Modal.Title>Create New Project</Modal.Title>
         </Modal.Header>
@@ -168,7 +168,7 @@ const LeadDashboard = () => {
               </Form.Select>
             </Form.Group>
 
-            <Button variant="primary" type="submit" className="w-100">Create Project</Button>
+            <Button variant="primary" type="submit" className="w-100 gradient-button">Create Project</Button>
           </Form>
         </Modal.Body>
       </Modal>
@@ -177,4 +177,3 @@ const LeadDashboard = () => {
 };
 
 export default LeadDashboard;
-  

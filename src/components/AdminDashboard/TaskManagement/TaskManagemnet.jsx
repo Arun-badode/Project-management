@@ -232,7 +232,7 @@ const TaskManagement = () => {
   };
 
   const renderTaskCard = (task) => (
-    <div key={task.id} className="card mb-3">
+    <div key={task.id} className="card bg-card mb-3">
       <div className="card-body">
         <div className="d-flex justify-content-between align-items-start mb-3">
           <div className="flex-grow-1">
@@ -321,7 +321,7 @@ const TaskManagement = () => {
   const renderTaskList = () => (
     <div className="mb-4">
       {/* Filters and Search */}
-      <div className="card mb-3">
+      <div className="card mb-3 bg-main ">
         <div className="card-body">
           <div className="row g-3 align-items-center">
             <div className="col-md-5">
@@ -368,10 +368,10 @@ const TaskManagement = () => {
             <div className="col-md-1">
               <button
                 onClick={() => setShowAddTask(true)}
-                className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-1"
+                className="gradient-button w-100 d-flex align-items-center justify-content-center gap-1"
               >
                 <Plus className="w-4 h-4" />
-                Add
+                +Add
               </button>
             </div>
           </div>
@@ -393,12 +393,12 @@ const TaskManagement = () => {
   );
 
   const renderTimeLog = () => (
-    <div className="mb-4">
-      <div className="card mb-3">
+    <div className="mb-4 ">
+      <div className="card mb-3 bg-card text-light">
         <div className="card-body">
-          <h5 className="card-title mb-4">Time Tracking Summary</h5>
+          <h5 className="card-title mb-4 ">Time Tracking Summary</h5>
           
-          <div className="row mb-4">
+          <div className="row mb-4 ">
             <div className="col-md-4 mb-3 mb-md-0">
               <div className="card bg-primary text-white">
                 <div className="card-body">
@@ -413,7 +413,7 @@ const TaskManagement = () => {
               </div>
             </div>
             
-            <div className="col-md-4 mb-3 mb-md-0">
+            <div className="col-md-4 mb-3 mb-md-0 ">
               <div className="card bg-success text-white">
                 <div className="card-body">
                   <div className="d-flex align-items-center gap-2 mb-2">
@@ -443,7 +443,7 @@ const TaskManagement = () => {
           </div>
 
           <div className="table-responsive">
-            <table className="table table-hover">
+            <table className="table table-gradient-bg  ">
               <thead>
                 <tr>
                   <th>Task</th>
@@ -490,11 +490,11 @@ const TaskManagement = () => {
 
   const renderQAOverview = () => (
     <div className="mb-4">
-      <div className="card mb-3">
+      <div className="card mb-3 bg-card" >
         <div className="card-body">
           <h5 className="card-title mb-4">QA Tasks Overview</h5>
           
-          <div className="row mb-4">
+          <div className="row mb-4 ">
             {['Not Started', 'Pending', 'In Review', 'Passed'].map(status => {
               const count = tasks.filter(task => task.qaStatus === status).length;
               const colors = {
@@ -519,7 +519,7 @@ const TaskManagement = () => {
 
           <div className="list-group">
             {tasks.map(task => (
-              <div key={task.id} className="list-group-item mb-2">
+              <div key={task.id} className="list-group-item mb-2 bg-card">
                 <div className="d-flex justify-content-between align-items-start">
                   <div className="flex-grow-1">
                     <h6 className="fw-bold mb-2">{task.title}</h6>
@@ -573,16 +573,16 @@ const TaskManagement = () => {
   };
 
   return (
-    <div className="bg-light min-vh-100">
+    <div className="bg-main min-vh-100">
       <div className="container py-4">
         {/* Header */}
         <div className="mb-4">
-          <h1 className="display-6 fw-bold mb-2">Task Management</h1>
+          <h2  className="gradient-heading">Task Management</h2>
           <p className="text-muted">Manage tasks, track time, and monitor progress</p>
         </div>
 
         {/* Navigation Tabs */}
-        <ul className="nav nav-tabs mb-4">
+        <ul className="nav nav-tabs  mb-4">
           {[
             { id: 'all-tasks', label: 'All Tasks', icon: CheckCircle2 },
             { id: 'time-logs', label: 'Time Logs', icon: Clock },
@@ -610,7 +610,7 @@ const TaskManagement = () => {
 
         {/* Add Task Modal */}
         {showAddTask && (
-          <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal show d-block custom-modal-dark" >
             <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">
@@ -695,13 +695,13 @@ const TaskManagement = () => {
                 <div className="modal-footer">
                   <button
                     onClick={() => setShowAddTask(false)}
-                    className="btn btn-secondary"
+                    className="btn btn-danger rounded-pill"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={addTask}
-                    className="btn btn-primary"
+                    className="gradient-button"
                   >
                     Add Task
                   </button>

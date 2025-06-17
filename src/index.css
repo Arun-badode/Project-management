@@ -1,3 +1,11 @@
+body{
+ background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e)!important;
+
+}
+
+
+
+
 .bg-main{
     background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e)!important;
 
@@ -41,6 +49,47 @@
 .gradient-button:hover {
   transform: scale(1.03);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Modal background and header */
+.custom-modal-dark .modal-content {
+  background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e)!important;
+  color: #ffffff;
+  border-radius: 10px;
+ 
+}
+
+.custom-modal-dark .modal-header {
+   background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e)!important;
+   color: #ffffff!important;
+  
+}
+
+.custom-modal-dark .modal-header .btn-close {
+  filter: invert(1);
+}
+
+
+/* Modal body */
+.custom-modal-dark .modal-body {
+  background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e)!important;
+  color: #ffffff;
+}
+
+/* Input fields */
+.custom-modal-dark .form-control,
+.custom-modal-dark .form-select {
+  background: linear-gradient(to bottom right, #141c3a, #1b2f6e)!important;
+  color: #ffffff;
+  border: 1px solid #555;
+}
+
+.custom-modal-dark .form-control::placeholder {
+  color: #aaa;
+}
+
+.custom-modal-dark .form-label {
+  color: #ccc;
 }
 
 
