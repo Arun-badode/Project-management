@@ -12,6 +12,9 @@ import TaskManagementPage from "./components/AdminDashboard/TaskManagement/TaskM
 import TaskManagement from "./components/AdminDashboard/TaskManagement/TaskManagemnet";
 import UserManagement from "./components/AdminDashboard/UserManagement/UserManagement";
 import ResourceManagement from "./components/AdminDashboard/ResourceManagement/ResourceManagement";
+import ProjectSupportPortal from "./components/ProjectSupport/ProjectSupport";
+import SettingsPage from "./components/AdminDashboard/Setting/Setting";
+import ProfileAcc from "./components/AdminDashboard/ProfileAcc/ProfileAcc";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -57,6 +60,9 @@ function App() {
             <Route path="/taskmanagement" element={<TaskManagement/>}/>
             <Route path='/usermanage' element={<UserManagement/>}/>
             <Route path="/resourcemanagement" element={<ResourceManagement/>}/>
+             <Route path="/projectsupport" element={<ProjectSupportPortal/>}/>
+              <Route path="/settingpage" element={<SettingsPage/>}/>
+               <Route path="/profile" element={<ProfileAcc/>}/>
 
             {/*Admin End */}
 
