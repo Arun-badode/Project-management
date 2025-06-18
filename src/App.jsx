@@ -35,7 +35,8 @@ function App() {
   const location = useLocation();
 
   // Check if current path is exactly "/" (login page) or "/signup" (sign up page)
-  const hideLayout = location.pathname === "/" || location.pathname === "/signup";
+ const hideLayout = location.pathname.startsWith("/") && (location.pathname === "/" || location.pathname === "/signup");
+
 
   return (
     <>
@@ -55,7 +56,7 @@ function App() {
         
         {/* right side content */}
         <div
-          className={`right-side-content ${isSidebarCollapsed && !hideLayout ? "collapsed" : ""}`}
+          className={` ${isSidebarCollapsed && !hideLayout ? "collapsed" : ""}`}
         >
           <Routes>
             <Route path="/" element={<LoginPage />} />
