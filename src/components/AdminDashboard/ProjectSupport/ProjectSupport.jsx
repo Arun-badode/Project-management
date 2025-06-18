@@ -99,7 +99,7 @@ const ProjectSupport = () => {
           <div class="col-md-3"><span class="badge bg-success">Complete</span></div>
         </div>
         
-        <pre class="bg-light p-3 mt-3"><code>// Example API call for creating tasks
+        <pre class="bg-card p-3 mt-3"><code>// Example API call for creating tasks
 fetch('/api/tasks', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
@@ -119,9 +119,9 @@ fetch('/api/tasks', {
         <h4>Understanding User Permissions</h4>
         <p>Our role-based permission system ensures secure collaboration:</p>
         
-        <div class="table-responsive">
-          <table class="table table-striped">
-            <thead>
+        <div class="table-responsive ">
+          <table class="table table-striped table-gradient-bg">
+            <thead >
               <tr><th>Role</th><th>View Projects</th><th>Edit Tasks</th><th>Manage Team</th><th>Billing Access</th></tr>
             </thead>
             <tbody>
@@ -215,8 +215,8 @@ fetch('/api/tasks', {
 
   return (
     <div className="p-4">
-      <div className="card-header text-white">
-        <h2 className="mb-3">
+      <div className="card-header  text-white">
+        <h2 className=" gradient-heading ">
           Support Center
         </h2>
       </div>
@@ -224,7 +224,7 @@ fetch('/api/tasks', {
         <div className="col-12">
           <div className="card shadow-sm">
 
-            <div className="card-body p-0">
+            <div className="card-body bg-main p-0">
               {/* Navigation Tabs */}
               <ul className="nav nav-tabs nav-fill" role="tablist">
                 <li className="nav-item" role="presentation">
@@ -238,7 +238,7 @@ fetch('/api/tasks', {
                     <span className="d-sm-none">Ticket</span>
                   </button>
                 </li>
-                <li className="nav-item" role="presentation">
+                <li className="nav-item " role="presentation">
                   <button
                     className={`nav-link ${activeTab === 'help-center' ? 'active' : ''}`}
                     onClick={() => setActiveTab('help-center')}
@@ -249,7 +249,7 @@ fetch('/api/tasks', {
                     <span className="d-sm-none">Help</span>
                   </button>
                 </li>
-                <li className="nav-item" role="presentation">
+                <li className="nav-item " role="presentation">
                   <button
                     className={`nav-link ${activeTab === 'user-guide' ? 'active' : ''}`}
                     onClick={() => setActiveTab('user-guide')}
@@ -268,10 +268,10 @@ fetch('/api/tasks', {
                 {/* Raise Ticket Tab */}
                 {activeTab === 'raise-ticket' && (
                   <div className="tab-pane fade show active">
-                    <div className="row justify-content-center">
-                      <div className="col-lg-10 col-xl-8">
-                        <div className="card shadow-sm">
-                          <div className="card-header bg-white">
+                    <div className="row   justify-content-center">
+                      <div className="col-lg-10 bg-card col-xl-8">
+                        <div className="card bg-card shadow-sm">
+                          <div className="card-header ">
                             <h4 className="mb-0">Submit a Support Ticket</h4>
                           </div>
                           <div className="card-body">
@@ -325,7 +325,7 @@ fetch('/api/tasks', {
                               </div>
 
                               <div className="row">
-                                <div className="col-md-6 mb-3">
+                                <div className="col-md-6   mb-3">
                                   <label htmlFor="category" className="form-label">
                                     Category <span className="text-danger">*</span>
                                   </label>
@@ -394,7 +394,7 @@ fetch('/api/tasks', {
                                     onChange={handleFileChange}
                                     accept=".jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt"
                                   />
-                                  <div className="form-text">
+                                  <div className="form-text text-white">
                                     Max file size: 10MB. Supported formats: JPG, PNG, PDF, DOC, TXT
                                   </div>
                                 </div>
@@ -438,17 +438,17 @@ fetch('/api/tasks', {
                 {activeTab === 'help-center' && (
                   <div className="tab-pane fade show active">
                     <div className="row">
-                      <div className="col-lg-3 mb-4">
-                        <div className="card h-100">
-                          <div className="card-header">
+                      <div className="col-lg-3 bg-card mb-4">
+                        <div className="card bg-card h-100">
+                          <div className="card-header ">
                             <h5 className="mb-0">Categories</h5>
                           </div>
-                          <div className="list-group list-group-flush">
+                          <div className="list-group list-group-flush ">
                             {Object.keys(faqData).map(category => (
                               <a
                                 key={category}
                                 href={`#${category.replace(/\s+/g, '-').toLowerCase()}`}
-                                className="list-group-item list-group-item-action"
+                                className="list-group-item list-group-item-action bg-card"
                               >
                                 {category}
                                 <span className="badge bg-primary rounded-pill float-end">
@@ -461,15 +461,15 @@ fetch('/api/tasks', {
                       </div>
 
                       <div className="col-lg-9">
-                        <div className="card">
+                        <div className="card bg-card">
                           <div className="card-header">
                             <div className="input-group">
-                              <span className="input-group-text">
+                              <span className="input-group-text ">
                                 <Search size={20} />
                               </span>
                               <input
                                 type="text"
-                                className="form-control form-control-lg"
+                                className="form-control form-control-lg  "
                                 placeholder="Search help articles..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -477,35 +477,35 @@ fetch('/api/tasks', {
                             </div>
                           </div>
 
-                          <div className="card-body">
+                          <div className="card-body   ">
                             {Object.keys(filteredFaqs).length === 0 ? (
-                              <div className="text-center py-5">
-                                <Search size={48} className="text-muted mb-3" />
+                              <div className="text-center  py-5 ">
+                                <Search size={48} className="text-muted   mb-3" />
                                 <h4>No results found</h4>
                                 <p className="text-muted">Try adjusting your search terms</p>
                               </div>
                             ) : (
                               Object.keys(filteredFaqs).map(category => (
-                                <div key={category} className="mb-4">
-                                  <h4 className="border-bottom pb-2" id={category.replace(/\s+/g, '-').toLowerCase()}>
+                                <div key={category} className="mb-4 ">
+                                  <h4 className="  pb-2 " id={category.replace(/\s+/g, '-').toLowerCase()}>
                                     {category}
                                   </h4>
-                                  <div className="accordion" id={`accordion-${category.replace(/\s+/g, '-')}`}>
+                                  <div className="accordion " id={`accordion-${category.replace(/\s+/g, '-')}`}>
                                     {filteredFaqs[category].map((item, index) => {
                                       const isExpanded = expandedFaq[`${category}-${index}`];
                                       return (
                                         <div key={index} className="accordion-item">
                                           <h2 className="accordion-header">
                                             <button
-                                              className={`accordion-button ${isExpanded ? '' : 'collapsed'}`}
-                                              type="button"
+                                              className={`accordion-button table-gradient-bg  ${isExpanded ? '' : 'collapsed'}`}
+                                              type="button text-white"
                                               onClick={() => toggleFaq(category, index)}
                                             >
                                               {item.q}
                                             </button>
                                           </h2>
                                           <div className={`accordion-collapse collapse ${isExpanded ? 'show' : ''}`}>
-                                            <div className="accordion-body">
+                                            <div className="accordion-body bg-dark text-white">
                                               {item.a}
                                             </div>
                                           </div>
@@ -517,9 +517,9 @@ fetch('/api/tasks', {
                               ))
                             )}
 
-                            <div className="text-center mt-5 pt-4 border-top">
+                            <div className="text-center mt-5 pt-4 ">
                               <h5>Still need help?</h5>
-                              <p className="text-muted">Can't find what you're looking for?</p>
+                              <p className="">Can't find what you're looking for?</p>
                               <button
                                 className="btn btn-primary"
                                 onClick={() => setActiveTab('raise-ticket')}
@@ -540,22 +540,22 @@ fetch('/api/tasks', {
                   <div className="tab-pane fade show active">
                     <div className="row">
                       {/* Sidebar Navigation */}
-                      <div className="col-lg-3 mb-4">
-                        <div className="" style={{ top: '1rem', zIndex: 1020 }}>
-                          <div className="card border-1  rounded-2">
-                            <div className="card-header bg-white border-bottom">
-                              <h5 className="mb-0 d-flex align-items-center text-primary">
+                      <div className="col-lg-3 mb-4  ">
+                        <div className=" " style={{ top: '1rem', zIndex: 1020, }}>
+                          <div className="card border-0   rounded-2">
+                            <div className="card-header bg-card  border-bottom">
+                              <h5 className="mb-0 d-flex align-items-center  text-primary">
                                 <FileText className="me-2" size={18} />
                                 Navigation
                               </h5>
                             </div>
 
-                            <div className="list-group list-group-flush">
+                            <div className="list-group  list-group-flush">
                               {userGuideContent.map((section) => (
                                 <a
                                   key={section.id}
                                   href={`#${section.id}`}
-                                  className="list-group-item list-group-item-action d-flex align-items-center px-3"
+                                  className="list-group-item  bg-card list-group-item-action d-flex align-items-center px-3"
                                   style={{
                                     transition: 'all 0.3s ease',
                                     cursor: 'pointer'
@@ -576,10 +576,10 @@ fetch('/api/tasks', {
                       </div>
 
                       {/* Main Content Area */}
-                      <div className="col-lg-9">
-                        <div className="card border-0 shadow-smanimate__animated animate__fadeIn">
-                          <div className="card-header bg-white d-flex justify-content-between align-items-center border-bottom">
-                            <h3 className="mb-0 text-dark">📘 Project Management Tool - User Guide</h3>
+                      <div className="col-lg-9 b">
+                        <div className="card border-0 bg-card shadow-smanimate__animated animate__fadeIn">
+                          <div className="card-header  d-flex justify-content-between  align-items-center border-bottom">
+                            <h3 className="mb-0 ">📘 Project Management Tool - User Guide</h3>
                             <span className="badge bg-info fs-6">v2.1</span>
                           </div>
 
@@ -597,9 +597,9 @@ fetch('/api/tasks', {
                               <div key={section.id} className="mb-5">
                                 <div id={section.id} className="scroll-margin-top">
                                   <div className="card shadow border-0 animate__animated animate__fadeInUp">
-                                    <div className="card-body">
+                                    <div className="card-body bg-card">
                                       <div
-                                        className="content-section"
+                                        className="content-section "
                                         dangerouslySetInnerHTML={{ __html: section.content }}
                                       />
                                     </div>
@@ -614,10 +614,10 @@ fetch('/api/tasks', {
                             ))}
 
                             {/* Bottom Call to Action */}
-                            <div className="card bg-light shadow-sm animate__animated animate__fadeInUp">
+                            <div className="card bg-card shadow-sm animate__animated animate__fadeInUp">
                               <div className="card-body text-center">
                                 <h5 className="mb-2">Need More Help?</h5>
-                                <p className="mb-3 text-muted">Explore our other support resources:</p>
+                                <p className="mb-3 ">Explore our other support resources:</p>
                                 <div className="d-flex flex-wrap justify-content-center gap-2">
                                   <button
                                     className="btn btn-outline-success btn-sm"

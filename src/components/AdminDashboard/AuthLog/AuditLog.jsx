@@ -301,8 +301,8 @@ const AuditLog = () => {
                     <div className="card bg-main shadow-sm border-0">
                         <div className="card-header  border-bottom">
                             <div className="d-flex justify-content-between  align-items-center">
-                                <h4 className="mb-0 text-primary gradient-heading">
-                                    <Activity className="me-2" size={24} />
+                                <h4 className=" gradient-heading">
+                                    <Activity className="me-2 text-primary" size={24} />
                                     Audit Logs Dashboard
                                 </h4>
                                 <div className="d-flex gap-2">
@@ -431,7 +431,7 @@ const AuditLog = () => {
                             {/* Table - Desktop View */}
                             <div className="card  d-none  d-lg-block">
                                 <div className="table-responsive ">
-                                    <table className="table  table-hover mb-0">
+                                    <table className="table  table-hover mb-0 table-gradient-bg">
                                         <thead className="table-light ">
                                             <tr>
                                                 {activeTab === 'all-activities' && (

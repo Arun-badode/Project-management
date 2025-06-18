@@ -225,10 +225,10 @@ const TimeTracker = () => {
             {/* Header */}
             <div className="tt-header-section row mb-4">
                 <div className="col-12">
-                    <h1 className="tt-main-title h2 gradient-heading fw-bold mb-0">
+                    <h1 className="gradient-heading ">
                         Time Tracking Dashboard
                     </h1>
-                    <p className="tt-subtitle text-muted mb-3">Monitor and analyze team productivity</p>
+                    <p className="tt-subtitle text-white mb-3">Monitor and analyze team productivity</p>
                 </div>
             </div>
 
@@ -238,7 +238,7 @@ const TimeTracker = () => {
                     <div className="tt-summary-card bg-card card h-100 border-0 shadow-sm">
                         <div className="card-body">
                             <div className="tt-card-header d-flex justify-content-between align-items-center mb-2">
-                                <h6 className="tt-card-title text-muted mb-0">Total Hours Logged</h6>
+                                <h6 className="tt-card-title text-white mb-0">Total Hours Logged</h6>
                                 <Clock size={20} className="text-primary" />
                             </div>
                             <div className="tt-card-value h3 text-primary fw-bold">{summaryData.totalHours}h</div>
@@ -247,10 +247,10 @@ const TimeTracker = () => {
                 </div>
 
                 <div className="col-lg-3 col-md-6 mb-3">
-                    <div className="tt-summary-card card h-100 border-0 shadow-sm">
+                    <div className="tt-summary-card card bg-card h-100 border-0 shadow-sm">
                         <div className="card-body">
                             <div className="tt-card-header d-flex justify-content-between align-items-center mb-2">
-                                <h6 className="tt-card-title text-muted mb-0">Avg Daily Hours</h6>
+                                <h6 className="tt-card-title text-white mb-0">Avg Daily Hours</h6>
                                 <TrendingUp size={20} className="text-success" />
                             </div>
                             <div className="tt-card-value h3 text-success fw-bold">{summaryData.avgDailyHours}h</div>
@@ -259,42 +259,42 @@ const TimeTracker = () => {
                 </div>
 
                 <div className="col-lg-3 col-md-6 mb-3">
-                    <div className="tt-summary-card card h-100 border-0 shadow-sm">
+                    <div className="tt-summary-card card h-100 bg-card border-0 shadow-sm">
                         <div className="card-body">
                             <div className="tt-card-header d-flex justify-content-between align-items-center mb-2">
-                                <h6 className="tt-card-title text-muted mb-0">Top Contributor</h6>
+                                <h6 className="tt-card-title text-white mb-0">Top Contributor</h6>
                                 <Users size={20} className="text-info" />
                             </div>
-                            <div className="tt-card-value h6 text-info fw-bold">{summaryData.topContributor}</div>
+                            <div className="tt-card-value h6  fw-bold">{summaryData.topContributor}</div>
                         </div>
                     </div>
                 </div>
 
                 <div className="col-lg-3 col-md-6 mb-3">
-                    <div className="tt-summary-card card h-100 border-0 shadow-sm">
+                    <div className="tt-summary-card card h-100 bg-card border-0 shadow-sm">
                         <div className="card-body">
                             <div className="tt-card-header d-flex justify-content-between align-items-center mb-2">
-                                <h6 className="tt-card-title text-muted mb-0">Least Active Project</h6>
+                                <h6 className="tt-card-title text-white mb-0">Least Active Project</h6>
                                 <AlertCircle size={20} className="text-warning" />
                             </div>
-                            <div className="tt-card-value h6 text-warning fw-bold">{summaryData.leastActiveProject}</div>
+                            <div className="tt-card-value h6  fw-bold">{summaryData.leastActiveProject}</div>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Charts Section */}
-            <div className="tt-charts-section row mb-4">
-                <div className="col-lg-6 mb-3">
-                    <div className="tt-chart-card card border-0 shadow-sm">
-                        <div className="card-header bg-white border-0">
-                            <h6 className="tt-chart-title mb-0 d-flex align-items-center">
+            <div className="tt-charts-section  row mb-4">
+                <div className="col-lg-6  mb-3">
+                    <div className="tt-chart-card   card border-0 shadow-sm">
+                        <div className="card-header  bg-card border-0">
+                            <h6 className="tt-chart-title  mb-0 d-flex align-items-center">
                                 <BarChart3 size={20} className="me-2 text-primary" />
                                 Hours by Team Member
                             </h6>
                         </div>
-                        <div className="card-body">
-                            <div className="tt-chart-placeholder bg-light rounded p-4 text-center">
+                        <div className="card-body  bg-card">
+                            <div className="tt-chart-placeholder bg-card bg-light rounded p-4 text-center">
                                 {Object.entries(summaryData.userHours).map(([user, hours], index) => (
                                     <div key={user} className="tt-chart-bar mb-2">
                                         <div className="d-flex justify-content-between align-items-center mb-1">
@@ -315,15 +315,15 @@ const TimeTracker = () => {
                 </div>
 
                 <div className="col-lg-6 mb-3">
-                    <div className="tt-chart-card card border-0 shadow-sm">
-                        <div className="card-header bg-white border-0">
+                    <div className="tt-chart-card bg-card card border-0 shadow-sm">
+                        <div className="card-header bg-white border-0 bg-card">
                             <h6 className="tt-chart-title mb-0 d-flex align-items-center">
                                 <BarChart3 size={20} className="me-2 text-success" />
                                 Project Distribution
                             </h6>
                         </div>
-                        <div className="card-body">
-                            <div className="tt-chart-placeholder bg-light rounded p-4 text-center">
+                        <div className="card-body ">
+                            <div className="tt-chart-placeholder bg-card rounded p-4 text-center">
                                 {Object.entries(summaryData.projectHours).map(([project, hours]) => (
                                     <div key={project} className="tt-chart-bar mb-2">
                                         <div className="d-flex justify-content-between align-items-center mb-1">
@@ -348,13 +348,13 @@ const TimeTracker = () => {
             <div className="tt-controls-section row mb-4">
                 <div className="col-12">
                     <div className="tt-controls-card card border-0 shadow-sm">
-                        <div className="card-body">
+                        <div className="card-body bg-card">
                             <div className="row align-items-end">
                                 {/* Filters */}
                                 <div className="col-lg-8 col-md-12 mb-3 mb-lg-0">
                                     <div className="row">
                                         <div className="col-md-3 mb-2">
-                                            <label className="tt-filter-label form-label small text-muted">Users</label>
+                                            <label className="tt-filter-label form-label small text-white">Users</label>
                                             <select
                                                 className="tt-filter-select form-select form-select-sm"
                                                 multiple
@@ -368,7 +368,7 @@ const TimeTracker = () => {
                                         </div>
 
                                         <div className="col-md-3 mb-2">
-                                            <label className="tt-filter-label form-label small text-muted">Projects</label>
+                                            <label className="tt-filter-label form-label small text-white">Projects</label>
                                             <select
                                                 className="tt-filter-select form-select form-select-sm"
                                                 multiple
@@ -382,7 +382,7 @@ const TimeTracker = () => {
                                         </div>
 
                                         <div className="col-md-3 mb-2">
-                                            <label className="tt-filter-label form-label small text-muted">Start Date</label>
+                                            <label className="tt-filter-label form-label small text-white">Start Date</label>
                                             <input
                                                 type="date"
                                                 className="tt-date-input form-control form-control-sm"
@@ -392,7 +392,7 @@ const TimeTracker = () => {
                                         </div>
 
                                         <div className="col-md-3 mb-2">
-                                            <label className="tt-filter-label form-label small text-muted">End Date</label>
+                                            <label className="tt-filter-label form-label small text-white">End Date</label>
                                             <input
                                                 type="date"
                                                 className="tt-date-input form-control form-control-sm"
@@ -470,19 +470,19 @@ const TimeTracker = () => {
             )}
 
             {/* Time Log Table */}
-            <div className="tt-table-section row">
-                <div className="col-12">
-                    <div className="tt-table-card card border-0 shadow-sm">
-                        <div className="card-header bg-white border-0">
-                            <h6 className="tt-table-title mb-0">Time Entries ({filteredData.length} records)</h6>
+            <div className="tt-table-section bg-card  row">
+                <div className="col-12 ">
+                    <div className="tt-table-card bg-card  card border-0 shadow-sm">
+                        <div className="card-header  border-0">
+                            <h6 className="tt-table-title  mb-0">Time Entries ({filteredData.length} records)</h6>
                         </div>
-                        <div className="card-body p-0">
-                            <div className="tt-table-responsive table-responsive">
-                                <table className="tt-data-table table table-hover mb-0">
-                                    <thead className="tt-table-header table-light">
+                        <div className="card-body  p-0">
+                            <div className="tt-table-responsive  table-responsive">
+                                <table className="tt-data-table table table-gradient-bg  table-hover mb-0">
+                                    <thead className="tt-table-header ">
                                         <tr>
                                             <th
-                                                className="tt-sortable-header"
+                                                className="tt-sortable-header "
                                                 onClick={() => handleSort('user')}
                                                 style={{ cursor: 'pointer' }}
                                             >
@@ -587,7 +587,7 @@ const TimeTracker = () => {
                             {totalPages > 1 && (
                                 <div className="tt-pagination-section d-flex justify-content-between align-items-center p-3 border-top">
                                     <div className="tt-pagination-info">
-                                        <small className="text-muted">
+                                        <small className="text-white">
                                             Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} entries
                                         </small>
                                     </div>

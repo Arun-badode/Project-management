@@ -117,13 +117,13 @@ const ProfileAcc = () => {
   };
 
   return (
-    <div className="min-vh-100 bg-light py-4">
+    <div className="min-vh-100 bg-light bg-main py-4">
       <div className="">
-        <div className="row justify-content-center">
+        <div className="row  justify-content-center">
           <div className="col-12 col-xl-10">
             {/* Header */}
             <div className="d-flex align-items-center justify-content-between mb-4">
-              <h1 className="display-6 fw-bold text-dark mb-0">Profile & Account</h1>
+              <h1 className="gradient-heading ">Profile & Account</h1>
               {successMessage && (
                 <div className="alert alert-success alert-dismissible fade show mb-0 py-2 px-3" role="alert">
                   <i className="bi bi-check-circle-fill me-2"></i>
@@ -135,8 +135,8 @@ const ProfileAcc = () => {
             <div className="row g-4">
               {/* My Profile Section */}
               <div className="col-12 col-lg-6">
-                <div className="card shadow-sm border-0 h-100">
-                  <div className="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <div className="card shadow-sm bg-card border-0 h-100">
+                  <div className="card-header  text-white d-flex justify-content-between align-items-center">
                     <h3 className="card-title mb-0 fs-5">My Profile</h3>
                     {!isEditMode ? (
                       <button 
@@ -263,15 +263,15 @@ const ProfileAcc = () => {
 
               <div className="col-12 col-lg-6">
                 {/* Change Password Section */}
-                <div className="card shadow-sm border-0 mb-4">
-                  <div className="card-header bg-warning text-dark">
+                <div className="card shadow-sm bg-card border-0 mb-4">
+                  <div className="card-header  text-white">
                     <h3 className="card-title mb-0 fs-5">Change Password</h3>
                   </div>
                   <div className="card-body">
                     <div>
                       <div className="row g-3">
                         <div className="col-12">
-                          <label className="form-label fw-semibold text-muted small">Current Password</label>
+                          <label className="form-label fw-semibold text-white small">Current Password</label>
                           <div className="input-group">
                             <input
                               type={showPassword.current ? "text" : "password"}
@@ -290,7 +290,7 @@ const ProfileAcc = () => {
                         </div>
                         
                         <div className="col-12">
-                          <label className="form-label fw-semibold text-muted small">New Password</label>
+                          <label className="form-label fw-semibold text-white small">New Password</label>
                           <div className="input-group">
                             <input
                               type={showPassword.new ? "text" : "password"}
@@ -309,7 +309,7 @@ const ProfileAcc = () => {
                         </div>
                         
                         <div className="col-12">
-                          <label className="form-label fw-semibold text-muted small">Confirm New Password</label>
+                          <label className="form-label fw-semibold text-white small">Confirm New Password</label>
                           <div className="input-group">
                             <input
                               type={showPassword.confirm ? "text" : "password"}
@@ -338,7 +338,7 @@ const ProfileAcc = () => {
                         <div className="col-12">
                           <button 
                             type="button" 
-                            className="btn btn-warning btn-lg w-100 fw-semibold"
+                            className="btn text-white btn-lg w-100 fw-semibold"
                             onClick={handlePasswordSubmit}
                           >
                             Update Password
@@ -350,8 +350,8 @@ const ProfileAcc = () => {
                 </div>
 
                 {/* Account Settings Section */}
-                <div className="card shadow-sm border-0">
-                  <div className="card-header bg-info text-white">
+                <div className="card shadow-sm bg-card  border-0">
+                  <div className="card-header  text-white">
                     <h3 className="card-title mb-0 fs-5">Account Settings</h3>
                   </div>
                   <div className="card-body">
@@ -361,7 +361,7 @@ const ProfileAcc = () => {
                         <div className="d-flex justify-content-between align-items-center py-2">
                           <div>
                             <div className="fw-semibold">Email Notifications</div>
-                            <small className="text-muted">Receive updates via email</small>
+                            <small className="  ">Receive updates via email</small>
                           </div>
                           <div className="form-check form-switch">
                             <input
@@ -380,7 +380,7 @@ const ProfileAcc = () => {
                         <div className="d-flex justify-content-between align-items-center py-2">
                           <div>
                             <div className="fw-semibold">Dark Mode</div>
-                            <small className="text-muted">Switch to dark theme</small>
+                            <small className="">Switch to dark theme</small>
                           </div>
                           <div className="form-check form-switch">
                             <input
@@ -397,7 +397,7 @@ const ProfileAcc = () => {
                       
                       {/* Language Dropdown */}
                       <div className="col-12">
-                        <label className="form-label fw-semibold text-muted small">Language Preference</label>
+                        <label className="form-label fw-semibold small">Language Preference</label>
                         <select
                           className="form-select form-select-lg border-0 bg-light"
                           value={settings.language}
@@ -413,8 +413,8 @@ const ProfileAcc = () => {
                       
                       {/* Delete Account Button */}
                       <div className="col-12">
-                        <hr className="my-3" />
-                        <div className="text-center">
+                        <hr className="my-3 " />
+                        <div className="text-center ">
                           <button
                             className="btn btn-outline-danger btn-lg"
                             onClick={() => setShowDeleteModal(true)}
@@ -440,7 +440,7 @@ const ProfileAcc = () => {
       {showDeleteModal && (
         <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content border-0 shadow-lg">
+            <div className="modal-content bg-card border-0 shadow-lg">
               <div className="modal-header bg-danger text-white border-0">
                 <h5 className="modal-title d-flex align-items-center">
                   <i className="bi bi-exclamation-triangle-fill me-2"></i>
@@ -451,7 +451,7 @@ const ProfileAcc = () => {
                 <div className="text-center">
                   <i className="bi bi-exclamation-triangle-fill text-warning mb-3" style={{ fontSize: '3rem' }}></i>
                   <h6 className="fw-bold mb-3">Are you absolutely sure?</h6>
-                  <p className="text-muted mb-0">
+                  <p className=" mb-0">
                     This action will permanently delete your account and all associated data. 
                     This cannot be undone.
                   </p>

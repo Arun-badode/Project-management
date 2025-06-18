@@ -181,9 +181,9 @@ export default function SettingsPage() {
                 Add Role
               </button>
             </div>
-            <div className="card-body">
+            <div className="card-body ">
               <div className="table-responsive ">
-                <table className="table table-bordered align-middle table-gradient-bg ">
+                <table className="table table-bordered align-middle table-gradient-bg  ">
                   <thead className="table-gradient-bg">
                     <tr>
                       <th>Role</th>
@@ -208,7 +208,7 @@ export default function SettingsPage() {
                         </td>
                         <td>
                           <button
-                            className="btn btn-outline-light btn-sm settings-edit-role-btn-unique"
+                            className="btn  text-dark btn-sm settings-edit-role-btn-unique"
                             onClick={() => handleRoleEdit(idx)}
                           >
                             Edit
@@ -467,8 +467,8 @@ export default function SettingsPage() {
               <div>
                 <label className="form-label fw-semibold">Past Backups</label>
                 <div className="table-responsive">
-                  <table className="table table-bordered align-middle settings-table-unique table-gradient-bg">
-                    <thead className="">
+                  <table className="table table-bordered  align-middle settings-table-unique table-gradient-bg">
+                    <thead className=" ">
                       <tr>
                         <th>#</th>
                         <th>Timestamp</th>

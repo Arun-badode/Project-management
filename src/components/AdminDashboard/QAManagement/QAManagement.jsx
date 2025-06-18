@@ -236,7 +236,7 @@ const QAManagement = () => {
                             {/* Tasks Table */}
                             <div className="d-none d-lg-block">
                                 <div className="table-responsive">
-                                    <table className="table  ">
+                                    <table className="table table-gradient-bg ">
                                         <thead className="text-white">
                                             <tr>
                                                 <th>Task ID</th>
@@ -384,7 +384,7 @@ const QAManagement = () => {
                             {/* Status Table */}
                             <div className="d-none d-lg-block">
                                 <div className="table-responsive">
-                                    <table className="table text-white">
+                                    <table className="table text-white  table-gradient-bg ">
                                         <thead className="text-white">
                                             <tr>
                                                 <th>Task ID</th>

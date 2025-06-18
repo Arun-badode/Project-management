@@ -145,7 +145,7 @@ const ReportingAnalytics = () => {
       </div>
 
       <div className="table-responsive ">
-        <table className="table text-white analytics-project-table ">
+        <table className="table text-white analytics-project-table table-gradient-bg ">
           <thead className="  ">
             <tr>
               <th>Project Name</th>
@@ -159,7 +159,7 @@ const ReportingAnalytics = () => {
           <tbody >
             {projectData.map(project => (
               <tr key={project.id} className="analytics-project-row ">
-                <td className=" text-white analytics-project-name">{project.name}</td>
+                <td className=" text-dark analytics-project-name">{project.name}</td>
                 <td>{project.owner}</td>
                 <td>
                   <div className="progress analytics-progress-bar" style={{height: '20px'}}>
@@ -274,7 +274,7 @@ const ReportingAnalytics = () => {
       <div className="row">
         <div className="col-lg-8">
           <div className="table-responsive">
-            <table className="table  analytics-performance-table">
+            <table className="table  analytics-performance-table table-gradient-bg">
               <thead className=" text-white ">
                 <tr>
                   <th>Team Member</th>
@@ -343,7 +343,7 @@ const ReportingAnalytics = () => {
       </div>
 
       <div className="table-responsive">
-        <table className="table table-striped analytics-deadline-table">
+        <table className="table table-striped analytics-deadline-table table-gradient-bg">
           <thead className="text-white">
             <tr>
               <th>Task Name</th>
@@ -427,7 +427,7 @@ const ReportingAnalytics = () => {
         </div>
         <div className="col-lg-4">
           <div className="analytics-pie-chart-container bg-card">
-            <h6 className="text-center mb-3">Billable vs Non-Billable</h6>
+            <h6 className="text-center  mb-3">Billable vs Non-Billable</h6>
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
@@ -566,7 +566,7 @@ const ReportingAnalytics = () => {
             </div>
             <div className="card-body bg-card">
               <div className="table-responsive">
-                <table className="table table-sm analytics-preview-table">
+                <table className="table table-sm analytics-preview-table table-gradient-bg">
                   <thead className="  text-white">
                     <tr>
                       <th>Task Name</th>
@@ -635,7 +635,7 @@ const ReportingAnalytics = () => {
         <div className="col-12">
           <div className="d-flex justify-content-between bg-main align-items-center analytics-dashboard-header">
             <div>
-              <h2 className="analytics-main-title gradient-heading mb-1">Reporting & Analytics</h2>
+              <h2 className=" gradient-heading ">Reporting & Analytics</h2>
               <p className="text-white analytics-subtitle">Comprehensive insights into project performance and team productivity</p>
             </div>
             <div className="analytics-global-controls">
@@ -761,6 +761,7 @@ const ReportingAnalytics = () => {
           box-shadow: 0 1px 3px rgba(0,0,0,0.1);
           border-radius: 0.5rem;
           overflow: hidden;
+          
         }
         
         .analytics-project-row:hover {
