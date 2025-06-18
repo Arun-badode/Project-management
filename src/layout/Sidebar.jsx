@@ -1,10 +1,9 @@
-import React, { useState } from "react";    
+import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "./Sidebar.css";
 
-// menuItemClick
-const Sidebar = ({ collapsed , }) => {
-  const [openSubmenu, setOpenSubmenu] = useState(null); // Tracks the open submenu
+const Sidebar = ({ collapsed }) => {
+  const [openSubmenu, setOpenSubmenu] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -12,123 +11,221 @@ const Sidebar = ({ collapsed , }) => {
     setOpenSubmenu((prev) => (prev === menuName ? null : menuName));
   };
 
-   // Function to check if a path is active
-   const isActive = (path) => {
+  const isActive = (path) => {
     return location.pathname === path;
   };
 
-    // Function to check if any of the submenu items are active
-    const isSubmenuActive = (paths) => {
-      return paths.some((path) => location.pathname.startsWith(path));
-    };
+  const isSubmenuActive = (paths) => {
+    return paths.some((path) => location.pathname.startsWith(path));
+  };
+
+  // ✅ Defined menuItemClick to prevent error
+  const menuItemClick = () => {
+    console.log("Menu item clicked");
+    // Add additional logic if needed
+  };
 
   return (
     <div className={`sidebar-container ${collapsed ? "collapsed" : ""}`}>
-      {/* <div className={`sidebar-container ${collapsed ? "collapsed" : ""}`}></div> */}
       <div className="sidebar bg-card">
         <ul className="menu">
-          {/* Dashboard Section */}
           <li className={`menu-item ${isActive("/admin") ? "active" : ""}`}>
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/admin"); menuItemClick();} } >
-              <i className="fa-solid fa-cubes"></i>
+              onClick={() => {
+                navigate("/admin");
+                menuItemClick();
+              }}
+            >
+              <i className="fa-solid fa-compass"></i>
               <span className="menu-text">Dashboard</span>
             </div>
           </li>
-           <li className={`menu-item ${isActive("/LeadDashboard") ? "active" : ""}`}>
+
+          <li
+            className={`menu-item ${
+              isActive("/LeadDashboard") ? "active" : ""
+            }`}
+          >
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/LeadDashboard"); menuItemClick();} } >
-              <i class="fa-brands fa-square-letterboxd"></i>
+              onClick={() => {
+                navigate("/LeadDashboard");
+                menuItemClick();
+              }}
+            >
+              <i className="fa-solid fa-diagram-project"></i>
               <span className="menu-text">Project Management</span>
             </div>
           </li>
-           <li className={`menu-item ${isActive("/ad") ? "active" : ""}`}>
+
+          <li
+            className={`menu-item ${
+              isActive("/taskmanagement") ? "active" : ""
+            }`}
+          >
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i class="fa-solid fa-list-check"></i>
+              onClick={() => {
+                navigate("/taskmanagement");
+                menuItemClick();
+              }}
+            >
+              <i className="fa-solid fa-tasks"></i>
               <span className="menu-text">Task Management</span>
             </div>
           </li>
-           <li className={`menu-item ${isActive("/ad") ? "active" : ""}`}>
+
+          <li
+            className={`menu-item ${isActive("/usermanage") ? "active" : ""}`}
+          >
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i class="fa-solid fa-user"></i>
-              <span className="menu-text"> User Management</span>
+              onClick={() => {
+                navigate("/usermanage");
+                menuItemClick();
+              }}
+            >
+              <i className="fa-solid fa-users-gear"></i>
+              <span className="menu-text">User Management</span>
             </div>
           </li>
-           <li className={`menu-item ${isActive("/ad") ? "active" : ""}`}>
+
+          <li
+            className={`menu-item ${
+              isActive("/resourcemanagement") ? "active" : ""
+            }`}
+          >
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i class="fa-solid fa-folder-open"></i>
+              onClick={() => {
+                navigate("/resourcemanagement");
+                menuItemClick();
+              }}
+            >
+              <i className="fa-solid fa-toolbox"></i>
               <span className="menu-text">Resource Management</span>
             </div>
           </li>
-           <li className={`menu-item ${isActive("/ad") ? "active" : ""}`}>
+
+          <li
+            className={`menu-item ${isActive("/timetracker") ? "active" : ""}`}
+          >
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i class="fa-solid fa-clock-rotate-left"></i>
+              onClick={() => {
+                navigate("/timetracker");
+                menuItemClick();
+              }}
+            >
+              <i className="fa-solid fa-clock"></i>
               <span className="menu-text">Time Tracking</span>
             </div>
           </li>
-           <li className={`menu-item ${isActive("/ad") ? "active" : ""}`}>
+
+          <li
+            className={`menu-item ${
+              isActive("/filemanagementsystem") ? "active" : ""
+            }`}
+          >
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i class="fa-solid fa-file"></i>
+              onClick={() => {
+                navigate("/filemanagementsystem");
+                menuItemClick();
+              }}
+            >
+              <i className="fa-solid fa-folder-open"></i>
               <span className="menu-text">File Management</span>
             </div>
           </li>
-           <li className={`menu-item ${isActive("/ad") ? "active" : ""}`}>
+
+          <li
+            className={`menu-item ${isActive("/qamanagement") ? "active" : ""}`}
+          >
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i class="fa-solid fa-pen-to-square"></i>
+              onClick={() => {
+                navigate("/qamanagement");
+                menuItemClick();
+              }}
+            >
+              <i className="fa-solid fa-check-to-slot"></i>
               <span className="menu-text">QA Management</span>
             </div>
           </li>
-           <li className={`menu-item ${isActive("/ad") ? "active" : ""}`}>
+
+          <li
+            className={`menu-item ${
+              isActive("/reportinganalytics") ? "active" : ""
+            }`}
+          >
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i class="fa-solid fa-satellite-dish"></i>
-              <span className="menu-text"> Reporting & Analytics</span>
+              onClick={() => {
+                navigate("/reportinganalytics");
+                menuItemClick();
+              }}
+            >
+              <i className="fa-solid fa-chart-line"></i>
+              <span className="menu-text">Reporting & Analytics</span>
             </div>
           </li>
-           <li className={`menu-item ${isActive("/ad") ? "active" : ""}`}>
+
+          <li
+            className={`menu-item ${isActive("/settingpage") ? "active" : ""}`}
+          >
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i class="fa-solid fa-gear"></i>
-              <span className="menu-text"> Settings</span>
+              onClick={() => {
+                navigate("/settingpage");
+                menuItemClick();
+              }}
+            >
+              <i className="fa-solid fa-gear"></i>
+              <span className="menu-text">Settings</span>
             </div>
           </li>
-           <li className={`menu-item ${isActive("/ad") ? "active" : ""}`}>
+
+          <li className={`menu-item ${isActive("/auditlog") ? "active" : ""}`}>
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/ad"); menuItemClick();} } >
-              <i class="fa-solid fa-chart-simple"></i>
+              onClick={() => {
+                navigate("/auditlog");
+                menuItemClick();
+              }}
+            >
+              <i className="fa-solid fa-shield"></i>
               <span className="menu-text">Audit Logs</span>
             </div>
           </li>
-           <li className={`menu-item ${isActive("/ad") ? "active" : ""}`}>
+
+          <li className={`menu-item ${isActive("/profile") ? "active" : ""}`}>
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/ad"); menuItemClick();} } >
-             <i class="fa-solid fa-user"></i>
+              onClick={() => {
+                navigate("/profile");
+                menuItemClick();
+              }}
+            >
+              <i className="fa-solid fa-user-circle"></i>
               <span className="menu-text">Profile & Account</span>
             </div>
           </li>
-           <li className={`menu-item ${isActive("/ad") ? "active" : ""}`}>
+
+          <li
+            className={`menu-item ${
+              isActive("/projectsupport") ? "active" : ""
+            }`}
+          >
             <div
               className="menu-link menu-i"
-              onClick={() => {navigate("/ad"); menuItemClick();} } >
-             <i class="fa-solid fa-envelope-open-text"></i>
+              onClick={() => {
+                navigate("/projectsupport");
+                menuItemClick();
+              }}
+            >
+              <i className="fa-solid fa-life-ring"></i>
               <span className="menu-text">Support</span>
             </div>
           </li>

@@ -1,75 +1,133 @@
 import React from "react";
 import { Link } from "react-router-dom";
+
 const Navbar = ({ toggleSidebar }) => {
   return (
-    <>
-      <nav className="navbar navbar-light bg-card">
-        <div className="container-fluid nav-conte">
-          <div className="nav-content">
-            <div className="nav-bran">
-              <a className="nav-brand" href="#">
-               P.M.
-              </a>
-              <div className="nav-taggle-icon" style={{fontSize:"25px",}} onClick={toggleSidebar}>
-                <a href="#">
-                  <i className="fa fa-bars" aria-hidden="true" style={{color:"white"}}></i>
-                </a>
-              </div>
-            </div>
-            
-            {/* Added search bar in the center */}
-            <div className="search-bar">
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                className="form-control"
-                style={{width: "500px", borderRadius:"30px"}}
-              />
-            </div>
-            
-            <div className="nav-main-icon">
-              <a className="bell-icon" href="#" style={{fontSize:"25px"}}>
-                <i className="fa-regular fa-bell"></i>
-              </a>
-              <div className="dropdown profile-elemen">
-                <div
-                  className="me-2 fw-bold p-1 rounded-4 profile d-flex align-items-center"
-                  style={{ cursor: "pointer", fontSize:"25px" }}
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false">
-                  <div className="profile-element">
-                    <div className="avatar online">
-                      <i className="fa-solid user-icon fa-circle-user"></i>
-                      <span className="text-dark ms-2"></span>
-                    </div>
-                  </div>
-                </div>
-                <ul className="dropdown-menu dropdown-menu-end">
-                  <li>
-                    <Link className="dropdown-item" to="/">
-                      Update Profile
-                    </Link>
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" to="/changepassword">
-                      Change Password
-                    </Link>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider" />
-                  </li>
-                  <li>
-                    <Link className="dropdown-item" to="/">
-                      Logout
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            </div>
+    <nav className="navbar navbar-expand-lg navbar-light bg-card sticky-top">
+      <div className="container-fluid px-3">
+        {/* Brand and Toggle Button */}
+        <div className="d-flex align-items-center">
+          <a className="navbar-brand fw-bold text-white me-3" href="#" style={{ fontSize: "24px" }}>
+            P.M.
+          </a>
+          <button 
+            className="btn btn-link text-white p-0 d-lg-inline-block"
+            onClick={toggleSidebar}
+            style={{ fontSize: "25px", textDecoration: "none" }}
+            aria-label="Toggle Sidebar"
+          >
+            <i className="fa fa-bars"></i>
+          </button>
+        </div>
+
+        {/* Search Bar - Hidden on small screens, shown on medium and up */}
+        <div className="d-none d-md-flex flex-grow-1 justify-content-center mx-3">
+          <div className="position-relative" style={{ maxWidth: "500px", width: "100%" }}>
+            <input
+              type="text"
+              placeholder="Search..."
+              className="form-control"
+              style={{
+                borderRadius: "30px",
+                paddingLeft: "15px",
+                paddingRight: "15px",
+                border: "1px solid #ddd"
+              }}
+            />
           </div>
         </div>
-      </nav>
-    </>
+
+        {/* Mobile Search Bar - Shows in center space when toggled */}
+        <div className="collapse d-md-none position-absolute top-100 start-50 translate-middle-x mt-1" id="mobileSearch" style={{ zIndex: 1050, width: "90%" }}>
+          <div className="bg-white rounded-3 shadow p-2">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="form-control"
+              style={{
+                borderRadius: "25px",
+                paddingLeft: "15px",
+                paddingRight: "15px",
+                border: "1px solid #ddd"
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Right Side Icons */}
+        <div className="d-flex align-items-center">
+          {/* Search Icon for Mobile - Only shown on small screens */}
+          <button 
+            className="btn btn-link text-white p-2 d-md-none me-2"
+            style={{ fontSize: "20px", textDecoration: "none" }}
+            data-bs-toggle="collapse"
+            data-bs-target="#mobileSearch"
+            aria-expanded="false"
+            aria-controls="mobileSearch"
+            aria-label="Toggle Search"
+          >
+            <i className="fa fa-search"></i>
+          </button>
+
+          {/* Notification Bell */}
+          <a 
+            className="btn btn-link text-white p-2 me-2" 
+            href="#" 
+            style={{ fontSize: "22px", textDecoration: "none" }}
+            aria-label="Notifications"
+          >
+            <i className="fa-regular fa-bell"></i>
+          </a>
+
+          {/* Profile Dropdown */}
+          <div className="dropdown">
+            <button
+              className="btn btn-link text-white p-2 d-flex align-items-center"
+              style={{ 
+                fontSize: "22px", 
+                textDecoration: "none",
+                border: "none"
+              }}
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              aria-label="Profile Menu"
+            >
+              <div className="position-relative">
+                <i className="fa-solid fa-circle-user"></i>
+                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" style={{ fontSize: "8px", width: "12px", height: "12px" }}>
+                  <span className="visually-hidden">Online</span>
+                </span>
+              </div>
+            </button>
+            <ul className="dropdown-menu dropdown-menu-end shadow">
+              <li>
+                <Link className="dropdown-item py-2" to="/">
+                  <i className="fa fa-user me-2"></i>
+                  Update Profile
+                </Link>
+              </li>
+              <li>
+                <Link className="dropdown-item py-2" to="/changepassword">
+                  <i className="fa fa-lock me-2"></i>
+                  Change Password
+                </Link>
+              </li>
+              <li>
+                <hr className="dropdown-divider" />
+              </li>
+              <li>
+                <Link className="dropdown-item py-2 text-danger" to="/">
+                  <i className="fa fa-sign-out-alt me-2"></i>
+                  Logout
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+
+    </nav>
   );
 };
 

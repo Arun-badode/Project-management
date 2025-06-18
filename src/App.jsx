@@ -8,9 +8,22 @@ import LoginPage from "./authtication/Login";
 
 import LeadDashboard from "./components/Lead/LeadDashboard";
 import AdminDashboard from "./components/AdminDashboard/AdminDashboard";
+import TaskManagementPage from "./components/AdminDashboard/TaskManagement/TaskManagemnet";
+import TaskManagement from "./components/AdminDashboard/TaskManagement/TaskManagemnet";
+import UserManagement from "./components/AdminDashboard/UserManagement/UserManagement";
+import ResourceManagement from "./components/AdminDashboard/ResourceManagement/ResourceManagement";
+import ProjectSupportPortal from "./components/ProjectSupport/ProjectSupport";
+import SettingsPage from "./components/AdminDashboard/Setting/Setting";
+import ProfileAcc from "./components/AdminDashboard/ProfileAcc/ProfileAcc";
+import AuditLog from "./components/AuthLog/AuditLog";
+import QAManagement from "./components/QAManagement/QAManagement";
+import TimeTracker from "./components/AdminDashboard/TimeTracker/TimeTracker";
+import ReportingAnalytics from "./components/ReportingAnalytics/ReportingAnalytics";
+import FileManagementSystem from "./components/FileManagementSystem/FileManagementSystem";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
   const menusidebarcollaps = () => {
     setIsSidebarCollapsed(true);
   };
@@ -18,19 +31,21 @@ function App() {
   const toggleSidebar = () => {
     setIsSidebarCollapsed((prev) => !prev);
   };
+
   const location = useLocation();
 
-  // Check if current path is exactly "/" (login page)
-  const hideLayout = location.pathname === "/";
+  // Check if current path is exactly "/" (login page) or "/signup" (sign up page)
+  const hideLayout = location.pathname === "/" || location.pathname === "/signup";
 
   return (
     <>
-      {/* navbar - hidden on login page */}
+      {/* navbar - hidden on login/signup page */}
       {!hideLayout && <Navbar toggleSidebar={toggleSidebar} />}
       
       {/* main content area */}
       <div className={`main-content ${hideLayout ? "full-width" : ""}`}>
-        {/* sidebar - hidden on login page */}
+        {/* sidebar - hidden on login/signup page */}
+         {/* sidebar - hidden on login/signup page */}
         {!hideLayout && (
           <Sidebar
             collapsed={isSidebarCollapsed}
@@ -40,14 +55,32 @@ function App() {
         
         {/* right side content */}
         <div
-          className={`right-side-content ${
-            isSidebarCollapsed && !hideLayout ? "collapsed" : ""
-          }`}
+          className={`right-side-content ${isSidebarCollapsed && !hideLayout ? "collapsed" : ""}`}
         >
           <Routes>
             <Route path="/" element={<LoginPage />} />
+            {/*Admin Start */}
+
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/taskmanagement" element={<TaskManagement/>}/>
+            <Route path='/usermanage' element={<UserManagement/>}/>
+            <Route path="/resourcemanagement" element={<ResourceManagement/>}/>
+             <Route path="/projectsupport" element={<ProjectSupportPortal/>}/>
+              <Route path="/settingpage" element={<SettingsPage/>}/>
+               <Route path="/profile" element={<ProfileAcc/>}/>
+                 <Route path="/auditlog" element={<AuditLog/>}/>
+                   <Route path="/timetracker" element={<TimeTracker/>}/>
+                     <Route path="/reportinganalytics" element={<ReportingAnalytics/>}/>
+                     <Route path="/filemanagementsystem" element={<FileManagementSystem/>}/>
+                      <Route path="/qamanagement" element={<QAManagement/>}/>
+
+
+
+            {/*Admin End */}
+
+
             <Route path="/LeadDashboard" element={<LeadDashboard />} />
+
             {/* Add your other routes here */}
           </Routes>
         </div>

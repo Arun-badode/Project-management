@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Button, Table, Badge, Modal, Form, Row, Col } from 'react-bootstrap';
 import { FaPlus, FaFileExport } from 'react-icons/fa';
-// import './AdminDashboard.css';
 
 const AdminDashboard = () => {
   const [showModal, setShowModal] = useState(false);
@@ -20,7 +19,6 @@ const AdminDashboard = () => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
-  // Random project data generator
   const generateRandomProjects = (count) => {
     const clients = ['Acme Corp', 'Globex', 'Soylent', 'Initech', 'Umbrella', 'Wayne Ent', 'Stark Ind', 'Oscorp'];
     const platforms = ['Web', 'Mobile', 'Desktop'];
@@ -29,21 +27,21 @@ const AdminDashboard = () => {
     const qaReviewers = ['Alan', 'Sarah', 'Mike', 'Lisa', 'David'];
     const qaStatuses = ['Passed', 'Failed', 'Pending', 'In Review'];
     const processStatuses = ['Ongoing', 'Completed', 'Pending', 'Delayed'];
-    
+
     const projects = [];
     const today = new Date();
-    
+
     for (let i = 0; i < count; i++) {
       const randomDays = Math.floor(Math.random() * 30) + 1;
       const dueDate = new Date(today);
       dueDate.setDate(today.getDate() + randomDays);
-      
+
       const qcDeadline = new Date(dueDate);
       qcDeadline.setDate(dueDate.getDate() - 2);
-      
+
       const qcDueDate = new Date(qcDeadline);
       qcDueDate.setDate(qcDeadline.getDate() + 1);
-      
+
       projects.push({
         id: i + 1,
         title: `Project ${i + 1}`,
@@ -64,54 +62,55 @@ const AdminDashboard = () => {
         serverPath: `/mnt/server/project/project-${i + 1}`
       });
     }
-    
+
     return projects;
   };
 
   const projects = generateRandomProjects(15);
 
   return (
-    <div className="admin-dashboard text-white p-4 bg-main">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+    <div className="admin-dashboard text-white p-3 p-md-4 bg-main">
+      {/* Header */}
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <h2 className="gradient-heading">Admin Dashboard</h2>
-        <div>
-          <Button variant="outline-light" className="gradient-button me-2" onClick={handleShow}>
+        <div className="d-flex flex-column flex-sm-row gap-2">
+          <Button  className="gradient-button" onClick={handleShow}>
             <FaPlus className="me-2" /> Create New Project
           </Button>
-          <Button variant="outline-light" className="gradient-button">
-            <FaFileExport className="me-2 " /> Export Data
+          <Button  className="gradient-button">
+            <FaFileExport className="me-2" /> Export Data
           </Button>
         </div>
       </div>
 
       {/* KPIs */}
-      <Row className="mb-4">
-        <Col md={3}>
-          <Card className="bg-card text-white p-3">
+      <Row className="mb-4 g-3">
+        <Col xs={12} sm={6} md={3}>
+          <Card className="bg-card text-white p-3 h-100">
             <Card.Body>
               <Card.Title>Total Active Projects</Card.Title>
               <h4>{projects.length}</h4>
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
-          <Card className="bg-card  text-white p-3">
+        <Col xs={12} sm={6} md={3}>
+          <Card className="bg-card text-white p-3 h-100">
             <Card.Body>
               <Card.Title>Total Resources</Card.Title>
               <h4>27</h4>
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
-          <Card className="bg-card  text-white p-3">
+        <Col xs={12} sm={6} md={3}>
+          <Card className="bg-card text-white p-3 h-100">
             <Card.Body>
-              <Card.Title>Projects Deadline</Card.Title>
+              <Card.Title>Projects Nearing Deadline</Card.Title>
               <h4>4</h4>
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
-          <Card className="bg-card  text-white p-3">
+        <Col xs={12} sm={6} md={3}>
+          <Card className="bg-card text-white p-3 h-100">
             <Card.Body>
               <Card.Title>Overdue Projects</Card.Title>
               <h4>2</h4>
@@ -121,10 +120,10 @@ const AdminDashboard = () => {
       </Row>
 
       {/* Filters */}
-      <Card className="bg-card  text-white p-3 mb-4">
+      <Card className="bg-card text-white p-3 mb-4">
         <h5>Filters</h5>
         <Row className="gy-3">
-          <Col md={2}>
+          <Col xs={12} sm={6} md={2}>
             <Form.Control
               type="text"
               name="client"
@@ -133,7 +132,7 @@ const AdminDashboard = () => {
               onChange={handleFilterChange}
             />
           </Col>
-          <Col md={2}>
+          <Col xs={12} sm={6} md={2}>
             <Form.Select name="platform" value={filters.platform} onChange={handleFilterChange}>
               <option value="">Platform</option>
               <option>Web</option>
@@ -141,7 +140,7 @@ const AdminDashboard = () => {
               <option>Desktop</option>
             </Form.Select>
           </Col>
-          <Col md={2}>
+          <Col xs={12} sm={6} md={2}>
             <Form.Control
               type="number"
               name="pages"
@@ -150,7 +149,7 @@ const AdminDashboard = () => {
               onChange={handleFilterChange}
             />
           </Col>
-          <Col md={2}>
+          <Col xs={12} sm={6} md={2}>
             <Form.Control
               type="text"
               name="handler"
@@ -159,7 +158,7 @@ const AdminDashboard = () => {
               onChange={handleFilterChange}
             />
           </Col>
-          <Col md={2}>
+          <Col xs={12} sm={6} md={2}>
             <Form.Select name="status" value={filters.status} onChange={handleFilterChange}>
               <option value="">Status</option>
               <option>In Progress</option>
@@ -171,87 +170,83 @@ const AdminDashboard = () => {
       </Card>
 
       {/* Main Table */}
-      <Card className="table-gradient-bg text-white p-3">
-        <h4>Project List</h4>
-        <Table  responsive hover className="mt-3 table-gradient-bg">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Project Title</th>
-              <th>Client</th>
-              <th>Tasks</th>
-              <th>Languages</th>
-              <th>Platform</th>
-              <th>Total Pages</th>
-              <th>Actual Due Date</th>
-              <th>Ready for QC Deadline</th>
-              <th>QC Hrs</th>
-              <th>QC Due Date</th>
-              <th>Status</th>
-              <th>Handler</th>
-              <th>Process Status</th>
-              <th>QA Reviewer</th>
-              <th>QA Status</th>
-              <th>Server Path</th>
-            </tr>
-          </thead>
-          <tbody>
-            {projects.map((project) => (
-              <tr key={project.id}>
-                <td>{project.id}</td>
-                <td>{project.title}</td>
-                <td>{project.client}</td>
-                <td>{project.tasks}</td>
-                <td>{project.languages}</td>
-                <td>{project.platform}</td>
-                <td>{project.pages}</td>
-                <td>{project.dueDate}</td>
-                <td>{project.qcDeadline}</td>
-                <td>{project.qcHours}</td>
-                <td>{project.qcDueDate}</td>
-                <td>
-                  <Badge 
-                    bg={
-                      project.status === 'Completed' ? 'success' : 
-                      project.status === 'On Hold' ? 'warning' : 'info'
-                    }
-                  >
-                    {project.status}
-                  </Badge>
-                </td>
-                <td>{project.handler}</td>
-                <td>
-                  <Badge 
-                    bg={
-                      project.processStatus === 'Completed' ? 'success' : 
-                      project.processStatus === 'Delayed' ? 'danger' : 
-                      project.processStatus === 'Pending' ? 'warning' : 'primary'
-                    }
-                  >
-                    {project.processStatus}
-                  </Badge>
-                </td>
-                <td>{project.qaReviewer}</td>
-                <td>
-                  <Badge 
-                    bg={
-                      project.qaStatus === 'Passed' ? 'success' : 
-                      project.qaStatus === 'Failed' ? 'danger' : 
-                      project.qaStatus === 'In Review' ? 'info' : 'secondary'
-                    }
-                  >
-                    {project.qaStatus}
-                  </Badge>
-                </td>
-                <td>{project.serverPath}</td>
+      <Card className="table-gradient-bg text-white p-3 mb-5">
+        <h4 className="mb-3">Project List</h4>
+        <div className="table-responsive">
+          <Table  className="table bg-card align-middle mb-0">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Project Title</th>
+                <th>Client</th>
+                <th>Tasks</th>
+                <th>Languages</th>
+                <th>Platform</th>
+                <th>Total Pages</th>
+                <th>Actual Due Date</th>
+                <th>Ready for QC Deadline</th>
+                <th>QC Hrs</th>
+                <th>QC Due Date</th>
+                <th>Status</th>
+                <th>Handler</th>
+                <th>Process Status</th>
+                <th>QA Reviewer</th>
+                <th>QA Status</th>
+                <th>Server Path</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {projects.map((project) => (
+                <tr key={project.id}>
+                  <td>{project.id}</td>
+                  <td>{project.title}</td>
+                  <td>{project.client}</td>
+                  <td>{project.tasks}</td>
+                  <td>{project.languages}</td>
+                  <td>{project.platform}</td>
+                  <td>{project.pages}</td>
+                  <td>{project.dueDate}</td>
+                  <td>{project.qcDeadline}</td>
+                  <td>{project.qcHours}</td>
+                  <td>{project.qcDueDate}</td>
+                  <td>
+                    <Badge bg={
+                      project.status === 'Completed' ? 'success' :
+                      project.status === 'On Hold' ? 'warning' : 'info'
+                    }>
+                      {project.status}
+                    </Badge>
+                  </td>
+                  <td>{project.handler}</td>
+                  <td>
+                    <Badge bg={
+                      project.processStatus === 'Completed' ? 'success' :
+                      project.processStatus === 'Delayed' ? 'danger' :
+                      project.processStatus === 'Pending' ? 'warning' : 'primary'
+                    }>
+                      {project.processStatus}
+                    </Badge>
+                  </td>
+                  <td>{project.qaReviewer}</td>
+                  <td>
+                    <Badge bg={
+                      project.qaStatus === 'Passed' ? 'success' :
+                      project.qaStatus === 'Failed' ? 'danger' :
+                      project.qaStatus === 'In Review' ? 'info' : 'secondary'
+                    }>
+                      {project.qaStatus}
+                    </Badge>
+                  </td>
+                  <td style={{ minWidth: "180px" }}>{project.serverPath}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
       </Card>
 
-      {/* Create New Project Modal */}
-      <Modal show={showModal} onHide={handleClose} centered>
+      {/* Create Project Modal */}
+      <Modal show={showModal} onHide={handleClose} centered  className='custom-modal-dark'>
         <Modal.Header closeButton className="bg-dark text-white">
           <Modal.Title>Create New Project</Modal.Title>
         </Modal.Header>
@@ -301,7 +296,7 @@ const AdminDashboard = () => {
                 <option>On Hold</option>
               </Form.Select>
             </Form.Group>
-            <Button variant="primary" type="submit">Create Project</Button>
+            <Button variant="primary" type="submit" className="w-100 gradient-button">Create Project</Button>
           </Form>
         </Modal.Body>
       </Modal>
