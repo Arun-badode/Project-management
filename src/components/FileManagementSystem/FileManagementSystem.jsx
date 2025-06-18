@@ -222,7 +222,7 @@ const FileManagementSystem = () => {
               className={`nav-link btn btn-link text-start text-dark ${activeTab === 'files' ? 'active fw-bold' : ''}`}
               onClick={() => setActiveTab('files')}
             >
-              <FolderOpen size={16} className="me-2" />
+              <FolderOpen size={16} className="me-2 " />
               Uploaded Files
             </button>
             <button 
@@ -271,7 +271,7 @@ const FileManagementSystem = () => {
           {/* Uploaded Files List */}
           {activeTab === 'files' && (
             <div>
-              <div className="d-flex justify-content-between align-items-center mb-4">
+              <div className="d-flex justify-content-between  align-items-center mb-4">
                 <h3>📋 Uploaded Files List</h3>
                 <div className="d-flex gap-2">
                   <input

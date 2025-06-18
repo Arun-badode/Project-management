@@ -468,7 +468,7 @@ export default function SettingsPage() {
                 <label className="form-label fw-semibold">Past Backups</label>
                 <div className="table-responsive">
                   <table className="table table-bordered align-middle settings-table-unique table-gradient-bg">
-                    <thead className="table-light text-light">
+                    <thead className="">
                       <tr>
                         <th>#</th>
                         <th>Timestamp</th>
