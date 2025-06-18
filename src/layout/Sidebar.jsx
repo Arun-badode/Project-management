@@ -92,12 +92,6 @@ const Sidebar = ({ collapsed }) => {
             </div>
           </li>
 
-          <li className={`menu-item ${isActive("/settingpage") ? "active" : ""}`}>
-            <div className="menu-link menu-i" onClick={() => { navigate("/settingpage"); menuItemClick(); }}>
-              <i className="fa-solid fa-gear"></i>
-              <span className="menu-text">Settings</span>
-            </div>
-          </li>
 
           <li className={`menu-item ${isActive("/auditlog") ? "active" : ""}`}>
             <div className="menu-link menu-i" onClick={() => { navigate("/auditlog"); menuItemClick(); }}>
@@ -117,6 +111,13 @@ const Sidebar = ({ collapsed }) => {
             <div className="menu-link menu-i" onClick={() => { navigate("/projectsupport"); menuItemClick(); }}>
               <i className="fa-solid fa-life-ring"></i>
               <span className="menu-text">Support</span>
+            </div>
+          </li>
+
+            <li className={`menu-item ${isActive("/settingpage") ? "active" : ""}`}>
+            <div className="menu-link menu-i" onClick={() => { navigate("/settingpage"); menuItemClick(); }}>
+              <i className="fa-solid fa-gear"></i>
+              <span className="menu-text">Settings</span>
             </div>
           </li>
         </ul>

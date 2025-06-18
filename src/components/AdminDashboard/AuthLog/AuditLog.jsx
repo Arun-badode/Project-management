@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Search, Download, Eye, Users, Activity, FileText, Calendar, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const AuditLog = () => {
@@ -743,12 +743,6 @@ const AuditLog = () => {
                     </div>
                 </div>
             )}
-
-            {/* Bootstrap CSS */}
-            <link
-                href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
-                rel="stylesheet"
-            />
         </div>
     );
 };

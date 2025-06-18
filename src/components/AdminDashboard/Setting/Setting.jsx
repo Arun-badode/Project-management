@@ -94,7 +94,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="container-fluid settings-main-unique py-4">
+    <div className="p-4 settings-main-unique py-4">
       <h2 className="gradient-heading">Settings</h2>
       <div className="row g-4 ">
         {/* App Configurations */}

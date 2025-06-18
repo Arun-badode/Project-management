@@ -574,7 +574,7 @@ const TaskManagement = () => {
 
   return (
     <div className="bg-main min-vh-100">
-      <div className="container py-4">
+      <div className="p-4 py-4">
         {/* Header */}
         <div className="mb-4">
           <h2  className="gradient-heading">Task Management</h2>
