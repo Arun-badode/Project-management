@@ -563,7 +563,7 @@ const TimeTracker = () => {
                                                     </div>
                                                 </td>
                                                 <td className="tt-time-cell d-none d-md-table-cell">
-                                                    <small className="tt-time-range text-muted">
+                                                    <small className="tt-time-range ">
                                                         {entry.startTime} - {entry.endTime}
                                                     </small>
                                                 </td>

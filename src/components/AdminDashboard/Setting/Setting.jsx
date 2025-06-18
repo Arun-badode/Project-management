@@ -208,7 +208,7 @@ export default function SettingsPage() {
                         </td>
                         <td>
                           <button
-                            className="btn  text-dark btn-sm settings-edit-role-btn-unique"
+                            className="btn  text-white btn-sm settings-edit-role-btn-unique"
                             onClick={() => handleRoleEdit(idx)}
                           >
                             Edit
@@ -433,7 +433,7 @@ export default function SettingsPage() {
                   </select>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Storage Destination</label>
+                  <label className="form-label fw-semibold me-2">Storage Destination</label>
                   <div className="btn-group settings-backup-toggle-unique" role="group">
                     <input
                       type="radio"

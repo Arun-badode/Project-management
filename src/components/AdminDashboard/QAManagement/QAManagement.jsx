@@ -514,7 +514,7 @@ const QAManagement = () => {
                                 </div>
                                 <div className="card-body">
                                     {uploadedFiles.length === 0 ? (
-                                        <p className="text-muted">No files uploaded yet.</p>
+                                        <p className="">No files uploaded yet.</p>
                                     ) : (
                                         <div className="list-group  list-group-flush">
                                             {uploadedFiles.map((file, index) => (
