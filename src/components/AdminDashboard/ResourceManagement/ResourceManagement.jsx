@@ -414,7 +414,7 @@ const ResourceManagement = () => {
                         <h6 className="card-title">{skill}</h6>
                         <div className="d-flex justify-content-between align-items-center">
                           <span>{count} resources</span>
-                          <span className="text-muted">{percentage}%</span>
+                          <span className="">{percentage}%</span>
                         </div>
                         <ProgressBar now={percentage} className="mt-2" style={{ height: '5px' }} />
                       </div>
@@ -453,30 +453,31 @@ const ResourceManagement = () => {
   };
 
   // Render availability calendar
-  const renderAvailabilityCalendar = () => (
-    <div className="card ">
-      <div className="card-header bg-card ">
-        <h5 className="card-title">Resource Availability Calendar</h5>
-      </div>
-      <div className="card-body bg-card text-light  ">
-        <div style={{ height: 700 }}>
-          <BigCalendar
-            localizer={localizer}
-            events={events}
-            startAccessor="start"
-            endAccessor="end"
-            style={{ height: '100%' }}
-            defaultView="week"
-            views={['day', 'week', 'month']}
-            step={60}
-            timeslots={1}
-            min={new Date(0, 0, 0, 8, 0, 0)}
-            max={new Date(0, 0, 0, 19, 0, 0)}
-          />
-        </div>
+ const renderAvailabilityCalendar = (calendarClass = 'calendar-blue') => (
+  <div className={`card ${calendarClass}`}>
+    <div className="card-header bg-card">
+      <h5 className="card-title">Resource Availability Calendar</h5>
+    </div>
+    <div className="card-body bg-card text-light">
+      <div style={{ height: 700 }}>
+        <BigCalendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          style={{ height: '100%' }}
+          defaultView="week"
+          views={['day', 'week', 'month']}
+          step={60}
+          timeslots={1}
+          min={new Date(0, 0, 0, 8, 0, 0)}
+          max={new Date(0, 0, 0, 19, 0, 0)}
+        />
       </div>
     </div>
-  );
+  </div>
+);
+
 
   // Render team load balancing
   const renderTeamLoadBalancing = () => (
