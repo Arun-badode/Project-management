@@ -237,7 +237,7 @@ const TaskManagement = () => {
         <div className="d-flex justify-content-between align-items-start mb-3">
           <div className="flex-grow-1">
             <h5 className="card-title mb-2">{task.title}</h5>
-            <p className="card-text text-muted mb-3">{task.description}</p>
+            <p className="card-text  mb-3">{task.description}</p>
             
             <div className="d-flex flex-wrap gap-2 mb-3">
               <span className={`badge ${getStatusColor(task.status)}`}>
@@ -251,7 +251,7 @@ const TaskManagement = () => {
               </span>
             </div>
 
-            <div className="d-flex align-items-center gap-4 text-muted mb-3">
+            <div className="d-flex align-items-center gap-4  mb-3">
               <div className="d-flex align-items-center gap-1">
                 <User className="w-4 h-4" />
                 <span>{task.assignee}</span>
@@ -385,8 +385,8 @@ const TaskManagement = () => {
 
       {filteredTasks.length === 0 && (
         <div className="text-center py-5">
-          <Target className="w-12 h-12 text-muted mx-auto mb-3" />
-          <p className="text-muted">No tasks found matching your criteria</p>
+          <Target className="w-12 h-12  mx-auto mb-3" />
+          <p className="">No tasks found matching your criteria</p>
         </div>
       )}
     </div>
@@ -400,7 +400,7 @@ const TaskManagement = () => {
           
           <div className="row mb-4 ">
             <div className="col-md-4 mb-3 mb-md-0">
-              <div className="card bg-primary text-white">
+              <div className="card bg-card text-white">
                 <div className="card-body">
                   <div className="d-flex align-items-center gap-2 mb-2">
                     <Timer className="w-5 h-5" />
@@ -414,7 +414,7 @@ const TaskManagement = () => {
             </div>
             
             <div className="col-md-4 mb-3 mb-md-0 ">
-              <div className="card bg-success text-white">
+              <div className="card bg-card text-white">
                 <div className="card-body">
                   <div className="d-flex align-items-center gap-2 mb-2">
                     <CheckCircle2 className="w-5 h-5" />
@@ -428,7 +428,7 @@ const TaskManagement = () => {
             </div>
             
             <div className="col-md-4">
-              <div className="card bg-warning text-dark">
+              <div className="card bg-card text-dark">
                 <div className="card-body">
                   <div className="d-flex align-items-center gap-2 mb-2">
                     <Clock className="w-5 h-5" />
@@ -458,7 +458,7 @@ const TaskManagement = () => {
                   <tr key={task.id}>
                     <td>
                       <div className="fw-bold">{task.title}</div>
-                      <div className="text-muted small">{task.category}</div>
+                      <div className=" small">{task.category}</div>
                     </td>
                     <td>{task.assignee}</td>
                     <td className="fw-bold">{formatTime(task.timeSpent)}</td>
@@ -498,10 +498,10 @@ const TaskManagement = () => {
             {['Not Started', 'Pending', 'In Review', 'Passed'].map(status => {
               const count = tasks.filter(task => task.qaStatus === status).length;
               const colors = {
-                'Not Started': 'bg-secondary text-white',
-                'Pending': 'bg-primary text-white',
-                'In Review': 'bg-warning text-dark',
-                'Passed': 'bg-success text-white'
+                'Not Started': 'bg-card text-white',
+                'Pending': 'bg-card text-white',
+                'In Review': 'bg-card text-dark',
+                'Passed': 'bg-card text-white'
               };
               
               return (
@@ -523,7 +523,7 @@ const TaskManagement = () => {
                 <div className="d-flex justify-content-between align-items-start">
                   <div className="flex-grow-1">
                     <h6 className="fw-bold mb-2">{task.title}</h6>
-                    <div className="d-flex gap-4 text-muted small mb-2">
+                    <div className="d-flex gap-4  small mb-2">
                       <span>Assignee: {task.assignee}</span>
                       <span>Status: {task.status}</span>
                       <span>Due: {task.dueDate}</span>
@@ -574,7 +574,7 @@ const TaskManagement = () => {
 
   return (
     <div className="bg-main min-vh-100">
-      <div className="container py-4">
+      <div className="p-4 py-4">
         {/* Header */}
         <div className="mb-4">
           <h2  className="gradient-heading">Task Management</h2>

@@ -20,12 +20,26 @@ body{
 .table-gradient-bg {
   background: linear-gradient(to bottom right, #141c3a, #1b2f6e) !important;
   color: #ffffff !important;
+  border-collapse: collapse !important;
+}
+
+.table-gradient-bg th,
+.table-gradient-bg td {
+  background-color: transparent !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.table-gradient-bg thead th {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
 }
 
 .table-gradient-bg tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.1) !important; /* Light hover for contrast */
-  color: #ffffff !important; /* Ensure text stays white */
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
 }
+
 
 
 .gradient-heading {
@@ -98,3 +112,8 @@ table tr td,
 table tr th {
   white-space: nowrap !important;
 }
+
+
+
+
+

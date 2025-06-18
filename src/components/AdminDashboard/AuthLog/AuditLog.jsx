@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Search, Download, Eye, Users, Activity, FileText, Calendar, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const AuditLog = () => {
@@ -295,18 +295,18 @@ const AuditLog = () => {
     };
 
     return (
-        <div className="container-fluid py-4 bg-light min-vh-100">
+        <div className="container-fluid py-4 bg-light min-vh-100 bg-main">
             <div className="row">
                 <div className="col-12">
-                    <div className="card shadow-sm border-0">
-                        <div className="card-header bg-white border-bottom">
-                            <div className="d-flex justify-content-between align-items-center">
-                                <h4 className="mb-0 text-primary">
-                                    <Activity className="me-2" size={24} />
+                    <div className="card bg-main shadow-sm border-0">
+                        <div className="card-header  border-bottom">
+                            <div className="d-flex justify-content-between  align-items-center">
+                                <h4 className=" gradient-heading">
+                                    <Activity className="me-2 text-primary" size={24} />
                                     Audit Logs Dashboard
                                 </h4>
                                 <div className="d-flex gap-2">
-                                    <button className="btn btn-outline-success btn-sm" onClick={exportCSV}>
+                                    <button className="btn btn-outline-primary btn-sm" onClick={exportCSV}>
                                         <Download size={16} className="me-1" />
                                         Export CSV
                                     </button>
@@ -325,7 +325,7 @@ const AuditLog = () => {
                                             setCurrentPage(1);
                                         }}
                                     >
-                                        <FileText size={16} className="me-1" />
+                                        <FileText size={16} className="me-1 " />
                                         All Activities Log
                                     </button>
                                 </li>
@@ -417,10 +417,10 @@ const AuditLog = () => {
                             {activeTab === 'login-logout' && (
                                 <div className="row mb-4">
                                     <div className="col-md-3">
-                                        <div className="card bg-primary text-white">
+                                        <div className="card  bg-card text-white">
                                             <div className="card-body text-center">
                                                 <Users size={32} className="mb-2" />
-                                                <h5 className="card-title">12</h5>
+                                                <h5 className="card-title ">12</h5>
                                                 <p className="card-text small">Currently Active Users</p>
                                             </div>
                                         </div>
@@ -429,10 +429,10 @@ const AuditLog = () => {
                             )}
 
                             {/* Table - Desktop View */}
-                            <div className="card shadow-sm d-none d-lg-block">
-                                <div className="table-responsive">
-                                    <table className="table table-hover mb-0">
-                                        <thead className="table-light">
+                            <div className="card  d-none  d-lg-block">
+                                <div className="table-responsive ">
+                                    <table className="table  table-hover mb-0 table-gradient-bg">
+                                        <thead className="table-light ">
                                             <tr>
                                                 {activeTab === 'all-activities' && (
                                                     <>
@@ -743,12 +743,6 @@ const AuditLog = () => {
                     </div>
                 </div>
             )}
-
-            {/* Bootstrap CSS */}
-            <link
-                href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
-                rel="stylesheet"
-            />
         </div>
     );
 };

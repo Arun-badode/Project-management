@@ -305,7 +305,7 @@ const ResourceManagement = () => {
                         {resource.currentProjects.length > 0 ? (
                           resource.currentProjects.join(', ')
                         ) : (
-                          <span className="text-muted">No projects</span>
+                          <span className="">No projects</span>
                         )}
                       </td>
                       <td>
@@ -455,7 +455,7 @@ const ResourceManagement = () => {
   // Render availability calendar
   const renderAvailabilityCalendar = () => (
     <div className="card ">
-      <div className="card-header bg-card">
+      <div className="card-header bg-card ">
         <h5 className="card-title">Resource Availability Calendar</h5>
       </div>
       <div className="card-body bg-card text-light  ">
@@ -568,7 +568,7 @@ const ResourceManagement = () => {
   };
 
   return (
-    <div className="container-fluid py-4">
+    <div className="p-4 py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="gradient-heading">Resource Management</h2>
         <div className="d-flex gap-2">
