@@ -668,9 +668,9 @@ const AuditLog = () => {
 
             {/* Modal */}
             {showModal && modalData && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-lg">
-                        <div className="modal-content">
+                <div className="modal fade show d-block " >
+                    <div className="modal-dialog  modal-lg">
+                        <div className="modal-content bg-card">
                             <div className="modal-header">
                                 <h5 className="modal-title">
                                     {activeTab === 'changes-history' ? 'Change Details' : 'Activity Details'}

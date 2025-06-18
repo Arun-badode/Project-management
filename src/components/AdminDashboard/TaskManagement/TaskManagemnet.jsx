@@ -647,7 +647,7 @@ const TaskManagement = () => {
                     <select
                       value={newTask.assignee}
                       onChange={(e) => setNewTask({...newTask, assignee: e.target.value})}
-                      className="form-select"
+                      className="form-select "
                     >
                       <option value="">Select assignee</option>
                       {teamMembers.map(member => (
@@ -656,8 +656,8 @@ const TaskManagement = () => {
                     </select>
                   </div>
                   
-                  <div className="row mb-3">
-                    <div className="col-md-6">
+                  <div className="row mb-3 ">
+                    <div className="col-md-6 ">
                       <select
                         value={newTask.priority}
                         onChange={(e) => setNewTask({...newTask, priority: e.target.value})}

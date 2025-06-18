@@ -199,7 +199,7 @@ const FileManagementSystem = () => {
                     {smIcon(f.extension)}
                     <div>
                       <div className="fw-semibold">{f.name}.{f.extension}</div>
-                      <small className="text-muted ">.{f.extension}</small>
+                      <small className=" ">.{f.extension}</small>
                     </div>
                   </td>
                   <td>{f.project}</td>
@@ -260,7 +260,7 @@ const FileManagementSystem = () => {
                   >
                     <FaUpload className="fs-2 mb-2 text-primary" />
                     <p className="mb-1">Drag &amp; drop files here</p>
-                    <p className="small text-muted mb-0">
+                    <p className="small mb-0">
                       or click to browse
                     </p>
                     <input

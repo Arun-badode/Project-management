@@ -527,7 +527,7 @@ const QAManagement = () => {
                                                         <span className="badge bg-secondary me-1">{file.taskId}</span>
                                                         <span className="badge bg-info">{file.fileType}</span>
                                                     </p>
-                                                    <small className="text-muted d-block text-break">Server Path: {file.serverPath}</small>
+                                                    <small className=" d-block text-break">Server Path: {file.serverPath}</small>
                                                     {file.comments && <p className="mb-2 mt-1 small text-break">Comments: {file.comments}</p>}
                                                     <div className="mt-2 d-flex flex-wrap gap-1">
                                                         <button className="btn btn-sm btn-outline-primary">📥 Download</button>
@@ -574,7 +574,7 @@ const QAManagement = () => {
                                         </div>
                                         <div className="mt-3">
                                             <h6>Task Description:</h6>
-                                            <p className="text-muted">This is a detailed description of the QA task that needs to be performed. It includes specific requirements, test cases, and expected outcomes.</p>
+                                            <p className="">This is a detailed description of the QA task that needs to be performed. It includes specific requirements, test cases, and expected outcomes.</p>
                                         </div>
                                     </div>
                                 </>
