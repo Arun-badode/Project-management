@@ -6,20 +6,20 @@ import Sidebar from "./layout/Sidebar";
 import { useState } from "react";
 import LoginPage from "./authtication/Login";
 
-import LeadDashboard from "./components/Lead/LeadDashboard";
+import LeadDashboard from "./components/AdminDashboard/Lead/LeadDashboard";
 import AdminDashboard from "./components/AdminDashboard/AdminDashboard";
 import TaskManagementPage from "./components/AdminDashboard/TaskManagement/TaskManagemnet";
 import TaskManagement from "./components/AdminDashboard/TaskManagement/TaskManagemnet";
 import UserManagement from "./components/AdminDashboard/UserManagement/UserManagement";
 import ResourceManagement from "./components/AdminDashboard/ResourceManagement/ResourceManagement";
-import ProjectSupportPortal from "./components/ProjectSupport/ProjectSupport";
+import ProjectSupportPortal from "./components/AdminDashboard/ProjectSupport/ProjectSupport";
 import SettingsPage from "./components/AdminDashboard/Setting/Setting";
 import ProfileAcc from "./components/AdminDashboard/ProfileAcc/ProfileAcc";
-import AuditLog from "./components/AuthLog/AuditLog";
-import QAManagement from "./components/QAManagement/QAManagement";
+import AuditLog from "./components/AdminDashboard/AuthLog/AuditLog";
+import QAManagement from "./components/AdminDashboard/QAManagement/QAManagement";
 import TimeTracker from "./components/AdminDashboard/TimeTracker/TimeTracker";
-import ReportingAnalytics from "./components/ReportingAnalytics/ReportingAnalytics";
-import FileManagementSystem from "./components/FileManagementSystem/FileManagementSystem";
+import ReportingAnalytics from "./components/AdminDashboard/ReportingAnalytics/ReportingAnalytics";
+import FileManagementSystem from "./components/AdminDashboard/FileManagementSystem/FileManagementSystem";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);

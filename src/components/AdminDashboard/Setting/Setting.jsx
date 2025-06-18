@@ -94,7 +94,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="container-fluid settings-main-unique py-4">
+    <div className="p-4 settings-main-unique py-4">
       <h2 className="gradient-heading">Settings</h2>
       <div className="row g-4 ">
         {/* App Configurations */}
@@ -181,9 +181,9 @@ export default function SettingsPage() {
                 Add Role
               </button>
             </div>
-            <div className="card-body">
+            <div className="card-body ">
               <div className="table-responsive ">
-                <table className="table table-bordered align-middle table-gradient-bg ">
+                <table className="table table-bordered align-middle table-gradient-bg  ">
                   <thead className="table-gradient-bg">
                     <tr>
                       <th>Role</th>
@@ -208,7 +208,7 @@ export default function SettingsPage() {
                         </td>
                         <td>
                           <button
-                            className="btn btn-outline-light btn-sm settings-edit-role-btn-unique"
+                            className="btn  text-white btn-sm settings-edit-role-btn-unique"
                             onClick={() => handleRoleEdit(idx)}
                           >
                             Edit
@@ -433,7 +433,7 @@ export default function SettingsPage() {
                   </select>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label fw-semibold">Storage Destination</label>
+                  <label className="form-label fw-semibold me-2">Storage Destination</label>
                   <div className="btn-group settings-backup-toggle-unique" role="group">
                     <input
                       type="radio"
@@ -467,8 +467,8 @@ export default function SettingsPage() {
               <div>
                 <label className="form-label fw-semibold">Past Backups</label>
                 <div className="table-responsive">
-                  <table className="table table-bordered align-middle settings-table-unique table-gradient-bg">
-                    <thead className="table-light text-light">
+                  <table className="table table-bordered  align-middle settings-table-unique table-gradient-bg">
+                    <thead className=" ">
                       <tr>
                         <th>#</th>
                         <th>Timestamp</th>

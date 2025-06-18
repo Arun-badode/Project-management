@@ -130,35 +130,35 @@ const QAManagement = () => {
             {/* Header */}
             <div className="row mb-4">
                 <div className="col-12">
-                    <h1 className="h3 mb-3 text-white">QA Management Dashboard</h1>
-                    <div className="row">
-                        <div className="col-md-3 col-sm-6 mb-3">
-                            <div className="card bg-primary text-white">
-                                <div className="card-body">
+                    <h1 className="h3 mb-3 gradient-heading">QA Management Dashboard</h1>
+                    <div className="row ">
+                        <div className="col-md-3  col-sm-6 mb-3">
+                            <div className="card bg-card text-white">
+                                <div className="card-body ">
                                     <h5>Total Tasks</h5>
                                     <h2>{tasks.length}</h2>
                                 </div>
                             </div>
                         </div>
                         <div className="col-md-3 col-sm-6 mb-3">
-                            <div className="card bg-warning text-white">
-                                <div className="card-body">
+                            <div className="card bg-card text-white">
+                                <div className="card-body ">
                                     <h5>In Progress</h5>
                                     <h2>{tasks.filter(t => t.status === 'In Progress').length}</h2>
                                 </div>
                             </div>
                         </div>
                         <div className="col-md-3 col-sm-6 mb-3">
-                            <div className="card bg-success text-white">
-                                <div className="card-body">
+                            <div className="card bg-card text-white">
+                                <div className="card-body ">
                                     <h5>Completed</h5>
                                     <h2>{tasks.filter(t => t.status === 'Completed').length}</h2>
                                 </div>
                             </div>
                         </div>
                         <div className="col-md-3 col-sm-6 mb-3">
-                            <div className="card bg-info text-white">
-                                <div className="card-body">
+                            <div className="card bg-card text-white">
+                                <div className="card-body ">
                                     <h5>Open Tasks</h5>
                                     <h2>{tasks.filter(t => t.status === 'Open').length}</h2>
                                 </div>
@@ -193,15 +193,15 @@ const QAManagement = () => {
             </ul>
 
             {/* Tab Content */}
-            <div className="tab-content">
+            <div className="tab-content ">
 
                 {/* Tab 1: QA Task Pool */}
                 {activeTab === 'taskPool' && (
-                    <div className="card">
+                    <div className="card bg-card">
                         <div className="card-header">
                             <h5>QA Task Pool</h5>
                         </div>
-                        <div className="card-body">
+                        <div className="card-body ">
                             {/* Filters */}
                             <div className="row mb-3">
                                 <div className="col-md-4 mb-2">
@@ -236,8 +236,8 @@ const QAManagement = () => {
                             {/* Tasks Table */}
                             <div className="d-none d-lg-block">
                                 <div className="table-responsive">
-                                    <table className="table table-hover">
-                                        <thead className="table-dark">
+                                    <table className="table table-gradient-bg ">
+                                        <thead className="text-white">
                                             <tr>
                                                 <th>Task ID</th>
                                                 <th>Title</th>
@@ -249,11 +249,11 @@ const QAManagement = () => {
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody className='text-white'>
                                             {filteredTasks.map(task => (
                                                 <tr key={task.id}>
-                                                    <td><code>{task.id}</code></td>
-                                                    <td>{task.title}</td>
+                                                    <td ><code>{task.id}</code></td>
+                                                    <td >{task.title}</td>
                                                     <td>{task.module}</td>
                                                     <td><span className={`badge bg-${getPriorityColor(task.priority)}`}>{task.priority}</span></td>
                                                     <td>{task.createdBy}</td>
@@ -315,15 +315,15 @@ const QAManagement = () => {
 
                 {/* Tab 2: Self-Assign QA Tasks */}
                 {activeTab === 'selfAssign' && (
-                    <div className="card">
-                        <div className="card-header">
+                    <div className="card bg-card">
+                        <div className="card-header ">
                             <h5>Available Tasks for Self-Assignment</h5>
                         </div>
-                        <div className="card-body">
+                        <div className="card-body  ">
                             <div className="row">
                                 {tasks.filter(task => task.status === 'Open').map(task => (
                                     <div key={task.id} className="col-md-6 col-lg-4 mb-3">
-                                        <div className="card h-100">
+                                        <div className="card bg-card h-100">
                                             <div className="card-body">
                                                 <h6 className="card-title">{task.title}</h6>
                                                 <p className="card-text">
@@ -347,7 +347,7 @@ const QAManagement = () => {
 
                 {/* Tab 3: QA Completion Status */}
                 {activeTab === 'completion' && (
-                    <div className="card">
+                    <div className="card bg-card ">
                         <div className="card-header">
                             <h5>QA Completion Status</h5>
                         </div>
@@ -362,7 +362,7 @@ const QAManagement = () => {
                                         <option value="Charlie Wilson">Charlie Wilson</option>
                                     </select>
                                 </div>
-                                <div className="col-md-3 mb-2">
+                                <div className="col-md-3 mb-2 ">
                                     <select className="form-select" value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
                                         <option value="">All Status</option>
                                         <option value="In Progress">In Progress</option>
@@ -384,8 +384,8 @@ const QAManagement = () => {
                             {/* Status Table */}
                             <div className="d-none d-lg-block">
                                 <div className="table-responsive">
-                                    <table className="table table-hover">
-                                        <thead className="table-dark">
+                                    <table className="table text-white  table-gradient-bg ">
+                                        <thead className="text-white">
                                             <tr>
                                                 <th>Task ID</th>
                                                 <th>Title</th>
@@ -412,7 +412,7 @@ const QAManagement = () => {
                                                         )}
                                                     </td>
                                                     <td>
-                                                        <button className="btn btn-sm btn-outline-primary me-1" onClick={() => setShowModal({ show: true, type: 'updateStatus', data: task })}>
+                                                        <button className="btn btn-sm  btn-outline-primary me-1" onClick={() => setShowModal({ show: true, type: 'updateStatus', data: task })}>
                                                             ✏️ Update
                                                         </button>
                                                         <button className="btn btn-sm btn-outline-info" onClick={() => setShowModal({ show: true, type: 'viewDetails', data: task })}>
@@ -467,11 +467,11 @@ const QAManagement = () => {
                 {activeTab === 'upload' && (
                     <div className="row g-4">
                         <div className="col-12 col-lg-6">
-                            <div className="card h-100">
-                                <div className="card-header">
+                            <div className="card bg-card h-100">
+                                <div className="card-header ">
                                     <h5 className="mb-0">Upload QA Files</h5>
                                 </div>
-                                <div className="card-body">
+                                <div className="card-body ">
                                     <div>
                                         <div className="mb-3">
                                             <label className="form-label">Task ID</label>
@@ -508,17 +508,17 @@ const QAManagement = () => {
                             </div>
                         </div>
                         <div className="col-12 col-lg-6">
-                            <div className="card h-100">
+                            <div className="card bg-card h-100">
                                 <div className="card-header">
                                     <h5 className="mb-0">Uploaded Files</h5>
                                 </div>
                                 <div className="card-body">
                                     {uploadedFiles.length === 0 ? (
-                                        <p className="text-muted">No files uploaded yet.</p>
+                                        <p className="">No files uploaded yet.</p>
                                     ) : (
-                                        <div className="list-group list-group-flush">
+                                        <div className="list-group  list-group-flush">
                                             {uploadedFiles.map((file, index) => (
-                                                <div key={index} className="list-group-item px-0">
+                                                <div key={index} className="list-group-item bg-card px-0">
                                                     <div className="d-flex w-100 justify-content-between align-items-start">
                                                         <h6 className="mb-1 text-truncate me-2">{file.fileName}</h6>
                                                         <small className="text-nowrap">{file.uploadedAt}</small>
@@ -553,11 +553,11 @@ const QAManagement = () => {
                             {/* View Details Modal */}
                             {showModal.type === 'viewDetails' && (
                                 <>
-                                    <div className="modal-header">
+                                    <div className="modal-header bg-card">
                                         <h5 className="modal-title">Task Details - {showModal.data.id}</h5>
                                         <button type="button" className="btn-close" onClick={() => setShowModal({ show: false, type: '', data: null })}></button>
                                     </div>
-                                    <div className="modal-body">
+                                    <div className="modal-body bg-card">
                                         <div className="row">
                                             <div className="col-md-6">
                                                 <p><strong>Title:</strong> {showModal.data.title}</p>
@@ -583,20 +583,20 @@ const QAManagement = () => {
                             {/* Self Assign Modal */}
                             {showModal.type === 'selfAssign' && (
                                 <>
-                                    <div className="modal-header">
+                                    <div className="modal-header bg-card">
                                         <h5 className="modal-title">Self-Assign Task</h5>
                                         <button type="button" className="btn-close" onClick={() => setShowModal({ show: false, type: '', data: null })}></button>
                                     </div>
-                                    <div className="modal-body">
+                                    <div className="modal-body bg-card">
                                         <p>Are you sure you want to assign <strong>{showModal.data.title}</strong> to yourself?</p>
-                                        <div className="alert alert-info">
+                                        <div className="alert alert-info text-dark">
                                             <strong>Task Details:</strong><br />
                                             ID: {showModal.data.id}<br />
                                             Module: {showModal.data.module}<br />
                                             Priority: {showModal.data.priority}
                                         </div>
                                     </div>
-                                    <div className="modal-footer">
+                                    <div className="modal-footer bg-card">
                                         <button type="button" className="btn btn-secondary" onClick={() => setShowModal({ show: false, type: '', data: null })}>Cancel</button>
                                         <button type="button" className="btn btn-primary" onClick={() => selfAssignTask(showModal.data.id)}>✋ Confirm Assignment</button>
                                     </div>
@@ -606,11 +606,11 @@ const QAManagement = () => {
                             {/* Update Status Modal */}
                             {showModal.type === 'updateStatus' && (
                                 <>
-                                    <div className="modal-header">
+                                    <div className="modal-header bg-card">
                                         <h5 className="modal-title">Update Task Status</h5>
                                         <button type="button" className="btn-close" onClick={() => setShowModal({ show: false, type: '', data: null })}></button>
                                     </div>
-                                    <div className="modal-body">
+                                    <div className="modal-body bg-card">
                                         <p>Update status for: <strong>{showModal.data.title}</strong></p>
                                         <p>Current Status: <span className={`badge bg-${getStatusColor(showModal.data.status)}`}>{showModal.data.status}</span></p>
                                         <div className="mt-3">

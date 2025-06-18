@@ -170,10 +170,10 @@ const AdminDashboard = () => {
       </Card>
 
       {/* Main Table */}
-      <Card className="table-gradient-bg text-white p-3 mb-5">
+      <Card className=" text-white p-3 mb-5 table-gradient-bg">
         <h4 className="mb-3">Project List</h4>
-        <div className="table-responsive">
-          <Table  className="table bg-card align-middle mb-0">
+        <div className="table-responsive table-gradient-bg ">
+          <Table  className=" table-gradient-bg  align-middle  mb-0">
             <thead>
               <tr>
                 <th>ID</th>
