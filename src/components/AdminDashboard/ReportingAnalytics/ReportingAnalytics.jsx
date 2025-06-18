@@ -103,9 +103,9 @@ const ReportingAnalytics = () => {
   };
 
   const renderProjectStatusReport = () => (
-    <div className="analytics-report-container">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4 className="analytics-report-title">Project Status Report</h4>
+    <div className="analytics-report-container ">
+      <div className="d-flex justify-content-between  align-items-center mb-4">
+        <h4 className="analytics-report-title gradient-heading">Project Status Report</h4>
         <div className="analytics-export-buttons">
           <button className="btn btn-outline-primary btn-sm me-2 analytics-export-btn" onClick={exportToPDF}>
             <Download size={16} className="me-1" /> PDF
@@ -125,8 +125,8 @@ const ReportingAnalytics = () => {
             <option>Mike Johnson</option>
           </select>
         </div>
-        <div className="col-md-4">
-          <select className="form-select analytics-filter-select">
+        <div className="col-md-4 ">
+          <select className="form-select  analytics-filter-select">
             <option>All Priorities</option>
             <option>Critical</option>
             <option>High</option>
@@ -144,9 +144,9 @@ const ReportingAnalytics = () => {
         </div>
       </div>
 
-      <div className="table-responsive">
-        <table className="table table-hover analytics-project-table">
-          <thead className="table-light">
+      <div className="table-responsive ">
+        <table className="table text-white analytics-project-table ">
+          <thead className="  ">
             <tr>
               <th>Project Name</th>
               <th>Owner</th>
@@ -156,10 +156,10 @@ const ReportingAnalytics = () => {
               <th>Due Date</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody >
             {projectData.map(project => (
-              <tr key={project.id} className="analytics-project-row">
-                <td className="fw-bold analytics-project-name">{project.name}</td>
+              <tr key={project.id} className="analytics-project-row ">
+                <td className=" text-white analytics-project-name">{project.name}</td>
                 <td>{project.owner}</td>
                 <td>
                   <div className="progress analytics-progress-bar" style={{height: '20px'}}>
@@ -185,7 +185,7 @@ const ReportingAnalytics = () => {
   const renderWorkloadReport = () => (
     <div className="analytics-report-container">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4 className="analytics-report-title">Monthly Workload Report</h4>
+        <h4 className="analytics-report-title gradient-heading">Monthly Workload Report</h4>
         <div className="analytics-workload-controls">
           <select className="form-select d-inline-block me-2 analytics-date-selector" style={{width: 'auto'}}>
             <option>Last 7 Days</option>
@@ -201,9 +201,9 @@ const ReportingAnalytics = () => {
         </div>
       </div>
 
-      <div className="row mb-4">
+      <div className="row mb-4 ">
         <div className="col-md-3">
-          <div className="card analytics-summary-card bg-primary text-white">
+          <div className="card analytics-summary-card bg-card text-white">
             <div className="card-body text-center">
               <h5 className="card-title">Avg Daily Tasks</h5>
               <h2 className="analytics-summary-number">28.5</h2>
@@ -211,7 +211,7 @@ const ReportingAnalytics = () => {
           </div>
         </div>
         <div className="col-md-3">
-          <div className="card analytics-summary-card bg-success text-white">
+          <div className="card analytics-summary-card bg-card text-white">
             <div className="card-body text-center">
               <h5 className="card-title">Max Hours</h5>
               <h2 className="analytics-summary-number">250</h2>
@@ -219,7 +219,7 @@ const ReportingAnalytics = () => {
           </div>
         </div>
         <div className="col-md-3">
-          <div className="card analytics-summary-card bg-warning text-white">
+          <div className="card analytics-summary-card bg-card text-white">
             <div className="card-body text-center">
               <h5 className="card-title">Peak Day</h5>
               <h2 className="analytics-summary-number">Jun 4</h2>
@@ -227,7 +227,7 @@ const ReportingAnalytics = () => {
           </div>
         </div>
         <div className="col-md-3">
-          <div className="card analytics-summary-card bg-info text-white">
+          <div className="card analytics-summary-card bg-card text-white">
             <div className="card-body text-center">
               <h5 className="card-title">Total Tasks</h5>
               <h2 className="analytics-summary-number">190</h2>
@@ -236,7 +236,7 @@ const ReportingAnalytics = () => {
         </div>
       </div>
 
-      <div className="analytics-chart-container">
+      <div className="analytics-chart-container bg-card">
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={workloadData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -254,7 +254,7 @@ const ReportingAnalytics = () => {
   const renderTeamPerformanceReport = () => (
     <div className="analytics-report-container">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4 className="analytics-report-title">Team Performance Report</h4>
+        <h4 className="analytics-report-title gradient-heading">Team Performance Report</h4>
         <div className="analytics-performance-filters">
           <select className="form-select d-inline-block me-2 analytics-role-filter" style={{width: 'auto'}}>
             <option>All Roles</option>
@@ -274,8 +274,8 @@ const ReportingAnalytics = () => {
       <div className="row">
         <div className="col-lg-8">
           <div className="table-responsive">
-            <table className="table table-hover analytics-performance-table">
-              <thead className="table-light">
+            <table className="table  analytics-performance-table">
+              <thead className=" text-white ">
                 <tr>
                   <th>Team Member</th>
                   <th>Completed Tasks</th>
@@ -287,8 +287,8 @@ const ReportingAnalytics = () => {
               </thead>
               <tbody>
                 {teamPerformanceData.map((member, index) => (
-                  <tr key={index} className="analytics-performance-row">
-                    <td className="fw-bold analytics-member-name">{member.name}</td>
+                  <tr key={index} className="analytics-performance-row text-white">
+                    <td className="text-white analytics-member-name">{member.name}</td>
                     <td><span className="badge bg-primary analytics-task-badge">{member.completedTasks}</span></td>
                     <td>
                       <div className="progress analytics-ontime-progress" style={{height: '15px'}}>
@@ -331,7 +331,7 @@ const ReportingAnalytics = () => {
   const renderMissedDeadlineReport = () => (
     <div className="analytics-report-container">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4 className="analytics-report-title">Missed Deadline Report</h4>
+        <h4 className="analytics-report-title gradient-heading">Missed Deadline Report</h4>
         <div className="analytics-deadline-controls">
           <button className="btn btn-outline-secondary btn-sm me-2 analytics-sort-btn">
             <Clock size={16} className="me-1" /> Sort by Delay
@@ -344,7 +344,7 @@ const ReportingAnalytics = () => {
 
       <div className="table-responsive">
         <table className="table table-striped analytics-deadline-table">
-          <thead className="table-dark">
+          <thead className="text-white">
             <tr>
               <th>Task Name</th>
               <th>Assigned To</th>
@@ -356,14 +356,14 @@ const ReportingAnalytics = () => {
           </thead>
           <tbody>
             {missedDeadlineData.map((task, index) => (
-              <tr key={index} className="analytics-deadline-row">
-                <td className="fw-bold analytics-task-name">{task.taskName}</td>
+              <tr key={index} className=" text-white analytics-deadline-row">
+                <td className="text-white analytics-task-name">{task.taskName}</td>
                 <td>{task.assignedTo}</td>
                 <td className="text-danger analytics-due-date">{task.dueDate}</td>
                 <td>
                   <span className="badge bg-danger analytics-delay-badge">+{task.delayDays} days</span>
                 </td>
-                <td className="analytics-comments">{task.comments}</td>
+                <td className="analytics-comments text-white">{task.comments}</td>
                 <td>
                   <button className="btn btn-sm btn-outline-info analytics-detail-btn">View Details</button>
                 </td>
@@ -382,7 +382,7 @@ const ReportingAnalytics = () => {
   const renderProductivityCharts = () => (
     <div className="analytics-report-container">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4 className="analytics-report-title">Productivity Charts</h4>
+        <h4 className="analytics-report-title gradient-heading">Productivity Charts</h4>
         <div className="analytics-productivity-controls">
           <div className="btn-group analytics-view-toggle" role="group">
             <button 
@@ -411,8 +411,8 @@ const ReportingAnalytics = () => {
       </div>
 
       <div className="row">
-        <div className="col-lg-8">
-          <div className="analytics-line-chart-container">
+        <div className="col-lg-8 ">
+          <div className="analytics-line-chart-container bg-card">
             <h6 className="mb-3">Productivity Trend</h6>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={productivityData}>
@@ -426,7 +426,7 @@ const ReportingAnalytics = () => {
           </div>
         </div>
         <div className="col-lg-4">
-          <div className="analytics-pie-chart-container">
+          <div className="analytics-pie-chart-container bg-card">
             <h6 className="text-center mb-3">Billable vs Non-Billable</h6>
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
@@ -451,13 +451,13 @@ const ReportingAnalytics = () => {
           <div className="analytics-productivity-stats mt-4">
             <div className="row text-center">
               <div className="col-6">
-                <div className="analytics-stat-card">
+                <div className="analytics-stat-card bg-card">
                   <h5 className="text-primary">87%</h5>
                   <small className="text-muted">Avg Productivity</small>
                 </div>
               </div>
               <div className="col-6">
-                <div className="analytics-stat-card">
+                <div className="analytics-stat-card   bg-card">
                   <h5 className="text-success">72%</h5>
                   <small className="text-muted">Billable Hours</small>
                 </div>
@@ -471,17 +471,17 @@ const ReportingAnalytics = () => {
 
   const renderCustomReportBuilder = () => (
     <div className="analytics-report-container">
-      <h4 className="analytics-report-title mb-4">Custom Report Builder</h4>
+      <h4 className="analytics-report-title mb-4 gradient-heading">Custom Report Builder</h4>
       
       <div className="row">
         <div className="col-lg-4">
-          <div className="card analytics-builder-card">
-            <div className="card-header analytics-builder-header">
-              <h6 className="mb-0"><Settings size={16} className="me-2" />Report Configuration</h6>
+          <div className="card analytics-builder-card bg-card">
+            <div className="card-header analytics-builder-header bg-card  ">
+              <h6 className="mb-0 "><Settings size={16} className="me-2" />Report Configuration</h6>
             </div>
-            <div className="card-body">
-              <div className="mb-3">
-                <label className="form-label analytics-builder-label">Date Range</label>
+            <div className="card-body bg-card">
+              <div className="mb-3 ">
+                <label className="form-label text-white analytics-builder-label">Date Range</label>
                 <select className="form-select analytics-builder-select">
                   <option>Last 7 days</option>
                   <option>Last 30 days</option>
@@ -491,7 +491,7 @@ const ReportingAnalytics = () => {
               </div>
               
               <div className="mb-3">
-                <label className="form-label analytics-builder-label">Team/User Filter</label>
+                <label className="form-label text-white analytics-builder-label">Team/User Filter</label>
                 <select className="form-select analytics-builder-select" multiple>
                   <option>All Users</option>
                   <option>John Doe</option>
@@ -502,7 +502,7 @@ const ReportingAnalytics = () => {
               </div>
               
               <div className="mb-3">
-                <label className="form-label analytics-builder-label">Status Filter</label>
+                <label className="form-label analytics-builder-label text-white">Status Filter</label>
                 <div className="analytics-checkbox-group">
                   <div className="form-check">
                     <input className="form-check-input analytics-builder-checkbox" type="checkbox" defaultChecked />
@@ -520,7 +520,7 @@ const ReportingAnalytics = () => {
               </div>
               
               <div className="mb-3">
-                <label className="form-label analytics-builder-label">Fields to Include</label>
+                <label className="form-label analytics-builder-label text-white">Fields to Include</label>
                 <div className="analytics-field-selector">
                   <div className="form-check">
                     <input className="form-check-input analytics-field-checkbox" type="checkbox" defaultChecked />
@@ -553,10 +553,10 @@ const ReportingAnalytics = () => {
           </div>
         </div>
         
-        <div className="col-lg-8">
-          <div className="card analytics-preview-card">
-            <div className="card-header analytics-preview-header d-flex justify-content-between align-items-center">
-              <h6 className="mb-0"><TrendingUp size={16} className="me-2" />Report Preview</h6>
+        <div className="col-lg-8 ">
+          <div className="card analytics-preview-card ">
+            <div className="card-header analytics-preview-header  bg-card d-flex justify-content-between align-items-center">
+              <h6 className="mb-0"><TrendingUp size={16} className="me-2 " />Report Preview</h6>
               <div className="analytics-preview-controls">
                 <button className="btn btn-sm btn-outline-primary me-2 analytics-export-preview-btn">
                   <Download size={16} className="me-1" /> Export
@@ -564,10 +564,10 @@ const ReportingAnalytics = () => {
                 <button className="btn btn-sm btn-primary analytics-refresh-btn">Refresh</button>
               </div>
             </div>
-            <div className="card-body">
+            <div className="card-body bg-card">
               <div className="table-responsive">
                 <table className="table table-sm analytics-preview-table">
-                  <thead className="table-light">
+                  <thead className="  text-white">
                     <tr>
                       <th>Task Name</th>
                       <th>Assigned To</th>
@@ -576,19 +576,19 @@ const ReportingAnalytics = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="analytics-preview-row">
+                    <tr className="analytics-preview-row text-white">
                       <td>Website Redesign</td>
                       <td>John Doe</td>
                       <td><span className="badge bg-success">Completed</span></td>
                       <td>100%</td>
                     </tr>
-                    <tr className="analytics-preview-row">
+                    <tr className="analytics-preview-row text-white">
                       <td>Mobile App Development</td>
                       <td>Jane Smith</td>
                       <td><span className="badge bg-warning">In Progress</span></td>
                       <td>75%</td>
                     </tr>
-                    <tr className="analytics-preview-row">
+                    <tr className="analytics-preview-row text-white">
                       <td>API Integration</td>
                       <td>Mike Johnson</td>
                       <td><span className="badge bg-info">In Progress</span></td>
@@ -630,13 +630,13 @@ const ReportingAnalytics = () => {
   };
 
   return (
-    <div className="container-fluid analytics-dashboard-container py-4">
+    <div className="container-fluid bg-main analytics-dashboard-container py-4">
       <div className="row mb-4">
         <div className="col-12">
-          <div className="d-flex justify-content-between align-items-center analytics-dashboard-header">
+          <div className="d-flex justify-content-between bg-main align-items-center analytics-dashboard-header">
             <div>
-              <h2 className="analytics-main-title mb-1">Reporting & Analytics</h2>
-              <p className="text-muted analytics-subtitle">Comprehensive insights into project performance and team productivity</p>
+              <h2 className="analytics-main-title gradient-heading mb-1">Reporting & Analytics</h2>
+              <p className="text-white analytics-subtitle">Comprehensive insights into project performance and team productivity</p>
             </div>
             <div className="analytics-global-controls">
               <button className="btn btn-outline-primary me-2 analytics-filter-btn">
@@ -650,16 +650,16 @@ const ReportingAnalytics = () => {
         </div>
       </div>
 
-      <div className="row">
-        <div className="col-lg-2 col-md-3 mb-4">
-          <div className="analytics-sidebar">
-            <div className="list-group analytics-nav-tabs">
+      <div className="row ">
+        <div className="col-lg-2   col-md-3 mb-4">
+          <div className="analytics-sidebar bg-card ">
+            <div className="list-group   analytics-nav-tabs">
               {reportTabs.map(tab => {
                 const IconComponent = tab.icon;
                 return (
                   <button
                     key={tab.id}
-                    className={`list-group-item list-group-item-action analytics-nav-item ${
+                    className={`list-group-item list-group-item-action bg-card analytics-nav-item ${
                       activeReportTab === tab.id ? 'active analytics-nav-active' : ''
                     }`}
                     onClick={() => setActiveReportTab(tab.id)}
@@ -674,7 +674,7 @@ const ReportingAnalytics = () => {
         </div>
 
         <div className="col-lg-10 col-md-9">
-          <div className="analytics-main-content">
+          <div className="analytics-main-content bg-card ">
             {renderActiveReport()}
           </div>
         </div>
