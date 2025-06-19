@@ -159,7 +159,7 @@ const Assigned = () => {
     <div className="min-vh-100 bg-main">
           <h1 className="h4 mb-2 mb-md-0 fw-bold gradient-heading ms-3 mt-3  ">Assigned Projects</h1>
       {/* Header */}
-      <header className="bg-white shadow-sm bg-card sticky-top">
+      <header className="bg-white shadow-sm bg-card ">
         <Container>
           <div className="d-flex flex-column  flex-md-row align-items-center justify-content-between py-3">
           
