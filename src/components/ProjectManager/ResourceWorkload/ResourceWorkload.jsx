@@ -136,19 +136,19 @@ function ResourceWorkload() {
   return (
     <div className="container-fluid bg-card" style={{ minHeight: '100vh' }}>
       {/* Header Section */}
-      <header className="bg-white shadow-sm mb-4">
+      <header className="bg-card shadow-sm mb-4">
         <div className="container bg-card">
           <div className="d-flex justify-content-between align-items-center py-3">
             <h1 className="h3 mb-0 ">Resource Workload</h1>
             <div className="d-flex align-items-center">
-              <span className=" me-3">{currentDateTime}</span>
+              {/* <span className=" me-3">{currentDateTime}</span>
               <button 
                 onClick={handleRefresh}
                 className="btn btn-secondary btn-sm me-3"
                 title="Refresh data"
               >
                 <i className="fas fa-sync-alt"></i>
-              </button>
+              </button> */}
               <div className="dropdown">
                 <button 
                   className="btn btn-secondary dropdown-toggle"

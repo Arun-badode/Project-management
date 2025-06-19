@@ -1,4 +1,25 @@
 import React, { useState } from 'react';
+import { 
+  Container, 
+  ListGroup, 
+  Badge, 
+  Button, 
+  Modal, 
+  Form, 
+  Row, 
+  Col,
+  ButtonGroup
+} from 'react-bootstrap';
+import {
+  PlayFill,
+  PauseFill,
+  Check,
+  PersonCheck,
+  ArrowLeftRight,
+  InfoCircle,
+  X,
+  Folder
+} from 'react-bootstrap-icons';
 
 
 function TaskRequest() {
@@ -85,234 +106,334 @@ function TaskRequest() {
      }, 800);
    };
 
-   // Handle request rejection
-   const handleReject = (id) => {
-     setIsLoading(prev => ({...prev, [id]: {...(prev[id] || {}), reject: true}}));
-     
-     // Simulate API call
-     setTimeout(() => {
-       setRequests(requests.map(request => 
-         request.id === id ? {...request, status: 'rejected'} : request
-       ));
-       setIsLoading(prev => ({...prev, [id]: {...(prev[id] || {}), reject: false}}));
-       setNotification({message: 'Request rejected', type: 'error'});
-       
-       // Auto-hide notification
-       setTimeout(() => setNotification(null), 3000);
-     }, 800);
-   };
+    const handleTaskAction = (taskId, action) => {
+        const taskIndex = tasks.findIndex(task => task.id === taskId);
+        if (taskIndex === -1) return;
 
    // Filter requests
    const filteredRequests = filter === 'all' 
      ? requests 
      : requests.filter(request => request.status === filter);
 
-   // Format date
-   const formatDate = (dateString) => {
-     const date = new Date(dateString);
-     return new Intl.DateTimeFormat('en-US', {
-       month: 'short',
-       day: 'numeric',
-       hour: '2-digit',
-       minute: '2-digit'
-     }).format(date);
-   };
+        switch (action) {
+            case 'start':
+                task.status = "WIP";
+                break;
+            case 'pause':
+                task.status = "WIP (Paused)";
+                break;
+            case 'complete':
+                setSelectedTask(task);
+                setShowCompleteModal(true);
+                return;
+            case 'self-assign':
+                task.status = "QC WIP";
+                task.assignee = "Current User";
+                break;
+            case 'reassign':
+                setSelectedTask(task);
+                setShowReassignModal(true);
+                return;
+            case 'details':
+                setSelectedTask(task);
+                setShowDetailsModal(true);
+                return;
+            default:
+                return;
+        }
 
-  return (
-    <div className="min-vh-100 mt-0 bg-card">
-      <div className="container py-4">
-        {/* Header */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h1 className="h3 mb-0">Task Reassignment Requests</h1>
-          <div className="dropdown">
-            <button 
-              className="btn btn-secondary dropdown-toggle"
-              type="button"
-              id="filterDropdown"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              <i className="fas fa-filter me-2"></i>
-              Filter: {filter === 'all' ? 'All Requests' : filter.charAt(0).toUpperCase() + filter.slice(1)}
-            </button>
-            <ul className="dropdown-menu" aria-labelledby="filterDropdown">
-              <li>
-                <button 
-                  className={`dropdown-item ${filter === 'all' ? 'active' : ''}`}
-                  onClick={() => setFilter('all')}
-                >
-                  All Requests
-                </button>
-              </li>
-              <li>
-                <button 
-                  className={`dropdown-item ${filter === 'pending' ? 'active' : ''}`}
-                  onClick={() => setFilter('pending')}
-                >
-                  Pending
-                </button>
-              </li>
-              <li>
-                <button 
-                  className={`dropdown-item ${filter === 'approved' ? 'active' : ''}`}
-                  onClick={() => setFilter('approved')}
-                >
-                  Approved
-                </button>
-              </li>
-              <li>
-                <button 
-                  className={`dropdown-item ${filter === 'rejected' ? 'active' : ''}`}
-                  onClick={() => setFilter('rejected')}
-                >
-                  Rejected
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
+        updatedTasks[taskIndex] = task;
+        setTasks(updatedTasks);
+    };
 
-        {/* Notification */}
-        {notification && (
-          <div className={`position-fixed top-0 end-0 p-3 ${notification.type === 'success' ? 'alert alert-success' : 'alert alert-danger'}`}
-            style={{zIndex: 11, marginTop: '1rem', marginRight: '1rem'}}>
-            <div className="d-flex align-items-center">
-              <i className={`me-2 ${notification.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'}`}></i>
-              <div>{notification.message}</div>
-            </div>
-          </div>
-        )}
+    const handleCompleteTask = () => {
+        if (!serverPath.trim()) {
+            setServerPathError("Server Path is required");
+            return;
+        }
 
-        {/* Request List */}
-        <div className="mb-4">
-          {filteredRequests.length > 0 ? (
-            <div className="row g-4">
-              {filteredRequests.map(request => (
-                <div key={request.id} className="col-md-6 col-lg-4">
-                  <div className="card h-100 bg-card">
-                    <div className="card-body">
-                      {/* Header with requester info and date */}
-                      <div className="d-flex justify-content-between align-items-start mb-3">
-                        <div className="d-flex align-items-center">
-                          <img 
-                            src={request.requester.avatar} 
-                            alt={request.requester.name} 
-                            className="rounded-circle me-3"
-                            width="40"
-                            height="40"
-                          />
-                          <div>
-                            <h5 className="mb-0">{request.requester.name}</h5>
-                            <small className="">{formatDate(request.requestDate)}</small>
-                          </div>
-                        </div>
+        const taskIndex = tasks.findIndex(task => task.id === selectedTask.id);
+        if (taskIndex === -1) return;
+
+        const updatedTasks = [...tasks];
+        const task = {...updatedTasks[taskIndex]};
+
+        if (task.status === "WIP") {
+            task.status = "QC YTS";
+        } else if (task.status === "Corr WIP") {
+            task.status = "RFD"; // Ready For Delivery
+        }
+
+        task.serverPath = serverPath;
+        updatedTasks[taskIndex] = task;
+
+        setTasks(updatedTasks);
+        setShowCompleteModal(false);
+        setServerPath("");
+        setNotes("");
+        setServerPathError("");
+    };
+
+    const handleReassignRequest = () => {
+        alert(`Reassignment requested for task "${selectedTask.name}" with reason: ${reassignReason}`);
+        setShowReassignModal(false);
+        setReassignReason("");
+    };
+
+    const renderActionButtons = (task) => {
+        return (
+            <ButtonGroup size="sm" className="flex-wrap">
+                {/* Start/Resume Work Button */}
+                {(task.status === "YTS" || task.status === "WIP (Paused)") && (
+                    <Button 
+                        variant="primary"
+                        onClick={() => handleTaskAction(task.id, 'start')}
+                        className="mb-1"
+                    >
+                        <PlayFill className="me-1" />
+                        <span className="d-none d-sm-inline">
+                            {task.status === "YTS" ? "Start Work" : "Resume Work"}
+                        </span>
+                    </Button>
+                )}
+                
+                {/* Pause Work Button */}
+                {task.status === "WIP" && (
+                    <Button 
+                        variant="warning"
+                        onClick={() => handleTaskAction(task.id, 'pause')}
+                        className="mb-1"
+                    >
+                        <PauseFill className="me-1" />
+                        <span className="d-none d-sm-inline">Pause Work</span>
+                    </Button>
+                )}
+                
+                {/* Complete Task Button */}
+                {(task.status === "WIP" || task.status === "Corr WIP") && (
+                    <Button 
+                        variant="success"
+                        onClick={() => handleTaskAction(task.id, 'complete')}
+                        className="mb-1"
+                    >
+                        <Check className="me-1" />
+                        <span className="d-none d-sm-inline">Complete Task</span>
+                    </Button>
+                )}
+                
+                {/* Self-Assign Button (QA Only) */}
+                {task.status === "QC YTS" && (
+                    <Button 
+                        variant="info"
+                        onClick={() => handleTaskAction(task.id, 'self-assign')}
+                        className="mb-1"
+                    >
+                        <PersonCheck className="me-1" />
+                        <span className="d-none d-sm-inline">Self-Assign</span>
+                    </Button>
+                )}
+                
+                {/* Request Reassignment Button */}
+                <Button 
+                    variant="warning"
+                    onClick={() => handleTaskAction(task.id, 'reassign')}
+                    className="mb-1"
+                >
+                    <ArrowLeftRight className="me-1" />
+                    <span className="d-none d-sm-inline">Reassign</span>
+                </Button>
+                
+                {/* View Details Button */}
+                <Button 
+                    variant="secondary"
+                    onClick={() => handleTaskAction(task.id, 'details')}
+                    className="mb-1"
+                >
+                    <InfoCircle className="me-1" />
+                    <span className="d-none d-sm-inline">Details</span>
+                </Button>
+            </ButtonGroup>
+        );
+    };
+
+    const getStatusBadgeColor = (status) => {
+        switch (status) {
+            case 'YTS': return 'bg-light text-dark';
+            case 'WIP': return 'bg-info text-white';
+            case 'WIP (Paused)': return 'bg-warning text-dark';
+            case 'QC YTS': return 'bg-secondary text-white';
+            case 'QC WIP': return 'bg-primary text-white';
+            case 'Corr WIP': return 'bg-danger text-white';
+            case 'RFD': return 'bg-success text-white';
+            default: return 'bg-light text-dark';
+        }
+    };
+
+    const getPriorityBadgeColor = (priority) => {
+        switch (priority) {
+            case 'Low': return 'bg-primary text-white';
+            case 'Medium': return 'bg-warning text-dark';
+            case 'High': return 'bg-danger text-white';
+            case 'Critical': return 'bg-dark text-white';
+            default: return 'bg-light text-dark';
+        }
+    };
+
+    return (
+        <Container fluid className="py-3">
+            <h1 className="gradient-heading ">Task Management</h1>
+
+            <ListGroup>
+                {tasks.map(task => (
+                    <ListGroup.Item key={task.id} className="mb-3 bg-card">
+                        <Row className="align-items-center">
+                            <Col xs={12} md={6} className="mb-2 mb-md-0">
+                                <h5 className="mb-1">{task.name}</h5>
+                                <div className="d-flex flex-wrap gap-1">
+                                    <Badge pill className={getStatusBadgeColor(task.status)}>
+                                        {task.status}
+                                    </Badge>
+                                    <Badge pill className={getPriorityBadgeColor(task.priority)}>
+                                        {task.priority}
+                                    </Badge>
+                                    <small className=" d-block d-md-inline">
+                                        Due: {new Date(task.dueDate).toLocaleDateString()}
+                                    </small>
+                                </div>
+                            </Col>
+                            <Col xs={12} md={6} className="text-md-end">
+                                {renderActionButtons(task)}
+                            </Col>
+                        </Row>
+                    </ListGroup.Item>
+                ))}
+            </ListGroup>
+
+            {/* Complete Task Modal */}
+            <Modal className='custom-modal-dark' show={showCompleteModal} onHide={() => setShowCompleteModal(false)} centered>
+                <Modal.Header  className='' closeButton>
+                    <Modal.Title >Complete Task</Modal.Title>
+                </Modal.Header >
+                <Modal.Body className=''>
+                    <Form>
+                        <Form.Group className="mb-3 ">
+                            <Form.Label>Server Path <span className="text-danger">*</span></Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={serverPath}
+                                onChange={(e) => setServerPath(e.target.value)}
+                                isInvalid={!!serverPathError}
+                                placeholder="Enter server path"
+                            />
+                            <Form.Control.Feedback type="invalid">
+                                {serverPathError}
+                            </Form.Control.Feedback>
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Notes</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                                placeholder="Add any additional notes"
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowCompleteModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" onClick={handleCompleteTask}>
+                        Complete Task
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Reassign Task Modal */}
+            <Modal className='custom-modal-dark' show={showReassignModal} onHide={() => setShowReassignModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Request Reassignment</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Reason for Reassignment</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={4}
+                                value={reassignReason}
+                                onChange={(e) => setReassignReason(e.target.value)}
+                                placeholder="Please explain why you need this task to be reassigned"
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowReassignModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="warning" onClick={handleReassignRequest}>
+                        Submit Request
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Task Details Modal */}
+            <Modal className='custom-modal-dark' show={showDetailsModal} onHide={() => setShowDetailsModal(false)} size="lg" centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Task Details</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {selectedTask && (
                         <div>
-                          <span className={`badge ${
-                            request.status === 'pending' ? 'bg-warning text-dark' :
-                            request.status === 'approved' ? 'bg-success' :
-                            'bg-danger'
-                          }`}>
-                            {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                          </span>
+                            <h5>{selectedTask.name}</h5>
+                            <div className="d-flex flex-wrap gap-2 mb-3">
+                                <Badge pill className={getStatusBadgeColor(selectedTask.status)}>
+                                    {selectedTask.status}
+                                </Badge>
+                                <Badge pill className={getPriorityBadgeColor(selectedTask.priority)}>
+                                    {selectedTask.priority}
+                                </Badge>
+                                <span className="">Project: {selectedTask.project}</span>
+                                <span className="">Due: {new Date(selectedTask.dueDate).toLocaleDateString()}</span>
+                                <span className="">Assignee: {selectedTask.assignee}</span>
+                            </div>
+
+                            <h6 className="mt-4">Files:</h6>
+                            <ul className="list-unstyled">
+                                {selectedTask.files.map((file, index) => (
+                                    <li key={index} className="mb-1">
+                                        <Folder className="me-2 text-primary" />
+                                        {file}
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <h6 className="mt-4">Comments:</h6>
+                            <div className="border rounded p-3">
+                                {selectedTask.comments.map((comment, index) => (
+                                    <div key={index} className="mb-3">
+                                        <div className="d-flex justify-content-between">
+                                            <strong>{comment.user}</strong>
+                                            <small className="text-muted">{comment.date}</small>
+                                        </div>
+                                        <p className="mb-0">{comment.text}</p>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                      </div>
-                      
-                      {/* Task details */}
-                      <div className="mb-3">
-                        <h6 className="card-title mb-1">{request.task.name}</h6>
-                        <p className="card-text  small">{request.task.description}</p>
-                      </div>
-                      
-                      {/* Reason (only shown when details are expanded) */}
-                      {showDetails === request.id && (
-                        <div className="mb-3  p-3 rounded">
-                          <h6 className="small fw-bold mb-1">Reason for reassignment:</h6>
-                          <p className="small  mb-0">{request.reason}</p>
-                        </div>
-                      )}
-                      
-                      {/* Action buttons */}
-                      <div className="d-flex flex-column">
-                        <div className="d-flex justify-content-between mb-2">
-                          <button
-                            className="btn btn-primary p-2  small"
-                            onClick={() => setShowDetails(showDetails === request.id ? null : request.id)}
-                          >
-                            {showDetails === request.id ? 'Hide Details' : 'View Details'}
-                          </button>
-                        </div>
-                        
-                        {request.status === 'pending' && (
-                          <div className="d-grid gap-2 d-md-flex bg-card">
-                            <button
-                              className="btn btn-primary me-md-2 flex-grow-1"
-                              onClick={() => handleApprove(request.id)}
-                              disabled={isLoading[request.id]?.approve || isLoading[request.id]?.reject}
-                            >
-                              {isLoading[request.id]?.approve ? (
-                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                              ) : (
-                                <i className="fas fa-check me-2"></i>
-                              )}
-                              Approve
-                            </button>
-                            <button
-                              className="btn btn-secondary flex-grow-1"
-                              onClick={() => handleReject(request.id)}
-                              disabled={isLoading[request.id]?.approve || isLoading[request.id]?.reject}
-                            >
-                              {isLoading[request.id]?.reject ? (
-                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                              ) : (
-                                <i className="fas fa-times me-2"></i>
-                              )}
-                              Reject
-                            </button>
-                          </div>
-                        )}
-                        
-                        {request.status !== 'pending' && (
-                          <div className={`small d-flex align-items-center ${
-                            request.status === 'approved' ? 'text-success' : 'text-danger'
-                          }`}>
-                            <i className={`me-2 ${
-                              request.status === 'approved' ? 'fas fa-check-circle' : 'fas fa-times-circle'
-                            }`}></i>
-                            <span>
-                              {request.status === 'approved' 
-                                ? 'This request has been approved' 
-                                : 'This request has been rejected'}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="card text-center p-5 bg-card">
-              <div className="mx-auto  rounded-circle d-flex align-items-center justify-content-center mb-3 bg-card" style={{width: '6rem', height: '6rem'}}>
-                <i className="fas fa-inbox  fs-3"></i>
-              </div>
-              <h3 className="h5 mb-2">No requests found</h3>
-              <p className=" mb-4">There are no task reassignment requests matching your current filter.</p>
-              {filter !== 'all' && (
-                <button 
-                  onClick={() => setFilter('all')}
-                  className="btn btn-secondary"
-                >
-                  <i className="fas fa-sync-alt me-2"></i>
-                  Show All Requests
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDetailsModal(false)}>
+                        Close
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </Container>
+    );
 }
 
 export default TaskRequest;

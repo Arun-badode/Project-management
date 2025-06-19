@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 
+
 function Collaboration() {
     const [messages, setMessages] = useState([
         {
@@ -155,128 +156,275 @@ function Collaboration() {
     const emojis = ['👍', '❤️', '😂', '🎉', '🔥', '💯', '👏', '🙌'];
 
     return (
-        <div>
-            <div className="container-fluid bg-card">
-                {/* Header */}
-                <header className=" border-bottom px-4 py-3 d-flex justify-content-between align-items-center shadow-sm">
+        <div className="vh-100 d-flex flex-column">
+            {/* Header */}
+            {/* <header className="bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
+                <div className="d-flex align-items-center">
+                    <button className="btn btn-outline-secondary me-3 d-lg-none">
+                        <i className="fas fa-bars"></i>
+                    </button>
                     <div className="d-flex align-items-center">
-                        <button className="btn btn-light p-2 rounded-circle">
-                            <i className="fas fa-bars text-gray-600"></i>
-                        </button>
-                        <div className="ml-4 d-flex align-items-center">
-                            <i className="fas fa-comments text-primary text-xl"></i>
-                            <h1 className="ml-2 h4 text-gray-800">TeamCollab</h1>
-                        </div>
+                        <i className="fas fa-comments text-primary fs-4 me-2"></i>
+                        <h1 className="h5 mb-0 d-none d-sm-inline">TeamCollab</h1>
                     </div>
-                    <div className="d-flex align-items-center gap-3">
-                        <span className="text-gray-600 "> {currentDateTime} </span>
-                        <button
-                            onClick={handleSendMessage}
-                            className="btn btn-outline-secondary ml-3"
-                            title="Refresh data"
-                        >
-                            <i className="fas fa-sync-alt"></i>
+                </div>
+                <div className="d-flex align-items-center">
+                    <span className="text-muted small me-3 d-none d-md-inline">{currentDateTime}</span>
+                    <div className="input-group input-group-sm ms-3" style={{ maxWidth: '250px' }}>
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            className="form-control"
+                        />
+                        <button className="btn btn-outline-secondary">
+                            <i className="fas fa-search"></i>
                         </button>
-                        <div className="ml-3 position-relative">
-                          
-                            <input
-                                type="text"
-                                placeholder="Search messages and files..."
-                                className="form-control form-control-sm"
-                            />
-                            
-                        </div>
                     </div>
-                </header>
+                </div>
+            </header> */}
 
-                {/* Main Content */}
-                <div className="d-flex">
-                    {/* Left Sidebar */}
-                    <div className="col-3  border-right p-3">
-                        {/* Filters */}
-                        <div className="mb-3">
+            {/* Main Content */}
+            <div className="flex-grow-1 d-flex overflow-hidden">
+                {/* Left Sidebar - Collapsible on mobile */}
+                <div className="d-none d-lg-block col-lg-3 border-end bg-light p-3 overflow-auto">
+                    {/* Filters */}
+                    <div className="mb-4">
+                        <h6 className="text-muted mb-3">FILTERS</h6>
+                        <div className="d-grid gap-2">
                             {['All', 'Unread', 'Mentions', 'Files'].map(filter => (
                                 <button
                                     key={filter}
                                     onClick={() => setActiveFilter(filter)}
-                                    className={`btn btn-sm ${activeFilter === filter ? 'btn-primary' : 'btn-light'} mb-2 w-100`}
+                                    className={`btn btn-sm text-start ${activeFilter === filter ? 'btn-primary' : 'btn-outline-secondary'}`}
                                 >
-                                    {filter} {filter === 'Unread' && <span className="badge badge-pill text-black">2</span>}
+                                    {filter} {filter === 'Unread' && <span className="badge bg-white text-dark ms-2">{currentThread.unreadCount}</span>}
                                 </button>
-                            ))}
-                        </div>
-
-                        {/* Conversations List */}
-                        <div>
-                            <h6>Recent Conversations</h6>
-                            {['Project Redesign Discussion', 'Marketing Campaign Planning', 'Q2 Budget Review'].map((thread, index) => (
-                                <div key={index} className="border p-2 mb-2">
-                                    <h5>{thread}</h5>
-                                    <p>Last message content...</p>
-                                    <button className="btn btn-link btn-sm">Open</button>
-                                </div>
                             ))}
                         </div>
                     </div>
 
-                    {/* Right Content Area */}
-                    <div className="col-9 bg-card">
-                        {/* Thread Header */}
-                        <div className="p-4 border-bottom">
-                            <h3>{currentThread.title}</h3>
-                            <p>{currentThread.participants.length} participants</p>
-                        </div>
-
-                        {/* Messages */}
-                        <div className="p-4 bg-card">
-                            {messages.map((message, index) => (
-                                <div key={index} className={`mb-4 bg-card ${message.sender === 'You' ? 'text-right' : ''}`}>
-                                    <div className="d-flex">
-                                        {message.sender !== 'You' && (
-                                            <img src={message.avatar} alt={message.sender} className="rounded-circle me-3" width="40" 
-                                            style={{width:"40px",height:"40px"}} />
+                    {/* Team Members */}
+                    <div className="mb-4">
+                        <h6 className="text-muted mb-3">TEAM MEMBERS</h6>
+                        <ul className="list-unstyled">
+                            {teamMembers.map(member => (
+                                <li key={member.id} className="mb-2 d-flex align-items-center">
+                                    <div className="position-relative me-2">
+                                        <img 
+                                            src={member.avatar} 
+                                            alt={member.name} 
+                                            className="rounded-circle" 
+                                            width="32" 
+                                            height="32"
+                                        />
+                                        {member.isOnline && (
+                                            <span className="position-absolute bottom-0 end-0 bg-success rounded-circle" style={{ width: '10px', height: '10px', border: '2px solid #f8f9fa' }}></span>
                                         )}
-                                        <div className="p-2 rounded">
-                                            <p><strong>{message.sender}</strong> <small>{message.timestamp}</small></p>
-                                            <p>{message.content}</p>
-                                            {message.reactions.length > 0 && (
-                                                <div>
-                                                    {message.reactions.map((reaction, idx) => (
-                                                        <span key={idx} className="badge badge-light mr-1">{reaction.emoji} {reaction.count}</span>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
                                     </div>
-                                </div>
+                                    <span className="small">{member.name}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    {/* Conversations List */}
+                    <div>
+                        <h6 className="text-muted mb-3">RECENT CONVERSATIONS</h6>
+                        <div className="list-group">
+                            {['Project Redesign Discussion', 'Marketing Campaign Planning', 'Q2 Budget Review'].map((thread, index) => (
+                                <button 
+                                    key={index} 
+                                    className={`list-group-item list-group-item-action ${currentThread.title === thread ? 'active' : ''}`}
+                                    onClick={() => setCurrentThread({
+                                        ...currentThread,
+                                        title: thread
+                                    })}
+                                >
+                                    <div className="d-flex justify-content-between">
+                                        <strong>{thread}</strong>
+                                        <small>11:32 AM</small>
+                                    </div>
+                                    <small className="text-truncate d-block">Last message preview...</small>
+                                </button>
                             ))}
                         </div>
+                    </div>
+                </div>
 
+                {/* Right Content Area */}
+                <div className="col-12 col-lg-9 d-flex flex-column bg-white">
+                    {/* Thread Header */}
+                    <div className="p-3 border-bottom d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 className="mb-0">{currentThread.title}</h4>
+                            <small className="text-muted">
+                                {currentThread.participants.length} participants • Last activity {currentThread.lastActivity}
+                            </small>
+                        </div>
+                        {/* <div className="d-flex">
+                            <button className="btn btn-sm btn-outline-secondary me-2">
+                                <i className="fas fa-search"></i>
+                            </button>
+                            <button className="btn btn-sm btn-outline-secondary">
+                                <i className="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div> */}
+                    </div>
+
+                    {/* Messages Area */}
+                    <div className="flex-grow-1 p-3 overflow-auto" style={{ backgroundColor: '#f8f9fa' }}>
+                        {messages.map((message) => (
+                            <div 
+                                key={message.id} 
+                                className={`mb-3 ${message.sender === 'You' ? 'text-end' : ''}`}
+                            >
+                                <div className={`d-flex ${message.sender === 'You' ? 'justify-content-end' : ''}`}>
+                                    {message.sender !== 'You' && (
+                                        <img 
+                                            src={message.avatar} 
+                                            alt={message.sender} 
+                                            className="rounded-circle me-2" 
+                                            width="40" 
+                                            height="40"
+                                        />
+                                    )}
+                                    <div 
+                                        className={`rounded p-3 ${message.sender === 'You' ? 'bg-primary text-white' : 'bg-white'}`}
+                                        style={{ maxWidth: '75%' }}
+                                    >
+                                        <div className="d-flex justify-content-between align-items-center mb-1">
+                                            <strong>{message.sender}</strong>
+                                            <small className={message.sender === 'You' ? 'text-white-50' : 'text-muted'}>
+                                                {message.timestamp}
+                                            </small>
+                                        </div>
+                                        <p className="mb-2">{message.content}</p>
+                                        
+                                        {/* Attachments */}
+                                        {message.attachments.length > 0 && (
+                                            <div className="mb-2">
+                                                {message.attachments.map((file, idx) => (
+                                                    <div 
+                                                        key={idx} 
+                                                        className={`p-2 rounded small d-flex align-items-center ${message.sender === 'You' ? 'bg-primary-dark' : 'bg-light'}`}
+                                                    >
+                                                        <i className="fas fa-file me-2"></i>
+                                                        <div className="flex-grow-1">
+                                                            <div>{file.name}</div>
+                                                            <small className={message.sender === 'You' ? 'text-white-50' : 'text-muted'}>
+                                                                {formatFileSize(file.size)}
+                                                            </small>
+                                                        </div>
+                                                        <button className="btn btn-link p-0 ms-2">
+                                                            <i className={`fas fa-download ${message.sender === 'You' ? 'text-white-50' : 'text-muted'}`}></i>
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                        
+                                        {/* Reactions */}
+                                        {message.reactions.length > 0 && (
+                                            <div className="d-flex flex-wrap gap-1 mt-2">
+                                                {message.reactions.map((reaction, idx) => (
+                                                    <button 
+                                                        key={idx} 
+                                                        className={`btn btn-sm p-0 px-1 rounded-pill ${reaction.reacted ? 'bg-white text-dark' : message.sender === 'You' ? 'bg-white-10' : 'bg-light'}`}
+                                                        onClick={() => handleReaction(message.id, reaction.emoji)}
+                                                    >
+                                                        <span>{reaction.emoji}</span> 
+                                                        <small className="ms-1">{reaction.count}</small>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        
                         {/* Typing Indicator */}
                         {isTyping && (
-                            <div className="d-flex bg-card">
-                                <div className="spinner-border text-primary mr-2" role="status"></div>
-                                <p>Someone is typing...</p>
+                            <div className="d-flex align-items-center mb-3">
+                                <img 
+                                    src={teamMembers[0].avatar} 
+                                    alt="Typing" 
+                                    className="rounded-circle me-2" 
+                                    width="40" 
+                                    height="40"
+                                />
+                                <div className="bg-white rounded p-2">
+                                    <div className="d-flex align-items-center">
+                                        <div className="typing-dots">
+                                            <div className="typing-dot"></div>
+                                            <div className="typing-dot"></div>
+                                            <div className="typing-dot"></div>
+                                        </div>
+                                        <small className="ms-2 text-muted">typing...</small>
+                                    </div>
+                                </div>
                             </div>
                         )}
+                        
+                        <div ref={messageEndRef} />
+                    </div>
 
-                        {/* Message Input */}
-                        <div className="input-group mb-3 bg-card">
+                    {/* Message Input */}
+                    <div className="p-3 border-top bg-white">
+                        <div className="position-relative">
                             <textarea
                                 value={newMessage}
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                className="form-control bg-card placeholder-white"
-                                rows="3"
+                                className="form-control mb-2"
+                                rows="2"
                                 placeholder="Type your message here..."
+                                style={{ resize: 'none' }}
                             ></textarea>
-                            <button
-                                onClick={handleSendMessage}
-                                disabled={newMessage.trim() === ''}
-                                className={`btn ${newMessage.trim() === '' ? 'btn-secondary' : 'btn-primary'} ml-2`}
-                            >
-                                Send
-                            </button>
+                            <div className="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <button 
+                                        className="btn btn-sm btn-outline-secondary me-2"
+                                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                                    >
+                                        <i className="far fa-smile"></i>
+                                    </button>
+                                    <button className="btn btn-sm btn-outline-secondary me-2">
+                                        <i className="fas fa-paperclip"></i>
+                                    </button>
+                                </div>
+                                <button
+                                    onClick={handleSendMessage}
+                                    disabled={newMessage.trim() === ''}
+                                    className={`btn ${newMessage.trim() === '' ? 'btn-outline-primary' : 'btn-primary'}`}
+                                >
+                                    Send <i className="fas fa-paper-plane ms-1"></i>
+                                </button>
+                            </div>
+                            
+                            {/* Emoji Picker */}
+                            {showEmojiPicker && (
+                                <div 
+                                    ref={emojiPickerRef}
+                                    className="position-absolute bottom-100 bg-white border rounded p-2 mb-2 shadow-sm"
+                                    style={{ zIndex: 1000 }}
+                                >
+                                    <div className="d-flex flex-wrap" style={{ width: '200px' }}>
+                                        {emojis.map((emoji, idx) => (
+                                            <button
+                                                key={idx}
+                                                className="btn btn-sm p-1"
+                                                onClick={() => {
+                                                    setNewMessage(prev => prev + emoji);
+                                                    setShowEmojiPicker(false);
+                                                }}
+                                            >
+                                                {emoji}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

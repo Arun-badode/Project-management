@@ -421,13 +421,13 @@ const Assigned = () => {
       )}
 
       {/* Floating back button */}
-      <Button
+      {/* <Button
         variant="light"
         className="position-fixed bottom-0 start-0 m-3 d-flex align-items-center shadow"
       >
         <ChevronLeft className="me-1" />
         Back to Dashboard
-      </Button>
+      </Button>  */}
 
       {/* Add Project Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered>
