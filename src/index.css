@@ -128,5 +128,14 @@ table tr th {
   background-color: rgba(255, 255, 255, 0.1) !important;  /* Subtle light effect */
 }
 
+/* Fix light background for off-range days in month view */
+.rbc-off-range-bg {
+  background-color: #0a0a3c !important;  /* Match your calendar's dark theme */
+}
+
+/* Optional: Also change the text color of off-range days */
+.rbc-off-range {
+  color: #999 !important;  /* Light grey or your custom muted color */
+}
 
 
