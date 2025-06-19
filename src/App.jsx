@@ -31,6 +31,7 @@ import TaskRequest from "./components/ProjectManager/TaskRequest/TaskRequest";
 import ResourceWorkload from "./components/ProjectManager/ResourceWorkload/ResourceWorkload";
 import Collaboration from "./components/ProjectManager/Collaboration/Collaboration";
 import Assigned from "./components/ProjectManager/Assigne/Assigned";
+import Task from "./components/TeamMember/Task/Task";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -97,7 +98,7 @@ function App() {
             <Route path="/attendance" element={<Attendance />} />
 
             {/* team Member */}
-            
+            <Route path="/task" element={<Task/>}/>
             <Route path="/team-dashboard" element={<TaskDashboard/>} />
             <Route path='/messages'element={<Messages/>}/>
             <Route path="/activity" element={<ActivitySummary/>}/>

@@ -21,86 +21,99 @@ import {
   Folder
 } from 'react-bootstrap-icons';
 
+
 function TaskRequest() {
-    const [tasks, setTasks] = useState([
-        {
-            id: 1,
-            name: "Design Homepage Layout",
-            status: "YTS", // Yet To Start
-            project: "Website Redesign",
-            dueDate: "2025-06-25",
-            assignee: "John Doe",
-            priority: "High",
-            files: ["homepage_mockup.psd", "assets_list.xlsx"],
-            comments: [
-                { user: "Project Manager", text: "Please follow the brand guidelines", date: "2025-06-17" }
-            ],
-            timeTracked: 0,
-            serverPath: ""
-        },
-        {
-            id: 2,
-            name: "Implement User Authentication",
-            status: "WIP", // Work In Progress
-            project: "Mobile App Development",
-            dueDate: "2025-06-23",
-            assignee: "Jane Smith",
-            priority: "Critical",
-            files: ["auth_flow.pdf", "api_docs.md"],
-            comments: [
-                { user: "Backend Dev", text: "API endpoints are ready for integration", date: "2025-06-18" }
-            ],
-            timeTracked: 4.5,
-            serverPath: ""
-        },
-        {
-            id: 3,
-            name: "QA Testing for Payment Module",
-            status: "QC YTS", // Quality Check Yet To Start
-            project: "E-commerce Platform",
-            dueDate: "2025-06-21",
-            assignee: "Unassigned",
-            priority: "Medium",
-            files: ["test_cases.xlsx", "payment_flow.pdf"],
-            comments: [
-                { user: "Developer", text: "All payment gateways have been integrated", date: "2025-06-16" }
-            ],
-            timeTracked: 0,
-            serverPath: ""
-        },
-        {
-            id: 4,
-            name: "Fix Navigation Bug",
-            status: "Corr WIP", // Correction Work In Progress
-            project: "Mobile App Development",
-            dueDate: "2025-06-20",
-            assignee: "Alex Johnson",
-            priority: "High",
-            files: ["bug_report.pdf", "screenshots.zip"],
-            comments: [
-                { user: "QA Tester", text: "Bug occurs on iOS devices only", date: "2025-06-15" }
-            ],
-            timeTracked: 2.5,
-            serverPath: ""
-        }
-    ]);
+   // Mock data for task reassignment requests
+   const [requests, setRequests] = useState([
+     {
+       id: 1,
+       requester: {
+         name: 'Emma Johnson',
+         avatar: 'https://readdy.ai/api/search-image?query=professional%20headshot%20portrait%20of%20a%20young%20businesswoman%20with%20short%20brown%20hair%20and%20friendly%20smile%2C%20minimal%20clean%20background%2C%20high%20quality%20professional%20linkedin%20profile%20photo&width=60&height=60&seq=avatar1&orientation=squarish'
+       },
+       task: {
+         name: 'Q2 Marketing Report',
+         description: 'Complete the quarterly marketing performance analysis and prepare presentation for stakeholders.'
+       },
+       requestDate: '2025-06-18T14:30:00',
+       status: 'pending',
+       reason: 'I have a conflicting deadline with another high-priority project that was assigned yesterday.'
+     },
+     {
+       id: 2,
+       requester: {
+         name: 'Michael Chen',
+         avatar: 'https://readdy.ai/api/search-image?query=professional%20headshot%20portrait%20of%20an%20asian%20businessman%20with%20glasses%20and%20neat%20black%20hair%2C%20minimal%20clean%20background%2C%20high%20quality%20professional%20linkedin%20profile%20photo&width=60&height=60&seq=avatar2&orientation=squarish'
+       },
+       task: {
+         name: 'Client Onboarding Process',
+         description: 'Create documentation and workflow for new enterprise client onboarding procedures.'
+       },
+       requestDate: '2025-06-17T09:15:00',
+       status: 'approved',
+       reason: 'I need to focus on resolving critical issues with our existing enterprise clients this week.'
+     },
+     {
+       id: 3,
+       requester: {
+         name: 'Sarah Williams',
+         avatar: 'https://readdy.ai/api/search-image?query=professional%20headshot%20portrait%20of%20a%20woman%20with%20curly%20dark%20hair%20and%20confident%20expression%2C%20minimal%20clean%20background%2C%20high%20quality%20professional%20linkedin%20profile%20photo&width=60&height=60&seq=avatar3&orientation=squarish'
+       },
+       task: {
+         name: 'Product Feature Development',
+         description: 'Implement new dashboard analytics feature based on recent user feedback.'
+       },
+       requestDate: '2025-06-19T10:45:00',
+       status: 'rejected',
+       reason: 'I lack the technical expertise required for this task and would be more effective working on UX improvements.'
+     },
+     {
+       id: 4,
+       requester: {
+         name: 'David Rodriguez',
+         avatar: 'https://readdy.ai/api/search-image?query=professional%20headshot%20portrait%20of%20a%20latino%20man%20with%20short%20dark%20hair%20and%20professional%20attire%2C%20minimal%20clean%20background%2C%20high%20quality%20professional%20linkedin%20profile%20photo&width=60&height=60&seq=avatar4&orientation=squarish'
+       },
+       task: {
+         name: 'Vendor Contract Negotiation',
+         description: 'Review and negotiate terms with software vendors for upcoming license renewals.'
+       },
+       requestDate: '2025-06-16T16:20:00',
+       status: 'pending',
+       reason: 'I am currently out of office dealing with a family emergency and will not return until next week.'
+     }
+   ]);
 
-    const [showCompleteModal, setShowCompleteModal] = useState(false);
-    const [showDetailsModal, setShowDetailsModal] = useState(false);
-    const [showReassignModal, setShowReassignModal] = useState(false);
-    const [selectedTask, setSelectedTask] = useState(null);
+   // Filter state
+   const [filter, setFilter] = useState('all');
+   const [showDetails, setShowDetails] = useState(null);
+   const [isLoading, setIsLoading] = useState({});
+   const [notification, setNotification] = useState(null);
 
-    const [serverPath, setServerPath] = useState("");
-    const [notes, setNotes] = useState("");
-    const [reassignReason, setReassignReason] = useState("");
-    const [serverPathError, setServerPathError] = useState("");
+   // Handle request approval
+   const handleApprove = (id) => {
+     setIsLoading(prev => ({...prev, [id]: {...(prev[id] || {}), approve: true}}));
+     
+     // Simulate API call
+     setTimeout(() => {
+       setRequests(requests.map(request => 
+         request.id === id ? {...request, status: 'approved'} : request
+       ));
+       setIsLoading(prev => ({...prev, [id]: {...(prev[id] || {}), approve: false}}));
+       setNotification({message: 'Request approved successfully', type: 'success'});
+       
+       // Auto-hide notification
+       setTimeout(() => setNotification(null), 3000);
+     }, 800);
+   };
 
     const handleTaskAction = (taskId, action) => {
         const taskIndex = tasks.findIndex(task => task.id === taskId);
         if (taskIndex === -1) return;
 
-        const updatedTasks = [...tasks];
-        const task = {...updatedTasks[taskIndex]};
+   // Filter requests
+   const filteredRequests = filter === 'all' 
+     ? requests 
+     : requests.filter(request => request.status === filter);
 
         switch (action) {
             case 'start':
