@@ -691,34 +691,42 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                   <Funnel {...funnelConfig} />
                 </div>
               </div>
-              <div className="col-md-6">
-                <h6 className="text-center mb-3">Lead Source Distribution</h6>
-                <div style={{ height: "300px" }}>
-                  <PieChart width={300} height={300}>
-                    <Pie
-                      data={data}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) =>
-                        `${name}: ${(percent * 100).toFixed(0)}%`
-                      }
-                      outerRadius={120}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {data.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </div>
-              </div>
+             <div className="col-md-6">
+  <h6 className="text-center mb-3">Lead Source Distribution</h6>
+  <div
+    style={{
+      height: "300px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+  >
+    <PieChart width={300} height={300}>
+      <Pie
+        data={data}
+        cx="50%"
+        cy="50%"
+        labelLine={false}
+        label={({ name, percent }) =>
+          `${name}: ${(percent * 100).toFixed(0)}%`
+        }
+        outerRadius={120}
+        fill="#8884d8"
+        dataKey="value"
+      >
+        {data.map((entry, index) => (
+          <Cell
+            key={`cell-${index}`}
+            fill={COLORS[index % COLORS.length]}
+          />
+        ))}
+      </Pie>
+      <Tooltip />
+      <Legend />
+    </PieChart>
+  </div>
+</div>
+
             </div>
           </div>
         </div>

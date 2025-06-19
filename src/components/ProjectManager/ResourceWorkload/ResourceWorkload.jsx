@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Chart from 'chart.js/auto';
 
 function ResourceWorkload() {
   const [currentDateTime, setCurrentDateTime] = useState('');
@@ -95,6 +96,44 @@ function ResourceWorkload() {
     if (percentage < 80) return 'bg-warning';
     return 'bg-danger';
   };
+
+
+    useEffect(() => {
+        // Get the canvas element
+        const ctx = document.getElementById('resource-distribution-chart');
+
+        // Initialize the chart
+        const myChart = new Chart(ctx, {
+            type: 'pie',  // Chart type, you can also use 'bar', 'line', etc.
+            data: {
+                labels: ['Computing', 'Storage', 'Network', 'Human'],  // Labels for the chart
+                datasets: [{
+                    label: 'Resource Distribution',
+                    data: [40, 25, 20, 15],  // Data for each category
+                    backgroundColor: ['#4C9AFF', '#6554C0', '#00B8D9', '#36B37E'],  // Colors for each category
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: (tooltipItem) => `${tooltipItem.label}: ${tooltipItem.raw}%`
+                        }
+                    }
+                }
+            }
+        });
+
+        // Cleanup on component unmount
+        return () => {
+            if (myChart) {
+                myChart.destroy();
+            }
+        };
+    }, []);
 
   return (
     <div className="container-fluid bg-light" style={{ minHeight: '100vh' }}>
@@ -216,14 +255,14 @@ function ResourceWorkload() {
           {/* Resource Distribution Chart */}
           <div className="col-lg-4 mb-3">
             <div className="card h-100">
-              <div className="card-body">
-                <h2 className="h5 mb-3">Resource Distribution</h2>
-                <div className="chart-container" style={{ position: 'relative', height: '300px' }}>
-                  <canvas id="resource-distribution-chart"></canvas>
+                <div className="card-body">
+                    <h2 className="h5 mb-3">Resource Distribution</h2>
+                    <div className="chart-container" style={{ position: 'relative', height: '300px' }}>
+                        <canvas id="resource-distribution-chart"></canvas>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
+        </div>
 
           {/* Task Workload List */}
           <div className="col-lg-8 mb-3">
