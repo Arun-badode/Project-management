@@ -12,7 +12,7 @@ body{
 }
 
 .bg-card{
-    background: linear-gradient(to bottom right, #141c3a, #1b2f6e)!important;
+    background: linear-gradient(to bottom right, #141c3a, #1b2f6e);
     color: white!important;
 
 }
