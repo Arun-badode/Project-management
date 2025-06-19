@@ -512,10 +512,10 @@ const Attendance = () => {
               </div>
               
               <div className="btn-group">
-                <button className="btn btn-sm btn-outline-secondary">
+                <button className="btn btn-sm btn-outline-secondary text-white">
                   Previous
                 </button>
-                <button className="btn btn-sm btn-outline-secondary">
+                <button className="btn btn-sm btn-outline-secondary text-white">
                   Next
                 </button>
               </div>

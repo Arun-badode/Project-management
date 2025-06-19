@@ -87,10 +87,11 @@ function Messages() {
 
   return (
     <div className="container py-5">
+        <h1 className="gradient-heading ">Messages</h1>
       {/* Header */}
-      <header className="bg-light p-3 mb-4 rounded shadow-sm">
+      <header className="bg-light p-3 bg-card mb-4 rounded shadow-sm">
         <div className="d-flex justify-content-between align-items-center">
-          <h1 className="h3">Messages</h1>
+        
           <div className="input-group">
             <input
               type="text"
@@ -111,9 +112,9 @@ function Messages() {
       {/* Main content */}
       <div>
         {filteredMessages.length > 0 ? (
-          <ul className="list-group">
+          <ul className="list-group ">
             {filteredMessages.map((message) => (
-              <li key={message.id} className="list-group-item d-flex justify-content-between align-items-center">
+              <li key={message.id} className=" table-gradient-bg list-group-item d-flex justify-content-between align-items-center">
                 <div className="d-flex align-items-center">
                   <img
                     src={message.avatar}

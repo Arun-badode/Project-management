@@ -75,17 +75,9 @@ function ActivitySummary() {
       <div className="row p-3">
         {/* Header with notifications */}
         <div className="col-12 d-flex justify-content-between align-items-center mb-4">
-          <h1 className="h2 font-weight-bold">Activity Summary</h1>
+          <h1 className=" gradient-heading ">Activity Summary</h1>
           <div className="dropdown">
-            <button
-              className="btn btn-light position-relative"
-              onClick={() => setShowNotifications(!showNotifications)}
-            >
-              <i className="fas fa-bell fa-lg"></i>
-              <span className="badge badge-danger position-absolute top-0 start-100 translate-middle">
-                {activityData.length}
-              </span>
-            </button>
+            
 
             {/* Notification dropdown */}
             {showNotifications && (
@@ -119,9 +111,9 @@ function ActivitySummary() {
         </div>
 
         {/* Activity Summary */}
-        <div className="card shadow-sm">
-          <div className="card-body">
-            <h2 className="h4 font-weight-bold mb-4">Activity Summary</h2>
+        <div className="card shadow-sm bg-card">
+          <div className="card-body ">
+            <h2 className="h4 font-weight-bold mb-4 ">Activity Summary</h2>
 
             {/* Activity list by month */}
             {activityData.map((monthData, monthIndex) => (
@@ -133,7 +125,7 @@ function ActivitySummary() {
 
                 {/* Task table */}
                 <div className="table-responsive">
-                  <table className="table table-striped table-bordered">
+                  <table className="table table-striped table-gradient-bg table-bordered">
                     <thead className="table-light">
                       <tr>
                         <th className="text-start">Task Name</th>
@@ -151,7 +143,7 @@ function ActivitySummary() {
                               {task.timestamps.map((timestamp, timeIndex) => (
                                 <span
                                   key={timeIndex}
-                                  className="d-block text-muted"
+                                  className="d-block "
                                 >
                                   {timestamp}
                                 </span>
@@ -169,8 +161,8 @@ function ActivitySummary() {
         </div>
 
         {/* In-App Messaging Preview */}
-        <div className="card shadow-sm mt-5">
-          <div className="card-body">
+        <div className="card shadow-sm mt-5 bg-card">
+          <div className="card-body ">
             <div className="d-flex justify-content-between align-items-center mb-4">
               <h2 className="h4 font-weight-bold">Recent Discussions</h2>
               <button className="btn btn-sm btn-link text-primary">
@@ -179,9 +171,9 @@ function ActivitySummary() {
             </div>
 
             {/* Recent discussion items */}
-            <div className="list-group">
+            <div className="list-group  ">
               {/* Message 1 */}
-              <div className="list-group-item d-flex align-items-start p-3">
+              <div className="list-group-item d-flex align-items-start p-3 table-gradient-bg">
                 <div
                   className="mr-3 rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
                   style={{ width: "40px", height: "40px" }}
@@ -191,7 +183,7 @@ function ActivitySummary() {
                 <div className="flex-grow-1">
                   <div className="d-flex justify-content-between">
                     <h5 className="font-weight-bold">John Doe</h5>
-                    <span className="text-muted small">Today, 11:32 AM</span>
+                    <span className=" small">Today, 11:32 AM</span>
                   </div>
                   <p className="mb-1">
                     Can you share the latest mockups for the Website Redesign
@@ -204,7 +196,7 @@ function ActivitySummary() {
               </div>
 
               {/* Message 2 */}
-              <div className="list-group-item d-flex align-items-start p-3">
+              <div className="list-group-item d-flex align-items-start p-3  table-gradient-bg">
                 <div
                   className="mr-3 rounded-circle bg-success text-white d-flex justify-content-center align-items-center"
                   style={{ width: "40px", height: "40px" }}
@@ -214,7 +206,7 @@ function ActivitySummary() {
                 <div className="flex-grow-1">
                   <div className="d-flex justify-content-between">
                     <h5 className="font-weight-bold">Anna Smith</h5>
-                    <span className="text-muted small">Yesterday, 3:45 PM</span>
+                    <span className=" small">Yesterday, 3:45 PM</span>
                   </div>
                   <p className="mb-1">
                     I've updated the marketing campaign timeline. Please review
@@ -227,7 +219,7 @@ function ActivitySummary() {
               </div>
 
               {/* Message 3 */}
-              <div className="list-group-item d-flex align-items-start p-3">
+              <div className="list-group-item d-flex align-items-start p-3 table-gradient-bg">
                 <div
                   className="mr-3 rounded-circle bg-warning text-white d-flex justify-content-center align-items-center"
                   style={{ width: "40px", height: "40px" }}
@@ -237,7 +229,7 @@ function ActivitySummary() {
                 <div className="flex-grow-1">
                   <div className="d-flex justify-content-between">
                     <h5 className="font-weight-bold">Robert Johnson</h5>
-                    <span className="text-muted small">Jun 16, 2025</span>
+                    <span className=" small">Jun 16, 2025</span>
                   </div>
                   <p className="mb-1">
                     The client meeting went well. They approved our proposal for
