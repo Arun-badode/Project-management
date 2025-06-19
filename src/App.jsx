@@ -21,6 +21,7 @@ import TimeTracker from "./components/AdminDashboard/TimeTracker/TimeTracker";
 import ReportingAnalytics from "./components/AdminDashboard/ReportingAnalytics/ReportingAnalytics";
 import FileManagementSystem from "./components/AdminDashboard/FileManagementSystem/FileManagementSystem";
 import TaskDashboard from "./components/TeamMember/Taskmanagementdashboard/TaskDashboard";
+import Productivity from "./components/TeamMember/Productivity/Productivity";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -95,6 +96,13 @@ function App() {
             {/* team Member */}
             
             <Route path="/taskdashboard" element={<TaskDashboard/>} />
+
+
+            {/* productivity */}
+
+             <Route path="/productivity" element={<Productivity/>} />
+
+
 
             {/* Add your other routes here */}
           </Routes>
