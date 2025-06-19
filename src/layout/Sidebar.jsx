@@ -265,13 +265,13 @@ const Sidebar = ({ collapsed }) => {
               </li>
               <li
                 className={`menu-item ${
-                  isActive("/team-dashboard") ? "active" : ""
+                  isActive("/assigned") ? "active" : ""
                 }`}
               >
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("/team-dashboard");
+                    navigate("/assigned");
                     menuItemClick();
                   }}
                 >
@@ -395,13 +395,13 @@ const Sidebar = ({ collapsed }) => {
               </li>
               <li
                 className={`menu-item ${
-                  isActive("/taskdashboard") ? "active" : ""
+                  isActive("/productivity") ? "active" : ""
                 }`}
               >
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("taskdashboard");
+                    navigate("/productivity");
                     menuItemClick();
                   }}
                 >
@@ -441,6 +441,24 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Messaging</span>
                 </div>
               </li>
+
+                 {/* <li
+                className={`menu-item ${
+                  isActive("/productivity") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/productivity");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-life-ring"></i>
+                  <span className="menu-text">Productivity</span>
+                </div>
+              </li> */}
+             
             </>
           )}
 

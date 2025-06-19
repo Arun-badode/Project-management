@@ -26,9 +26,11 @@ import ActivitySummary from "./components/TeamMember/Activity/ActivitySummary";
 import ManagerDashboard from "./components/ProjectManager/ManagerDashboard/ManagerDashboard";
 import CreateProject from "./components/ProjectManager/CreateProject/CreateProject";
 import Attendance from "./components/TeamMember/Attendance/Attendance";
+import Productivity from "./components/TeamMember/Productivity/Productivity";
 import TaskRequest from "./components/ProjectManager/TaskRequest/TaskRequest";
 import ResourceWorkload from "./components/ProjectManager/ResourceWorkload/ResourceWorkload";
 import Collaboration from "./components/ProjectManager/Collaboration/Collaboration";
+import Assigned from "./components/ProjectManager/Assigne/Assigned";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -107,6 +109,9 @@ function App() {
 
             <Route path="/manager-dashboard" element={<ManagerDashboard/>}/>
             <Route path="/createproject" element={<CreateProject/>}/>
+            <Route path="/attendance" element={<Attendance/>} />
+               <Route path="/assigned" element={<Assigned/>} />
+
             <Route path="/taskrequest" element={<TaskRequest/>}/>
             <Route path="/sourcework" element={<ResourceWorkload/>}/>
             <Route path="/collaboration" element={<Collaboration/>}/>
@@ -114,6 +119,13 @@ function App() {
              {/* <Route path="/task" element={<Task/>} /> */}
 
 
+            {/* productivity */}
+
+             <Route path="/productivity" element={<Productivity/>} />
+
+
+
+            {/* Add your other routes here */}
              {/* End team Member */}
 
 
