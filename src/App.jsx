@@ -22,6 +22,7 @@ import ReportingAnalytics from "./components/AdminDashboard/ReportingAnalytics/R
 import FileManagementSystem from "./components/AdminDashboard/FileManagementSystem/FileManagementSystem";
 import TaskDashboard from "./components/TeamMember/Taskmanagementdashboard/TaskDashboard";
 import Productivity from "./components/TeamMember/Productivity/Productivity";
+import Attendance from "./components/TeamMember/Attendance/Attendance";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -96,6 +97,8 @@ function App() {
             {/* team Member */}
             
             <Route path="/team-dashboard" element={<TaskDashboard/>} />
+            <Route path="/attendance" element={<Attendance/>} />
+             {/* <Route path="/task" element={<Task/>} /> */}
 
 
             {/* productivity */}
@@ -105,6 +108,16 @@ function App() {
 
 
             {/* Add your other routes here */}
+             {/* End team Member */}
+
+
+
+            {/* Manager */}
+
+
+
+            {/* End Manager */}
+            
           </Routes>
         </div>
       </div>
