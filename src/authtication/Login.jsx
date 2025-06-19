@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const LoginPage = () => {
   return (
-    <div className="container-fluid login-page">
+    <div className="container-fluid login-page ">
       <div className="row vh-100">
         {/* Left Panel */}
         <div className="col-md-6 login-left d-flex flex-column justify-content-center align-items-center text-white">
