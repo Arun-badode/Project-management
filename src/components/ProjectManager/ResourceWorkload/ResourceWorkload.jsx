@@ -21,7 +21,7 @@ function ResourceWorkload() {
 
   const taskData = [
     { id: 'TSK-001', name: 'Database Migration', resource: 'Computing', consumption: 45, priority: 'High', startTime: '08:00 AM', duration: '4h', progress: 75, status: 'Running' },
-    { id: 'TSK-002', name: 'Server divtenance', resource: 'Network', consumption: 30, priority: 'Medium', startTime: '09:30 AM', duration: '2h', progress: 50, status: 'Running' },
+    { id: 'TSK-002', name: 'Server Maintenance', resource: 'Network', consumption: 30, priority: 'Medium', startTime: '09:30 AM', duration: '2h', progress: 50, status: 'Running' },
     { id: 'TSK-003', name: 'Backup Process', resource: 'Storage', consumption: 80, priority: 'High', startTime: '10:00 AM', duration: '3h', progress: 25, status: 'Running' },
     { id: 'TSK-004', name: 'Code Deployment', resource: 'Computing', consumption: 60, priority: 'Medium', startTime: '11:00 AM', duration: '1h', progress: 90, status: 'Running' },
     { id: 'TSK-005', name: 'Security Audit', resource: 'Human', consumption: 50, priority: 'Low', startTime: '01:00 PM', duration: '5h', progress: 10, status: 'Running' },
@@ -96,25 +96,62 @@ function ResourceWorkload() {
     return 'bg-danger';
   };
 
+    useEffect(() => {
+        // Get the canvas element
+        const ctx = document.getElementById('resource-distribution-chart');
+
+        // Initialize the chart
+        const myChart = new Chart(ctx, {
+            type: 'pie',  // Chart type, you can also use 'bar', 'line', etc.
+            data: {
+                labels: ['Computing', 'Storage', 'Network', 'Human'],  // Labels for the chart
+                datasets: [{
+                    label: 'Resource Distribution',
+                    data: [40, 25, 20, 15],  // Data for each category
+                    backgroundColor: ['#4C9AFF', '#6554C0', '#00B8D9', '#36B37E'],  // Colors for each category
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: (tooltipItem) => `${tooltipItem.label}: ${tooltipItem.raw}%`
+                        }
+                    }
+                }
+            }
+        });
+
+        // Cleanup on component unmount
+        return () => {
+            if (myChart) {
+                myChart.destroy();
+            }
+        };
+    }, []);
+
   return (
-    <div className="container-fluid bg-light" style={{ minHeight: '100vh' }}>
+    <div className="container-fluid bg-card" style={{ minHeight: '100vh' }}>
       {/* Header Section */}
       <header className="bg-white shadow-sm mb-4">
-        <div className="container">
+        <div className="container bg-card">
           <div className="d-flex justify-content-between align-items-center py-3">
-            <h1 className="h3 mb-0 text-dark">Resource Workload</h1>
+            <h1 className="h3 mb-0 ">Resource Workload</h1>
             <div className="d-flex align-items-center">
-              <span className="text-muted me-3">{currentDateTime}</span>
+              <span className=" me-3">{currentDateTime}</span>
               <button 
                 onClick={handleRefresh}
-                className="btn btn-outline-secondary btn-sm me-3"
+                className="btn btn-secondary btn-sm me-3"
                 title="Refresh data"
               >
                 <i className="fas fa-sync-alt"></i>
               </button>
               <div className="dropdown">
                 <button 
-                  className="btn btn-outline-secondary dropdown-toggle"
+                  className="btn btn-secondary dropdown-toggle"
                   type="button"
                   id="resourceFilterDropdown"
                   data-bs-toggle="dropdown"
@@ -136,15 +173,15 @@ function ResourceWorkload() {
 
       <div className="container mb-5">
         {/* Resource Status Overview */}
-        <section className="mb-4">
+        <section className="mb-4 ">
           <h2 className="h5 mb-3">Resource Status Overview</h2>
           <div className="row">
             <div className="col-md-6 col-lg-3 mb-3">
-              <div className="card h-100">
+              <div className="card h-100 bg-card">
                 <div className="card-body">
                   <div className="d-flex justify-content-between">
                     <div>
-                      <h6 className="card-subtitle mb-2 text-muted">Total Resources</h6>
+                      <h6 className="card-subtitle mb-2 ">Total Resources</h6>
                       <h3 className="card-title">{resourceStats.total}</h3>
                     </div>
                     <div className="bg-primary bg-opacity-10 rounded p-3">
@@ -156,11 +193,11 @@ function ResourceWorkload() {
             </div>
 
             <div className="col-md-6 col-lg-3 mb-3">
-              <div className="card h-100">
+              <div className="card h-100 bg-card">
                 <div className="card-body">
                   <div className="d-flex justify-content-between">
                     <div>
-                      <h6 className="card-subtitle mb-2 text-muted">Resources In Use</h6>
+                      <h6 className="card-subtitle mb-2 ">Resources In Use</h6>
                       <h3 className="card-title">{resourceStats.inUse}</h3>
                     </div>
                     <div className="bg-success bg-opacity-10 rounded p-3">
@@ -172,11 +209,11 @@ function ResourceWorkload() {
             </div>
 
             <div className="col-md-6 col-lg-3 mb-3">
-              <div className="card h-100">
+              <div className="card h-100 bg-card">
                 <div className="card-body">
                   <div className="d-flex justify-content-between">
                     <div>
-                      <h6 className="card-subtitle mb-2 text-muted">Utilization</h6>
+                      <h6 className="card-subtitle mb-2">Utilization</h6>
                       <h3 className="card-title">{resourceStats.utilization}%</h3>
                     </div>
                     <div className="bg-warning bg-opacity-10 rounded p-3">
@@ -194,11 +231,11 @@ function ResourceWorkload() {
             </div>
 
             <div className="col-md-6 col-lg-3 mb-3">
-              <div className="card h-100">
+              <div className="card h-100 bg-card">
                 <div className="card-body">
                   <div className="d-flex justify-content-between">
                     <div>
-                      <h6 className="card-subtitle mb-2 text-muted">Critical Alerts</h6>
+                      <h6 className="card-subtitle mb-2 ">Critical Alerts</h6>
                       <h3 className="card-title">{resourceStats.alerts}</h3>
                     </div>
                     <div className="bg-danger bg-opacity-10 rounded p-3">
@@ -214,25 +251,25 @@ function ResourceWorkload() {
         {/* Resource Distribution and Task Workload */}
         <div className="row mb-4">
           {/* Resource Distribution Chart */}
-          <div className="col-lg-4 mb-3">
+           <div className="col-lg-4 mb-3">
             <div className="card h-100">
-              <div className="card-body">
-                <h2 className="h5 mb-3">Resource Distribution</h2>
-                <div className="chart-container" style={{ position: 'relative', height: '300px' }}>
-                  <canvas id="resource-distribution-chart"></canvas>
+                <div className="card-body">
+                    <h2 className="h5 mb-3">Resource Distribution</h2>
+                    <div className="chart-container" style={{ position: 'relative', height: '300px' }}>
+                        <canvas id="resource-distribution-chart"></canvas>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
+        </div>
 
           {/* Task Workload List */}
           <div className="col-lg-8 mb-3">
-            <div className="card h-100">
+            <div className="card h-100 bg-card">
               <div className="card-header">
                 <h2 className="h5 mb-0">Task Workload</h2>
               </div>
               <div className="card-body p-0">
-                <div className="table-responsive">
+                <div className="table-responsive table-gradient-bg">
                   <table className="table table-hover mb-0">
                     <thead>
                       <tr>
@@ -289,7 +326,7 @@ function ResourceWorkload() {
         </div>
 
         {/* Resource Timeline */}
-        <section className="card mb-4">
+        <section className="card mb-4 bg-card">
           <div className="card-body">
             <h2 className="h5 mb-3">Resource Timeline</h2>
             <div className="table-responsive">
@@ -308,7 +345,7 @@ function ResourceWorkload() {
 
                 {/* Timeline Rows */}
                 {resourceTypes.map((resource, index) => (
-                  <div key={index} className="d-flex py-2 border-bottom">
+                  <div key={index} className="d-flex py-2 border-bottom bg-card">
                     <div style={{ width: '120px' }} className="d-flex align-items-center">
                       <span className="fw-bold">{resource.name}</span>
                     </div>
@@ -358,20 +395,20 @@ function ResourceWorkload() {
 
         {/* Action Controls */}
         <section className="card">
-          <div className="card-body">
+          <div className="card-body bg-card">
             <div className="d-flex flex-wrap justify-content-between align-items-center">
               <h2 className="h5 mb-3 mb-md-0">Quick Actions</h2>
               <div className="d-flex flex-wrap gap-2">
                 <button className="btn btn-primary">
                   <i className="fas fa-plus me-2"></i> Allocate Resources
                 </button>
-                <button className="btn btn-purple">
+                <button className="btn btn-info">
                   <i className="fas fa-sort-amount-up me-2"></i> Prioritize Tasks
                 </button>
                 <button className="btn btn-success">
                   <i className="fas fa-balance-scale me-2"></i> Balance Load
                 </button>
-                <button className="btn btn-outline-secondary">
+                <button className="btn btn-secondary">
                   <i className="fas fa-file-export me-2"></i> Export Data
                 </button>
               </div>
