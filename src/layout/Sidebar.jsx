@@ -249,13 +249,13 @@ const Sidebar = ({ collapsed }) => {
           
            <li
                 className={`menu-item ${
-                  isActive("/team-dashboard") ? "active" : ""
+                  isActive("/manager-dashboard") ? "active" : ""
                 }`}
               >
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("/team-dashboard");
+                    navigate("/manager-dashboard");
                     menuItemClick();
                   }}
                 >
@@ -265,13 +265,13 @@ const Sidebar = ({ collapsed }) => {
               </li>
               <li
                 className={`menu-item ${
-                  isActive("/team-dashboard") ? "active" : ""
+                  isActive("/assigned") ? "active" : ""
                 }`}
               >
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("/team-dashboard");
+                    navigate("/assigned");
                     menuItemClick();
                   }}
                 >
@@ -281,13 +281,13 @@ const Sidebar = ({ collapsed }) => {
               </li>
               <li
                 className={`menu-item ${
-                  isActive("/team-dashboard") ? "active" : ""
+                  isActive("/createproject") ? "active" : ""
                 }`}
               >
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("/team-dashboard");
+                    navigate("/createproject");
                     menuItemClick();
                   }}
                 >
@@ -421,7 +421,7 @@ const Sidebar = ({ collapsed }) => {
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("taskdashboard");
+                    navigate("/activity");
                     menuItemClick();
                   }}
                 >
@@ -437,7 +437,7 @@ const Sidebar = ({ collapsed }) => {
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("taskdashboard");
+                    navigate("/messages");
                     menuItemClick();
                   }}
                 >
