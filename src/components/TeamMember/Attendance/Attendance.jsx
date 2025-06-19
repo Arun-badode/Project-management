@@ -223,22 +223,22 @@ const Attendance = () => {
   }, []);
 
   return (
-    <div className="min-vh-100 bg-light text-dark">
+    <div className="min-vh-100 bg-main text-white">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className=" shadow-sm">
         <div className="container-fluid py-3">
           <div className="d-flex justify-content-between align-items-center">
             <div>
-              <h1 className="h2 mb-0 text-dark">Team Attendance</h1>
+              <h1 className="h2 mb-0 ">Team Attendance</h1>
               <nav aria-label="breadcrumb">
-                <ol className="breadcrumb mb-0">
-                  <li className="breadcrumb-item">Dashboard</li>
-                  <li className="breadcrumb-item active" aria-current="page">Attendance</li>
+                <ol className="breadcrumb mb-0 gap-2">
+                  <li className="breadcrumb-item">Dashboard </li>
+                  <li className="active text-white gap-" >/ Attendance</li>
                 </ol>
               </nav>
             </div>
             <div className="text-end">
-              <div className="text-muted small">Today</div>
+              <div className=" small">Today</div>
               <div className="fw-medium">{formattedDate}</div>
             </div>
           </div>
@@ -249,15 +249,15 @@ const Attendance = () => {
         {/* Daily Overview Section */}
         <section className="mb-4">
           <h2 className="h4 mb-3">Daily Overview</h2>
-          <div className="row g-3">
-            <div className="col-md-6 col-lg-3">
-              <div className="bg-white rounded shadow-sm p-4 h-100">
+          <div className="row g-3 ">
+            <div className="col-md-6 col-lg-3 " >
+              <div className=" rounded shadow-sm p-4 h-100 bg-card">
                 <div className="d-flex align-items-center">
-                  <div className="p-3 rounded-circle bg-primary bg-opacity-10 text-primary">
+                  <div className="p-3 rounded-circle bg-primary ">
                     <i className="fas fa-users fs-5"></i>
                   </div>
                   <div className="ms-3">
-                    <p className="text-muted small mb-1">Total Team Members</p>
+                    <p className=" small mb-1">Total Team Members</p>
                     <p className="h4 mb-0 fw-semibold">{teamData.totalMembers}</p>
                   </div>
                 </div>
@@ -265,13 +265,13 @@ const Attendance = () => {
             </div>
             
             <div className="col-md-6 col-lg-3">
-              <div className="bg-white rounded shadow-sm p-4 h-100">
+              <div className="bg-white rounded shadow-sm p-4 h-100 bg-card">
                 <div className="d-flex align-items-center">
-                  <div className="p-3 rounded-circle bg-success bg-opacity-10 text-success">
+                  <div className="p-3 rounded-circle bg-success ">
                     <i className="fas fa-check-circle fs-5"></i>
                   </div>
                   <div className="ms-3">
-                    <p className="text-muted small mb-1">Present Today</p>
+                    <p className=" small mb-1">Present Today</p>
                     <p className="h4 mb-0 fw-semibold">{teamData.presentToday}</p>
                   </div>
                 </div>
@@ -279,13 +279,13 @@ const Attendance = () => {
             </div>
             
             <div className="col-md-6 col-lg-3">
-              <div className="bg-white rounded shadow-sm p-4 h-100">
+              <div className="bg-white rounded shadow-sm p-4 h-100 bg-card">
                 <div className="d-flex align-items-center">
-                  <div className="p-3 rounded-circle bg-warning bg-opacity-10 text-warning">
+                  <div className="p-3 rounded-circle bg-warning ">
                     <i className="fas fa-clock fs-5"></i>
                   </div>
                   <div className="ms-3">
-                    <p className="text-muted small mb-1">Late Arrivals</p>
+                    <p className=" small mb-1">Late Arrivals</p>
                     <p className="h4 mb-0 fw-semibold">{teamData.lateArrivals}</p>
                   </div>
                 </div>
@@ -293,13 +293,13 @@ const Attendance = () => {
             </div>
             
             <div className="col-md-6 col-lg-3">
-              <div className="bg-white rounded shadow-sm p-4 h-100">
+              <div className="bg-white rounded shadow-sm p-4 h-100 bg-card ">
                 <div className="d-flex align-items-center">
-                  <div className="p-3 rounded-circle bg-danger bg-opacity-10 text-danger">
+                  <div className="p-3 rounded-circle bg-danger ">
                     <i className="fas fa-times-circle fs-5"></i>
                   </div>
                   <div className="ms-3">
-                    <p className="text-muted small mb-1">Absent Members</p>
+                    <p className=" small mb-1">Absent Members</p>
                     <p className="h4 mb-0 fw-semibold">{teamData.absentMembers}</p>
                   </div>
                 </div>
@@ -311,7 +311,7 @@ const Attendance = () => {
         <div className="row g-4">
           {/* Monthly Calendar View */}
           <section className="col-lg-8">
-            <div className="bg-white rounded shadow-sm p-4 h-100">
+            <div className="bg-white rounded shadow-sm p-4 h-100 bg-card ">
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2 className="h4 mb-0">Monthly Calendar</h2>
                 <div className="d-flex align-items-center">
@@ -333,7 +333,7 @@ const Attendance = () => {
                 </div>
               </div>
               
-              <div className="row row-cols-7  mb-2">
+              <div className="row row-cols-7  mb-2 bg-card">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => (
                   <div key={index} className="col text-center fw-medium small py-2">
                     {day}
@@ -345,14 +345,14 @@ const Attendance = () => {
                 {calendarDays.map((day, index) => (
                   <div 
                     key={index} 
-                    className={`col p-1 border rounded d-flex flex-column ${!day ? 'bg-light' : ''} 
-                      ${day?.isWeekend ? 'bg-light text-muted' : ''}
+                    className={`col p-1 border rounded d-flex flex-column ${!day ? 'bg-card' : ''} 
+                      ${day?.isWeekend ? 'bg-card' : ''}
                       ${day?.isToday ? 'border-primary border-2' : 'border-light'}`}
                     style={{ height: '60px' }}
                   >
                     {day && (
                       <>
-                        <span className={`small ${day.isToday ? 'fw-bold' : ''}`}>{day.day}</span>
+                        <span className={`small ${day.isToday ? 'fw-bold bg-card' : ''}`}>{day.day}</span>
                         {!day.isWeekend && day.status !== 'future' && (
                           <div className="mt-auto">
                             <span 
@@ -389,7 +389,7 @@ const Attendance = () => {
 
           {/* Attendance Summary */}
           <section className="col-lg-4">
-            <div className="bg-white rounded shadow-sm p-4 h-100">
+            <div className="bg-card rounded shadow-sm p-4 h-100">
               <h2 className="h4 mb-3">Attendance Summary</h2>
               
               <div className="mb-4">
@@ -411,19 +411,19 @@ const Attendance = () => {
         </div>
 
         {/* Team Member List */}
-        <section className="mt-4 bg-white rounded shadow-sm overflow-hidden">
+        <section className="mt-4  rounded shadow-sm overflow-hidden">
           <div className="p-4 border-bottom">
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 mb-md-0">
               <h2 className="h4 mb-3 mb-md-0">Team Members</h2>
               
               <div className="d-flex flex-column flex-md-row w-100 w-md-auto">
-                <div className="position-relative me-md-2 mb-2 mb-md-0">
+                <div className="position-relative me-md-2 mb-2 mb-md-0 bg-card">
                   <input
                     type="text"
                     placeholder="Search members..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="form-control ps-4"
+                    className="form-control ps-4 "
                     style={{ width: '100%', minWidth: '240px' }}
                   />
                   <div className="position-absolute top-50 start-0 translate-middle-y ms-2 text-muted">
@@ -431,9 +431,9 @@ const Attendance = () => {
                   </div>
                 </div>
                 
-                <div className="position-relative">
+                <div className="position-relative text-white">
                   <button
-                    className="btn btn-outline-secondary dropdown-toggle"
+                    className="btn btn-secondary dropdown-toggle"
                     type="button"
                     id="departmentDropdown"
                     data-bs-toggle="dropdown"
@@ -460,7 +460,7 @@ const Attendance = () => {
           </div>
           
           <div className="table-responsive">
-            <table className="table table-hover mb-0">
+            <table className="table table-hover mb-0 table-gradient-bg">
               <thead className="table-light">
                 <tr>
                   <th scope="col">Employee</th>

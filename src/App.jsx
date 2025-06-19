@@ -5,10 +5,10 @@ import Navbar from "./layout/Navbar";
 import Sidebar from "./layout/Sidebar";
 import { useState } from "react";
 import LoginPage from "./authtication/Login";
+import SignupPage from "./authtication/singup";
 
 import LeadDashboard from "./components/AdminDashboard/Lead/LeadDashboard";
 import AdminDashboard from "./components/AdminDashboard/AdminDashboard";
-import TaskManagementPage from "./components/AdminDashboard/TaskManagement/TaskManagemnet";
 import TaskManagement from "./components/AdminDashboard/TaskManagement/TaskManagemnet";
 import UserManagement from "./components/AdminDashboard/UserManagement/UserManagement";
 import ResourceManagement from "./components/AdminDashboard/ResourceManagement/ResourceManagement";
@@ -26,9 +26,12 @@ import ActivitySummary from "./components/TeamMember/Activity/ActivitySummary";
 import ManagerDashboard from "./components/ProjectManager/ManagerDashboard/ManagerDashboard";
 import CreateProject from "./components/ProjectManager/CreateProject/CreateProject";
 import Attendance from "./components/TeamMember/Attendance/Attendance";
+import Productivity from "./components/TeamMember/Productivity/Productivity";
 import TaskRequest from "./components/ProjectManager/TaskRequest/TaskRequest";
 import ResourceWorkload from "./components/ProjectManager/ResourceWorkload/ResourceWorkload";
 import Collaboration from "./components/ProjectManager/Collaboration/Collaboration";
+import Assigned from "./components/ProjectManager/Assigne/Assigned";
+import Task from "./components/TeamMember/Task/Task";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -43,9 +46,9 @@ function App() {
 
   const location = useLocation();
 
-  // Check if current path is exactly "/" (login page) or "/signup" (sign up page)
-  const hideLayout =
-    location.pathname === "/" || location.pathname === "/signup";
+  // Define routes where navbar and sidebar should be hidden
+  const NO_LAYOUT_ROUTES = ["/", "/singup"];
+  const hideLayout = NO_LAYOUT_ROUTES.includes(location.pathname);
 
   return (
     <>
@@ -54,7 +57,6 @@ function App() {
 
       {/* main content area */}
       <div className={`main-content ${hideLayout ? "full-width" : ""}`}>
-        {/* sidebar - hidden on login/signup page */}
         {/* sidebar - hidden on login/signup page */}
         {!hideLayout && (
           <Sidebar
@@ -70,38 +72,33 @@ function App() {
           }`}
         >
           <Routes>
+            {/* Authentication routes (no navbar/sidebar) */}
             <Route path="/" element={<LoginPage />} />
-            {/*Admin Start */}
+            <Route path="/singup" element={<SignupPage />} />
 
+            {/* Admin routes */}
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/taskmanagement" element={<TaskManagement />} />
             <Route path="/usermanage" element={<UserManagement />} />
-            <Route
-              path="/resourcemanagement"
-              element={<ResourceManagement />}
-            />
+            <Route path="/resourcemanagement" element={<ResourceManagement />} />
             <Route path="/projectsupport" element={<ProjectSupportPortal />} />
             <Route path="/settingpage" element={<SettingsPage />} />
             <Route path="/profile" element={<ProfileAcc />} />
             <Route path="/auditlog" element={<AuditLog />} />
             <Route path="/timetracker" element={<TimeTracker />} />
-            <Route
-              path="/reportinganalytics"
-              element={<ReportingAnalytics />}
-            />
-            <Route
-              path="/filemanagementsystem"
-              element={<FileManagementSystem />}
-            />
+            <Route path="/reportinganalytics" element={<ReportingAnalytics />} />
+            <Route path="/filemanagementsystem" element={<FileManagementSystem />} />
             <Route path="/qamanagement" element={<QAManagement />} />
 
-            {/*Admin End */}
-
+            {/* Lead routes */}
             <Route path="/LeadDashboard" element={<LeadDashboard />} />
 
+            {/* Team Member routes */}
+            <Route path="/team-dashboard" element={<TaskDashboard />} />
+            <Route path="/attendance" element={<Attendance />} />
 
             {/* team Member */}
-            
+            <Route path="/task" element={<Task/>}/>
             <Route path="/team-dashboard" element={<TaskDashboard/>} />
             <Route path='/messages'element={<Messages/>}/>
             <Route path="/activity" element={<ActivitySummary/>}/>
@@ -113,6 +110,9 @@ function App() {
 
             <Route path="/manager-dashboard" element={<ManagerDashboard/>}/>
             <Route path="/createproject" element={<CreateProject/>}/>
+            <Route path="/attendance" element={<Attendance/>} />
+               <Route path="/assigned" element={<Assigned/>} />
+
             <Route path="/taskrequest" element={<TaskRequest/>}/>
             <Route path="/sourcework" element={<ResourceWorkload/>}/>
             <Route path="/collaboration" element={<Collaboration/>}/>
@@ -120,6 +120,13 @@ function App() {
              {/* <Route path="/task" element={<Task/>} /> */}
 
 
+            {/* productivity */}
+
+             <Route path="/productivity" element={<Productivity/>} />
+
+
+
+            {/* Add your other routes here */}
              {/* End team Member */}
 
 

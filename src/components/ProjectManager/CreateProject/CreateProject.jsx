@@ -91,7 +91,7 @@ function CreateProject() {
 
   return (
     <div>
-      <div className="container-fluid min-vh-100 bg-light">
+      <div className="container-fluid min-vh-100 bg-main">
         {/* Header */}
         {/* <header className="bg-white shadow-sm p-3 mb-5">
           <div className="d-flex justify-content-between align-items-center">
@@ -103,12 +103,12 @@ function CreateProject() {
         </header> */}
 
         {/* Main Content */}
-        <div className="container py-3">
-            <h1>Create New Project</h1>
-          <div className="card shadow-lg p-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="container  py-3">
+            <h1 className='gradient-heading'>Create New Project</h1>
+          <div className="card shadow-lg p-4 bg-card">
+            <form onSubmit={handleSubmit} className="space-y-4 ">
               {/* Project Basic Information */}
-              <div className="space-y-4">
+              <div className="space-y-4 ">
                 <h2 className="h5 text-gray-900 border-bottom pb-2">Basic Information</h2>
 
                 {/* Project Name */}
