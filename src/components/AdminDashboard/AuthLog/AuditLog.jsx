@@ -533,7 +533,7 @@ const AuditLog = () => {
                             {/* Mobile Card View */}
                             <div className="d-lg-none">
                                 {getCurrentData().map((item) => (
-                                    <div key={item.id} className="card mb-3 shadow-sm">
+                                    <div key={item.id} className="card mb-3 bg-card shadow-sm">
                                         <div className="card-body">
                                             {activeTab === 'all-activities' && (
                                                 <>
@@ -544,7 +544,7 @@ const AuditLog = () => {
                                                     <p className="card-text mb-2">
                                                         <strong>{item.activity}</strong> in {item.module}
                                                     </p>
-                                                    <div className="row small text-muted mb-2">
+                                                    <div className="row  small  mb-2">
                                                         <div className="col-6">
                                                             <strong>Time:</strong><br />
                                                             {item.timestamp}
@@ -554,7 +554,7 @@ const AuditLog = () => {
                                                             <code>{item.ipAddress}</code>
                                                         </div>
                                                     </div>
-                                                    <div className="small text-muted mb-3">
+                                                    <div className="  small  mb-3">
                                                         <strong>Device:</strong> {item.device}
                                                     </div>
                                                     <button
@@ -578,7 +578,7 @@ const AuditLog = () => {
                                                             <span className={getStatusBadge(item.status)}>{item.status}</span>
                                                         </div>
                                                     </div>
-                                                    <div className="row small text-muted mb-2">
+                                                    <div className="row small text-white mb-2">
                                                         <div className="col-6">
                                                             <strong>Date & Time:</strong><br />
                                                             {item.datetime}
@@ -588,7 +588,7 @@ const AuditLog = () => {
                                                             <code>{item.ipAddress}</code>
                                                         </div>
                                                     </div>
-                                                    <div className="small text-muted">
+                                                    <div className="small text-white">
                                                         <strong>Device:</strong> {item.device}
                                                     </div>
                                                 </>
@@ -605,9 +605,9 @@ const AuditLog = () => {
                                                     <p className="card-text mb-2">
                                                         <strong>{item.entityName}</strong>
                                                     </p>
-                                                    <p className="small text-muted mb-2">{item.changeSummary}</p>
+                                                    <p className="small text-white mb-2">{item.changeSummary}</p>
                                                     <div className="d-flex justify-content-between align-items-center">
-                                                        <span className="small text-muted">{item.timestamp}</span>
+                                                        <span className="small text-white">{item.timestamp}</span>
                                                         <button
                                                             className="btn btn-outline-primary btn-sm"
                                                             onClick={() => handleViewDetails(item)}
@@ -625,7 +625,7 @@ const AuditLog = () => {
 
                             {/* Pagination */}
                             <div className="d-flex justify-content-between align-items-center mt-4">
-                                <div className="text-muted">
+                                <div className="text-white">
                                     Showing page {currentPage} of {getTotalPages()}
                                 </div>
                                 <nav>
@@ -668,9 +668,9 @@ const AuditLog = () => {
 
             {/* Modal */}
             {showModal && modalData && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-lg">
-                        <div className="modal-content">
+                <div className="modal fade show d-block " >
+                    <div className="modal-dialog  modal-lg">
+                        <div className="modal-content bg-card">
                             <div className="modal-header">
                                 <h5 className="modal-title">
                                     {activeTab === 'changes-history' ? 'Change Details' : 'Activity Details'}

@@ -155,16 +155,16 @@ const FileManagementSystem = () => {
         <div className="row g-3">
           {files.map((f, i) => (
             <div className="col-12 col-sm-6 col-md-4 col-lg-3 " key={i}>
-              <div className="card h-100 shadow-sm">
-                <div className="card-body text-center">
+              <div className="card bg-card h-100  shadow-sm">
+                <div className="card-body  text-center">
                   {lgIcon(f.extension)}
                   <h6 className="mt-3">{f.name}.{f.extension}</h6>
-                  <small className="text-muted d-block">
+                  <small className=" d-block">
                     {f.size} • {f.version}
                   </small>
-                  <small className="text-muted">{f.modified}</small>
+                  <small className="">{f.modified}</small>
                 </div>
-                <div className="card-footer d-flex justify-content-between align-items-center">
+                <div className="card-footer d-flex  justify-content-between align-items-center">
                   <span className="badge bg-light text-dark">{f.task}</span>
                   <div className="d-flex gap-2">
                     <FaDownload className="text-secondary" role="button" />
@@ -199,7 +199,7 @@ const FileManagementSystem = () => {
                     {smIcon(f.extension)}
                     <div>
                       <div className="fw-semibold">{f.name}.{f.extension}</div>
-                      <small className="text-muted ">.{f.extension}</small>
+                      <small className=" ">.{f.extension}</small>
                     </div>
                   </td>
                   <td>{f.project}</td>
@@ -260,7 +260,7 @@ const FileManagementSystem = () => {
                   >
                     <FaUpload className="fs-2 mb-2 text-primary" />
                     <p className="mb-1">Drag &amp; drop files here</p>
-                    <p className="small text-muted mb-0">
+                    <p className="small mb-0">
                       or click to browse
                     </p>
                     <input

@@ -233,89 +233,81 @@ const TaskManagement = () => {
 
   const renderTaskCard = (task) => (
     <div key={task.id} className="card bg-card mb-3">
-      <div className="card-body">
-        <div className="d-flex justify-content-between align-items-start mb-3">
-          <div className="flex-grow-1">
-            <h5 className="card-title mb-2">{task.title}</h5>
-            <p className="card-text  mb-3">{task.description}</p>
-            
-            <div className="d-flex flex-wrap gap-2 mb-3">
-              <span className={`badge ${getStatusColor(task.status)}`}>
-                {task.status}
-              </span>
-              <span className={`badge ${getPriorityColor(task.priority)}`}>
-                {task.priority}
-              </span>
-              <span className="badge bg-purple text-white">
-                {task.category}
-              </span>
-            </div>
+  <div className="card-body">
+    <div className="d-flex flex-column flex-md-row justify-content-between align-items-start mb-3 gap-3">
+      <div className="flex-grow-1 w-100">
+        <h5 className="card-title mb-2">{task.title}</h5>
+        <p className="card-text mb-3">{task.description}</p>
+        
+        <div className="d-flex flex-wrap gap-2 mb-3">
+          <span className={`badge ${getStatusColor(task.status)}`}>{task.status}</span>
+          <span className={`badge ${getPriorityColor(task.priority)}`}>{task.priority}</span>
+          <span className="badge bg-purple text-white">{task.category}</span>
+        </div>
 
-            <div className="d-flex align-items-center gap-4  mb-3">
-              <div className="d-flex align-items-center gap-1">
-                <User className="w-4 h-4" />
-                <span>{task.assignee}</span>
-              </div>
-              <div className="d-flex align-items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                <span>{task.dueDate}</span>
-              </div>
-              <div className="d-flex align-items-center gap-1">
-                <Clock className="w-4 h-4" />
-                <span>{formatTime(task.timeSpent)}</span>
-              </div>
-            </div>
-
-            <div className="d-flex align-items-center gap-2">
-              <button
-                onClick={() => toggleTimer(task.id)}
-                className={`btn btn-sm d-flex align-items-center gap-1 ${
-                  task.isTimerRunning ? 'btn-danger' : 'btn-success'
-                }`}
-              >
-                {task.isTimerRunning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                {task.isTimerRunning ? 'Stop' : 'Start'}
-              </button>
-              
-              <select
-                value={task.assignee}
-                onChange={(e) => reassignTask(task.id, e.target.value)}
-                className="form-select form-select-sm"
-              >
-                {teamMembers.map(member => (
-                  <option key={member} value={member}>{member}</option>
-                ))}
-              </select>
-
-              <select
-                value={task.status}
-                onChange={(e) => updateTask(task.id, { status: e.target.value })}
-                className="form-select form-select-sm"
-              >
-                {statuses.map(status => (
-                  <option key={status} value={status}>{status}</option>
-                ))}
-              </select>
-            </div>
+        <div className="d-flex flex-wrap align-items-center gap-3 mb-3">
+          <div className="d-flex align-items-center gap-1">
+            <User className="w-4 h-4" />
+            <span>{task.assignee}</span>
           </div>
-
-          <div className="d-flex gap-2 ms-4">
-            <button
-              onClick={() => setEditingTask(task)}
-              className="btn btn-sm btn-outline-secondary"
-            >
-              <Edit3 className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => deleteTask(task.id)}
-              className="btn btn-sm btn-outline-danger"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+          <div className="d-flex align-items-center gap-1">
+            <Calendar className="w-4 h-4" />
+            <span>{task.dueDate}</span>
+          </div>
+          <div className="d-flex align-items-center gap-1">
+            <Clock className="w-4 h-4" />
+            <span>{formatTime(task.timeSpent)}</span>
           </div>
         </div>
+
+        <div className="d-flex flex-column flex-sm-row align-items-stretch gap-2">
+          <button
+            onClick={() => toggleTimer(task.id)}
+            className={`btn btn-sm d-flex align-items-center gap-1 ${task.isTimerRunning ? 'btn-danger' : 'btn-success'} w-100 w-sm-auto`}
+          >
+            {task.isTimerRunning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+            {task.isTimerRunning ? 'Stop' : 'Start'}
+          </button>
+          
+          <select
+            value={task.assignee}
+            onChange={(e) => reassignTask(task.id, e.target.value)}
+            className="form-select form-select-sm w-100 w-sm-auto"
+          >
+            {teamMembers.map(member => (
+              <option key={member} value={member}>{member}</option>
+            ))}
+          </select>
+
+          <select
+            value={task.status}
+            onChange={(e) => updateTask(task.id, { status: e.target.value })}
+            className="form-select form-select-sm w-100 w-sm-auto"
+          >
+            {statuses.map(status => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="d-flex flex-row  flex-md-column gap-2 ms-md-4 mt-3 mt-md-0 w-50 w-md-auto">
+        <button
+          onClick={() => setEditingTask(task)}
+          className="btn btn-sm btn-outline-secondary ms-5  w-50 md-auto" 
+        >
+          <Edit3 className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => deleteTask(task.id)}
+          className="btn btn-sm btn-outline-danger ms-5 w-50 w-md-auto"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
       </div>
     </div>
+  </div>
+</div>
   );
 
   const renderTaskList = () => (
@@ -647,7 +639,7 @@ const TaskManagement = () => {
                     <select
                       value={newTask.assignee}
                       onChange={(e) => setNewTask({...newTask, assignee: e.target.value})}
-                      className="form-select"
+                      className="form-select "
                     >
                       <option value="">Select assignee</option>
                       {teamMembers.map(member => (
@@ -656,8 +648,8 @@ const TaskManagement = () => {
                     </select>
                   </div>
                   
-                  <div className="row mb-3">
-                    <div className="col-md-6">
+                  <div className="row mb-3 ">
+                    <div className="col-md-6 ">
                       <select
                         value={newTask.priority}
                         onChange={(e) => setNewTask({...newTask, priority: e.target.value})}

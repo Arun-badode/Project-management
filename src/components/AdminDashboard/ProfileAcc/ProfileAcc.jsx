@@ -118,12 +118,12 @@ const ProfileAcc = () => {
 
   return (
     <div className="min-vh-100 bg-light bg-main py-4">
-      <div className="">
-        <div className="row  justify-content-center">
+      <div className="container-fluid px-2 px-md-4">
+        <div className="row justify-content-center">
           <div className="col-12 col-xl-10">
             {/* Header */}
-            <div className="d-flex align-items-center justify-content-between mb-4">
-              <h1 className="gradient-heading ">Profile & Account</h1>
+            <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-4 gap-2">
+              <h1 className="gradient-heading text-center text-md-start">Profile & Account</h1>
               {successMessage && (
                 <div className="alert alert-success alert-dismissible fade show mb-0 py-2 px-3" role="alert">
                   <i className="bi bi-check-circle-fill me-2"></i>
@@ -136,7 +136,7 @@ const ProfileAcc = () => {
               {/* My Profile Section */}
               <div className="col-12 col-lg-6">
                 <div className="card shadow-sm bg-card border-0 h-100">
-                  <div className="card-header  text-white d-flex justify-content-between align-items-center">
+                  <div className="card-header text-white d-flex justify-content-between align-items-center">
                     <h3 className="card-title mb-0 fs-5">My Profile</h3>
                     {!isEditMode ? (
                       <button 
@@ -146,9 +146,9 @@ const ProfileAcc = () => {
                         Edit
                       </button>
                     ) : (
-                      <div className="btn-group btn-group-sm">
+                      <div className="btn-group btn-group-sm flex-column flex-sm-row">
                         <button 
-                          className="btn btn-success"
+                          className="btn btn-success mb-2 mb-sm-0"
                           onClick={handleSaveProfile}
                         >
                           <i className="bi bi-check-lg me-1"></i>
@@ -264,7 +264,7 @@ const ProfileAcc = () => {
               <div className="col-12 col-lg-6">
                 {/* Change Password Section */}
                 <div className="card shadow-sm bg-card border-0 mb-4">
-                  <div className="card-header  text-white">
+                  <div className="card-header text-white">
                     <h3 className="card-title mb-0 fs-5">Change Password</h3>
                   </div>
                   <div className="card-body">
@@ -350,8 +350,8 @@ const ProfileAcc = () => {
                 </div>
 
                 {/* Account Settings Section */}
-                <div className="card shadow-sm bg-card  border-0">
-                  <div className="card-header  text-white">
+                <div className="card shadow-sm bg-card border-0">
+                  <div className="card-header text-white">
                     <h3 className="card-title mb-0 fs-5">Account Settings</h3>
                   </div>
                   <div className="card-body">
@@ -361,7 +361,7 @@ const ProfileAcc = () => {
                         <div className="d-flex justify-content-between align-items-center py-2">
                           <div>
                             <div className="fw-semibold">Email Notifications</div>
-                            <small className="  ">Receive updates via email</small>
+                            <small>Receive updates via email</small>
                           </div>
                           <div className="form-check form-switch">
                             <input
@@ -376,11 +376,11 @@ const ProfileAcc = () => {
                         </div>
                       </div>
                       
-                      <div className="col-12">
+                      {/* <div className="col-12">
                         <div className="d-flex justify-content-between align-items-center py-2">
                           <div>
                             <div className="fw-semibold">Dark Mode</div>
-                            <small className="">Switch to dark theme</small>
+                            <small>Switch to dark theme</small>
                           </div>
                           <div className="form-check form-switch">
                             <input
@@ -393,7 +393,7 @@ const ProfileAcc = () => {
                             />
                           </div>
                         </div>
-                      </div>
+                      </div> */}
                       
                       {/* Language Dropdown */}
                       <div className="col-12">
@@ -413,10 +413,10 @@ const ProfileAcc = () => {
                       
                       {/* Delete Account Button */}
                       <div className="col-12">
-                        <hr className="my-3 " />
-                        <div className="text-center ">
+                        <hr className="my-3" />
+                        <div className="text-center">
                           <button
-                            className="btn btn-outline-danger btn-lg"
+                            className="btn btn-outline-danger btn-lg w-100 w-md-auto"
                             onClick={() => setShowDeleteModal(true)}
                           >
                             <i className="bi bi-trash3-fill me-2"></i>
@@ -451,13 +451,13 @@ const ProfileAcc = () => {
                 <div className="text-center">
                   <i className="bi bi-exclamation-triangle-fill text-warning mb-3" style={{ fontSize: '3rem' }}></i>
                   <h6 className="fw-bold mb-3">Are you absolutely sure?</h6>
-                  <p className=" mb-0">
+                  <p className="mb-0">
                     This action will permanently delete your account and all associated data. 
                     This cannot be undone.
                   </p>
                 </div>
               </div>
-              <div className="modal-footer border-0 justify-content-center">
+              <div className="modal-footer border-0 justify-content-center flex-column flex-sm-row gap-2">
                 <button
                   type="button"
                   className="btn btn-outline-secondary btn-lg px-4"

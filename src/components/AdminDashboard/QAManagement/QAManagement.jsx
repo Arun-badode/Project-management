@@ -280,12 +280,12 @@ const QAManagement = () => {
                             <div className="d-lg-none">
                                 {filteredTasks.map(task => (
                                     <div key={task.id} className="card mb-3">
-                                        <div className="card-body">
+                                        <div className="card-body bg-card">
                                             <div className="d-flex justify-content-between align-items-start mb-2">
                                                 <h6 className="card-title mb-0">{task.title}</h6>
                                                 <span className={`badge bg-${getStatusColor(task.status)}`}>{task.status}</span>
                                             </div>
-                                            <p className="card-text small text-muted mb-2">
+                                            <p className="card-text small  mb-2">
                                                 <strong>ID:</strong> {task.id} | <strong>Module:</strong> {task.module}
                                             </p>
                                             <div className="mb-2">
@@ -527,7 +527,7 @@ const QAManagement = () => {
                                                         <span className="badge bg-secondary me-1">{file.taskId}</span>
                                                         <span className="badge bg-info">{file.fileType}</span>
                                                     </p>
-                                                    <small className="text-muted d-block text-break">Server Path: {file.serverPath}</small>
+                                                    <small className=" d-block text-break">Server Path: {file.serverPath}</small>
                                                     {file.comments && <p className="mb-2 mt-1 small text-break">Comments: {file.comments}</p>}
                                                     <div className="mt-2 d-flex flex-wrap gap-1">
                                                         <button className="btn btn-sm btn-outline-primary">📥 Download</button>
@@ -574,7 +574,7 @@ const QAManagement = () => {
                                         </div>
                                         <div className="mt-3">
                                             <h6>Task Description:</h6>
-                                            <p className="text-muted">This is a detailed description of the QA task that needs to be performed. It includes specific requirements, test cases, and expected outcomes.</p>
+                                            <p className="">This is a detailed description of the QA task that needs to be performed. It includes specific requirements, test cases, and expected outcomes.</p>
                                         </div>
                                     </div>
                                 </>
