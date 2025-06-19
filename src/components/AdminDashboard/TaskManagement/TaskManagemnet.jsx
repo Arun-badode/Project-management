@@ -639,11 +639,11 @@ const TaskManagement = () => {
                     <select
                       value={newTask.assignee}
                       onChange={(e) => setNewTask({...newTask, assignee: e.target.value})}
-                      className="form-select "
+                      className="form-select bg-card "
                     >
-                      <option value="">Select assignee</option>
+                      <option value="" className='text-dark'>Select assignee</option>
                       {teamMembers.map(member => (
-                        <option key={member} value={member}>{member}</option>
+                        <option className='text-dark' key={member} value={member}>{member}</option>
                       ))}
                     </select>
                   </div>
