@@ -307,7 +307,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                             <div className="fw-bold">
                               Enterprise CRM Implementation
                             </div>
-                            <div className="text-muted small">PRJ-2023-001</div>
+                            <div className=" small">PRJ-2023-001</div>
                           </div>
                         </div>
                       </td>
@@ -367,7 +367,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                             <div className="fw-bold">
                               Market Analysis Report
                             </div>
-                            <div className="text-muted small">PRJ-2023-008</div>
+                            <div className=" small">PRJ-2023-008</div>
                           </div>
                         </div>
                       </td>
@@ -420,7 +420,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                             <div className="fw-bold">
                               Mobile App Development
                             </div>
-                            <div className="text-muted small">PRJ-2023-012</div>
+                            <div className=" small">PRJ-2023-012</div>
                           </div>
                         </div>
                       </td>
@@ -464,7 +464,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                             className="rounded-circle border border-white ms-n2 bg-light d-flex align-items-center justify-content-center"
                             style={{ width: "32px", height: "32px" }}
                           >
-                            <span className="small text-muted">+2</span>
+                            <span className="small ">+2</span>
                           </div>
                         </div>
                       </td>
@@ -479,7 +479,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                             <div className="fw-bold">
                               Digital Marketing Campaign
                             </div>
-                            <div className="text-muted small">PRJ-2023-015</div>
+                            <div className=" small">PRJ-2023-015</div>
                           </div>
                         </div>
                       </td>
@@ -553,7 +553,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                         New lead <span className="fw-bold">Acme Corp</span>{" "}
                         added to pipeline
                       </p>
-                      <p className="text-muted small">2h ago</p>
+                      <p className=" small">2h ago</p>
                     </div>
                   </div>
                   <div className="d-flex position-relative mb-4">
@@ -571,7 +571,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                         <span className="fw-bold">Mobile App Development</span>{" "}
                         reached 90% completion
                       </p>
-                      <p className="text-muted small">4h ago</p>
+                      <p className=" small">4h ago</p>
                     </div>
                   </div>
                   <div className="d-flex position-relative mb-4">
@@ -589,7 +589,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                         on proposal for{" "}
                         <span className="fw-bold">TechStart Inc</span>
                       </p>
-                      <p className="text-muted small">Yesterday</p>
+                      <p className="small">Yesterday</p>
                     </div>
                   </div>
                   <div className="d-flex position-relative mb-4">
@@ -606,7 +606,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                         Meeting scheduled with{" "}
                         <span className="fw-bold">Global Solutions Ltd</span>
                       </p>
-                      <p className="text-muted small">2 days ago</p>
+                      <p className="small">2 days ago</p>
                     </div>
                   </div>
                   <div className="d-flex position-relative">
@@ -624,7 +624,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                         <span className="fw-bold">Nexus Technologies</span> -{" "}
                         <span className="fw-bold text-success">$125,000</span>
                       </p>
-                      <p className="text-muted small">3 days ago</p>
+                      <p className=" small">3 days ago</p>
                     </div>
                   </div>
                 </div>
