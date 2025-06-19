@@ -59,9 +59,9 @@ function ManagerDashboard() {
     };
 
     return (
-        <div className="container-fluid bg-light" style={{ minHeight: '100vh' }}>
+        <div className="container-fluid bg-light py-3" style={{ minHeight: '100vh' }}>
             {/* Header Section */}
-            <header className="bg-white shadow-sm mb-4">
+            {/* <header className="bg-white shadow-sm mb-4">
                 <div className="container">
                     <div className="d-flex justify-content-between align-items-center py-3">
                         <div className="d-flex align-items-center">
@@ -106,9 +106,10 @@ function ManagerDashboard() {
                         </div>
                     </div>
                 </div>
-            </header>
+            </header> */}
+            <h1>Manager Dashboard</h1>
 
-            <main className="container mb-5">
+            <div className="container mb-5">
                 {/* KPI Overview Cards */}
                 <div className="row mb-4">
                     {/* Total Leads */}
@@ -544,10 +545,10 @@ function ManagerDashboard() {
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
 
             {/* Quick Actions Panel */}
-            <div className="position-fixed bottom-0 end-0 p-3" style={{ zIndex: 11 }}>
+            {/* <div className="position-fixed bottom-0 end-0 p-3" style={{ zIndex: 11 }}>
                 <div className="toast show" role="alert" aria-live="assertive" aria-atomic="true">
                     <div className="toast-header">
                         <strong className="me-auto">Quick Actions</strong>
@@ -577,7 +578,7 @@ function ManagerDashboard() {
                 <button className="btn btn-primary rounded-circle p-3 position-absolute bottom-0 end-0 mb-5 me-3">
                     <i className="fas fa-plus fs-5"></i>
                 </button>
-            </div>
+            </div> */}
         </div>
     );
 }

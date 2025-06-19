@@ -25,6 +25,7 @@ import Messages from "./components/TeamMember/Messages/Messages";
 import ActivitySummary from "./components/TeamMember/Activity/ActivitySummary";
 import ManagerDashboard from "./components/ProjectManager/ManagerDashboard/ManagerDashboard";
 import CreateProject from "./components/ProjectManager/CreateProject/CreateProject";
+import Attendance from "./components/TeamMember/Attendance/Attendance";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -108,6 +109,20 @@ function App() {
 
             <Route path="/manager-dashboard" element={<ManagerDashboard/>}/>
             <Route path="/createproject" element={<CreateProject/>}/>
+            <Route path="/attendance" element={<Attendance/>} />
+             {/* <Route path="/task" element={<Task/>} /> */}
+
+
+             {/* End team Member */}
+
+
+
+            {/* Manager */}
+
+
+
+            {/* End Manager */}
+            
           </Routes>
         </div>
       </div>
