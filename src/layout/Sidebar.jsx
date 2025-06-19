@@ -367,13 +367,13 @@ const Sidebar = ({ collapsed }) => {
               </li>
               <li
                 className={`menu-item ${
-                  isActive("/taskdashboard") ? "active" : ""
+                  isActive("/task") ? "active" : ""
                 }`}
               >
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("taskdashboard");
+                    navigate("/task");
                     menuItemClick();
                   }}
                 >
@@ -383,13 +383,13 @@ const Sidebar = ({ collapsed }) => {
               </li>
               <li
                 className={`menu-item ${
-                  isActive("/taskdashboard") ? "active" : ""
+                  isActive("/attendance") ? "active" : ""
                 }`}
               >
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("taskdashboard");
+                    navigate("/attendance");
                     menuItemClick();
                   }}
                 >
