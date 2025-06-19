@@ -20,7 +20,7 @@ import QAManagement from "./components/AdminDashboard/QAManagement/QAManagement"
 import TimeTracker from "./components/AdminDashboard/TimeTracker/TimeTracker";
 import ReportingAnalytics from "./components/AdminDashboard/ReportingAnalytics/ReportingAnalytics";
 import FileManagementSystem from "./components/AdminDashboard/FileManagementSystem/FileManagementSystem";
-import TaskDashboard from "./components/Taskmanagementdashboard/TaskDashboard";
+import TaskDashboard from "./components/TeamMember/Taskmanagementdashboard/TaskDashboard";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -36,54 +36,65 @@ function App() {
   const location = useLocation();
 
   // Check if current path is exactly "/" (login page) or "/signup" (sign up page)
- const hideLayout = location.pathname.startsWith("/") && (location.pathname === "/" || location.pathname === "/signup");
-
+  const hideLayout =
+    location.pathname === "/" || location.pathname === "/signup";
 
   return (
     <>
       {/* navbar - hidden on login/signup page */}
       {!hideLayout && <Navbar toggleSidebar={toggleSidebar} />}
-      
+
       {/* main content area */}
       <div className={`main-content ${hideLayout ? "full-width" : ""}`}>
         {/* sidebar - hidden on login/signup page */}
-         {/* sidebar - hidden on login/signup page */}
+        {/* sidebar - hidden on login/signup page */}
         {!hideLayout && (
           <Sidebar
             collapsed={isSidebarCollapsed}
             menuItemClick={menusidebarcollaps}
           />
         )}
-        
+
         {/* right side content */}
         <div
-          className={` ${isSidebarCollapsed && !hideLayout ? "collapsed" : ""}`}
+          className={`right-side-content ${
+            isSidebarCollapsed && !hideLayout ? "collapsed" : ""
+          }`}
         >
           <Routes>
             <Route path="/" element={<LoginPage />} />
             {/*Admin Start */}
 
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/taskmanagement" element={<TaskManagement/>}/>
-            <Route path='/usermanage' element={<UserManagement/>}/>
-            <Route path="/resourcemanagement" element={<ResourceManagement/>}/>
-             <Route path="/projectsupport" element={<ProjectSupportPortal/>}/>
-              <Route path="/settingpage" element={<SettingsPage/>}/>
-               <Route path="/profile" element={<ProfileAcc/>}/>
-                 <Route path="/auditlog" element={<AuditLog/>}/>
-                   <Route path="/timetracker" element={<TimeTracker/>}/>
-                     <Route path="/reportinganalytics" element={<ReportingAnalytics/>}/>
-                     <Route path="/filemanagementsystem" element={<FileManagementSystem/>}/>
-                      <Route path="/qamanagement" element={<QAManagement/>}/>
-                       <Route path="/taskdashboard" element={<TaskDashboard/>}/>
-
-
-
+            <Route path="/dashboard" element={<AdminDashboard />} />
+            <Route path="/taskmanagement" element={<TaskManagement />} />
+            <Route path="/usermanage" element={<UserManagement />} />
+            <Route
+              path="/resourcemanagement"
+              element={<ResourceManagement />}
+            />
+            <Route path="/projectsupport" element={<ProjectSupportPortal />} />
+            <Route path="/settingpage" element={<SettingsPage />} />
+            <Route path="/profile" element={<ProfileAcc />} />
+            <Route path="/auditlog" element={<AuditLog />} />
+            <Route path="/timetracker" element={<TimeTracker />} />
+            <Route
+              path="/reportinganalytics"
+              element={<ReportingAnalytics />}
+            />
+            <Route
+              path="/filemanagementsystem"
+              element={<FileManagementSystem />}
+            />
+            <Route path="/qamanagement" element={<QAManagement />} />
 
             {/*Admin End */}
 
-
             <Route path="/LeadDashboard" element={<LeadDashboard />} />
+
+
+            {/* team Member */}
+            
+            <Route path="/taskdashboard" element={<TaskDashboard/>} />
 
             {/* Add your other routes here */}
           </Routes>

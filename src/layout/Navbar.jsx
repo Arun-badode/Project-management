@@ -101,17 +101,17 @@ const Navbar = ({ toggleSidebar }) => {
             </button>
             <ul className="dropdown-menu dropdown-menu-end shadow">
               <li>
-                <Link className="dropdown-item py-2" to="/">
+                <Link className="dropdown-item py-2" to="/profile">
                   <i className="fa fa-user me-2"></i>
                   Update Profile
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link className="dropdown-item py-2" to="/changepassword">
                   <i className="fa fa-lock me-2"></i>
                   Change Password
                 </Link>
-              </li>
+              </li> */}
               <li>
                 <hr className="dropdown-divider" />
               </li>

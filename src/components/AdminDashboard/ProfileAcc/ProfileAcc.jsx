@@ -376,7 +376,7 @@ const ProfileAcc = () => {
                         </div>
                       </div>
                       
-                      <div className="col-12">
+                      {/* <div className="col-12">
                         <div className="d-flex justify-content-between align-items-center py-2">
                           <div>
                             <div className="fw-semibold">Dark Mode</div>
@@ -393,7 +393,7 @@ const ProfileAcc = () => {
                             />
                           </div>
                         </div>
-                      </div>
+                      </div> */}
                       
                       {/* Language Dropdown */}
                       <div className="col-12">

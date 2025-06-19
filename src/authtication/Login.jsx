@@ -1,64 +1,119 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEnvelope, faLock, faEye } from "@fortawesome/free-solid-svg-icons";
 import "./Login.css";
-import { Link } from "react-router-dom";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
+
+  const roleCredentials = {
+    Admin: { email: "admin@gmail.com", password: "admin@123" },
+    Manager: { email: "manager@gmail.com", password: "manager@123" },
+    "Team Member": { email: "team@gmail.com", password: "team@123" },
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!role) {
+      alert("Please select a role.");
+      return;
+    }
+
+    // Save role and email in localStorage
+    localStorage.setItem("userRole", role);
+    localStorage.setItem("userEmail", email);
+
+    navigate("/dashboard");
+  };
+
+  const handleRoleSelect = (selectedRole) => {
+    setRole(selectedRole);
+    setEmail(roleCredentials[selectedRole].email);
+    setPassword(roleCredentials[selectedRole].password);
+  };
+
   return (
-    <div className="container-fluid login-page ">
-      <div className="row vh-100">
+    <div
+      className="login-page container"
+      style={{ justifyContent: "flex-start", marginBottom: "50px" }}
+    >
+      <div className="login-container row">
         {/* Left Panel */}
-        <div className="col-md-6 login-left d-flex flex-column justify-content-center align-items-center text-white">
-          <img
-            src="https://i.ibb.co/XZNS87Gm/icon-project-removebg-preview.png"
-            alt="Logo"
-            className="mb-4"
-            style={{ width: "150px", height: "120px" }}
-          />
-          <h1>Welcome Back!</h1>
-          <p className="px-4 text-center">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vitae
-            mauris volutpat.
-          </p>
+        <div className="col-md-6 login-left d-flex justify-content-center align-items-center">
+          <div className="login-left-content">
+            <img
+              src="https://i.ibb.co/XZNS87Gm/icon-project-removebg-preview.png"
+              alt="Logo"
+              className="login-logo"
+            />
+            <h1>Welcome Back!</h1>
+            <p>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
+              vitae mauris volutpat.
+            </p>
+          </div>
         </div>
 
         {/* Right Panel */}
         <div className="col-md-6 login-right d-flex justify-content-center align-items-center">
-          <form
-            className="login-form p-4 rounded w-100"
-            style={{ maxWidth: "400px" }}
-          >
-            <h4 className="mb-4 text-center">
-              Hello!
-              <br />
-              <span className="text-muted small">Sign in to your account</span>
-            </h4>
+          <div className="login-form-container">
+            <form className="login-form" onSubmit={handleSubmit}>
+              <h4 className="login-form-title">
+                Hello!
+                <br />
+                <span className="text-muted">Sign in to your account</span>
+              </h4>
 
-            <div className="form-group mb-3 position-relative">
-              <i class="fa-solid fa-envelope icon-left"></i>
-              <input
-                type="email"
-                className="form-control ps-5 "
-                placeholder="E-mail"
-                required
-              />
-            </div>
+              <div className="login-input-group">
+                <FontAwesomeIcon icon={faEnvelope} className="login-input-icon" />
+                <input
+                  type="email"
+                  className="form-control login-input"
+                  placeholder="E-mail"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
 
-            <div className="form-group mb-3 position-relative ">
-              <i class="fa-solid fa-lock icon-left"></i>
-              <input
-                type="password"
-                className="form-control ps-5"
-                placeholder="Password"
-                required
-              />
-            <i class="fa-solid fa-eye eye-icon "></i>
-            </div>
-            <Link to="/admin">
-              <button type="submit" className="btn w-100 btn-pri">
+              <div className="login-input-group">
+                <FontAwesomeIcon icon={faLock} className="login-input-icon" />
+                <input
+                  type="password"
+                  className="form-control login-input"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <FontAwesomeIcon icon={faEye} className="login-password-toggle" />
+              </div>
+
+              {/* Role Selection Buttons */}
+              <div className="d-flex flex-wrap justify-content-center mt-3 gap-2">
+                {Object.keys(roleCredentials).map((r) => (
+                  <button
+                    type="button"
+                    key={r}
+                    className={`btn btn-outline-secondary ${role === r ? "active" : ""}`}
+                    onClick={() => handleRoleSelect(r)}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+
+              <button type="submit" className="btn login-submit-btn mt-3">
                 SIGN IN
               </button>
-            </Link>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </div>
