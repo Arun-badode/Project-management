@@ -109,7 +109,7 @@ function Messages() {
       </header>
 
       {/* Main content */}
-      <main>
+      <div>
         {filteredMessages.length > 0 ? (
           <ul className="list-group">
             {filteredMessages.map((message) => (
@@ -146,7 +146,7 @@ function Messages() {
             <p>{searchTerm ? 'Try adjusting your search terms.' : 'Start a conversation with your team.'}</p>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock, faEye } from "@fortawesome/free-solid-svg-icons";
 import "./Login.css";
+import {  faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -10,6 +11,8 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const roleCredentials = {
     Admin: { email: "admin@gmail.com", password: "admin@123" },
@@ -29,7 +32,20 @@ const LoginPage = () => {
     localStorage.setItem("userRole", role);
     localStorage.setItem("userEmail", email);
 
-    navigate("/dashboard");
+    // Navigate based on role
+    switch (role) {
+      case "Admin":
+        navigate("/admin-dashboard");
+        break;
+      case "Manager":
+        navigate("/manager-dashboard");
+        break;
+      case "Team Member":
+        navigate("/team-dashboard");
+        break;
+      default:
+        navigate("/dashboard"); // fallback
+    }
   };
 
   const handleRoleSelect = (selectedRole) => {
@@ -52,7 +68,7 @@ const LoginPage = () => {
               alt="Logo"
               className="login-logo"
             />
-            <h1>Welcome Back!</h1>
+            <h1 className="text-white">Welcome Back!</h1>
             <p>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
               vitae mauris volutpat.
@@ -71,7 +87,10 @@ const LoginPage = () => {
               </h4>
 
               <div className="login-input-group">
-                <FontAwesomeIcon icon={faEnvelope} className="login-input-icon" />
+                <FontAwesomeIcon
+                  icon={faEnvelope}
+                  className="login-input-icon"
+                />
                 <input
                   type="email"
                   className="form-control login-input"
@@ -85,14 +104,20 @@ const LoginPage = () => {
               <div className="login-input-group">
                 <FontAwesomeIcon icon={faLock} className="login-input-icon" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   className="form-control login-input"
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
-                <FontAwesomeIcon icon={faEye} className="login-password-toggle" />
+                <span
+                  className="password-toggle-icon"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                </span>
               </div>
 
               {/* Role Selection Buttons */}
@@ -101,7 +126,9 @@ const LoginPage = () => {
                   <button
                     type="button"
                     key={r}
-                    className={`btn btn-outline-secondary ${role === r ? "active" : ""}`}
+                    className={`btn btn-outline-secondary ${
+                      role === r ? "active" : ""
+                    }`}
                     onClick={() => handleRoleSelect(r)}
                   >
                     {r}

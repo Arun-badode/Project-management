@@ -21,6 +21,10 @@ import TimeTracker from "./components/AdminDashboard/TimeTracker/TimeTracker";
 import ReportingAnalytics from "./components/AdminDashboard/ReportingAnalytics/ReportingAnalytics";
 import FileManagementSystem from "./components/AdminDashboard/FileManagementSystem/FileManagementSystem";
 import TaskDashboard from "./components/TeamMember/Taskmanagementdashboard/TaskDashboard";
+import Messages from "./components/TeamMember/Messages/Messages";
+import ActivitySummary from "./components/TeamMember/Activity/ActivitySummary";
+import ManagerDashboard from "./components/ProjectManager/ManagerDashboard/ManagerDashboard";
+import CreateProject from "./components/ProjectManager/CreateProject/CreateProject";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -65,7 +69,7 @@ function App() {
             <Route path="/" element={<LoginPage />} />
             {/*Admin Start */}
 
-            <Route path="/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/taskmanagement" element={<TaskManagement />} />
             <Route path="/usermanage" element={<UserManagement />} />
             <Route
@@ -94,9 +98,16 @@ function App() {
 
             {/* team Member */}
             
-            <Route path="/taskdashboard" element={<TaskDashboard/>} />
+            <Route path="/team-dashboard" element={<TaskDashboard/>} />
+            <Route path='/messages'element={<Messages/>}/>
+            <Route path="/activity" element={<ActivitySummary/>}/>
 
             {/* Add your other routes here */}
+
+            {/*manager project */}
+
+            <Route path="/manager-dashboard" element={<ManagerDashboard/>}/>
+            <Route path="/createproject" element={<CreateProject/>}/>
           </Routes>
         </div>
       </div>
