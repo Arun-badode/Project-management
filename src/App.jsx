@@ -20,6 +20,7 @@ import QAManagement from "./components/AdminDashboard/QAManagement/QAManagement"
 import TimeTracker from "./components/AdminDashboard/TimeTracker/TimeTracker";
 import ReportingAnalytics from "./components/AdminDashboard/ReportingAnalytics/ReportingAnalytics";
 import FileManagementSystem from "./components/AdminDashboard/FileManagementSystem/FileManagementSystem";
+import TaskDashboard from "./components/Taskmanagementdashboard/TaskDashboard";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -73,6 +74,8 @@ function App() {
                      <Route path="/reportinganalytics" element={<ReportingAnalytics/>}/>
                      <Route path="/filemanagementsystem" element={<FileManagementSystem/>}/>
                       <Route path="/qamanagement" element={<QAManagement/>}/>
+                       <Route path="/taskdashboard" element={<TaskDashboard/>}/>
+
 
 
 

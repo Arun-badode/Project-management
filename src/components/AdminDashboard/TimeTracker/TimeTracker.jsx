@@ -547,7 +547,7 @@ const TimeTracker = () => {
                                                 <td className="tt-user-cell">
                                                     <div className="tt-user-info">
                                                         <div className="tt-user-name fw-medium">{entry.user}</div>
-                                                        <small className="tt-mobile-info d-md-none text-muted">
+                                                        <small className="tt-mobile-info d-md-none text-white">
                                                             {entry.project} • {entry.task}
                                                         </small>
                                                     </div>

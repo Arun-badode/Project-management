@@ -155,16 +155,16 @@ const FileManagementSystem = () => {
         <div className="row g-3">
           {files.map((f, i) => (
             <div className="col-12 col-sm-6 col-md-4 col-lg-3 " key={i}>
-              <div className="card h-100 shadow-sm">
-                <div className="card-body text-center">
+              <div className="card bg-card h-100  shadow-sm">
+                <div className="card-body  text-center">
                   {lgIcon(f.extension)}
                   <h6 className="mt-3">{f.name}.{f.extension}</h6>
-                  <small className="text-muted d-block">
+                  <small className=" d-block">
                     {f.size} • {f.version}
                   </small>
-                  <small className="text-muted">{f.modified}</small>
+                  <small className="">{f.modified}</small>
                 </div>
-                <div className="card-footer d-flex justify-content-between align-items-center">
+                <div className="card-footer d-flex  justify-content-between align-items-center">
                   <span className="badge bg-light text-dark">{f.task}</span>
                   <div className="d-flex gap-2">
                     <FaDownload className="text-secondary" role="button" />

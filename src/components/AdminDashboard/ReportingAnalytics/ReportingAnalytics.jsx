@@ -118,7 +118,7 @@ const ReportingAnalytics = () => {
       
       <div className="row mb-3">
         <div className="col-md-4">
-          <select className="form-select analytics-filter-select">
+          <select className="form-select analytics-filter-select mb-1">
             <option>All Owners</option>
             <option>John Doe</option>
             <option>Jane Smith</option>
@@ -126,7 +126,7 @@ const ReportingAnalytics = () => {
           </select>
         </div>
         <div className="col-md-4 ">
-          <select className="form-select  analytics-filter-select">
+          <select className="form-select  analytics-filter-select mb-1 ">
             <option>All Priorities</option>
             <option>Critical</option>
             <option>High</option>
@@ -333,10 +333,10 @@ const ReportingAnalytics = () => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="analytics-report-title gradient-heading">Missed Deadline Report</h4>
         <div className="analytics-deadline-controls">
-          <button className="btn btn-outline-secondary btn-sm me-2 analytics-sort-btn">
+          <button className="btn btn-outline-secondary btn-sm me-2 mb-1 analytics-sort-btn">
             <Clock size={16} className="me-1" /> Sort by Delay
           </button>
-          <button className="btn btn-outline-primary btn-sm analytics-sort-btn">
+          <button className="btn btn-outline-primary btn-sm mb-1 analytics-sort-btn">
             <Users size={16} className="me-1" /> Sort by User
           </button>
         </div>
@@ -383,23 +383,26 @@ const ReportingAnalytics = () => {
     <div className="analytics-report-container">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="analytics-report-title gradient-heading">Productivity Charts</h4>
-        <div className="analytics-productivity-controls">
-          <div className="btn-group analytics-view-toggle" role="group">
+        <div className="analytics-productivity-controls ">
+          <div className="btn-group analytics-view-toggle d-flex mb-2 flex-column flex-sm-row w-100" role="group">
             <button 
-              className={`btn ${productivityView === 'daily' ? 'btn-primary' : 'btn-outline-primary'} analytics-view-btn`}
+              className={`btn ${productivityView === 'daily' ? 'btn-primary' : 'btn-outline-primary'} mb-2 analytics-view-btn flex-fill`}
               onClick={() => setProductivityView('daily')}
+              type="button"
             >
               Daily
             </button>
             <button 
-              className={`btn ${productivityView === 'weekly' ? 'btn-primary' : 'btn-outline-primary'} analytics-view-btn`}
+              className={`btn ${productivityView === 'weekly' ? 'btn-primary' : 'btn-outline-primary'} analytics-view-btn mb-2 flex-fill`}
               onClick={() => setProductivityView('weekly')}
+              type="button"
             >
               Weekly
             </button>
             <button 
-              className={`btn ${productivityView === 'monthly' ? 'btn-primary' : 'btn-outline-primary'} analytics-view-btn`}
+              className={`btn ${productivityView === 'monthly' ? 'btn-primary' : 'btn-outline-primary'} analytics-view-btn mb-2  flex-fill`}
               onClick={() => setProductivityView('monthly')}
+              type="button"
             >
               Monthly
             </button>
@@ -453,13 +456,13 @@ const ReportingAnalytics = () => {
               <div className="col-6">
                 <div className="analytics-stat-card bg-card">
                   <h5 className="text-primary">87%</h5>
-                  <small className="text-muted">Avg Productivity</small>
+                  <small className="">Avg Productivity</small>
                 </div>
               </div>
               <div className="col-6">
                 <div className="analytics-stat-card   bg-card">
                   <h5 className="text-success">72%</h5>
-                  <small className="text-muted">Billable Hours</small>
+                  <small className="">Billable Hours</small>
                 </div>
               </div>
             </div>
@@ -558,10 +561,10 @@ const ReportingAnalytics = () => {
             <div className="card-header analytics-preview-header  bg-card d-flex justify-content-between align-items-center">
               <h6 className="mb-0"><TrendingUp size={16} className="me-2 " />Report Preview</h6>
               <div className="analytics-preview-controls">
-                <button className="btn btn-sm btn-outline-primary me-2 analytics-export-preview-btn">
+                <button className="btn btn-sm btn-outline-primary me-2 analytics-export-preview-btn mb-2">
                   <Download size={16} className="me-1" /> Export
                 </button>
-                <button className="btn btn-sm btn-primary analytics-refresh-btn">Refresh</button>
+                <button className="btn btn-sm btn-primary analytics-refresh-btn mb-2">Refresh</button>
               </div>
             </div>
             <div className="card-body bg-card">

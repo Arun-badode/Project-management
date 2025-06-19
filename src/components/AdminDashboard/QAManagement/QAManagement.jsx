@@ -280,12 +280,12 @@ const QAManagement = () => {
                             <div className="d-lg-none">
                                 {filteredTasks.map(task => (
                                     <div key={task.id} className="card mb-3">
-                                        <div className="card-body">
+                                        <div className="card-body bg-card">
                                             <div className="d-flex justify-content-between align-items-start mb-2">
                                                 <h6 className="card-title mb-0">{task.title}</h6>
                                                 <span className={`badge bg-${getStatusColor(task.status)}`}>{task.status}</span>
                                             </div>
-                                            <p className="card-text small text-muted mb-2">
+                                            <p className="card-text small  mb-2">
                                                 <strong>ID:</strong> {task.id} | <strong>Module:</strong> {task.module}
                                             </p>
                                             <div className="mb-2">
