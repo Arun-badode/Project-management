@@ -66,7 +66,7 @@ function App() {
             <Route path="/" element={<LoginPage />} />
             {/*Admin Start */}
 
-            <Route path="/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/taskmanagement" element={<TaskManagement />} />
             <Route path="/usermanage" element={<UserManagement />} />
             <Route
@@ -95,7 +95,7 @@ function App() {
 
             {/* team Member */}
             
-            <Route path="/taskdashboard" element={<TaskDashboard/>} />
+            <Route path="/team-dashboard" element={<TaskDashboard/>} />
 
 
             {/* productivity */}

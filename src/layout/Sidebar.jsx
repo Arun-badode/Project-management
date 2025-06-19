@@ -27,13 +27,13 @@ const Sidebar = ({ collapsed }) => {
             <>
               <li
                 className={`menu-item ${
-                  isActive("/dashboard") ? "active" : ""
+                  isActive("/admin-dashboard") ? "active" : ""
                 }`}
               >
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("/dashboard");
+                    navigate("/admin-dashboard");
                     menuItemClick();
                   }}
                 >
@@ -245,11 +245,126 @@ const Sidebar = ({ collapsed }) => {
           )}
 
           {/* Manager Only */}
-          {role === "Manager" && <></>}
+          {role === "Manager" && <>
+          
+           <li
+                className={`menu-item ${
+                  isActive("/team-dashboard") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/team-dashboard");
+                    menuItemClick();
+                  }}
+                >
+                 <i className="fa-solid fa-compass"></i>
+                  <span className="menu-text">Dashboard</span>
+                </div>
+              </li>
+              <li
+                className={`menu-item ${
+                  isActive("/team-dashboard") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/team-dashboard");
+                    menuItemClick();
+                  }}
+                >
+                  <i class="fa-solid fa-address-card"></i>
+                  <span className="menu-text">Assigned Projects</span>
+                </div>
+              </li>
+              <li
+                className={`menu-item ${
+                  isActive("/team-dashboard") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/team-dashboard");
+                    menuItemClick();
+                  }}
+                >
+                  <i class="fa-solid fa-circle-plus"></i>
+                  <span className="menu-text">Create Project</span>
+                </div>
+              </li>
+              <li
+                className={`menu-item ${
+                  isActive("/team-dashboard") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/team-dashboard");
+                    menuItemClick();
+                  }}
+                >
+                 <i class="fa-solid fa-bell"></i>
+                  <span className="menu-text">Task Requests</span>
+                </div>
+              </li>
+              <li
+                className={`menu-item ${
+                  isActive("/team-dashboard") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/team-dashboard");
+                    menuItemClick();
+                  }}
+                >
+                  <i class="fa-solid fa-chart-line"></i>
+                  <span className="menu-text">Resource Workload</span>
+                </div>
+              </li>
+              <li
+                className={`menu-item ${
+                  isActive("/team-dashboard") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/team-dashboard");
+                    menuItemClick();
+                  }}
+                >
+                 <i class="fa-solid fa-comments"></i>
+                  <span className="menu-text">Collaboration</span>
+                </div>
+              </li>
+          
+          </>}
 
           {/* Team Member Only */}
           {role === "Team Member" && (
             <>
+              <li
+                className={`menu-item ${
+                  isActive("/team-dashboard") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/team-dashboard");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-compass"></i>
+                  <span className="menu-text">Dashboard</span>
+                </div>
+              </li>
               <li
                 className={`menu-item ${
                   isActive("/taskdashboard") ? "active" : ""
@@ -262,8 +377,72 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
-                  <i className="fa-solid fa-gear"></i>
-                  <span className="menu-text">Dashboard</span>
+                  <i class="fa-solid fa-list"></i>
+                  <span className="menu-text">My Tasks</span>
+                </div>
+              </li>
+              <li
+                className={`menu-item ${
+                  isActive("/taskdashboard") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("taskdashboard");
+                    menuItemClick();
+                  }}
+                >
+                  <i class="fa-solid fa-calendar-days"></i>
+                  <span className="menu-text">Attendance</span>
+                </div>
+              </li>
+              <li
+                className={`menu-item ${
+                  isActive("/taskdashboard") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("taskdashboard");
+                    menuItemClick();
+                  }}
+                >
+                 <i class="fa-solid fa-chart-line"></i>   
+                  <span className="menu-text">Productivity</span>
+                </div>
+              </li>
+              <li
+                className={`menu-item ${
+                  isActive("/taskdashboard") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("taskdashboard");
+                    menuItemClick();
+                  }}
+                >
+                  <i class="fa-solid fa-clock-rotate-left"></i>
+                  <span className="menu-text">Activity</span>
+                </div>
+              </li>
+              <li
+                className={`menu-item ${
+                  isActive("/taskdashboard") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("taskdashboard");
+                    menuItemClick();
+                  }}
+                >
+                  <i class="fa-solid fa-comment"></i>
+                  <span className="menu-text">Messaging</span>
                 </div>
               </li>
 

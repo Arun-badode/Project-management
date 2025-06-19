@@ -165,3 +165,14 @@
     max-width: 90%;
   }
 }
+.password-toggle-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #777;
+}
+
+.login-input-group {
+  position: relative;
+}
