@@ -249,11 +249,11 @@ const Productivity = () => {
   ];
 
   return (
-    <div className="min-vh-100 bg-light bg-main py-4 ">
+    <div className="m">
       {/* Header Section */}
      
 
-      <main className="container-fluid" style={{ maxWidth: 1000 }} >
+      <div className="container-fluid"  >
          <header className="mb-4">
           <h1 className="gradient-heading">Productivity</h1>
           <p className="text-white">
@@ -261,11 +261,11 @@ const Productivity = () => {
           </p>
         </header>
         {/* Filter Controls */}
-        <div className="mb-4 bg-white rounded shadow-sm p-3">
-          <div className="row gy-2 align-items-center">
-            <div className="col-12 col-md-4">
+        <div className="mb-4 bg-card rounded shadow-sm p-3">
+          <div className="row gy-2  align-items-center">
+            <div className="col-12  col-md-4">
               <div className="d-flex flex-column flex-sm-row align-items-center gap-2">
-                <span className="fw-semibold text-secondary small">Time Period:</span>
+                <span className="fw-semibold  small">Time Period:</span>
                 <div className="btn-group w-100" role="group">
                   {['Day', 'Week', 'Month'].map((period) => (
                     <button
@@ -303,13 +303,13 @@ const Productivity = () => {
         <div className="row g-3 mb-4">
           {summaryCards.map((card, index) => (
             <div key={index} className="col-12 col-sm-6 col-lg-3">
-              <div className="bg-white rounded shadow-sm p-3 h-100">
+              <div className="bg-card rounded shadow-sm p-3 h-100">
                 <div className="d-flex align-items-center">
                   <div className={`rounded-circle bg-${card.color}-subtle d-flex align-items-center justify-content-center me-3`} style={{ width: 48, height: 48 }}>
                     <i className={`bi ${card.icon} text-${card.color} fs-4`}></i>
                   </div>
                   <div>
-                    <div className="text-secondary small">{card.title}</div>
+                    <div className=" small">{card.title}</div>
                     <div className="h4 mb-0">{card.value}</div>
                     <span className={`small ${card.trendUp ? 'text-success' : 'text-danger'}`}>
                       <i className={`bi bi-arrow-${card.trendUp ? 'up' : 'down'} me-1`}></i>
@@ -327,7 +327,7 @@ const Productivity = () => {
                     aria-valuemax="100"
                   ></div>
                 </div>
-                <div className="text-muted small mt-2">{card.text}</div>
+                <div className=" small mt-2">{card.text}</div>
               </div>
             </div>
           ))}
@@ -336,11 +336,11 @@ const Productivity = () => {
         {/* Time Distribution Chart & Timeline */}
         <div className="row g-3 mb-4">
           <div className="col-12 col-lg-8">
-            <div className="bg-white rounded shadow-sm p-3 h-100">
+            <div className="bg-card rounded shadow-sm p-3 h-100">
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="mb-0">Time Distribution</h5>
                 <div className="dropdown">
-                  <button className="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                  <button className="btn btn-sm text-white dropdown-toggle" type="button" data-bs-toggle="dropdown">
                     View Details
                   </button>
                   <ul className="dropdown-menu dropdown-menu-end">
@@ -361,7 +361,7 @@ const Productivity = () => {
             </div>
           </div>
           <div className="col-12 col-lg-4">
-            <div className="bg-white rounded shadow-sm p-3 h-100">
+            <div className="bg-card rounded shadow-sm p-3 h-100">
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="mb-0">Today's Timeline</h5>
                 <button className="btn btn-sm btn-outline-primary">
@@ -395,8 +395,8 @@ const Productivity = () => {
 
         {/* Detailed Statistics */}
         <div className="row g-3">
-          <div className="col-12 col-md-6">
-            <div className="bg-white rounded shadow-sm p-3 h-100">
+          <div className="col-12 col-md-6 mb-5">
+            <div className="bg-card rounded shadow-sm p-3 h-100">
               <h5 className="mb-3">Weekly Productivity Trend</h5>
               <div 
                 ref={productivityTrendChartRef}
@@ -408,8 +408,8 @@ const Productivity = () => {
               ></div>
             </div>
           </div>
-          <div className="col-12 col-md-6">
-            <div className="bg-white rounded shadow-sm p-3 h-100">
+          <div className="col-12 col-md-6 mb-5">
+            <div className="bg-card rounded shadow-sm p-3 h-100">
               <h5 className="mb-3">Focus Time by Hour</h5>
               <div 
                 ref={focusTimeChartRef}
@@ -422,7 +422,7 @@ const Productivity = () => {
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };
