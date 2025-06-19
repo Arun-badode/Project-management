@@ -1,23 +1,20 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope, faLock, faEye } from "@fortawesome/free-solid-svg-icons";
-import "./Login.css";
+import { faEnvelope, faLock, faEye, faUser } from "@fortawesome/free-solid-svg-icons";
 import { faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import "./Login.css";
 
-const LoginPage = () => {
+const SignupPage = () => {
   const navigate = useNavigate();
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
-  const roleCredentials = {
-    Admin: { email: "admin@gmail.com", password: "admin@123" },
-    Manager: { email: "manager@gmail.com", password: "manager@123" },
-    "Team Member": { email: "team@gmail.com", password: "team@123" },
-  };
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -27,38 +24,21 @@ const LoginPage = () => {
       return;
     }
 
-    // Save role and email in localStorage
-    localStorage.setItem("userRole", role);
-    localStorage.setItem("userEmail", email);
-
-    // Navigate based on role
-    switch (role) {
-      case "Admin":
-        navigate("/admin-dashboard");
-        break;
-      case "Manager":
-        navigate("/manager-dashboard");
-        break;
-      case "Team Member":
-        navigate("/team-dashboard");
-        break;
-      default:
-        navigate("/dashboard"); // fallback
+    if (password !== confirmPassword) {
+      alert("Passwords don't match!");
+      return;
     }
-  };
 
-  const handleRoleSelect = (selectedRole) => {
-    setRole(selectedRole);
-    setEmail(roleCredentials[selectedRole].email);
-    setPassword(roleCredentials[selectedRole].password);
+    // Save user data in localStorage (in a real app, you would send this to a server)
+   
   };
 
   return (
     <div
       className="login-page container"
-      style={{ justifyContent: "flex-start", marginBottom: "50px" }}
+      style={{ justifyContent: "flex-start",}}
     >
-      <div className="login-container row">
+      <div className="login-container row" style={{height:"100%"}}>
         {/* Left Panel */}
         <div className="col-md-6 login-left d-flex justify-content-center align-items-center">
           <div className="login-left-content">
@@ -67,10 +47,9 @@ const LoginPage = () => {
               alt="Logo"
               className="login-logo"
             />
-            <h1 className="text-white">Welcome Back!</h1>
+            <h1 className="text-white">Join Us!</h1>
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
-              vitae mauris volutpat.
+              Create your account and start managing your projects efficiently with our platform.
             </p>
           </div>
         </div>
@@ -80,10 +59,25 @@ const LoginPage = () => {
           <div className="login-form-container">
             <form className="login-form" onSubmit={handleSubmit}>
               <h4 className="login-form-title">
-                Hello!
+                Register
                 <br />
-                <span className="text-muted">Sign in to your account</span>
+                <span className="text-muted">Create your account</span>
               </h4>
+
+              <div className="login-input-group">
+                <FontAwesomeIcon
+                  icon={faUser}
+                  className="login-input-icon"
+                />
+                <input
+                  type="text"
+                  className="form-control login-input"
+                  placeholder="Full Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
 
               <div className="login-input-group">
                 <FontAwesomeIcon
@@ -119,31 +113,33 @@ const LoginPage = () => {
                 </span>
               </div>
 
-              {/* Role Selection Buttons */}
-              <div className="d-flex flex-wrap justify-content-center mt-3 gap-2">
-                {Object.keys(roleCredentials).map((r) => (
-                  <button
-                    type="button"
-                    key={r}
-                    className={`btn btn-outline-secondary ${
-                      role === r ? "active" : ""
-                    }`}
-                    onClick={() => handleRoleSelect(r)}
-                  >
-                    {r}
-                  </button>
-                ))}
+              <div className="login-input-group">
+                <FontAwesomeIcon icon={faLock} className="login-input-icon" />
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  className="form-control login-input"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+                <span
+                  className="password-toggle-icon"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
+                </span>
               </div>
-
               <button type="submit" className="btn login-submit-btn mt-3">
-                LOGIN IN
+                SIGN UP
               </button>
-               <div className="text-center mt-3">
+
+              <div className="text-center mt-3">
                 <p className="text-muted">
-                  Already have an account? <a href="/singup" style={{ color: "#6e8efb" }}>sing up</a>
+                  Already have an account? <a href="/" style={{ color: "#6e8efb" }}>Login</a>
                 </p>
               </div>
-              
             </form>
           </div>
         </div>
@@ -152,4 +148,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default SignupPage;

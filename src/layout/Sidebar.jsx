@@ -20,7 +20,7 @@ const Sidebar = ({ collapsed }) => {
 
   return (
     <div className={`sidebar-container ${collapsed ? "collapsed" : ""}`}>
-      <div className="sidebar bg-card">
+      <div className="sidebar " >
         <ul className="menu">
           {/* Admin Only */}
           {role === "Admin" && (
@@ -245,9 +245,9 @@ const Sidebar = ({ collapsed }) => {
           )}
 
           {/* Manager Only */}
-          {role === "Manager" && <>
-          
-           <li
+          {role === "Manager" && (
+            <>
+              <li
                 className={`menu-item ${
                   isActive("/team-dashboard") ? "active" : ""
                 }`}
@@ -259,7 +259,7 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
-                 <i className="fa-solid fa-compass"></i>
+                  <i className="fa-solid fa-compass"></i>
                   <span className="menu-text">Dashboard</span>
                 </div>
               </li>
@@ -307,7 +307,7 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
-                 <i class="fa-solid fa-bell"></i>
+                  <i class="fa-solid fa-bell"></i>
                   <span className="menu-text">Task Requests</span>
                 </div>
               </li>
@@ -339,12 +339,12 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
-                 <i class="fa-solid fa-comments"></i>
+                  <i class="fa-solid fa-comments"></i>
                   <span className="menu-text">Collaboration</span>
                 </div>
               </li>
-          
-          </>}
+            </>
+          )}
 
           {/* Team Member Only */}
           {role === "Team Member" && (
@@ -365,11 +365,7 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Dashboard</span>
                 </div>
               </li>
-              <li
-                className={`menu-item ${
-                  isActive("/task") ? "active" : ""
-                }`}
-              >
+              <li className={`menu-item ${isActive("/task") ? "active" : ""}`}>
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
@@ -409,7 +405,7 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
-                 <i class="fa-solid fa-chart-line"></i>   
+                  <i class="fa-solid fa-chart-line"></i>
                   <span className="menu-text">Productivity</span>
                 </div>
               </li>
@@ -445,7 +441,6 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Messaging</span>
                 </div>
               </li>
-             
             </>
           )}
 
