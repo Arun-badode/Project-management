@@ -156,14 +156,14 @@ const Assigned = () => {
   };
 
   return (
-    <div className="min-vh-100 bg-main">
+    <div className=" bg-main">
           <h1 className="h4 mb-2 mb-md-0 fw-bold gradient-heading ms-3 mt-3  ">Assigned Projects</h1>
       {/* Header */}
-      <header className="bg-white shadow-sm bg-card ">
-        <Container>
-          <div className="d-flex flex-column  flex-md-row align-items-center justify-content-between py-3">
+      <header className=" ">
+        <Container className='bg-card '>
+          <div className="d-flex flex-column  flex-md-row align-items-end justify-content-end py-3">
           
-            <div className="d-flex  align-items-center gap-2">
+            <div className="d-flex  align-items-end justify-content-end gap-2">
               <Button 
                 variant="outline-secondary" 
                 onClick={() => setShowFilters(!showFilters)}
@@ -355,13 +355,13 @@ const Assigned = () => {
       )}
 
       {/* Floating back button */}
-      <Button 
+      {/* <Button 
         variant="light" 
         className="position-fixed bottom-0 start-0 m-3 d-flex align-items-center shadow"
       >
         <ChevronLeft className="me-1" />
         Back to Dashboard
-      </Button>
+      </Button> */}
 
       {/* Add Project Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered>

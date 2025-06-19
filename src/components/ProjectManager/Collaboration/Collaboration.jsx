@@ -158,7 +158,7 @@ function Collaboration() {
         <div>
             <div className="container-fluid bg-card">
                 {/* Header */}
-                <header className=" border-bottom px-4 py-3 d-flex justify-content-between align-items-center shadow-sm">
+                {/* <header className=" border-bottom px-4 py-3 d-flex justify-content-between align-items-center shadow-sm">
                     <div className="d-flex align-items-center">
                         <button className="btn btn-light p-2 rounded-circle">
                             <i className="fas fa-bars text-gray-600"></i>
@@ -187,7 +187,7 @@ function Collaboration() {
                             
                         </div>
                     </div>
-                </header>
+                </header> */}
 
                 {/* Main Content */}
                 <div className="d-flex">
