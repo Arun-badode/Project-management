@@ -103,8 +103,8 @@ const ReportingAnalytics = () => {
   };
 
   const renderProjectStatusReport = () => (
-    <div className="analytics-report-container ">
-      <div className="d-flex justify-content-between  align-items-center mb-4">
+    <div className=" bg-card ">
+      <div className="d-flex justify-content-between   align-items-center mb-4 bg-card">
         <h4 className="analytics-report-title gradient-heading">Project Status Report</h4>
         <div className="analytics-export-buttons">
           <button className="btn btn-outline-primary btn-sm me-2 analytics-export-btn" onClick={exportToPDF}>
@@ -653,8 +653,8 @@ const ReportingAnalytics = () => {
         </div>
       </div>
 
-      <div className="row ">
-        <div className="col-lg-2   col-md-3 mb-4">
+      <div className="row  ">
+        <div className="col-lg-2      col-md-3 mb-4">
           <div className="analytics-sidebar bg-card ">
             <div className="list-group   analytics-nav-tabs">
               {reportTabs.map(tab => {
@@ -685,12 +685,12 @@ const ReportingAnalytics = () => {
 
       <style jsx>{`
         .analytics-dashboard-container {
-          background-color: #f8f9fa;
+          
           min-height: 100vh;
         }
         
         .analytics-dashboard-header {
-          background: white;
+       
           padding: 1.5rem;
           border-radius: 0.5rem;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -707,7 +707,7 @@ const ReportingAnalytics = () => {
         }
         
         .analytics-sidebar {
-          background: white;
+        
           border-radius: 0.5rem;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
           padding: 1rem;
@@ -730,7 +730,7 @@ const ReportingAnalytics = () => {
         }
         
         .analytics-main-content {
-          background: white;
+          
           border-radius: 0.5rem;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
           padding: 2rem;
