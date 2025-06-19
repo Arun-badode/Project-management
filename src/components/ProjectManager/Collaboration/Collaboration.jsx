@@ -156,9 +156,9 @@ function Collaboration() {
 
     return (
         <div>
-            <div className="container-fluid">
+            <div className="container-fluid bg-card">
                 {/* Header */}
-                <header className="bg-white border-bottom px-4 py-3 d-flex justify-content-between align-items-center shadow-sm">
+                <header className=" border-bottom px-4 py-3 d-flex justify-content-between align-items-center shadow-sm">
                     <div className="d-flex align-items-center">
                         <button className="btn btn-light p-2 rounded-circle">
                             <i className="fas fa-bars text-gray-600"></i>
@@ -168,8 +168,8 @@ function Collaboration() {
                             <h1 className="ml-2 h4 text-gray-800">TeamCollab</h1>
                         </div>
                     </div>
-                    <div className="d-flex align-items-center">
-                        <span className="text-gray-600">{currentDateTime}</span>
+                    <div className="d-flex align-items-center gap-3">
+                        <span className="text-gray-600 "> {currentDateTime} </span>
                         <button
                             onClick={handleSendMessage}
                             className="btn btn-outline-secondary ml-3"
@@ -178,12 +178,13 @@ function Collaboration() {
                             <i className="fas fa-sync-alt"></i>
                         </button>
                         <div className="ml-3 position-relative">
+                          
                             <input
                                 type="text"
                                 placeholder="Search messages and files..."
                                 className="form-control form-control-sm"
                             />
-                            <i className="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-gray-400"></i>
+                            
                         </div>
                     </div>
                 </header>
@@ -191,7 +192,7 @@ function Collaboration() {
                 {/* Main Content */}
                 <div className="d-flex">
                     {/* Left Sidebar */}
-                    <div className="col-3 bg-white border-right p-3">
+                    <div className="col-3  border-right p-3">
                         {/* Filters */}
                         <div className="mb-3">
                             {['All', 'Unread', 'Mentions', 'Files'].map(filter => (
@@ -200,7 +201,7 @@ function Collaboration() {
                                     onClick={() => setActiveFilter(filter)}
                                     className={`btn btn-sm ${activeFilter === filter ? 'btn-primary' : 'btn-light'} mb-2 w-100`}
                                 >
-                                    {filter} {filter === 'Unread' && <span className="badge badge-pill badge-primary">2</span>}
+                                    {filter} {filter === 'Unread' && <span className="badge badge-pill text-black">2</span>}
                                 </button>
                             ))}
                         </div>
@@ -219,7 +220,7 @@ function Collaboration() {
                     </div>
 
                     {/* Right Content Area */}
-                    <div className="col-9">
+                    <div className="col-9 bg-card">
                         {/* Thread Header */}
                         <div className="p-4 border-bottom">
                             <h3>{currentThread.title}</h3>
@@ -227,15 +228,15 @@ function Collaboration() {
                         </div>
 
                         {/* Messages */}
-                        <div className="p-4">
+                        <div className="p-4 bg-card">
                             {messages.map((message, index) => (
-                                <div key={index} className={`mb-4 ${message.sender === 'You' ? 'text-right' : ''}`}>
+                                <div key={index} className={`mb-4 bg-card ${message.sender === 'You' ? 'text-right' : ''}`}>
                                     <div className="d-flex">
                                         {message.sender !== 'You' && (
                                             <img src={message.avatar} alt={message.sender} className="rounded-circle me-3" width="40" 
                                             style={{width:"40px",height:"40px"}} />
                                         )}
-                                        <div className="bg-light p-2 rounded">
+                                        <div className="p-2 rounded">
                                             <p><strong>{message.sender}</strong> <small>{message.timestamp}</small></p>
                                             <p>{message.content}</p>
                                             {message.reactions.length > 0 && (
@@ -253,19 +254,19 @@ function Collaboration() {
 
                         {/* Typing Indicator */}
                         {isTyping && (
-                            <div className="d-flex">
+                            <div className="d-flex bg-card">
                                 <div className="spinner-border text-primary mr-2" role="status"></div>
                                 <p>Someone is typing...</p>
                             </div>
                         )}
 
                         {/* Message Input */}
-                        <div className="input-group mt-3">
+                        <div className="input-group mb-3 bg-card">
                             <textarea
                                 value={newMessage}
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                className="form-control"
+                                className="form-control bg-card placeholder-white"
                                 rows="3"
                                 placeholder="Type your message here..."
                             ></textarea>

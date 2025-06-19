@@ -365,10 +365,10 @@ const Assigned = () => {
 
       {/* Add Project Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered>
-        <Modal.Header closeButton>
+        <Modal.Header className='bg-card' closeButton>
           <Modal.Title>Add New Project</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body className="bg-card">
           <Form>
             <Form.Group className="mb-3">
               <Form.Label>Project Name *</Form.Label>
@@ -377,6 +377,7 @@ const Assigned = () => {
                 value={newProject.name}
                 onChange={(e) => setNewProject({...newProject, name: e.target.value})}
                 placeholder="Enter project name"
+                
               />
             </Form.Group>
             
@@ -435,7 +436,7 @@ const Assigned = () => {
             </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
+        <Modal.Footer className='bg-card'>
           <Button variant="secondary" onClick={() => setShowAddModal(false)}>
             Cancel
           </Button>

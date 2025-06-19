@@ -71,7 +71,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
 
   return (
     <div
-      className="container-fluid bg-light py-3"
+      className="container-fluid bg-card py-3"
       style={{ minHeight: "100vh" }}
     >
       {/* Header Section */}
@@ -128,11 +128,11 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
         <div className="row mb-4">
           {/* Total Leads */}
           <div className="col-md-6 col-lg-3 mb-4">
-            <div className="card h-100 shadow-sm">
+            <div className="card h-100 shadow-sm bg-card">
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
-                    <p className="text-muted small mb-1">Total Leads</p>
+                    <p className=" small mb-1">Total Leads</p>
                     <p className="h3 fw-bold mb-1">1,284</p>
                   </div>
                   <div className="p-2 bg-primary bg-opacity-10 rounded">
@@ -143,7 +143,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                   <span className="text-success small fw-bold d-flex align-items-center">
                     <i className="fas fa-arrow-up me-1"></i> 12.5%
                   </span>
-                  <span className="text-muted small ms-2">vs last month</span>
+                  <span className=" small ms-2">vs last month</span>
                 </div>
                 <div className="progress mt-2" style={{ height: "6px" }}>
                   <div
@@ -157,11 +157,11 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
 
           {/* Conversion Rate */}
           <div className="col-md-6 col-lg-3 mb-4">
-            <div className="card h-100 shadow-sm">
+            <div className="card h-100 shadow-sm bg-card">
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
-                    <p className="text-muted small mb-1">Conversion Rate</p>
+                    <p className=" small mb-1">Conversion Rate</p>
                     <p className="h3 fw-bold mb-1">24.8%</p>
                   </div>
                   <div className="p-2 bg-success bg-opacity-10 rounded">
@@ -172,7 +172,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                   <span className="text-success small fw-bold d-flex align-items-center">
                     <i className="fas fa-arrow-up me-1"></i> 3.2%
                   </span>
-                  <span className="text-muted small ms-2">vs last month</span>
+                  <span className="small ms-2">vs last month</span>
                 </div>
                 <div className="progress mt-2" style={{ height: "6px" }}>
                   <div
@@ -186,11 +186,11 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
 
           {/* Revenue Generated */}
           <div className="col-md-6 col-lg-3 mb-4">
-            <div className="card h-100 shadow-sm">
+            <div className="card h-100 shadow-sm bg-card">
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
-                    <p className="text-muted small mb-1">Revenue Generated</p>
+                    <p className="small mb-1">Revenue Generated</p>
                     <p className="h3 fw-bold mb-1">$342,856</p>
                   </div>
                   <div className="p-2 bg-info bg-opacity-10 rounded">
@@ -201,7 +201,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                   <span className="text-success small fw-bold d-flex align-items-center">
                     <i className="fas fa-arrow-up me-1"></i> 8.7%
                   </span>
-                  <span className="text-muted small ms-2">vs last month</span>
+                  <span className=" small ms-2">vs last month</span>
                 </div>
                 <div className="progress mt-2" style={{ height: "6px" }}>
                   <div
@@ -215,11 +215,11 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
 
           {/* Active Projects */}
           <div className="col-md-6 col-lg-3 mb-4">
-            <div className="card h-100 shadow-sm">
+            <div className="card h-100 shadow-sm bg-card">
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
-                    <p className="text-muted small mb-1">Active Projects</p>
+                    <p className=" small mb-1">Active Projects</p>
                     <p className="h3 fw-bold mb-1">32</p>
                   </div>
                   <div className="p-2 bg-purple bg-opacity-10 rounded">
@@ -230,7 +230,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                   <span className="text-danger small fw-bold d-flex align-items-center">
                     <i className="fas fa-arrow-down me-1"></i> 2.3%
                   </span>
-                  <span className="text-muted small ms-2">vs last month</span>
+                  <span className="small ms-2">vs last month</span>
                 </div>
                 <div className="progress mt-2" style={{ height: "6px" }}>
                   <div
@@ -246,16 +246,16 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
         <div className="row">
           {/* Project Status Section */}
           <div className="col-lg-8 mb-4">
-            <div className="card shadow-sm">
-              <div className="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
+            <div className="card shadow-sm bg-card">
+              <div className="card-header border-bottom d-flex justify-content-between align-items-center py-3">
                 <h5 className="mb-0">Project Status</h5>
                 <div className="d-flex align-items-center">
-                  <button className="btn btn-link text-primary me-3 small">
+                  <button className="btn btn-primary me-3 small">
                     View All
                   </button>
                   <div className="dropdown">
                     <button
-                      className="btn btn-sm btn-outline-secondary dropdown-toggle"
+                      className="btn btn-secondary dropdown-toggle"
                       type="button"
                       id="filterDropdown"
                       data-bs-toggle="dropdown"
@@ -263,7 +263,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                       Filter
                     </button>
                     <ul
-                      className="dropdown-menu"
+                      className="dropdown-menu "
                       aria-labelledby="filterDropdown"
                     >
                       <li>
@@ -286,7 +286,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                 </div>
               </div>
               <div className="table-responsive">
-                <table className="table table-hover mb-0">
+                <table className="table table-hover mb-0 table-gradient-bg">
                   <thead className="table-light">
                     <tr>
                       <th scope="col">Project</th>
@@ -530,10 +530,10 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
 
           {/* Recent Activities */}
           <div className="col-lg-4 mb-4">
-            <div className="card shadow-sm h-100">
-              <div className="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
+            <div className="card shadow-sm h-100 bg-card">
+              <div className="card-header  border-bottom d-flex justify-content-between align-items-center py-3">
                 <h5 className="mb-0">Recent Activities</h5>
-                <button className="btn btn-link text-primary small">
+                <button className="btn btn-primary small">
                   View All
                 </button>
               </div>
@@ -634,8 +634,8 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
         </div>
 
         {/* Lead Analytics */}
-        <div className="card shadow-sm mt-4">
-          <div className="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-3">
+        <div className="card shadow-sm mt-4 bg-card">
+          <div className="card-header border-bottom d-flex justify-content-between align-items-center py-3">
             <h5 className="mb-0">Lead Analytics</h5>
             <div className="d-flex align-items-center">
               <div className="dropdown me-3">
