@@ -119,14 +119,14 @@ function TaskRequest() {
    };
 
   return (
-    <div className="min-vh-100 bg-light">
+    <div className="min-vh-100 mt-0 bg-card">
       <div className="container py-4">
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h1 className="h3 mb-0">Task Reassignment Requests</h1>
           <div className="dropdown">
             <button 
-              className="btn btn-outline-secondary dropdown-toggle"
+              className="btn btn-secondary dropdown-toggle"
               type="button"
               id="filterDropdown"
               data-bs-toggle="dropdown"
@@ -189,7 +189,7 @@ function TaskRequest() {
             <div className="row g-4">
               {filteredRequests.map(request => (
                 <div key={request.id} className="col-md-6 col-lg-4">
-                  <div className="card h-100">
+                  <div className="card h-100 bg-card">
                     <div className="card-body">
                       {/* Header with requester info and date */}
                       <div className="d-flex justify-content-between align-items-start mb-3">
@@ -203,7 +203,7 @@ function TaskRequest() {
                           />
                           <div>
                             <h5 className="mb-0">{request.requester.name}</h5>
-                            <small className="text-muted">{formatDate(request.requestDate)}</small>
+                            <small className="">{formatDate(request.requestDate)}</small>
                           </div>
                         </div>
                         <div>
@@ -220,14 +220,14 @@ function TaskRequest() {
                       {/* Task details */}
                       <div className="mb-3">
                         <h6 className="card-title mb-1">{request.task.name}</h6>
-                        <p className="card-text text-muted small">{request.task.description}</p>
+                        <p className="card-text  small">{request.task.description}</p>
                       </div>
                       
                       {/* Reason (only shown when details are expanded) */}
                       {showDetails === request.id && (
-                        <div className="mb-3 bg-light p-3 rounded">
+                        <div className="mb-3  p-3 rounded">
                           <h6 className="small fw-bold mb-1">Reason for reassignment:</h6>
-                          <p className="small text-muted mb-0">{request.reason}</p>
+                          <p className="small  mb-0">{request.reason}</p>
                         </div>
                       )}
                       
@@ -235,7 +235,7 @@ function TaskRequest() {
                       <div className="d-flex flex-column">
                         <div className="d-flex justify-content-between mb-2">
                           <button
-                            className="btn btn-link p-0 text-primary small"
+                            className="btn btn-primary p-2  small"
                             onClick={() => setShowDetails(showDetails === request.id ? null : request.id)}
                           >
                             {showDetails === request.id ? 'Hide Details' : 'View Details'}
@@ -243,7 +243,7 @@ function TaskRequest() {
                         </div>
                         
                         {request.status === 'pending' && (
-                          <div className="d-grid gap-2 d-md-flex">
+                          <div className="d-grid gap-2 d-md-flex bg-card">
                             <button
                               className="btn btn-primary me-md-2 flex-grow-1"
                               onClick={() => handleApprove(request.id)}
@@ -257,7 +257,7 @@ function TaskRequest() {
                               Approve
                             </button>
                             <button
-                              className="btn btn-outline-secondary flex-grow-1"
+                              className="btn btn-secondary flex-grow-1"
                               onClick={() => handleReject(request.id)}
                               disabled={isLoading[request.id]?.approve || isLoading[request.id]?.reject}
                             >
@@ -292,16 +292,16 @@ function TaskRequest() {
               ))}
             </div>
           ) : (
-            <div className="card text-center p-5">
-              <div className="mx-auto bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style={{width: '6rem', height: '6rem'}}>
-                <i className="fas fa-inbox text-muted fs-3"></i>
+            <div className="card text-center p-5 bg-card">
+              <div className="mx-auto  rounded-circle d-flex align-items-center justify-content-center mb-3 bg-card" style={{width: '6rem', height: '6rem'}}>
+                <i className="fas fa-inbox  fs-3"></i>
               </div>
               <h3 className="h5 mb-2">No requests found</h3>
-              <p className="text-muted mb-4">There are no task reassignment requests matching your current filter.</p>
+              <p className=" mb-4">There are no task reassignment requests matching your current filter.</p>
               {filter !== 'all' && (
                 <button 
                   onClick={() => setFilter('all')}
-                  className="btn btn-outline-secondary"
+                  className="btn btn-secondary"
                 >
                   <i className="fas fa-sync-alt me-2"></i>
                   Show All Requests
