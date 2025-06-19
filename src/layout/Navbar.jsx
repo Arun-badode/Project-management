@@ -7,13 +7,13 @@ const Navbar = ({ toggleSidebar }) => {
       <div className="container-fluid px-3">
         {/* Brand and Toggle Button */}
         <div className="d-flex align-items-center">
-          <a className="navbar-brand fw-bold text-white me-3" href="#" style={{ fontSize: "24px" }}>
-            P.M.
+          <a className="navbar-brand fw-bold text-white me-3" href="#" style={{ fontSize: "19px" }}>
+            Project Management
           </a>
           <button 
             className="btn btn-link text-white p-0 d-lg-inline-block"
             onClick={toggleSidebar}
-            style={{ fontSize: "25px", textDecoration: "none" }}
+            style={{ fontSize: "20px", textDecoration: "none" }}
             aria-label="Toggle Sidebar"
           >
             <i className="fa fa-bars"></i>

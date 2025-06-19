@@ -254,11 +254,11 @@ function TaskRequest() {
 
     return (
         <div className="container">
-            <h1>Task Management</h1>
+            <h1 className='text-white'>Task Management</h1>
 
-            <div className="list-group">
+            <div className="list-group ">
                 {tasks.map(task => (
-                    <div key={task.id} className="list-group-item d-flex justify-content-between align-items-center">
+                    <div key={task.id} className="list-group-item d-flex justify-content-between align-items-center bg-card">
                         <div className="flex-1">
                             <h5 className="mb-1">{task.name}</h5>
                             <span className={`badge ${getStatusBadgeColor(task.status)}`}>{task.status}</span>
@@ -275,7 +275,7 @@ function TaskRequest() {
             {showCompleteModal && selectedTask && (
                 <div className="modal fade show" tabIndex={-1} style={{ display: 'block' }} aria-hidden="true">
                     <div className="modal-dialog">
-                        <div className="modal-content">
+                        <div className="modal-content bg-card">
                             <div className="modal-header">
                                 <h5 className="modal-title">Complete Task</h5>
                                 <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -316,9 +316,9 @@ function TaskRequest() {
 
             {/* Reassign Task Modal */}
             {showReassignModal && selectedTask && (
-                <div className="modal fade show" tabIndex={-1} style={{ display: 'block' }} aria-hidden="true">
+                <div className="modal fade show " tabIndex={-1} style={{ display: 'block' }} aria-hidden="true">
                     <div className="modal-dialog">
-                        <div className="modal-content">
+                        <div className="modal-content bg-card">
                             <div className="modal-header">
                                 <h5 className="modal-title">Request Reassignment</h5>
                                 <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
