@@ -252,7 +252,7 @@ function ResourceWorkload() {
         <div className="row mb-4">
           {/* Resource Distribution Chart */}
            <div className="col-lg-4 mb-3">
-            <div className="card h-100">
+            <div className="card h-100 bg-card">
                 <div className="card-body">
                     <h2 className="h5 mb-3">Resource Distribution</h2>
                     <div className="chart-container" style={{ position: 'relative', height: '300px' }}>
