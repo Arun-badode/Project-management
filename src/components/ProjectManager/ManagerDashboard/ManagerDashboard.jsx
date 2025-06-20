@@ -286,244 +286,249 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                 </div>
               </div>
               <div className="table-responsive">
-                <table className="table table-hover mb-0 table-gradient-bg">
-                  <thead className="table-light">
-                    <tr>
-                      <th scope="col">Project</th>
-                      <th scope="col">Progress</th>
-                      <th scope="col">Due Date</th>
-                      <th scope="col">Status</th>
-                      <th scope="col">Team</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <div className="bg-primary bg-opacity-10 rounded p-2 me-3">
-                            <i className="fas fa-building text-primary"></i>
-                          </div>
-                          <div>
-                            <div className="fw-bold">
-                              Enterprise CRM Implementation
-                            </div>
-                            <div className=" small">PRJ-2023-001</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <div
-                            className="progress flex-grow-1 me-2"
-                            style={{ height: "6px" }}
-                          >
-                            <div
-                              className="progress-bar bg-primary"
-                              style={{ width: "75%" }}
-                            ></div>
-                          </div>
-                          <span className="small">75%</span>
-                        </div>
-                      </td>
-                      <td>Jul 15, 2025</td>
-                      <td>
-                        <span className="badge bg-success bg-opacity-10 text-success">
-                          In Progress
-                        </span>
-                      </td>
-                      <td>
-                        <div className="d-flex">
-                          <img
-                            className="rounded-circle border border-white"
-                            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20business%20woman%20with%20short%20dark%20hair%2C%20neutral%20expression%2C%20corporate%20attire%2C%20studio%20lighting%2C%20plain%20background%2C%20high%20quality%20linkedin%20profile&width=50&height=50&seq=2&orientation=squarish"
-                            width="32"
-                            height="32"
-                            alt=""
-                          />
-                          <img
-                            className="rounded-circle border border-white ms-n2"
-                            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20middle%20aged%20business%20man%20with%20glasses%2C%20confident%20expression%2C%20formal%20business%20attire%2C%20neutral%20background%2C%20corporate%20portrait%20style&width=50&height=50&seq=3&orientation=squarish"
-                            width="32"
-                            height="32"
-                            alt=""
-                          />
-                          <img
-                            className="rounded-circle border border-white ms-n2"
-                            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20asian%20business%20professional%2C%20neutral%20expression%2C%20business%20casual%20attire%2C%20clean%20background%2C%20corporate%20portrait&width=50&height=50&seq=4&orientation=squarish"
-                            width="32"
-                            height="32"
-                            alt=""
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <div className="bg-info bg-opacity-10 rounded p-2 me-3">
-                            <i className="fas fa-chart-pie text-info"></i>
-                          </div>
-                          <div>
-                            <div className="fw-bold">
-                              Market Analysis Report
-                            </div>
-                            <div className=" small">PRJ-2023-008</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <div
-                            className="progress flex-grow-1 me-2"
-                            style={{ height: "6px" }}
-                          >
-                            <div
-                              className="progress-bar bg-info"
-                              style={{ width: "45%" }}
-                            ></div>
-                          </div>
-                          <span className="small">45%</span>
-                        </div>
-                      </td>
-                      <td>Aug 30, 2025</td>
-                      <td>
-                        <span className="badge bg-warning bg-opacity-10 text-warning">
-                          Pending
-                        </span>
-                      </td>
-                      <td>
-                        <div className="d-flex">
-                          <img
-                            className="rounded-circle border border-white"
-                            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20business%20woman%20with%20blonde%20hair%2C%20friendly%20smile%2C%20business%20casual%20attire%2C%20neutral%20background%2C%20high%20quality%20corporate%20portrait&width=50&height=50&seq=5&orientation=squarish"
-                            width="32"
-                            height="32"
-                            alt=""
-                          />
-                          <img
-                            className="rounded-circle border border-white ms-n2"
-                            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20middle%20aged%20business%20man%20with%20beard%2C%20serious%20expression%2C%20formal%20business%20attire%2C%20neutral%20background%2C%20corporate%20portrait%20style&width=50&height=50&seq=6&orientation=squarish"
-                            width="32"
-                            height="32"
-                            alt=""
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <div className="bg-success bg-opacity-10 rounded p-2 me-3">
-                            <i className="fas fa-mobile-alt text-success"></i>
-                          </div>
-                          <div>
-                            <div className="fw-bold">
-                              Mobile App Development
-                            </div>
-                            <div className=" small">PRJ-2023-012</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <div
-                            className="progress flex-grow-1 me-2"
-                            style={{ height: "6px" }}
-                          >
-                            <div
-                              className="progress-bar bg-success"
-                              style={{ width: "90%" }}
-                            ></div>
-                          </div>
-                          <span className="small">90%</span>
-                        </div>
-                      </td>
-                      <td>Jun 30, 2025</td>
-                      <td>
-                        <span className="badge bg-success bg-opacity-10 text-success">
-                          In Progress
-                        </span>
-                      </td>
-                      <td>
-                        <div className="d-flex">
-                          <img
-                            className="rounded-circle border border-white"
-                            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20tech%20professional%20with%20glasses%2C%20neutral%20expression%2C%20casual%20tech%20company%20attire%2C%20clean%20background%2C%20silicon%20valley%20style%20portrait&width=50&height=50&seq=7&orientation=squarish"
-                            width="32"
-                            height="32"
-                            alt=""
-                          />
-                          <img
-                            className="rounded-circle border border-white ms-n2"
-                            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20female%20software%20developer%2C%20confident%20expression%2C%20tech%20casual%20attire%2C%20neutral%20background%2C%20tech%20company%20portrait%20style&width=50&height=50&seq=8&orientation=squarish"
-                            width="32"
-                            height="32"
-                            alt=""
-                          />
-                          <div
-                            className="rounded-circle border border-white ms-n2 bg-light d-flex align-items-center justify-content-center"
-                            style={{ width: "32px", height: "32px" }}
-                          >
-                            <span className="small ">+2</span>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <div className="bg-purple bg-opacity-10 rounded p-2 me-3">
-                            <i className="fas fa-ad text-purple"></i>
-                          </div>
-                          <div>
-                            <div className="fw-bold">
-                              Digital Marketing Campaign
-                            </div>
-                            <div className=" small">PRJ-2023-015</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <div
-                            className="progress flex-grow-1 me-2"
-                            style={{ height: "6px" }}
-                          >
-                            <div
-                              className="progress-bar bg-purple"
-                              style={{ width: "100%" }}
-                            ></div>
-                          </div>
-                          <span className="small">100%</span>
-                        </div>
-                      </td>
-                      <td>Jun 10, 2025</td>
-                      <td>
-                        <span className="badge bg-secondary bg-opacity-10 text-secondary">
-                          Completed
-                        </span>
-                      </td>
-                      <td>
-                        <div className="d-flex">
-                          <img
-                            className="rounded-circle border border-white"
-                            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20marketing%20professional%20woman%2C%20creative%20expression%2C%20business%20casual%20attire%2C%20neutral%20background%2C%20marketing%20agency%20style%20portrait&width=50&height=50&seq=9&orientation=squarish"
-                            width="32"
-                            height="32"
-                            alt=""
-                          />
-                          <img
-                            className="rounded-circle border border-white ms-n2"
-                            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20creative%20director%2C%20stylish%20appearance%2C%20creative%20industry%20attire%2C%20clean%20background%2C%20advertising%20agency%20style%20portrait&width=50&height=50&seq=10&orientation=squarish"
-                            width="32"
-                            height="32"
-                            alt=""
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+               <table className="table table-hover mb-0 table-gradient-bg">
+  <thead className="table-light">
+    <tr>
+      <th scope="col">ID</th>
+      <th scope="col">Project</th>
+      <th scope="col">Progress</th>
+      <th scope="col">Due Date</th>
+      <th scope="col">Status</th>
+      <th scope="col">Team</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>
+        <div className="d-flex align-items-center">
+          <div className="bg-primary bg-opacity-10 rounded p-2 me-3">
+            <i className="fas fa-building text-primary"></i>
+          </div>
+          <div>
+            <div className="fw-bold">
+              Enterprise CRM Implementation
+            </div>
+            <div className=" small">PRJ-2023-001</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div className="d-flex align-items-center">
+          <div
+            className="progress flex-grow-1 me-2"
+            style={{ height: "6px" }}
+          >
+            <div
+              className="progress-bar bg-primary"
+              style={{ width: "75%" }}
+            ></div>
+          </div>
+          <span className="small">75%</span>
+        </div>
+      </td>
+      <td>Jul 15, 2025</td>
+      <td>
+        <span className="badge bg-success bg-opacity-10 text-success">
+          In Progress
+        </span>
+      </td>
+      <td>
+        <div className="d-flex">
+          <img
+            className="rounded-circle border border-white"
+            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20business%20woman%20with%20short%20dark%20hair%2C%20neutral%20expression%2C%20corporate%20attire%2C%20studio%20lighting%2C%20plain%20background%2C%20high%20quality%20linkedin%20profile&width=50&height=50&seq=2&orientation=squarish"
+            width="32"
+            height="32"
+            alt=""
+          />
+          <img
+            className="rounded-circle border border-white ms-n2"
+            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20middle%20aged%20business%20man%20with%20glasses%2C%20confident%20expression%2C%20formal%20business%20attire%2C%20neutral%20background%2C%20corporate%20portrait%20style&width=50&height=50&seq=3&orientation=squarish"
+            width="32"
+            height="32"
+            alt=""
+          />
+          <img
+            className="rounded-circle border border-white ms-n2"
+            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20asian%20business%20professional%2C%20neutral%20expression%2C%20business%20casual%20attire%2C%20clean%20background%2C%20corporate%20portrait&width=50&height=50&seq=4&orientation=squarish"
+            width="32"
+            height="32"
+            alt=""
+          />
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>
+        <div className="d-flex align-items-center">
+          <div className="bg-info bg-opacity-10 rounded p-2 me-3">
+            <i className="fas fa-chart-pie text-info"></i>
+          </div>
+          <div>
+            <div className="fw-bold">
+              Market Analysis Report
+            </div>
+            <div className=" small">PRJ-2023-008</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div className="d-flex align-items-center">
+          <div
+            className="progress flex-grow-1 me-2"
+            style={{ height: "6px" }}
+          >
+            <div
+              className="progress-bar bg-info"
+              style={{ width: "45%" }}
+            ></div>
+          </div>
+          <span className="small">45%</span>
+        </div>
+      </td>
+      <td>Aug 30, 2025</td>
+      <td>
+        <span className="badge bg-warning bg-opacity-10 text-warning">
+          Pending
+        </span>
+      </td>
+      <td>
+        <div className="d-flex">
+          <img
+            className="rounded-circle border border-white"
+            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20business%20woman%20with%20blonde%20hair%2C%20friendly%20smile%2C%20business%20casual%20attire%2C%20neutral%20background%2C%20high%20quality%20corporate%20portrait&width=50&height=50&seq=5&orientation=squarish"
+            width="32"
+            height="32"
+            alt=""
+          />
+          <img
+            className="rounded-circle border border-white ms-n2"
+            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20middle%20aged%20business%20man%20with%20beard%2C%20serious%20expression%2C%20formal%20business%20attire%2C%20neutral%20background%2C%20corporate%20portrait%20style&width=50&height=50&seq=6&orientation=squarish"
+            width="32"
+            height="32"
+            alt=""
+          />
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>
+        <div className="d-flex align-items-center">
+          <div className="bg-success bg-opacity-10 rounded p-2 me-3">
+            <i className="fas fa-mobile-alt text-success"></i>
+          </div>
+          <div>
+            <div className="fw-bold">
+              Mobile App Development
+            </div>
+            <div className=" small">PRJ-2023-012</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div className="d-flex align-items-center">
+          <div
+            className="progress flex-grow-1 me-2"
+            style={{ height: "6px" }}
+          >
+            <div
+              className="progress-bar bg-success"
+              style={{ width: "90%" }}
+            ></div>
+          </div>
+          <span className="small">90%</span>
+        </div>
+      </td>
+      <td>Jun 30, 2025</td>
+      <td>
+        <span className="badge bg-success bg-opacity-10 text-success">
+          In Progress
+        </span>
+      </td>
+      <td>
+        <div className="d-flex">
+          <img
+            className="rounded-circle border border-white"
+            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20tech%20professional%20with%20glasses%2C%20neutral%20expression%2C%20casual%20tech%20company%20attire%2C%20clean%20background%2C%20silicon%20valley%20style%20portrait&width=50&height=50&seq=7&orientation=squarish"
+            width="32"
+            height="32"
+            alt=""
+          />
+          <img
+            className="rounded-circle border border-white ms-n2"
+            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20female%20software%20developer%2C%20confident%20expression%2C%20tech%20casual%20attire%2C%20neutral%20background%2C%20tech%20company%20portrait%20style&width=50&height=50&seq=8&orientation=squarish"
+            width="32"
+            height="32"
+            alt=""
+          />
+          <div
+            className="rounded-circle border border-white ms-n2 bg-light d-flex align-items-center justify-content-center"
+            style={{ width: "32px", height: "32px" }}
+          >
+            <span className="small ">+2</span>
+          </div>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>
+        <div className="d-flex align-items-center">
+          <div className="bg-purple bg-opacity-10 rounded p-2 me-3">
+            <i className="fas fa-ad text-purple"></i>
+          </div>
+          <div>
+            <div className="fw-bold">
+              Digital Marketing Campaign
+            </div>
+            <div className=" small">PRJ-2023-015</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div className="d-flex align-items-center">
+          <div
+            className="progress flex-grow-1 me-2"
+            style={{ height: "6px" }}
+          >
+            <div
+              className="progress-bar bg-purple"
+              style={{ width: "100%" }}
+            ></div>
+          </div>
+          <span className="small">100%</span>
+        </div>
+      </td>
+      <td>Jun 10, 2025</td>
+      <td>
+        <span className="badge bg-secondary bg-opacity-10 text-secondary">
+          Completed
+        </span>
+      </td>
+      <td>
+        <div className="d-flex">
+          <img
+            className="rounded-circle border border-white"
+            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20marketing%20professional%20woman%2C%20creative%20expression%2C%20business%20casual%20attire%2C%20neutral%20background%2C%20marketing%20agency%20style%20portrait&width=50&height=50&seq=9&orientation=squarish"
+            width="32"
+            height="32"
+            alt=""
+          />
+          <img
+            className="rounded-circle border border-white ms-n2"
+            src="https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20creative%20director%2C%20stylish%20appearance%2C%20creative%20industry%20attire%2C%20clean%20background%2C%20advertising%20agency%20style%20portrait&width=50&height=50&seq=10&orientation=squarish"
+            width="32"
+            height="32"
+            alt=""
+          />
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</table>
               </div>
             </div>
           </div>

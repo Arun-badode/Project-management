@@ -98,6 +98,7 @@ const TaskManagement = () => {
   const statuses = ['To Do', 'In Progress', 'In Review', 'Completed', 'Cancelled'];
   const priorities = ['Low', 'Medium', 'High', 'Critical'];
   const categories = ['Development', 'Design', 'Documentation', 'Testing', 'Planning'];
+  const projects = ["Website Redesign", "Mobile App", "Marketing Campaign"];
 
   // Timer functionality
   useEffect(() => {
@@ -435,45 +436,47 @@ const TaskManagement = () => {
           </div>
 
           <div className="table-responsive">
-            <table className="table table-gradient-bg  ">
-              <thead>
-                <tr>
-                  <th>Task</th>
-                  <th>Assignee</th>
-                  <th>Time Spent</th>
-                  <th>Status</th>
-                  <th>Timer</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tasks.map(task => (
-                  <tr key={task.id}>
-                    <td>
-                      <div className="fw-bold">{task.title}</div>
-                      <div className=" small">{task.category}</div>
-                    </td>
-                    <td>{task.assignee}</td>
-                    <td className="fw-bold">{formatTime(task.timeSpent)}</td>
-                    <td>
-                      <span className={`badge ${getStatusColor(task.status)}`}>
-                        {task.status}
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => toggleTimer(task.id)}
-                        className={`btn btn-sm d-flex align-items-center gap-1 ${
-                          task.isTimerRunning ? 'btn-danger' : 'btn-success'
-                        }`}
-                      >
-                        {task.isTimerRunning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                        {task.isTimerRunning ? 'Stop' : 'Start'}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+         <table className="table table-gradient-bg">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Task</th>
+      <th>Assignee</th>
+      <th>Time Spent</th>
+      <th>Status</th>
+      <th>Timer</th>
+    </tr>
+  </thead>
+  <tbody>
+    {tasks.map((task, idx) => (
+      <tr key={task.id}>
+        <td>{task.id}</td> {/* Or use idx+1 for serial number: <td>{idx + 1}</td> */}
+        <td>
+          <div className="fw-bold">{task.title}</div>
+          <div className="small">{task.category}</div>
+        </td>
+        <td>{task.assignee}</td>
+        <td className="fw-bold">{formatTime(task.timeSpent)}</td>
+        <td>
+          <span className={`badge ${getStatusColor(task.status)}`}>
+            {task.status}
+          </span>
+        </td>
+        <td>
+          <button
+            onClick={() => toggleTimer(task.id)}
+            className={`btn btn-sm d-flex align-items-center gap-1 ${
+              task.isTimerRunning ? 'btn-danger' : 'btn-success'
+            }`}
+          >
+            {task.isTimerRunning ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+            {task.isTimerRunning ? 'Stop' : 'Start'}
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
           </div>
         </div>
       </div>
@@ -602,57 +605,72 @@ const TaskManagement = () => {
 
         {/* Add Task Modal */}
         {showAddTask && (
-          <div className="modal show d-block custom-modal-dark" >
+          <div className="modal show d-block custom-modal-dark">
             <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title">Add New Task</h5>
-                  <button 
-                    type="button" 
-                    className="btn-close" 
+                  <button
+                    type="button"
+                    className="btn-close"
                     onClick={() => setShowAddTask(false)}
                   ></button>
                 </div>
-                
+
                 <div className="modal-body">
                   <div className="mb-3">
                     <input
                       type="text"
                       placeholder="Task title"
                       value={newTask.title}
-                      onChange={(e) => setNewTask({...newTask, title: e.target.value})}
+                      onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                       className="form-control"
                     />
                   </div>
-                  
+
                   <div className="mb-3">
                     <textarea
                       placeholder="Task description"
                       value={newTask.description}
-                      onChange={(e) => setNewTask({...newTask, description: e.target.value})}
+                      onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
                       className="form-control"
                       rows="3"
                     />
                   </div>
-                  
+
+                  {/* Project select input */}
                   <div className="mb-3">
                     <select
-                      value={newTask.assignee}
-                      onChange={(e) => setNewTask({...newTask, assignee: e.target.value})}
-                      className="form-select bg-card "
+                      value={newTask.project}
+                      onChange={(e) => setNewTask({ ...newTask, project: e.target.value })}
+                      className="form-select"
                     >
-                      <option value="" className='text-white'>Select assignee</option>
-                      {teamMembers.map(member => (
-                        <option className='text-white' key={member} value={member}>{member}</option>
+                      <option value="">Select project</option>
+                      {projects.map(project => (
+                        <option key={project} value={project}>{project}</option>
                       ))}
                     </select>
                   </div>
-                  
+
+                  {/* Assignee select input */}
+                  <div className="mb-3">
+                    <select
+                      value={newTask.assignee}
+                      onChange={(e) => setNewTask({ ...newTask, assignee: e.target.value })}
+                      className="form-select bg-card"
+                    >
+                      <option value="" className="text-white">Select assignee</option>
+                      {teamMembers.map(member => (
+                        <option className="text-white" key={member} value={member}>{member}</option>
+                      ))}
+                    </select>
+                  </div>
+
                   <div className="row mb-3 ">
                     <div className="col-md-6 ">
                       <select
                         value={newTask.priority}
-                        onChange={(e) => setNewTask({...newTask, priority: e.target.value})}
+                        onChange={(e) => setNewTask({ ...newTask, priority: e.target.value })}
                         className="form-select"
                       >
                         {priorities.map(priority => (
@@ -664,7 +682,7 @@ const TaskManagement = () => {
                     <div className="col-md-6">
                       <select
                         value={newTask.category}
-                        onChange={(e) => setNewTask({...newTask, category: e.target.value})}
+                        onChange={(e) => setNewTask({ ...newTask, category: e.target.value })}
                         className="form-select"
                       >
                         {categories.map(category => (
@@ -673,17 +691,17 @@ const TaskManagement = () => {
                       </select>
                     </div>
                   </div>
-                  
+
                   <div className="mb-3">
                     <input
                       type="date"
                       value={newTask.dueDate}
-                      onChange={(e) => setNewTask({...newTask, dueDate: e.target.value})}
+                      onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
                       className="form-control"
                     />
                   </div>
                 </div>
-                
+
                 <div className="modal-footer">
                   <button
                     onClick={() => setShowAddTask(false)}
@@ -708,3 +726,8 @@ const TaskManagement = () => {
 };
 
 export default TaskManagement;
+
+
+
+
+

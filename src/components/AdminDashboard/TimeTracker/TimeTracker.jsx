@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     Calendar,
     Download,
@@ -47,6 +47,49 @@ const TimeTracker = () => {
             'Documentation': 5
         }
     };
+
+    // --- Sorting Logic Start ---
+    const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'asc' });
+
+    const handleSort = (key) => {
+        setSortConfig((prev) => {
+            if (prev.key === key) {
+                // Toggle direction
+                return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+            }
+            return { key, direction: 'asc' };
+        });
+    };
+
+    const currentData = useMemo(() => {
+        const sorted = [...timeEntries];
+        sorted.sort((a, b) => {
+            let aValue = a[sortConfig.key];
+            let bValue = b[sortConfig.key];
+
+            // For date, compare as Date objects
+            if (sortConfig.key === 'date') {
+                aValue = new Date(aValue);
+                bValue = new Date(bValue);
+            }
+            // For totalHours, compare as numbers
+            if (sortConfig.key === 'totalHours') {
+                aValue = Number(aValue);
+                bValue = Number(bValue);
+            }
+            // For string comparison
+            if (typeof aValue === 'string' && typeof bValue === 'string') {
+                aValue = aValue.toLowerCase();
+                bValue = bValue.toLowerCase();
+            }
+
+            if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+            if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+        return sorted;
+    }, [sortConfig, timeEntries]);
+    // --- Sorting Logic End ---
 
     const getStatusBadgeClass = (status) => {
         return status === 'Billable'
@@ -201,7 +244,6 @@ const TimeTracker = () => {
                                             <select
                                                 className="tt-filter-select form-select form-select-sm"
                                                 multiple
-                                               
                                             >
                                                 {[...new Set(timeEntries.map(entry => entry.user))].map(user => (
                                                     <option key={user} value={user}>{user}</option>
@@ -214,7 +256,6 @@ const TimeTracker = () => {
                                             <select
                                                 className="tt-filter-select form-select form-select-sm"
                                                 multiple
-                                              
                                             >
                                                 {[...new Set(timeEntries.map(entry => entry.project))].map(project => (
                                                     <option key={project} value={project}>{project}</option>
@@ -227,7 +268,6 @@ const TimeTracker = () => {
                                             <input
                                                 type="date"
                                                 className="tt-date-input form-control form-control-sm"
-                                                
                                             />
                                         </div>
 
@@ -236,7 +276,6 @@ const TimeTracker = () => {
                                             <input
                                                 type="date"
                                                 className="tt-date-input form-control form-control-sm"
-                                                
                                             />
                                         </div>
                                     </div>
@@ -294,34 +333,76 @@ const TimeTracker = () => {
                         <div className="card-header border-0">
                             <h6 className="tt-table-title mb-0">Time Entries ({timeEntries.length} records)</h6>
                         </div>
-                        <div className="card-body p-0">
-                            <div className="tt-table-responsive table-responsive">
+                        <div className="card-body  p-0">
+                            <div className="tt-table-responsive  table-responsive">
                                 <table className="tt-data-table table table-gradient-bg table-hover mb-0">
                                     <thead className="tt-table-header">
                                         <tr>
-                                            <th className="tt-sortable-header" style={{ cursor: 'default' }}>
+                                            <th>ID</th>
+                                            <th
+                                                className="tt-sortable-header"
+                                                onClick={() => handleSort('user')}
+                                                style={{ cursor: 'pointer' }}
+                                            >
                                                 User
+                                                {sortConfig.key === 'user' && (
+                                                    <ChevronDown
+                                                        size={16}
+                                                        className={`ms-1 ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`}
+                                                    />
+                                                )}
                                             </th>
-                                            <th className="tt-sortable-header d-none d-md-table-cell" style={{ cursor: 'default' }}>
+                                            <th
+                                                className="tt-sortable-header d-none d-md-table-cell"
+                                                onClick={() => handleSort('project')}
+                                                style={{ cursor: 'pointer' }}
+                                            >
                                                 Project
+                                                {sortConfig.key === 'project' && (
+                                                    <ChevronDown
+                                                        size={16}
+                                                        className={`ms-1 ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`}
+                                                    />
+                                                )}
                                             </th>
                                             <th className="tt-task-header d-none d-lg-table-cell">Task</th>
-                                            <th className="tt-sortable-header" style={{ cursor: 'default' }}>
+                                            <th
+                                                className="tt-sortable-header"
+                                                onClick={() => handleSort('date')}
+                                                style={{ cursor: 'pointer' }}
+                                            >
                                                 Date
+                                                {sortConfig.key === 'date' && (
+                                                    <ChevronDown
+                                                        size={16}
+                                                        className={`ms-1 ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`}
+                                                    />
+                                                )}
                                             </th>
                                             <th className="tt-time-header d-none d-md-table-cell">Time</th>
-                                            <th className="tt-sortable-header" style={{ cursor: 'default' }}>
+                                            <th
+                                                className="tt-sortable-header"
+                                                onClick={() => handleSort('totalHours')}
+                                                style={{ cursor: 'pointer' }}
+                                            >
                                                 Hours
+                                                {sortConfig.key === 'totalHours' && (
+                                                    <ChevronDown
+                                                        size={16}
+                                                        className={`ms-1 ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`}
+                                                    />
+                                                )}
                                             </th>
                                             <th className="tt-status-header">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {timeEntries.map(entry => (
+                                        {currentData.map(entry => (
                                             <tr
                                                 key={entry.id}
                                                 className={`tt-table-row ${isOverdue(entry.date) ? 'tt-overdue-row table-warning' : ''} ${isLongHours(entry.totalHours) ? 'tt-long-hours-row' : ''}`}
                                             >
+                                                <td>{entry.id}</td>
                                                 <td className="tt-user-cell">
                                                     <div className="tt-user-info">
                                                         <div className="tt-user-name fw-medium">{entry.user}</div>
@@ -341,7 +422,7 @@ const TimeTracker = () => {
                                                     </div>
                                                 </td>
                                                 <td className="tt-time-cell d-none d-md-table-cell">
-                                                    <small className="tt-time-range">
+                                                    <small className="tt-time-range ">
                                                         {entry.startTime} - {entry.endTime}
                                                     </small>
                                                 </td>

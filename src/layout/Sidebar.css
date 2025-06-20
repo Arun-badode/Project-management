@@ -135,3 +135,14 @@
   border-radius: 12px;
   padding-left: 20px;
 }
+
+
+.form-check-input:checked {
+  background-color: #198754; /* Bootstrap's green */
+  border-color: #198754;
+}
+
+.form-check-input:not(:checked) {
+  background-color: #dc3545; /* Bootstrap's red */
+  border-color: #dc3545;
+}

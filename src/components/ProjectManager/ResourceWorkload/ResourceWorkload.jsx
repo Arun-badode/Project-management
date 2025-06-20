@@ -271,54 +271,56 @@ function ResourceWorkload() {
               <div className="card-body p-0">
                 <div className="table-responsive table-gradient-bg">
                   <table className="table table-hover mb-0">
-                    <thead>
-                      <tr>
-                        <th>Task</th>
-                        <th>Resource</th>
-                        <th>Priority</th>
-                        <th>Time</th>
-                        <th>Progress</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {taskData.map((task) => (
-                        <tr key={task.id}>
-                          <td>
-                            <div className="fw-bold">{task.name}</div>
-                            <small className="">{task.id}</small>
-                          </td>
-                          <td>
-                            <div>{task.resource}</div>
-                            <small className="">{task.consumption}% usage</small>
-                          </td>
-                          <td>
-                            <span className={getPriorityColor(task.priority)}>
-                              {task.priority}
-                            </span>
-                          </td>
-                          <td>
-                            <div>{task.startTime}</div>
-                            <small className="">{task.duration}</small>
-                          </td>
-                          <td>
-                            <div className="progress" style={{ height: '5px' }}>
-                              <div 
-                                className="progress-bar bg-primary" 
-                                style={{ width: `${task.progress}%` }}
-                              ></div>
-                            </div>
-                            <small className="">{task.progress}%</small>
-                          </td>
-                          <td>
-                            <span className={`badge ${getStatusColor(task.status)}`}>
-                              {task.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Task</th>
+      <th>Resource</th>
+      <th>Priority</th>
+      <th>Time</th>
+      <th>Progress</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {taskData.map((task) => (
+      <tr key={task.id}>
+        <td>{task.id}</td>
+        <td>
+          <div className="fw-bold">{task.name}</div>
+          <small className="">{task.id}</small>
+        </td>
+        <td>
+          <div>{task.resource}</div>
+          <small className="">{task.consumption}% usage</small>
+        </td>
+        <td>
+          <span className={getPriorityColor(task.priority)}>
+            {task.priority}
+          </span>
+        </td>
+        <td>
+          <div>{task.startTime}</div>
+          <small className="">{task.duration}</small>
+        </td>
+        <td>
+          <div className="progress" style={{ height: '5px' }}>
+            <div 
+              className="progress-bar bg-primary" 
+              style={{ width: `${task.progress}%` }}
+            ></div>
+          </div>
+          <small className="">{task.progress}%</small>
+        </td>
+        <td>
+          <span className={`badge ${getStatusColor(task.status)}`}>
+            {task.status}
+          </span>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
                 </div>
               </div>
             </div>

@@ -32,6 +32,7 @@ import ResourceWorkload from "./components/ProjectManager/ResourceWorkload/Resou
 import Collaboration from "./components/ProjectManager/Collaboration/Collaboration";
 import Assigned from "./components/ProjectManager/Assigne/Assigned";
 import Task from "./components/TeamMember/Task/Task";
+import ChangesPassword from "./components/AdminDashboard/ChangePassword/ChangesPassword";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -89,6 +90,7 @@ function App() {
             <Route path="/reportinganalytics" element={<ReportingAnalytics />} />
             <Route path="/filemanagementsystem" element={<FileManagementSystem />} />
             <Route path="/qamanagement" element={<QAManagement />} />
+            <Route path="/changepassword" element={<ChangesPassword/>}/>
 
             {/* Lead routes */}
             <Route path="/LeadDashboard" element={<LeadDashboard />} />

@@ -365,140 +365,143 @@ const handleEditChange = (e) => {
           </div>
           <div className="card-body p-0">
             <div className="table-responsive">
-              <table className="table table-hover table-gradient-bg  align-middle mb-0">
-                <thead className="table-light">
-                  <tr>
-                    <th
-                      className="cursor-pointer"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => handleSort('project')}
-                    >
-                      Project Title
-                      {sortColumn === 'project' && (
-                        <span className="ms-1">
-                          {sortDirection === 'asc' ? (
-                            <i className="bi bi-caret-up-fill"></i>
-                          ) : (
-                            <i className="bi bi-caret-down-fill"></i>
-                          )}
-                        </span>
-                      )}
-                    </th>
-                    <th
-                      className="cursor-pointer"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => handleSort('task')}
-                    >
-                      Task
-                      {sortColumn === 'task' && (
-                        <span className="ms-1">
-                          {sortDirection === 'asc' ? (
-                            <i className="bi bi-caret-up-fill"></i>
-                          ) : (
-                            <i className="bi bi-caret-down-fill"></i>
-                          )}
-                        </span>
-                      )}
-                    </th>
-                    <th
-                      className="cursor-pointer"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => handleSort('dueDate')}
-                    >
-                      Due Date &amp; Time
-                      {sortColumn === 'dueDate' && (
-                        <span className="ms-1">
-                          {sortDirection === 'asc' ? (
-                            <i className="bi bi-caret-up-fill"></i>
-                          ) : (
-                            <i className="bi bi-caret-down-fill"></i>
-                          )}
-                        </span>
-                      )}
-                    </th>
-                    <th
-                      className="cursor-pointer"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => handleSort('status')}
-                    >
-                      Status
-                      {sortColumn === 'status' && (
-                        <span className="ms-1">
-                          {sortDirection === 'asc' ? (
-                            <i className="bi bi-caret-up-fill"></i>
-                          ) : (
-                            <i className="bi bi-caret-down-fill"></i>
-                          )}
-                        </span>
-                      )}
-                    </th>
-                    <th
-                      className="cursor-pointer"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => handleSort('priority')}
-                    >
-                      Priority
-                      {sortColumn === 'priority' && (
-                        <span className="ms-1">
-                          {sortDirection === 'asc' ? (
-                            <i className="bi bi-caret-up-fill"></i>
-                          ) : (
-                            <i className="bi bi-caret-down-fill"></i>
-                          )}
-                        </span>
-                      )}
-                    </th>
-                    <th
-                      className="cursor-pointer"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => handleSort('timeSpent')}
-                    >
-                      Time Spent
-                      {sortColumn === 'timeSpent' && (
-                        <span className="ms-1">
-                          {sortDirection === 'asc' ? (
-                            <i className="bi bi-caret-up-fill"></i>
-                          ) : (
-                            <i className="bi bi-caret-down-fill"></i>
-                          )}
-                        </span>
-                      )}
-                    </th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedTasks.length > 0 ? (
-                    sortedTasks.map((task) => (
-                      <tr key={task.id}>
-                        <td>{task.project}</td>
-                        <td>{task.task}</td>
-                        <td>{formatDateTime(task.dueDate)}</td>
-                        <td>{renderStatusBadge(task.status)}</td>
-                        <td>{renderPriorityBadge(task.priority)}</td>
-                        <td>{task.timeSpent}</td>
-                        <td>
-                           <button
-                        className="btn btn-link text-primary p-0 me-2"
-                        onClick={() => handleEditClick(task)}
-                      >
-                        <i className="bi bi-pencil-square"></i>
-                      </button>
-                          <button className="btn btn-link text-danger p-0">
-                            <i className="bi bi-trash"></i>
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={7} className="text-center text-muted">
-                        No tasks found matching your criteria
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+       <table className="table table-hover table-gradient-bg align-middle mb-0">
+  <thead className="table-light">
+    <tr>
+      <th>S. No.</th> {/* Changed from ID to Serial Number */}
+      <th
+        className="cursor-pointer"
+        style={{ cursor: 'pointer' }}
+        onClick={() => handleSort('project')}
+      >
+        Project Title
+        {sortColumn === 'project' && (
+          <span className="ms-1">
+            {sortDirection === 'asc' ? (
+              <i className="bi bi-caret-up-fill"></i>
+            ) : (
+              <i className="bi bi-caret-down-fill"></i>
+            )}
+          </span>
+        )}
+      </th>
+      <th
+        className="cursor-pointer"
+        style={{ cursor: 'pointer' }}
+        onClick={() => handleSort('task')}
+      >
+        Task
+        {sortColumn === 'task' && (
+          <span className="ms-1">
+            {sortDirection === 'asc' ? (
+              <i className="bi bi-caret-up-fill"></i>
+            ) : (
+              <i className="bi bi-caret-down-fill"></i>
+            )}
+          </span>
+        )}
+      </th>
+      <th
+        className="cursor-pointer"
+        style={{ cursor: 'pointer' }}
+        onClick={() => handleSort('dueDate')}
+      >
+        Due Date &amp; Time
+        {sortColumn === 'dueDate' && (
+          <span className="ms-1">
+            {sortDirection === 'asc' ? (
+              <i className="bi bi-caret-up-fill"></i>
+            ) : (
+              <i className="bi bi-caret-down-fill"></i>
+            )}
+          </span>
+        )}
+      </th>
+      <th
+        className="cursor-pointer"
+        style={{ cursor: 'pointer' }}
+        onClick={() => handleSort('status')}
+      >
+        Status
+        {sortColumn === 'status' && (
+          <span className="ms-1">
+            {sortDirection === 'asc' ? (
+              <i className="bi bi-caret-up-fill"></i>
+            ) : (
+              <i className="bi bi-caret-down-fill"></i>
+            )}
+          </span>
+        )}
+      </th>
+      <th
+        className="cursor-pointer"
+        style={{ cursor: 'pointer' }}
+        onClick={() => handleSort('priority')}
+      >
+        Priority
+        {sortColumn === 'priority' && (
+          <span className="ms-1">
+            {sortDirection === 'asc' ? (
+              <i className="bi bi-caret-up-fill"></i>
+            ) : (
+              <i className="bi bi-caret-down-fill"></i>
+            )}
+          </span>
+        )}
+      </th>
+      <th
+        className="cursor-pointer"
+        style={{ cursor: 'pointer' }}
+        onClick={() => handleSort('timeSpent')}
+      >
+        Time Spent
+        {sortColumn === 'timeSpent' && (
+          <span className="ms-1">
+            {sortDirection === 'asc' ? (
+              <i className="bi bi-caret-up-fill"></i>
+            ) : (
+              <i className="bi bi-caret-down-fill"></i>
+            )}
+          </span>
+        )}
+      </th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {sortedTasks.length > 0 ? (
+      sortedTasks.map((task, index) => (
+        <tr key={task.id}>
+          <td>{index + 1}</td> {/* Serial Number */}
+          <td>{task.project}</td>
+          <td>{task.task}</td>
+          <td>{formatDateTime(task.dueDate)}</td>
+          <td>{renderStatusBadge(task.status)}</td>
+          <td>{renderPriorityBadge(task.priority)}</td>
+          <td>{task.timeSpent}</td>
+          <td>
+            <button
+              className="btn btn-link text-primary p-0 me-2"
+              onClick={() => handleEditClick(task)}
+            >
+              <i className="bi bi-pencil-square"></i>
+            </button>
+            <button className="btn btn-link text-danger p-0">
+              <i className="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      ))
+    ) : (
+      <tr>
+        <td colSpan={8} className="text-center text-muted">
+          No tasks found matching your criteria
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
+
             </div>
       <Modal show={showEditModal} onHide={handleCloseModal} centered className="custom-modal-dark">
   <Modal.Header closeButton>

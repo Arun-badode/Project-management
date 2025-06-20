@@ -268,76 +268,78 @@ const ResourceManagement = () => {
           </div>
           <div className="card-body">
             <div className="table-responsive">
-              <table className="table table-hover table-gradient-bg ">
-                <thead>
-                  <tr>
-                    <th>Resource</th>
-                    <th>Role</th>
-                    <th>Projects</th>
-                    <th>Allocation</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {resources.map(resource => (
-                    <tr key={resource.id}>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <div className="avatar me-2">
-                            <i className="fas fa-user-circle fa-2x text-primary"></i>
-                          </div>
-                          <div>
-                            <strong>{resource.name}</strong>
-                            <div className="text-white small">{resource.email}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{resource.role}</td>
-                      <td>
-                        {resource.currentProjects.length > 0 ? (
-                          resource.currentProjects.join(', ')
-                        ) : (
-                          <span className="">No projects</span>
-                        )}
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <div className="progress flex-grow-1 me-2" style={{ height: '20px' }}>
-                            <div 
-                              className={`progress-bar ${getAllocationClass(resource.allocation)}`} 
-                              role="progressbar" 
-                              style={{ width: `${resource.allocation}%` }}
-                              aria-valuenow={resource.allocation}
-                              aria-valuemin="0"
-                              aria-valuemax="100"
-                            >
-                              {resource.allocation}%
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        {resource.allocation >= 90 ? (
-                          <Badge bg="warning" text="dark">Overloaded</Badge>
-                        ) : resource.allocation < 60 ? (
-                          <Badge bg="danger">Underutilized</Badge>
-                        ) : (
-                          <Badge bg="success">Optimal</Badge>
-                        )}
-                      </td>
-                      <td>
-                        <button 
-                          className="btn btn-sm btn-outline-primary"
-                          onClick={() => viewResourceDetails(resource)}
-                        >
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+             <table className="table table-hover table-gradient-bg ">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Resource</th>
+      <th>Role</th>
+      <th>Projects</th>
+      <th>Allocation</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredResources.map(resource => (
+      <tr key={resource.id}>
+        <td>{resource.id}</td>
+        <td>
+          <div className="d-flex align-items-center">
+            <div className="avatar me-2">
+              <i className="fas fa-user-circle fa-2x text-primary"></i>
+            </div>
+            <div>
+              <strong>{resource.name}</strong>
+              <div className="text-white small">{resource.email}</div>
+            </div>
+          </div>
+        </td>
+        <td>{resource.role}</td>
+        <td>
+          {resource.currentProjects.length > 0 ? (
+            resource.currentProjects.join(', ')
+          ) : (
+            <span className="">No projects</span>
+          )}
+        </td>
+        <td>
+          <div className="d-flex align-items-center">
+            <div className="progress flex-grow-1 me-2" style={{ height: '20px' }}>
+              <div 
+                className={`progress-bar ${getAllocationClass(resource.allocation)}`} 
+                role="progressbar" 
+                style={{ width: `${resource.allocation}%` }}
+                aria-valuenow={resource.allocation}
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
+                {resource.allocation}%
+              </div>
+            </div>
+          </div>
+        </td>
+        <td>
+          {resource.allocation >= 90 ? (
+            <Badge bg="warning" text="dark">Overloaded</Badge>
+          ) : resource.allocation < 60 ? (
+            <Badge bg="danger">Underutilized</Badge>
+          ) : (
+            <Badge bg="success">Optimal</Badge>
+          )}
+        </td>
+        <td>
+          <button 
+            className="btn btn-sm btn-outline-primary"
+            onClick={() => viewResourceDetails(resource)}
+          >
+            View
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
             </div>
           </div>
         </div>

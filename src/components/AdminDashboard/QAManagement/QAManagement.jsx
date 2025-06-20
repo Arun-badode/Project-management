@@ -327,12 +327,12 @@ const QAManagement = () => {
                                             <div className="card-body">
                                                 <h6 className="card-title">{task.title}</h6>
                                                 <p className="card-text">
-                                                    <small className="text-muted">ID: {task.id}</small><br />
+                                                    <small className="">ID: {task.id}</small><br />
                                                     <span className="badge bg-secondary me-1">{task.module}</span>
                                                     <span className={`badge bg-${getPriorityColor(task.priority)}`}>{task.priority}</span>
                                                 </p>
                                                 <p className="card-text">Created by: {task.createdBy}</p>
-                                                <p className="card-text"><small className="text-muted">Created: {task.createdAt}</small></p>
+                                                <p className="card-text"><small className="">Created: {task.createdAt}</small></p>
                                                 <button className="btn btn-primary w-100" onClick={() => setShowModal({ show: true, type: 'selfAssign', data: task })}>
                                                     ✋ Self-Assign Task
                                                 </button>

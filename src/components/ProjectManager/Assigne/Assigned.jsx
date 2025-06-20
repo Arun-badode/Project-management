@@ -96,7 +96,7 @@ const Assigned = () => {
     name: "",
     status: "Planning",
     dueDate: "",
-    teamMembers: 1,
+    teamMembers: "",
     priority: "Medium",
     description: "",
   });
@@ -112,7 +112,7 @@ const Assigned = () => {
       status: newProject.status,
       dueDate: newProject.dueDate,
       progress: 0,
-      teamMembers: Number(newProject.teamMembers),
+      teamMembers: newProject.teamMembers,
       priority: newProject.priority,
     };
 
@@ -122,7 +122,7 @@ const Assigned = () => {
       name: "",
       status: "Planning",
       dueDate: "",
-      teamMembers: 1,
+      teamMembers: "",
       priority: "Medium",
       description: "",
     });
@@ -475,17 +475,22 @@ const Assigned = () => {
 
             <Form.Group className="mb-3">
               <Form.Label>Team Members</Form.Label>
-              <Form.Control
+              <Form.Select
                 type="number"
                 min="1"
                 value={newProject.teamMembers}
                 onChange={(e) =>
                   setNewProject({
                     ...newProject,
-                    teamMembers: Number(e.target.value),
+                    teamMembers: e.target.value,
                   })
                 }
-              />
+              >
+                <option value="John Doe">John Doe</option>
+    <option value="Sarah Smith">Sarah Smith</option>
+    <option value="Mike Johnson">Mike Johnson</option>
+    <option value="Emily Davis">Emily Davis</option>
+                </Form.Select>
             </Form.Group>
 
             <Form.Group className="mb-3">
