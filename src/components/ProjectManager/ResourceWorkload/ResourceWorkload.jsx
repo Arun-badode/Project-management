@@ -286,11 +286,11 @@ function ResourceWorkload() {
                         <tr key={task.id}>
                           <td>
                             <div className="fw-bold">{task.name}</div>
-                            <small className="text-muted">{task.id}</small>
+                            <small className="">{task.id}</small>
                           </td>
                           <td>
                             <div>{task.resource}</div>
-                            <small className="text-muted">{task.consumption}% usage</small>
+                            <small className="">{task.consumption}% usage</small>
                           </td>
                           <td>
                             <span className={getPriorityColor(task.priority)}>
@@ -299,7 +299,7 @@ function ResourceWorkload() {
                           </td>
                           <td>
                             <div>{task.startTime}</div>
-                            <small className="text-muted">{task.duration}</small>
+                            <small className="">{task.duration}</small>
                           </td>
                           <td>
                             <div className="progress" style={{ height: '5px' }}>
@@ -308,7 +308,7 @@ function ResourceWorkload() {
                                 style={{ width: `${task.progress}%` }}
                               ></div>
                             </div>
-                            <small className="text-muted">{task.progress}%</small>
+                            <small className="">{task.progress}%</small>
                           </td>
                           <td>
                             <span className={`badge ${getStatusColor(task.status)}`}>
@@ -336,7 +336,7 @@ function ResourceWorkload() {
                   <div style={{ width: '120px' }}></div>
                   <div className="d-flex flex-grow-1">
                     {Array.from({ length: 12 }).map((_, i) => (
-                      <div key={i} className="flex-grow-1 text-center small text-muted">
+                      <div key={i} className="flex-grow-1 text-center small ">
                         {i + 8 > 12 ? `${i + 8 - 12} PM` : `${i + 8} AM`}
                       </div>
                     ))}
