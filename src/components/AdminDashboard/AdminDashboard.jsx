@@ -14,20 +14,18 @@ import { FaPlus, FaFileExport } from "react-icons/fa";
 
 const AdminDashboard = () => {
   const [showModal, setShowModal] = useState(false);
-  const [filters, setFilters] = useState({
-    client: "",
-    platform: "",
-    pages: "",
-    handler: "",
-    status: "",
-  });
+  
+  //   client: "",
+  //   platform: "",
+  //   pages: "",
+  //   handler: "",
+  //   status: "",
+  // });
 
   const handleShow = () => setShowModal(true);
   const handleClose = () => setShowModal(false);
 
-  const handleFilterChange = (e) => {
-    setFilters({ ...filters, [e.target.name]: e.target.value });
-  };
+ 
 
   const generateRandomProjects = (count) => {
     const clients = [
@@ -148,15 +146,14 @@ const AdminDashboard = () => {
               type="text"
               name="client"
               placeholder="Client"
-              value={filters.client}
-              onChange={handleFilterChange}
+             
+              
             />
           </Col>
           <Col xs={12} sm={6} md={2}>
             <Form.Select
               name="platform"
-              value={filters.platform}
-              onChange={handleFilterChange}
+             
             >
               <option value="">Platform</option>
               <option>Web</option>
@@ -169,8 +166,8 @@ const AdminDashboard = () => {
               type="number"
               name="pages"
               placeholder="Total Pages"
-              value={filters.pages}
-              onChange={handleFilterChange}
+             
+             
             />
           </Col>
           <Col xs={12} sm={6} md={2}>
@@ -178,15 +175,15 @@ const AdminDashboard = () => {
               type="text"
               name="handler"
               placeholder="Handler"
-              value={filters.handler}
-              onChange={handleFilterChange}
+             
+             
             />
           </Col>
           <Col xs={12} sm={6} md={2}>
             <Form.Select
               name="status"
-              value={filters.status}
-              onChange={handleFilterChange}
+              
+              
             >
               <option value="">Status</option>
               <option>In Progress</option>
