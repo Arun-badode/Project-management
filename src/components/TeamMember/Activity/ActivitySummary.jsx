@@ -126,34 +126,34 @@ function ActivitySummary() {
                 {/* Task table */}
                 <div className="table-responsive">
                   <table className="table table-striped table-gradient-bg table-bordered">
-                    <thead className="table-light">
-                      <tr>
-                        <th className="text-start">Task Name</th>
-                        <th className="text-center">Total Hours</th>
-                        <th className="text-end">Timestamps</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {monthData.tasks.map((task, taskIndex) => (
-                        <tr key={taskIndex}>
-                          <td className="text-start">{task.name}</td>
-                          <td className="text-center">{task.hours}</td>
-                          <td className="text-end">
-                            <div>
-                              {task.timestamps.map((timestamp, timeIndex) => (
-                                <span
-                                  key={timeIndex}
-                                  className="d-block "
-                                >
-                                  {timestamp}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+  <thead className="table-light">
+    <tr>
+      <th className="text-start">ID</th> {/* New ID column */}
+      <th className="text-start">Task Name</th>
+      <th className="text-center">Total Hours</th>
+      <th className="text-end">Timestamps</th>
+    </tr>
+  </thead>
+  <tbody>
+    {monthData.tasks.map((task, taskIndex) => (
+      <tr key={taskIndex}>
+        <td className="text-start">{taskIndex + 1}</td> {/* Display ID */}
+        <td className="text-start">{task.name}</td>
+        <td className="text-center">{task.hours}</td>
+        <td className="text-end">
+          <div>
+            {task.timestamps.map((timestamp, timeIndex) => (
+              <span key={timeIndex} className="d-block">
+                {timestamp}
+              </span>
+            ))}
+          </div>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
                 </div>
               </div>
             ))}

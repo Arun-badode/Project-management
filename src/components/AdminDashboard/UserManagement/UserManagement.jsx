@@ -527,102 +527,104 @@ const UserManagement = () => {
       <div className="card">
         <div className="card-body bg-card">
           <div className="table-responsive">
-            <table className="table table-gradient-bg">
-              <thead>
-                <tr>
-                  <th onClick={() => requestSort('name')} style={{ cursor: 'pointer' }}>
-                    <div className="d-flex align-items-center">
-                      Name
-                      <span className="ms-2">{renderSortIndicator('name')}</span>
-                    </div>
-                  </th>
-                  <th onClick={() => requestSort('email')} style={{ cursor: 'pointer' }}>
-                    <div className="d-flex align-items-center">
-                      Email
-                      <span className="ms-2">{renderSortIndicator('email')}</span>
-                    </div>
-                  </th>
-                  <th onClick={() => requestSort('role')} style={{ cursor: 'pointer' }}>
-                    <div className="d-flex align-items-center">
-                      Role
-                      <span className="ms-2">{renderSortIndicator('role')}</span>
-                    </div>
-                  </th>
-                  <th onClick={() => requestSort('status')} style={{ cursor: 'pointer' }}>
-                    <div className="d-flex align-items-center">
-                      Status
-                      <span className="ms-2">{renderSortIndicator('status')}</span>
-                    </div>
-                  </th>
-                  <th onClick={() => requestSort('lastActive')} style={{ cursor: 'pointer' }}>
-                    <div className="d-flex align-items-center">
-                      Last Active
-                      <span className="ms-2">{renderSortIndicator('lastActive')}</span>
-                    </div>
-                  </th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map(user => (
-                    <tr key={user.id}>
-                      <td>{user.name}</td>
-                      <td>{user.email}</td>
-                      <td>
-                        <span className={`badge ${getRoleClass(user.role)}`}>
-                          {user.role}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`badge ${getStatusClass(user.status)}`}>
-                          {user.status}
-                        </span>
-                      </td>
-                      <td>{user.lastActive}</td>
-                      <td>
-                        <div className="d-flex gap-2">
-                          <button
-                            className="btn btn-sm btn-outline-primary"
-                            onClick={() => setShowUserActivity(user)}
-                            title="View Activity"
-                          >
-                            <Activity size={16} />
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-secondary"
-                            onClick={() => setEditingUser(user)}
-                            title="Edit"
-                          >
-                            <Edit size={16} />
-                          </button>
-                          <button
-                            className={`btn btn-sm ${user.status === 'Active' ? 'btn-outline-warning' : 'btn-outline-success'}`}
-                            onClick={() => toggleUserStatus(user.id)}
-                            title={user.status === 'Active' ? 'Deactivate' : 'Activate'}
-                          >
-                            {user.status === 'Active' ? <Lock size={16} /> : <Unlock size={16} />}
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={() => deleteUser(user.id)}
-                            title="Delete"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="text-center py-4">
-                      No users found matching your criteria
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+           <table className="table table-gradient-bg">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th onClick={() => requestSort('name')} style={{ cursor: 'pointer' }}>
+        <div className="d-flex align-items-center">
+          Name
+          <span className="ms-2">{renderSortIndicator('name')}</span>
+        </div>
+      </th>
+      <th onClick={() => requestSort('email')} style={{ cursor: 'pointer' }}>
+        <div className="d-flex align-items-center">
+          Email
+          <span className="ms-2">{renderSortIndicator('email')}</span>
+        </div>
+      </th>
+      <th onClick={() => requestSort('role')} style={{ cursor: 'pointer' }}>
+        <div className="d-flex align-items-center">
+          Role
+          <span className="ms-2">{renderSortIndicator('role')}</span>
+        </div>
+      </th>
+      <th onClick={() => requestSort('status')} style={{ cursor: 'pointer' }}>
+        <div className="d-flex align-items-center">
+          Status
+          <span className="ms-2">{renderSortIndicator('status')}</span>
+        </div>
+      </th>
+      <th onClick={() => requestSort('lastActive')} style={{ cursor: 'pointer' }}>
+        <div className="d-flex align-items-center">
+          Last Active
+          <span className="ms-2">{renderSortIndicator('lastActive')}</span>
+        </div>
+      </th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredUsers.length > 0 ? (
+      filteredUsers.map(user => (
+        <tr key={user.id}>
+          <td>{user.id}</td>
+          <td>{user.name}</td>
+          <td>{user.email}</td>
+          <td>
+            <span className={`badge ${getRoleClass(user.role)}`}>
+              {user.role}
+            </span>
+          </td>
+          <td>
+            <span className={`badge ${getStatusClass(user.status)}`}>
+              {user.status}
+            </span>
+          </td>
+          <td>{user.lastActive}</td>
+          <td>
+            <div className="d-flex gap-2">
+              <button
+                className="btn btn-sm btn-outline-primary"
+                onClick={() => setShowUserActivity(user)}
+                title="View Activity"
+              >
+                <Activity size={16} />
+              </button>
+              <button
+                className="btn btn-sm btn-outline-secondary"
+                onClick={() => setEditingUser(user)}
+                title="Edit"
+              >
+                <Edit size={16} />
+              </button>
+              <button
+                className={`btn btn-sm ${user.status === 'Active' ? 'btn-outline-warning' : 'btn-outline-success'}`}
+                onClick={() => toggleUserStatus(user.id)}
+                title={user.status === 'Active' ? 'Deactivate' : 'Activate'}
+              >
+                {user.status === 'Active' ? <Lock size={16} /> : <Unlock size={16} />}
+              </button>
+              <button
+                className="btn btn-sm btn-outline-danger"
+                onClick={() => deleteUser(user.id)}
+                title="Delete"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          </td>
+        </tr>
+      ))
+    ) : (
+      <tr>
+        <td colSpan="7" className="text-center py-4">
+          No users found matching your criteria
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
           </div>
         </div>
       </div>

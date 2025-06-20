@@ -52,6 +52,7 @@ const LeadDashboard = () => {
           <Table hover className="table-borderless table-gradient-bg mb-0">
             <thead>
               <tr>
+                <th>ID</th>
                 <th>Project Name</th>
                 <th>Process Status</th>
                 <th>QA Status</th>
@@ -61,6 +62,7 @@ const LeadDashboard = () => {
             </thead>
             <tbody>
               <tr>
+                <td>1</td>
                 <td>AI Tool Migration</td>
                 <td><Badge bg="info">In Progress</Badge></td>
                 <td><Badge bg="warning">Pending</Badge></td>
@@ -68,6 +70,7 @@ const LeadDashboard = () => {
                 <td><ProgressBar now={60} label={`60%`} /></td>
               </tr>
               <tr>
+                <td>2</td>
                 <td>UI Redesign</td>
                 <td><Badge bg="primary">Design Phase</Badge></td>
                 <td><Badge bg="danger">Blocked</Badge></td>

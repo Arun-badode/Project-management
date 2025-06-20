@@ -9,11 +9,15 @@ import {
   Row,
   Col,
 } from "react-bootstrap";
-import { FaPlus, FaFileExport } from "react-icons/fa";
+import { FaPlus, FaFileExport, FaEye, FaEdit, FaTrash } from "react-icons/fa";
 
 
 const AdminDashboard = () => {
   const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [editProject, setEditProject] = useState(null);
   
   //   client: "",
   //   platform: "",
@@ -25,7 +29,15 @@ const AdminDashboard = () => {
   const handleShow = () => setShowModal(true);
   const handleClose = () => setShowModal(false);
 
- 
+  const handleView = (project) => {
+    setSelectedProject(project);
+    setShowViewModal(true);
+  };
+
+  const handleEdit = (project) => {
+    setEditProject(project);
+    setShowEditModal(true);
+  };
 
   const generateRandomProjects = (count) => {
     const clients = [
@@ -217,7 +229,7 @@ const AdminDashboard = () => {
                 <th>Process Status</th>
                 <th>QA Reviewer</th>
                 <th>QA Status</th>
-                <th>Server Path</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -279,7 +291,22 @@ const AdminDashboard = () => {
                       {project.qaStatus}
                     </Badge>
                   </td>
-                  <td style={{ minWidth: "180px" }}>{project.serverPath}</td>
+                  <td>
+                    <Button
+                      variant="link"
+                      className="text-info p-0 me-2"
+                      title="View"
+                      onClick={() => handleView(project)}
+                    >
+                      <FaEye />
+                    </Button>
+                    <Button variant="link" className="text-warning p-0 me-2" title="Edit" onClick={() => handleEdit(project)}>
+                      <FaEdit />
+                    </Button>
+                    <Button variant="link" className="text-danger p-0" title="Delete">
+                      <FaTrash />
+                    </Button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -352,6 +379,136 @@ const AdminDashboard = () => {
               Create Project
             </Button>
           </Form>
+        </Modal.Body>
+      </Modal>
+
+      {/* View Project Details Modal */}
+      <Modal
+        show={showViewModal}
+        onHide={() => setShowViewModal(false)}
+        centered
+        className="custom-modal-dark"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Project Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedProject && (
+            <div>
+              <p><strong>Title:</strong> {selectedProject.title}</p>
+              <p><strong>Client:</strong> {selectedProject.client}</p>
+              <p><strong>Platform:</strong> {selectedProject.platform}</p>
+              <p><strong>Pages:</strong> {selectedProject.pages}</p>
+              <p><strong>Due Date:</strong> {selectedProject.dueDate}</p>
+              <p><strong>Status:</strong> {selectedProject.status}</p>
+              <p><strong>Handler:</strong> {selectedProject.handler}</p>
+              <p><strong>QA Reviewer:</strong> {selectedProject.qaReviewer}</p>
+              <p><strong>QA Status:</strong> {selectedProject.qaStatus}</p>
+              <p><strong>Server Path:</strong> {selectedProject.serverPath}</p>
+              {/* Add more fields as needed */}
+            </div>
+          )}
+        </Modal.Body>
+      </Modal>
+
+      {/* Edit Project Modal */}
+      <Modal
+        show={showEditModal}
+        onHide={() => setShowEditModal(false)}
+        centered
+        className="custom-modal-dark"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Project</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {editProject && (
+            <Form>
+              <Form.Group className="mb-3">
+                <Form.Label>Project Title</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={editProject.title}
+                  onChange={e =>
+                    setEditProject({ ...editProject, title: e.target.value })
+                  }
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Client</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={editProject.client}
+                  onChange={e =>
+                    setEditProject({ ...editProject, client: e.target.value })
+                  }
+                />
+              </Form.Group>
+              <Form.Group className="mb-3 ">
+                <Form.Label>Platform</Form.Label>
+                <Form.Select
+                  className="text-white border-secondary "
+                  defaultValue={editProject.platform}
+                >
+                  <option>Web</option>
+                  <option>Mobile</option>
+                  <option>Desktop</option>
+                </Form.Select>
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Total Pages</Form.Label>
+                <Form.Control
+                  type="number"
+                  placeholder="Enter page count"
+                  defaultValue={editProject.pages}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Actual Due Date</Form.Label>
+                <Form.Control
+                  type="datetime-local"
+                  defaultValue={editProject.dueDate}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Ready for QC Deadline</Form.Label>
+                <Form.Control
+                  type="datetime-local"
+                  defaultValue={editProject.qcDeadline}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>QC Hours Allocated</Form.Label>
+                <Form.Control
+                  type="number"
+                  defaultValue={editProject.qcHours}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>QC Due Date</Form.Label>
+                <Form.Control
+                  type="datetime-local"
+                  defaultValue={editProject.qcDueDate}
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Status</Form.Label>
+                <Form.Select defaultValue={editProject.status}>
+                  <option>In Progress</option>
+                  <option>Completed</option>
+                  <option>On Hold</option>
+                </Form.Select>
+              </Form.Group>
+              <Button
+                variant="primary"
+                type="submit"
+                className="w-100 gradient-button"
+              >
+                Save Changes
+              </Button>
+            </Form>
+          )}
         </Modal.Body>
       </Modal>
     </div>

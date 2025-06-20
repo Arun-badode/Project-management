@@ -145,39 +145,41 @@ const ReportingAnalytics = () => {
       </div>
 
       <div className="table-responsive ">
-        <table className="table text-white analytics-project-table table-gradient-bg ">
-          <thead className="  ">
-            <tr>
-              <th>Project Name</th>
-              <th>Owner</th>
-              <th>Progress</th>
-              <th>Status</th>
-              <th>Priority</th>
-              <th>Due Date</th>
-            </tr>
-          </thead>
-          <tbody >
-            {projectData.map(project => (
-              <tr key={project.id} className="analytics-project-row ">
-                <td className=" text-dark analytics-project-name">{project.name}</td>
-                <td>{project.owner}</td>
-                <td>
-                  <div className="progress analytics-progress-bar" style={{height: '20px'}}>
-                    <div 
-                      className="progress-bar analytics-progress-fill bg-primary" 
-                      style={{width: `${project.progress}%`}}
-                    >
-                      {project.progress}%
-                    </div>
-                  </div>
-                </td>
-                <td><span className={getStatusBadgeClass(project.status)}>{project.status}</span></td>
-                <td><span className={getPriorityBadgeClass(project.priority)}>{project.priority}</span></td>
-                <td>{project.dueDate}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+       <table className="table text-white analytics-project-table table-gradient-bg ">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Project Name</th>
+      <th>Owner</th>
+      <th>Progress</th>
+      <th>Status</th>
+      <th>Priority</th>
+      <th>Due Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    {projectData.map(project => (
+      <tr key={project.id} className="analytics-project-row">
+        <td>{project.id}</td>
+        <td className="text-dark analytics-project-name">{project.name}</td>
+        <td>{project.owner}</td>
+        <td>
+          <div className="progress analytics-progress-bar" style={{height: '20px'}}>
+            <div 
+              className="progress-bar analytics-progress-fill bg-primary" 
+              style={{width: `${project.progress}%`}}
+            >
+              {project.progress}%
+            </div>
+          </div>
+        </td>
+        <td><span className={getStatusBadgeClass(project.status)}>{project.status}</span></td>
+        <td><span className={getPriorityBadgeClass(project.priority)}>{project.priority}</span></td>
+        <td>{project.dueDate}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
       </div>
     </div>
   );
@@ -274,39 +276,49 @@ const ReportingAnalytics = () => {
       <div className="row">
         <div className="col-lg-8">
           <div className="table-responsive">
-            <table className="table  analytics-performance-table table-gradient-bg">
-              <thead className=" text-white ">
-                <tr>
-                  <th>Team Member</th>
-                  <th>Completed Tasks</th>
-                  <th>On-Time %</th>
-                  <th>Hours Logged</th>
-                  <th>Role</th>
-                  <th>Performance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {teamPerformanceData.map((member, index) => (
-                  <tr key={index} className="analytics-performance-row text-white ">
-                    <td className="text-white analytics-member-name">{member.name}</td>
-                    <td><span className="badge bg-primary analytics-task-badge">{member.completedTasks}</span></td>
-                    <td>
-                      <div className="progress analytics-ontime-progress" style={{height: '15px'}}>
-                        <div 
-                          className="progress-bar bg-success" 
-                          style={{width: `${member.onTimePercentage}%`}}
-                        >
-                          {member.onTimePercentage}%
-                        </div>
-                      </div>
-                    </td>
-                    <td>{member.hoursLogged}h</td>
-                    <td><span className="badge bg-light text-dark analytics-role-badge">{member.role}</span></td>
-                    <td>{getPerformanceBadge(member.performance)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <table className="table analytics-performance-table table-gradient-bg">
+  <thead className="text-white">
+    <tr>
+      <th>ID</th>
+      <th>Team Member</th>
+      <th>Completed Tasks</th>
+      <th>On-Time %</th>
+      <th>Hours Logged</th>
+      <th>Role</th>
+      <th>Performance</th>
+    </tr>
+  </thead>
+  <tbody>
+    {teamPerformanceData.map((member, index) => (
+      <tr key={index} className="analytics-performance-row text-white">
+        <td>{index + 1}</td>
+        <td className="text-white analytics-member-name">{member.name}</td>
+        <td>
+          <span className="badge bg-primary analytics-task-badge">
+            {member.completedTasks}
+          </span>
+        </td>
+        <td>
+          <div className="progress analytics-ontime-progress" style={{ height: '15px' }}>
+            <div
+              className="progress-bar bg-success"
+              style={{ width: `${member.onTimePercentage}%` }}
+            >
+              {member.onTimePercentage}%
+            </div>
+          </div>
+        </td>
+        <td>{member.hoursLogged}h</td>
+        <td>
+          <span className="badge bg-light text-dark analytics-role-badge">
+            {member.role}
+          </span>
+        </td>
+        <td>{getPerformanceBadge(member.performance)}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
           </div>
         </div>
         <div className="col-lg-4  ">
@@ -344,33 +356,39 @@ const ReportingAnalytics = () => {
 
       <div className="table-responsive">
         <table className="table table-striped analytics-deadline-table table-gradient-bg">
-          <thead className="text-white">
-            <tr>
-              <th>Task Name</th>
-              <th>Assigned To</th>
-              <th>Due Date</th>
-              <th>Delay (Days)</th>
-              <th>Comments</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {missedDeadlineData.map((task, index) => (
-              <tr key={index} className=" text-white analytics-deadline-row">
-                <td className="text-white analytics-task-name">{task.taskName}</td>
-                <td>{task.assignedTo}</td>
-                <td className="text-danger analytics-due-date">{task.dueDate}</td>
-                <td>
-                  <span className="badge bg-danger analytics-delay-badge">+{task.delayDays} days</span>
-                </td>
-                <td className="analytics-comments text-white">{task.comments}</td>
-                <td>
-                  <button className="btn btn-sm btn-outline-info analytics-detail-btn">View Details</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+  <thead className="text-white">
+    <tr>
+      <th>ID</th>
+      <th>Task Name</th>
+      <th>Assigned To</th>
+      <th>Due Date</th>
+      <th>Delay (Days)</th>
+      <th>Comments</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {missedDeadlineData.map((task, index) => (
+      <tr key={index} className="text-white analytics-deadline-row">
+        <td>{index + 1}</td>
+        <td className="text-white analytics-task-name">{task.taskName}</td>
+        <td>{task.assignedTo}</td>
+        <td className="text-danger analytics-due-date">{task.dueDate}</td>
+        <td>
+          <span className="badge bg-danger analytics-delay-badge">
+            +{task.delayDays} days
+          </span>
+        </td>
+        <td className="analytics-comments text-white">{task.comments}</td>
+        <td>
+          <button className="btn btn-sm btn-outline-info analytics-detail-btn">
+            View Details
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
       </div>
 
       <div className="alert alert-warning analytics-deadline-alert mt-3">
@@ -569,36 +587,40 @@ const ReportingAnalytics = () => {
             </div>
             <div className="card-body bg-card">
               <div className="table-responsive">
-                <table className="table table-sm analytics-preview-table table-gradient-bg">
-                  <thead className="  text-white">
-                    <tr>
-                      <th>Task Name</th>
-                      <th>Assigned To</th>
-                      <th>Status</th>
-                      <th>Progress</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="analytics-preview-row text-white">
-                      <td>Website Redesign</td>
-                      <td>John Doe</td>
-                      <td><span className="badge bg-success">Completed</span></td>
-                      <td>100%</td>
-                    </tr>
-                    <tr className="analytics-preview-row text-white">
-                      <td>Mobile App Development</td>
-                      <td>Jane Smith</td>
-                      <td><span className="badge bg-warning">In Progress</span></td>
-                      <td>75%</td>
-                    </tr>
-                    <tr className="analytics-preview-row text-white">
-                      <td>API Integration</td>
-                      <td>Mike Johnson</td>
-                      <td><span className="badge bg-info">In Progress</span></td>
-                      <td>60%</td>
-                    </tr>
-                  </tbody>
-                </table>
+               <table className="table table-sm analytics-preview-table table-gradient-bg">
+  <thead className="text-white">
+    <tr>
+      <th>ID</th>
+      <th>Task Name</th>
+      <th>Assigned To</th>
+      <th>Status</th>
+      <th>Progress</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr className="analytics-preview-row text-white">
+      <td>1</td>
+      <td>Website Redesign</td>
+      <td>John Doe</td>
+      <td><span className="badge bg-success">Completed</span></td>
+      <td>100%</td>
+    </tr>
+    <tr className="analytics-preview-row text-white">
+      <td>2</td>
+      <td>Mobile App Development</td>
+      <td>Jane Smith</td>
+      <td><span className="badge bg-warning">In Progress</span></td>
+      <td>75%</td>
+    </tr>
+    <tr className="analytics-preview-row text-white">
+      <td>3</td>
+      <td>API Integration</td>
+      <td>Mike Johnson</td>
+      <td><span className="badge bg-info">In Progress</span></td>
+      <td>60%</td>
+    </tr>
+  </tbody>
+</table>
               </div>
               
               <div className="alert alert-info analytics-preview-note mt-3">
