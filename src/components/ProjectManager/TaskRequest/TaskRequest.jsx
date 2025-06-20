@@ -119,14 +119,14 @@ function TaskRequest() {
    };
 
   return (
-    <div className="min-vh-100 bg-light">
+    <div className="min-vh-100 bg-main">
       <div className="container py-4">
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h1 className="h3 mb-0">Task Reassignment Requests</h1>
+          <h1 className="h2 mb-0 gradient-heading">Task Reassignment Requests</h1>
           <div className="dropdown">
             <button 
-              className="btn btn-outline-secondary dropdown-toggle"
+              className="btn btn-outline-primary ms-2 dropdown-toggle"
               type="button"
               id="filterDropdown"
               data-bs-toggle="dropdown"
@@ -189,7 +189,7 @@ function TaskRequest() {
             <div className="row g-4">
               {filteredRequests.map(request => (
                 <div key={request.id} className="col-md-6 col-lg-4">
-                  <div className="card h-100">
+                  <div className="card h-100 bg-card">
                     <div className="card-body">
                       {/* Header with requester info and date */}
                       <div className="d-flex justify-content-between align-items-start mb-3">
@@ -203,7 +203,7 @@ function TaskRequest() {
                           />
                           <div>
                             <h5 className="mb-0">{request.requester.name}</h5>
-                            <small className="text-muted">{formatDate(request.requestDate)}</small>
+                            <small className="">{formatDate(request.requestDate)}</small>
                           </div>
                         </div>
                         <div>
@@ -220,14 +220,14 @@ function TaskRequest() {
                       {/* Task details */}
                       <div className="mb-3">
                         <h6 className="card-title mb-1">{request.task.name}</h6>
-                        <p className="card-text text-muted small">{request.task.description}</p>
+                        <p className="card-text  small">{request.task.description}</p>
                       </div>
                       
                       {/* Reason (only shown when details are expanded) */}
                       {showDetails === request.id && (
                         <div className="mb-3 bg-light p-3 rounded">
                           <h6 className="small fw-bold mb-1">Reason for reassignment:</h6>
-                          <p className="small text-muted mb-0">{request.reason}</p>
+                          <p className="small  mb-0">{request.reason}</p>
                         </div>
                       )}
                       

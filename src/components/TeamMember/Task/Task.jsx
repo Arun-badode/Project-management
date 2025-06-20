@@ -5,7 +5,7 @@ function Task() {
         {
             id: 1,
             name: "Design Homepage Layout",
-            status: "YTS", // Yet To Start
+            status: "YTS",
             project: "Website Redesign",
             dueDate: "2025-06-25",
             assignee: "John Doe",
@@ -74,12 +74,12 @@ function Task() {
     const [reassignReason, setReassignReason] = useState("");
     const [serverPathError, setServerPathError] = useState("");
 
- const handleTaskAction = (taskId, action) => {
+    const handleTaskAction = (taskId, action) => {
         const taskIndex = tasks.findIndex(task => task.id === taskId);
         if (taskIndex === -1) return;
 
         const updatedTasks = [...tasks];
-        const task = {...updatedTasks[taskIndex]};
+        const task = { ...updatedTasks[taskIndex] };
 
         switch (action) {
             case 'start':
@@ -94,7 +94,7 @@ function Task() {
                 return;
             case 'self-assign':
                 task.status = "QC WIP";
-                task.assignee = "Current User"; // In a real app, this would be the logged-in user
+                task.assignee = "Current User";
                 break;
             case 'reassign':
                 setSelectedTask(task);
@@ -112,7 +112,6 @@ function Task() {
         setTasks(updatedTasks);
     };
 
-
     const handleCompleteTask = () => {
         if (!serverPath.trim()) {
             setServerPathError("Server Path is required");
@@ -123,12 +122,12 @@ function Task() {
         if (taskIndex === -1) return;
 
         const updatedTasks = [...tasks];
-        const task = {...updatedTasks[taskIndex]};
+        const task = { ...updatedTasks[taskIndex] };
 
         if (task.status === "WIP") {
             task.status = "QC YTS";
         } else if (task.status === "Corr WIP") {
-            task.status = "RFD"; // Ready For Delivery
+            task.status = "RFD";
         }
 
         task.serverPath = serverPath;
@@ -147,12 +146,11 @@ function Task() {
         setReassignReason("");
     };
 
-     const renderActionButtons = (task) => {
+    const renderActionButtons = (task) => {
         return (
-            <div className="btn-group">
-                {/* Start/Resume Work Button */}
+            <div className="d-flex flex-wrap gap-2">
                 {(task.status === "YTS" || task.status === "WIP (Paused)") && (
-                    <button 
+                    <button
                         onClick={() => handleTaskAction(task.id, 'start')}
                         className="btn btn-primary btn-sm"
                     >
@@ -160,10 +158,8 @@ function Task() {
                         {task.status === "YTS" ? "Start Work" : "Resume Work"}
                     </button>
                 )}
-                
-                {/* Pause Work Button */}
                 {task.status === "WIP" && (
-                    <button 
+                    <button
                         onClick={() => handleTaskAction(task.id, 'pause')}
                         className="btn btn-warning btn-sm"
                     >
@@ -171,10 +167,8 @@ function Task() {
                         Pause Work
                     </button>
                 )}
-                
-                {/* Complete Task Button */}
                 {(task.status === "WIP" || task.status === "Corr WIP") && (
-                    <button 
+                    <button
                         onClick={() => handleTaskAction(task.id, 'complete')}
                         className="btn btn-success btn-sm"
                     >
@@ -182,10 +176,8 @@ function Task() {
                         Complete Task
                     </button>
                 )}
-                
-                {/* Self-Assign Button (QA Only) */}
                 {task.status === "QC YTS" && (
-                    <button 
+                    <button
                         onClick={() => handleTaskAction(task.id, 'self-assign')}
                         className="btn btn-info btn-sm"
                     >
@@ -193,18 +185,14 @@ function Task() {
                         Self-Assign
                     </button>
                 )}
-                
-                {/* Request Reassignment Button */}
-                <button 
+                <button
                     onClick={() => handleTaskAction(task.id, 'reassign')}
                     className="btn btn-warning btn-sm"
                 >
                     <i className="fas fa-exchange-alt me-2"></i>
                     Reassign
                 </button>
-                
-                {/* View Details Button */}
-                <button 
+                <button
                     onClick={() => handleTaskAction(task.id, 'details')}
                     className="btn btn-secondary btn-sm"
                 >
@@ -253,16 +241,15 @@ function Task() {
 
 
     return (
-        <div className="container">
-            <h1>Task Management</h1>
-
-            <div className="list-group">
+        <div className="container-fluid py-4">
+            <h1 className="mb-4 gradient-heading">Task Management</h1>
+            <div className="list-group overflow-auto">
                 {tasks.map(task => (
-                    <div key={task.id} className="list-group-item d-flex justify-content-between align-items-center">
-                        <div className="flex-1">
+                    <div key={task.id} className="list-group-item bg-card d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-2">
+                        <div className="flex-grow-1 mb-2 mb-md-0">
                             <h5 className="mb-1">{task.name}</h5>
                             <span className={`badge ${getStatusBadgeColor(task.status)}`}>{task.status}</span>
-                            <span className={`badge ${getPriorityBadgeColor(task.priority)} ml-2`}>{task.priority}</span>
+                            <span className={`badge ${getPriorityBadgeColor(task.priority)} ms-2`}>{task.priority}</span>
                         </div>
                         <div className="flex-shrink-0">
                             {renderActionButtons(task)}
@@ -273,12 +260,12 @@ function Task() {
 
             {/* Complete Task Modal */}
             {showCompleteModal && selectedTask && (
-                <div className="modal fade show" tabIndex={-1} style={{ display: 'block' }} aria-hidden="true">
+                <div className="modal fade show custom-modal-dark " tabIndex={-1} style={{ display: 'block' }} aria-hidden="true">
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">Complete Task</h5>
-                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" className="btn-close" onClick={() => setShowCompleteModal(false)} aria-label="Close"></button>
                             </div>
                             <div className="modal-body">
                                 <div className="mb-3">
@@ -316,12 +303,12 @@ function Task() {
 
             {/* Reassign Task Modal */}
             {showReassignModal && selectedTask && (
-                <div className="modal fade show" tabIndex={-1} style={{ display: 'block' }} aria-hidden="true">
+                <div className="modal fade show custom-modal-dark" tabIndex={-1} style={{ display: 'block' }} aria-hidden="true">
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">Request Reassignment</h5>
-                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" className="btn-close" onClick={() => setShowReassignModal(false)} aria-label="Close"></button>
                             </div>
                             <div className="modal-body">
                                 <div className="mb-3">
