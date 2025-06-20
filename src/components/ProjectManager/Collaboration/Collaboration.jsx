@@ -276,33 +276,33 @@ function Collaboration() {
                         {messages.map((message) => (
                             <div 
                                 key={message.id} 
-                                className={`mb-3 ${message.sender === 'You' ? 'text-end' : ''}`}
+                                className={`mb-3  ${message.sender === 'You' ? 'text-end' : ''}`}
                             >
-                                <div className={`d-flex ${message.sender === 'You' ? 'justify-content-end' : ''}`}>
+                                <div className={`d-flex  ${message.sender === 'You' ? 'justify-content-end' : ''}`}>
                                     {message.sender !== 'You' && (
                                         <img 
                                             src={message.avatar} 
                                             alt={message.sender} 
-                                            className="rounded-circle me-2 " 
+                                            className="rounded-circle me-2  " 
                                             width="40" 
                                             height="40"
                                         />
                                     )}
                                     <div 
-                                        className={`rounded p-3 ${message.sender === 'You' ? 'bg-primary text-white' : 'bg-white'}`}
+                                        className={`rounded p-3 ${message.sender === 'You' ? '' : 'bg-card'}`}
                                         style={{ maxWidth: '75%' }}
                                     >
-                                        <div className="d-flex  justify-content-between align-items-center mb-1">
+                                        <div className="d-flex   justify-content-between align-items-center mb-1">
                                             <strong>{message.sender}</strong>
                                             <small className={message.sender === 'You' ? 'text-white-50' : 'text-muted'}>
                                                 {message.timestamp}
                                             </small>
                                         </div>
-                                        <p className="mb-2">{message.content}</p>
+                                        <p className="mb-2 ">{message.content}</p>
                                         
                                         {/* Attachments */}
                                         {message.attachments.length > 0 && (
-                                            <div className="mb-2 ">
+                                            <div className="mb-2 text-dark">
                                                 {message.attachments.map((file, idx) => (
                                                     <div 
                                                         key={idx} 
@@ -311,7 +311,7 @@ function Collaboration() {
                                                         <i className="fas fa-file me-2"></i>
                                                         <div className="flex-grow-1">
                                                             <div>{file.name}</div>
-                                                            <small className={message.sender === 'You' ? 'text-white-50' : 'text-muted'}>
+                                                            <small className={message.sender === 'You' ? 'text-dark' : 'text-dark'}>
                                                                 {formatFileSize(file.size)}
                                                             </small>
                                                         </div>
@@ -376,7 +376,7 @@ function Collaboration() {
                                 value={newMessage}
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                className="form-control mb-2"
+                                className="form-control mb-2 "
                                 rows="2"
                                 placeholder="Type your message here..."
                                 style={{ resize: 'none' }}
