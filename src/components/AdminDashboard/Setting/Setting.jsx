@@ -99,7 +99,7 @@ export default function SettingsPage() {
       <div className="row g-4 ">
         {/* App Configurations */}
         <div className="col-12 col-lg-6">
-          <div className="card shadow-sm settings-card-unique bg-card">
+          <div className="card shadow-sm settings-card-unique custom-modal-dark bg-card">
             <div className="card-header bg-light settings-card-header-unique bg-card">
               <h5 className="mb-0 ">App Configurations</h5>
             </div>
@@ -298,7 +298,7 @@ export default function SettingsPage() {
 
         {/* Excel Template Management */}
         <div className="col-12 col-lg-6">
-          <div className="card shadow-sm settings-card-unique bg-card">
+          <div className="card shadow-sm settings-card-unique bg-card custom-modal-dark">
             <div className="card-header bg-light settings-card-header-unique bg-card">
               <h5 className="mb-0">Excel Template Management</h5>
             </div>
@@ -353,8 +353,8 @@ export default function SettingsPage() {
 
         {/* Notification Settings */}
         <div className="col-12 col-lg-6">
-          <div className="card shadow-sm settings-card-unique bg-card">
-            <div className="card-header bg-light settings-card-header-unique bg-card">
+          <div className="card shadow-sm settings-card-unique bg-card custom-modal-dark">
+            <div className="card-header bg-light settings-card-header-unique bg-card ">
               <h5 className="mb-0 ">Notification Settings</h5>
             </div>
             <div className="card-body">
@@ -414,7 +414,7 @@ export default function SettingsPage() {
 
         {/* Backup & Recovery Settings */}
         <div className="col-12">
-          <div className="card shadow-sm settings-card-unique bg-card">
+          <div className="card shadow-sm settings-card-unique bg-card custom-modal-dark">
             <div className="card-header bg-light settings-card-header-unique bg-card">
               <h5 className="mb-0">Backup & Recovery Settings</h5>
             </div>

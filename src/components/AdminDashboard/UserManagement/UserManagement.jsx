@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   UserPlus, 
   Users, 
@@ -17,8 +17,8 @@ import {
 } from 'lucide-react';
 
 const UserManagement = () => {
-  // Sample user data
-  const [users, setUsers] = useState([
+  // Sample user data - now static
+  const users = [
     {
       id: 1,
       name: 'John Smith',
@@ -64,9 +64,9 @@ const UserManagement = () => {
       lastActive: '2023-06-15 17:10',
       joinDate: '2022-09-05'
     }
-  ]);
+  ];
 
-  // State for form and UI
+  // UI state (kept but non-functional)
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showUserActivity, setShowUserActivity] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
@@ -75,93 +75,20 @@ const UserManagement = () => {
   const [filterStatus, setFilterStatus] = useState('All');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
-  // New user form state
-  const [newUser, setNewUser] = useState({
+  // Static form data
+  const newUser = {
     name: '',
     email: '',
     role: 'DTP',
     status: 'Active'
-  });
+  };
 
   // Available roles
   const roles = ['Admin', 'Lead', 'DTP', 'QA'];
 
-  // Handle sorting
+  // Non-functional sort handler
   const requestSort = (key) => {
-    let direction = 'asc';
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc';
-    }
-    setSortConfig({ key, direction });
-  };
-
-  // Sort users
-  const sortedUsers = [...users].sort((a, b) => {
-    if (sortConfig.key) {
-      if (a[sortConfig.key] < b[sortConfig.key]) {
-        return sortConfig.direction === 'asc' ? -1 : 1;
-      }
-      if (a[sortConfig.key] > b[sortConfig.key]) {
-        return sortConfig.direction === 'asc' ? 1 : -1;
-      }
-    }
-    return 0;
-  });
-
-  // Filter users
-  const filteredUsers = sortedUsers.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = filterRole === 'All' || user.role === filterRole;
-    const matchesStatus = filterStatus === 'All' || user.status === filterStatus;
-    
-    return matchesSearch && matchesRole && matchesStatus;
-  });
-
-  // Create new user
-  const handleCreateUser = () => {
-    if (newUser.name && newUser.email) {
-      const user = {
-        id: Date.now(),
-        ...newUser,
-        lastActive: new Date().toISOString().split('T')[0] + ' ' + 
-                   new Date().toTimeString().split(' ')[0].substring(0, 5),
-        joinDate: new Date().toISOString().split('T')[0]
-      };
-      setUsers([...users, user]);
-      setNewUser({
-        name: '',
-        email: '',
-        role: 'DTP',
-        status: 'Active'
-      });
-      setShowCreateForm(false);
-    }
-  };
-
-  // Update user
-  const handleUpdateUser = () => {
-    if (editingUser) {
-      setUsers(users.map(user => 
-        user.id === editingUser.id ? editingUser : user
-      ));
-      setEditingUser(null);
-    }
-  };
-
-  // Toggle user status
-  const toggleUserStatus = (userId) => {
-    setUsers(users.map(user => 
-      user.id === userId ? { 
-        ...user, 
-        status: user.status === 'Active' ? 'Inactive' : 'Active' 
-      } : user
-    ));
-  };
-
-  // Delete user
-  const deleteUser = (userId) => {
-    setUsers(users.filter(user => user.id !== userId));
+    // Sorting functionality removed
   };
 
   // Get status badge class
@@ -180,9 +107,9 @@ const UserManagement = () => {
     }
   };
 
-  // Render create user form
+  // Render create user form (non-functional)
   const renderCreateForm = () => (
-    <div className="modal show d-block custom-modal-dark" >
+    <div className="modal show d-block custom-modal-dark">
       <div className="modal-dialog">
         <div className="modal-content">
           <div className="modal-header">
@@ -201,7 +128,7 @@ const UserManagement = () => {
                 type="text"
                 className="form-control"
                 value={newUser.name}
-                onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                readOnly
                 placeholder="Enter full name"
               />
             </div>
@@ -212,7 +139,7 @@ const UserManagement = () => {
                 type="email"
                 className="form-control"
                 value={newUser.email}
-                onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                readOnly
                 placeholder="Enter email address"
               />
             </div>
@@ -222,7 +149,7 @@ const UserManagement = () => {
               <select
                 className="form-select"
                 value={newUser.role}
-                onChange={(e) => setNewUser({...newUser, role: e.target.value})}
+                disabled
               >
                 {roles.map(role => (
                   <option key={role} value={role}>{role}</option>
@@ -235,7 +162,7 @@ const UserManagement = () => {
               <select
                 className="form-select"
                 value={newUser.status}
-                onChange={(e) => setNewUser({...newUser, status: e.target.value})}
+                disabled
               >
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
@@ -252,7 +179,7 @@ const UserManagement = () => {
             </button>
             <button
               className="gradient-button"
-              onClick={handleCreateUser}
+              disabled
             >
               Create User
             </button>
@@ -262,7 +189,7 @@ const UserManagement = () => {
     </div>
   );
 
-  // Render edit user form
+  // Render edit user form (non-functional)
   const renderEditForm = () => (
     <div className="modal show d-block custom-modal-dark">
       <div className="modal-dialog">
@@ -282,8 +209,8 @@ const UserManagement = () => {
               <input
                 type="text"
                 className="form-control"
-                value={editingUser.name}
-                onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
+                value={editingUser?.name || ''}
+                readOnly
               />
             </div>
             
@@ -292,8 +219,8 @@ const UserManagement = () => {
               <input
                 type="email"
                 className="form-control"
-                value={editingUser.email}
-                onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
+                value={editingUser?.email || ''}
+                readOnly
               />
             </div>
             
@@ -301,8 +228,8 @@ const UserManagement = () => {
               <label className="form-label">Role</label>
               <select
                 className="form-select"
-                value={editingUser.role}
-                onChange={(e) => setEditingUser({...editingUser, role: e.target.value})}
+                value={editingUser?.role || ''}
+                disabled
               >
                 {roles.map(role => (
                   <option key={role} value={role}>{role}</option>
@@ -314,8 +241,8 @@ const UserManagement = () => {
               <label className="form-label">Status</label>
               <select
                 className="form-select"
-                value={editingUser.status}
-                onChange={(e) => setEditingUser({...editingUser, status: e.target.value})}
+                value={editingUser?.status || ''}
+                disabled
               >
                 <option value="Active">Active</option>
                 <option value="Inactive">Inactive</option>
@@ -332,7 +259,7 @@ const UserManagement = () => {
             </button>
             <button
               className="gradient-button"
-              onClick={handleUpdateUser}
+              disabled
             >
               Save Changes
             </button>
@@ -342,13 +269,13 @@ const UserManagement = () => {
     </div>
   );
 
-  // Render user activity modal
+  // Render user activity modal (non-functional)
   const renderUserActivity = () => (
-    <div className="modal show d-block custom-modal-dark" >
+    <div className="modal show d-block custom-modal-dark">
       <div className="modal-dialog modal-lg">
         <div className="modal-content">
           <div className="modal-header">
-            <h5 className="modal-title">User Activity: {showUserActivity.name}</h5>
+            <h5 className="modal-title">User Activity: {showUserActivity?.name}</h5>
             <button 
               type="button" 
               className="btn-close" 
@@ -362,10 +289,10 @@ const UserManagement = () => {
                 <div className="card">
                   <div className="card-body bg-card">
                     <h6 className="card-title">User Information</h6>
-                    <div className="mb-2"><strong>Email:</strong> {showUserActivity.email}</div>
-                    <div className="mb-2"><strong>Role:</strong> <span className={`badge ${getRoleClass(showUserActivity.role)}`}>{showUserActivity.role}</span></div>
-                    <div className="mb-2"><strong>Status:</strong> <span className={`badge ${getStatusClass(showUserActivity.status)}`}>{showUserActivity.status}</span></div>
-                    <div><strong>Joined:</strong> {showUserActivity.joinDate}</div>
+                    <div className="mb-2"><strong>Email:</strong> {showUserActivity?.email}</div>
+                    <div className="mb-2"><strong>Role:</strong> <span className={`badge ${getRoleClass(showUserActivity?.role)}`}>{showUserActivity?.role}</span></div>
+                    <div className="mb-2"><strong>Status:</strong> <span className={`badge ${getStatusClass(showUserActivity?.status)}`}>{showUserActivity?.status}</span></div>
+                    <div><strong>Joined:</strong> {showUserActivity?.joinDate}</div>
                   </div>
                 </div>
               </div>
@@ -377,7 +304,7 @@ const UserManagement = () => {
                       <div className="activity-item">
                         <div className="activity-badge"></div>
                         <div className="activity-content">
-                          <strong>Last Active:</strong> {showUserActivity.lastActive}
+                          <strong>Last Active:</strong> {showUserActivity?.lastActive}
                         </div>
                       </div>
                       <div className="activity-item">
@@ -404,7 +331,7 @@ const UserManagement = () => {
               </div>
             </div>
             
-            <div className="card ">
+            <div className="card">
               <div className="card-body table-gradient-bg">
                 <h6 className="card-title">Detailed Activity Log</h6>
                 <div className="table-responsive">
@@ -457,11 +384,8 @@ const UserManagement = () => {
     </div>
   );
 
-  // Render sort indicator
+  // Render sort indicator (non-functional)
   const renderSortIndicator = (key) => {
-    if (sortConfig.key === key) {
-      return sortConfig.direction === 'asc' ? <ChevronUp size={16} /> : <ChevronDown size={16} />;
-    }
     return <ChevronDown size={16} className="text-muted" />;
   };
 
@@ -478,7 +402,7 @@ const UserManagement = () => {
         </button>
       </div>
 
-      {/* Filters and Search */}
+      {/* Filters and Search (non-functional) */}
       <div className="card mb-4 bg-card">
         <div className="card-body">
           <div className="row g-3">
@@ -493,6 +417,7 @@ const UserManagement = () => {
                   placeholder="Search users..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                 
                 />
               </div>
             </div>
@@ -501,6 +426,7 @@ const UserManagement = () => {
                 className="form-select"
                 value={filterRole}
                 onChange={(e) => setFilterRole(e.target.value)}
+                
               >
                 <option value="All">All Roles</option>
                 {roles.map(role => (
@@ -513,6 +439,7 @@ const UserManagement = () => {
                 className="form-select"
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
+               
               >
                 <option value="All">All Statuses</option>
                 <option value="Active">Active</option>
@@ -530,31 +457,31 @@ const UserManagement = () => {
             <table className="table table-gradient-bg">
               <thead>
                 <tr>
-                  <th onClick={() => requestSort('name')} style={{ cursor: 'pointer' }}>
+                  <th style={{ cursor: 'default' }}>
                     <div className="d-flex align-items-center">
                       Name
                       <span className="ms-2">{renderSortIndicator('name')}</span>
                     </div>
                   </th>
-                  <th onClick={() => requestSort('email')} style={{ cursor: 'pointer' }}>
+                  <th style={{ cursor: 'default' }}>
                     <div className="d-flex align-items-center">
                       Email
                       <span className="ms-2">{renderSortIndicator('email')}</span>
                     </div>
                   </th>
-                  <th onClick={() => requestSort('role')} style={{ cursor: 'pointer' }}>
+                  <th style={{ cursor: 'default' }}>
                     <div className="d-flex align-items-center">
                       Role
                       <span className="ms-2">{renderSortIndicator('role')}</span>
                     </div>
                   </th>
-                  <th onClick={() => requestSort('status')} style={{ cursor: 'pointer' }}>
+                  <th style={{ cursor: 'default' }}>
                     <div className="d-flex align-items-center">
                       Status
                       <span className="ms-2">{renderSortIndicator('status')}</span>
                     </div>
                   </th>
-                  <th onClick={() => requestSort('lastActive')} style={{ cursor: 'pointer' }}>
+                  <th style={{ cursor: 'default' }}>
                     <div className="d-flex align-items-center">
                       Last Active
                       <span className="ms-2">{renderSortIndicator('lastActive')}</span>
@@ -564,63 +491,55 @@ const UserManagement = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map(user => (
-                    <tr key={user.id}>
-                      <td>{user.name}</td>
-                      <td>{user.email}</td>
-                      <td>
-                        <span className={`badge ${getRoleClass(user.role)}`}>
-                          {user.role}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`badge ${getStatusClass(user.status)}`}>
-                          {user.status}
-                        </span>
-                      </td>
-                      <td>{user.lastActive}</td>
-                      <td>
-                        <div className="d-flex gap-2">
-                          <button
-                            className="btn btn-sm btn-outline-primary"
-                            onClick={() => setShowUserActivity(user)}
-                            title="View Activity"
-                          >
-                            <Activity size={16} />
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-secondary"
-                            onClick={() => setEditingUser(user)}
-                            title="Edit"
-                          >
-                            <Edit size={16} />
-                          </button>
-                          <button
-                            className={`btn btn-sm ${user.status === 'Active' ? 'btn-outline-warning' : 'btn-outline-success'}`}
-                            onClick={() => toggleUserStatus(user.id)}
-                            title={user.status === 'Active' ? 'Deactivate' : 'Activate'}
-                          >
-                            {user.status === 'Active' ? <Lock size={16} /> : <Unlock size={16} />}
-                          </button>
-                          <button
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={() => deleteUser(user.id)}
-                            title="Delete"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="text-center py-4">
-                      No users found matching your criteria
+                {users.map(user => (
+                  <tr key={user.id}>
+                    <td>{user.name}</td>
+                    <td>{user.email}</td>
+                    <td>
+                      <span className={`badge ${getRoleClass(user.role)}`}>
+                        {user.role}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`badge ${getStatusClass(user.status)}`}>
+                        {user.status}
+                      </span>
+                    </td>
+                    <td>{user.lastActive}</td>
+                    <td>
+                      <div className="d-flex gap-2">
+                        <button
+                          className="btn btn-sm btn-outline-primary"
+                          onClick={() => setShowUserActivity(user)}
+                          title="View Activity"
+                        >
+                          <Activity size={16} />
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline-secondary"
+                          onClick={() => setEditingUser(user)}
+                          title="Edit"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          className={`btn btn-sm ${user.status === 'Active' ? 'btn-outline-warning' : 'btn-outline-success'}`}
+                          disabled
+                          title={user.status === 'Active' ? 'Deactivate' : 'Activate'}
+                        >
+                          {user.status === 'Active' ? <Lock size={16} /> : <Unlock size={16} />}
+                        </button>
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          disabled
+                          title="Delete"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
-                )}
+                ))}
               </tbody>
             </table>
           </div>

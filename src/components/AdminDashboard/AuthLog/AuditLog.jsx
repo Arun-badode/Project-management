@@ -366,16 +366,14 @@ const AuditLog = () => {
                                             type="text"
                                             className="form-control border-start-0"
                                             placeholder="Search logs..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                   
                                         />
                                     </div>
                                 </div>
                                 <div className="col-md-2 mb-3">
                                     <select
                                         className="form-select"
-                                        value={selectedRole}
-                                        onChange={(e) => setSelectedRole(e.target.value)}
+                                        
                                     >
                                         <option value="">All Roles</option>
                                         {roles.map(role => (

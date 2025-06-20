@@ -471,7 +471,7 @@ const QAManagement = () => {
                                 <div className="card-header ">
                                     <h5 className="mb-0">Upload QA Files</h5>
                                 </div>
-                                <div className="card-body ">
+                                <div className="card-body "> 
                                     <div>
                                         <div className="mb-3">
                                             <label className="form-label">Task ID</label>

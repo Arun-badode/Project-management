@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import {
     Calendar,
     Download,
@@ -15,8 +15,8 @@ import {
 } from 'lucide-react';
 
 const TimeTracker = () => {
-    // Sample data
-    const [timeEntries] = useState([
+    // Static data
+    const timeEntries = [
         { id: 1, user: 'John Doe', project: 'Website Redesign', task: 'Homepage Layout', date: '2025-06-17', startTime: '09:00', endTime: '17:00', totalHours: 8, status: 'Billable' },
         { id: 2, user: 'Sarah Smith', project: 'Mobile App', task: 'UI Components', date: '2025-06-17', startTime: '10:00', endTime: '18:30', totalHours: 8.5, status: 'Billable' },
         { id: 3, user: 'Mike Johnson', project: 'API Development', task: 'Authentication', date: '2025-06-16', startTime: '08:30', endTime: '16:30', totalHours: 8, status: 'Billable' },
@@ -25,172 +25,27 @@ const TimeTracker = () => {
         { id: 6, user: 'Sarah Smith', project: 'Training', task: 'Team Meeting', date: '2025-06-15', startTime: '14:00', endTime: '16:00', totalHours: 2, status: 'Non-billable' },
         { id: 7, user: 'Mike Johnson', project: 'API Development', task: 'Database Setup', date: '2025-06-14', startTime: '09:00', endTime: '12:00', totalHours: 3, status: 'Billable' },
         { id: 8, user: 'Emily Davis', project: 'Documentation', task: 'User Manual', date: '2025-06-14', startTime: '10:00', endTime: '15:00', totalHours: 5, status: 'Non-billable' }
-    ]);
+    ];
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(5);
-    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
-    const [showToast, setShowToast] = useState(false);
-    const [toastMessage, setToastMessage] = useState('');
-
-    // Filter states
-    const [filters, setFilters] = useState({
-        users: [],
-        projects: [],
-        dateRange: { start: '', end: '' }
-    });
-
-    const [activeFilters, setActiveFilters] = useState([]);
-
-    // Get unique values for filters
-    const uniqueUsers = [...new Set(timeEntries.map(entry => entry.user))];
-    const uniqueProjects = [...new Set(timeEntries.map(entry => entry.project))];
-
-    // Filter and sort data
-    const filteredData = useMemo(() => {
-        let filtered = timeEntries.filter(entry => {
-            const userMatch = filters.users.length === 0 || filters.users.includes(entry.user);
-            const projectMatch = filters.projects.length === 0 || filters.projects.includes(entry.project);
-
-            let dateMatch = true;
-            if (filters.dateRange.start && filters.dateRange.end) {
-                const entryDate = new Date(entry.date);
-                const startDate = new Date(filters.dateRange.start);
-                const endDate = new Date(filters.dateRange.end);
-                dateMatch = entryDate >= startDate && entryDate <= endDate;
-            }
-
-            return userMatch && projectMatch && dateMatch;
-        });
-
-        if (sortConfig.key) {
-            filtered.sort((a, b) => {
-                if (a[sortConfig.key] < b[sortConfig.key]) {
-                    return sortConfig.direction === 'asc' ? -1 : 1;
-                }
-                if (a[sortConfig.key] > b[sortConfig.key]) {
-                    return sortConfig.direction === 'asc' ? 1 : -1;
-                }
-                return 0;
-            });
+    // Static summary data
+    const summaryData = {
+        totalHours: '54.0',
+        avgDailyHours: '6.8',
+        topContributor: 'John Doe',
+        leastActiveProject: 'Training',
+        userHours: {
+            'John Doe': 13,
+            'Sarah Smith': 10.5,
+            'Mike Johnson': 11,
+            'Emily Davis': 19.5
+        },
+        projectHours: {
+            'Website Redesign': 16.5,
+            'Mobile App': 13.5,
+            'API Development': 11,
+            'Training': 2,
+            'Documentation': 5
         }
-
-        return filtered;
-    }, [timeEntries, filters, sortConfig]);
-
-    // Pagination
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-    const currentData = filteredData.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
-
-    // Summary calculations
-    const summaryData = useMemo(() => {
-        const totalHours = filteredData.reduce((sum, entry) => sum + entry.totalHours, 0);
-        const avgDailyHours = totalHours / (filteredData.length || 1);
-
-        const userHours = filteredData.reduce((acc, entry) => {
-            acc[entry.user] = (acc[entry.user] || 0) + entry.totalHours;
-            return acc;
-        }, {});
-
-        const topContributor = Object.keys(userHours).reduce((a, b) =>
-            userHours[a] > userHours[b] ? a : b, Object.keys(userHours)[0] || 'N/A'
-        );
-
-        const projectHours = filteredData.reduce((acc, entry) => {
-            acc[entry.project] = (acc[entry.project] || 0) + entry.totalHours;
-            return acc;
-        }, {});
-
-        const leastActiveProject = Object.keys(projectHours).reduce((a, b) =>
-            projectHours[a] < projectHours[b] ? a : b, Object.keys(projectHours)[0] || 'N/A'
-        );
-
-        return {
-            totalHours: totalHours.toFixed(1),
-            avgDailyHours: avgDailyHours.toFixed(1),
-            topContributor,
-            leastActiveProject,
-            userHours,
-            projectHours
-        };
-    }, [filteredData]);
-
-    const handleSort = (key) => {
-        let direction = 'asc';
-        if (sortConfig.key === key && sortConfig.direction === 'asc') {
-            direction = 'desc';
-        }
-        setSortConfig({ key, direction });
-    };
-
-    const handleFilterChange = (type, value) => {
-        setFilters(prev => ({
-            ...prev,
-            [type]: value
-        }));
-    };
-
-    const applyFilters = () => {
-        const newActiveFilters = [];
-
-        if (filters.users.length > 0) {
-            newActiveFilters.push(...filters.users.map(user => ({ type: 'user', value: user })));
-        }
-        if (filters.projects.length > 0) {
-            newActiveFilters.push(...filters.projects.map(project => ({ type: 'project', value: project })));
-        }
-        if (filters.dateRange.start && filters.dateRange.end) {
-            newActiveFilters.push({
-                type: 'dateRange',
-                value: `${filters.dateRange.start} to ${filters.dateRange.end}`
-            });
-        }
-
-        setActiveFilters(newActiveFilters);
-        setCurrentPage(1);
-    };
-
-    const clearFilters = () => {
-        setFilters({
-            users: [],
-            projects: [],
-            dateRange: { start: '', end: '' }
-        });
-        setActiveFilters([]);
-        setCurrentPage(1);
-    };
-
-    const removeFilter = (index) => {
-        const newActiveFilters = [...activeFilters];
-        const removedFilter = newActiveFilters.splice(index, 1)[0];
-
-        if (removedFilter.type === 'user') {
-            setFilters(prev => ({
-                ...prev,
-                users: prev.users.filter(user => user !== removedFilter.value)
-            }));
-        } else if (removedFilter.type === 'project') {
-            setFilters(prev => ({
-                ...prev,
-                projects: prev.projects.filter(project => project !== removedFilter.value)
-            }));
-        } else if (removedFilter.type === 'dateRange') {
-            setFilters(prev => ({
-                ...prev,
-                dateRange: { start: '', end: '' }
-            }));
-        }
-
-        setActiveFilters(newActiveFilters);
-    };
-
-    const handleExport = (format) => {
-        setToastMessage(`Time logs exported successfully as ${format.toUpperCase()}`);
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
     };
 
     const getStatusBadgeClass = (status) => {
@@ -210,22 +65,10 @@ const TimeTracker = () => {
 
     return (
         <div className="tt-dashboard-container bg-main container-fluid p-4 bg-light min-vh-100">
-            {/* Toast Notification */}
-            {showToast && (
-                <div className="tt-toast-notification position-fixed top-0 end-0 m-3" style={{ zIndex: 1050 }}>
-                    <div className="toast show bg-success text-white">
-                        <div className="toast-body d-flex align-items-center">
-                            <CheckCircle size={20} className="me-2" />
-                            {toastMessage}
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* Header */}
             <div className="tt-header-section row mb-4">
                 <div className="col-12">
-                    <h1 className="gradient-heading ">
+                    <h1 className="gradient-heading">
                         Time Tracking Dashboard
                     </h1>
                     <p className="tt-subtitle text-white mb-3">Monitor and analyze team productivity</p>
@@ -265,7 +108,7 @@ const TimeTracker = () => {
                                 <h6 className="tt-card-title text-white mb-0">Top Contributor</h6>
                                 <Users size={20} className="text-info" />
                             </div>
-                            <div className="tt-card-value h6  fw-bold">{summaryData.topContributor}</div>
+                            <div className="tt-card-value h6 fw-bold">{summaryData.topContributor}</div>
                         </div>
                     </div>
                 </div>
@@ -277,23 +120,23 @@ const TimeTracker = () => {
                                 <h6 className="tt-card-title text-white mb-0">Least Active Project</h6>
                                 <AlertCircle size={20} className="text-warning" />
                             </div>
-                            <div className="tt-card-value h6  fw-bold">{summaryData.leastActiveProject}</div>
+                            <div className="tt-card-value h6 fw-bold">{summaryData.leastActiveProject}</div>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Charts Section */}
-            <div className="tt-charts-section  row mb-4">
-                <div className="col-lg-6  mb-3">
-                    <div className="tt-chart-card   card border-0 shadow-sm">
-                        <div className="card-header  bg-card border-0">
-                            <h6 className="tt-chart-title  mb-0 d-flex align-items-center">
+            <div className="tt-charts-section row mb-4">
+                <div className="col-lg-6 mb-3">
+                    <div className="tt-chart-card card border-0 shadow-sm">
+                        <div className="card-header bg-card border-0">
+                            <h6 className="tt-chart-title mb-0 d-flex align-items-center">
                                 <BarChart3 size={20} className="me-2 text-primary" />
                                 Hours by Team Member
                             </h6>
                         </div>
-                        <div className="card-body  bg-card">
+                        <div className="card-body bg-card">
                             <div className="tt-chart-placeholder bg-card bg-light rounded p-4 text-center">
                                 {Object.entries(summaryData.userHours).map(([user, hours], index) => (
                                     <div key={user} className="tt-chart-bar mb-2">
@@ -316,13 +159,13 @@ const TimeTracker = () => {
 
                 <div className="col-lg-6 mb-3">
                     <div className="tt-chart-card bg-card card border-0 shadow-sm">
-                        <div className="card-header bg-white border-0 bg-card">
+                        <div className="card-header bg-card border-0">
                             <h6 className="tt-chart-title mb-0 d-flex align-items-center">
                                 <BarChart3 size={20} className="me-2 text-success" />
                                 Project Distribution
                             </h6>
                         </div>
-                        <div className="card-body ">
+                        <div className="card-body">
                             <div className="tt-chart-placeholder bg-card rounded p-4 text-center">
                                 {Object.entries(summaryData.projectHours).map(([project, hours]) => (
                                     <div key={project} className="tt-chart-bar mb-2">
@@ -344,7 +187,7 @@ const TimeTracker = () => {
                 </div>
             </div>
 
-            {/* Filters and Export Section */}
+            {/* Filters and Export Section (non-functional) */}
             <div className="tt-controls-section row mb-4">
                 <div className="col-12">
                     <div className="tt-controls-card card border-0 shadow-sm">
@@ -358,10 +201,9 @@ const TimeTracker = () => {
                                             <select
                                                 className="tt-filter-select form-select form-select-sm"
                                                 multiple
-                                                value={filters.users}
-                                                onChange={(e) => handleFilterChange('users', Array.from(e.target.selectedOptions, option => option.value))}
+                                               
                                             >
-                                                {uniqueUsers.map(user => (
+                                                {[...new Set(timeEntries.map(entry => entry.user))].map(user => (
                                                     <option key={user} value={user}>{user}</option>
                                                 ))}
                                             </select>
@@ -372,10 +214,9 @@ const TimeTracker = () => {
                                             <select
                                                 className="tt-filter-select form-select form-select-sm"
                                                 multiple
-                                                value={filters.projects}
-                                                onChange={(e) => handleFilterChange('projects', Array.from(e.target.selectedOptions, option => option.value))}
+                                              
                                             >
-                                                {uniqueProjects.map(project => (
+                                                {[...new Set(timeEntries.map(entry => entry.project))].map(project => (
                                                     <option key={project} value={project}>{project}</option>
                                                 ))}
                                             </select>
@@ -386,8 +227,7 @@ const TimeTracker = () => {
                                             <input
                                                 type="date"
                                                 className="tt-date-input form-control form-control-sm"
-                                                value={filters.dateRange.start}
-                                                onChange={(e) => handleFilterChange('dateRange', { ...filters.dateRange, start: e.target.value })}
+                                                
                                             />
                                         </div>
 
@@ -396,18 +236,17 @@ const TimeTracker = () => {
                                             <input
                                                 type="date"
                                                 className="tt-date-input form-control form-control-sm"
-                                                value={filters.dateRange.end}
-                                                onChange={(e) => handleFilterChange('dateRange', { ...filters.dateRange, end: e.target.value })}
+                                                
                                             />
                                         </div>
                                     </div>
 
                                     <div className="tt-filter-buttons mt-2">
-                                        <button className="tt-apply-btn btn btn-primary btn-sm me-2" onClick={applyFilters}>
+                                        <button className="tt-apply-btn btn btn-primary btn-sm me-2" disabled>
                                             <Filter size={16} className="me-1" />
                                             Apply Filters
                                         </button>
-                                        <button className="tt-clear-btn btn btn-outline-secondary btn-sm" onClick={clearFilters}>
+                                        <button className="tt-clear-btn btn btn-outline-secondary btn-sm" disabled>
                                             Clear All
                                         </button>
                                     </div>
@@ -420,20 +259,20 @@ const TimeTracker = () => {
                                             <button
                                                 className="tt-export-btn btn btn-success dropdown-toggle"
                                                 type="button"
-                                                data-bs-toggle="dropdown"
+                                                disabled
                                             >
                                                 <Download size={16} className="me-1" />
                                                 Export Data
                                             </button>
                                             <ul className="tt-export-menu dropdown-menu">
                                                 <li>
-                                                    <button className="dropdown-item" onClick={() => handleExport('excel')}>
+                                                    <button className="dropdown-item" disabled>
                                                         <FileText size={16} className="me-2" />
                                                         Export as Excel
                                                     </button>
                                                 </li>
                                                 <li>
-                                                    <button className="dropdown-item" onClick={() => handleExport('pdf')}>
+                                                    <button className="dropdown-item" disabled>
                                                         <FileText size={16} className="me-2" />
                                                         Export as PDF
                                                     </button>
@@ -448,98 +287,37 @@ const TimeTracker = () => {
                 </div>
             </div>
 
-            {/* Active Filters */}
-            {activeFilters.length > 0 && (
-                <div className="tt-active-filters-section row mb-3">
-                    <div className="col-12">
-                        <div className="tt-filter-tags d-flex flex-wrap gap-2">
-                            <span className="tt-filters-label small text-muted me-2">Active Filters:</span>
-                            {activeFilters.map((filter, index) => (
-                                <span key={index} className="tt-filter-tag badge bg-light text-dark border">
-                                    {filter.value}
-                                    <button
-                                        className="tt-remove-filter btn-close btn-close-sm ms-1"
-                                        onClick={() => removeFilter(index)}
-                                        style={{ fontSize: '0.6em' }}
-                                    ></button>
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* Time Log Table */}
-            <div className="tt-table-section bg-card  row">
-                <div className="col-12 ">
-                    <div className="tt-table-card bg-card  card border-0 shadow-sm">
-                        <div className="card-header  border-0">
-                            <h6 className="tt-table-title  mb-0">Time Entries ({filteredData.length} records)</h6>
+            <div className="tt-table-section bg-card row">
+                <div className="col-12">
+                    <div className="tt-table-card bg-card card border-0 shadow-sm">
+                        <div className="card-header border-0">
+                            <h6 className="tt-table-title mb-0">Time Entries ({timeEntries.length} records)</h6>
                         </div>
-                        <div className="card-body  p-0">
-                            <div className="tt-table-responsive  table-responsive">
-                                <table className="tt-data-table table table-gradient-bg  table-hover mb-0">
-                                    <thead className="tt-table-header ">
+                        <div className="card-body p-0">
+                            <div className="tt-table-responsive table-responsive">
+                                <table className="tt-data-table table table-gradient-bg table-hover mb-0">
+                                    <thead className="tt-table-header">
                                         <tr>
-                                            <th
-                                                className="tt-sortable-header "
-                                                onClick={() => handleSort('user')}
-                                                style={{ cursor: 'pointer' }}
-                                            >
+                                            <th className="tt-sortable-header" style={{ cursor: 'default' }}>
                                                 User
-                                                {sortConfig.key === 'user' && (
-                                                    <ChevronDown
-                                                        size={16}
-                                                        className={`ms-1 ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`}
-                                                    />
-                                                )}
                                             </th>
-                                            <th
-                                                className="tt-sortable-header d-none d-md-table-cell"
-                                                onClick={() => handleSort('project')}
-                                                style={{ cursor: 'pointer' }}
-                                            >
+                                            <th className="tt-sortable-header d-none d-md-table-cell" style={{ cursor: 'default' }}>
                                                 Project
-                                                {sortConfig.key === 'project' && (
-                                                    <ChevronDown
-                                                        size={16}
-                                                        className={`ms-1 ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`}
-                                                    />
-                                                )}
                                             </th>
                                             <th className="tt-task-header d-none d-lg-table-cell">Task</th>
-                                            <th
-                                                className="tt-sortable-header"
-                                                onClick={() => handleSort('date')}
-                                                style={{ cursor: 'pointer' }}
-                                            >
+                                            <th className="tt-sortable-header" style={{ cursor: 'default' }}>
                                                 Date
-                                                {sortConfig.key === 'date' && (
-                                                    <ChevronDown
-                                                        size={16}
-                                                        className={`ms-1 ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`}
-                                                    />
-                                                )}
                                             </th>
                                             <th className="tt-time-header d-none d-md-table-cell">Time</th>
-                                            <th
-                                                className="tt-sortable-header"
-                                                onClick={() => handleSort('totalHours')}
-                                                style={{ cursor: 'pointer' }}
-                                            >
+                                            <th className="tt-sortable-header" style={{ cursor: 'default' }}>
                                                 Hours
-                                                {sortConfig.key === 'totalHours' && (
-                                                    <ChevronDown
-                                                        size={16}
-                                                        className={`ms-1 ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`}
-                                                    />
-                                                )}
                                             </th>
                                             <th className="tt-status-header">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {currentData.map(entry => (
+                                        {timeEntries.map(entry => (
                                             <tr
                                                 key={entry.id}
                                                 className={`tt-table-row ${isOverdue(entry.date) ? 'tt-overdue-row table-warning' : ''} ${isLongHours(entry.totalHours) ? 'tt-long-hours-row' : ''}`}
@@ -563,7 +341,7 @@ const TimeTracker = () => {
                                                     </div>
                                                 </td>
                                                 <td className="tt-time-cell d-none d-md-table-cell">
-                                                    <small className="tt-time-range ">
+                                                    <small className="tt-time-range">
                                                         {entry.startTime} - {entry.endTime}
                                                     </small>
                                                 </td>
@@ -582,49 +360,6 @@ const TimeTracker = () => {
                                     </tbody>
                                 </table>
                             </div>
-
-                            {/* Pagination */}
-                            {totalPages > 1 && (
-                                <div className="tt-pagination-section d-flex justify-content-between align-items-center p-3 border-top">
-                                    <div className="tt-pagination-info">
-                                        <small className="text-white">
-                                            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} entries
-                                        </small>
-                                    </div>
-                                    <nav className="tt-pagination-nav">
-                                        <ul className="pagination pagination-sm mb-0">
-                                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                                <button
-                                                    className="page-link"
-                                                    onClick={() => setCurrentPage(currentPage - 1)}
-                                                    disabled={currentPage === 1}
-                                                >
-                                                    Previous
-                                                </button>
-                                            </li>
-                                            {[...Array(totalPages)].map((_, index) => (
-                                                <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
-                                                    <button
-                                                        className="page-link"
-                                                        onClick={() => setCurrentPage(index + 1)}
-                                                    >
-                                                        {index + 1}
-                                                    </button>
-                                                </li>
-                                            ))}
-                                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                                <button
-                                                    className="page-link"
-                                                    onClick={() => setCurrentPage(currentPage + 1)}
-                                                    disabled={currentPage === totalPages}
-                                                >
-                                                    Next
-                                                </button>
-                                            </li>
-                                        </ul>
-                                    </nav>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>

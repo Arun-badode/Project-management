@@ -118,7 +118,7 @@ const ResourceManagement = () => {
 
   // UI state
   const [activeTab, setActiveTab] = useState('utilization');
-  const [searchTerm, setSearchTerm] = useState('');
+ 
   const [filterRole, setFilterRole] = useState('All');
   const [loading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -143,13 +143,7 @@ const ResourceManagement = () => {
                    'AWS', 'Docker', 'Kubernetes'];
 
   // Filter resources
-  const filteredResources = resources.filter(resource => {
-    const matchesSearch = resource.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         resource.role.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = filterRole === 'All' || resource.role === filterRole;
-    
-    return matchesSearch && matchesRole;
-  });
+
 
   // Calculate utilization metrics
   const utilizationMetrics = {
@@ -258,15 +252,13 @@ const ResourceManagement = () => {
       type="text" 
       className="form-control" 
       placeholder="Search..." 
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
+      
     />
   </div>
   <select 
     className="form-select w-100 w-md-auto"
     style={{ maxWidth: 150 }}
-    value={filterRole}
-    onChange={(e) => setFilterRole(e.target.value)}
+   
   >
     {roles.map(role => (
       <option key={role} value={role}>{role}</option>
@@ -288,7 +280,7 @@ const ResourceManagement = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredResources.map(resource => (
+                  {resources.map(resource => (
                     <tr key={resource.id}>
                       <td>
                         <div className="d-flex align-items-center">
