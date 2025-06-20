@@ -69,8 +69,7 @@ const LoginPage = () => {
             />
             <h1 className="text-white">Welcome Back!</h1>
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
-              vitae mauris volutpat.
+             All-in-One Project Management Dashboard for Creative Teams – Seamlessly Track Tasks, Monitor Deadlines, Analyze Productivity, and Collaborate in Real-Time with a User-Centric Interface Built for DTP and QA Specialists.
             </p>
           </div>
         </div>

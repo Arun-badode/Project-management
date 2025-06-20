@@ -98,10 +98,15 @@ input::placeholder, textarea::placeholder {
 
 /* Input fields */
 .custom-modal-dark .form-control,
-.custom-modal-dark .form-select {
-  background: linear-gradient(to bottom right, #141c3a, #1b2f6e)!important;
-  color: #ffffff;
-  border: 1px solid #555;
+.custom-modal-dark .form-select,
+.custom-modal-dark .option {
+  background: linear-gradient(to bottom right, #141c3a, #1b2f6e) !important;
+  color: #ffffff !important;
+  border: 1px solid #555 !important;
+}
+.custom-modal-dark option {
+  background-color: #1b2f6e;
+  color: white;
 }
 
 .custom-modal-dark .form-control::placeholder {

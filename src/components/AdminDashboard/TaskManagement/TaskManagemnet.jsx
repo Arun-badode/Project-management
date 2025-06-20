@@ -641,9 +641,9 @@ const TaskManagement = () => {
                       onChange={(e) => setNewTask({...newTask, assignee: e.target.value})}
                       className="form-select bg-card "
                     >
-                      <option value="" className='text-dark'>Select assignee</option>
+                      <option value="" className='text-white'>Select assignee</option>
                       {teamMembers.map(member => (
-                        <option className='text-dark' key={member} value={member}>{member}</option>
+                        <option className='text-white' key={member} value={member}>{member}</option>
                       ))}
                     </select>
                   </div>

@@ -156,7 +156,7 @@ export default function SettingsPage() {
                   </select>
                 </div>
               </div>
-              <div className="form-check form-switch settings-theme-toggle-unique">
+              {/* <div className="form-check form-switch settings-theme-toggle-unique">
                 <input
                   className="form-check-input"
                   type="checkbox"
@@ -167,7 +167,7 @@ export default function SettingsPage() {
                 <label className="form-check-label" htmlFor="themeSwitch">
                   {theme === "light" ? "Light Theme" : "Dark Theme"}
                 </label>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

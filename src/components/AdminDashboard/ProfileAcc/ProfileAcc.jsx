@@ -36,6 +36,7 @@ const ProfileAcc = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   // Profile handlers
   const handleProfileChange = (field, value) => {
@@ -263,7 +264,7 @@ const ProfileAcc = () => {
 
               <div className="col-12 col-lg-6">
                 {/* Change Password Section */}
-                <div className="card shadow-sm bg-card border-0 mb-4">
+                {/* <div className="card shadow-sm bg-card border-0 mb-4">
                   <div className="card-header text-white">
                     <h3 className="card-title mb-0 fs-5">Change Password</h3>
                   </div>
@@ -347,7 +348,7 @@ const ProfileAcc = () => {
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> */}
 
                 {/* Account Settings Section */}
                 <div className="card shadow-sm bg-card border-0">
@@ -394,6 +395,14 @@ const ProfileAcc = () => {
                           </div>
                         </div>
                       </div> */}
+                     <div>
+                        <button
+                          className='btn btn-primary'
+                          onClick={() => setShowPasswordModal(true)}
+                        >
+                          Change Password
+                        </button>
+                      </div>
                       
                       {/* Language Dropdown */}
                       <div className="col-12">
@@ -435,6 +444,110 @@ const ProfileAcc = () => {
           </div>
         </div>
       </div>
+
+        {showPasswordModal && (
+        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content bg-card border-0 shadow-lg">
+              <div className="modal-header text-white bg-primary border-0">
+                <h5 className="modal-title">
+                  <i className="bi bi-key-fill me-2"></i>
+                  Change Password
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  aria-label="Close"
+                  onClick={() => setShowPasswordModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body p-4">
+                <div className="row g-3">
+                  <div className="col-12">
+                    <label className="form-label fw-semibold text-white small">Current Password</label>
+                    <div className="input-group">
+                      <input
+                        type={showPassword.current ? "text" : "password"}
+                        className="form-control form-control-lg border-0 bg-light"
+                        value={passwords.current}
+                        onChange={(e) => handlePasswordChange('current', e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => togglePasswordVisibility('current')}
+                      >
+                        <i className={`bi ${showPassword.current ? 'bi-eye-slash-fill' : 'bi-eye-fill'}`}></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="col-12">
+                    <label className="form-label fw-semibold text-white small">New Password</label>
+                    <div className="input-group">
+                      <input
+                        type={showPassword.new ? "text" : "password"}
+                        className="form-control form-control-lg border-0 bg-light"
+                        value={passwords.new}
+                        onChange={(e) => handlePasswordChange('new', e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => togglePasswordVisibility('new')}
+                      >
+                        <i className={`bi ${showPassword.new ? 'bi-eye-slash-fill' : 'bi-eye-fill'}`}></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="col-12">
+                    <label className="form-label fw-semibold text-white small">Confirm New Password</label>
+                    <div className="input-group">
+                      <input
+                        type={showPassword.confirm ? "text" : "password"}
+                        className="form-control form-control-lg border-0 bg-light"
+                        value={passwords.confirm}
+                        onChange={(e) => handlePasswordChange('confirm', e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => togglePasswordVisibility('confirm')}
+                      >
+                        <i className={`bi ${showPassword.confirm ? 'bi-eye-slash-fill' : 'bi-eye-fill'}`}></i>
+                      </button>
+                    </div>
+                  </div>
+                  {passwordError && (
+                    <div className="col-12">
+                      <div className="alert alert-danger py-2 mb-0">
+                        {passwordError}
+                      </div>
+                    </div>
+                  )}
+                  <div className="col-12">
+                    <button
+                      type="button"
+                      className="btn text-white btn-lg w-100 fw-semibold"
+                      onClick={() => {
+                        handlePasswordSubmit();
+                        if (
+                          passwords.new === passwords.confirm &&
+                          passwords.new.length >= 6 &&
+                          passwords.current
+                        ) {
+                          setShowPasswordModal(false);
+                        }
+                      }}
+                    >
+                      Update Password
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Account Modal */}
       {showDeleteModal && (
