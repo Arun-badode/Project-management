@@ -429,8 +429,8 @@ const Assigned = () => {
       </Button>  */}
 
       {/* Add Project Modal */}
-      <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered>
-        <Modal.Header className="bg-card" closeButton>
+      <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered className="custom-modal-dark">
+        <Modal.Header className="" closeButton>
           <Modal.Title>Add New Project</Modal.Title>
         </Modal.Header>
         <Modal.Body className="bg-card">

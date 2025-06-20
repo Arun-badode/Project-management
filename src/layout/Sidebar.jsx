@@ -208,7 +208,7 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
 
-              <li
+              {/* <li
                 className={`menu-item ${
                   isActive("/projectsupport") ? "active" : ""
                 }`}
@@ -223,7 +223,7 @@ const Sidebar = ({ collapsed }) => {
                   <i className="fa-solid fa-life-ring"></i>
                   <span className="menu-text">Support</span>
                 </div>
-              </li>
+              </li> */}
 
               <li
                 className={`menu-item ${

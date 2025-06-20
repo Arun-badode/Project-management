@@ -414,7 +414,7 @@ const ReportingAnalytics = () => {
       </div>
 
       <div className="row">
-        <div className="col-lg-8 ">
+        <div className="col-lg-8 bg-card">
           <div className="analytics-line-chart-container bg-card">
             <h6 className="mb-3">Productivity Trend</h6>
             <ResponsiveContainer width="100%" height={300}>

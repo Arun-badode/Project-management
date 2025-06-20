@@ -103,7 +103,7 @@ const Navbar = ({ toggleSidebar }) => {
               <li>
                 <Link className="dropdown-item py-2" to="/profile">
                   <i className="fa fa-user me-2"></i>
-                  Update Profile
+                   Profile
                 </Link>
               </li>
               {/* <li>
