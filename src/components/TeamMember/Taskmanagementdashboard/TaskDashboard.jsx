@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { Modal, Button, Form } from 'react-bootstrap';
 
 export const TaskDashboard = () => {
   const [selectedTab, setSelectedTab] = useState('all');
   const [sortColumn, setSortColumn] = useState('dueDate');
   const [sortDirection, setSortDirection] = useState('asc');
+   const [showEditModal, setShowEditModal] = useState(false);
+  const [editTask, setEditTask] = useState(null);
 
   // Sample data for tasks
   const tasks = [
@@ -204,6 +207,24 @@ export const TaskDashboard = () => {
       <span className={`badge ${badgeClass}`}>{statusText}</span>
     );
   };
+
+   const handleEditClick = (task) => {
+    setEditTask(task);
+    setShowEditModal(true);
+  };
+
+  // Close modal
+  const handleCloseModal = () => {
+    setShowEditModal(false);
+    setEditTask(null);
+  };
+const handleEditChange = (e) => {
+  const { name, value } = e.target;
+  setEditTask((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
 
   return (
     <div className="min-vh-100 bg-light bg-main py-4 px-2 px-md-4">
@@ -457,9 +478,12 @@ export const TaskDashboard = () => {
                         <td>{renderPriorityBadge(task.priority)}</td>
                         <td>{task.timeSpent}</td>
                         <td>
-                          <button className="btn btn-link text-primary p-0 me-2">
-                            <i className="bi bi-pencil-square"></i>
-                          </button>
+                           <button
+                        className="btn btn-link text-primary p-0 me-2"
+                        onClick={() => handleEditClick(task)}
+                      >
+                        <i className="bi bi-pencil-square"></i>
+                      </button>
                           <button className="btn btn-link text-danger p-0">
                             <i className="bi bi-trash"></i>
                           </button>
@@ -476,6 +500,66 @@ export const TaskDashboard = () => {
                 </tbody>
               </table>
             </div>
+      <Modal show={showEditModal} onHide={handleCloseModal} centered className="custom-modal-dark">
+  <Modal.Header closeButton>
+    <Modal.Title>Edit Task</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    {editTask && (
+      <Form>
+        <Form.Group className="mb-3">
+          <Form.Label>Project</Form.Label>
+          <Form.Control type="text" value={editTask.project} readOnly />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Task</Form.Label>
+          <Form.Control type="text" value={editTask.task} readOnly />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Due Date</Form.Label>
+          <Form.Control type="text" value={formatDateTime(editTask.dueDate)} readOnly />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Status</Form.Label>
+          <Form.Select
+            name="status"
+            value={editTask.status}
+            onChange={handleEditChange}
+          >
+            <option value="YTS">Yet to Start</option>
+            <option value="WIP">In Progress</option>
+            <option value="QC">Quality Check</option>
+          </Form.Select>
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Priority</Form.Label>
+          <Form.Select
+            name="priority"
+            value={editTask.priority}
+            onChange={handleEditChange}
+          >
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </Form.Select>
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Time Spent</Form.Label>
+          <Form.Control type="text" value={editTask.timeSpent} readOnly />
+        </Form.Group>
+      </Form>
+    )}
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={handleCloseModal}>
+      Close
+    </Button>
+    <Button variant="primary" >
+      Save
+    </Button>
+    {/* Add Save button if you want to save changes */}
+  </Modal.Footer>
+</Modal>
           </div>
           {/* Pagination */}
           <div className="card-footer table-gradient-bg d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2">

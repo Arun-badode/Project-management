@@ -175,7 +175,7 @@ function ActivitySummary() {
               {/* Message 1 */}
               <div className="list-group-item d-flex align-items-start p-3 table-gradient-bg">
                 <div
-                  className="mr-3 rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
+                  className="me-3 rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
                   style={{ width: "40px", height: "40px" }}
                 >
                   JD
@@ -198,7 +198,7 @@ function ActivitySummary() {
               {/* Message 2 */}
               <div className="list-group-item d-flex align-items-start p-3  table-gradient-bg">
                 <div
-                  className="mr-3 rounded-circle bg-success text-white d-flex justify-content-center align-items-center"
+                  className="me-3 rounded-circle bg-success text-white d-flex justify-content-center align-items-center"
                   style={{ width: "40px", height: "40px" }}
                 >
                   AS
@@ -221,7 +221,7 @@ function ActivitySummary() {
               {/* Message 3 */}
               <div className="list-group-item d-flex align-items-start p-3 table-gradient-bg">
                 <div
-                  className="mr-3 rounded-circle bg-warning text-white d-flex justify-content-center align-items-center"
+                  className="me-3 rounded-circle bg-warning text-white d-flex justify-content-center align-items-center"
                   style={{ width: "40px", height: "40px" }}
                 >
                   RJ

@@ -134,7 +134,7 @@ const QAManagement = () => {
                     <div className="row ">
                         <div className="col-md-3  col-sm-6 mb-3">
                             <div className="card bg-card text-white">
-                                <div className="card-body ">
+                                <div className="card-body  ">
                                     <h5>Total Tasks</h5>
                                     <h2>{tasks.length}</h2>
                                 </div>
@@ -351,7 +351,7 @@ const QAManagement = () => {
                         <div className="card-header">
                             <h5>QA Completion Status</h5>
                         </div>
-                        <div className="card-body">
+                        <div className="card-body ">
                             {/* Filters */}
                             <div className="row mb-3">
                                 <div className="col-md-3 mb-2">
@@ -430,7 +430,7 @@ const QAManagement = () => {
                             <div className="d-lg-none">
                                 {filteredTasks.filter(task => task.assignedTo).map(task => (
                                     <div key={task.id} className="card mb-3">
-                                        <div className="card-body">
+                                        <div className="card-body bg-card">
                                             <div className="d-flex justify-content-between align-items-start mb-2">
                                                 <h6 className="card-title mb-0">{task.title}</h6>
                                                 <span className={`badge bg-${getStatusColor(task.status)}`}>{task.status}</span>

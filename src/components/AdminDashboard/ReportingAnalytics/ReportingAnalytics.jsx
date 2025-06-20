@@ -236,7 +236,7 @@ const ReportingAnalytics = () => {
         </div>
       </div>
 
-      <div className="analytics-chart-container bg-card">
+      <div className="analytics-chart-container bg-main">
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={workloadData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -287,7 +287,7 @@ const ReportingAnalytics = () => {
               </thead>
               <tbody>
                 {teamPerformanceData.map((member, index) => (
-                  <tr key={index} className="analytics-performance-row text-white">
+                  <tr key={index} className="analytics-performance-row text-white ">
                     <td className="text-white analytics-member-name">{member.name}</td>
                     <td><span className="badge bg-primary analytics-task-badge">{member.completedTasks}</span></td>
                     <td>
@@ -309,8 +309,8 @@ const ReportingAnalytics = () => {
             </table>
           </div>
         </div>
-        <div className="col-lg-4">
-          <div className="analytics-radar-container">
+        <div className="col-lg-4  ">
+          <div className="analytics-radar-container bg-main ">
             <h6 className="text-center mb-3">Performance Comparison</h6>
             <ResponsiveContainer width="100%" height={250}>
               <RadarChart data={radarData}>
@@ -415,7 +415,7 @@ const ReportingAnalytics = () => {
 
       <div className="row">
         <div className="col-lg-8 bg-card">
-          <div className="analytics-line-chart-container bg-card">
+          <div className="analytics-line-chart-container bg-main">
             <h6 className="mb-3">Productivity Trend</h6>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={productivityData}>
@@ -429,7 +429,7 @@ const ReportingAnalytics = () => {
           </div>
         </div>
         <div className="col-lg-4">
-          <div className="analytics-pie-chart-container bg-card">
+          <div className="analytics-pie-chart-container bg-main">
             <h6 className="text-center  mb-3">Billable vs Non-Billable</h6>
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
@@ -454,13 +454,13 @@ const ReportingAnalytics = () => {
           <div className="analytics-productivity-stats mt-4">
             <div className="row text-center">
               <div className="col-6">
-                <div className="analytics-stat-card bg-card">
+                <div className="analytics-stat-card bg-main">
                   <h5 className="text-primary">87%</h5>
                   <small className="">Avg Productivity</small>
                 </div>
               </div>
               <div className="col-6">
-                <div className="analytics-stat-card   bg-card">
+                <div className="analytics-stat-card   bg-main">
                   <h5 className="text-success">72%</h5>
                   <small className="">Billable Hours</small>
                 </div>
