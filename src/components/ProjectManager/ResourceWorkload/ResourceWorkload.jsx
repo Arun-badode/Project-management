@@ -418,11 +418,11 @@ function ResourceWorkload() {
       </div>
 
       {/* Floating Action Button */}
-      <div className="position-fixed bottom-0 end-0 p-3">
+      {/* <div className="position-fixed bottom-0 end-0 p-3">
         <button className="btn btn-primary rounded-circle" style={{ width: '56px', height: '56px' }}>
           <i className="fas fa-plus"></i>
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }

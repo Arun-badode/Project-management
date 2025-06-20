@@ -105,7 +105,7 @@ function CreateProject() {
         {/* Main Content */}
         <div className="container  py-3">
             <h1 className='gradient-heading'>Create New Project</h1>
-          <div className="card shadow-lg p-4 bg-card">
+          <div className="card shadow-lg p-4 create-card">
             <form onSubmit={handleSubmit} className="space-y-4 ">
               {/* Project Basic Information */}
               <div className="space-y-4 ">

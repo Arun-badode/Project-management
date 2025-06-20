@@ -124,7 +124,14 @@ table tr th {
   white-space: nowrap !important;
 }
 
-
+.create-card,
+.create-card input,
+.create-card textarea,
+.create-card .form-control
+{
+   background: linear-gradient(to bottom right, #141c3a, #1b2f6e)!important;
+    color: white!important;
+}
 
 
 /* calendarColors.css */

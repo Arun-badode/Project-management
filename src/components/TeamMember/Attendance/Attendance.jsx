@@ -507,8 +507,8 @@ const Attendance = () => {
           
           <div className="p-3 border-top">
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-center">
-              <div className="text-muted small mb-2 mb-md-0">
-                Showing <span className="fw-medium">{filteredMembers.length}</span> of <span className="fw-medium">{teamMembers.length}</span> team members
+              <div className="text-white small mb-2 mb-md-0">
+                Showing <span className="fw-medium text-white">{filteredMembers.length}</span> of <span className="fw-medium text-white">{teamMembers.length}</span> team members
               </div>
               
               <div className="btn-group">
