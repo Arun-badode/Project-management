@@ -139,7 +139,7 @@ const LoginPage = () => {
               </button>
                <div className="text-center mt-3">
                 <p className="text-muted">
-                  Already have an account? <a href="/singup" style={{ color: "#6e8efb" }}>sing up</a>
+                  Already have an account? <Link to="/singup" style={{ color: "#6e8efb" }}>sing up</Link>
                 </p>
               </div>
               
