@@ -174,7 +174,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
       </Row>
 
       {/* Filters */}
-      <Card className="bg-card text-white p-3 mb-4">
+      {/* <Card className="bg-card text-white p-3 mb-4">
         <h5>Filters</h5>
         <Row className="gy-3">
           <Col xs={12} sm={6} md={2}>
@@ -228,7 +228,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
             </Form.Select>
           </Col>
         </Row>
-      </Card>
+      </Card> */}
 
 
  <div className="row g-4 mb-4">
@@ -317,7 +317,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
                 <th>QC Due Date</th>
                 <th>Status</th>
                 <th>Handler</th>
-                <th>Process Status</th>
+                {/* <th>Process Status</th> */}
                 <th>QA Reviewer</th>
                 <th>QA Status</th>
                 <th>Action</th>
@@ -351,7 +351,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
                     </Badge>
                   </td>
                   <td>{project.handler}</td>
-                  <td>
+                  {/* <td>
                     <Badge
                       bg={
                         project.processStatus === "Completed"
@@ -365,7 +365,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
                     >
                       {project.processStatus}
                     </Badge>
-                  </td>
+                  </td> */}
                   <td>{project.qaReviewer}</td>
                   <td>
                     <Badge
@@ -495,7 +495,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
               <p><strong>Handler:</strong> {selectedProject.handler}</p>
               <p><strong>QA Reviewer:</strong> {selectedProject.qaReviewer}</p>
               <p><strong>QA Status:</strong> {selectedProject.qaStatus}</p>
-              <p><strong>Server Path:</strong> {selectedProject.serverPath}</p>
+              {/* <p><strong>Server Path:</strong> {selectedProject.serverPath}</p> */}
               {/* Add more fields as needed */}
             </div>
           )}

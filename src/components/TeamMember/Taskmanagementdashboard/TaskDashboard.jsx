@@ -512,15 +512,15 @@ const handleEditChange = (e) => {
       <Form>
         <Form.Group className="mb-3">
           <Form.Label>Project</Form.Label>
-          <Form.Control type="text" value={editTask.project} readOnly />
+          <Form.Control type="text" value={editTask.project}  />
         </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label>Task</Form.Label>
-          <Form.Control type="text" value={editTask.task} readOnly />
+          <Form.Control type="text" value={editTask.task}  />
         </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label>Due Date</Form.Label>
-          <Form.Control type="text" value={formatDateTime(editTask.dueDate)} readOnly />
+          <Form.Control type="date" value={formatDateTime(editTask.dueDate)}  />
         </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label>Status</Form.Label>
@@ -548,7 +548,7 @@ const handleEditChange = (e) => {
         </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label>Time Spent</Form.Label>
-          <Form.Control type="text" value={editTask.timeSpent} readOnly />
+          <Form.Control type="text" value={editTask.timeSpent}  />
         </Form.Group>
       </Form>
     )}

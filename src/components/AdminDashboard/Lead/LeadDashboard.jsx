@@ -13,7 +13,7 @@ import { FaPlus, FaEye, FaEdit, FaTrash } from "react-icons/fa";
 const platforms = ["Web", "Mobile", "Desktop"];
 const statuses = ["In Progress", "Completed", "On Hold"];
 const handlers = ["Alice", "Bob", "Charlie", "David"];
-const processStatuses = ["Pending", "Completed", "Delayed"];
+// const processStatuses = ["Pending", "Completed", "Delayed"];
 const qaReviewers = ["Eve", "Mallory", "Trent"];
 const qaStatuses = ["Passed", "Failed", "In Review"];
 
@@ -77,8 +77,8 @@ const LeadDashboard = () => {
         qcDueDate: qcDueDate.toISOString().split("T")[0],
         status: statuses[Math.floor(Math.random() * statuses.length)],
         handler: handlers[Math.floor(Math.random() * handlers.length)],
-        processStatus:
-          processStatuses[Math.floor(Math.random() * processStatuses.length)],
+        // processStatus:
+        //   processStatuses[Math.floor(Math.random() * processStatuses.length)],
         qaReviewer: qaReviewers[Math.floor(Math.random() * qaReviewers.length)],
         qaStatus: qaStatuses[Math.floor(Math.random() * qaStatuses.length)],
         serverPath: `/server/path/project${i + 1}`,
@@ -96,6 +96,7 @@ const LeadDashboard = () => {
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <h2 className="gradient-heading">All Project</h2>
         <div className="d-flex flex-column flex-sm-row gap-2">
+          <Button className="gradient-button"><i class="fa-solid fa-upload me-2"></i>Excel Import</Button>
           <Button className="gradient-button" onClick={handleShow}>
             <FaPlus className="me-2" /> Create New Project
           </Button>
@@ -122,7 +123,7 @@ const LeadDashboard = () => {
                 <th>QC Due Date</th>
                 <th>Status</th>
                 <th>Handler</th>
-                <th>Process Status</th>
+                {/* <th>Process Status</th> */}
                 <th>QA Reviewer</th>
                 <th>QA Status</th>
                 <th>Action</th>
@@ -156,7 +157,7 @@ const LeadDashboard = () => {
                     </Badge>
                   </td>
                   <td>{project.handler}</td>
-                  <td>
+                  {/* <td>
                     <Badge
                       bg={
                         project.processStatus === "Completed"
@@ -170,7 +171,7 @@ const LeadDashboard = () => {
                     >
                       {project.processStatus}
                     </Badge>
-                  </td>
+                  </td> */}
                   <td>{project.qaReviewer}</td>
                   <td>
                     <Badge
@@ -326,9 +327,9 @@ const LeadDashboard = () => {
               <p>
                 <strong>QA Status:</strong> {selectedProject.qaStatus}
               </p>
-              <p>
+              {/* <p>
                 <strong>Server Path:</strong> {selectedProject.serverPath}
-              </p>
+              </p> */}
             </div>
           )}
         </Modal.Body>

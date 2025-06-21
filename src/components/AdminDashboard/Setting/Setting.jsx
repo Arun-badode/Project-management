@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 const rolesData = [
   { name: "Admin", permissions: { create: true, edit: true, delete: true } },
@@ -188,7 +189,7 @@ export default function SettingsPage() {
                       type="checkbox"
                       className="form-check-input"
                       checked={role.permissions.create}
-                      disabled
+                
                     />
                   </td>
                   <td>
@@ -196,7 +197,7 @@ export default function SettingsPage() {
                       type="checkbox"
                       className="form-check-input"
                       checked={role.permissions.edit}
-                      disabled
+                     
                     />
                   </td>
                   <td>
@@ -204,16 +205,18 @@ export default function SettingsPage() {
                       type="checkbox"
                       className="form-check-input"
                       checked={role.permissions.delete}
-                      disabled
+                   
                     />
                   </td>
                   <td>
+                    <Link to="/role&permission">
                     <button
                       className="btn btn-sm btn-outline-primary"
-                      onClick={() => handleRoleEdit(idx)}
+                     
                     >
                       <i className="bi bi-pencil-fill me-1"></i>Edit
                     </button>
+                    </Link>
                   </td>
                 </tr>
               ))

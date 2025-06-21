@@ -42,6 +42,23 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
 
+                <li
+                className={`menu-item ${
+                  isActive("/usermanage") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/usermanage");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-users-gear"></i>
+                  <span className="menu-text">User </span>
+                </div>
+              </li>
+
               <li
                 className={`menu-item ${
                   isActive("/LeadDashboard") ? "active" : ""
@@ -60,22 +77,7 @@ const Sidebar = ({ collapsed }) => {
               </li>
 
               
-              <li
-                className={`menu-item ${
-                  isActive("/usermanage") ? "active" : ""
-                }`}
-              >
-                <div
-                  className="menu-link menu-i"
-                  onClick={() => {
-                    navigate("/usermanage");
-                    menuItemClick();
-                  }}
-                >
-                  <i className="fa-solid fa-users-gear"></i>
-                  <span className="menu-text">Team </span>
-                </div>
-              </li>
+            
 
               <li
                 className={`menu-item ${
@@ -229,18 +231,18 @@ const Sidebar = ({ collapsed }) => {
 
               <li
                 className={`menu-item ${
-                  isActive("/settingpage") ? "active" : ""
+                  isActive("/role&permission") ? "active" : ""
                 }`}
               >
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("/settingpage");
+                    navigate("/role&permission");
                     menuItemClick();
                   }}
                 >
                   <i className="fa-solid fa-gear"></i>
-                  <span className="menu-text">Settings</span>
+                  <span className="menu-text">Role & Permission</span>
                 </div>
               </li>
             </>

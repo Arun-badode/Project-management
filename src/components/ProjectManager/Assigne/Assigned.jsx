@@ -215,7 +215,7 @@ const Assigned = () => {
             className="d-flex align-items-center"
           >
             <Plus className="me-2" />
-            Add New Project
+            Assined Project
           </Button>
         </div>
       </div>
@@ -382,7 +382,7 @@ const Assigned = () => {
                 </p>
                 <Button variant="primary" onClick={() => setShowAddModal(true)}>
                   <Plus className="me-2" />
-                  Add New Project
+                  Assigned Project
                 </Button>
               </Card.Body>
             </Card>
@@ -431,7 +431,7 @@ const Assigned = () => {
       {/* Add Project Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered className="custom-modal-dark">
         <Modal.Header className="" closeButton>
-          <Modal.Title>Add New Project</Modal.Title>
+          <Modal.Title>Assigned Project</Modal.Title>
         </Modal.Header>
         <Modal.Body className="bg-card">
           <Form>

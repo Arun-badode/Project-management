@@ -242,7 +242,7 @@ function Task() {
 
     return (
         <div className="container-fluid py-4">
-            <h1 className="mb-4 gradient-heading">Task Management</h1>
+            <h1 className="mb-4 gradient-heading">Task</h1>
             <div className="list-group overflow-auto">
                 {tasks.map(task => (
                     <div key={task.id} className="list-group-item bg-card d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-2">

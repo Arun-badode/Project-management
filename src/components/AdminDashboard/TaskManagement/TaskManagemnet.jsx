@@ -182,9 +182,9 @@ const TaskManagement = () => {
     );
   };
 
-  const deleteTask = (taskId) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
-  };
+  // const deleteTask = (taskId) => {
+  //   setTasks(tasks.filter(task => task.id !== taskId));
+  // };
 
   const reassignTask = (taskId, newAssignee) => {
     updateTask(taskId, { assignee: newAssignee });
@@ -300,7 +300,7 @@ const TaskManagement = () => {
           <Edit3 className="w-4 h-4" />
         </button>
         <button
-          onClick={() => deleteTask(task.id)}
+          
           className="btn btn-sm btn-outline-danger ms-5 w-50 w-md-auto"
         >
           <Trash2 className="w-4 h-4" />
