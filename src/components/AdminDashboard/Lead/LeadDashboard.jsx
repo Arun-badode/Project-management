@@ -96,10 +96,13 @@ const LeadDashboard = () => {
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <h2 className="gradient-heading">All Project</h2>
         <div className="d-flex flex-column flex-sm-row gap-2">
-          <Button className="gradient-button"><i class="fa-solid fa-upload me-2"></i>Excel Import</Button>
+          <Button className="gradient-button"><i class="fa-solid fa-download me-2"></i>Black Excel Download</Button>  
+          <Button className="gradient-button"><i class="fa-solid fa-upload me-2"></i>Import Excel</Button>
+           <Button className="gradient-button"><i class="fa-solid fa-download me-2"></i>Download Excel</Button>
           <Button className="gradient-button" onClick={handleShow}>
             <FaPlus className="me-2" /> Create New Project
           </Button>
+         
         </div>
       </div>
 

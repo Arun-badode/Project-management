@@ -199,6 +199,19 @@ const Assigned = () => {
         <h1 className="h4 mb-2 mb-md-0 fw-bold gradient-heading ms-3 mt-3  ">
           Assigned Projects
         </h1>
+         <Form.Group
+              controlId="searchProjects"
+              className="position-relative w-25 justify-content-center justify-content-end"
+            >
+              <Form.Control
+                type="text"
+                placeholder="Search projects..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="ps-4"
+              />
+              
+            </Form.Group>
 
         <div className="d-flex  align-items-center gap-2">
           <Button
@@ -223,26 +236,14 @@ const Assigned = () => {
       <header className=" shadow-sm  ">
         <div>
           {/* Search and filters */}
-          <div className="pb-3 p-5">
-            <Form.Group
-              controlId="searchProjects"
-              className="position-relative w-25 justify-content-center justify-content-end"
-            >
-              <Form.Control
-                type="text"
-                placeholder="Search projects..."
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="ps-4"
-              />
-              
-            </Form.Group>
+          <div className="">
+           
 
             {showFilters && (
-              <Row className="mt-3 g-3">
+              <Row className="g-3">
                 <Col md={4}>
                   <Form.Group controlId="sortBy">
-                    <Form.Label>Sort by</Form.Label>
+                    <Form.Label className="text-white">Sort by</Form.Label>
                     <Form.Select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
@@ -255,7 +256,7 @@ const Assigned = () => {
                 </Col>
                 <Col md={4}>
                   <Form.Group controlId="filterStatus">
-                    <Form.Label>Status</Form.Label>
+                    <Form.Label className="text-white">Status</Form.Label>
                     <Form.Select
                       value={filterStatus}
                       onChange={(e) => setFilterStatus(e.target.value)}
@@ -270,7 +271,7 @@ const Assigned = () => {
                 </Col>
                 <Col md={4}>
                   <Form.Group controlId="filterPriority">
-                    <Form.Label>Priority</Form.Label>
+                    <Form.Label className="text-white">Priority</Form.Label>
                     <Form.Select
                       value={filterPriority}
                       onChange={(e) => setFilterPriority(e.target.value)}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
 
 function UserManagement() {
    const [showModal, setShowModal] = useState(false);
@@ -31,7 +31,7 @@ const [selectedMember, setSelectedMember] = useState(null);
     e.preventDefault();
     // Add logic to add member to teamMembers (currently static)
     setShowModal(false);
-    setForm({ initials: '', name: '', role: '' });
+    setForm({ initials: "", name: "", role: "" });
   };
   return (
     <div>
@@ -308,7 +308,7 @@ const [selectedMember, setSelectedMember] = useState(null);
 
 
     </div>
-  )
+  );
 }
 
-export default UserManagement
+export default UserManagement;

@@ -411,7 +411,7 @@ const AuditLog = () => {
                     ))}
                   </select>
                 </div>
-                {activeTab === "login-logout" && (
+                {/* {activeTab === "login-logout" && (
                   <>
                     <div className="col-md-2 mb-3">
                       <select
@@ -442,7 +442,7 @@ const AuditLog = () => {
                       </select>
                     </div>
                   </>
-                )}
+                )} */}
               </div>
 
               {/* Active Users Card (for Login/Logout tab) */}
@@ -463,144 +463,164 @@ const AuditLog = () => {
               )}
 
               {/* Table - Desktop View */}
-         <div className="card  d-none  d-lg-block">
+              <div className="card  d-none  d-lg-block">
                 <div className="table-responsive ">
-                 <table className="table table-hover mb-0 table-gradient-bg">
-  <thead className="table-light">
-    <tr>
-      {activeTab === "all-activities" && (
-        <>
-          <th>ID</th>
-          <th>Timestamp</th>
-          <th>User</th>
-          <th>Role</th>
-          <th>Activity</th>
-          <th>Module</th>
-          <th>IP Address</th>
-          <th>Device/Browser</th>
-          <th>Actions</th>
-        </>
-      )}
-      {activeTab === "login-logout" && (
-        <>
-          <th>ID</th>
-          <th>Date & Time</th>
-          <th>User</th>
-          <th>Role</th>
-          <th>Action</th>
-          <th>Status</th>
-          <th>IP Address</th>
-          <th>Device/Browser</th>
-        </>
-      )}
-      {activeTab === "changes-history" && (
-        <>
-          <th>ID</th>
-          <th>Timestamp</th>
-          <th>User</th>
-          <th>Entity Type</th>
-          <th>Action</th>
-          <th>Entity Name</th>
-          <th>Change Summary</th>
-          <th>Actions</th>
-        </>
-      )}
-    </tr>
-  </thead>
-  <tbody>
-    {getCurrentData().map((item) => (
-      <tr key={item.id}>
-        {activeTab === "all-activities" && (
-          <>
-            <td>{item.id}</td>
-            <td className="text-muted small">{item.timestamp}</td>
-            <td>
-              <strong>{item.user}</strong>
-            </td>
-            <td>
-              <span className="badge bg-secondary">{item.role}</span>
-            </td>
-            <td>{item.activity}</td>
-            <td>{item.module}</td>
-            <td>
-              <code>{item.ipAddress}</code>
-            </td>
-            <td className="text-muted small">{item.device}</td>
-            <td>
-              <button
-                className="btn btn-outline-primary btn-sm"
-                onClick={() => handleViewDetails(item)}
-              >
-                <Eye size={14} className="me-1" />
-                Details
-              </button>
-            </td>
-          </>
-        )}
-        {activeTab === "login-logout" && (
-          <>
-            <td>{item.id}</td>
-            <td className="text-muted small">{item.datetime}</td>
-            <td>
-              <strong>{item.user}</strong>
-            </td>
-            <td>
-              <span className="badge bg-secondary">{item.role}</span>
-            </td>
-            <td>
-              <span
-                className={`badge ${
-                  item.action === "Login" ? "bg-info" : "bg-warning"
-                }`}
-              >
-                {item.action}
-              </span>
-            </td>
-            <td>
-              <span className={getStatusBadge(item.status)}>
-                {item.status}
-              </span>
-            </td>
-            <td>
-              <code>{item.ipAddress}</code>
-            </td>
-            <td className="text-muted small">{item.device}</td>
-          </>
-        )}
-        {activeTab === "changes-history" && (
-          <>
-            <td>{item.id}</td>
-            <td className="text-muted small">{item.timestamp}</td>
-            <td>
-              <strong>{item.user}</strong>
-            </td>
-            <td>
-              <span className="badge bg-info">{item.entityType}</span>
-            </td>
-            <td>
-              <span className={getActionBadge(item.action)}>
-                {item.action}
-              </span>
-            </td>
-            <td>
-              <strong>{item.entityName}</strong>
-            </td>
-            <td className="text-muted">{item.changeSummary}</td>
-            <td>
-              <button
-                className="btn btn-outline-primary btn-sm"
-                onClick={() => handleViewDetails(item)}
-              >
-                <Eye size={14} className="me-1" />
-                View
-              </button>
-            </td>
-          </>
-        )}
-      </tr>
-    ))}
-  </tbody>
-</table>
+                  <table className="table table-hover mb-0 table-gradient-bg">
+                    <thead className="table-light">
+                      <tr>
+                        {activeTab === "all-activities" && (
+                          <>
+                            <th>ID</th>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Activity</th>
+                            <th>Module</th>
+                            <th>IP Address</th>
+                            <th>Device/Browser</th>
+                            <th>Actions</th>
+                          </>
+                        )}
+                        {activeTab === "login-logout" && (
+                          <>
+                            <th>ID</th>
+                            <th>Date & Time</th>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Action</th>
+                            <th>Status</th>
+                            <th>IP Address</th>
+                            <th>Device/Browser</th>
+                          </>
+                        )}
+                        {activeTab === "changes-history" && (
+                          <>
+                            <th>ID</th>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th>Entity Type</th>
+                            <th>Action</th>
+                            <th>Entity Name</th>
+                            <th>Change Summary</th>
+                            <th>Actions</th>
+                          </>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getCurrentData().map((item) => (
+                        <tr key={item.id}>
+                          {activeTab === "all-activities" && (
+                            <>
+                              <td>{item.id}</td>
+                              <td className="text-muted small">
+                                {item.timestamp}
+                              </td>
+                              <td>
+                                <strong>{item.user}</strong>
+                              </td>
+                              <td>
+                                <span className="badge bg-secondary">
+                                  {item.role}
+                                </span>
+                              </td>
+                              <td>{item.activity}</td>
+                              <td>{item.module}</td>
+                              <td>
+                                <code>{item.ipAddress}</code>
+                              </td>
+                              <td className="text-muted small">
+                                {item.device}
+                              </td>
+                              <td>
+                                <button
+                                  className="btn btn-outline-primary btn-sm"
+                                  onClick={() => handleViewDetails(item)}
+                                >
+                                  <Eye size={14} className="me-1" />
+                                  Details
+                                </button>
+                              </td>
+                            </>
+                          )}
+                          {activeTab === "login-logout" && (
+                            <>
+                              <td>{item.id}</td>
+                              <td className="text-muted small">
+                                {item.datetime}
+                              </td>
+                              <td>
+                                <strong>{item.user}</strong>
+                              </td>
+                              <td>
+                                <span className="badge bg-secondary">
+                                  {item.role}
+                                </span>
+                              </td>
+                              <td>
+                                <span
+                                  className={`badge ${
+                                    item.action === "Login"
+                                      ? "bg-info"
+                                      : "bg-warning"
+                                  }`}
+                                >
+                                  {item.action}
+                                </span>
+                              </td>
+                              <td>
+                                <span className={getStatusBadge(item.status)}>
+                                  {item.status}
+                                </span>
+                              </td>
+                              <td>
+                                <code>{item.ipAddress}</code>
+                              </td>
+                              <td className="text-muted small">
+                                {item.device}
+                              </td>
+                            </>
+                          )}
+                          {activeTab === "changes-history" && (
+                            <>
+                              <td>{item.id}</td>
+                              <td className="text-muted small">
+                                {item.timestamp}
+                              </td>
+                              <td>
+                                <strong>{item.user}</strong>
+                              </td>
+                              <td>
+                                <span className="badge bg-info">
+                                  {item.entityType}
+                                </span>
+                              </td>
+                              <td>
+                                <span className={getActionBadge(item.action)}>
+                                  {item.action}
+                                </span>
+                              </td>
+                              <td>
+                                <strong>{item.entityName}</strong>
+                              </td>
+                              <td className="text-muted">
+                                {item.changeSummary}
+                              </td>
+                              <td>
+                                <button
+                                  className="btn btn-outline-primary btn-sm"
+                                  onClick={() => handleViewDetails(item)}
+                                >
+                                  <Eye size={14} className="me-1" />
+                                  View
+                                </button>
+                              </td>
+                            </>
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
 

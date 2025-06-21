@@ -28,25 +28,25 @@ const TimeTracker = () => {
     ];
 
     // Static summary data
-    const summaryData = {
-        totalHours: '54.0',
-        avgDailyHours: '6.8',
-        topContributor: 'John Doe',
-        leastActiveProject: 'Training',
-        userHours: {
-            'John Doe': 13,
-            'Sarah Smith': 10.5,
-            'Mike Johnson': 11,
-            'Emily Davis': 19.5
-        },
-        projectHours: {
-            'Website Redesign': 16.5,
-            'Mobile App': 13.5,
-            'API Development': 11,
-            'Training': 2,
-            'Documentation': 5
-        }
-    };
+    // const summaryData = {
+    //     totalHours: '54.0',
+    //     avgDailyHours: '6.8',
+    //     topContributor: 'John Doe',
+    //     leastActiveProject: 'Training',
+    //     userHours: {
+    //         'John Doe': 13,
+    //         'Sarah Smith': 10.5,
+    //         'Mike Johnson': 11,
+    //         'Emily Davis': 19.5
+    //     },
+    //     projectHours: {
+    //         'Website Redesign': 16.5,
+    //         'Mobile App': 13.5,
+    //         'API Development': 11,
+    //         'Training': 2,
+    //         'Documentation': 5
+    //     }
+    // };
 
     // --- Sorting Logic Start ---
     const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'asc' });
@@ -119,7 +119,7 @@ const TimeTracker = () => {
             </div>
 
             {/* Summary Cards */}
-            <div className="tt-summary-section row mb-4">
+            {/* <div className="tt-summary-section row mb-4">
                 <div className="col-lg-3 col-md-6 mb-3">
                     <div className="tt-summary-card bg-card card h-100 border-0 shadow-sm">
                         <div className="card-body">
@@ -167,10 +167,10 @@ const TimeTracker = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Charts Section */}
-            <div className="tt-charts-section row mb-4">
+            {/* <div className="tt-charts-section row mb-4">
                 <div className="col-lg-6 mb-3">
                     <div className="tt-chart-card card border-0 shadow-sm">
                         <div className="card-header bg-card border-0">
@@ -228,15 +228,15 @@ const TimeTracker = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Filters and Export Section (non-functional) */}
-            <div className="tt-controls-section row mb-4">
+            {/* <div className="tt-controls-section row mb-4">
                 <div className="col-12">
                     <div className="tt-controls-card card border-0 shadow-sm">
                         <div className="card-body bg-card">
                             <div className="row align-items-end">
-                                {/* Filters */}
+                               
                                 <div className="col-lg-8 col-md-12 mb-3 mb-lg-0">
                                     <div className="row">
                                         <div className="col-md-3 mb-2">
@@ -291,7 +291,7 @@ const TimeTracker = () => {
                                     </div>
                                 </div>
 
-                                {/* Export */}
+                               
                                 <div className="col-lg-4 col-md-12">
                                     <div className="tt-export-section d-flex justify-content-lg-end">
                                         <div className="dropdown">
@@ -324,7 +324,7 @@ const TimeTracker = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* Time Log Table */}
             <div className="tt-table-section bg-card row">
