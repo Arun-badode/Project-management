@@ -193,7 +193,7 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
 
-              <li
+              {/* <li
                 className={`menu-item ${isActive("/profile") ? "active" : ""}`}
               >
                 <div
@@ -206,7 +206,7 @@ const Sidebar = ({ collapsed }) => {
                   <i className="fa-solid fa-user-circle"></i>
                   <span className="menu-text">Profile & Account</span>
                 </div>
-              </li>
+              </li> */}
 
               <li
                 className={`menu-item ${

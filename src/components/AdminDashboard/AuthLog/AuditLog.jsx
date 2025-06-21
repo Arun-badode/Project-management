@@ -383,7 +383,7 @@ const AuditLog = () => {
                                         ))}
                                     </select>
                                 </div>
-                                {activeTab === 'login-logout' && (
+                                {/* {activeTab === 'login-logout' && (
                                     <>
                                         <div className="col-md-2 mb-3">
                                             <select
@@ -410,7 +410,7 @@ const AuditLog = () => {
                                             </select>
                                         </div>
                                     </>
-                                )}
+                                )} */}
                             </div>
 
                             {/* Active Users Card (for Login/Logout tab) */}
