@@ -35,7 +35,10 @@ const TaskManagement = () => {
       timerStart: null,
       category: "Design",
       qaStatus: "Pending",
-      project: "Brand Refresh Project"
+      project: "Brand Refresh Project",
+      module: "UI Components",
+      createdBy: "Emma Davis",
+      createdAt: "2025-04-20",
     },
     {
       id: 2,
@@ -50,7 +53,10 @@ const TaskManagement = () => {
       timerStart: null,
       category: "Development",
       qaStatus: "Pending",
-      project: "Invoice System"
+      project: "Invoice System",
+      module: "Quotes Module",
+      createdBy: "John Smith",
+      createdAt: "2025-04-18",
     },
     {
       id: 3,
@@ -65,7 +71,10 @@ const TaskManagement = () => {
       timerStart: null,
       category: "Development",
       qaStatus: "Passed",
-      project: "Website Redesign"
+      project: "Website Redesign",
+      module: "Auth Service",
+      createdBy: "Lisa Wong",
+      createdAt: "2025-06-10",
     },
     {
       id: 4,
@@ -80,7 +89,10 @@ const TaskManagement = () => {
       timerStart: null,
       category: "Documentation",
       qaStatus: "Not Started",
-      project: "Mobile App"
+      project: "Mobile App",
+      module: "Backend API",
+      createdBy: "Sarah Chen",
+      createdAt: "2025-06-20",
     },
   ]);
 
@@ -100,7 +112,9 @@ const TaskManagement = () => {
     priority: "Medium",
     dueDate: "",
     category: "Development",
-    project: ""
+    project: "",
+    module: "",
+    createdBy: "",
   });
 
   const teamMembers = [
@@ -132,7 +146,15 @@ const TaskManagement = () => {
     "Invoice System",
     "Website Redesign",
     "Mobile App",
-    "Marketing Campaign"
+    "Marketing Campaign",
+  ];
+  const modules = [
+    "UI Components",
+    "Quotes Module",
+    "Auth Service",
+    "Backend API",
+    "Dashboard",
+    "Settings",
   ];
 
   // Timer functionality
@@ -200,6 +222,7 @@ const TaskManagement = () => {
         isTimerRunning: false,
         timerStart: null,
         qaStatus: "Not Started",
+        createdAt: new Date().toISOString().split("T")[0],
       };
       setTasks([...tasks, task]);
       setNewTask({
@@ -210,7 +233,9 @@ const TaskManagement = () => {
         priority: "Medium",
         dueDate: "",
         category: "Development",
-        project: ""
+        project: "",
+        module: "",
+        createdBy: "",
       });
       setShowAddTask(false);
     }
@@ -302,12 +327,14 @@ const TaskManagement = () => {
   };
 
   const renderTaskCard = (task) => (
-    <div key={task.id} className="card mb-3  bg-card">
+    <div key={task.id} className="card mb-3 bg-card">
       <div className="card-body">
         <div className="d-flex justify-content-between align-items-start mb-2">
           <div>
             <h5 className="card-title mb-1">{task.title}</h5>
-            <p className="card-text text-muted small mb-2">{task.description}</p>
+            <p className="card-text text-muted small mb-2">
+              {task.description}
+            </p>
           </div>
           <div className="d-flex gap-2">
             <button
@@ -361,11 +388,7 @@ const TaskManagement = () => {
               task.isTimerRunning ? "btn-danger" : "btn-success"
             }`}
           >
-            {task.isTimerRunning ? (
-              <Pause size={14} />
-            ) : (
-              <Play size={14} />
-            )}
+            {task.isTimerRunning ? <Pause size={14} /> : <Play size={14} />}
             {task.isTimerRunning ? "Stop" : "Start"}
           </button>
         </div>
@@ -374,7 +397,7 @@ const TaskManagement = () => {
   );
 
   const renderTaskTable = () => (
-    <div className="table-responsive ">
+    <div className="table-responsive">
       <table className="table table-hover align-middle table-gradient-bg">
         <thead className="table-light">
           <tr>
@@ -417,7 +440,11 @@ const TaskManagement = () => {
                       task.isTimerRunning ? "btn-danger" : "btn-success"
                     }`}
                   >
-                    {task.isTimerRunning ? <Pause size={14} /> : <Play size={14} />}
+                    {task.isTimerRunning ? (
+                      <Pause size={14} />
+                    ) : (
+                      <Play size={14} />
+                    )}
                   </button>
                   <button
                     onClick={() => setQuickViewTask(task)}
@@ -449,8 +476,8 @@ const TaskManagement = () => {
   const renderTaskList = () => (
     <div className="mb-4">
       {/* Filters and Search */}
-      <div className="card mb-3  bg-card">
-        <div className="card-body ">
+      <div className="card mb-3 bg-card">
+        <div className="card-body">
           <div className="row g-3 align-items-center">
             <div className="col-md-5">
               <div className="input-group">
@@ -507,21 +534,25 @@ const TaskManagement = () => {
               </button>
             </div>
           </div>
-          
+
           {/* View Mode Toggle */}
           <div className="mt-3 d-flex justify-content-end">
             <div className="btn-group" role="group">
               <button
                 type="button"
-                className={`btn ${viewMode === 'table' ? 'btn-primary' : 'btn-outline-primary'}`}
-                onClick={() => setViewMode('table')}
+                className={`btn ${
+                  viewMode === "table" ? "btn-primary" : "btn-outline-primary"
+                }`}
+                onClick={() => setViewMode("table")}
               >
                 Table View
               </button>
               <button
                 type="button"
-                className={`btn ${viewMode === 'card' ? 'btn-primary' : 'btn-outline-primary'}`}
-                onClick={() => setViewMode('card')}
+                className={`btn ${
+                  viewMode === "card" ? "btn-primary" : "btn-outline-primary"
+                }`}
+                onClick={() => setViewMode("card")}
               >
                 Card View
               </button>
@@ -531,9 +562,11 @@ const TaskManagement = () => {
       </div>
 
       {/* Task View */}
-      {viewMode === 'table' ? renderTaskTable() : (
+      {viewMode === "table" ? (
+        renderTaskTable()
+      ) : (
         <div className="row row-cols-1 row-cols-md-2 g-4">
-          {filteredTasks.map(task => (
+          {filteredTasks.map((task) => (
             <div key={task.id} className="col">
               {renderTaskCard(task)}
             </div>
@@ -556,8 +589,8 @@ const TaskManagement = () => {
         <div className="card-body">
           <h5 className="card-title mb-4">Time Tracking Summary</h5>
 
-          <div className="row mb-4 ">
-            <div className="col-md-4 mb-3 mb-md-0 ">
+          <div className="row mb-4">
+            <div className="col-md-4 mb-3 mb-md-0">
               <div className="card bg-card">
                 <div className="card-body">
                   <div className="d-flex align-items-center gap-2 mb-2">
@@ -602,8 +635,8 @@ const TaskManagement = () => {
             </div>
           </div>
 
-          <div className="table-responsive table-gradient-bg ">
-            <table className="table table-hover ">
+          <div className="table-responsive table-gradient-bg">
+            <table className="table table-hover">
               <thead>
                 <tr>
                   <th>ID</th>
@@ -656,70 +689,72 @@ const TaskManagement = () => {
 
   const renderQAOverview = () => (
     <div className="mb-4">
-      <div className="card mb-3">
-        <div className="card-body bg-card">
+      <div className="card mb-3 bg-card">
+        <div className="card-body">
           <h5 className="card-title mb-4">QA Tasks Overview</h5>
 
-          <div className="row mb-4">
-            {["Not Started", "Pending", "In Review", "Passed"].map((status) => {
-              const count = tasks.filter(
-                (task) => task.qaStatus === status
-              ).length;
-              return (
-                <div key={status} className="col-md-3 mb-3 mb-md-0">
-                  <div className="card bg-card">
-                    <div className="card-body">
-                      <div className="fw-medium">{status}</div>
-                      <h3 className="fw-bold">{count}</h3>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="list-group">
-            {tasks.map((task) => (
-              <div key={task.id} className="list-group-item mb-2 bg-card">
-                <div className="d-flex justify-content-between align-items-start">
-                  <div className="flex-grow-1">
-                    <h6 className="fw-bold mb-2">{task.title}</h6>
-                    <div className="d-flex gap-4 small mb-2">
-                      <span>Assignee: {task.assignee}</span>
-                      <span>Status: {task.status}</span>
-                      <span>Due: {task.dueDate}</span>
-                    </div>
-                    <div className="d-flex gap-2">
-                      <span
-                        className={`badge ${getQAStatusColor(task.qaStatus)}`}
-                      >
-                        QA: {task.qaStatus}
-                      </span>
-                      <span
-                        className={`badge ${getPriorityColor(task.priority)}`}
-                      >
-                        {task.priority}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="ms-4">
-                    <select
-                      value={task.qaStatus}
-                      onChange={(e) =>
-                        updateTask(task.id, { qaStatus: e.target.value })
-                      }
-                      className="form-select form-select-sm"
-                    >
-                      <option value="Not Started">Not Started</option>
-                      <option value="Pending">Pending</option>
-                      <option value="In Review">In Review</option>
-                      <option value="Passed">Passed</option>
-                      <option value="Failed">Failed</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="d-none d-lg-block">
+            <div className="table-responsive">
+              <table className="table table-gradient-bg">
+                <thead className="text-white">
+                  <tr>
+                    <th>Task ID</th>
+                    <th>Title</th>
+                    <th>Module</th>
+                    <th>Priority</th>
+                    <th>Created By</th>
+                    <th>Created At</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="text-white">
+                  {filteredTasks.map((task) => (
+                    <tr key={task.id}>
+                      <td>
+                        <code>{task.id}</code>
+                      </td>
+                      <td>{task.title}</td>
+                      <td>{task.module}</td>
+                      <td>
+                        <span
+                          className={`badge ${getPriorityColor(task.priority)}`}
+                        >
+                          {task.priority}
+                        </span>
+                      </td>
+                      <td>{task.createdBy}</td>
+                      <td>{task.createdAt}</td>
+                      <td>
+                        <span
+                          className={`badge ${getStatusColor(task.status)}`}
+                        >
+                          {task.status}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          className="btn btn-sm btn-outline-primary me-1"
+                          onClick={() => setQuickViewTask(task)}
+                        >
+                          <Eye size={14} /> View
+                        </button>
+                        {task.status === "To Do" && (
+                          <button
+                            className="btn btn-sm btn-success"
+                            onClick={() =>
+                              updateTask(task.id, { status: "In Progress" })
+                            }
+                          >
+                            ✋ Self-Assign
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -744,7 +779,7 @@ const TaskManagement = () => {
       {/* Header */}
       <div className="mb-4">
         <h2 className="fw-bold text-white">Task Management</h2>
-        <p className=" text-white">
+        <p className="text-white">
           Manage tasks, track time, and monitor progress
         </p>
       </div>
@@ -778,9 +813,12 @@ const TaskManagement = () => {
 
       {/* Add Task Modal */}
       {showAddTask && (
-        <div className="modal show d-block " style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-lg custom-modal-dark ">
-            <div className="modal-content ">
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <div className="modal-dialog modal-lg custom-modal-dark">
+            <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Add New Task</h5>
                 <button
@@ -910,6 +948,44 @@ const TaskManagement = () => {
 
                 <div className="row mb-3">
                   <div className="col-md-6">
+                    <label className="form-label">Module</label>
+                    <select
+                      value={newTask.module}
+                      onChange={(e) =>
+                        setNewTask({ ...newTask, module: e.target.value })
+                      }
+                      className="form-select"
+                    >
+                      <option value="">Select module</option>
+                      {modules.map((module) => (
+                        <option key={module} value={module}>
+                          {module}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="col-md-6">
+                    <label className="form-label">Created By</label>
+                    <select
+                      value={newTask.createdBy}
+                      onChange={(e) =>
+                        setNewTask({ ...newTask, createdBy: e.target.value })
+                      }
+                      className="form-select"
+                    >
+                      <option value="">Select creator</option>
+                      {teamMembers.map((member) => (
+                        <option key={member} value={member}>
+                          {member}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="row mb-3">
+                  <div className="col-md-6">
                     <label className="form-label">Due Date</label>
                     <input
                       type="date"
@@ -941,7 +1017,10 @@ const TaskManagement = () => {
 
       {/* Edit Task Modal */}
       {editingTask && (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-lg custom-modal-dark">
             <div className="modal-content">
               <div className="modal-header">
@@ -971,7 +1050,10 @@ const TaskManagement = () => {
                   <textarea
                     value={editingTask.description}
                     onChange={(e) =>
-                      setEditingTask({ ...editingTask, description: e.target.value })
+                      setEditingTask({
+                        ...editingTask,
+                        description: e.target.value,
+                      })
                     }
                     className="form-control"
                     rows="3"
@@ -984,7 +1066,10 @@ const TaskManagement = () => {
                     <select
                       value={editingTask.project}
                       onChange={(e) =>
-                        setEditingTask({ ...editingTask, project: e.target.value })
+                        setEditingTask({
+                          ...editingTask,
+                          project: e.target.value,
+                        })
                       }
                       className="form-select"
                     >
@@ -1001,7 +1086,10 @@ const TaskManagement = () => {
                     <select
                       value={editingTask.assignee}
                       onChange={(e) =>
-                        setEditingTask({ ...editingTask, assignee: e.target.value })
+                        setEditingTask({
+                          ...editingTask,
+                          assignee: e.target.value,
+                        })
                       }
                       className="form-select"
                     >
@@ -1020,7 +1108,10 @@ const TaskManagement = () => {
                     <select
                       value={editingTask.status}
                       onChange={(e) =>
-                        setEditingTask({ ...editingTask, status: e.target.value })
+                        setEditingTask({
+                          ...editingTask,
+                          status: e.target.value,
+                        })
                       }
                       className="form-select"
                     >
@@ -1037,7 +1128,10 @@ const TaskManagement = () => {
                     <select
                       value={editingTask.priority}
                       onChange={(e) =>
-                        setEditingTask({ ...editingTask, priority: e.target.value })
+                        setEditingTask({
+                          ...editingTask,
+                          priority: e.target.value,
+                        })
                       }
                       className="form-select"
                     >
@@ -1054,7 +1148,10 @@ const TaskManagement = () => {
                     <select
                       value={editingTask.category}
                       onChange={(e) =>
-                        setEditingTask({ ...editingTask, category: e.target.value })
+                        setEditingTask({
+                          ...editingTask,
+                          category: e.target.value,
+                        })
                       }
                       className="form-select"
                     >
@@ -1069,12 +1166,57 @@ const TaskManagement = () => {
 
                 <div className="row mb-3">
                   <div className="col-md-6">
+                    <label className="form-label">Module</label>
+                    <select
+                      value={editingTask.module}
+                      onChange={(e) =>
+                        setEditingTask({
+                          ...editingTask,
+                          module: e.target.value,
+                        })
+                      }
+                      className="form-select"
+                    >
+                      {modules.map((module) => (
+                        <option key={module} value={module}>
+                          {module}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="col-md-6">
+                    <label className="form-label">Created By</label>
+                    <select
+                      value={editingTask.createdBy}
+                      onChange={(e) =>
+                        setEditingTask({
+                          ...editingTask,
+                          createdBy: e.target.value,
+                        })
+                      }
+                      className="form-select"
+                    >
+                      {teamMembers.map((member) => (
+                        <option key={member} value={member}>
+                          {member}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="row mb-3">
+                  <div className="col-md-6">
                     <label className="form-label">Due Date</label>
                     <input
                       type="date"
                       value={editingTask.dueDate}
                       onChange={(e) =>
-                        setEditingTask({ ...editingTask, dueDate: e.target.value })
+                        setEditingTask({
+                          ...editingTask,
+                          dueDate: e.target.value,
+                        })
                       }
                       className="form-control"
                     />
@@ -1085,7 +1227,10 @@ const TaskManagement = () => {
                     <select
                       value={editingTask.qaStatus}
                       onChange={(e) =>
-                        setEditingTask({ ...editingTask, qaStatus: e.target.value })
+                        setEditingTask({
+                          ...editingTask,
+                          qaStatus: e.target.value,
+                        })
                       }
                       className="form-select"
                     >
@@ -1117,7 +1262,10 @@ const TaskManagement = () => {
 
       {/* Quick View Modal */}
       {quickViewTask && (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog">
             <div className="modal-content bg-card">
               <div className="modal-header">
@@ -1137,13 +1285,21 @@ const TaskManagement = () => {
                 <div className="mb-3">
                   <div className="d-flex justify-content-between mb-2">
                     <span className="fw-medium">Status:</span>
-                    <span className={`badge ${getStatusColor(quickViewTask.status)}`}>
+                    <span
+                      className={`badge ${getStatusColor(
+                        quickViewTask.status
+                      )}`}
+                    >
                       {quickViewTask.status}
                     </span>
                   </div>
                   <div className="d-flex justify-content-between mb-2">
                     <span className="fw-medium">Priority:</span>
-                    <span className={`badge ${getPriorityColor(quickViewTask.priority)}`}>
+                    <span
+                      className={`badge ${getPriorityColor(
+                        quickViewTask.priority
+                      )}`}
+                    >
                       {quickViewTask.priority}
                     </span>
                   </div>
@@ -1160,6 +1316,18 @@ const TaskManagement = () => {
                     <span>{quickViewTask.category}</span>
                   </div>
                   <div className="d-flex justify-content-between mb-2">
+                    <span className="fw-medium">Module:</span>
+                    <span>{quickViewTask.module}</span>
+                  </div>
+                  <div className="d-flex justify-content-between mb-2">
+                    <span className="fw-medium">Created By:</span>
+                    <span>{quickViewTask.createdBy}</span>
+                  </div>
+                  <div className="d-flex justify-content-between mb-2">
+                    <span className="fw-medium">Created At:</span>
+                    <span>{quickViewTask.createdAt}</span>
+                  </div>
+                  <div className="d-flex justify-content-between mb-2">
                     <span className="fw-medium">Due Date:</span>
                     <span>{quickViewTask.dueDate}</span>
                   </div>
@@ -1169,7 +1337,11 @@ const TaskManagement = () => {
                   </div>
                   <div className="d-flex justify-content-between">
                     <span className="fw-medium">QA Status:</span>
-                    <span className={`badge ${getQAStatusColor(quickViewTask.qaStatus)}`}>
+                    <span
+                      className={`badge ${getQAStatusColor(
+                        quickViewTask.qaStatus
+                      )}`}
+                    >
                       {quickViewTask.qaStatus}
                     </span>
                   </div>
