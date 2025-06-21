@@ -271,54 +271,56 @@ function ResourceWorkload() {
               <div className="card-body p-0">
                 <div className="table-responsive table-gradient-bg">
                   <table className="table table-hover mb-0">
-                    <thead>
-                      <tr>
-                        <th>Task</th>
-                        <th>Resource</th>
-                        <th>Priority</th>
-                        <th>Time</th>
-                        <th>Progress</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {taskData.map((task) => (
-                        <tr key={task.id}>
-                          <td>
-                            <div className="fw-bold">{task.name}</div>
-                            <small className="text-muted">{task.id}</small>
-                          </td>
-                          <td>
-                            <div>{task.resource}</div>
-                            <small className="text-muted">{task.consumption}% usage</small>
-                          </td>
-                          <td>
-                            <span className={getPriorityColor(task.priority)}>
-                              {task.priority}
-                            </span>
-                          </td>
-                          <td>
-                            <div>{task.startTime}</div>
-                            <small className="text-muted">{task.duration}</small>
-                          </td>
-                          <td>
-                            <div className="progress" style={{ height: '5px' }}>
-                              <div 
-                                className="progress-bar bg-primary" 
-                                style={{ width: `${task.progress}%` }}
-                              ></div>
-                            </div>
-                            <small className="text-muted">{task.progress}%</small>
-                          </td>
-                          <td>
-                            <span className={`badge ${getStatusColor(task.status)}`}>
-                              {task.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Task</th>
+      <th>Resource</th>
+      <th>Priority</th>
+      <th>Time</th>
+      <th>Progress</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {taskData.map((task) => (
+      <tr key={task.id}>
+        <td>{task.id}</td>
+        <td>
+          <div className="fw-bold">{task.name}</div>
+          <small className="">{task.id}</small>
+        </td>
+        <td>
+          <div>{task.resource}</div>
+          <small className="">{task.consumption}% usage</small>
+        </td>
+        <td>
+          <span className={getPriorityColor(task.priority)}>
+            {task.priority}
+          </span>
+        </td>
+        <td>
+          <div>{task.startTime}</div>
+          <small className="">{task.duration}</small>
+        </td>
+        <td>
+          <div className="progress" style={{ height: '5px' }}>
+            <div 
+              className="progress-bar bg-primary" 
+              style={{ width: `${task.progress}%` }}
+            ></div>
+          </div>
+          <small className="">{task.progress}%</small>
+        </td>
+        <td>
+          <span className={`badge ${getStatusColor(task.status)}`}>
+            {task.status}
+          </span>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
                 </div>
               </div>
             </div>
@@ -336,7 +338,7 @@ function ResourceWorkload() {
                   <div style={{ width: '120px' }}></div>
                   <div className="d-flex flex-grow-1">
                     {Array.from({ length: 12 }).map((_, i) => (
-                      <div key={i} className="flex-grow-1 text-center small text-muted">
+                      <div key={i} className="flex-grow-1 text-center small ">
                         {i + 8 > 12 ? `${i + 8 - 12} PM` : `${i + 8} AM`}
                       </div>
                     ))}
@@ -418,11 +420,11 @@ function ResourceWorkload() {
       </div>
 
       {/* Floating Action Button */}
-      <div className="position-fixed bottom-0 end-0 p-3">
+      {/* <div className="position-fixed bottom-0 end-0 p-3">
         <button className="btn btn-primary rounded-circle" style={{ width: '56px', height: '56px' }}>
           <i className="fas fa-plus"></i>
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }

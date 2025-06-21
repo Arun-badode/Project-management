@@ -156,7 +156,7 @@ function Collaboration() {
     const emojis = ['👍', '❤️', '😂', '🎉', '🔥', '💯', '👏', '🙌'];
 
     return (
-        <div className="vh-100 d-flex flex-column">
+        <div className="vh-100 d-flex  flex-column">
             {/* Header */}
             {/* <header className="bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
                 <div className="d-flex align-items-center">
@@ -186,7 +186,7 @@ function Collaboration() {
             {/* Main Content */}
             <div className="flex-grow-1 d-flex overflow-hidden">
                 {/* Left Sidebar - Collapsible on mobile */}
-                <div className="d-none d-lg-block col-lg-3 border-end bg-light p-3 overflow-auto">
+                <div className="d-none d-lg-block col-lg-3 border-end bg-card p-3 overflow-auto">
                     {/* Filters */}
                     <div className="mb-4">
                         <h6 className="text-muted mb-3">FILTERS</h6>
@@ -205,7 +205,7 @@ function Collaboration() {
 
                     {/* Team Members */}
                     <div className="mb-4">
-                        <h6 className="text-muted mb-3">TEAM MEMBERS</h6>
+                        <h6 className=" mb-3">TEAM MEMBERS</h6>
                         <ul className="list-unstyled">
                             {teamMembers.map(member => (
                                 <li key={member.id} className="mb-2 d-flex align-items-center">
@@ -229,12 +229,12 @@ function Collaboration() {
 
                     {/* Conversations List */}
                     <div>
-                        <h6 className="text-muted mb-3">RECENT CONVERSATIONS</h6>
+                        <h6 className=" mb-3">RECENT CONVERSATIONS</h6>
                         <div className="list-group">
                             {['Project Redesign Discussion', 'Marketing Campaign Planning', 'Q2 Budget Review'].map((thread, index) => (
                                 <button 
                                     key={index} 
-                                    className={`list-group-item list-group-item-action ${currentThread.title === thread ? 'active' : ''}`}
+                                    className={`list-group-item bg-card list-group-item-action ${currentThread.title === thread ? 'active' : ''}`}
                                     onClick={() => setCurrentThread({
                                         ...currentThread,
                                         title: thread
@@ -252,12 +252,12 @@ function Collaboration() {
                 </div>
 
                 {/* Right Content Area */}
-                <div className="col-12 col-lg-9 d-flex flex-column bg-white">
+                <div className="col-12 col-lg-9 d-flex flex-column ">
                     {/* Thread Header */}
-                    <div className="p-3 border-bottom d-flex justify-content-between align-items-center">
+                    <div className="p-3 border-bottom bg-main d-flex justify-content-between align-items-center">
                         <div>
-                            <h4 className="mb-0">{currentThread.title}</h4>
-                            <small className="text-muted">
+                            <h4 className="mb-0 text-white">{currentThread.title}</h4>
+                            <small className="text-white">
                                 {currentThread.participants.length} participants • Last activity {currentThread.lastActivity}
                             </small>
                         </div>
@@ -272,37 +272,37 @@ function Collaboration() {
                     </div>
 
                     {/* Messages Area */}
-                    <div className="flex-grow-1 p-3 overflow-auto" style={{ backgroundColor: '#f8f9fa' }}>
+                    <div className="flex-grow-1 p-3 bg-main overflow-auto " style={{ backgroundColor: '#f8f9fa' }}>
                         {messages.map((message) => (
                             <div 
                                 key={message.id} 
-                                className={`mb-3 ${message.sender === 'You' ? 'text-end' : ''}`}
+                                className={`mb-3  ${message.sender === 'You' ? 'text-end' : ''}`}
                             >
-                                <div className={`d-flex ${message.sender === 'You' ? 'justify-content-end' : ''}`}>
+                                <div className={`d-flex  ${message.sender === 'You' ? 'justify-content-end' : ''}`}>
                                     {message.sender !== 'You' && (
                                         <img 
                                             src={message.avatar} 
                                             alt={message.sender} 
-                                            className="rounded-circle me-2" 
+                                            className="rounded-circle me-2  " 
                                             width="40" 
                                             height="40"
                                         />
                                     )}
                                     <div 
-                                        className={`rounded p-3 ${message.sender === 'You' ? 'bg-primary text-white' : 'bg-white'}`}
+                                        className={`rounded p-3 ${message.sender === 'You' ? '' : 'bg-card'}`}
                                         style={{ maxWidth: '75%' }}
                                     >
-                                        <div className="d-flex justify-content-between align-items-center mb-1">
+                                        <div className="d-flex   justify-content-between align-items-center mb-1">
                                             <strong>{message.sender}</strong>
                                             <small className={message.sender === 'You' ? 'text-white-50' : 'text-muted'}>
                                                 {message.timestamp}
                                             </small>
                                         </div>
-                                        <p className="mb-2">{message.content}</p>
+                                        <p className="mb-2 ">{message.content}</p>
                                         
                                         {/* Attachments */}
                                         {message.attachments.length > 0 && (
-                                            <div className="mb-2">
+                                            <div className="mb-2 text-dark">
                                                 {message.attachments.map((file, idx) => (
                                                     <div 
                                                         key={idx} 
@@ -311,7 +311,7 @@ function Collaboration() {
                                                         <i className="fas fa-file me-2"></i>
                                                         <div className="flex-grow-1">
                                                             <div>{file.name}</div>
-                                                            <small className={message.sender === 'You' ? 'text-white-50' : 'text-muted'}>
+                                                            <small className={message.sender === 'You' ? 'text-dark' : 'text-dark'}>
                                                                 {formatFileSize(file.size)}
                                                             </small>
                                                         </div>
@@ -345,16 +345,16 @@ function Collaboration() {
                         
                         {/* Typing Indicator */}
                         {isTyping && (
-                            <div className="d-flex align-items-center mb-3">
+                            <div className="d-flex  align-items-center mb-3">
                                 <img 
                                     src={teamMembers[0].avatar} 
                                     alt="Typing" 
-                                    className="rounded-circle me-2" 
+                                    className="rounded-circle me-2 " 
                                     width="40" 
                                     height="40"
                                 />
-                                <div className="bg-white rounded p-2">
-                                    <div className="d-flex align-items-center">
+                                <div className=" rounded p-2">
+                                    <div className="d-flex align-items-center ">
                                         <div className="typing-dots">
                                             <div className="typing-dot"></div>
                                             <div className="typing-dot"></div>
@@ -370,13 +370,13 @@ function Collaboration() {
                     </div>
 
                     {/* Message Input */}
-                    <div className="p-3 border-top bg-white">
+                    <div className="p-3 border-top bg-main">
                         <div className="position-relative">
                             <textarea
                                 value={newMessage}
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                className="form-control mb-2"
+                                className="form-control mb-2 "
                                 rows="2"
                                 placeholder="Type your message here..."
                                 style={{ resize: 'none' }}

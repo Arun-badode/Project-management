@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock, faEye, faUser } from "@fortawesome/free-solid-svg-icons";
 import { faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import "./Login.css";
+
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -137,7 +138,7 @@ const SignupPage = () => {
 
               <div className="text-center mt-3">
                 <p className="text-muted">
-                  Already have an account? <a href="/" style={{ color: "#6e8efb" }}>Login</a>
+                  Already have an account? <Link to="/" style={{ color: "#6e8efb" }}><span>Login</span></Link>
                 </p>
               </div>
             </form>

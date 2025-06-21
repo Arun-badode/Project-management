@@ -7,10 +7,14 @@ const Navbar = ({ toggleSidebar }) => {
       <div className="container-fluid px-3">
         {/* Brand and Toggle Button */}
         <div className="d-flex align-items-center">
-          <a className="navbar-brand fw-bold text-white me-3" href="#" style={{ fontSize: "19px" }}>
+          <a
+            className="navbar-brand fw-bold text-white me-3"
+            href="#"
+            style={{ fontSize: "19px" }}
+          >
             Project Management
           </a>
-          <button 
+          <button
             className="btn btn-link text-white p-0 d-lg-inline-block"
             onClick={toggleSidebar}
             style={{ fontSize: "20px", textDecoration: "none" }}
@@ -21,43 +25,69 @@ const Navbar = ({ toggleSidebar }) => {
         </div>
 
         {/* Search Bar - Hidden on small screens, shown on medium and up */}
-        <div className="d-none d-md-flex flex-grow-1 justify-content-center mx-3">
-          <div className="position-relative" style={{ maxWidth: "500px", width: "100%" }}>
-            <input
-              type="text"
-              placeholder="Search..."
-              className="form-control"
-              style={{
-                borderRadius: "30px",
-                paddingLeft: "15px",
-                paddingRight: "15px",
-                border: "1px solid #ddd"
-              }}
-            />
-          </div>
+         <div className="d-none d-md-flex flex-grow-1 justify-content-center mx-3">
+      {/* Desktop Search */}
+      <div className="position-relative" style={{ maxWidth: "500px", width: "100%" }}>
+        <input
+          type="text"
+          placeholder="Search..."
+          className="form-control pe-5"
+          style={{
+            borderRadius: "30px",
+            paddingLeft: "15px",
+            border: "1px solid #ddd",
+          }}
+        />
+        <i
+          className="bi bi-search position-absolute"
+          style={{
+            right: "20px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            color: "#888",
+            pointerEvents: "none"
+          }}
+        ></i>
+      </div>
+
+      {/* Mobile Search (collapsed by default) */}
+      <div
+        className="collapse d-md-none position-absolute top-100 start-50 translate-middle-x mt-1"
+        id="mobileSearch"
+        style={{ zIndex: 1050, width: "90%" }}
+      >
+        <div className="bg-white rounded-3 shadow p-2 position-relative">
+          <input
+            type="text"
+            placeholder="Search..."
+            className="form-control pe-5"
+            style={{
+              borderRadius: "25px",
+              paddingLeft: "15px",
+              border: "1px solid #ddd",
+            }}
+          />
+          <i
+            className="bi bi-search position-absolute"
+            style={{
+              right: "20px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "#888",
+              pointerEvents: "none"
+            }}
+          ></i>
         </div>
+      </div>
+    </div>
 
         {/* Mobile Search Bar - Shows in center space when toggled */}
-        <div className="collapse d-md-none position-absolute top-100 start-50 translate-middle-x mt-1" id="mobileSearch" style={{ zIndex: 1050, width: "90%" }}>
-          <div className="bg-white rounded-3 shadow p-2">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="form-control"
-              style={{
-                borderRadius: "25px",
-                paddingLeft: "15px",
-                paddingRight: "15px",
-                border: "1px solid #ddd"
-              }}
-            />
-          </div>
-        </div>
+       
 
         {/* Right Side Icons */}
         <div className="d-flex align-items-center">
           {/* Search Icon for Mobile - Only shown on small screens */}
-          <button 
+          <button
             className="btn btn-link text-white p-2 d-md-none me-2"
             style={{ fontSize: "20px", textDecoration: "none" }}
             data-bs-toggle="collapse"
@@ -70,9 +100,25 @@ const Navbar = ({ toggleSidebar }) => {
           </button>
 
           {/* Notification Bell */}
-          <a 
-            className="btn btn-link text-white p-2 me-2" 
-            href="#" 
+
+          <div class="form-check form-switch">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="statusSwitch"
+              onchange="toggleStatus(this)"
+              style={{fontSize:"20px"}}
+            />
+            <label
+              class="form-check-label fw-bold"
+              for="statusSwitch"
+              id="statusLabel"
+            ></label>
+          </div>
+
+          <a
+            className="btn btn-link text-white p-2 me-2"
+            href="#"
             style={{ fontSize: "22px", textDecoration: "none" }}
             aria-label="Notifications"
           >
@@ -83,10 +129,10 @@ const Navbar = ({ toggleSidebar }) => {
           <div className="dropdown">
             <button
               className="btn btn-link text-white p-2 d-flex align-items-center"
-              style={{ 
-                fontSize: "22px", 
+              style={{
+                fontSize: "22px",
                 textDecoration: "none",
-                border: "none"
+                border: "none",
               }}
               data-bs-toggle="dropdown"
               aria-expanded="false"
@@ -94,7 +140,10 @@ const Navbar = ({ toggleSidebar }) => {
             >
               <div className="position-relative">
                 <i className="fa-solid fa-circle-user"></i>
-                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" style={{ fontSize: "8px", width: "12px", height: "12px" }}>
+                <span
+                  className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success"
+                  style={{ fontSize: "8px", width: "12px", height: "12px" }}
+                >
                   <span className="visually-hidden">Online</span>
                 </span>
               </div>
@@ -103,15 +152,15 @@ const Navbar = ({ toggleSidebar }) => {
               <li>
                 <Link className="dropdown-item py-2" to="/profile">
                   <i className="fa fa-user me-2"></i>
-                  Update Profile
+                  Profile
                 </Link>
               </li>
-              {/* <li>
+              <li>
                 <Link className="dropdown-item py-2" to="/changepassword">
                   <i className="fa fa-lock me-2"></i>
                   Change Password
                 </Link>
-              </li> */}
+              </li>
               <li>
                 <hr className="dropdown-divider" />
               </li>
@@ -125,8 +174,6 @@ const Navbar = ({ toggleSidebar }) => {
           </div>
         </div>
       </div>
-
-
     </nav>
   );
 };

@@ -55,7 +55,25 @@ const Sidebar = ({ collapsed }) => {
                   }}
                 >
                   <i className="fa-solid fa-diagram-project"></i>
-                  <span className="menu-text">Project Management</span>
+                  <span className="menu-text">Project </span>
+                </div>
+              </li>
+
+              
+              <li
+                className={`menu-item ${
+                  isActive("/usermanage") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/usermanage");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-users-gear"></i>
+                  <span className="menu-text">Team </span>
                 </div>
               </li>
 
@@ -72,28 +90,12 @@ const Sidebar = ({ collapsed }) => {
                   }}
                 >
                   <i className="fa-solid fa-tasks"></i>
-                  <span className="menu-text">Task Management</span>
+                  <span className="menu-text">Task </span>
                 </div>
               </li>
 
-              <li
-                className={`menu-item ${
-                  isActive("/usermanage") ? "active" : ""
-                }`}
-              >
-                <div
-                  className="menu-link menu-i"
-                  onClick={() => {
-                    navigate("/usermanage");
-                    menuItemClick();
-                  }}
-                >
-                  <i className="fa-solid fa-users-gear"></i>
-                  <span className="menu-text">User Management</span>
-                </div>
-              </li>
 
-              <li
+              {/* <li
                 className={`menu-item ${
                   isActive("/resourcemanagement") ? "active" : ""
                 }`}
@@ -106,9 +108,9 @@ const Sidebar = ({ collapsed }) => {
                   }}
                 >
                   <i className="fa-solid fa-toolbox"></i>
-                  <span className="menu-text">Resource Management</span>
+                  <span className="menu-text">Resource </span>
                 </div>
-              </li>
+              </li> */}
 
               <li
                 className={`menu-item ${
@@ -208,7 +210,7 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li> */}
 
-              <li
+              {/* <li
                 className={`menu-item ${
                   isActive("/projectsupport") ? "active" : ""
                 }`}
@@ -223,7 +225,7 @@ const Sidebar = ({ collapsed }) => {
                   <i className="fa-solid fa-life-ring"></i>
                   <span className="menu-text">Support</span>
                 </div>
-              </li>
+              </li> */}
 
               <li
                 className={`menu-item ${

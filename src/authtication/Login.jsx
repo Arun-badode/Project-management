@@ -69,8 +69,7 @@ const LoginPage = () => {
             />
             <h1 className="text-white">Welcome Back!</h1>
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
-              vitae mauris volutpat.
+             All-in-One Project Management Dashboard for Creative Teams – Seamlessly Track Tasks, Monitor Deadlines, Analyze Productivity, and Collaborate in Real-Time with a User-Centric Interface Built for DTP and QA Specialists.
             </p>
           </div>
         </div>
@@ -140,7 +139,7 @@ const LoginPage = () => {
               </button>
                <div className="text-center mt-3">
                 <p className="text-muted">
-                  Already have an account? <a href="/singup" style={{ color: "#6e8efb" }}>sing up</a>
+                  Already have an account? <Link to="/singup" style={{ color: "#6e8efb" }}>sing up</Link>
                 </p>
               </div>
               

@@ -18,12 +18,7 @@ const backupsData = [
 
 export default function SettingsPage() {
   // App Config
-  const [appName, setAppName] = useState("My Application");
-  const [logo, setLogo] = useState(null);
-  const [logoPreview, setLogoPreview] = useState(null);
-  const [language, setLanguage] = useState("en");
-  const [timezone, setTimezone] = useState("UTC");
-  const [theme, setTheme] = useState("light");
+
 
   // Roles
   const [roles, setRoles] = useState(rolesData);
@@ -32,29 +27,15 @@ export default function SettingsPage() {
   const [roleForm, setRoleForm] = useState({ name: "", permissions: { create: false, edit: false, delete: false } });
 
   // Templates
-  const [templates, setTemplates] = useState(templatesData);
-  const [uploadType, setUploadType] = useState("Product");
-  const [uploadedFile, setUploadedFile] = useState(null);
+ 
 
-  // Notifications
-  const [notifications, setNotifications] = useState({
-    email: true,
-    sms: false,
-    inApp: true,
-    frequency: "Immediate",
-  });
+
 
   // Backup
-  const [backupFrequency, setBackupFrequency] = useState("Daily");
-  const [backupLocation, setBackupLocation] = useState("Cloud");
-  const [backups, setBackups] = useState(backupsData);
+ 
 
   // Handlers
-  const handleLogoChange = (e) => {
-    const file = e.target.files[0];
-    setLogo(file);
-    setLogoPreview(URL.createObjectURL(file));
-  };
+
 
   const handleRoleEdit = (idx) => {
     setEditRoleIndex(idx);
@@ -98,8 +79,8 @@ export default function SettingsPage() {
       <h2 className="gradient-heading">Settings</h2>
       <div className="row g-4 ">
         {/* App Configurations */}
-        <div className="col-12 col-lg-6">
-          <div className="card shadow-sm settings-card-unique bg-card">
+        {/* <div className="col-12 col-lg-6">
+          <div className="card shadow-sm settings-card-unique custom-modal-dark bg-card">
             <div className="card-header bg-light settings-card-header-unique bg-card">
               <h5 className="mb-0 ">App Configurations</h5>
             </div>
@@ -170,135 +151,173 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
-        {/* Role & Permission Control */}
-        <div className="col-12 col-lg-6">
-          <div className="card shadow-sm settings-card-unique bg-card ">
-            <div className="card-header  settings-card-header-unique d-flex justify-content-between align-items-center">
-              <h5 className="mb-0">Role & Permission Control</h5>
-              <button className="gradient-button" onClick={handleAddRole}>
-                Add Role
-              </button>
-            </div>
-            <div className="card-body ">
-              <div className="table-responsive ">
-                <table className="table table-bordered align-middle table-gradient-bg  ">
-                  <thead className="table-gradient-bg">
-                    <tr>
-                      <th>Role</th>
-                      <th>Create</th>
-                      <th>Edit</th>
-                      <th>Delete</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {roles.map((role, idx) => (
-                      <tr key={role.name}>
-                        <td>{role.name}</td>
-                        <td>
-                          <input type="checkbox" className="form-check-input" checked={role.permissions.create} disabled />
-                        </td>
-                        <td>
-                          <input type="checkbox" className="form-check-input" checked={role.permissions.edit} disabled />
-                        </td>
-                        <td>
-                          <input type="checkbox" className="form-check-input" checked={role.permissions.delete} disabled />
-                        </td>
-                        <td>
-                          <button
-                            className="btn  text-white btn-sm settings-edit-role-btn-unique"
-                            onClick={() => handleRoleEdit(idx)}
-                          >
-                            Edit
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+     {/* Role & Permission Control */}
+<div className="col-12">
+  <div className="card shadow-sm bg-card border-0 bg-card">
+    <div className="card-header d-flex justify-content-between align-items-center ">
+      <h5 className="mb-0">Role & Permission Control</h5>
+      <button className="btn btn-light btn-sm fw-semibold gradient-button" onClick={handleAddRole}>
+        <i className="bi bi-plus-circle me-1 "></i>Add Role
+      </button>
+    </div>
+    <div className="card-body">
+      <div className="table-responsive">
+        <table className="table table-bordered table-hover align-middle text-center table-gradient-bg">
+          <thead className="table-light">
+            <tr>
+              <th>Role</th>
+              <th>Create</th>
+              <th>Edit</th>
+              <th>Delete</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {roles.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="text-muted py-4">No roles added yet</td>
+              </tr>
+            ) : (
+              roles.map((role, idx) => (
+                <tr key={role.name}>
+                  <td className="fw-semibold">{role.name}</td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      checked={role.permissions.create}
+                      disabled
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      checked={role.permissions.edit}
+                      disabled
+                    />
+                  </td>
+                  <td>
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      checked={role.permissions.delete}
+                      disabled
+                    />
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-sm btn-outline-primary"
+                      onClick={() => handleRoleEdit(idx)}
+                    >
+                      <i className="bi bi-pencil-fill me-1"></i>Edit
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Role Modal */}
+      {showRoleModal && (
+        <div className="modal show d-block custom-modal-dark" tabIndex="-1" >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow">
+              <div className="modal-header bg-primary text-white">
+                <h5 className="modal-title">
+                  {editRoleIndex !== null ? "Edit Role" : "Add Role"}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={() => setShowRoleModal(false)}
+                ></button>
               </div>
-              {/* Role Modal */}
-              {showRoleModal && (
-                <div className="modal show d-block custom-modal-dark" tabIndex="-1" role="dialog">
-                  <div className="modal-dialog" role="document">
-                    <div className="modal-content">
-                      <div className="modal-header">
-                        <h5 className="modal-title">{editRoleIndex !== null ? "Edit Role" : "Add Role"}</h5>
-                        <button type="button" className="btn-close" onClick={() => setShowRoleModal(false)}></button>
-                      </div>
-                      <div className="modal-body">
-                        <div className="mb-3">
-                          <label className="form-label">Role Name</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            name="name"
-                            value={roleForm.name}
-                            onChange={handleRoleFormChange}
-                          />
-                        </div>
-                        <div className="mb-2 fw-semibold">Permissions</div>
-                        <div className="form-check mb-1">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            name="create"
-                            checked={roleForm.permissions.create}
-                            onChange={handleRoleFormChange}
-                            id="permCreate"
-                          />
-                          <label className="form-check-label" htmlFor="permCreate">
-                            Create
-                          </label>
-                        </div>
-                        <div className="form-check mb-1">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            name="edit"
-                            checked={roleForm.permissions.edit}
-                            onChange={handleRoleFormChange}
-                            id="permEdit"
-                          />
-                          <label className="form-check-label" htmlFor="permEdit">
-                            Edit
-                          </label>
-                        </div>
-                        <div className="form-check mb-1">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            name="delete"
-                            checked={roleForm.permissions.delete}
-                            onChange={handleRoleFormChange}
-                            id="permDelete"
-                          />
-                          <label className="form-check-label" htmlFor="permDelete">
-                            Delete
-                          </label>
-                        </div>
-                      </div>
-                      <div className="modal-footer">
-                        <button type="button" className="btn btn-danger rounded-pill " onClick={() => setShowRoleModal(false)}>
-                          Cancel
-                        </button>
-                        <button type="button" className="gradient-button" onClick={handleRoleSave}>
-                          Save
-                        </button>
-                      </div>
-                    </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label className="form-label fw-semibold">Role Name</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    name="name"
+                    value={roleForm.name}
+                    onChange={handleRoleFormChange}
+                    placeholder="e.g. Admin, Manager"
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label fw-semibold">Permissions</label>
+                  <div className="form-check form-switch mb-2">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="permCreate"
+                      name="create"
+                      checked={roleForm.permissions.create}
+                      onChange={handleRoleFormChange}
+                    />
+                    <label className="form-check-label" htmlFor="permCreate">
+                      Create Access
+                    </label>
+                  </div>
+                  <div className="form-check form-switch mb-2">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="permEdit"
+                      name="edit"
+                      checked={roleForm.permissions.edit}
+                      onChange={handleRoleFormChange}
+                    />
+                    <label className="form-check-label" htmlFor="permEdit">
+                      Edit Access
+                    </label>
+                  </div>
+                  <div className="form-check form-switch mb-2">
+                    <input
+                      className="form-check-input"
+                      type="checkbox"
+                      id="permDelete"
+                      name="delete"
+                      checked={roleForm.permissions.delete}
+                      onChange={handleRoleFormChange}
+                    />
+                    <label className="form-check-label" htmlFor="permDelete">
+                      Delete Access
+                    </label>
                   </div>
                 </div>
-              )}
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="btn btn-outline-secondary rounded-pill"
+                  onClick={() => setShowRoleModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn btn-primary rounded-pill"
+                  onClick={handleRoleSave}
+                >
+                  Save Role
+                </button>
+              </div>
             </div>
           </div>
         </div>
+      )}
+    </div>
+  </div>
+</div>
+
 
         {/* Excel Template Management */}
-        <div className="col-12 col-lg-6">
-          <div className="card shadow-sm settings-card-unique bg-card">
+        {/* <div className="col-12 col-lg-6">
+          <div className="card shadow-sm settings-card-unique bg-card custom-modal-dark">
             <div className="card-header bg-light settings-card-header-unique bg-card">
               <h5 className="mb-0">Excel Template Management</h5>
             </div>
@@ -349,12 +368,12 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Notification Settings */}
-        <div className="col-12 col-lg-6">
-          <div className="card shadow-sm settings-card-unique bg-card">
-            <div className="card-header bg-light settings-card-header-unique bg-card">
+        {/* <div className="col-12 col-lg-6">
+          <div className="card shadow-sm settings-card-unique bg-card custom-modal-dark">
+            <div className="card-header bg-light settings-card-header-unique bg-card ">
               <h5 className="mb-0 ">Notification Settings</h5>
             </div>
             <div className="card-body">
@@ -410,11 +429,11 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Backup & Recovery Settings */}
-        <div className="col-12">
-          <div className="card shadow-sm settings-card-unique bg-card">
+        {/* <div className="col-12">
+          <div className="card shadow-sm settings-card-unique bg-card custom-modal-dark">
             <div className="card-header bg-light settings-card-header-unique bg-card">
               <h5 className="mb-0">Backup & Recovery Settings</h5>
             </div>
@@ -489,7 +508,7 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

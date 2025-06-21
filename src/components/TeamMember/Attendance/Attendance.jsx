@@ -460,55 +460,58 @@ const Attendance = () => {
           </div>
           
           <div className="table-responsive">
-            <table className="table table-hover mb-0 table-gradient-bg">
-              <thead className="table-light">
-                <tr>
-                  <th scope="col">Employee</th>
-                  <th scope="col">Department</th>
-                  <th scope="col">Check-in</th>
-                  <th scope="col">Check-out</th>
-                  <th scope="col">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredMembers.map((member) => (
-                  <tr key={member.id}>
-                    <td>
-                      <div className="d-flex align-items-center">
-                        <img 
-                          src={member.avatar} 
-                          alt={member.name} 
-                          className="rounded-circle me-3" 
-                          width="40" 
-                          height="40" 
-                        />
-                        <div>
-                          <div className="fw-medium">{member.name}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>{member.department}</td>
-                    <td>{member.checkIn}</td>
-                    <td>{member.checkOut}</td>
-                    <td>
-                      <span className={`badge 
-                        ${member.status === 'Present' ? 'bg-success' : ''}
-                        ${member.status === 'Late' ? 'bg-warning' : ''}
-                        ${member.status === 'Absent' ? 'bg-danger' : ''}
-                      `}>
-                        {member.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <table className="table table-hover mb-0 table-gradient-bg">
+  <thead className="table-light">
+    <tr>
+      <th scope="col">ID</th> {/* New ID column */}
+      <th scope="col">Employee</th>
+      <th scope="col">Department</th>
+      <th scope="col">Check-in</th>
+      <th scope="col">Check-out</th>
+      <th scope="col">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredMembers.map((member) => (
+      <tr key={member.id}>
+        <td>{member.id}</td> {/* New ID cell */}
+        <td>
+          <div className="d-flex align-items-center">
+            <img 
+              src={member.avatar} 
+              alt={member.name} 
+              className="rounded-circle me-3" 
+              width="40" 
+              height="40" 
+            />
+            <div>
+              <div className="fw-medium">{member.name}</div>
+            </div>
+          </div>
+        </td>
+        <td>{member.department}</td>
+        <td>{member.checkIn}</td>
+        <td>{member.checkOut}</td>
+        <td>
+          <span className={`badge 
+            ${member.status === 'Present' ? 'bg-success' : ''}
+            ${member.status === 'Late' ? 'bg-warning' : ''}
+            ${member.status === 'Absent' ? 'bg-danger' : ''}
+          `}>
+            {member.status}
+          </span>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
           </div>
           
           <div className="p-3 border-top">
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-center">
-              <div className="text-muted small mb-2 mb-md-0">
-                Showing <span className="fw-medium">{filteredMembers.length}</span> of <span className="fw-medium">{teamMembers.length}</span> team members
+              <div className="text-white small mb-2 mb-md-0">
+                Showing <span className="fw-medium text-white">{filteredMembers.length}</span> of <span className="fw-medium text-white">{teamMembers.length}</span> team members
               </div>
               
               <div className="btn-group">

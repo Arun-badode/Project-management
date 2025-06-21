@@ -96,7 +96,7 @@ const Assigned = () => {
     name: "",
     status: "Planning",
     dueDate: "",
-    teamMembers: 1,
+    teamMembers: "",
     priority: "Medium",
     description: "",
   });
@@ -112,7 +112,7 @@ const Assigned = () => {
       status: newProject.status,
       dueDate: newProject.dueDate,
       progress: 0,
-      teamMembers: Number(newProject.teamMembers),
+      teamMembers: newProject.teamMembers,
       priority: newProject.priority,
     };
 
@@ -122,7 +122,7 @@ const Assigned = () => {
       name: "",
       status: "Planning",
       dueDate: "",
-      teamMembers: 1,
+      teamMembers: "",
       priority: "Medium",
       description: "",
     });
@@ -243,7 +243,7 @@ const Assigned = () => {
               <Row className="g-3">
                 <Col md={4}>
                   <Form.Group controlId="sortBy">
-                    <Form.Label>Sort by</Form.Label>
+                    <Form.Label className="text-white">Sort by</Form.Label>
                     <Form.Select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
@@ -256,7 +256,7 @@ const Assigned = () => {
                 </Col>
                 <Col md={4}>
                   <Form.Group controlId="filterStatus">
-                    <Form.Label>Status</Form.Label>
+                    <Form.Label className="text-white">Status</Form.Label>
                     <Form.Select
                       value={filterStatus}
                       onChange={(e) => setFilterStatus(e.target.value)}
@@ -271,7 +271,7 @@ const Assigned = () => {
                 </Col>
                 <Col md={4}>
                   <Form.Group controlId="filterPriority">
-                    <Form.Label>Priority</Form.Label>
+                    <Form.Label className="text-white">Priority</Form.Label>
                     <Form.Select
                       value={filterPriority}
                       onChange={(e) => setFilterPriority(e.target.value)}
@@ -430,8 +430,8 @@ const Assigned = () => {
       </Button>  */}
 
       {/* Add Project Modal */}
-      <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered>
-        <Modal.Header className="bg-card" closeButton>
+      <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered className="custom-modal-dark">
+        <Modal.Header className="" closeButton>
           <Modal.Title>Add New Project</Modal.Title>
         </Modal.Header>
         <Modal.Body className="bg-card">
@@ -476,17 +476,22 @@ const Assigned = () => {
 
             <Form.Group className="mb-3">
               <Form.Label>Team Members</Form.Label>
-              <Form.Control
+              <Form.Select
                 type="number"
                 min="1"
                 value={newProject.teamMembers}
                 onChange={(e) =>
                   setNewProject({
                     ...newProject,
-                    teamMembers: Number(e.target.value),
+                    teamMembers: e.target.value,
                   })
                 }
-              />
+              >
+                <option value="John Doe">John Doe</option>
+    <option value="Sarah Smith">Sarah Smith</option>
+    <option value="Mike Johnson">Mike Johnson</option>
+    <option value="Emily Davis">Emily Davis</option>
+                </Form.Select>
             </Form.Group>
 
             <Form.Group className="mb-3">
