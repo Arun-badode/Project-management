@@ -92,6 +92,22 @@ const Assigned = () => {
   const [filterPriority, setFilterPriority] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+
+  const [editProject, setEditProject] = useState(null);
+
+  const handleView = (project) => {
+    setSelectedProject(project);
+    setShowViewModal(true);
+  };
+
+  const handleEdit = (project) => {
+    setEditProject({ ...project });
+    setShowEditModal(true);
+  };
+
   const [newProject, setNewProject] = useState({
     name: "",
     status: "Planning",
@@ -199,19 +215,18 @@ const Assigned = () => {
         <h1 className="h4 mb-2 mb-md-0 fw-bold gradient-heading ms-3 mt-3  ">
           Assigned Projects
         </h1>
-         <Form.Group
-              controlId="searchProjects"
-              className="position-relative w-25 justify-content-center justify-content-end"
-            >
-              <Form.Control
-                type="text"
-                placeholder="Search projects..."
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="ps-4"
-              />
-              
-            </Form.Group>
+        <Form.Group
+          controlId="searchProjects"
+          className="position-relative w-25 justify-content-center justify-content-end"
+        >
+          <Form.Control
+            type="text"
+            placeholder="Search projects..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="ps-4"
+          />
+        </Form.Group>
 
         <div className="d-flex  align-items-center gap-2">
           <Button
@@ -237,8 +252,6 @@ const Assigned = () => {
         <div>
           {/* Search and filters */}
           <div className="">
-           
-
             {showFilters && (
               <Row className="g-3">
                 <Col md={4}>
@@ -338,22 +351,24 @@ const Assigned = () => {
                     </Card.Body>
 
                     <Card.Footer className="bg-card border-top">
-                      <div className="d-flex justify-content-between">
+                      <div className="d-flex justify-content-start">
                         <Button
                           variant="link"
                           size="sm"
-                          className="text-decoration-none p-0"
+                          className="text-decoration-none p-0 me-2"
+                          onClick={() => handleView(project)}
                         >
-                          <Eye className="me-1" /> View
+                          <Eye className="me-1 " /> View
                         </Button>
                         <Button
                           variant="link"
                           size="sm"
                           className="text-decoration-none p-0"
+                          onClick={() => handleEdit(project)}
                         >
                           <Pencil className="me-1" /> Edit
                         </Button>
-                        <Button
+                        {/* <Button
                           variant="link"
                           size="sm"
                           className="text-decoration-none p-0"
@@ -366,7 +381,7 @@ const Assigned = () => {
                           className="text-decoration-none p-0"
                         >
                           <CheckCircle className="me-1" /> Complete
-                        </Button>
+                        </Button> */}
                       </div>
                     </Card.Footer>
                   </Card>
@@ -390,6 +405,134 @@ const Assigned = () => {
           )}
         </Container>
       </div>
+      <Modal
+  show={showViewModal}
+  onHide={() => setShowViewModal(false)}
+  centered
+  className="custom-modal-dark"
+>
+  <Modal.Header closeButton>
+    <Modal.Title>View Project</Modal.Title>
+  </Modal.Header>
+  <Modal.Body className="bg-card">
+    {selectedProject && (
+      <div>
+        <h5>{selectedProject.name}</h5>
+        <p>Status: {selectedProject.status}</p>
+        <p>Due Date: {formatDate(selectedProject.dueDate)}</p>
+        <p>Team Members: {selectedProject.teamMembers}</p>
+        <p>Priority: {selectedProject.priority}</p>
+        {/* Add more fields as needed */}
+      </div>
+    )}
+  </Modal.Body>
+  <Modal.Footer className="bg-card">
+    <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+      Close
+    </Button>
+  </Modal.Footer>
+</Modal>
+
+{/* Edit Project Modal */}
+<Modal
+  show={showEditModal}
+  onHide={() => setShowEditModal(false)}
+  centered
+  className="custom-modal-dark"
+>
+  <Modal.Header closeButton>
+    <Modal.Title>Edit Project</Modal.Title>
+  </Modal.Header>
+  <Modal.Body className="bg-card">
+    {editProject && (
+      <Form>
+        <Form.Group className="mb-3">
+          <Form.Label>Project Name *</Form.Label>
+          <Form.Control
+            type="text"
+            value={editProject.name}
+            onChange={(e) =>
+              setEditProject({ ...editProject, name: e.target.value })
+            }
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Status</Form.Label>
+          <Form.Select
+            value={editProject.status}
+            onChange={(e) =>
+              setEditProject({ ...editProject, status: e.target.value })
+            }
+          >
+            <option value="Planning">Planning</option>
+            <option value="In Progress">In Progress</option>
+            <option value="On Hold">On Hold</option>
+            <option value="Completed">Completed</option>
+          </Form.Select>
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Due Date *</Form.Label>
+          <Form.Control
+            type="date"
+            value={editProject.dueDate}
+            onChange={(e) =>
+              setEditProject({ ...editProject, dueDate: e.target.value })
+            }
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Team Members</Form.Label>
+          <Form.Control
+            type="number"
+            min="1"
+            value={editProject.teamMembers}
+            onChange={(e) =>
+              setEditProject({ ...editProject, teamMembers: e.target.value })
+            }
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Priority</Form.Label>
+          <Form.Select
+            value={editProject.priority}
+            onChange={(e) =>
+              setEditProject({ ...editProject, priority: e.target.value })
+            }
+          >
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </Form.Select>
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Description</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            value={editProject.description || ""}
+            onChange={(e) =>
+              setEditProject({ ...editProject, description: e.target.value })
+            }
+          />
+        </Form.Group>
+      </Form>
+    )}
+  </Modal.Body>
+  <Modal.Footer className="bg-card">
+    <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+      Cancel
+    </Button>
+    <Button
+      variant="primary"
+      onClick={() => {
+        setProjects(projects.map((p) => (p.id === editProject.id ? editProject : p)));
+        setShowEditModal(false);
+      }}
+    >
+      Save Changes
+    </Button>
+  </Modal.Footer>
+</Modal>
 
       {/* Pagination */}
       {filteredProjects.length > 0 && (
@@ -430,7 +573,12 @@ const Assigned = () => {
       </Button>  */}
 
       {/* Add Project Modal */}
-      <Modal show={showAddModal} onHide={() => setShowAddModal(false)} centered className="custom-modal-dark">
+      <Modal
+        show={showAddModal}
+        onHide={() => setShowAddModal(false)}
+        centered
+        className="custom-modal-dark"
+      >
         <Modal.Header className="" closeButton>
           <Modal.Title>Assigned Project</Modal.Title>
         </Modal.Header>
@@ -488,10 +636,10 @@ const Assigned = () => {
                 }
               >
                 <option value="John Doe">John Doe</option>
-    <option value="Sarah Smith">Sarah Smith</option>
-    <option value="Mike Johnson">Mike Johnson</option>
-    <option value="Emily Davis">Emily Davis</option>
-                </Form.Select>
+                <option value="Sarah Smith">Sarah Smith</option>
+                <option value="Mike Johnson">Mike Johnson</option>
+                <option value="Emily Davis">Emily Davis</option>
+              </Form.Select>
             </Form.Group>
 
             <Form.Group className="mb-3">
