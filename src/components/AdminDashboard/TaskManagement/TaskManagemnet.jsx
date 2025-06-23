@@ -397,7 +397,7 @@ const TaskManagement = () => {
         </div>
       </div>
 
-      <div className="d-flex flex-row  flex-md-column gap-2 ms-md-4 mt-3 mt-md-0 w-50 w-md-auto">
+      {/* <div className="d-flex flex-row  flex-md-column gap-2 ms-md-4 mt-3 mt-md-0 w-50 w-md-auto">
         <button
           onClick={() => setEditingTask(task)}
           className="btn btn-sm btn-outline-secondary ms-5  w-50 md-auto" 
@@ -410,7 +410,7 @@ const TaskManagement = () => {
         >
           <Trash2 className="w-4 h-4" />
         </button>
-      </div>
+      </div> */}
     </div>
   );
 

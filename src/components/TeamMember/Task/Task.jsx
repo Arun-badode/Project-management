@@ -366,7 +366,7 @@ function Task() {
       <h1 className="mb-4 gradient-heading">Task Management</h1>
 
       {/* Timer Card - Similar to the image */}
-      <div className="card mb-4 bg-card text-center">
+      <div className="card mb-4 bg-card   ">
         <div className="card-header">
           <h5>UI Design for Dashboard</h5>
           <div className="small">Project: Design System</div>
