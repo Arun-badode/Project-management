@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import { Form, Button } from "react-bootstrap";
 function CreateProject() {
   const [projectName, setProjectName] = useState('');
   const [projectDescription, setProjectDescription] = useState('');
@@ -91,272 +91,71 @@ function CreateProject() {
 
   return (
     <div>
-      <div className="container-fluid min-vh-100 bg-main">
-        {/* Header */}
-        {/* <header className="bg-white shadow-sm p-3 mb-5">
-          <div className="d-flex justify-content-between align-items-center">
-            <button className="btn btn-light me-4">
-              <i className="fas fa-arrow-left"></i>
-            </button>
-            <h1 className="h4 text-primary">Create New Project</h1>
-          </div>
-        </header> */}
+     <div className="container mt-5 p-4  text-white rounded shadow custom-modal-dark">
+      <h3 className="mb-4">Create New Project</h3>
+      <Form>
+        <Form.Group className="mb-3">
+          <Form.Label>Project Name</Form.Label>
+          <Form.Control type="text" placeholder="Enter title" />
+        </Form.Group>
 
-        {/* Main Content */}
-        <div className="container  py-3">
-            <h1 className='gradient-heading'>Create New Project</h1>
-          <div className="card shadow-lg p-4 create-card">
-            <form onSubmit={handleSubmit} className="space-y-4 ">
-              {/* Project Basic Information */}
-              <div className="space-y-4 ">
-                <h2 className="h5 text-gray-900 border-bottom pb-2">Basic Information</h2>
+        <Form.Group className="mb-3">
+          <Form.Label>Client Name</Form.Label>
+          <Form.Control type="text" placeholder="Enter client name" />
+        </Form.Group>
 
-                {/* Project Name */}
-                <div>
-                  <label htmlFor="project-name" className="form-label">
-                    Project Name <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="project-name"
-                    className={`form-control ${errors.projectName ? 'is-invalid' : ''}`}
-                    placeholder="Enter project name"
-                    value={projectName}
-                    onChange={(e) => setProjectName(e.target.value)}
-                  />
-                  {errors.projectName && (
-                    <div className="invalid-feedback">{errors.projectName}</div>
-                  )}
-                </div>
+        <Form.Group className="mb-3">
+          <Form.Label>Platform</Form.Label>
+          <Form.Select className="text-white border-secondary bg-dark">
+            <option>Web</option>
+            <option>Mobile</option>
+            <option>Desktop</option>
+          </Form.Select>
+        </Form.Group>
 
-                {/* Project Description */}
-                <div>
-                  <label htmlFor="project-description" className="form-label">
-                    Project Description
-                  </label>
-                  <textarea
-                    id="project-description"
-                    rows={4}
-                    className="form-control"
-                    placeholder="Describe your project"
-                    value={projectDescription}
-                    onChange={(e) => setProjectDescription(e.target.value)}
-                  />
-                </div>
+        <Form.Group className="mb-3">
+          <Form.Label>Total Pages</Form.Label>
+          <Form.Control type="number" placeholder="Enter page count" />
+        </Form.Group>
 
-                {/* Project Type */}
-                <div>
-                  <label htmlFor="project-type" className="form-label">
-                    Project Type <span className="text-danger">*</span>
-                  </label>
-                  <button
-                    type="button"
-                    className={`form-control ${errors.projectType ? 'is-invalid' : ''} dropdown-toggle`}
-                    onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
-                    data-bs-toggle="dropdown"
-                    aria-expanded={isTypeDropdownOpen}
-                  >
-                    {projectType || 'Select project type'}
-                  </button>
-                  {isTypeDropdownOpen && (
-                    <ul className="dropdown-menu show">
-                      {projectTypes.map((type) => (
-                        <li key={type}>
-                          <button
-                            className="dropdown-item"
-                            onClick={() => {
-                              setProjectType(type);
-                              setIsTypeDropdownOpen(false);
-                            }}
-                          >
-                            {type}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {errors.projectType && (
-                    <div className="invalid-feedback">{errors.projectType}</div>
-                  )}
-                </div>
-              </div>
+        <Form.Group className="mb-3">
+          <Form.Label>Actual Due Date</Form.Label>
+          <Form.Control type="datetime-local" />
+        </Form.Group>
 
-              {/* Team Members */}
-              <div className="space-y-4">
-                <h2 className="h5 text-gray-900 border-bottom pb-2">Team Members</h2>
+        <Form.Group className="mb-3">
+          <Form.Label>Ready for QC Deadline</Form.Label>
+          <Form.Control type="datetime-local" />
+        </Form.Group>
 
-                <div className="d-flex flex-column">
-                  <label htmlFor="team-member" className="form-label">Add Team Members</label>
-                  <div className="input-group">
-                    <input
-                      type="text"
-                      id="team-member"
-                      className="form-control"
-                      placeholder="Search or enter member name"
-                      value={memberInput}
-                      onChange={(e) => setMemberInput(e.target.value)}
-                      onFocus={() => setIsDropdownOpen(true)}
-                      onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={handleAddMember}
-                    >
-                      <i className="fas fa-plus"></i> Add
-                    </button>
-                  </div>
+        <Form.Group className="mb-3">
+          <Form.Label>QC Hours Allocated</Form.Label>
+          <Form.Control type="number" />
+        </Form.Group>
 
-                  {/* Member Suggestions */}
-                  {isDropdownOpen && memberInput && (
-                    <ul className="list-group mt-2">
-                      {suggestedMembers
-                        .filter(member =>
-                          member.toLowerCase().includes(memberInput.toLowerCase()) &&
-                          !teamMembers.includes(member)
-                        )
-                        .map((member) => (
-                          <li
-                            key={member}
-                            className="list-group-item cursor-pointer"
-                            onClick={() => {
-                              setMemberInput(member);
-                              setIsDropdownOpen(false);
-                            }}
-                          >
-                            {member}
-                          </li>
-                        ))}
-                    </ul>
-                  )}
+        <Form.Group className="mb-3">
+          <Form.Label>QC Due Date</Form.Label>
+          <Form.Control type="datetime-local" />
+        </Form.Group>
 
-                  {/* Added Team Members */}
-                  {teamMembers.length > 0 && (
-                    <div className="mt-3">
-                      <h5 className="text-muted">Team Members:</h5>
-                      <div className="d-flex flex-wrap gap-2">
-                        {teamMembers.map(member => (
-                          <div
-                            key={member}
-                            className="badge bg-primary text-white"
-                          >
-                            {member}
-                            <button
-                              type="button"
-                              className="btn-close btn-close-white ms-1"
-                              onClick={() => handleRemoveMember(member)}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+        <Form.Group className="mb-3">
+          <Form.Label>Status</Form.Label>
+          <Form.Select>
+            <option>In Progress</option>
+            <option>Completed</option>
+            <option>On Hold</option>
+          </Form.Select>
+        </Form.Group>
 
-              {/* Project Settings */}
-              <div className="space-y-4">
-                <h2 className="h5 text-gray-900 border-bottom pb-2">Project Settings</h2>
-
-                {/* Privacy Setting */}
-                <div>
-                  <label className="form-label">Privacy</label>
-                  <div className="form-check form-check-inline">
-                    <input
-                      type="radio"
-                      id="privacy-public"
-                      name="privacy"
-                      className="form-check-input"
-                      checked={!isPrivate}
-                      onChange={() => setIsPrivate(false)}
-                    />
-                    <label htmlFor="privacy-public" className="form-check-label">Public</label>
-                  </div>
-                  <div className="form-check form-check-inline">
-                    <input
-                      type="radio"
-                      id="privacy-private"
-                      name="privacy"
-                      className="form-check-input"
-                      checked={isPrivate}
-                      onChange={() => setIsPrivate(true)}
-                    />
-                    <label htmlFor="privacy-private" className="form-check-label">Private</label>
-                  </div>
-                </div>
-
-                {/* Deadline */}
-                <div>
-                  <label htmlFor="deadline" className="form-label">Deadline <span className="text-danger">*</span></label>
-                  <input
-                    type="date"
-                    id="deadline"
-                    className={`form-control ${errors.deadline ? 'is-invalid' : ''}`}
-                    value={deadline}
-                    onChange={(e) => setDeadline(e.target.value)}
-                  />
-                  {errors.deadline && (
-                    <div className="invalid-feedback">{errors.deadline}</div>
-                  )}
-                </div>
-
-                {/* Priority Level */}
-                <div>
-                  <label htmlFor="priority" className="form-label">Priority Level</label>
-                  <button
-                    type="button"
-                    className="form-control dropdown-toggle"
-                    onClick={() => setIsPriorityDropdownOpen(!isPriorityDropdownOpen)}
-                    data-bs-toggle="dropdown"
-                    aria-expanded={isPriorityDropdownOpen}
-                  >
-                    {priority}
-                  </button>
-                  {isPriorityDropdownOpen && (
-                    <ul className="dropdown-menu show">
-                      {priorityLevels.map((level) => (
-                        <li key={level}>
-                          <button
-                            className="dropdown-item"
-                            onClick={() => {
-                              setPriority(level);
-                              setIsPriorityDropdownOpen(false);
-                            }}
-                          >
-                            {level}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="pt-4 border-top d-flex justify-content-end gap-3">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={handleCancel}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className={`btn btn-primary ${isLoading ? 'disabled' : ''}`}
-                >
-                  {isLoading ? (
-                    <span>Creating...</span>
-                  ) : (
-                    <span>Create Project</span>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
+        <Button
+          variant="primary"
+          type="submit"
+          className="w-100 gradient-button"
+        >
+          Create Project
+        </Button>
+      </Form>
+    </div>
     </div>
   );
 }
