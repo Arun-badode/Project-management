@@ -293,7 +293,7 @@ const RoleManagementSystem = () => {
   }, [showPermissionsModal]);
 
   return (
-    <div className="min-vh-100 bg-light p-2 p-md-3">
+    <div className="min-vh-100 bg-light p-2 p-md-3 bg-main">
       <div
         className="mb-4 border-0 mybg text-white bg-card"
         style={{ borderRadius: '12px', padding: '1.2rem', height: '80px',  }}

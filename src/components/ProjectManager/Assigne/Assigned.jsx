@@ -406,133 +406,141 @@ const Assigned = () => {
         </Container>
       </div>
       <Modal
-  show={showViewModal}
-  onHide={() => setShowViewModal(false)}
-  centered
-  className="custom-modal-dark"
->
-  <Modal.Header closeButton>
-    <Modal.Title>View Project</Modal.Title>
-  </Modal.Header>
-  <Modal.Body className="bg-card">
-    {selectedProject && (
-      <div>
-        <h5>{selectedProject.name}</h5>
-        <p>Status: {selectedProject.status}</p>
-        <p>Due Date: {formatDate(selectedProject.dueDate)}</p>
-        <p>Team Members: {selectedProject.teamMembers}</p>
-        <p>Priority: {selectedProject.priority}</p>
-        {/* Add more fields as needed */}
-      </div>
-    )}
-  </Modal.Body>
-  <Modal.Footer className="bg-card">
-    <Button variant="secondary" onClick={() => setShowViewModal(false)}>
-      Close
-    </Button>
-  </Modal.Footer>
-</Modal>
+        show={showViewModal}
+        onHide={() => setShowViewModal(false)}
+        centered
+        className="custom-modal-dark"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>View Project</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="bg-card">
+          {selectedProject && (
+            <div>
+              <h5>{selectedProject.name}</h5>
+              <p>Status: {selectedProject.status}</p>
+              <p>Due Date: {formatDate(selectedProject.dueDate)}</p>
+              <p>Team Members: {selectedProject.teamMembers}</p>
+              <p>Priority: {selectedProject.priority}</p>
+              {/* Add more fields as needed */}
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer className="bg-card">
+          <Button variant="secondary" onClick={() => setShowViewModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
-{/* Edit Project Modal */}
-<Modal
-  show={showEditModal}
-  onHide={() => setShowEditModal(false)}
-  centered
-  className="custom-modal-dark"
->
-  <Modal.Header closeButton>
-    <Modal.Title>Edit Project</Modal.Title>
-  </Modal.Header>
-  <Modal.Body className="bg-card">
-    {editProject && (
-      <Form>
-        <Form.Group className="mb-3">
-          <Form.Label>Project Name *</Form.Label>
-          <Form.Control
-            type="text"
-            value={editProject.name}
-            onChange={(e) =>
-              setEditProject({ ...editProject, name: e.target.value })
-            }
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Status</Form.Label>
-          <Form.Select
-            value={editProject.status}
-            onChange={(e) =>
-              setEditProject({ ...editProject, status: e.target.value })
-            }
+      {/* Edit Project Modal */}
+      <Modal
+        show={showEditModal}
+        onHide={() => setShowEditModal(false)}
+        centered
+        className="custom-modal-dark"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Project</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="bg-card">
+          {editProject && (
+            <Form>
+              <Form.Group className="mb-3">
+                <Form.Label>Project Name *</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={editProject.name}
+                  onChange={(e) =>
+                    setEditProject({ ...editProject, name: e.target.value })
+                  }
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Status</Form.Label>
+                <Form.Select
+                  value={editProject.status}
+                  onChange={(e) =>
+                    setEditProject({ ...editProject, status: e.target.value })
+                  }
+                >
+                  <option value="Planning">Planning</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="On Hold">On Hold</option>
+                  <option value="Completed">Completed</option>
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Due Date *</Form.Label>
+                <Form.Control
+                  type="date"
+                  value={editProject.dueDate}
+                  onChange={(e) =>
+                    setEditProject({ ...editProject, dueDate: e.target.value })
+                  }
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Team Members</Form.Label>
+                <Form.Control
+                  type="number"
+                  min="1"
+                  value={editProject.teamMembers}
+                  onChange={(e) =>
+                    setEditProject({
+                      ...editProject,
+                      teamMembers: e.target.value,
+                    })
+                  }
+                />
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Priority</Form.Label>
+                <Form.Select
+                  value={editProject.priority}
+                  onChange={(e) =>
+                    setEditProject({ ...editProject, priority: e.target.value })
+                  }
+                >
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Label>Description</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={editProject.description || ""}
+                  onChange={(e) =>
+                    setEditProject({
+                      ...editProject,
+                      description: e.target.value,
+                    })
+                  }
+                />
+              </Form.Group>
+            </Form>
+          )}
+        </Modal.Body>
+        <Modal.Footer className="bg-card">
+          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              setProjects(
+                projects.map((p) => (p.id === editProject.id ? editProject : p))
+              );
+              setShowEditModal(false);
+            }}
           >
-            <option value="Planning">Planning</option>
-            <option value="In Progress">In Progress</option>
-            <option value="On Hold">On Hold</option>
-            <option value="Completed">Completed</option>
-          </Form.Select>
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Due Date *</Form.Label>
-          <Form.Control
-            type="date"
-            value={editProject.dueDate}
-            onChange={(e) =>
-              setEditProject({ ...editProject, dueDate: e.target.value })
-            }
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Team Members</Form.Label>
-          <Form.Control
-            type="number"
-            min="1"
-            value={editProject.teamMembers}
-            onChange={(e) =>
-              setEditProject({ ...editProject, teamMembers: e.target.value })
-            }
-          />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Priority</Form.Label>
-          <Form.Select
-            value={editProject.priority}
-            onChange={(e) =>
-              setEditProject({ ...editProject, priority: e.target.value })
-            }
-          >
-            <option value="High">High</option>
-            <option value="Medium">Medium</option>
-            <option value="Low">Low</option>
-          </Form.Select>
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Description</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={3}
-            value={editProject.description || ""}
-            onChange={(e) =>
-              setEditProject({ ...editProject, description: e.target.value })
-            }
-          />
-        </Form.Group>
-      </Form>
-    )}
-  </Modal.Body>
-  <Modal.Footer className="bg-card">
-    <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-      Cancel
-    </Button>
-    <Button
-      variant="primary"
-      onClick={() => {
-        setProjects(projects.map((p) => (p.id === editProject.id ? editProject : p)));
-        setShowEditModal(false);
-      }}
-    >
-      Save Changes
-    </Button>
-  </Modal.Footer>
-</Modal>
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* Pagination */}
       {filteredProjects.length > 0 && (
