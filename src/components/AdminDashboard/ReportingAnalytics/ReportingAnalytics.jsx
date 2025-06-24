@@ -652,12 +652,12 @@ const ReportingAnalytics = () => {
   );
 
   const reportTabs = [
-    { id: 'project-status', label: 'Project Status', icon: Target },
-    { id: 'workload', label: 'Monthly Workload', icon: Calendar },
-    { id: 'team-performance', label: 'Team Performance', icon: Users },
-    { id: 'missed-deadlines', label: 'Missed Deadlines', icon: Clock },
-    { id: 'productivity', label: 'Productivity Charts', icon: TrendingUp },
-    { id: 'custom-builder', label: 'Custom Builder', icon: Settings }
+    { id: 'project-status', label: 'Project Report', icon: Target },
+    { id: 'workload', label: 'Feedback log ', icon: Calendar },
+    { id: 'team-performance', label: 'Team Performance ', icon: Users },
+    { id: 'missed-deadlines', label: 'Revenue Reporting ', icon: Clock },
+    // { id: 'productivity', label: 'Productivity Charts', icon: TrendingUp },
+    // { id: 'custom-builder', label: 'Custom Builder', icon: Settings }
   ];
 
   const renderActiveReport = () => {
