@@ -138,9 +138,9 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
       </div>
 
       {/* KPIs */}
-      <Row className="mb-4 g-3">
+      <Row className="mb-3 g-2">
         <Col xs={12} sm={6} md={2}>
-          <Card className="bg-card text-white p-3 h-100">
+          <Card className="bg-card text-white p-2  h-75" >
             <Card.Body>
               <Card.Title> Active Projects</Card.Title>
               <h4>{projects.length}</h4>
@@ -149,7 +149,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
         </Col>
        
         <Col xs={12} sm={6} md={2}>
-          <Card className="bg-card text-white p-3 h-100">
+          <Card className="bg-card text-white p-2  h-75">
             <Card.Body>
               <Card.Title> Near Due</Card.Title>
               <h4>4</h4>
@@ -157,7 +157,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
           </Card>
         </Col>
         <Col xs={12} sm={6} md={2}>
-          <Card className="bg-card text-white p-3 h-100">
+          <Card className="bg-card text-white p-2  h-75">
             <Card.Body>
               <Card.Title>Overdue </Card.Title>
               <h4>2</h4>
@@ -165,7 +165,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
           </Card>
         </Col>
         <Col xs={12} sm={6} md={2}>
-          <Card className="bg-card text-white p-3 h-100">
+          <Card className="bg-card text-white p-2  h-75">
             <Card.Body>
               <Card.Title>Team On-Duty</Card.Title>
               <h4>{projects.length}</h4>
@@ -173,7 +173,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
           </Card>
         </Col>
         <Col xs={12} sm={6} md={2}>
-          <Card className="bg-card text-white p-3 h-100">
+          <Card className="bg-card text-white p-2  h-75">
             <Card.Body>
               <Card.Title>Events Today </Card.Title>
               <h4>{projects.length}</h4>
@@ -181,7 +181,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
           </Card>
         </Col>
         <Col xs={12} sm={6} md={2}>
-          <Card className="bg-card text-white p-3  h-100">
+          <Card className="bg-card text-white p-2  h-75">
             <Card.Body>
               <Card.Title>Pending Approval  </Card.Title>
               <h4>{projects.length}</h4>
@@ -321,7 +321,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
   {/* SCROLLABLE CONTAINER */}
   <div
     className="table-responsive"
-    style={{ maxHeight: "400px", overflowY: "auto" }}
+    style={{ maxHeight: "500px", overflowY: "auto" }}
   >
     <Table className="table-gradient-bg align-middle mt-0 table table-bordered table-hover">
       <thead className="table-light bg-dark sticky-top">

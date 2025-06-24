@@ -73,6 +73,23 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Task Management </span>
                 </div>
               </li>
+
+              <li
+                className={`menu-item ${
+                  isActive("/project") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/project");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-diagram-project"></i>
+                  <span className="menu-text">Projects </span>
+                </div>
+              </li>
                <li
                 className={`menu-item ${
                   isActive("/reportinganalytics") ? "active" : ""

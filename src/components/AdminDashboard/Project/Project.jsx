@@ -17,7 +17,7 @@ const handlers = ["Alice", "Bob", "Charlie", "David"];
 const qaReviewers = ["Eve", "Mallory", "Trent"];
 const qaStatuses = ["Passed", "Failed", "In Review"];
 
-const LeadDashboard = () => {
+const Project = () => {
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -94,8 +94,16 @@ const LeadDashboard = () => {
     <div className="admin-dashboard text-white p-3 p-md-4 bg-main">
       {/* Header */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-        <h2 className="gradient-heading">Active Project</h2>
-        
+        <h2 className="gradient-heading">All Project</h2>
+        <div className="d-flex flex-column flex-sm-row gap-2">
+          <Button className="gradient-button"><i class="fa-solid fa-download me-2"></i>Black Excel Download</Button>  
+          <Button className="gradient-button"><i class="fa-solid fa-upload me-2"></i>Import Excel</Button>
+           <Button className="gradient-button"><i class="fa-solid fa-download me-2"></i>Download Excel</Button>
+          <Button className="gradient-button" onClick={handleShow}>
+            <FaPlus className="me-2" /> Create New Project
+          </Button>
+         
+        </div>
       </div>
 
       {/* Main Table */}
@@ -105,7 +113,7 @@ const LeadDashboard = () => {
   {/* ✅ Scrollable Wrapper */}
   <div
     className="table-responsive table-gradient-bg"
-    style={{ maxHeight: '500px', overflowY: 'auto' }}
+    style={{ maxHeight: '400px', overflowY: 'auto' }}
   >
     <Table className="table-gradient-bg align-middle mb-0 table table-bordered table-hover">
       <thead className="table-light bg-dark sticky-top">
@@ -452,4 +460,4 @@ const LeadDashboard = () => {
   );
 };
 
-export default LeadDashboard;
+export default Project;
