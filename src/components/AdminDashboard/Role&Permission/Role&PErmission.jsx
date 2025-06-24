@@ -14,6 +14,7 @@ const RoleManagementSystem = () => {
   const [roles, setRoles] = useState([
     { _id: "1", roleName: "Admin", description: "Full Access" },
     { _id: "2", roleName: "Manager", description: "Limited Access" },
+    { _id: "3", roleName: "Team Member", description: "Custom Access" },
   ]);
 
   const dummyPermissions = {
@@ -183,7 +184,11 @@ const RoleManagementSystem = () => {
           >
             <Plus size={16} /> Add Role
           </button>
+
+        
+          
         </div>
+        
       </div>
 
       <div className="card-body p-0">
@@ -378,8 +383,21 @@ const RoleManagementSystem = () => {
                 }
               />
             </div>
+
+       
+
+
+
+
+
+
           </form>
         </Modal.Body>
+
+
+
+
+        
         <Modal.Footer>
           <button
             className="btn btn-secondary"
