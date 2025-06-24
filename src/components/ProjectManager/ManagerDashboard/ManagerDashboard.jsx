@@ -285,9 +285,10 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
                   </div>
                 </div>
               </div>
-              <div className="table-responsive">
+              <div className="table-responsive"
+    style={{ maxHeight: "400px", overflowY: "auto" }}>
                <table className="table table-hover mb-0 table-gradient-bg">
-  <thead className="table-light">
+  <thead className="table-light  sticky-top bg-dark">
     <tr>
       <th scope="col">ID</th>
       <th scope="col">Project</th>
@@ -359,6 +360,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
         </div>
       </td>
     </tr>
+    
     <tr>
       <td>2</td>
       <td>

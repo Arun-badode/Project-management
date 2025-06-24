@@ -73,6 +73,9 @@ export const TaskDashboard = () => {
       priority: 'Medium',
       timeSpent: '4h 10m',
     },
+    
+
+
   ];
 
   // Filter tasks based on selected tab
@@ -364,9 +367,10 @@ const handleEditChange = (e) => {
             </ul>
           </div>
           <div className="card-body p-0">
-            <div className="table-responsive">
+            <div  className="table-responsive"
+    style={{ maxHeight: "400px", overflowY: "auto" }}>
        <table className="table table-hover table-gradient-bg align-middle mb-0">
-  <thead className="table-light">
+  <thead className="table-light bg-dark sticky-top">
     <tr>
       <th>S. No.</th> {/* Changed from ID to Serial Number */}
       <th

@@ -1,25 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope, faLock, faEye } from "@fortawesome/free-solid-svg-icons";
+import { faEnvelope, faLock, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import "./Login.css";
-import { faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-
+  const [showVideo, setShowVideo] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const roleCredentials = {
-    Admin: { email: "admin@gmail.com", password: "admin@123" },
-    Manager: { email: "manager@gmail.com", password: "manager@123" },
-    "Team Member": { email: "team@gmail.com", password: "team@123" },
+    Admin: { email: "admin123", password: "admin@123" },
+    Manager: { email: "manager123", password: "manager@123" },
+    "Team Member": { email: "team123", password: "team@123" },
   };
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowVideo(false);
+    }, 4000); // 4 seconds video duration
+
+    return () => clearTimeout(timer);
+  }, []);
+
+   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!role) {
@@ -27,11 +35,9 @@ const LoginPage = () => {
       return;
     }
 
-    // Save role and email in localStorage
     localStorage.setItem("userRole", role);
     localStorage.setItem("userEmail", email);
 
-    // Navigate based on role
     switch (role) {
       case "Admin":
         navigate("/admin-dashboard");
@@ -43,7 +49,7 @@ const LoginPage = () => {
         navigate("/team-dashboard");
         break;
       default:
-        navigate("/dashboard"); // fallback
+        navigate("/dashboard");
     }
   };
 
@@ -53,10 +59,30 @@ const LoginPage = () => {
     setPassword(roleCredentials[selectedRole].password);
   };
 
+  if (showVideo) {
+    return (
+      <div className="video-splash-screen">
+        <video 
+          autoPlay 
+          muted 
+          playsInline 
+          className="splash-video"
+          onEnded={() => setShowVideo(false)}
+        >
+          <source 
+            src={isMobile ? "../public/video/Eminoids - Logo Animation Blue.mp4" : "../public/video/Eminoids - Logo Animation Blue_Mob.mp4"} 
+            type="video/mp4" 
+          />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    );
+  }
+
   return (
     <div
       className="login-page container"
-      style={{ justifyContent: "flex-start", marginBottom: "50px" }}
+      style={{ justifyContent: "center", marginTop:"30px",}}
     >
       <div className="login-container row">
         {/* Left Panel */}
@@ -68,8 +94,8 @@ const LoginPage = () => {
               className="login-logo"
             />
             <h1 className="text-white">Welcome Back!</h1>
-            <p>
-             All-in-One Project Management Dashboard for Creative Teams – Seamlessly Track Tasks, Monitor Deadlines, Analyze Productivity, and Collaborate in Real-Time with a User-Centric Interface Built for DTP and QA Specialists.
+            <p className="fw-bold">
+              “Let’s turn tasks into triumphs!” 
             </p>
           </div>
         </div>
@@ -81,7 +107,7 @@ const LoginPage = () => {
               <h4 className="login-form-title">
                 Hello!
                 <br />
-                <span className="text-muted">Sign in to your account</span>
+                <span className="text-muted">Step in and take control.</span>
               </h4>
 
               <div className="login-input-group">
@@ -90,9 +116,9 @@ const LoginPage = () => {
                   className="login-input-icon"
                 />
                 <input
-                  type="email"
+                  type="Username"
                   className="form-control login-input"
-                  placeholder="E-mail"
+                  placeholder="Username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -137,12 +163,11 @@ const LoginPage = () => {
               <button type="submit" className="btn login-submit-btn mt-3">
                 LOGIN IN
               </button>
-               <div className="text-center mt-3">
+              <div className="text-center mt-3">
                 <p className="text-muted">
-                  Already have an account? <Link to="/singup" style={{ color: "#6e8efb" }}>sing up</Link>
+                 Version Build 1.0 <Link to="/singup" style={{ color: "#6e8efb" }}>Sign up</Link>
                 </p>
               </div>
-              
             </form>
           </div>
         </div>
