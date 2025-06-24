@@ -1,13 +1,8 @@
 .sidebar-container {
   width: 295px;
   scrollbar-width: none;
-<<<<<<< HEAD
   background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e) !important;
   height: 89vh;
-=======
-
-  height:100%;
->>>>>>> 100b2cd81a73d18fc6ef98fc0a70190819fcb48a
   overflow-y: auto;
   transition: width 0.3s ease;
   margin-top: 85px;
@@ -106,14 +101,9 @@
   padding: 10px 0;
   cursor: pointer;
 }
-<<<<<<< HEAD
 
 .submenu-item {
   color: #578E7E;
-=======
-.submenu-item {
-  color: #578e7e;
->>>>>>> 100b2cd81a73d18fc6ef98fc0a70190819fcb48a
 }
 
 .submenu-arrow {
@@ -152,19 +142,4 @@
   color: white;
   border-radius: 12px;
   padding-left: 20px;
-<<<<<<< HEAD
 }
-=======
-}
-
-
-.form-check-input:checked {
-  background-color: #198754; /* Bootstrap's green */
-  border-color: #198754;
-}
-
-.form-check-input:not(:checked) {
-  background-color: #dc3545; /* Bootstrap's red */
-  border-color: #dc3545;
-}
->>>>>>> 100b2cd81a73d18fc6ef98fc0a70190819fcb48a
