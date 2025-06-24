@@ -219,7 +219,7 @@ const Navbar = ({ toggleSidebar }) => {
                           <button
                             className="btn btn-primary"
                             onClick={() => {
-                              setUserStatus('away');
+                              setUserStatus('(away)');
                               setIsOnBreak(true);
                               setShowBreakConfirmation(false);
                               setShowOverlay(true);
