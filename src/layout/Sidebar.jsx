@@ -227,7 +227,13 @@ const Sidebar = ({ collapsed }) => {
                   <i className="fa-solid fa-life-ring"></i>
                   <span className="menu-text">Support</span>
                 </div>
-              </li> */}
+              </li> */
+              
+              
+              
+              
+              
+              }
 
               <li
                 className={`menu-item ${
@@ -243,6 +249,30 @@ const Sidebar = ({ collapsed }) => {
                 >
                   <i className="fa-solid fa-gear"></i>
                   <span className="menu-text">Role & Permission</span>
+                </div>
+
+
+
+
+                
+              </li>
+
+
+
+              <li
+                className={`menu-item ${
+                  isActive("/collaboration") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/collaboration");
+                    menuItemClick();
+                  }}
+                >
+                  <i class="fa-solid fa-comments"></i>
+                  <span className="menu-text">Chat Room</span>
                 </div>
               </li>
             </>
@@ -344,7 +374,7 @@ const Sidebar = ({ collapsed }) => {
                   }}
                 >
                   <i class="fa-solid fa-comments"></i>
-                  <span className="menu-text">Collaboration</span>
+                  <span className="menu-text">Chat Room</span>
                 </div>
               </li>
             </>
