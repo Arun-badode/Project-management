@@ -389,9 +389,9 @@ function Collaboration() {
                                     >
                                         <i className="far fa-smile"></i>
                                     </button>
-                                    <button className="btn btn-sm btn-outline-secondary me-2">
+                                    {/* <button className="btn btn-sm btn-outline-secondary me-2">
                                         <i className="fas fa-paperclip"></i>
-                                    </button>
+                                    </button> */}
                                 </div>
                                 <button
                                     onClick={handleSendMessage}
