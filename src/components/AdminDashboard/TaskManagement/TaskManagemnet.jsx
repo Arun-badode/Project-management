@@ -415,80 +415,80 @@ const TaskManagement = () => {
   );
 
   const renderTaskTable = () => (
-    <div className="table-responsive">
-      <table className="table table-hover align-middle table-gradient-bg">
-        <thead className="table-light">
-          <tr>
-            <th>Task</th>
-            <th>Project</th>
-            <th>Status</th>
-            <th>Priority</th>
-            <th>Assignee</th>
-            <th>Due Date</th>
-            <th>Time Spent</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredTasks.map((task) => (
-            <tr key={task.id}>
-              <td>
-                <div className="fw-bold">{task.title}</div>
-                <div className="text-muted small">{task.description}</div>
-              </td>
-              <td>{task.project}</td>
-              <td>
-                <span className={`badge ${getStatusColor(task.status)}`}>
-                  {task.status}
-                </span>
-              </td>
-              <td>
-                <span className={`badge ${getPriorityColor(task.priority)}`}>
-                  {task.priority}
-                </span>
-              </td>
-              <td>{task.assignee}</td>
-              <td>{task.dueDate}</td>
-              <td>{formatTime(task.timeSpent)}</td>
-              <td>
-                <div className="d-flex gap-2">
-                  <button
-                    onClick={() => toggleTimer(task.id)}
-                    className={`btn btn-sm ${
-                      task.isTimerRunning ? "btn-danger" : "btn-success"
-                    }`}
-                  >
-                    {task.isTimerRunning ? (
-                      <Pause size={14} />
-                    ) : (
-                      <Play size={14} />
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setQuickViewTask(task)}
-                    className="btn btn-sm btn-info"
-                  >
-                    <Eye size={14} />
-                  </button>
-                  <button
-                    onClick={() => setEditingTask(task)}
-                    className="btn btn-sm btn-primary"
-                  >
-                    <Edit3 size={14} />
-                  </button>
-                  <button
-                    onClick={() => deleteTask(task.id)}
-                    className="btn btn-sm btn-danger"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+   <div
+  className="table-responsive"
+  style={{ maxHeight: "400px", overflowY: "auto" }}
+>
+  <table className="table table-hover align-middle table-gradient-bg mb-0">
+    <thead className="bg-dark sticky-top">
+      <tr>
+        <th>Task</th>
+        <th>Project</th>
+        <th>Status</th>
+        <th>Priority</th>
+        <th>Assignee</th>
+        <th>Due Date</th>
+        <th>Time Spent</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {filteredTasks.map((task) => (
+        <tr key={task.id}>
+          <td>
+            <div className="fw-bold">{task.title}</div>
+            <div className=" small">{task.description}</div>
+          </td>
+          <td>{task.project}</td>
+          <td>
+            <span className={`badge ${getStatusColor(task.status)}`}>
+              {task.status}
+            </span>
+          </td>
+          <td>
+            <span className={`badge ${getPriorityColor(task.priority)}`}>
+              {task.priority}
+            </span>
+          </td>
+          <td>{task.assignee}</td>
+          <td>{task.dueDate}</td>
+          <td>{formatTime(task.timeSpent)}</td>
+          <td>
+            <div className="d-flex gap-2">
+              <button
+                onClick={() => toggleTimer(task.id)}
+                className={`btn btn-sm ${
+                  task.isTimerRunning ? "btn-danger" : "btn-success"
+                }`}
+              >
+                {task.isTimerRunning ? <Pause size={14} /> : <Play size={14} />}
+              </button>
+              <button
+                onClick={() => setQuickViewTask(task)}
+                className="btn btn-sm btn-info"
+              >
+                <Eye size={14} />
+              </button>
+              <button
+                onClick={() => setEditingTask(task)}
+                className="btn btn-sm btn-primary"
+              >
+                <Edit3 size={14} />
+              </button>
+              <button
+                onClick={() => deleteTask(task.id)}
+                className="btn btn-sm btn-danger"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
   );
 
   const renderTaskList = () => (
@@ -653,53 +653,53 @@ const TaskManagement = () => {
             </div>
           </div>
 
-          <div className="table-responsive table-gradient-bg">
-            <table className="table table-hover">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Task</th>
-                  <th>Assignee</th>
-                  <th>Time Spent</th>
-                  <th>Status</th>
-                  <th>Timer</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tasks.map((task) => (
-                  <tr key={task.id}>
-                    <td>{task.id}</td>
-                    <td>
-                      <div className="fw-bold">{task.title}</div>
-                      <div className="small text-muted">{task.category}</div>
-                    </td>
-                    <td>{task.assignee}</td>
-                    <td className="fw-bold">{formatTime(task.timeSpent)}</td>
-                    <td>
-                      <span className={`badge ${getStatusColor(task.status)}`}>
-                        {task.status}
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => toggleTimer(task.id)}
-                        className={`btn btn-sm ${
-                          task.isTimerRunning ? "btn-danger" : "btn-success"
-                        }`}
-                      >
-                        {task.isTimerRunning ? (
-                          <Pause size={14} />
-                        ) : (
-                          <Play size={14} />
-                        )}
-                        {task.isTimerRunning ? "Stop" : "Start"}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div
+  className="table-responsive table-gradient-bg"
+  style={{ maxHeight: "400px", overflowY: "auto" }}
+>
+  <table className="table table-hover mb-0">
+    <thead className=" bg-dark sticky-top">
+      <tr>
+        <th>ID</th>
+        <th>Task</th>
+        <th>Assignee</th>
+        <th>Time Spent</th>
+        <th>Status</th>
+        <th>Timer</th>
+      </tr>
+    </thead>
+    <tbody>
+      {tasks.map((task) => (
+        <tr key={task.id}>
+          <td>{task.id}</td>
+          <td>
+            <div className="fw-bold">{task.title}</div>
+            <div className="small text-muted">{task.category}</div>
+          </td>
+          <td>{task.assignee}</td>
+          <td className="fw-bold">{formatTime(task.timeSpent)}</td>
+          <td>
+            <span className={`badge ${getStatusColor(task.status)}`}>
+              {task.status}
+            </span>
+          </td>
+          <td>
+            <button
+              onClick={() => toggleTimer(task.id)}
+              className={`btn btn-sm ${
+                task.isTimerRunning ? "btn-danger" : "btn-success"
+              }`}
+            >
+              {task.isTimerRunning ? <Pause size={14} /> : <Play size={14} />}
+              {task.isTimerRunning ? " Stop" : " Start"}
+            </button>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
         </div>
       </div>
     </div>
@@ -712,67 +712,67 @@ const TaskManagement = () => {
           <h5 className="card-title mb-4">QA Tasks Overview</h5>
 
           <div className="d-none d-lg-block">
-            <div className="table-responsive">
-              <table className="table table-gradient-bg">
-                <thead className="text-white">
-                  <tr>
-                    <th>Task ID</th>
-                    <th>Title</th>
-                    <th>Module</th>
-                    <th>Priority</th>
-                    <th>Created By</th>
-                    <th>Created At</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="text-white">
-                  {filteredTasks.map((task) => (
-                    <tr key={task.id}>
-                      <td>
-                        <code>{task.id}</code>
-                      </td>
-                      <td>{task.title}</td>
-                      <td>{task.module}</td>
-                      <td>
-                        <span
-                          className={`badge ${getPriorityColor(task.priority)}`}
-                        >
-                          {task.priority}
-                        </span>
-                      </td>
-                      <td>{task.createdBy}</td>
-                      <td>{task.createdAt}</td>
-                      <td>
-                        <span
-                          className={`badge ${getStatusColor(task.status)}`}
-                        >
-                          {task.status}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-outline-primary me-1"
-                          onClick={() => setQuickViewTask(task)}
-                        >
-                          <Eye size={14} /> View
-                        </button>
-                        {task.status === "To Do" && (
-                          <button
-                            className="btn btn-sm btn-success"
-                            onClick={() =>
-                              updateTask(task.id, { status: "In Progress" })
-                            }
-                          >
-                            ✋ Self-Assign
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <div
+  className="table-responsive"
+  style={{ maxHeight: "400px", overflowY: "auto" }}
+>
+  <table className="table table-gradient-bg mb-0">
+    <thead className="text-white sticky-top bg-dark">
+      <tr>
+        <th>Task ID</th>
+        <th>Title</th>
+        <th>Module</th>
+        <th>Priority</th>
+        <th>Created By</th>
+        <th>Created At</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody className="text-white">
+      {filteredTasks.map((task) => (
+        <tr key={task.id}>
+          <td>
+            <code>{task.id}</code>
+          </td>
+          <td>{task.title}</td>
+          <td>{task.module}</td>
+          <td>
+            <span className={`badge ${getPriorityColor(task.priority)}`}>
+              {task.priority}
+            </span>
+          </td>
+          <td>{task.createdBy}</td>
+          <td>{task.createdAt}</td>
+          <td>
+            <span className={`badge ${getStatusColor(task.status)}`}>
+              {task.status}
+            </span>
+          </td>
+          <td>
+            <button
+              className="btn btn-sm btn-outline-primary me-1"
+              onClick={() => setQuickViewTask(task)}
+            >
+              <Eye size={14} /> View
+            </button>
+            {task.status === "To Do" && (
+              <button
+                className="btn btn-sm btn-success"
+                onClick={() =>
+                  updateTask(task.id, { status: "In Progress" })
+                }
+              >
+                ✋ Self-Assign
+              </button>
+            )}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
           </div>
         </div>
       </div>

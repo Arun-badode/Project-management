@@ -334,113 +334,121 @@ const TimeTracker = () => {
                             <h6 className="tt-table-title mb-0">Time Entries ({timeEntries.length} records)</h6>
                         </div>
                         <div className="card-body  p-0">
-                            <div className="tt-table-responsive  table-responsive">
-                                <table className="tt-data-table table table-gradient-bg table-hover mb-0">
-                                    <thead className="tt-table-header">
-                                        <tr>
-                                            <th>ID</th>
-                                            <th
-                                                className="tt-sortable-header"
-                                                onClick={() => handleSort('user')}
-                                                style={{ cursor: 'pointer' }}
-                                            >
-                                                User
-                                                {sortConfig.key === 'user' && (
-                                                    <ChevronDown
-                                                        size={16}
-                                                        className={`ms-1 ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`}
-                                                    />
-                                                )}
-                                            </th>
-                                            <th
-                                                className="tt-sortable-header d-none d-md-table-cell"
-                                                onClick={() => handleSort('project')}
-                                                style={{ cursor: 'pointer' }}
-                                            >
-                                                Project
-                                                {sortConfig.key === 'project' && (
-                                                    <ChevronDown
-                                                        size={16}
-                                                        className={`ms-1 ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`}
-                                                    />
-                                                )}
-                                            </th>
-                                            <th className="tt-task-header d-none d-lg-table-cell">Task</th>
-                                            <th
-                                                className="tt-sortable-header"
-                                                onClick={() => handleSort('date')}
-                                                style={{ cursor: 'pointer' }}
-                                            >
-                                                Date
-                                                {sortConfig.key === 'date' && (
-                                                    <ChevronDown
-                                                        size={16}
-                                                        className={`ms-1 ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`}
-                                                    />
-                                                )}
-                                            </th>
-                                            <th className="tt-time-header d-none d-md-table-cell">Time</th>
-                                            <th
-                                                className="tt-sortable-header"
-                                                onClick={() => handleSort('totalHours')}
-                                                style={{ cursor: 'pointer' }}
-                                            >
-                                                Hours
-                                                {sortConfig.key === 'totalHours' && (
-                                                    <ChevronDown
-                                                        size={16}
-                                                        className={`ms-1 ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`}
-                                                    />
-                                                )}
-                                            </th>
-                                            <th className="tt-status-header">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {currentData.map(entry => (
-                                            <tr
-                                                key={entry.id}
-                                                className={`tt-table-row ${isOverdue(entry.date) ? 'tt-overdue-row table-warning' : ''} ${isLongHours(entry.totalHours) ? 'tt-long-hours-row' : ''}`}
-                                            >
-                                                <td>{entry.id}</td>
-                                                <td className="tt-user-cell">
-                                                    <div className="tt-user-info">
-                                                        <div className="tt-user-name fw-medium">{entry.user}</div>
-                                                        <small className="tt-mobile-info d-md-none text-white">
-                                                            {entry.project} • {entry.task}
-                                                        </small>
-                                                    </div>
-                                                </td>
-                                                <td className="tt-project-cell d-none d-md-table-cell">{entry.project}</td>
-                                                <td className="tt-task-cell d-none d-lg-table-cell">{entry.task}</td>
-                                                <td className="tt-date-cell">
-                                                    <div className="tt-date-display">
-                                                        {new Date(entry.date).toLocaleDateString()}
-                                                        {isOverdue(entry.date) && (
-                                                            <AlertCircle size={14} className="tt-overdue-icon text-warning ms-1" />
-                                                        )}
-                                                    </div>
-                                                </td>
-                                                <td className="tt-time-cell d-none d-md-table-cell">
-                                                    <small className="tt-time-range ">
-                                                        {entry.startTime} - {entry.endTime}
-                                                    </small>
-                                                </td>
-                                                <td className="tt-hours-cell">
-                                                    <span className={`tt-hours-badge badge ${isLongHours(entry.totalHours) ? 'bg-warning text-dark' : 'bg-light text-dark'}`}>
-                                                        {entry.totalHours}h
-                                                    </span>
-                                                </td>
-                                                <td className="tt-status-cell">
-                                                    <span className={getStatusBadgeClass(entry.status)}>
-                                                        {entry.status}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                            <div
+  className="tt-table-responsive table-responsive"
+  style={{ maxHeight: "400px", overflowY: "auto" }}
+>
+  <table className="tt-data-table table table-gradient-bg table-hover mb-0">
+    <thead className="tt-table-header  bg-dark sticky-top">
+      <tr>
+        <th>ID</th>
+        <th
+          className="tt-sortable-header"
+          onClick={() => handleSort("user")}
+          style={{ cursor: "pointer" }}
+        >
+          User
+          {sortConfig.key === "user" && (
+            <ChevronDown
+              size={16}
+              className={`ms-1 ${sortConfig.direction === "desc" ? "rotate-180" : ""}`}
+            />
+          )}
+        </th>
+        <th
+          className="tt-sortable-header d-none d-md-table-cell"
+          onClick={() => handleSort("project")}
+          style={{ cursor: "pointer" }}
+        >
+          Project
+          {sortConfig.key === "project" && (
+            <ChevronDown
+              size={16}
+              className={`ms-1 ${sortConfig.direction === "desc" ? "rotate-180" : ""}`}
+            />
+          )}
+        </th>
+        <th className="tt-task-header d-none d-lg-table-cell">Task</th>
+        <th
+          className="tt-sortable-header"
+          onClick={() => handleSort("date")}
+          style={{ cursor: "pointer" }}
+        >
+          Date
+          {sortConfig.key === "date" && (
+            <ChevronDown
+              size={16}
+              className={`ms-1 ${sortConfig.direction === "desc" ? "rotate-180" : ""}`}
+            />
+          )}
+        </th>
+        <th className="tt-time-header d-none d-md-table-cell">Time</th>
+        <th
+          className="tt-sortable-header"
+          onClick={() => handleSort("totalHours")}
+          style={{ cursor: "pointer" }}
+        >
+          Hours
+          {sortConfig.key === "totalHours" && (
+            <ChevronDown
+              size={16}
+              className={`ms-1 ${sortConfig.direction === "desc" ? "rotate-180" : ""}`}
+            />
+          )}
+        </th>
+        <th className="tt-status-header">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {currentData.map((entry) => (
+        <tr
+          key={entry.id}
+          className={`tt-table-row ${isOverdue(entry.date) ? "tt-overdue-row table-warning" : ""} ${
+            isLongHours(entry.totalHours) ? "tt-long-hours-row" : ""
+          }`}
+        >
+          <td>{entry.id}</td>
+          <td className="tt-user-cell">
+            <div className="tt-user-info">
+              <div className="tt-user-name fw-medium">{entry.user}</div>
+              <small className="tt-mobile-info d-md-none text-white">
+                {entry.project} • {entry.task}
+              </small>
+            </div>
+          </td>
+          <td className="tt-project-cell d-none d-md-table-cell">{entry.project}</td>
+          <td className="tt-task-cell d-none d-lg-table-cell">{entry.task}</td>
+          <td className="tt-date-cell">
+            <div className="tt-date-display">
+              {new Date(entry.date).toLocaleDateString()}
+              {isOverdue(entry.date) && (
+                <AlertCircle size={14} className="tt-overdue-icon text-warning ms-1" />
+              )}
+            </div>
+          </td>
+          <td className="tt-time-cell d-none d-md-table-cell">
+            <small className="tt-time-range">
+              {entry.startTime} - {entry.endTime}
+            </small>
+          </td>
+          <td className="tt-hours-cell">
+            <span
+              className={`tt-hours-badge badge ${
+                isLongHours(entry.totalHours) ? "bg-warning text-dark" : "bg-light text-dark"
+              }`}
+            >
+              {entry.totalHours}h
+            </span>
+          </td>
+          <td className="tt-status-cell">
+            <span className={getStatusBadgeClass(entry.status)}>{entry.status}</span>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
                         </div>
                     </div>
                 </div>

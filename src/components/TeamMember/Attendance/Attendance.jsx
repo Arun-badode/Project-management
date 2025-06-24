@@ -459,9 +459,10 @@ const Attendance = () => {
             </div>
           </div>
           
-          <div className="table-responsive">
+          <div className="table-responsive"
+    style={{ maxHeight: "400px", overflowY: "auto" }}>
           <table className="table table-hover mb-0 table-gradient-bg">
-  <thead className="table-light">
+  <thead className="table-light bg-dark sticky-top">
     <tr>
       <th scope="col">ID</th> {/* New ID column */}
       <th scope="col">Employee</th>

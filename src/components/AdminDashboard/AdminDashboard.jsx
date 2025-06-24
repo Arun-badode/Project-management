@@ -139,35 +139,52 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
       {/* KPIs */}
       <Row className="mb-4 g-3">
-        <Col xs={12} sm={6} md={3}>
+        <Col xs={12} sm={6} md={2}>
           <Card className="bg-card text-white p-3 h-100">
             <Card.Body>
-              <Card.Title>Total Active Projects</Card.Title>
+              <Card.Title> Active Projects</Card.Title>
               <h4>{projects.length}</h4>
             </Card.Body>
           </Card>
         </Col>
-        <Col xs={12} sm={6} md={3}>
+       
+        <Col xs={12} sm={6} md={2}>
           <Card className="bg-card text-white p-3 h-100">
             <Card.Body>
-              <Card.Title>Total Resources</Card.Title>
-              <h4>27</h4>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col xs={12} sm={6} md={3}>
-          <Card className="bg-card text-white p-3 h-100">
-            <Card.Body>
-              <Card.Title>Projects Nearing Deadline</Card.Title>
+              <Card.Title> Near Due</Card.Title>
               <h4>4</h4>
             </Card.Body>
           </Card>
         </Col>
-        <Col xs={12} sm={6} md={3}>
+        <Col xs={12} sm={6} md={2}>
           <Card className="bg-card text-white p-3 h-100">
             <Card.Body>
-              <Card.Title>Overdue Projects</Card.Title>
+              <Card.Title>Overdue </Card.Title>
               <h4>2</h4>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col xs={12} sm={6} md={2}>
+          <Card className="bg-card text-white p-3 h-100">
+            <Card.Body>
+              <Card.Title>Team On-Duty</Card.Title>
+              <h4>{projects.length}</h4>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col xs={12} sm={6} md={2}>
+          <Card className="bg-card text-white p-3 h-100">
+            <Card.Body>
+              <Card.Title>Events Today </Card.Title>
+              <h4>{projects.length}</h4>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col xs={12} sm={6} md={2}>
+          <Card className="bg-card text-white p-3  h-100">
+            <Card.Body>
+              <Card.Title>Pending Approval  </Card.Title>
+              <h4>{projects.length}</h4>
             </Card.Body>
           </Card>
         </Col>
@@ -298,112 +315,100 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
 
       {/* Main Table */}
-      <Card className=" text-white p-3 mb-5 table-gradient-bg">
-        <h4 className="mb-3">Project List</h4>
-        <div className="table-responsive table-gradient-bg ">
-          <Table className=" table-gradient-bg  align-middle  mb-0">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Project Title</th>
-                <th>Client</th>
-                <th>Tasks</th>
-                <th>Languages</th>
-                <th>Platform</th>
-                <th>Total Pages</th>
-                <th>Actual Due Date</th>
-                <th>Ready for QC Deadline</th>
-                <th>QC Hrs</th>
-                <th>QC Due Date</th>
-                <th>Status</th>
-                <th>Handler</th>
-                {/* <th>Process Status</th> */}
-                <th>QA Reviewer</th>
-                <th>QA Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map((project) => (
-                <tr key={project.id}>
-                  <td>{project.id}</td>
-                  <td>{project.title}</td>
-                  <td>{project.client}</td>
-                  <td>{project.tasks}</td>
-                  <td>{project.languages}</td>
-                  <td>{project.platform}</td>
-                  <td>{project.pages}</td>
-                  <td>{project.dueDate}</td>
-                  <td>{project.qcDeadline}</td>
-                  <td>{project.qcHours}</td>
-                  <td>{project.qcDueDate}</td>
-                  <td>
-                    <Badge
-                      bg={
-                        project.status === "Completed"
-                          ? "success"
-                          : project.status === "On Hold"
-                          ? "warning"
-                          : "info"
-                      }
-                    >
-                      {project.status}
-                    </Badge>
-                  </td>
-                  <td>{project.handler}</td>
-                  {/* <td>
-                    <Badge
-                      bg={
-                        project.processStatus === "Completed"
-                          ? "success"
-                          : project.processStatus === "Delayed"
-                          ? "danger"
-                          : project.processStatus === "Pending"
-                          ? "warning"
-                          : "primary"
-                      }
-                    >
-                      {project.processStatus}
-                    </Badge>
-                  </td> */}
-                  <td>{project.qaReviewer}</td>
-                  <td>
-                    <Badge
-                      bg={
-                        project.qaStatus === "Passed"
-                          ? "success"
-                          : project.qaStatus === "Failed"
-                          ? "danger"
-                          : project.qaStatus === "In Review"
-                          ? "info"
-                          : "secondary"
-                      }
-                    >
-                      {project.qaStatus}
-                    </Badge>
-                  </td>
-                  <td>
-                    <Button
-                      variant="link"
-                      className="text-info p-0 me-2"
-                      title="View"
-                      onClick={() => handleView(project)}
-                    >
-                      <FaEye />
-                    </Button>
-                    <Button variant="link" className="text-warning p-0 me-2" title="Edit" onClick={() => handleEdit(project)}>
-                      <FaEdit />
-                    </Button>
-                    <Button variant="link" className="text-danger p-0" title="Delete">
-                      <FaTrash />
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
-      </Card>
+     <Card className="text-white p-3 mb-5 table-gradient-bg">
+  <h4 className="mb-3">Project List</h4>
+
+  {/* SCROLLABLE CONTAINER */}
+  <div
+    className="table-responsive"
+    style={{ maxHeight: "400px", overflowY: "auto" }}
+  >
+    <Table className="table-gradient-bg align-middle mt-0 table table-bordered table-hover">
+      <thead className="table-light bg-dark sticky-top">
+        <tr>
+          <th>ID</th>
+          <th>Project Title</th>
+          <th>Client</th>
+          <th>Tasks</th>
+          <th>Languages</th>
+          <th>Platform</th>
+          <th>Total Pages</th>
+          <th>Actual Due Date</th>
+          <th>Ready for QC Deadline</th>
+          <th>QC Hrs</th>
+          <th>QC Due Date</th>
+          <th>Status</th>
+          <th>Handler</th>
+          <th>QA Reviewer</th>
+          <th>QA Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {projects.map((project) => (
+          <tr key={project.id}>
+            <td>{project.id}</td>
+            <td>{project.title}</td>
+            <td>{project.client}</td>
+            <td>{project.tasks}</td>
+            <td>{project.languages}</td>
+            <td>{project.platform}</td>
+            <td>{project.pages}</td>
+            <td>{project.dueDate}</td>
+            <td>{project.qcDeadline}</td>
+            <td>{project.qcHours}</td>
+            <td>{project.qcDueDate}</td>
+            <td>
+              <Badge
+                bg={
+                  project.status === "Completed"
+                    ? "success"
+                    : project.status === "On Hold"
+                    ? "warning"
+                    : "info"
+                }
+              >
+                {project.status}
+              </Badge>
+            </td>
+            <td>{project.handler}</td>
+            <td>{project.qaReviewer}</td>
+            <td>
+              <Badge
+                bg={
+                  project.qaStatus === "Passed"
+                    ? "success"
+                    : project.qaStatus === "Failed"
+                    ? "danger"
+                    : project.qaStatus === "In Review"
+                    ? "info"
+                    : "secondary"
+                }
+              >
+                {project.qaStatus}
+              </Badge>
+            </td>
+            <td>
+              <Button
+                variant="link"
+                className="text-info p-0 ms-3"
+                title="View"
+                onClick={() => handleView(project)}
+              >
+                <FaEye />
+              </Button>
+              
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+
+    
+  </div>
+</Card>
+
 
       {/* Create Project Modal */}
       <Modal
@@ -602,6 +607,10 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
           )}
         </Modal.Body>
       </Modal>
+
+       <Col md={12} className="text-end">
+  <Button className="gradient-button me-2">Go To</Button>
+</Col>
     </div>
   );
 };
