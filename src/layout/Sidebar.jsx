@@ -20,7 +20,7 @@ const Sidebar = ({ collapsed }) => {
 
   return (
     <div className={`sidebar-container ${collapsed ? "collapsed" : ""}`}>
-      <div className="sidebar bg-card " style={{height:"101vh"}} >
+      <div className="sidebar bg-card " style={{ height: "101vh" }}>
         <ul className="menu">
           {/* Admin Only */}
           {role === "Admin" && (
@@ -41,8 +41,88 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Dashboard</span>
                 </div>
               </li>
+              <li
+                className={`menu-item ${
+                  isActive("/LeadDashboard") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/LeadDashboard");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-diagram-project"></i>
+                  <span className="menu-text">Active Projects </span>
+                </div>
+              </li>
+               <li
+                className={`menu-item ${
+                  isActive("/taskmanagement") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/taskmanagement");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-tasks"></i>
+                  <span className="menu-text">Task Management </span>
+                </div>
+              </li>
+               <li
+                className={`menu-item ${
+                  isActive("/reportinganalytics") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/reportinganalytics");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-chart-line"></i>
+                  <span className="menu-text">Reporting & Analytics</span>
+                </div>
+              </li>
+               <li
+                className={`menu-item ${isActive("/auditlog") ? "active" : ""}`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/auditlog");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-shield"></i>
+                  <span className="menu-text">Audit Logs</span>
+                </div>
+              </li>
+              <li
+                className={`menu-item ${
+                  isActive("/attendance") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/attendance");
+                    menuItemClick();
+                  }}
+                >
+                  <i class="fa-solid fa-calendar-days"></i>
+                  <span className="menu-text">Attendance</span>
+                </div>
+              </li>
 
-                <li
+
+
+              <li
                 className={`menu-item ${
                   isActive("/usermanage") ? "active" : ""
                 }`}
@@ -59,43 +139,9 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
 
-              <li
-                className={`menu-item ${
-                  isActive("/LeadDashboard") ? "active" : ""
-                }`}
-              >
-                <div
-                  className="menu-link menu-i"
-                  onClick={() => {
-                    navigate("/LeadDashboard");
-                    menuItemClick();
-                  }}
-                >
-                  <i className="fa-solid fa-diagram-project"></i>
-                  <span className="menu-text">Project </span>
-                </div>
-              </li>
-
               
-            
 
-              <li
-                className={`menu-item ${
-                  isActive("/taskmanagement") ? "active" : ""
-                }`}
-              >
-                <div
-                  className="menu-link menu-i"
-                  onClick={() => {
-                    navigate("/taskmanagement");
-                    menuItemClick();
-                  }}
-                >
-                  <i className="fa-solid fa-tasks"></i>
-                  <span className="menu-text">Task </span>
-                </div>
-              </li>
-
+             
 
               {/* <li
                 className={`menu-item ${
@@ -165,38 +211,8 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
 
-              <li
-                className={`menu-item ${
-                  isActive("/reportinganalytics") ? "active" : ""
-                }`}
-              >
-                <div
-                  className="menu-link menu-i"
-                  onClick={() => {
-                    navigate("/reportinganalytics");
-                    menuItemClick();
-                  }}
-                >
-                  <i className="fa-solid fa-chart-line"></i>
-                  <span className="menu-text">Reporting & Analytics</span>
-                </div>
-              </li>
-
-              <li
-                className={`menu-item ${isActive("/auditlog") ? "active" : ""}`}
-              >
-                <div
-                  className="menu-link menu-i"
-                  onClick={() => {
-                    navigate("/auditlog");
-                    menuItemClick();
-                  }}
-                >
-                  <i className="fa-solid fa-shield"></i>
-                  <span className="menu-text">Audit Logs</span>
-                </div>
-              </li>
-
+             
+             
               {/* <li
                 className={`menu-item ${isActive("/profile") ? "active" : ""}`}
               >
@@ -268,9 +284,7 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
               <li
-                className={`menu-item ${
-                  isActive("/assigned") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/assigned") ? "active" : ""}`}
               >
                 <div
                   className="menu-link menu-i"
@@ -446,7 +460,7 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
 
-                 {/* <li
+              {/* <li
                 className={`menu-item ${
                   isActive("/productivity") ? "active" : ""
                 }`}
@@ -462,7 +476,6 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Productivity</span>
                 </div>
               </li> */}
-             
             </>
           )}
 
