@@ -39,7 +39,7 @@ const SignupPage = () => {
       className="login-page container"
       style={{ justifyContent: "flex-start",}}
     >
-      <div className="login-container row" style={{height:"100%"}}>
+      <div className="login-container row" style={{height:"100%",  marginTop:"-10px"}}>
         {/* Left Panel */}
         <div className="col-md-6 login-left d-flex justify-content-center align-items-center">
           <div className="login-left-content">
