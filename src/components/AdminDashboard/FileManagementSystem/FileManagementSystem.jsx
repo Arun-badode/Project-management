@@ -92,17 +92,17 @@ const FileManagementSystem = () => {
   }, []);
 
   return (
-    <div className="container-fluid bg-light p-4 min-vh-100 position-relative">
+    <div className="container-fluid bg-main  p-4 min-vh-100 position-relative">
       {dragActive && (
         <div className="drag-overlay">
           <div className="text-center text-primary">
             <i className="bi bi-upload fs-1"></i>
-            <p className="fs-4 fw-semibold">Drop files anywhere to upload</p>
+            <p className="fs-4 fw-semibold ">Drop files anywhere to upload</p>
           </div>
         </div>
       )}
 
-      <h3>File Management</h3>
+      <h3 className="gradient-heading">File Management</h3>
 
       <div className="row g-3 align-items-center mb-3 mt-3">
         <div className="col-12 col-md-auto">
@@ -154,17 +154,17 @@ const FileManagementSystem = () => {
       {grid ? (
         <div className="row g-3">
           {files.map((f, i) => (
-            <div className="col-12 col-sm-6 col-md-4 col-lg-3" key={i}>
-              <div className="card h-100 shadow-sm">
-                <div className="card-body text-center">
+            <div className="col-12 col-sm-6 col-md-4 col-lg-3 " key={i}>
+              <div className="card bg-card h-100  shadow-sm">
+                <div className="card-body  text-center">
                   {lgIcon(f.extension)}
                   <h6 className="mt-3">{f.name}.{f.extension}</h6>
-                  <small className="text-muted d-block">
+                  <small className=" d-block">
                     {f.size} • {f.version}
                   </small>
-                  <small className="text-muted">{f.modified}</small>
+                  <small className="">{f.modified}</small>
                 </div>
-                <div className="card-footer d-flex justify-content-between align-items-center">
+                <div className="card-footer d-flex  justify-content-between align-items-center">
                   <span className="badge bg-light text-dark">{f.task}</span>
                   <div className="d-flex gap-2">
                     <FaDownload className="text-secondary" role="button" />
@@ -177,9 +177,9 @@ const FileManagementSystem = () => {
           ))}
         </div>
       ) : (
-        <div className="table-responsive bg-white rounded shadow-sm">
-          <table className="table align-middle table-hover mb-0">
-            <thead className="table-light text-uppercase">
+        <div className="table-responsive  rounded shadow-sm">
+          <table className="table align-middle   table-hover mb-0 table-gradient-bg">
+            <thead className="table-light  text-uppercase">
               <tr>
                 <th><input type="checkbox" /></th>
                 <th>Name</th>
@@ -195,11 +195,11 @@ const FileManagementSystem = () => {
               {files.map((f, i) => (
                 <tr key={i}>
                   <td><input type="checkbox" /></td>
-                  <td className="d-flex align-items-center">
+                  <td className="d-flex  align-items-center">
                     {smIcon(f.extension)}
                     <div>
                       <div className="fw-semibold">{f.name}.{f.extension}</div>
-                      <small className="text-muted">.{f.extension}</small>
+                      <small className=" ">.{f.extension}</small>
                     </div>
                   </td>
                   <td>{f.project}</td>
@@ -224,17 +224,17 @@ const FileManagementSystem = () => {
       {showUpload && (
         <>
           <div
-            className="modal fade show d-block"
+            className="modal fade show d-block "
             tabIndex="-1"
             role="dialog"
             onClick={() => setShowUpload(false)}
           >
             <div
-              className="modal-dialog modal-dialog-centered"
+              className="modal-dialog modal-dialog-centered "
               role="document"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="modal-content">
+              <div className="modal-content bg-card">
                 <div className="modal-header border-0">
                   <h5 className="modal-title fw-bold">Upload Files</h5>
                   <button
@@ -260,7 +260,7 @@ const FileManagementSystem = () => {
                   >
                     <FaUpload className="fs-2 mb-2 text-primary" />
                     <p className="mb-1">Drag &amp; drop files here</p>
-                    <p className="small text-muted mb-0">
+                    <p className="small mb-0">
                       or click to browse
                     </p>
                     <input

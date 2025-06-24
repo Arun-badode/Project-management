@@ -1,19 +1,23 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 const Navbar = ({ toggleSidebar }) => {
+  const [role, setRole] = useState("");
+
+  useEffect(() => {
+    const userRole = localStorage.getItem("userRole");
+    setRole(userRole);
+  }, []);
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-card sticky-top">
       <div className="container-fluid px-3">
         {/* Brand and Toggle Button */}
         <div className="d-flex align-items-center">
-          <a className="navbar-brand fw-bold text-white me-3" href="#" style={{ fontSize: "24px" }}>
-            P.M.
-          </a>
-          <button 
+          <img src="../public/Logo/Eminoids - Logo_B.png" height={60} />
+          <button
             className="btn btn-link text-white p-0 d-lg-inline-block"
             onClick={toggleSidebar}
-            style={{ fontSize: "25px", textDecoration: "none" }}
+            style={{ fontSize: "20px", textDecoration: "none" }}
             aria-label="Toggle Sidebar"
           >
             <i className="fa fa-bars"></i>
@@ -22,57 +26,63 @@ const Navbar = ({ toggleSidebar }) => {
 
         {/* Search Bar - Hidden on small screens, shown on medium and up */}
         <div className="d-none d-md-flex flex-grow-1 justify-content-center mx-3">
-          <div className="position-relative" style={{ maxWidth: "500px", width: "100%" }}>
-            <input
-              type="text"
-              placeholder="Search..."
-              className="form-control"
-              style={{
-                borderRadius: "30px",
-                paddingLeft: "15px",
-                paddingRight: "15px",
-                border: "1px solid #ddd"
-              }}
-            />
+          {/* Desktop Search */}
+
+          {/* Mobile Search (collapsed by default) */}
+          <div
+            className="collapse d-md-none position-absolute top-100 start-50 translate-middle-x mt-1"
+            id="mobileSearch"
+            style={{ zIndex: 1050, width: "90%" }}
+          >
+            <div className="bg-white rounded-3 shadow p-2 position-relative">
+              <input
+                type="text"
+                placeholder="Search..."
+                className="form-control pe-5"
+                style={{
+                  borderRadius: "25px",
+                  paddingLeft: "15px",
+                  border: "1px solid #ddd",
+                }}
+              />
+              <i
+                className="bi bi-search position-absolute"
+                style={{
+                  right: "20px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#888",
+                  pointerEvents: "none",
+                }}
+              ></i>
+            </div>
           </div>
         </div>
 
         {/* Mobile Search Bar - Shows in center space when toggled */}
-        <div className="collapse d-md-none position-absolute top-100 start-50 translate-middle-x mt-1" id="mobileSearch" style={{ zIndex: 1050, width: "90%" }}>
-          <div className="bg-white rounded-3 shadow p-2">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="form-control"
-              style={{
-                borderRadius: "25px",
-                paddingLeft: "15px",
-                paddingRight: "15px",
-                border: "1px solid #ddd"
-              }}
-            />
-          </div>
-        </div>
 
         {/* Right Side Icons */}
         <div className="d-flex align-items-center">
           {/* Search Icon for Mobile - Only shown on small screens */}
-          <button 
-            className="btn btn-link text-white p-2 d-md-none me-2"
-            style={{ fontSize: "20px", textDecoration: "none" }}
-            data-bs-toggle="collapse"
-            data-bs-target="#mobileSearch"
-            aria-expanded="false"
-            aria-controls="mobileSearch"
-            aria-label="Toggle Search"
-          >
-            <i className="fa fa-search"></i>
-          </button>
 
           {/* Notification Bell */}
-          <a 
-            className="btn btn-link text-white p-2 me-2" 
-            href="#" 
+
+          <>
+            {role !== "Admin" && (
+              <div className="form-check form-switch">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="statusSwitch"
+                  style={{ fontSize: "20px" }}
+                />
+              </div>
+            )}
+          </>
+
+          <a
+            className="btn btn-link text-white p-2 me-2"
+            href="#"
             style={{ fontSize: "22px", textDecoration: "none" }}
             aria-label="Notifications"
           >
@@ -83,10 +93,10 @@ const Navbar = ({ toggleSidebar }) => {
           <div className="dropdown">
             <button
               className="btn btn-link text-white p-2 d-flex align-items-center"
-              style={{ 
-                fontSize: "22px", 
+              style={{
+                fontSize: "22px",
                 textDecoration: "none",
-                border: "none"
+                border: "none",
               }}
               data-bs-toggle="dropdown"
               aria-expanded="false"
@@ -94,16 +104,19 @@ const Navbar = ({ toggleSidebar }) => {
             >
               <div className="position-relative">
                 <i className="fa-solid fa-circle-user"></i>
-                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" style={{ fontSize: "8px", width: "12px", height: "12px" }}>
+                <span
+                  className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success"
+                  style={{ fontSize: "8px", width: "12px", height: "12px" }}
+                >
                   <span className="visually-hidden">Online</span>
                 </span>
               </div>
             </button>
             <ul className="dropdown-menu dropdown-menu-end shadow">
               <li>
-                <Link className="dropdown-item py-2" to="/">
+                <Link className="dropdown-item py-2" to="/profile">
                   <i className="fa fa-user me-2"></i>
-                  Update Profile
+                  Profile
                 </Link>
               </li>
               <li>
@@ -125,8 +138,6 @@ const Navbar = ({ toggleSidebar }) => {
           </div>
         </div>
       </div>
-
-
     </nav>
   );
 };

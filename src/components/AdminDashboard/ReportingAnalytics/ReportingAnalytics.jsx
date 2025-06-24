@@ -14,7 +14,9 @@ const ReportingAnalytics = () => {
     { id: 2, name: 'Mobile App Development', owner: 'Jane Smith', progress: 45, status: 'Delayed', priority: 'Critical', dueDate: '2025-06-30' },
     { id: 3, name: 'Database Migration', owner: 'Mike Johnson', progress: 100, status: 'Completed', priority: 'Medium', dueDate: '2025-06-10' },
     { id: 4, name: 'API Integration', owner: 'Sarah Wilson', progress: 70, status: 'On Track', priority: 'High', dueDate: '2025-07-20' },
-    { id: 5, name: 'Security Audit', owner: 'David Brown', progress: 25, status: 'Delayed', priority: 'Critical', dueDate: '2025-06-25' }
+    { id: 5, name: 'Security Audit', owner: 'David Brown', progress: 25, status: 'Delayed', priority: 'Critical', dueDate: '2025-06-25' },
+        
+    
   ];
 
   const workloadData = [
@@ -32,7 +34,8 @@ const ReportingAnalytics = () => {
     { name: 'Jane Smith', completedTasks: 42, onTimePercentage: 88, hoursLogged: 155, role: 'Full Stack Developer', performance: 'High Performer' },
     { name: 'Mike Johnson', completedTasks: 35, onTimePercentage: 85, hoursLogged: 140, role: 'Backend Developer', performance: 'Good Performer' },
     { name: 'Sarah Wilson', completedTasks: 38, onTimePercentage: 90, hoursLogged: 150, role: 'UI/UX Designer', performance: 'High Performer' },
-    { name: 'David Brown', completedTasks: 30, onTimePercentage: 78, hoursLogged: 135, role: 'DevOps Engineer', performance: 'Average Performer' }
+    { name: 'David Brown', completedTasks: 30, onTimePercentage: 78, hoursLogged: 135, role: 'DevOps Engineer', performance: 'Average Performer' },
+    
   ];
 
   const missedDeadlineData = [
@@ -103,8 +106,8 @@ const ReportingAnalytics = () => {
   };
 
   const renderProjectStatusReport = () => (
-    <div className="analytics-report-container ">
-      <div className="d-flex justify-content-between  align-items-center mb-4">
+    <div className=" bg-card ">
+      <div className="d-flex justify-content-between   align-items-center mb-4 bg-card">
         <h4 className="analytics-report-title gradient-heading">Project Status Report</h4>
         <div className="analytics-export-buttons">
           <button className="btn btn-outline-primary btn-sm me-2 analytics-export-btn" onClick={exportToPDF}>
@@ -118,7 +121,7 @@ const ReportingAnalytics = () => {
       
       <div className="row mb-3">
         <div className="col-md-4">
-          <select className="form-select analytics-filter-select">
+          <select className="form-select analytics-filter-select mb-1">
             <option>All Owners</option>
             <option>John Doe</option>
             <option>Jane Smith</option>
@@ -126,7 +129,7 @@ const ReportingAnalytics = () => {
           </select>
         </div>
         <div className="col-md-4 ">
-          <select className="form-select  analytics-filter-select">
+          <select className="form-select  analytics-filter-select mb-1 ">
             <option>All Priorities</option>
             <option>Critical</option>
             <option>High</option>
@@ -144,41 +147,55 @@ const ReportingAnalytics = () => {
         </div>
       </div>
 
-      <div className="table-responsive ">
-        <table className="table text-white analytics-project-table ">
-          <thead className="  ">
-            <tr>
-              <th>Project Name</th>
-              <th>Owner</th>
-              <th>Progress</th>
-              <th>Status</th>
-              <th>Priority</th>
-              <th>Due Date</th>
-            </tr>
-          </thead>
-          <tbody >
-            {projectData.map(project => (
-              <tr key={project.id} className="analytics-project-row ">
-                <td className=" text-white analytics-project-name">{project.name}</td>
-                <td>{project.owner}</td>
-                <td>
-                  <div className="progress analytics-progress-bar" style={{height: '20px'}}>
-                    <div 
-                      className="progress-bar analytics-progress-fill bg-primary" 
-                      style={{width: `${project.progress}%`}}
-                    >
-                      {project.progress}%
-                    </div>
-                  </div>
-                </td>
-                <td><span className={getStatusBadgeClass(project.status)}>{project.status}</span></td>
-                <td><span className={getPriorityBadgeClass(project.priority)}>{project.priority}</span></td>
-                <td>{project.dueDate}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div
+  className="table-responsive"
+    style={{ maxHeight: "400px", overflowY: "auto" }}
+>
+  <table className="table text-white analytics-project-table table-gradient-bg table-hover table-bordered mb-0">
+    <thead className="table-light bg-dark sticky-top">
+      <tr>
+        <th>ID</th>
+        <th>Project Name</th>
+        <th>Owner</th>
+        <th>Progress</th>
+        <th>Status</th>
+        <th>Priority</th>
+        <th>Due Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {projectData.map(project => (
+        <tr key={project.id} className="analytics-project-row">
+          <td>{project.id}</td>
+          <td className="text-dark analytics-project-name">{project.name}</td>
+          <td>{project.owner}</td>
+          <td>
+            <div className="progress analytics-progress-bar" style={{ height: '20px' }}>
+              <div
+                className="progress-bar analytics-progress-fill bg-primary"
+                style={{ width: `${project.progress}%` }}
+              >
+                {project.progress}%
+              </div>
+            </div>
+          </td>
+          <td>
+            <span className={getStatusBadgeClass(project.status)}>
+              {project.status}
+            </span>
+          </td>
+          <td>
+            <span className={getPriorityBadgeClass(project.priority)}>
+              {project.priority}
+            </span>
+          </td>
+          <td>{project.dueDate}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
     </div>
   );
 
@@ -236,7 +253,7 @@ const ReportingAnalytics = () => {
         </div>
       </div>
 
-      <div className="analytics-chart-container bg-card">
+      <div className="analytics-chart-container bg-main">
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={workloadData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -273,44 +290,55 @@ const ReportingAnalytics = () => {
 
       <div className="row">
         <div className="col-lg-8">
-          <div className="table-responsive">
-            <table className="table  analytics-performance-table">
-              <thead className=" text-white ">
-                <tr>
-                  <th>Team Member</th>
-                  <th>Completed Tasks</th>
-                  <th>On-Time %</th>
-                  <th>Hours Logged</th>
-                  <th>Role</th>
-                  <th>Performance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {teamPerformanceData.map((member, index) => (
-                  <tr key={index} className="analytics-performance-row text-white">
-                    <td className="text-white analytics-member-name">{member.name}</td>
-                    <td><span className="badge bg-primary analytics-task-badge">{member.completedTasks}</span></td>
-                    <td>
-                      <div className="progress analytics-ontime-progress" style={{height: '15px'}}>
-                        <div 
-                          className="progress-bar bg-success" 
-                          style={{width: `${member.onTimePercentage}%`}}
-                        >
-                          {member.onTimePercentage}%
-                        </div>
-                      </div>
-                    </td>
-                    <td>{member.hoursLogged}h</td>
-                    <td><span className="badge bg-light text-dark analytics-role-badge">{member.role}</span></td>
-                    <td>{getPerformanceBadge(member.performance)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="table-responsive"
+    style={{ maxHeight: "400px", overflowY: "auto" }}>
+          <table className="table analytics-performance-table table-gradient-bg">
+  <thead className="text-white bg-dark  sticky-top">
+    <tr>
+      <th>ID</th>
+      <th>Team Member</th>
+      <th>Completed Tasks</th>
+      <th>On-Time %</th>
+      <th>Hours Logged</th>
+      <th>Role</th>
+      <th>Performance</th>
+    </tr>
+  </thead>
+  <tbody>
+    {teamPerformanceData.map((member, index) => (
+      <tr key={index} className="analytics-performance-row text-white">
+        <td>{index + 1}</td>
+        <td className="text-white analytics-member-name">{member.name}</td>
+        <td>
+          <span className="badge bg-primary analytics-task-badge">
+            {member.completedTasks}
+          </span>
+        </td>
+        <td>
+          <div className="progress analytics-ontime-progress" style={{ height: '15px' }}>
+            <div
+              className="progress-bar bg-success"
+              style={{ width: `${member.onTimePercentage}%` }}
+            >
+              {member.onTimePercentage}%
+            </div>
+          </div>
+        </td>
+        <td>{member.hoursLogged}h</td>
+        <td>
+          <span className="badge bg-light text-dark analytics-role-badge">
+            {member.role}
+          </span>
+        </td>
+        <td>{getPerformanceBadge(member.performance)}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
           </div>
         </div>
-        <div className="col-lg-4">
-          <div className="analytics-radar-container">
+        <div className="col-lg-4  ">
+          <div className="analytics-radar-container bg-main ">
             <h6 className="text-center mb-3">Performance Comparison</h6>
             <ResponsiveContainer width="100%" height={250}>
               <RadarChart data={radarData}>
@@ -333,44 +361,51 @@ const ReportingAnalytics = () => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="analytics-report-title gradient-heading">Missed Deadline Report</h4>
         <div className="analytics-deadline-controls">
-          <button className="btn btn-outline-secondary btn-sm me-2 analytics-sort-btn">
+          <button className="btn btn-outline-secondary btn-sm me-2 mb-1 analytics-sort-btn">
             <Clock size={16} className="me-1" /> Sort by Delay
           </button>
-          <button className="btn btn-outline-primary btn-sm analytics-sort-btn">
+          <button className="btn btn-outline-primary btn-sm mb-1 analytics-sort-btn">
             <Users size={16} className="me-1" /> Sort by User
           </button>
         </div>
       </div>
 
-      <div className="table-responsive">
-        <table className="table table-striped analytics-deadline-table">
-          <thead className="text-white">
-            <tr>
-              <th>Task Name</th>
-              <th>Assigned To</th>
-              <th>Due Date</th>
-              <th>Delay (Days)</th>
-              <th>Comments</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {missedDeadlineData.map((task, index) => (
-              <tr key={index} className=" text-white analytics-deadline-row">
-                <td className="text-white analytics-task-name">{task.taskName}</td>
-                <td>{task.assignedTo}</td>
-                <td className="text-danger analytics-due-date">{task.dueDate}</td>
-                <td>
-                  <span className="badge bg-danger analytics-delay-badge">+{task.delayDays} days</span>
-                </td>
-                <td className="analytics-comments text-white">{task.comments}</td>
-                <td>
-                  <button className="btn btn-sm btn-outline-info analytics-detail-btn">View Details</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div  className="table-responsive"
+    style={{ maxHeight: "400px", overflowY: "auto" }}>
+        <table className="table table-striped analytics-deadline-table table-gradient-bg">
+  <thead className="text-white bg-dark  sticky-top">
+    <tr>
+      <th>ID</th>
+      <th>Task Name</th>
+      <th>Assigned To</th>
+      <th>Due Date</th>
+      <th>Delay (Days)</th>
+      <th>Comments</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {missedDeadlineData.map((task, index) => (
+      <tr key={index} className="text-white analytics-deadline-row">
+        <td>{index + 1}</td>
+        <td className="text-white analytics-task-name">{task.taskName}</td>
+        <td>{task.assignedTo}</td>
+        <td className="text-danger analytics-due-date">{task.dueDate}</td>
+        <td>
+          <span className="badge bg-danger analytics-delay-badge">
+            +{task.delayDays} days
+          </span>
+        </td>
+        <td className="analytics-comments text-white">{task.comments}</td>
+        <td>
+          <button className="btn btn-sm btn-outline-info analytics-detail-btn">
+            View Details
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
       </div>
 
       <div className="alert alert-warning analytics-deadline-alert mt-3">
@@ -383,23 +418,26 @@ const ReportingAnalytics = () => {
     <div className="analytics-report-container">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="analytics-report-title gradient-heading">Productivity Charts</h4>
-        <div className="analytics-productivity-controls">
-          <div className="btn-group analytics-view-toggle" role="group">
+        <div className="analytics-productivity-controls ">
+          <div className="btn-group analytics-view-toggle d-flex mb-2 flex-column flex-sm-row w-100" role="group">
             <button 
-              className={`btn ${productivityView === 'daily' ? 'btn-primary' : 'btn-outline-primary'} analytics-view-btn`}
+              className={`btn ${productivityView === 'daily' ? 'btn-primary' : 'btn-outline-primary'} mb-2 analytics-view-btn flex-fill`}
               onClick={() => setProductivityView('daily')}
+              type="button"
             >
               Daily
             </button>
             <button 
-              className={`btn ${productivityView === 'weekly' ? 'btn-primary' : 'btn-outline-primary'} analytics-view-btn`}
+              className={`btn ${productivityView === 'weekly' ? 'btn-primary' : 'btn-outline-primary'} analytics-view-btn mb-2 flex-fill`}
               onClick={() => setProductivityView('weekly')}
+              type="button"
             >
               Weekly
             </button>
             <button 
-              className={`btn ${productivityView === 'monthly' ? 'btn-primary' : 'btn-outline-primary'} analytics-view-btn`}
+              className={`btn ${productivityView === 'monthly' ? 'btn-primary' : 'btn-outline-primary'} analytics-view-btn mb-2  flex-fill`}
               onClick={() => setProductivityView('monthly')}
+              type="button"
             >
               Monthly
             </button>
@@ -411,8 +449,8 @@ const ReportingAnalytics = () => {
       </div>
 
       <div className="row">
-        <div className="col-lg-8 ">
-          <div className="analytics-line-chart-container bg-card">
+        <div className="col-lg-8 bg-card">
+          <div className="analytics-line-chart-container bg-main">
             <h6 className="mb-3">Productivity Trend</h6>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={productivityData}>
@@ -426,8 +464,8 @@ const ReportingAnalytics = () => {
           </div>
         </div>
         <div className="col-lg-4">
-          <div className="analytics-pie-chart-container bg-card">
-            <h6 className="text-center mb-3">Billable vs Non-Billable</h6>
+          <div className="analytics-pie-chart-container bg-main">
+            <h6 className="text-center  mb-3">Billable vs Non-Billable</h6>
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
@@ -451,15 +489,15 @@ const ReportingAnalytics = () => {
           <div className="analytics-productivity-stats mt-4">
             <div className="row text-center">
               <div className="col-6">
-                <div className="analytics-stat-card bg-card">
+                <div className="analytics-stat-card bg-main">
                   <h5 className="text-primary">87%</h5>
-                  <small className="text-muted">Avg Productivity</small>
+                  <small className="">Avg Productivity</small>
                 </div>
               </div>
               <div className="col-6">
-                <div className="analytics-stat-card   bg-card">
+                <div className="analytics-stat-card   bg-main">
                   <h5 className="text-success">72%</h5>
-                  <small className="text-muted">Billable Hours</small>
+                  <small className="">Billable Hours</small>
                 </div>
               </div>
             </div>
@@ -558,44 +596,49 @@ const ReportingAnalytics = () => {
             <div className="card-header analytics-preview-header  bg-card d-flex justify-content-between align-items-center">
               <h6 className="mb-0"><TrendingUp size={16} className="me-2 " />Report Preview</h6>
               <div className="analytics-preview-controls">
-                <button className="btn btn-sm btn-outline-primary me-2 analytics-export-preview-btn">
+                <button className="btn btn-sm btn-outline-primary me-2 analytics-export-preview-btn mb-2">
                   <Download size={16} className="me-1" /> Export
                 </button>
-                <button className="btn btn-sm btn-primary analytics-refresh-btn">Refresh</button>
+                <button className="btn btn-sm btn-primary analytics-refresh-btn mb-2">Refresh</button>
               </div>
             </div>
             <div className="card-body bg-card">
-              <div className="table-responsive">
-                <table className="table table-sm analytics-preview-table">
-                  <thead className="  text-white">
-                    <tr>
-                      <th>Task Name</th>
-                      <th>Assigned To</th>
-                      <th>Status</th>
-                      <th>Progress</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="analytics-preview-row text-white">
-                      <td>Website Redesign</td>
-                      <td>John Doe</td>
-                      <td><span className="badge bg-success">Completed</span></td>
-                      <td>100%</td>
-                    </tr>
-                    <tr className="analytics-preview-row text-white">
-                      <td>Mobile App Development</td>
-                      <td>Jane Smith</td>
-                      <td><span className="badge bg-warning">In Progress</span></td>
-                      <td>75%</td>
-                    </tr>
-                    <tr className="analytics-preview-row text-white">
-                      <td>API Integration</td>
-                      <td>Mike Johnson</td>
-                      <td><span className="badge bg-info">In Progress</span></td>
-                      <td>60%</td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div  className="table-responsive"
+    style={{ maxHeight: "400px", overflowY: "auto" }}>
+               <table className="table table-sm analytics-preview-table table-gradient-bg">
+  <thead className="text-white bg-dark  sticky-top">
+    <tr>
+      <th>ID</th>
+      <th>Task Name</th>
+      <th>Assigned To</th>
+      <th>Status</th>
+      <th>Progress</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr className="analytics-preview-row text-white">
+      <td>1</td>
+      <td>Website Redesign</td>
+      <td>John Doe</td>
+      <td><span className="badge bg-success">Completed</span></td>
+      <td>100%</td>
+    </tr>
+    <tr className="analytics-preview-row text-white">
+      <td>2</td>
+      <td>Mobile App Development</td>
+      <td>Jane Smith</td>
+      <td><span className="badge bg-warning">In Progress</span></td>
+      <td>75%</td>
+    </tr>
+    <tr className="analytics-preview-row text-white">
+      <td>3</td>
+      <td>API Integration</td>
+      <td>Mike Johnson</td>
+      <td><span className="badge bg-info">In Progress</span></td>
+      <td>60%</td>
+    </tr>
+  </tbody>
+</table>
               </div>
               
               <div className="alert alert-info analytics-preview-note mt-3">
@@ -635,7 +678,7 @@ const ReportingAnalytics = () => {
         <div className="col-12">
           <div className="d-flex justify-content-between bg-main align-items-center analytics-dashboard-header">
             <div>
-              <h2 className="analytics-main-title gradient-heading mb-1">Reporting & Analytics</h2>
+              <h2 className=" gradient-heading ">Reporting & Analytics</h2>
               <p className="text-white analytics-subtitle">Comprehensive insights into project performance and team productivity</p>
             </div>
             <div className="analytics-global-controls">
@@ -650,8 +693,8 @@ const ReportingAnalytics = () => {
         </div>
       </div>
 
-      <div className="row ">
-        <div className="col-lg-2   col-md-3 mb-4">
+      <div className="row  ">
+        <div className="col-lg-2      col-md-3 mb-4">
           <div className="analytics-sidebar bg-card ">
             <div className="list-group   analytics-nav-tabs">
               {reportTabs.map(tab => {
@@ -682,12 +725,12 @@ const ReportingAnalytics = () => {
 
       <style jsx>{`
         .analytics-dashboard-container {
-          background-color: #f8f9fa;
+          
           min-height: 100vh;
         }
         
         .analytics-dashboard-header {
-          background: white;
+       
           padding: 1.5rem;
           border-radius: 0.5rem;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -704,7 +747,7 @@ const ReportingAnalytics = () => {
         }
         
         .analytics-sidebar {
-          background: white;
+        
           border-radius: 0.5rem;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
           padding: 1rem;
@@ -727,7 +770,7 @@ const ReportingAnalytics = () => {
         }
         
         .analytics-main-content {
-          background: white;
+          
           border-radius: 0.5rem;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
           padding: 2rem;
@@ -761,6 +804,7 @@ const ReportingAnalytics = () => {
           box-shadow: 0 1px 3px rgba(0,0,0,0.1);
           border-radius: 0.5rem;
           overflow: hidden;
+          
         }
         
         .analytics-project-row:hover {

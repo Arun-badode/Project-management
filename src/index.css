@@ -11,8 +11,14 @@ body{
 
 }
 
+.white-placeholder::placeholder {
+  color: white;
+}
+input::placeholder, textarea::placeholder {
+  color: white;
+}
 .bg-card{
-    background: linear-gradient(to bottom right, #141c3a, #1b2f6e)!important;
+    background: linear-gradient(to bottom right, #141c3a, #1b2f6e);
     color: white!important;
 
 }
@@ -20,16 +26,30 @@ body{
 .table-gradient-bg {
   background: linear-gradient(to bottom right, #141c3a, #1b2f6e) !important;
   color: #ffffff !important;
+  border-collapse: collapse !important;
+}
+
+.table-gradient-bg th,
+.table-gradient-bg td {
+  background-color: transparent !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.table-gradient-bg thead th {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
 }
 
 .table-gradient-bg tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.1) !important; /* Light hover for contrast */
-  color: #ffffff !important; /* Ensure text stays white */
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
 }
 
 
+
 .gradient-heading {
-  background: linear-gradient(to right, #4dc3ff, #b86bff); /* Blue to Purple */
+  background: linear-gradient(to right, #4dc3ff, #b86bff); 
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight:bold;
@@ -78,10 +98,15 @@ body{
 
 /* Input fields */
 .custom-modal-dark .form-control,
-.custom-modal-dark .form-select {
-  background: linear-gradient(to bottom right, #141c3a, #1b2f6e)!important;
-  color: #ffffff;
-  border: 1px solid #555;
+.custom-modal-dark .form-select,
+.custom-modal-dark .option {
+  background: linear-gradient(to bottom right, #141c3a, #1b2f6e) !important;
+  color: #ffffff !important;
+  border: 1px solid #555 !important;
+}
+.custom-modal-dark option {
+  background-color: #1b2f6e;
+  color: white;
 }
 
 .custom-modal-dark .form-control::placeholder {
@@ -98,3 +123,37 @@ table tr td,
 table tr th {
   white-space: nowrap !important;
 }
+
+.create-card,
+.create-card input,
+.create-card textarea,
+.create-card .form-control
+{
+   background: linear-gradient(to bottom right, #141c3a, #1b2f6e)!important;
+    color: white!important;
+}
+
+
+/* calendarColors.css */
+
+.calendar-blue .rbc-calendar {
+    background: linear-gradient(to bottom right, #141c3a, #1b2f6e)!important;
+    color: white!important;
+}
+
+
+.rbc-today {
+  background-color: rgba(255, 255, 255, 0.1) !important;  /* Subtle light effect */
+}
+
+/* Fix light background for off-range days in month view */
+.rbc-off-range-bg {
+  background-color: #0a0a3c !important;  /* Match your calendar's dark theme */
+}
+
+/* Optional: Also change the text color of off-range days */
+.rbc-off-range {
+  color: #999 !important;  /* Light grey or your custom muted color */
+}
+
+

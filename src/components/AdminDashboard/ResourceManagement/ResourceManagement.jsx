@@ -16,6 +16,7 @@ import {
 import moment from 'moment';
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
 import { Modal, Button, Form, Badge, ProgressBar } from 'react-bootstrap';
+import { ResponsiveContainer } from 'recharts';
 
 // Initialize calendar localizer
 const localizer = momentLocalizer(moment);
@@ -116,7 +117,7 @@ const ResourceManagement = () => {
 
   // UI state
   const [activeTab, setActiveTab] = useState('utilization');
-  const [searchTerm, setSearchTerm] = useState('');
+ 
   const [filterRole, setFilterRole] = useState('All');
   const [loading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -141,13 +142,7 @@ const ResourceManagement = () => {
                    'AWS', 'Docker', 'Kubernetes'];
 
   // Filter resources
-  const filteredResources = resources.filter(resource => {
-    const matchesSearch = resource.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         resource.role.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = filterRole === 'All' || resource.role === filterRole;
-    
-    return matchesSearch && matchesRole;
-  });
+
 
   // Calculate utilization metrics
   const utilizationMetrics = {
@@ -249,101 +244,101 @@ const ResourceManagement = () => {
         <div className="card h-100 bg-card">
           <div className="card-header d-flex justify-content-between align-items-center">
             <h5 className="card-title mb-0">Resource Utilization</h5>
-            <div className="d-flex">
-              <div className="input-group me-2" style={{ width: '200px' }}>
-                <span className="input-group-text bg-white"><Search size={16} /></span>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  placeholder="Search..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <select 
-                className="form-select" 
-                style={{ width: '150px' }}
-                value={filterRole}
-                onChange={(e) => setFilterRole(e.target.value)}
-              >
-                {roles.map(role => (
-                  <option key={role} value={role}>{role}</option>
-                ))}
-              </select>
-            </div>
+           <div className="d-flex flex-column flex-md-row gap-2 w-100">
+  <div className="input-group w-100 w-md-auto" style={{ maxWidth: 200 }}>
+    <span className="input-group-text bg-white"><Search size={16} /></span>
+    <input 
+      type="text" 
+      className="form-control" 
+      placeholder="Search..." 
+      
+    />
+  </div>
+  <select 
+    className="form-select w-100 w-md-auto"
+    style={{ maxWidth: 150 }}
+   
+  >
+    {roles.map(role => (
+      <option key={role} value={role}>{role}</option>
+    ))}
+  </select>
+</div>
           </div>
           <div className="card-body">
             <div className="table-responsive">
-              <table className="table table-hover table-gradient-bg ">
-                <thead>
-                  <tr>
-                    <th>Resource</th>
-                    <th>Role</th>
-                    <th>Projects</th>
-                    <th>Allocation</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredResources.map(resource => (
-                    <tr key={resource.id}>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <div className="avatar me-2">
-                            <i className="fas fa-user-circle fa-2x text-primary"></i>
-                          </div>
-                          <div>
-                            <strong>{resource.name}</strong>
-                            <div className="text-muted small">{resource.email}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{resource.role}</td>
-                      <td>
-                        {resource.currentProjects.length > 0 ? (
-                          resource.currentProjects.join(', ')
-                        ) : (
-                          <span className="text-muted">No projects</span>
-                        )}
-                      </td>
-                      <td>
-                        <div className="d-flex align-items-center">
-                          <div className="progress flex-grow-1 me-2" style={{ height: '20px' }}>
-                            <div 
-                              className={`progress-bar ${getAllocationClass(resource.allocation)}`} 
-                              role="progressbar" 
-                              style={{ width: `${resource.allocation}%` }}
-                              aria-valuenow={resource.allocation}
-                              aria-valuemin="0"
-                              aria-valuemax="100"
-                            >
-                              {resource.allocation}%
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        {resource.allocation >= 90 ? (
-                          <Badge bg="warning" text="dark">Overloaded</Badge>
-                        ) : resource.allocation < 60 ? (
-                          <Badge bg="danger">Underutilized</Badge>
-                        ) : (
-                          <Badge bg="success">Optimal</Badge>
-                        )}
-                      </td>
-                      <td>
-                        <button 
-                          className="btn btn-sm btn-outline-primary"
-                          onClick={() => viewResourceDetails(resource)}
-                        >
-                          View
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+             <table className="table table-hover table-gradient-bg ">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Resource</th>
+      <th>Role</th>
+      <th>Projects</th>
+      <th>Allocation</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredResources.map(resource => (
+      <tr key={resource.id}>
+        <td>{resource.id}</td>
+        <td>
+          <div className="d-flex align-items-center">
+            <div className="avatar me-2">
+              <i className="fas fa-user-circle fa-2x text-primary"></i>
+            </div>
+            <div>
+              <strong>{resource.name}</strong>
+              <div className="text-white small">{resource.email}</div>
+            </div>
+          </div>
+        </td>
+        <td>{resource.role}</td>
+        <td>
+          {resource.currentProjects.length > 0 ? (
+            resource.currentProjects.join(', ')
+          ) : (
+            <span className="">No projects</span>
+          )}
+        </td>
+        <td>
+          <div className="d-flex align-items-center">
+            <div className="progress flex-grow-1 me-2" style={{ height: '20px' }}>
+              <div 
+                className={`progress-bar ${getAllocationClass(resource.allocation)}`} 
+                role="progressbar" 
+                style={{ width: `${resource.allocation}%` }}
+                aria-valuenow={resource.allocation}
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
+                {resource.allocation}%
+              </div>
+            </div>
+          </div>
+        </td>
+        <td>
+          {resource.allocation >= 90 ? (
+            <Badge bg="warning" text="dark">Overloaded</Badge>
+          ) : resource.allocation < 60 ? (
+            <Badge bg="danger">Underutilized</Badge>
+          ) : (
+            <Badge bg="success">Optimal</Badge>
+          )}
+        </td>
+        <td>
+          <button 
+            className="btn btn-sm btn-outline-primary"
+            onClick={() => viewResourceDetails(resource)}
+          >
+            View
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
             </div>
           </div>
         </div>
@@ -413,7 +408,7 @@ const ResourceManagement = () => {
                         <h6 className="card-title">{skill}</h6>
                         <div className="d-flex justify-content-between align-items-center">
                           <span>{count} resources</span>
-                          <span className="text-muted">{percentage}%</span>
+                          <span className="">{percentage}%</span>
                         </div>
                         <ProgressBar now={percentage} className="mt-2" style={{ height: '5px' }} />
                       </div>
@@ -431,19 +426,19 @@ const ResourceManagement = () => {
               <h5 className="card-title">Skill Demand vs Availability</h5>
             </div>
             <div className="card-body bg-card">
-              <BarChart
-                width={800}
-                height={400}
-                data={skillData}
-                margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="skill" angle={-45} textAnchor="end" height={60} />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="count" name="Resources with Skill" fill="#8884d8" />
-              </BarChart>
+             <ResponsiveContainer width="100%" height={400}>
+  <BarChart
+    data={skillData}
+    margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+  >
+    <CartesianGrid strokeDasharray="3 3" />
+    <XAxis dataKey="skill" angle={-45} textAnchor="end" height={60} />
+    <YAxis />
+    <Tooltip />
+    <Legend />
+    <Bar dataKey="count" name="Resources with Skill" fill="#8884d8" />
+  </BarChart>
+</ResponsiveContainer>
             </div>
           </div>
         </div>
@@ -452,30 +447,31 @@ const ResourceManagement = () => {
   };
 
   // Render availability calendar
-  const renderAvailabilityCalendar = () => (
-    <div className="card ">
-      <div className="card-header bg-card">
-        <h5 className="card-title">Resource Availability Calendar</h5>
-      </div>
-      <div className="card-body bg-card text-light  ">
-        <div style={{ height: 700 }}>
-          <BigCalendar
-            localizer={localizer}
-            events={events}
-            startAccessor="start"
-            endAccessor="end"
-            style={{ height: '100%' }}
-            defaultView="week"
-            views={['day', 'week', 'month']}
-            step={60}
-            timeslots={1}
-            min={new Date(0, 0, 0, 8, 0, 0)}
-            max={new Date(0, 0, 0, 19, 0, 0)}
-          />
-        </div>
+ const renderAvailabilityCalendar = (calendarClass = 'calendar-blue') => (
+  <div className={`card ${calendarClass}`}>
+    <div className="card-header bg-card">
+      <h5 className="card-title">Resource Availability Calendar</h5>
+    </div>
+    <div className="card-body bg-card text-light">
+      <div style={{ height: 700 }}>
+        <BigCalendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          style={{ height: '100%' }}
+          defaultView="week"
+          views={['day', 'week', 'month']}
+          step={60}
+          timeslots={1}
+          min={new Date(0, 0, 0, 8, 0, 0)}
+          max={new Date(0, 0, 0, 19, 0, 0)}
+        />
       </div>
     </div>
-  );
+  </div>
+);
+
 
   // Render team load balancing
   const renderTeamLoadBalancing = () => (
@@ -486,9 +482,9 @@ const ResourceManagement = () => {
             <h5 className="card-title">Project Workload</h5>
           </div>
           <div className="card-body bg-card">
+            <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart
-              width={500}
-              height={300}
               data={projects.map(project => ({
                 name: project.name,
                 teamSize: project.teamSize,
@@ -503,6 +499,8 @@ const ResourceManagement = () => {
               <Legend />
               <Bar dataKey="teamSize" name="Team Size" fill="#8884d8" />
             </BarChart>
+          </ResponsiveContainer>
+        </div>
           </div>
         </div>
       </div>
@@ -513,37 +511,39 @@ const ResourceManagement = () => {
             <h5 className="card-title">Resource Allocation</h5>
           </div>
           <div className="card-body ">
-            <table className="table table-sm table-gradient-bg">
-              <thead>
-                <tr>
-                  <th>Project</th>
-                  <th>Resources</th>
-                  <th>Allocation</th>
-                </tr>
-              </thead>
-              <tbody>
-                {projects.map(project => {
-                  const projectResources = resources.filter(r => 
-                    r.currentProjects.includes(project.name)
-                  );
-                  const totalAllocation = projectResources.reduce(
-                    (sum, r) => sum + r.allocation, 0
-                  );
-                  
-                  return (
-                    <tr key={project.id}>
-                      <td>{project.name}</td>
-                      <td>
-                        {projectResources.map(r => r.name).join(', ') || 'None'}
-                      </td>
-                      <td>
-                        <ProgressBar now={totalAllocation} label={`${totalAllocation}%`} />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="table-responsive">
+              <table className="table table-sm table-gradient-bg">
+                <thead>
+                  <tr>
+                    <th>Project</th>
+                    <th>Resources</th>
+                    <th>Allocation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {projects.map(project => {
+                    const projectResources = resources.filter(r =>
+                      r.currentProjects.includes(project.name)
+                    );
+                    const totalAllocation = projectResources.reduce(
+                      (sum, r) => sum + r.allocation, 0
+                    );
+
+                    return (
+                      <tr key={project.id}>
+                        <td>{project.name}</td>
+                        <td>
+                          {projectResources.map(r => r.name).join(', ') || 'None'}
+                        </td>
+                        <td>
+                          <ProgressBar now={totalAllocation} label={`${totalAllocation}%`} />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
