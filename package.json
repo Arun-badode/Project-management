@@ -10,14 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
-<<<<<<< HEAD
-=======
     "@ant-design/charts": "^2.4.0",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "github:fortawesome/react-fontawesome",
     "bootstrap": "^5.3.7",
->>>>>>> 100b2cd81a73d18fc6ef98fc0a70190819fcb48a
     "bootstrap-icons": "^1.13.1",
     "build": "^0.1.4",
     "chart.js": "^4.5.0",
