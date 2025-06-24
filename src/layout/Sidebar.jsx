@@ -75,13 +75,13 @@ const Sidebar = ({ collapsed }) => {
               </li>
               <li
                 className={`menu-item ${
-                  isActive("/taskmanagement") ? "active" : ""
+                  isActive("/calendar") ? "active" : ""
                 }`}
               >
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("/taskmanagement");
+                    navigate("/calendar");
                     menuItemClick();
                   }}
                 >
