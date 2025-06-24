@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import moment from 'moment';
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { Modal, Button, Form, Badge, ProgressBar } from 'react-bootstrap';
 
 // Initialize calendar localizer

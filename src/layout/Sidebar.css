@@ -1,7 +1,7 @@
 .sidebar-container {
   width: 295px;
   scrollbar-width: none;
- background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e)!important;
+  background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e) !important;
   height: 89vh;
   overflow-y: auto;
   transition: width 0.3s ease;
@@ -22,6 +22,7 @@
   opacity: 0;
   visibility: hidden;
 }
+
 .sidebar {
   padding: 10px;
 }
@@ -80,11 +81,13 @@
 .submenu-item i {
   padding: 0 5px;
 }
+
 .submenu-item {
   padding: 10px 0;
   cursor: pointer;
 }
-.submenu-item{
+
+.submenu-item {
   color: #578E7E;
 }
 
@@ -96,19 +99,24 @@
 .submenu-arrow.rotated {
   transform: rotate(360deg);
 }
+
 .menu-item.active .menu-link {
-  background-color: #133eb3; /* Highlight active menu item */
-  color: white; /* Active text color */
+  background-color: #133eb3;
+  /* Highlight active menu item */
+  color: white;
+  /* Active text color */
   border-radius: 12px;
 }
 
 .menu-item:hover .menu-link {
-  background-color: #133eb3; /* Highlight active menu item */
-  color: white; /* Active text color */
+  background-color: #133eb3;
+  /* Highlight active menu item */
+  color: white;
+  /* Active text color */
   border-radius: 12px;
 }
 
-.sidebar-container.collapsed .submenu .submenu-item i{
+.sidebar-container.collapsed .submenu .submenu-item i {
   visibility: visible !important;
   opacity: 1 !important;
   padding-left: 0px !important;
@@ -120,4 +128,3 @@
   border-radius: 12px;
   padding-left: 20px;
 }
-
