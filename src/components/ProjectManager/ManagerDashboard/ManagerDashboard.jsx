@@ -121,7 +121,7 @@ function ManagerDashboard() {
                     </div>
                 </div>
             </header> */}
-      <h1>Manager Dashboard</h1>
+      <h1 className="gradient-heading ">Manager Dashboard</h1>
 
       <div className="container mb-5">
         {/* KPI Overview Cards */}

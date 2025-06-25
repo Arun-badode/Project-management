@@ -214,7 +214,7 @@ const Attendance = () => {
     <div className="container-fluid py-4">
       <div className="row mb-4">
         <div className="col-12">
-          <h1 className="h2 text-white">Attendance Management</h1>
+          <h1 className="h2  gradient-heading ">Attendance Management</h1>
           <p className="text-white">Cycle: April 28, 2025 - May 27, 2025</p>
         </div>
       </div>
@@ -339,13 +339,13 @@ const Attendance = () => {
                           </div>
                           <div>
                             <div className="fw-semibold">{employee.employeeName}</div>
-                            <div className="small text-muted">{employee.employeeId}</div>
+                            <div className="small ">{employee.employeeId}</div>
                           </div>
                         </div>
                       </td>
                       <td>
                         <div>{employee.department}</div>
-                        <div className="small text-muted">{employee.position}</div>
+                        <div className="small ">{employee.position}</div>
                       </td>
                       <td>
                         <span className="badge bg-success-subtle text-success">

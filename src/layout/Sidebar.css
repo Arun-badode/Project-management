@@ -1,5 +1,5 @@
 .sidebar-container {
-  width: 295px;
+  width: 275px;
   scrollbar-width: none;
   background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e) !important;
   height: 89vh;
@@ -58,13 +58,16 @@
 }
 
 .menu-link {
+  
   display: flex;
   align-items: center;
   padding: 10px;
+  gap: 8px;
   text-decoration: none;
   color: white;
   cursor: pointer;
   transition: background 0.3s ease;
+ 
 }
 
 .menu-text {
