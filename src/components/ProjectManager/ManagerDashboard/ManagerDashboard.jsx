@@ -125,123 +125,113 @@ function ManagerDashboard() {
 
       <div className="container mb-5">
         {/* KPI Overview Cards */}
-        <div className="row mb-4">
-          {/* Total Leads */}
-          <div className="col-md-6 col-lg-3 mb-4">
-            <div className="card h-100 shadow-sm bg-card">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-start">
-                  <div>
-                    <p className=" small mb-1">Total Leads</p>
-                    <p className="h3 fw-bold mb-1">1,284</p>
-                  </div>
-                  <div className="p-2 bg-primary bg-opacity-10 rounded">
-                    <i className="fas fa-user-plus text-primary"></i>
-                  </div>
-                </div>
-                <div className="d-flex align-items-center mt-3">
-                  <span className="text-success small fw-bold d-flex align-items-center">
-                    <i className="fas fa-arrow-up me-1"></i> 12.5%
-                  </span>
-                  <span className=" small ms-2">vs last month</span>
-                </div>
-                <div className="progress mt-2" style={{ height: "6px" }}>
-                  <div
-                    className="progress-bar bg-primary"
-                    style={{ width: "75%" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+     <div className="row mb-4 g-3">
+  {/* Total Leads */}
+  <div className="col-md-6 col-lg-3">
+    <div className="card h-100 shadow-sm text-white bg-primary  rounded-4">
+      <div className="card-body d-flex flex-column justify-content-between h-100">
+        <div className="d-flex justify-content-between align-items-start">
+          <div>
+            <p className="small mb-1">Total Leads</p>
+            <h3 className="fw-bold mb-0">1,284</h3>
           </div>
-
-          {/* Conversion Rate */}
-          <div className="col-md-6 col-lg-3 mb-4">
-            <div className="card h-100 shadow-sm bg-card">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-start">
-                  <div>
-                    <p className=" small mb-1">Conversion Rate</p>
-                    <p className="h3 fw-bold mb-1">24.8%</p>
-                  </div>
-                  <div className="p-2 bg-success bg-opacity-10 rounded">
-                    <i className="fas fa-chart-line text-success"></i>
-                  </div>
-                </div>
-                <div className="d-flex align-items-center mt-3">
-                  <span className="text-success small fw-bold d-flex align-items-center">
-                    <i className="fas fa-arrow-up me-1"></i> 3.2%
-                  </span>
-                  <span className="small ms-2">vs last month</span>
-                </div>
-                <div className="progress mt-2" style={{ height: "6px" }}>
-                  <div
-                    className="progress-bar bg-success"
-                    style={{ width: "24.8%" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Revenue Generated */}
-          <div className="col-md-6 col-lg-3 mb-4">
-            <div className="card h-100 shadow-sm bg-card">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-start">
-                  <div>
-                    <p className="small mb-1">Revenue Generated</p>
-                    <p className="h3 fw-bold mb-1">$342,856</p>
-                  </div>
-                  <div className="p-2 bg-info bg-opacity-10 rounded">
-                    <i className="fas fa-dollar-sign text-info"></i>
-                  </div>
-                </div>
-                <div className="d-flex align-items-center mt-3">
-                  <span className="text-success small fw-bold d-flex align-items-center">
-                    <i className="fas fa-arrow-up me-1"></i> 8.7%
-                  </span>
-                  <span className=" small ms-2">vs last month</span>
-                </div>
-                <div className="progress mt-2" style={{ height: "6px" }}>
-                  <div
-                    className="progress-bar bg-info"
-                    style={{ width: "65%" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Active Projects */}
-          <div className="col-md-6 col-lg-3 mb-4">
-            <div className="card h-100 shadow-sm bg-card">
-              <div className="card-body">
-                <div className="d-flex justify-content-between align-items-start">
-                  <div>
-                    <p className=" small mb-1">Active Projects</p>
-                    <p className="h3 fw-bold mb-1">32</p>
-                  </div>
-                  <div className="p-2 bg-purple bg-opacity-10 rounded">
-                    <i className="fas fa-tasks text-purple"></i>
-                  </div>
-                </div>
-                <div className="d-flex align-items-center mt-3">
-                  <span className="text-danger small fw-bold d-flex align-items-center">
-                    <i className="fas fa-arrow-down me-1"></i> 2.3%
-                  </span>
-                  <span className="small ms-2">vs last month</span>
-                </div>
-                <div className="progress mt-2" style={{ height: "6px" }}>
-                  <div
-                    className="progress-bar bg-purple"
-                    style={{ width: "45%" }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+          <div className="p-2 bg-white bg-opacity-25 rounded">
+            <i className="fas fa-user-plus text-white fs-5"></i>
           </div>
         </div>
+        <div className="d-flex align-items-center mt-3">
+          <span className="text-white small fw-semibold d-flex align-items-center">
+            <i className="fas fa-arrow-up me-1"></i> 12.5%
+          </span>
+          <span className="small ms-2 text-white-50">vs last month</span>
+        </div>
+        <div className="progress mt-2 bg-white bg-opacity-25" style={{ height: "6px" }}>
+          <div className="progress-bar bg-white" style={{ width: "75%" }}></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Conversion Rate */}
+  <div className="col-md-6 col-lg-3">
+    <div className="card h-100 shadow-sm text-dark bg-warning  rounded-4">
+      <div className="card-body d-flex flex-column justify-content-between h-100">
+        <div className="d-flex justify-content-between align-items-start">
+          <div>
+            <p className="small mb-1">Conversion Rate</p>
+            <h3 className="fw-bold mb-0">24.8%</h3>
+          </div>
+          <div className="p-2 bg-dark bg-opacity-10 rounded">
+            <i className="fas fa-chart-line text-dark fs-5"></i>
+          </div>
+        </div>
+        <div className="d-flex align-items-center mt-3">
+          <span className="text-dark small fw-semibold d-flex align-items-center">
+            <i className="fas fa-arrow-up me-1"></i> 3.2%
+          </span>
+          <span className="small ms-2 text-dark-50">vs last month</span>
+        </div>
+        <div className="progress mt-2 bg-dark bg-opacity-25" style={{ height: "6px" }}>
+          <div className="progress-bar bg-dark" style={{ width: "24.8%" }}></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Revenue Generated */}
+  <div className="col-md-6 col-lg-3">
+    <div className="card h-100 shadow-sm text-white bg-info  rounded-4">
+      <div className="card-body d-flex flex-column justify-content-between h-100">
+        <div className="d-flex justify-content-between align-items-start">
+          <div>
+            <p className="small mb-1">Revenue Generated</p>
+            <h3 className="fw-bold mb-0">$342,856</h3>
+          </div>
+          <div className="p-2 bg-white bg-opacity-25 rounded">
+            <i className="fas fa-dollar-sign text-white fs-5"></i>
+          </div>
+        </div>
+        <div className="d-flex align-items-center mt-3">
+          <span className="text-white small fw-semibold d-flex align-items-center">
+            <i className="fas fa-arrow-up me-1"></i> 8.7%
+          </span>
+          <span className="small ms-2 text-white-50">vs last month</span>
+        </div>
+        <div className="progress mt-2 bg-white bg-opacity-25" style={{ height: "6px" }}>
+          <div className="progress-bar bg-white" style={{ width: "65%" }}></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Active Projects */}
+  <div className="col-md-6 col-lg-3">
+    <div className="card h-100 shadow-sm text-white bg-secondary  rounded-4">
+      <div className="card-body d-flex flex-column justify-content-between h-100">
+        <div className="d-flex justify-content-between align-items-start">
+          <div>
+            <p className="small mb-1">Active Projects</p>
+            <h3 className="fw-bold mb-0">32</h3>
+          </div>
+          <div className="p-2 bg-white bg-opacity-25 rounded">
+            <i className="fas fa-tasks text-white fs-5"></i>
+          </div>
+        </div>
+        <div className="d-flex align-items-center mt-3">
+          <span className="text-white small fw-semibold d-flex align-items-center">
+            <i className="fas fa-arrow-down me-1"></i> 2.3%
+          </span>
+          <span className="small ms-2 text-white-50">vs last month</span>
+        </div>
+        <div className="progress mt-2 bg-white bg-opacity-25" style={{ height: "6px" }}>
+          <div className="progress-bar bg-white" style={{ width: "45%" }}></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
         <div className="row">
           {/* Project Status Section */}
