@@ -210,11 +210,11 @@ const Assigned = () => {
   };
 
   return (
-    <div className="min-vh-100 bg-main">
+    <div className="min-vh-100 bg-main p-3 ">
       <div className="d-flex flex-column  flex-md-row align-items-center justify-content-between py-3">
-        <h1 className="h2 mb-2 mb-md-0 fw-bold gradient-heading ms-3 mt-3  ">
+        <h2 className=" gradient-heading ms-3   ">
           Assigned Projects
-        </h1>
+        </h2>
         <Form.Group
           controlId="searchProjects"
           className="position-relative w-25 justify-content-center justify-content-end gap-3 mb-2"
@@ -232,15 +232,15 @@ const Assigned = () => {
           <Button
             variant="btn btn-secondary"
             onClick={() => setShowFilters(!showFilters)}
-            className="d-flex align-items-center"
+            className="d-flex align-items-center rounded-5"
           >
             <Filter className="me-2" />
             Filters
           </Button>
           <Button
-            variant="primary"
+        
             onClick={() => setShowAddModal(true)}
-            className="d-flex align-items-center"
+            className="d-flex align-items-center gradient-button"
           >
             <Plus className="me-2" />
             Assined Project
@@ -396,7 +396,7 @@ const Assigned = () => {
                 <p className="text-muted mb-4">
                   Try adjusting your search or filter criteria.
                 </p>
-                <Button variant="primary" onClick={() => setShowAddModal(true)}>
+                <Button className="gradient-button" onClick={() => setShowAddModal(true)}>
                   <Plus className="me-2" />
                   Assigned Project
                 </Button>
@@ -678,10 +678,10 @@ const Assigned = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer className="bg-card">
-          <Button variant="secondary" onClick={() => setShowAddModal(false)}>
+          <Button variant="secondary" className="rounded-5" onClick={() => setShowAddModal(false)}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleAddProject}>
+          <Button className="gradient-button" onClick={handleAddProject}>
             Create Project
           </Button>
         </Modal.Footer>

@@ -66,7 +66,7 @@ const Calander = () => {
     <div className="container py-4 ">
       <div className=" p-3 rounded shadow bg-card">
         <div className="d-flex justify-content-between align-items-center mb-3">
-          <h3>Calendar</h3>
+          <h1 className='gradient-heading'>Calendar</h1>
           <div>
             <button className="btn btn-primary btn-sm me-2" onClick={() => toggleFilter('dob')}>Date of Birth</button>
             <button className="btn btn-danger btn-sm me-2" onClick={() => toggleFilter('doj')}>Date of Joining</button>

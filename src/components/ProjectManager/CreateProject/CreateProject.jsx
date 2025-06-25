@@ -92,7 +92,7 @@ function CreateProject() {
   return (
     <div >
      <div className="container mt-3 p-4  text-white rounded shadow custom-modal-dark">
-      <h3 className="mb-4">Create New Project</h3>
+      <h2 className="mb-4 gradient-heading">Create New Project</h2>
       <Form>
         <Form.Group className="mb-3">
           <Form.Label>Project Name</Form.Label>

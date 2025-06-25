@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Funnel } from "@ant-design/charts";
 
-import { PieChart, Pie, Cell, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
 
 function ManagerDashboard() {
   const [timeFilter, setTimeFilter] = useState("This Week");
@@ -39,14 +39,14 @@ function ManagerDashboard() {
   };
 
   const data = [
-    { name: 'Direct', value: 27 },
-    { name: 'Referral', value: 25 },
-    { name: 'Social', value: 18 },
-    { name: 'Email', value: 15 },
-    { name: 'Other', value: 15 },
+    { name: "Direct", value: 27 },
+    { name: "Referral", value: 25 },
+    { name: "Social", value: 18 },
+    { name: "Email", value: 15 },
+    { name: "Other", value: 15 },
   ];
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF'];
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#A28EFF"];
 
   // Lead Source Chart Data
   const pieData = [
@@ -121,33 +121,38 @@ function ManagerDashboard() {
                     </div>
                 </div>
             </header> */}
-      <h1>Manager Dashboard</h1>
+      <h2 className="gradient-heading ">Manager Dashboard</h2>
 
       <div className="container mb-5">
         {/* KPI Overview Cards */}
-        <div className="row mb-4">
+        <div className="row mb-4 g-3">
           {/* Total Leads */}
-          <div className="col-md-6 col-lg-3 mb-4">
-            <div className="card h-100 shadow-sm bg-card">
-              <div className="card-body">
+          <div className="col-md-6 col-lg-3">
+            <div className="card h-100 shadow-sm text-white bg-primary  rounded-4">
+              <div className="card-body d-flex flex-column justify-content-between h-100">
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
-                    <p className=" small mb-1">Total Leads</p>
-                    <p className="h3 fw-bold mb-1">1,284</p>
+                    <p className="small mb-1">Total Leads</p>
+                    <h3 className="fw-bold mb-0">1,284</h3>
                   </div>
-                  <div className="p-2 bg-primary bg-opacity-10 rounded">
-                    <i className="fas fa-user-plus text-primary"></i>
+                  <div className="p-2 bg-white bg-opacity-25 rounded">
+                    <i className="fas fa-user-plus text-white fs-5"></i>
                   </div>
                 </div>
                 <div className="d-flex align-items-center mt-3">
-                  <span className="text-success small fw-bold d-flex align-items-center">
+                  <span className="text-white small fw-semibold d-flex align-items-center">
                     <i className="fas fa-arrow-up me-1"></i> 12.5%
                   </span>
-                  <span className=" small ms-2">vs last month</span>
+                  <span className="small ms-2 text-white-50">
+                    vs last month
+                  </span>
                 </div>
-                <div className="progress mt-2" style={{ height: "6px" }}>
+                <div
+                  className="progress mt-2 bg-white bg-opacity-25"
+                  style={{ height: "6px" }}
+                >
                   <div
-                    className="progress-bar bg-primary"
+                    className="progress-bar bg-white"
                     style={{ width: "75%" }}
                   ></div>
                 </div>
@@ -156,27 +161,30 @@ function ManagerDashboard() {
           </div>
 
           {/* Conversion Rate */}
-          <div className="col-md-6 col-lg-3 mb-4">
-            <div className="card h-100 shadow-sm bg-card">
-              <div className="card-body">
+          <div className="col-md-6 col-lg-3">
+            <div className="card h-100 shadow-sm text-dark bg-warning  rounded-4">
+              <div className="card-body d-flex flex-column justify-content-between h-100">
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
-                    <p className=" small mb-1">Conversion Rate</p>
-                    <p className="h3 fw-bold mb-1">24.8%</p>
+                    <p className="small mb-1">Conversion Rate</p>
+                    <h3 className="fw-bold mb-0">24.8%</h3>
                   </div>
-                  <div className="p-2 bg-success bg-opacity-10 rounded">
-                    <i className="fas fa-chart-line text-success"></i>
+                  <div className="p-2 bg-dark bg-opacity-10 rounded">
+                    <i className="fas fa-chart-line text-dark fs-5"></i>
                   </div>
                 </div>
                 <div className="d-flex align-items-center mt-3">
-                  <span className="text-success small fw-bold d-flex align-items-center">
+                  <span className="text-dark small fw-semibold d-flex align-items-center">
                     <i className="fas fa-arrow-up me-1"></i> 3.2%
                   </span>
-                  <span className="small ms-2">vs last month</span>
+                  <span className="small ms-2 text-dark-50">vs last month</span>
                 </div>
-                <div className="progress mt-2" style={{ height: "6px" }}>
+                <div
+                  className="progress mt-2 bg-dark bg-opacity-25"
+                  style={{ height: "6px" }}
+                >
                   <div
-                    className="progress-bar bg-success"
+                    className="progress-bar bg-dark"
                     style={{ width: "24.8%" }}
                   ></div>
                 </div>
@@ -185,27 +193,32 @@ function ManagerDashboard() {
           </div>
 
           {/* Revenue Generated */}
-          <div className="col-md-6 col-lg-3 mb-4">
-            <div className="card h-100 shadow-sm bg-card">
-              <div className="card-body">
+          <div className="col-md-6 col-lg-3">
+            <div className="card h-100 shadow-sm text-white bg-info  rounded-4">
+              <div className="card-body d-flex flex-column justify-content-between h-100">
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
                     <p className="small mb-1">Revenue Generated</p>
-                    <p className="h3 fw-bold mb-1">$342,856</p>
+                    <h3 className="fw-bold mb-0">$342,856</h3>
                   </div>
-                  <div className="p-2 bg-info bg-opacity-10 rounded">
-                    <i className="fas fa-dollar-sign text-info"></i>
+                  <div className="p-2 bg-white bg-opacity-25 rounded">
+                    <i className="fas fa-dollar-sign text-white fs-5"></i>
                   </div>
                 </div>
                 <div className="d-flex align-items-center mt-3">
-                  <span className="text-success small fw-bold d-flex align-items-center">
+                  <span className="text-white small fw-semibold d-flex align-items-center">
                     <i className="fas fa-arrow-up me-1"></i> 8.7%
                   </span>
-                  <span className=" small ms-2">vs last month</span>
+                  <span className="small ms-2 text-white-50">
+                    vs last month
+                  </span>
                 </div>
-                <div className="progress mt-2" style={{ height: "6px" }}>
+                <div
+                  className="progress mt-2 bg-white bg-opacity-25"
+                  style={{ height: "6px" }}
+                >
                   <div
-                    className="progress-bar bg-info"
+                    className="progress-bar bg-white"
                     style={{ width: "65%" }}
                   ></div>
                 </div>
@@ -214,27 +227,32 @@ function ManagerDashboard() {
           </div>
 
           {/* Active Projects */}
-          <div className="col-md-6 col-lg-3 mb-4">
-            <div className="card h-100 shadow-sm bg-card">
-              <div className="card-body">
+          <div className="col-md-6 col-lg-3">
+            <div className="card h-100 shadow-sm text-white bg-secondary  rounded-4">
+              <div className="card-body d-flex flex-column justify-content-between h-100">
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
-                    <p className=" small mb-1">Active Projects</p>
-                    <p className="h3 fw-bold mb-1">32</p>
+                    <p className="small mb-1">Active Projects</p>
+                    <h3 className="fw-bold mb-0">32</h3>
                   </div>
-                  <div className="p-2 bg-purple bg-opacity-10 rounded">
-                    <i className="fas fa-tasks text-purple"></i>
+                  <div className="p-2 bg-white bg-opacity-25 rounded">
+                    <i className="fas fa-tasks text-white fs-5"></i>
                   </div>
                 </div>
                 <div className="d-flex align-items-center mt-3">
-                  <span className="text-danger small fw-bold d-flex align-items-center">
+                  <span className="text-white small fw-semibold d-flex align-items-center">
                     <i className="fas fa-arrow-down me-1"></i> 2.3%
                   </span>
-                  <span className="small ms-2">vs last month</span>
+                  <span className="small ms-2 text-white-50">
+                    vs last month
+                  </span>
                 </div>
-                <div className="progress mt-2" style={{ height: "6px" }}>
+                <div
+                  className="progress mt-2 bg-white bg-opacity-25"
+                  style={{ height: "6px" }}
+                >
                   <div
-                    className="progress-bar bg-purple"
+                    className="progress-bar bg-white"
                     style={{ width: "45%" }}
                   ></div>
                 </div>
@@ -285,8 +303,10 @@ function ManagerDashboard() {
                   </div>
                 </div>
               </div>
-              <div className="table-responsive"
-                style={{ maxHeight: "400px", overflowY: "auto" }}>
+              <div
+                className="table-responsive"
+                style={{ maxHeight: "400px", overflowY: "auto" }}
+              >
                 <table className="table table-hover mb-0 table-gradient-bg">
                   <thead className="table-light bg-dark">
                     <tr>
@@ -540,9 +560,7 @@ function ManagerDashboard() {
             <div className="card shadow-sm h-100 bg-card">
               <div className="card-header  border-bottom d-flex justify-content-between align-items-center py-3">
                 <h5 className="mb-0">Recent Activities</h5>
-                <button className="btn btn-primary small">
-                  View All
-                </button>
+                <button className="btn btn-primary small">View All</button>
               </div>
               <div className="card-body">
                 <div className="activity-feed">
@@ -733,7 +751,6 @@ function ManagerDashboard() {
                   </PieChart>
                 </div>
               </div>
-
             </div>
           </div>
         </div>

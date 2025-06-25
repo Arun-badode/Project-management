@@ -286,9 +286,9 @@ const ActiveProject= () => {
       {/* Header with action buttons */}
       <div className="row mb-4">
         <div className="col-md-6">
-          <h2 className="mb-0 text-white">Active Projects</h2>
+          <h2 className="mb-0 gradient-heading">Active Projects</h2>
         </div>
-        <div className="col-md-6 text-md-end">
+        {/* <div className="col-md-6 text-md-end">
           <div className="d-flex flex-wrap justify-content-md-end gap-2">
             <button className="btn btn-dark">
               <i className="fas fa-file-excel me-2"></i>Download Excel
@@ -300,7 +300,7 @@ const ActiveProject= () => {
               <i className="fas fa-download me-2"></i>Download Excel
             </button>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Filters */}
@@ -462,7 +462,7 @@ const ActiveProject= () => {
                           {/* Batch Edit Controls */}
                           {selectedFiles.length > 0 && (
                             <div className="card mb-4">
-                              <div className="card-body">
+                              <div className="card-body bg-card">
                                 <h6 className="card-title mb-3">Batch Edit</h6>
                                 <div className="row g-3">
                                   <div className="col-md-4 col-lg-2">
@@ -538,7 +538,7 @@ const ActiveProject= () => {
                                 </div>
                                 <div className="mt-3">
                                   <button
-                                    className="btn btn-sm btn-primary"
+                                    className="btn gradient-button"
                                     onClick={applyBatchEdits}
                                   >
                                     Apply to Selected Files
@@ -660,7 +660,7 @@ const ActiveProject= () => {
                         <div className="d-flex justify-content-end gap-2">
                           <button
                             type="button"
-                            className="btn btn-secondary"
+                            className="btn btn-secondary rounded-5"
                             onClick={() => setExpandedRow(null)}
                           >
                             Close
@@ -668,7 +668,7 @@ const ActiveProject= () => {
                           {hasUnsavedChanges && (
                             <button
                               type="button"
-                              className="btn btn-primary"
+                              className="btn gradient-button"
                             >
                               Save Changes
                             </button>

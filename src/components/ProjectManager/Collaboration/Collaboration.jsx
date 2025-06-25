@@ -234,7 +234,7 @@ function Collaboration() {
                             {['Project Redesign Discussion', 'Marketing Campaign Planning', 'Q2 Budget Review'].map((thread, index) => (
                                 <button 
                                     key={index} 
-                                    className={`list-group-item bg-card list-group-item-action ${currentThread.title === thread ? 'active' : ''}`}
+                                    className={`list-group-item bg-card list-group-item-action  ${currentThread.title === thread ? 'active' : ''}`}
                                     onClick={() => setCurrentThread({
                                         ...currentThread,
                                         title: thread
@@ -376,7 +376,7 @@ function Collaboration() {
                                 value={newMessage}
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                className="form-control mb-2 "
+                                className="form-control mb-2 bg-card"
                                 rows="2"
                                 placeholder="Type your message here..."
                                 style={{ resize: 'none' }}
