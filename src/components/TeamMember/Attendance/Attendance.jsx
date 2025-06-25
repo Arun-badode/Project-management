@@ -225,7 +225,7 @@ const Attendance = () => {
           <div className="row">
             <div className="col-md-8">
               <div className="row">
-                <div className="col-md-4 mb-3 mb-md-0">
+                <div className="col-md-4 mt-4 py-1 ">
                   <div className="input-group">
                     <span className="input-group-text">
                       <i className="fas fa-search"></i>
@@ -239,7 +239,7 @@ const Attendance = () => {
                     />
                   </div>
                 </div>
-                <div className="col-md-4 mb-3 mb-md-0">
+                <div className="col-md-4 py-1 mt-4">
                   <select
                     className="form-select"
                     value={departmentFilter}
@@ -265,7 +265,7 @@ const Attendance = () => {
                       <label className="form-label small">End Date</label>
                       <input
                         type="date"
-                        className="form-control"
+                        className="form-control "
                         value={dateRange.end}
                         onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
                       />
@@ -339,13 +339,13 @@ const Attendance = () => {
                           </div>
                           <div>
                             <div className="fw-semibold">{employee.employeeName}</div>
-                            <div className="small text-muted">{employee.employeeId}</div>
+                            <div className="small text-white">{employee.employeeId}</div>
                           </div>
                         </div>
                       </td>
                       <td>
                         <div>{employee.department}</div>
-                        <div className="small text-muted">{employee.position}</div>
+                        <div className="small ">{employee.position}</div>
                       </td>
                       <td>
                         <span className="badge bg-success-subtle text-success">
