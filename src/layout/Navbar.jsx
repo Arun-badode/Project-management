@@ -52,11 +52,14 @@ const Navbar = ({ toggleSidebar }) => {
           {/* Brand and Sidebar Toggle */}
           <div className="d-flex align-items-center gap-3 flex-shrink-0">
             <img
-              src="https://ik.imagekit.io/wycpoxj6v/Eminoids%20-%20Logo_B.png?updatedAt=1750836038955"
-              height={50}
-              alt="Logo"
-              style={{ maxWidth: 120, height: "auto" }}
-            />
+  src="https://ik.imagekit.io/wycpoxj6v/Eminoids%20-%20Logo_B.png?updatedAt=1750836038955"
+  alt="Logo"
+  style={{
+    width: window.innerWidth >= 992 ? "250px" : "120px",
+    height: "auto",
+  }}
+/>
+
             <button
               className="btn btn-link text-white p-0 d-lg-none"
               onClick={toggleSidebar}

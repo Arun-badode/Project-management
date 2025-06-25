@@ -343,7 +343,7 @@ const getStatusColor = (status) => {
                           </div>
                         </div>
                         <div>
-                          <div className="text-dark small mb-1">QA Reviewers</div>
+                          <div className="text-white small mb-1">QA Reviewers</div>
                           <div className="d-flex align-items-center">
                             <span className="badge bg-info bg-opacity-10 text-info">
                               {project.qaReviewers}
@@ -513,7 +513,7 @@ const getStatusColor = (status) => {
 
         {/* Time Log Modal */}
         {isTimeLogOpen && selectedProject && (
-          <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal fade show d-block custom-modal-dark" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
             <div className="modal-dialog modal-lg">
               <div className="modal-content">
                 <div className="modal-header">
@@ -546,15 +546,15 @@ const getStatusColor = (status) => {
                     </div>
                   </div>
                   <div>
-                    <h6 className="fw-medium mb-3">Resource Time Allocation</h6>
-                    <div className="bg-light rounded p-3">
-                      <div className="row g-3 mb-2 small fw-medium text-light">
+                    <h6 className="fw-medium mb-3 ">Resource Time Allocation</h6>
+                    <div className="custom-modal-dark rounded p-3">
+                      <div className="row g-3 mb-2 small fw-medium text-light ">
                         <div className="col-md-4">Role</div>
                         <div className="col-md-4">Team Member</div>
                         <div className="col-md-4">Hours Spent</div>
                       </div>
                       {getProjectById(selectedProject)?.timeSpent.map((resource, index) => (
-                        <div key={index} className="row g-3 py-2 border-top small">
+                        <div key={index} className="row g-3 py-2 border-top mt-0 small">
                           <div className="col-md-4">{resource.role}</div>
                           <div className="col-md-4 fw-medium">{resource.name}</div>
                           <div className="col-md-4">{resource.hours} hrs</div>
