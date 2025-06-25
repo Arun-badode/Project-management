@@ -148,12 +148,12 @@ const App = () => {
   };
 
   return (
-    <div className="min-vh-100 bg-light">
+    <div className="min-vh-100 bg-main">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-white shadow-sm bg-card">
         <div className="container">
           <div className="d-flex justify-content-between align-items-center py-3">
-            <h1 className="h2 fw-bold text-dark mb-0">Action Center</h1>
+            <h1 className="h2 fw-bold  mb-0">Action Center</h1>
             <div className="d-flex gap-2">
               <button 
                 onClick={() => handleExport('csv')}
@@ -205,14 +205,14 @@ const App = () => {
               <i className={`fas fa-filter me-2 ${showFilters ? 'text-primary' : ''}`}></i>
               {showFilters ? 'Hide Filters' : 'Show Filters'}
             </button>
-            <div className="text-muted small">
+            <div className="text-white small">
               {activeTab === 'pending' ? `${pendingRequests.length} pending requests` : `${actionHistory.length} history records`}
             </div>
           </div>
 
           {showFilters && (
-            <div className="card mb-4">
-              <div className="card-body">
+            <div className="card mb-4 ">
+              <div className="card-body ">
                 <div className="row g-3">
                   <div className="col-md-6 col-lg-4">
                     <label htmlFor="actionType" className="form-label">Action Type</label>
@@ -388,33 +388,34 @@ const App = () => {
           <div>
             {/* Team to Manager Requests */}
             <div className="mb-5">
-              <h2 className="h5 fw-medium mb-3">Team to Manager Requests</h2>
+              <h2 className="h5 fw-medium mb-3 text-white">Team to Manager Requests</h2>
               <div className="row g-3">
                 {pendingRequests
                   .filter(request => request.category === 'team-to-manager')
                   .map(request => (
                     <div key={request.id} className="col-12">
-                      <div className="card">
-                        <div className="card-body">
+                      <div className="card bg-card">
+                        <div className="card-body ">
                           <div className="d-flex flex-column flex-md-row justify-content-between">
                             <div className="mb-3 mb-md-0">
                               <div className="d-flex align-items-center mb-2">
                                 <span className="badge bg-warning text-dark me-2">
                                   {request.type}
                                 </span>
-                                <span className="text-muted small">
+                                <span className=" small">
                                   {formatDate(request.timestamp)}
                                 </span>
                               </div>
                               <h3 className="h6 fw-medium mb-1">
-                                {request.requester} <span className="text-muted">({request.requesterRole})</span>
+                                {request.requester} <span className="">({request.requesterRole})</span>
                               </h3>
-                              <p className="mb-0 text-muted">{request.details}</p>
+                              <p className="mb-0 ">{request.details}</p>
                             </div>
                             <div className="d-flex gap-2">
                               <button
                                 onClick={() => handleAction(request.id, 'reject')}
                                 className="btn btn-outline-danger d-flex align-items-center"
+                                style={{height:"45px", marginTop:"20px"}}
                               >
                                 <i className="fas fa-times me-2"></i>
                                 Reject
@@ -422,6 +423,7 @@ const App = () => {
                               <button
                                 onClick={() => handleAction(request.id, 'approve')}
                                 className="btn btn-success d-flex align-items-center"
+                                 style={{height:"45px", marginTop:"20px"}}
                               >
                                 <i className="fas fa-check me-2"></i>
                                 Approve
@@ -437,13 +439,13 @@ const App = () => {
 
             {/* Manager to Admin Requests */}
             <div>
-              <h2 className="h5 fw-medium mb-3">Manager to Admin Requests</h2>
+              <h2 className="h5 fw-medium mb-3 text-white">Manager to Admin Requests</h2>
               <div className="row g-3">
                 {pendingRequests
                   .filter(request => request.category === 'manager-to-admin')
                   .map(request => (
                     <div key={request.id} className="col-12">
-                      <div className="card">
+                      <div className="card bg-card">
                         <div className="card-body">
                           <div className="d-flex flex-column flex-md-row justify-content-between">
                             <div className="mb-3 mb-md-0">
@@ -451,19 +453,20 @@ const App = () => {
                                 <span className="badge bg-purple text-white me-2">
                                   {request.type}
                                 </span>
-                                <span className="text-muted small">
+                                <span className=" small">
                                   {formatDate(request.timestamp)}
                                 </span>
                               </div>
                               <h3 className="h6 fw-medium mb-1">
-                                {request.requester} <span className="text-muted">({request.requesterRole})</span>
+                                {request.requester} <span className="">({request.requesterRole})</span>
                               </h3>
-                              <p className="mb-0 text-muted">{request.details}</p>
+                              <p className="mb-0 ">{request.details}</p>
                             </div>
                             <div className="d-flex gap-2">
                               <button
                                 onClick={() => handleAction(request.id, 'reject')}
                                 className="btn btn-outline-danger d-flex align-items-center"
+                                 style={{height:"45px", marginTop:"20px"}}
                               >
                                 <i className="fas fa-times me-2"></i>
                                 Reject
@@ -471,6 +474,7 @@ const App = () => {
                               <button
                                 onClick={() => handleAction(request.id, 'approve')}
                                 className="btn btn-success d-flex align-items-center"
+                                 style={{height:"45px", marginTop:"20px"}}
                               >
                                 <i className="fas fa-check me-2"></i>
                                 Approve
@@ -485,10 +489,10 @@ const App = () => {
             </div>
           </div>
         ) : (
-          <div className="card">
+          <div className="card ">
             <div className="list-group list-group-flush">
               {actionHistory.map(action => (
-                <div key={action.id} className="list-group-item list-group-item-action">
+                <div key={action.id} className="list-group-item list-group-item-action bg-card">
                   <div className="d-flex">
                     <div className="flex-shrink-0 me-3">
                       {action.actionType === 'Approved' && (
@@ -509,14 +513,14 @@ const App = () => {
                     </div>
                     <div className="flex-grow-1">
                       <div className="d-flex flex-column flex-md-row justify-content-between mb-1">
-                        <h3 className="h6 fw-medium mb-1 mb-md-0">
+                        <h3 className="h6 fw-medium mb-1 mb-md-0 text-white">
                           {action.actionType} - {action.requestType}
                         </h3>
-                        <span className="text-muted small">
+                        <span className=" small">
                           {formatDate(action.timestamp)}
                         </span>
                       </div>
-                      <div className="d-flex flex-wrap gap-2 small text-muted mb-2">
+                      <div className="d-flex flex-wrap gap-2 small  mb-2">
                         <span>
                           <span className="fw-medium">Requested by:</span> {action.requester} ({action.requesterRole})
                         </span>
@@ -526,7 +530,7 @@ const App = () => {
                           </span>
                         )}
                       </div>
-                      <p className="mb-0 text-muted">{action.details}</p>
+                      <p className="mb-0 ">{action.details}</p>
                     </div>
                   </div>
                 </div>

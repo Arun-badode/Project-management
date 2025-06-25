@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { Edit, Plus } from "lucide-react";
-import { Modal } from "react-bootstrap";
+import React, { useState, useEffect } from 'react';
+import { Edit, Plus } from 'lucide-react';
+import { Modal } from 'react-bootstrap';
+
 
 const RoleManagementSystem = () => {
-  const [currentView, setCurrentView] = useState("roleList");
+  const [currentView, setCurrentView] = useState('roleList');
   const [selectedRole, setSelectedRole] = useState(null);
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [showAddRoleModal, setShowAddRoleModal] = useState(false);
 
   const [permissionsState, setPermissionsState] = useState({});
-  const [newRole, setNewRole] = useState({ roleName: "", description: "" });
+  const [newRole, setNewRole] = useState({ roleName: '', description: '' });
 
   const [roles, setRoles] = useState([
     { _id: "1", roleName: "Admin", description: "Full Access" },
@@ -20,112 +21,112 @@ const RoleManagementSystem = () => {
   const dummyPermissions = {
     Dashboard: [
       {
-        feature: "Overview",
+        feature: 'Overview',
         isGet: true,
         isCreate: false,
         isEdit: false,
         isDelete: false,
         permission: true,
-        _id: "a1",
+        _id: 'a1',
       },
     ],
     Users: [
       {
-        feature: "Manage Users",
+        feature: 'Manage Users',
         isGet: true,
         isCreate: true,
         isEdit: true,
         isDelete: true,
         permission: true,
-        _id: "b1",
+        _id: 'b1',
       },
     ],
-    Project: [
+     Project: [
       {
-        feature: "Manage Users",
+        feature: 'Manage Users',
         isGet: true,
         isCreate: true,
         isEdit: true,
         isDelete: true,
         permission: true,
-        _id: "b1",
+        _id: 'b1',
       },
     ],
-    Task: [
+     Task: [
       {
-        feature: "Manage Users",
+        feature: 'Manage Users',
         isGet: true,
         isCreate: true,
         isEdit: true,
         isDelete: true,
         permission: true,
-        _id: "b1",
+        _id: 'b1',
       },
     ],
-    TimeTraking: [
+     TimeTraking: [
       {
-        feature: "Manage Users",
+        feature: 'Manage Users',
         isGet: true,
         isCreate: true,
         isEdit: true,
         isDelete: true,
         permission: true,
-        _id: "b1",
+        _id: 'b1',
       },
     ],
-    FileManagement: [
+     FileManagement: [
       {
-        feature: "Manage Users",
+        feature: 'Manage Users',
         isGet: true,
         isCreate: true,
         isEdit: true,
         isDelete: true,
         permission: true,
-        _id: "b1",
+        _id: 'b1',
       },
     ],
-    QAManagement: [
+     QAManagement: [
       {
-        feature: "Manage Users",
+        feature: 'Manage Users',
         isGet: true,
         isCreate: true,
         isEdit: true,
         isDelete: true,
         permission: true,
-        _id: "b1",
+        _id: 'b1',
       },
     ],
-    Reporting$Analytics: [
+     Reporting$Analytics: [
       {
-        feature: "Manage Users",
+        feature: 'Manage Users',
         isGet: true,
         isCreate: true,
         isEdit: true,
         isDelete: true,
         permission: true,
-        _id: "b1",
+        _id: 'b1',
       },
     ],
-    AuditLog: [
+     AuditLog: [
       {
-        feature: "Manage Users",
+        feature: 'Manage Users',
         isGet: true,
         isCreate: true,
         isEdit: true,
         isDelete: true,
         permission: true,
-        _id: "b1",
+        _id: 'b1',
       },
     ],
-    ProfileAccount: [
+     ProfileAccount: [
       {
-        feature: "Manage Users",
+        feature: 'Manage Users',
         isGet: true,
         isCreate: true,
         isEdit: true,
         isDelete: true,
         permission: true,
-        _id: "b1",
+        _id: 'b1',
       },
     ],
   };
@@ -143,7 +144,7 @@ const RoleManagementSystem = () => {
   };
 
   const handleOpenAddRoleModal = () => {
-    setNewRole({ roleName: "", description: "" });
+    setNewRole({ roleName: '', description: '' });
     setShowAddRoleModal(true);
   };
 
@@ -178,10 +179,7 @@ const RoleManagementSystem = () => {
       <div className="card-header bg-white border-bottom pb-0 bg-card">
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2 ">
           <h2 className="card-title h4 m-0">Permissions</h2>
-          <button
-            className="btn btn-primary btn-sm d-flex align-items-center gap-1"
-            onClick={handleOpenAddRoleModal}
-          >
+          <button className="btn btn-primary btn-sm d-flex align-items-center gap-1" onClick={handleOpenAddRoleModal}>
             <Plus size={16} /> Add Role
           </button>
 
@@ -207,15 +205,10 @@ const RoleManagementSystem = () => {
                 <tr key={role._id}>
                   <td>{role.roleName}</td>
                   <td>
-                    <span className="badge bg-light text-primary">
-                      {role.description}
-                    </span>
+                    <span className="badge bg-light text-primary">{role.description}</span>
                   </td>
                   <td>
-                    <button
-                      className="btn btn-sm btn-outline-success"
-                      onClick={() => handleEditRole(role)}
-                    >
+                    <button className="btn btn-sm btn-outline-success" onClick={() => handleEditRole(role)}>
                       <Edit size={14} />
                     </button>
                   </td>
@@ -229,7 +222,7 @@ const RoleManagementSystem = () => {
   );
 
   const PermissionsView = () => (
-    <div className="">
+    <div className=''>
       {Object.entries(permissionsState).map(([module, features]) => (
         <div key={module} className="mb-5">
           <div className="bg-light p-3 rounded mb-3 bg-card">
@@ -252,7 +245,7 @@ const RoleManagementSystem = () => {
               <tbody>
                 {features.map((item, index) => (
                   <tr key={item._id}>
-                    <td>{index === 0 ? module : ""}</td>
+                    <td>{index === 0 ? module : ''}</td>
                     <td>
                       {index === 0 && (
                         <input
@@ -273,13 +266,7 @@ const RoleManagementSystem = () => {
                       )}
                     </td>
                     <td>{item.feature}</td>
-                    {[
-                      "isGet",
-                      "isCreate",
-                      "isEdit",
-                      "isDelete",
-                      "permission",
-                    ].map((type, idx) => (
+                    {['isGet', 'isCreate', 'isEdit', 'isDelete', 'permission'].map((type, idx) => (
                       <td key={idx}>
                         <input
                           type="checkbox"
@@ -297,16 +284,10 @@ const RoleManagementSystem = () => {
         </div>
       ))}
       <div className="border-top pt-4 mt-4 d-flex justify-content-end gap-3">
-        <button
-          className="btn btn-outline-secondary"
-          onClick={handleClosePermissionsModal}
-        >
+        <button className="btn btn-outline-secondary" onClick={handleClosePermissionsModal}>
           Cancel
         </button>
-        <button
-          className="btn btn-primary"
-          onClick={() => alert("Permissions saved")}
-        >
+        <button className="btn btn-primary" onClick={() => alert('Permissions saved')}>
           Save Permissions
         </button>
       </div>
@@ -314,35 +295,26 @@ const RoleManagementSystem = () => {
   );
 
   useEffect(() => {
-    document.body.style.overflow = showPermissionsModal ? "hidden" : "auto";
+    document.body.style.overflow = showPermissionsModal ? 'hidden' : 'auto';
   }, [showPermissionsModal]);
 
   return (
     <div className="min-vh-100 bg-light p-2 p-md-3 bg-main">
       <div
         className="mb-4 border-0 mybg text-white bg-card"
-        style={{ borderRadius: "12px", padding: "1.2rem", height: "80px" }}
+        style={{ borderRadius: '12px', padding: '1.2rem', height: '80px',  }}
       >
         <h2 className="mb-0">Permission Management</h2>
       </div>
 
       <div className="row justify-content-center">
-        {currentView === "roleList" ? <RoleListView /> : <PermissionsView />}
+        {currentView === 'roleList' ? <RoleListView /> : <PermissionsView />}
       </div>
 
       {/* Permission Modal */}
-      <Modal
-        show={showPermissionsModal}
-        onHide={handleClosePermissionsModal}
-        size="xl"
-        backdrop="static"
-        centered
-        className="custom-modal-dark"
-      >
+      <Modal show={showPermissionsModal} onHide={handleClosePermissionsModal} size="xl" backdrop="static" centered className='custom-modal-dark'>
         <Modal.Header closeButton>
-          <Modal.Title>
-            Assign Permission ({selectedRole?.roleName})
-          </Modal.Title>
+          <Modal.Title>Assign Permission ({selectedRole?.roleName})</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <PermissionsView />
@@ -350,12 +322,7 @@ const RoleManagementSystem = () => {
       </Modal>
 
       {/* Add Role Modal */}
-      <Modal
-        show={showAddRoleModal}
-        onHide={handleCloseAddRoleModal}
-        centered
-        className="custom-modal-dark"
-      >
+      <Modal show={showAddRoleModal} onHide={handleCloseAddRoleModal} centered className='custom-modal-dark'>
         <Modal.Header closeButton>
           <Modal.Title>Add New Role</Modal.Title>
         </Modal.Header>
@@ -367,9 +334,7 @@ const RoleManagementSystem = () => {
                 type="text"
                 className="form-control"
                 value={newRole.roleName}
-                onChange={(e) =>
-                  setNewRole({ ...newRole, roleName: e.target.value })
-                }
+                onChange={(e) => setNewRole({ ...newRole, roleName: e.target.value })}
               />
             </div>
             <div className="mb-3">
@@ -378,9 +343,7 @@ const RoleManagementSystem = () => {
                 type="text"
                 className="form-control"
                 value={newRole.description}
-                onChange={(e) =>
-                  setNewRole({ ...newRole, description: e.target.value })
-                }
+                onChange={(e) => setNewRole({ ...newRole, description: e.target.value })}
               />
             </div>
 
@@ -399,10 +362,7 @@ const RoleManagementSystem = () => {
 
         
         <Modal.Footer>
-          <button
-            className="btn btn-secondary"
-            onClick={handleCloseAddRoleModal}
-          >
+          <button className="btn btn-secondary" onClick={handleCloseAddRoleModal}>
             Cancel
           </button>
           <button className="btn btn-primary" onClick={handleAddRole}>

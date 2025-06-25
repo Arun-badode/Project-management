@@ -58,7 +58,9 @@ const Navbar = ({ toggleSidebar }) => {
     setRole(userRole);
   }, []);
   return (
+    
     <nav className="navbar navbar-expand-lg navbar-light bg-card sticky-top">
+      
       <div className="container-fluid px-3">
         {/* Brand and Toggle Button */}
         <div className="d-flex align-items-center" style={{gap:"35px"}}>
@@ -339,6 +341,7 @@ const Navbar = ({ toggleSidebar }) => {
                   Profile
                 </Link>
               </li>
+              
               <li>
                 <Link className="dropdown-item py-2" to="/changepassword">
                   <i className="fa fa-lock me-2"></i>
