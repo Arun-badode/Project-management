@@ -62,7 +62,7 @@ const Navbar = ({ toggleSidebar }) => {
       <div className="container-fluid px-3">
         {/* Brand and Toggle Button */}
         <div className="d-flex align-items-center">
-          <img src="../public/Logo/Eminoids - Logo_B.png" height={60} />
+          <img src="public/Logo/Eminoids - Logo_B.png" height={60} />
           <button
             className="btn btn-link text-white p-0 d-lg-inline-block"
             onClick={toggleSidebar}

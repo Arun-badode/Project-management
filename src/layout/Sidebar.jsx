@@ -91,6 +91,24 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Projects </span>
                 </div>
               </li>
+
+               <li
+                className={`menu-item ${
+                  isActive("/actioncenter") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/actioncenter");
+                    menuItemClick();
+                  }}
+                >
+                  <i class="fa-solid fa-hexagon-nodes"></i>
+                  <span className="menu-text">Action Center</span>
+                </div>
+              </li>
+
                <li
                 className={`menu-item ${
                   isActive("/reportinganalytics") ? "active" : ""
@@ -133,7 +151,7 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
-                  <i class="fa-solid fa-calendar-days"></i>
+                  <i class="fa-solid fa-clipboard-user"></i>
                   <span className="menu-text">Attendance</span>
                 </div>
               </li>
@@ -150,7 +168,7 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
-                  <i className="fa-solid fa-tasks"></i>
+                 <i class="fa-solid fa-calendar-days"></i>
                   <span className="menu-text">Calander </span>
                 </div>
               </li>
@@ -192,7 +210,7 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Resource </span>
                 </div>
               </li> */}
-
+{/* 
               <li
                 className={`menu-item ${
                   isActive("/timetracker") ? "active" : ""
@@ -208,9 +226,9 @@ const Sidebar = ({ collapsed }) => {
                   <i className="fa-solid fa-clock"></i>
                   <span className="menu-text">Time Tracking</span>
                 </div>
-              </li>
+              </li> */}
 
-              <li
+              {/* <li
                 className={`menu-item ${
                   isActive("/filemanagementsystem") ? "active" : ""
                 }`}
@@ -225,9 +243,9 @@ const Sidebar = ({ collapsed }) => {
                   <i className="fa-solid fa-folder-open"></i>
                   <span className="menu-text">File Management</span>
                 </div>
-              </li>
+              </li> */}
 
-              <li
+              {/* <li
                 className={`menu-item ${
                   isActive("/qamanagement") ? "active" : ""
                 }`}
@@ -242,7 +260,7 @@ const Sidebar = ({ collapsed }) => {
                   <i className="fa-solid fa-check-to-slot"></i>
                   <span className="menu-text">QA Management</span>
                 </div>
-              </li>
+              </li> */}
 
              
              
