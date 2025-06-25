@@ -396,15 +396,16 @@ const App = () => {
       {/* Header */}
       <div className="bg-white shadow-sm bg-main">
         <div className="container-fluid py-2">
-          <div className="d-flex align-items-center justify-content-between">
-            <div className="d-flex align-items-center ">
-              <h2 className=" mb-0 gradient-heading">Projects</h2>
-              <div className="d-flex ms-3">
-                <button className="btn btn-success text-light  me-2">
+          <div className="row align-items-center justify-content-between g-2">
+            {/* Left: Title & Buttons */}
+            <div className="col-12 col-md-auto d-flex flex-column flex-md-row align-items-start align-items-md-center">
+              <h2 className="mb-2 mb-md-0 gradient-heading">Projects</h2>
+              <div className="d-flex flex-wrap ms-md-3 gap-2">
+                <button className="btn btn-success text-light">
                   <i className="fas fa-file-excel text-light me-2"></i>
                   Blank Excel
                 </button>
-                <button className="btn btn-primary  me-2">
+                <button className="btn btn-primary">
                   <i className="fas fa-file-import text-light me-2"></i>
                   Import Excel
                 </button>
@@ -414,8 +415,9 @@ const App = () => {
                 </button>
               </div>
             </div>
-            <div className="d-flex align-items-center ">
-              <div className="position-relative me-3">
+            {/* Right: Search & Create */}
+            <div className="col-12 col-md-auto d-flex flex-column flex-md-row align-items-stretch align-items-md-center mt-2 mt-md-0 gap-2">
+              <div className="position-relative flex-grow-1">
                 <div className="position-absolute top-50 start-0 translate-middle-y ps-3">
                   <i className="fas fa-search text-muted"></i>
                 </div>
@@ -432,20 +434,20 @@ const App = () => {
                 </div>
               </div>
               {isAdmin && (
-                <>
+                <div className="d-flex gap-2 mt-2 mt-md-0">
                   <button
                     onClick={() => setShowCreateModal(true)}
-                    className="gradient-button "
+                    className="gradient-button w-100"
                   >
                     <i className="fas fa-plus me-2"></i> Create New Project
                   </button>
                   <button
                     onClick={() => setShowSettings(true)}
-                    className="btn btn-light btn-sm ms-2"
+                    className="btn btn-light btn-sm"
                   >
                     <i className="fas fa-cog text-muted"></i>
                   </button>
-                </>
+                </div>
               )}
             </div>
           </div>
@@ -453,7 +455,7 @@ const App = () => {
         {/* Tabs */}
         <div className="border-bottom mt-2">
           <div className="container-fluid">
-            <ul className="nav nav-tabs border-bottom-0">
+            <ul className="nav nav-tabs border-bottom-0 flex-wrap">
               <li className="nav-item">
                 <button
                   className={`nav-link ${activeTab === 'created' ? 'active' : ''}`}
@@ -493,7 +495,7 @@ const App = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container pt-5 pb-4" >
+      <div className="container pt-5 pb-4">
         {/* Search Results Indicator */}
         {searchQuery && (
           <div className="alert alert-info mb-4">
@@ -538,8 +540,8 @@ const App = () => {
               </div>
             ) : (
               <div className="card">
-                <div className="table-responsive table-gradient-bg">
-                  <table className="table table-hover mb-0 ">
+                <div className="table-responsive" style={{ overflowX: 'auto' }}>
+                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
                     <thead className="bg-light table-gradient-bg">
                       <tr>
                         <th>Project Title</th>
@@ -645,8 +647,8 @@ const App = () => {
               </div>
             ) : (
               <div className="card">
-                <div className="table-responsive ">
-                  <table className="table table-hover mb-0 table-gradient-bg">
+                <div className="table-responsive" style={{ overflowX: 'auto' }}>
+                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
                     <thead className="bg-light table-gradient-bg">
                       <tr>
                         <th>Project Title</th>
@@ -740,9 +742,9 @@ const App = () => {
         {/* Completed Projects Tab */}
         {activeTab === 'completed' && (
           <div className="mb-4">
-            <div className="d-flex justify-content-between align-items-center mb-3">
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
               <h2 className="h5 mb-0 text-light">Completed Projects</h2>
-              <button className="btn btn-success btn-sm">
+              <button className="btn btn-success btn-sm w-100 w-md-auto">
                 <i className="fas fa-file-excel me-2"></i> Export to Excel
               </button>
             </div>
@@ -759,13 +761,13 @@ const App = () => {
                 {/* Performance Chart */}
                 <div className="card mb-4 bg-card text-light">
                   <div className="card-body">
-                    <div ref={chartRef} style={{ height: '400px' }}></div>
+                    <div ref={chartRef} style={{ height: '400px', minWidth: '300px' }}></div>
                   </div>
                 </div>
                 {/* Project Cards */}
                 <div className="card">
-                  <div className="table-responsive table-gradient-bg">
-                    <table className="table table-hover mb-0">
+                  <div className="table-responsive" style={{ overflowX: 'auto' }}>
+                    <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
                       <thead className="table-gradient-bg">
                         <tr>
                           <th>Project Title</th>

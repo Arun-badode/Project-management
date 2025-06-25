@@ -342,7 +342,7 @@ const Assigned = () => {
                       </div>
 
                       <div className="mb-3">
-                        <div className="d-flex justify-content-between small text-muted mb-1">
+                        <div className="d-flex justify-content-between small mb-1">
                           <span>Progress</span>
                           <span>{project.progress}%</span>
                         </div>
