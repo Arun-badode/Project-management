@@ -231,7 +231,7 @@ export const TaskDashboard = () => {
 
   return (
     <div className="min-vh-100 bg-light bg-main">
-      <div className="p-3" style={{ maxWidth: 1200 }}>
+      <div className="p-3" style={{ maxWidth: '100%' }}>
         <header className="mb-4">
           <h2 className="gradient-heading">My Task Dashboard</h2>
           <p className="text-white">
