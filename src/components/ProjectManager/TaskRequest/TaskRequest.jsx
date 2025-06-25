@@ -122,53 +122,57 @@ function TaskRequest() {
     <div className="min-vh-100 bg-main">
       <div className="container py-4">
         {/* Header */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2 className="h2 mb-0 gradient-heading">Task Reassignment Requests</h2 >
-          <div className="dropdown">
-            <button 
-              className="btn btn-outline-primary ms-2 dropdown-toggle"
-              type="button"
-              id="filterDropdown"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              <i className="fas fa-filter me-2"></i>
-              Filter: {filter === 'all' ? 'All Requests' : filter.charAt(0).toUpperCase() + filter.slice(1)}
-            </button>
-            <ul className="dropdown-menu" aria-labelledby="filterDropdown">
-              <li>
-                <button 
-                  className={`dropdown-item ${filter === 'all' ? 'active' : ''}`}
-                  onClick={() => setFilter('all')}
-                >
-                  All Requests
-                </button>
-              </li>
-              <li>
-                <button 
-                  className={`dropdown-item ${filter === 'pending' ? 'active' : ''}`}
-                  onClick={() => setFilter('pending')}
-                >
-                  Pending
-                </button>
-              </li>
-              <li>
-                <button 
-                  className={`dropdown-item ${filter === 'approved' ? 'active' : ''}`}
-                  onClick={() => setFilter('approved')}
-                >
-                  Approved
-                </button>
-              </li>
-              <li>
-                <button 
-                  className={`dropdown-item ${filter === 'rejected' ? 'active' : ''}`}
-                  onClick={() => setFilter('rejected')}
-                >
-                  Rejected
-                </button>
-              </li>
-            </ul>
+        <div className="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between mb-4 gap-2">
+          <h1 className="h2 mb-2 mb-md-0 gradient-heading text-center text-md-start">
+            Task Reassignment Requests
+          </h1>
+          <div className="d-flex justify-content-md-end">
+            <div className="dropdown w-100 w-md-auto">
+              <button 
+                className="btn btn-outline-primary dropdown-toggle w-100"
+                type="button"
+                id="filterDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i className="fas fa-filter me-2"></i>
+                Filter: {filter === 'all' ? 'All Requests' : filter.charAt(0).toUpperCase() + filter.slice(1)}
+              </button>
+              <ul className="dropdown-menu" aria-labelledby="filterDropdown">
+                <li>
+                  <button 
+                    className={`dropdown-item ${filter === 'all' ? 'active' : ''}`}
+                    onClick={() => setFilter('all')}
+                  >
+                    All Requests
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    className={`dropdown-item ${filter === 'pending' ? 'active' : ''}`}
+                    onClick={() => setFilter('pending')}
+                  >
+                    Pending
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    className={`dropdown-item ${filter === 'approved' ? 'active' : ''}`}
+                    onClick={() => setFilter('approved')}
+                  >
+                    Approved
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    className={`dropdown-item ${filter === 'rejected' ? 'active' : ''}`}
+                    onClick={() => setFilter('rejected')}
+                  >
+                    Rejected
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
