@@ -139,7 +139,7 @@ function ResourceWorkload() {
       <header className="bg-card shadow-sm mb-4">
         <div className="container bg-card">
           <div className="d-flex justify-content-between align-items-center py-3">
-            <h1 className="h3 mb-0 ">Resource Workload</h1>
+            <h1 className="gradient-heading mb-0 ">Resource Workload</h1>
             <div className="d-flex align-items-center">
               {/* <span className=" me-3">{currentDateTime}</span>
               <button 

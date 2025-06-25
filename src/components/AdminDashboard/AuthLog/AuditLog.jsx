@@ -349,7 +349,7 @@ const AuditLog = () => {
                 </h4>
                 <div className="d-flex gap-2">
                   <button
-                    className="btn btn-outline-primary btn-sm"
+                    className="btn btn-outline-primary "
                     onClick={exportCSV}
                   >
                     <Download size={16} className="me-1" />
@@ -415,7 +415,7 @@ const AuditLog = () => {
                     </span>
                     <input
                       type="text"
-                      className="form-control border-start-0"
+                      className="form-control border-start-0 p-2"
                       placeholder="Search logs..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -825,7 +825,7 @@ const AuditLog = () => {
 
       {/* Modal */}
       {showModal && modalData && (
-        <div className="modal fade show d-block ">
+        <div className="modal fade show d-block custom-modal-dark ">
           <div className="modal-dialog  modal-lg">
             <div className="modal-content bg-card">
               <div className="modal-header">
@@ -844,9 +844,10 @@ const AuditLog = () => {
                 {activeTab === "changes-history" && modalData.beforeAfter ? (
                   <div>
                     <div className="row">
-                      <div className="col-md-6">
-                        <h6 className="text-danger">Before:</h6>
-                        <div className="bg-light p-3 rounded">
+                       
+                      <div className="col-md-6 ">
+                       <h6 className="text-danger">Before:</h6>
+                        <div className=" p-3 rounded bg-card">
                           {modalData.beforeAfter.before ? (
                             <pre className="mb-0">
                               {JSON.stringify(
@@ -856,7 +857,7 @@ const AuditLog = () => {
                               )}
                             </pre>
                           ) : (
-                            <em className="text-muted">
+                            <em className="">
                               No previous state (new entity)
                             </em>
                           )}
@@ -864,7 +865,7 @@ const AuditLog = () => {
                       </div>
                       <div className="col-md-6">
                         <h6 className="text-success">After:</h6>
-                        <div className="bg-light p-3 rounded">
+                        <div className="bg-light p-3 rounded bg-card">
                           {modalData.beforeAfter.after ? (
                             <pre className="mb-0">
                               {JSON.stringify(
@@ -874,7 +875,7 @@ const AuditLog = () => {
                               )}
                             </pre>
                           ) : (
-                            <em className="text-muted">Entity deleted</em>
+                            <em className="">Entity deleted</em>
                           )}
                         </div>
                       </div>
@@ -908,7 +909,7 @@ const AuditLog = () => {
               <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="btn gradient-button"
                   onClick={() => setShowModal(false)}
                 >
                   Close

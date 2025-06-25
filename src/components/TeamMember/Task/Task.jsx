@@ -301,7 +301,7 @@ function Task() {
         {task.status !== "YTS" && (
           <button
             onClick={() => handleTaskAction(task.id, "switch")}
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary "
           >
             <i className="fas fa-exchange-alt me-2"></i>
             Switch Task
@@ -309,14 +309,14 @@ function Task() {
         )}
         <button
           onClick={() => handleTaskAction(task.id, "reassign")}
-          className="btn btn-warning btn-sm"
+          className="btn btn-warning "
         >
           <i className="fas fa-exchange-alt me-2"></i>
           Reassign
         </button>
         <button
           onClick={() => handleTaskAction(task.id, "details")}
-          className="btn btn-secondary btn-sm"
+          className="btn btn-secondary "
         >
           <i className="fas fa-expand-alt me-2"></i>
           Details
@@ -488,14 +488,14 @@ function Task() {
               <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="btn btn-secondary rounded-5"
                   onClick={() => setShowCompleteModal(false)}
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
-                  className="btn btn-primary"
+                  className="btn gradient-button"
                   onClick={handleCompleteTask}
                 >
                   Complete Task
@@ -543,7 +543,7 @@ function Task() {
               <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="btn btn-secondary rounded-5"
                   onClick={() => setShowReassignModal(false)}
                 >
                   Cancel
@@ -652,7 +652,7 @@ function Task() {
               <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="btn btn-secondary rounded-5"
                   onClick={() => setShowDetailsModal(false)}
                 >
                   Close
@@ -764,7 +764,7 @@ function Task() {
               <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="btn btn-secondary rounded-5"
                   onClick={() => setShowTimerModal(false)}
                 >
                   Close

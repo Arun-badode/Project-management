@@ -564,10 +564,10 @@ const handleEditChange = (e) => {
     )}
   </Modal.Body>
   <Modal.Footer>
-    <Button variant="secondary" onClick={handleCloseModal}>
+    <Button variant="secondary" onClick={handleCloseModal} className='rounded-5'>
       Close
     </Button>
-    <Button variant="primary" >
+    <Button variant="" className='gradient-button' >
       Save
     </Button>
     {/* Add Save button if you want to save changes */}

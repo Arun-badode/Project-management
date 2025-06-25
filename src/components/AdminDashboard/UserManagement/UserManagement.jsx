@@ -81,7 +81,8 @@ function UserManagement() {
   };
 
   const renderTable = () => (
-    <table className="table table-bordered align-middle table-gradient-bg">
+    <div className="table-responsive">
+    <table className="table  table-bordered align-middle table-gradient-bg">
       <thead>
         <tr>
           <th>Emp ID</th>
@@ -108,9 +109,9 @@ function UserManagement() {
               <td>{member.role}</td>
               <td>{member.appSkills.join(", ")}</td>
               <td>{member.username}</td>
-              <td>
+              <td className="">
                 <button
-                  className="btn btn-sm btn-primary"
+                  className="btn btn-sm btn-primary me-2"
                   onClick={() => {
                     setSelectedMember(member);
                     setModalType("view");
@@ -120,7 +121,7 @@ function UserManagement() {
                   View
                 </button>
                 <button
-                  className="btn btn-sm btn-info"
+                  className="btn btn-sm btn-info me-2"
                   onClick={() => {
                     setSelectedMember(member);
                     setModalType("edit");
@@ -135,6 +136,7 @@ function UserManagement() {
           ))}
       </tbody>
     </table>
+    </div>
   );
 
   const renderModalContent = () => {
@@ -278,12 +280,12 @@ function UserManagement() {
   <div className="modal-footer">
     <button
       type="button"
-      className="btn btn-secondary"
+      className="btn btn-secondary rounded-5"
       onClick={() => setShowModal(false)}
     >
       Cancel
     </button>
-    <button type="submit" className="btn btn-primary">
+    <button type="submit" className="btn gradient-button">
       {modalType === "edit" ? "Save Changes" : "Add Member"}
     </button>
   </div>
@@ -293,11 +295,12 @@ function UserManagement() {
   };
 
   return (
-    <div>
-      <h3 className="text-white mt-2">User Management</h3>
+    <div className="p-4">
+      <div className="d-flex justify-content-between">
+      <h3 className="gradient-heading mt-2 ">User Management</h3>
       <div className="text-end mb-3">
       <button
-        className="btn btn-primary"
+        className="btn gradient-button"
         onClick={() => {
           setModalType("add");
           setShowModal(true);
@@ -305,6 +308,7 @@ function UserManagement() {
       >
         + Add Member
       </button>
+      </div>
       </div>
       {renderTable()}
 
