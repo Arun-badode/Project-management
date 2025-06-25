@@ -47,7 +47,7 @@ const Navbar = ({ toggleSidebar }) => {
 
   return (
     <>
-      <nav className="navbar navbar-expand-lg navbar-light bg-card sticky-top py-2">
+      <nav className="navbar navbar-expand-lg navbar-light bg-card . py-2">
         <div className="container-fluid px-2 px-md-3">
           {/* Brand and Sidebar Toggle */}
           <div className="d-flex align-items-center gap-3 flex-shrink-0">

@@ -213,7 +213,11 @@ const ReportingAnalytics = () => {
 
       <div className="table-responsive" style={{ maxHeight: "400px", overflowY: "auto" }}>
         <table className="table text-white analytics-project-table table-gradient-bg table-hover table-bordered mb-0">
+<<<<<<< HEAD
           <thead className="table-light bg-dark ">
+=======
+          <thead className="table-light bg-dark .">
+>>>>>>> bf23a6f65c9a6e91cd07b50dfdf6a52be73ad990
             <tr>
               <th>ID</th>
               <th>Project Name</th>
@@ -394,7 +398,7 @@ const ReportingAnalytics = () => {
 
       <div className="table-responsive" style={{ maxHeight: "400px", overflowY: "auto" }}>
         <table className="table text-white analytics-feedback-table table-gradient-bg">
-          <thead className="text-white bg-dark sticky-top">
+          <thead className="text-white bg-dark .">
             <tr>
               <th>ID</th>
               <th>Project</th>
@@ -453,7 +457,7 @@ const ReportingAnalytics = () => {
         <div className="col-lg-12">
           <div className="table-responsive" style={{ maxHeight: "400px", overflowY: "auto" }}>
             <table className="table analytics-performance-table table-gradient-bg">
-              <thead className="text-white bg-dark sticky-top">
+              <thead className="text-white bg-dark .">
                 <tr>
                   <th>EMP ID</th>
                   <th>Team Member</th>

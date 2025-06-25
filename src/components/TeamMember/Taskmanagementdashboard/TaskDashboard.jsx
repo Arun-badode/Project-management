@@ -376,7 +376,11 @@ export const TaskDashboard = () => {
             <div className="table-responsive"
               style={{ maxHeight: "400px", overflowY: "auto" }}>
               <table className="table table-hover table-gradient-bg align-middle mb-0">
+<<<<<<< HEAD
                 <thead className="table-light bg-dark">
+=======
+                <thead className="table-light bg-dark .">
+>>>>>>> bf23a6f65c9a6e91cd07b50dfdf6a52be73ad990
                   <tr>
                     <th>S. No.</th> {/* Changed from ID to Serial Number */}
                     <th
@@ -491,13 +495,13 @@ export const TaskDashboard = () => {
                         <td>{task.timeSpent}</td>
                         <td>
                           <button
-                            className="btn btn-link text-primary p-0 me-2"
+                            className="btn btn-info text-light p-2 me-2"
                             onClick={() => handleEditClick(task)}
                           >
-                            <i className="bi bi-pencil-square"></i>
+                            <i className="fas fa-edit"></i>
                           </button>
-                          <button className="btn btn-link text-danger p-0">
-                            <i className="bi bi-trash"></i>
+                          <button className="btn btn-danger text-light p-2">
+                            <i className="fas fa-trash"></i>
                           </button>
                         </td>
                       </tr>

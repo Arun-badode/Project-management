@@ -339,7 +339,7 @@ const TimeTracker = () => {
   style={{ maxHeight: "400px", overflowY: "auto" }}
 >
   <table className="tt-data-table table table-gradient-bg table-hover mb-0">
-    <thead className="tt-table-header  bg-dark sticky-top">
+    <thead className="tt-table-header  bg-dark .">
       <tr>
         <th>ID</th>
         <th
