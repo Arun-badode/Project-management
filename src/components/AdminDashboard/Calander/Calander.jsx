@@ -64,7 +64,7 @@ const Calander = () => {
 
   return (
     <div className="container py-4">
-      <div className="bg-light p-3 rounded shadow">
+      <div className="bg-light p-3 rounded shadow ">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h3>Calendar</h3>
           <div>
