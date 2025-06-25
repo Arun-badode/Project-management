@@ -317,7 +317,7 @@ const ActiveProject= () => {
             ))}
           </select>
         </div>
-        <div className="col-md-4">
+        <div className="col-md-4 mt-2">
           <select
             className="form-select"
             value={taskFilter}
@@ -329,7 +329,7 @@ const ActiveProject= () => {
             ))}
           </select>
         </div>
-        <div className="col-md-4">
+        <div className="col-md-4 mt-2">
           <select
             className="form-select"
             value={languageFilter}
@@ -345,7 +345,7 @@ const ActiveProject= () => {
 
       {/* Tabs */}
       <ul className="nav nav-tabs mb-4">
-        <li className="nav-item">
+        <li className="nav-item ">
           <button
             className={`nav-link ${activeTab === 'all' ? 'active' : ''}`}
             onClick={() => setActiveTab('all')}
@@ -364,8 +364,8 @@ const ActiveProject= () => {
       </ul>
 
       {/* Projects Table */}
-      <div className="table-responsive">
-        <table className="table table-striped table-hover table-gradient-bg">
+      <div className="table-responsive" style={{ maxHeight: "500px", overflowY: "auto" }}>
+        <table className="table-gradient-bg align-middle mt-0 table table-bordered table-hover">
           <thead className="table-light">
             <tr>
               <th>S. No.</th>

@@ -213,7 +213,7 @@ const ReportingAnalytics = () => {
 
       <div className="table-responsive" style={{ maxHeight: "400px", overflowY: "auto" }}>
         <table className="table text-white analytics-project-table table-gradient-bg table-hover table-bordered mb-0">
-          <thead className="table-light bg-dark sticky-top">
+          <thead className="table-light bg-dark ">
             <tr>
               <th>ID</th>
               <th>Project Name</th>
