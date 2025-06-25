@@ -53,9 +53,9 @@ const Navbar = ({ toggleSidebar }) => {
           <div className="d-flex align-items-center gap-3 flex-shrink-0">
             <img
               src="https://ik.imagekit.io/wycpoxj6v/Eminoids%20-%20Logo_B.png?updatedAt=1750836038955"
-              height={50}
+              height={70}
               alt="Logo"
-              style={{ maxWidth: 120, height: "auto" }}
+              style={{ maxWidth: 250, height: "auto" }}
             />
             <button
               className="btn btn-link text-white p-0 d-lg-none"
