@@ -162,12 +162,7 @@ const ActiveProject= () => {
     return Array.from(new Set(projects.map(project => project[key])));
   };
 
-  // Save changes for inline editing
-  const saveInlineChanges = (projectId) => {
-    // Update the project in the main projects array
-    setProjects(projects.map(p => p.id === projectId));
-    setHasUnsavedChanges(false);
-  };
+  
 
   const handleEditProject = (project) => {
     setEditedProject({...project});
@@ -279,7 +274,6 @@ const ActiveProject= () => {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={handleSaveProjectEdit}
                 >
                   Save Changes
                 </button>
@@ -675,7 +669,6 @@ const ActiveProject= () => {
                             <button
                               type="button"
                               className="btn btn-primary"
-                              onClick={() => saveInlineChanges(project.id)}
                             >
                               Save Changes
                             </button>
@@ -919,12 +912,7 @@ const ActiveProject= () => {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => {
-                    // Update the project in the main projects array
-                    setProjects(projects.map(p => p.id === selectedProject.id ? selectedProject : p));
-                    setShowDetailModal(false);
-                    setHasUnsavedChanges(false);
-                  }}
+               
                 >
                   Save Changes
                 </button>
