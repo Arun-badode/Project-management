@@ -52,14 +52,13 @@ const Navbar = ({ toggleSidebar }) => {
           {/* Brand and Sidebar Toggle */}
           <div className="d-flex align-items-center gap-3 flex-shrink-0">
             <img
-  src="https://ik.imagekit.io/wycpoxj6v/Eminoids%20-%20Logo_B.png?updatedAt=1750836038955"
-  alt="Logo"
-  style={{
-    width: window.innerWidth >= 992 ? "250px" : "120px",
-    height: "auto",
-  }}
-/>
-
+              src="https://ik.imagekit.io/wycpoxj6v/Eminoids%20-%20Logo_B.png?updatedAt=1750836038955"
+              alt="Logo"
+              style={{
+                width: window.innerWidth >= 992 ? "250px" : "120px",
+                height: "auto",
+              }}
+            />
             <button
               className="btn btn-link text-white p-0 d-lg-none"
               onClick={toggleSidebar}
@@ -69,7 +68,7 @@ const Navbar = ({ toggleSidebar }) => {
               <i className="fa fa-bars"></i>
             </button>
           </div>
-          
+
 
           {/* Right Side Content */}
           <div className="d-flex align-items-center ms-auto gap-2 gap-md-3 flex-shrink-0">
@@ -183,7 +182,7 @@ const Navbar = ({ toggleSidebar }) => {
                 </div>
               </button>
               {showProfileDropdown && (
-                <ul 
+                <ul
                   className="dropdown-menu dropdown-menu-end shadow show"
                   style={{
                     position: 'absolute',
