@@ -492,7 +492,7 @@ const AuditLog = () => {
                 <div  className="table-responsive"
     style={{ maxHeight: "400px", overflowY: "auto" }}>
                   <table className="table table-hover mb-0 table-gradient-bg">
-                    <thead className="table-light bg-dark  sticky-top">
+                    <thead className="table-light bg-dark  .">
                       <tr>
                         {activeTab === "all-activities" && (
                           <>

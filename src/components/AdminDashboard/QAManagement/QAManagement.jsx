@@ -365,7 +365,7 @@ const QAManagement = () => {
                   style={{ maxHeight: "400px", overflowY: "auto" }}
                 >
                   <table className="table table-gradient-bg mb-0">
-                    <thead className="text-white bg-dark table-light sticky-top">
+                    <thead className="text-white bg-dark table-light .">
                       <tr>
                         <th>Task ID</th>
                         <th>Title</th>
@@ -626,7 +626,7 @@ const QAManagement = () => {
     style={{ maxHeight: "400px", overflowY: "auto" }}
 >
   <table className="table text-white table-gradient-bg table-hover table-bordered mb-0">
-    <thead className="table-light bg-dark sticky-top">
+    <thead className="table-light bg-dark .">
       <tr>
         <th>Task ID</th>
         <th>Title</th>
