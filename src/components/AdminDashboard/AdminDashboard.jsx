@@ -350,8 +350,8 @@ const AdminDashboard = () => {
           className="table-responsive"
           style={{ maxHeight: "500px", overflowY: "auto" }}
         >
-          <Table className="table-gradient-bg align-middle mt-0 table table-bordered table-hover">
-            <thead className="table-light bg-dark sticky-top">
+          <Table className="table-gradient-bg align-middle  table table-bordered table-hover">
+            <thead className="table bg-dark p-2  sticky-top">
               <tr>
                 <th>ID</th>
                 <th>Project Title</th>
