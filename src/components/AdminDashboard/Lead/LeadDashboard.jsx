@@ -180,7 +180,7 @@ const LeadDashboard = () => {
           }}
         >
           <Table className="table-gradient-bg align-middle mb-0 table table-bordered table-hover">
-            <thead className="table-light bg-dark sticky-top">
+            <thead className="table-light bg-dark ">
               <tr>
                 <th>S. No.</th>
                 <th>Project Title</th>
