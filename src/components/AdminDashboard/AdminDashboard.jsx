@@ -324,7 +324,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
     style={{ maxHeight: "500px", overflowY: "auto" }}
   >
     <Table className="table-gradient-bg align-middle mt-0 table table-bordered table-hover">
-      <thead className="table-light bg-dark sticky-top">
+      <thead className="table-light bg-dark ">
         <tr>
           <th>ID</th>
           <th>Project Title</th>

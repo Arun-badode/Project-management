@@ -464,9 +464,18 @@ const Project = () => {
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showFileEditModal, setShowFileEditModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [editProject, setEditProject] = useState(null);
+  const [editingFile, setEditingFile] = useState(null);
   const [expandedProjectId, setExpandedProjectId] = useState(null);
+  const [projects, setProjects] = useState([]);
+  const [editFileForm, setEditFileForm] = useState({
+    name: '',
+    status: '',
+    progress: 0,
+    assignedTo: ''
+  });
 
   const handleShow = () => setShowModal(true);
   const handleClose = () => setShowModal(false);
@@ -487,6 +496,76 @@ const Project = () => {
     } else {
       setExpandedProjectId(projectId);
     }
+  };
+
+  // File actions handlers
+  const handleFileEdit = (file, projectId) => {
+    setEditingFile({ ...file, projectId });
+    setEditFileForm({
+      name: file.name,
+      status: file.status,
+      progress: file.progress,
+      assignedTo: file.assignedTo
+    });
+    setShowFileEditModal(true);
+  };
+
+  const handleFileOk = (file, projectId) => {
+    console.log('File approved:', file.id, 'in project:', projectId);
+    alert(`File "${file.name}" has been approved and marked as OK!`);
+    
+    // Update file status to approved/completed
+    setProjects(prevProjects => 
+      prevProjects.map(project => 
+        project.id === projectId 
+          ? {
+              ...project,
+              files: project.files.map(f => 
+                f.id === file.id 
+                  ? { ...f, status: 'Completed', progress: 100 }
+                  : f
+              )
+            }
+          : project
+      )
+    );
+  };
+
+  const handleFileSave = () => {
+    if (!editingFile) return;
+
+    setProjects(prevProjects => 
+      prevProjects.map(project => 
+        project.id === editingFile.projectId 
+          ? {
+              ...project,
+              files: project.files.map(file => 
+                file.id === editingFile.id 
+                  ? {
+                      ...file,
+                      name: editFileForm.name,
+                      status: editFileForm.status,
+                      progress: parseInt(editFileForm.progress),
+                      assignedTo: editFileForm.assignedTo,
+                      lastUpdated: new Date().toLocaleDateString()
+                    }
+                  : file
+              )
+            }
+          : project
+      )
+    );
+
+    setShowFileEditModal(false);
+    setEditingFile(null);
+    alert('File details updated successfully!');
+  };
+
+  const handleFileInputChange = (field, value) => {
+    setEditFileForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   // Generate random files for each project
@@ -517,7 +596,7 @@ const Project = () => {
       "Oscorp",
     ];
 
-    const projects = [];
+    const projectList = [];
     const today = new Date();
 
     for (let i = 0; i < count; i++) {
@@ -534,7 +613,7 @@ const Project = () => {
       const fileCount = Math.floor(Math.random() * 5) + 3; // 3-7 files per project
       const files = generateRandomFiles(fileCount);
 
-      projects.push({
+      projectList.push({
         id: i + 1,
         title: `Project ${i + 1}`,
         client: clients[Math.floor(Math.random() * clients.length)],
@@ -556,10 +635,13 @@ const Project = () => {
       });
     }
 
-    return projects;
+    return projectList;
   };
 
-  const projects = generateRandomProjects(15);
+  // Initialize projects on component mount
+  React.useEffect(() => {
+    setProjects(generateRandomProjects(15));
+  }, []);
 
   // Close dropdown when clicking outside
   const handleClickOutside = (e) => {
@@ -610,133 +692,221 @@ const Project = () => {
       <Card className="text-white p-3 mb-5 table-gradient-bg">
         <h4 className="mb-3">Project List</h4>
 
-        <div
-          className="table-responsive table-gradient-bg"
-          style={{ maxHeight: '400px', overflowY: 'auto' }}
-        >
-          <Table className="table-gradient-bg align-middle mb-0 table table-bordered table-hover">
-            <thead className="table-light bg-dark sticky-top">
-              <tr>
-                <th>S. No.</th>
-                <th>Project Title</th>
-                <th>Client</th>
-                <th>Task</th>
-                <th>Language</th>
-                <th>Platform</th>
-                <th>Total Pages</th>
-                <th>Actual Due Date & Time</th>
-                <th>Progress</th>
-                <th>Action</th>
-              </tr>
-            </thead>
+       <div
+  className="table-responsive table-gradient-bg"
+  style={{ maxHeight: '400px', overflowY: 'auto', overflowX: 'auto' }}
+>
+  <Table className="table-gradient-bg align-middle mb-0 table table-bordered w-100">
+    <thead className="table-light bg-dark ">
+      <tr>
+        <th>S. No.</th>
+        <th>Project Title</th>
+        <th>Client</th>
+        <th>Task</th>
+        <th>Language</th>
+        <th>Platform</th>
+        <th>Total Pages</th>
+        <th>Actual Due Date & Time</th>
+        <th>Progress</th>
+        <th>Action</th>
+      </tr>
+    </thead>
 
-            <tbody>
-              {projects.map((project, index) => (
-                <React.Fragment key={project.id}>
-                  <tr>
-                    <td>{index + 1}</td>
-                    <td>{project.title}</td>
-                    <td>{project.client}</td>
-                    <td>{project.tasks}</td>
-                    <td>{project.languages}</td>
-                    <td>{project.platform}</td>
-                    <td>{project.pages}</td>
-                    <td>{project.dueDate}</td>
-                    <td>
-                      <div 
-                        className="progress-clickable" 
-                        onClick={() => toggleFileDetails(project.id)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <div className="d-flex justify-content-between mb-1">
-                          <small>{project.progress}%</small>
-                          {expandedProjectId === project.id ? <FaChevronUp /> : <FaChevronDown />}
-                        </div>
-                        <ProgressBar 
-                          now={project.progress} 
-                          variant={
-                            project.progress < 30 ? "danger" : 
-                            project.progress < 70 ? "warning" : "success"
-                          } 
-                        />
-                      </div>
-                    </td>
-                    <td>
-                      <Button
-                        variant="link"
-                        className="text-info p-0 me-2"
-                        title="View"
-                        onClick={() => handleView(project)}
-                      >
-                        <FaEye />
-                      </Button>
-                      <Button
-                        variant="link"
-                        className="text-warning p-0 me-2"
-                        title="Edit"
-                        onClick={() => handleEdit(project)}
-                      >
-                        <FaEdit />
-                      </Button>
-                      <Button
-                        variant="link"
-                        className="text-danger p-0"
-                        title="Delete"
-                      >
-                        <FaTrash />
-                      </Button>
-                    </td>
-                  </tr>
-                  {expandedProjectId === project.id && (
-                    <tr>
-                      <td colSpan="10" className="p-0">
-                        <div className="file-details-dropdown p-3 bg-dark">
-                          <h5>File Details for {project.title}</h5>
-                          <Table striped bordered hover variant="dark" className="mt-2">
-                            <thead>
-                              <tr>
-                                <th>File Name</th>
-                                <th>Status</th>
-                                <th>Progress</th>
-                                <th>Last Updated</th>
-                                <th>Assigned To</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {project.files.map(file => (
-                                <tr key={file.id}>
-                                  <td>{file.name}</td>
-                                  <td>
-                                    <Badge bg={getStatusColor(file.status)}>
-                                      {file.status}
-                                    </Badge>
-                                  </td>
-                                  <td>
-                                    <ProgressBar 
-                                      now={file.progress} 
-                                      variant={
-                                        file.progress < 30 ? "danger" : 
-                                        file.progress < 70 ? "warning" : "success"
-                                      } 
-                                      label={`${file.progress}%`}
-                                    />
-                                  </td>
-                                  <td>{file.lastUpdated}</td>
-                                  <td>{file.assignedTo}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </Table>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))}
-            </tbody>
-          </Table>
-        </div>
+    <tbody>
+      {projects.map((project, index) => (
+        <React.Fragment key={project.id}>
+          <tr>
+            <td>{index + 1}</td>
+            <td>{project.title}</td>
+            <td>{project.client}</td>
+            <td>{project.tasks}</td>
+            <td>{project.languages}</td>
+            <td>{project.platform}</td>
+            <td>{project.pages}</td>
+            <td>{project.dueDate}</td>
+            <td>
+              <div 
+                className="progress-clickable" 
+                onClick={() => toggleFileDetails(project.id)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className="d-flex justify-content-between mb-1">
+                  <small>{project.progress}%</small>
+                  {expandedProjectId === project.id ? <FaChevronUp /> : <FaChevronDown />}
+                </div>
+                <ProgressBar 
+                  now={project.progress} 
+                  variant={
+                    project.progress < 30 ? "danger" : 
+                    project.progress < 70 ? "warning" : "success"
+                  } 
+                />
+              </div>
+            </td>
+            <td>
+              <Button
+                variant="link"
+                className="text-info p-0 me-2"
+                title="View"
+                onClick={() => handleView(project)}
+              >
+                <FaEye />
+              </Button>
+              <Button
+                variant="link"
+                className="text-warning p-0 me-2"
+                title="Edit"
+                onClick={() => handleEdit(project)}
+              >
+                <FaEdit />
+              </Button>
+              <Button
+                variant="link"
+                className="text-danger p-0"
+                title="Delete"
+              >
+                <FaTrash />
+              </Button>
+            </td>
+          </tr>
+
+          {expandedProjectId === project.id && (
+            <tr>
+              <td colSpan="10" className="p-0">
+                <div className="file-details-dropdown p-3 bg-carrd">
+                  <h5 className="text-wrap">File Details for {project.title}</h5>
+                  <div className="table-responsive">
+                    <Table striped bordered hover variant="dark" className="mt-2 w-100">
+                      <thead>
+                        <tr>
+                          <th>File Name</th>
+                          <th>Status</th>
+                          <th>Progress</th>
+                          <th>Last Updated</th>
+                          <th>Assigned To</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {project.files.map(file => (
+                          <tr key={file.id}>
+                            <td>{file.name}</td>
+                            <td>
+                              <Badge bg={getStatusColor(file.status)}>
+                                {file.status}
+                              </Badge>
+                            </td>
+                            <td>
+                              <ProgressBar 
+                                now={file.progress} 
+                                variant={
+                                  file.progress < 30 ? "danger" : 
+                                  file.progress < 70 ? "warning" : "success"
+                                } 
+                                label={`${file.progress}%`}
+                              />
+                            </td>
+                            <td>{file.lastUpdated}</td>
+                            <td>{file.assignedTo}</td>
+                            <td>
+                              <div className="d-flex flex-wrap gap-2">
+                                <Button 
+                                  variant="success" 
+                                  size="sm"
+                                  onClick={() => handleFileOk(file, project.id)}
+                                  title="Mark as OK"
+                                >
+                                  OK
+                                </Button>
+                                <Button 
+                                  variant="primary" 
+                                  size="sm"
+                                  onClick={() => handleFileEdit(file, project.id)}
+                                  title="Edit File"
+                                >
+                                  Edit
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          )}
+        </React.Fragment>
+      ))}
+    </tbody>
+  </Table>
+</div>
+
       </Card>
+
+      {/* File Edit Modal */}
+      <Modal  show={showFileEditModal} onHide={() => setShowFileEditModal(false)} centered>
+        <Modal.Header closeButton className="bg-dark text-white">
+          <Modal.Title>Edit File Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="bg-dark   text-white">
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>File Name</Form.Label>
+              <Form.Control
+                type="text"
+                value={editFileForm.name}
+                onChange={(e) => handleFileInputChange('name', e.target.value)}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Status</Form.Label>
+              <Form.Select
+                value={editFileForm.status}
+                onChange={(e) => handleFileInputChange('status', e.target.value)}
+              >
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="QA Passed">QA Passed</option>
+                <option value="QA Failed">QA Failed</option>
+              </Form.Select>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Progress ({editFileForm.progress}%)</Form.Label>
+              <Form.Range
+                min="0"
+                max="100"
+                value={editFileForm.progress}
+                onChange={(e) => handleFileInputChange('progress', parseInt(e.target.value))}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Assigned To</Form.Label>
+              <Form.Select
+                value={editFileForm.assignedTo}
+                onChange={(e) => handleFileInputChange('assignedTo', e.target.value)}
+              >
+                {handlers.map(handler => (
+                  <option key={handler} value={handler}>{handler}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer className="bg-dark">
+          <Button variant="secondary" onClick={() => setShowFileEditModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleFileSave}>
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* Create Project Modal */}
       <Modal
