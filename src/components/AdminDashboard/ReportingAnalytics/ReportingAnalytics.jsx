@@ -28,9 +28,9 @@ const ReportingAnalytics = () => {
   ];
 
   // Filter projects for report based on status
-  const filteredProjectData = projectData.filter(project => 
-    project.status === 'Delayed in Process' || 
-    project.status === 'Delayed in QA' || 
+  const filteredProjectData = projectData.filter(project =>
+    project.status === 'Delayed in Process' ||
+    project.status === 'Delayed in QA' ||
     project.status === 'Failed in QA'
   );
 
@@ -42,8 +42,8 @@ const ReportingAnalytics = () => {
   ];
 
   // Filter feedback for current month by default
-  const currentMonthFeedback = feedbackData.filter(feedback => 
-    feedback.month === new Date().getMonth() + 1 && 
+  const currentMonthFeedback = feedbackData.filter(feedback =>
+    feedback.month === new Date().getMonth() + 1 &&
     feedback.year === new Date().getFullYear()
   );
 
@@ -174,7 +174,7 @@ const ReportingAnalytics = () => {
           </button>
         </div>
       </div>
-      
+
       <div className="row mb-3">
         <div className="col-md-3">
           <select className="form-select analytics-filter-select mb-1">
@@ -270,20 +270,20 @@ const ReportingAnalytics = () => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="analytics-report-title gradient-heading">Feedback Log</h4>
         <div>
-          <button 
+          <button
             className="btn btn-primary  me-2 analytics-add-btn"
             onClick={() => setShowFeedbackForm(true)}
           >
             <Plus size={16} className="me-1" /> Add Feedback
           </button>
-          <select className="form-select d-inline-block me-2 analytics-date-selector" style={{width: 'auto'}}>
+          <select className="form-select d-inline-block me-2 analytics-date-selector" style={{ width: 'auto' }}>
             <option>Current Month</option>
             <option>Last Month</option>
             <option>Last 3 Months</option>
             <option>All Time</option>
             <option>Custom Range</option>
           </select>
-          <select className="form-select d-inline-block analytics-team-selector" style={{width: 'auto'}}>
+          <select className="form-select d-inline-block analytics-team-selector" style={{ width: 'auto' }}>
             <option>All Team Members</option>
             <option>John Doe</option>
             <option>Jane Smith</option>
@@ -304,9 +304,9 @@ const ReportingAnalytics = () => {
                 <div className="row mb-3">
                   <div className="col-md-6">
                     <label className="form-label">Project</label>
-                    <input 
-                      type="text" 
-                      className="form-control" 
+                    <input
+                      type="text"
+                      className="form-control"
                       name="project"
                       value={feedbackFormData.project}
                       onChange={handleFeedbackInputChange}
@@ -315,26 +315,26 @@ const ReportingAnalytics = () => {
                   </div>
                   <div className="col-md-3">
                     <label className="form-label">Month</label>
-                    <select 
+                    <select
                       className="form-select"
                       name="month"
                       value={feedbackFormData.month}
                       onChange={handleFeedbackInputChange}
                     >
-                      {Array.from({length: 12}, (_, i) => (
-                        <option key={i+1} value={i+1}>{new Date(0, i).toLocaleString('default', { month: 'long' })}</option>
+                      {Array.from({ length: 12 }, (_, i) => (
+                        <option key={i + 1} value={i + 1}>{new Date(0, i).toLocaleString('default', { month: 'long' })}</option>
                       ))}
                     </select>
                   </div>
                   <div className="col-md-3">
                     <label className="form-label">Year</label>
-                    <select 
+                    <select
                       className="form-select"
                       name="year"
                       value={feedbackFormData.year}
                       onChange={handleFeedbackInputChange}
                     >
-                      {Array.from({length: 5}, (_, i) => (
+                      {Array.from({ length: 5 }, (_, i) => (
                         <option key={i} value={new Date().getFullYear() - 2 + i}>{new Date().getFullYear() - 2 + i}</option>
                       ))}
                     </select>
@@ -342,8 +342,8 @@ const ReportingAnalytics = () => {
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Feedback Details</label>
-                  <textarea 
-                    className="form-control" 
+                  <textarea
+                    className="form-control"
                     rows="3"
                     name="details"
                     value={feedbackFormData.details}
@@ -353,9 +353,9 @@ const ReportingAnalytics = () => {
                 <div className="row mb-3">
                   <div className="col-md-6">
                     <label className="form-label">Accountable Team Member</label>
-                    <input 
-                      type="text" 
-                      className="form-control" 
+                    <input
+                      type="text"
+                      className="form-control"
                       name="accountable"
                       value={feedbackFormData.accountable}
                       onChange={handleFeedbackInputChange}
@@ -363,9 +363,9 @@ const ReportingAnalytics = () => {
                   </div>
                   <div className="col-md-6">
                     <label className="form-label">Manager</label>
-                    <input 
-                      type="text" 
-                      className="form-control" 
+                    <input
+                      type="text"
+                      className="form-control"
                       name="manager"
                       value={feedbackFormData.manager}
                       onChange={handleFeedbackInputChange}
@@ -374,8 +374,8 @@ const ReportingAnalytics = () => {
                 </div>
                 <div className="mb-3">
                   <label className="form-label">Resolution/Action Taken</label>
-                  <textarea 
-                    className="form-control" 
+                  <textarea
+                    className="form-control"
                     rows="3"
                     name="resolution"
                     value={feedbackFormData.resolution}
@@ -428,18 +428,18 @@ const ReportingAnalytics = () => {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="analytics-report-title gradient-heading">Team Performance Report</h4>
         <div className="analytics-performance-filters">
-          <select className="form-select d-inline-block me-2 analytics-team-filter" style={{width: 'auto'}}>
+          <select className="form-select d-inline-block me-2 analytics-team-filter" style={{ width: 'auto' }}>
             <option>All Teams</option>
             <option>Adobe</option>
             <option>MS Office</option>
             <option>QA</option>
           </select>
-          <select className="form-select d-inline-block me-2 analytics-role-filter" style={{width: 'auto'}}>
+          <select className="form-select d-inline-block me-2 analytics-role-filter" style={{ width: 'auto' }}>
             <option>All Roles</option>
             <option>DTP Specialist</option>
             <option>Quality Analyst</option>
           </select>
-          <select className="form-select d-inline-block analytics-time-filter" style={{width: 'auto'}}>
+          <select className="form-select d-inline-block analytics-time-filter" style={{ width: 'auto' }}>
             <option>Current Month</option>
             <option>Last Month</option>
             <option>Last 3 Months</option>
@@ -549,7 +549,7 @@ const ReportingAnalytics = () => {
           <div className="card bg-card text-white mb-4">
             <div className="card-header d-flex justify-content-between align-items-center">
               <h5>Month-wise Revenue (₹ Lakhs)</h5>
-              <select className="form-select form-select-sm d-inline-block" style={{width: 'auto'}}>
+              <select className="form-select form-select-sm d-inline-block" style={{ width: 'auto' }}>
                 <option>2024-2025</option>
                 <option>2023-2024</option>
                 <option>2022-2023</option>
@@ -574,7 +574,7 @@ const ReportingAnalytics = () => {
           <div className="card bg-card text-white mb-4">
             <div className="card-header d-flex justify-content-between align-items-center">
               <h5>Client vs Year (₹ Lakhs)</h5>
-              <select className="form-select form-select-sm d-inline-block" style={{width: 'auto'}}>
+              <select className="form-select form-select-sm d-inline-block" style={{ width: 'auto' }}>
                 <option>2024-2025</option>
                 <option>2023-2024</option>
                 <option>2022-2023</option>
@@ -603,12 +603,12 @@ const ReportingAnalytics = () => {
             <div className="card-header d-flex justify-content-between align-items-center">
               <h5>Client vs Month (₹ Lakhs)</h5>
               <div>
-                <select className="form-select form-select-sm d-inline-block me-2" style={{width: 'auto'}}>
+                <select className="form-select form-select-sm d-inline-block me-2" style={{ width: 'auto' }}>
                   <option>June</option>
                   <option>May</option>
                   <option>April</option>
                 </select>
-                <select className="form-select form-select-sm d-inline-block" style={{width: 'auto'}}>
+                <select className="form-select form-select-sm d-inline-block" style={{ width: 'auto' }}>
                   <option>2025</option>
                   <option>2024</option>
                   <option>2023</option>
@@ -674,26 +674,29 @@ const ReportingAnalytics = () => {
 
       <div className="row">
         <div className="col-lg-2 col-md-3 mb-4">
-          <div className="analytics-sidebar bg-card">
+          <div className="bg-card shadow-sm p-2 h-100">
             <div className="list-group analytics-nav-tabs">
-              {reportTabs.map(tab => {
+              {reportTabs.map((tab) => {
                 const IconComponent = tab.icon;
+                const isActive = activeReportTab === tab.id;
+
                 return (
                   <button
                     key={tab.id}
-                    className={`list-group-item list-group-item-action bg-card analytics-nav-item ${
-                      activeReportTab === tab.id ? 'active analytics-nav-active' : ''
-                    }`}
+                    className={`list-group-item list-group-item-action d-flex align-items-center gap-2 px-3 py-2 rounded mb-2 fw-semibold border-0 transition-all ${isActive ? 'bg-primary text-white' : 'bg-dark text-white'
+                      }`}
                     onClick={() => setActiveReportTab(tab.id)}
+                    style={{ transition: 'background-color 0.3s, color 0.3s' }}
                   >
-                    <IconComponent size={16} className="me-2" />
-                    {tab.label}
+                    <IconComponent size={16} />
+                    <span className="flex-grow-1">{tab.label}</span>
                   </button>
                 );
               })}
             </div>
           </div>
         </div>
+
 
         <div className="col-lg-10 col-md-9">
           <div className="analytics-main-content bg-card">
