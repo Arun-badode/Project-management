@@ -362,8 +362,8 @@ function Task() {
   };
 
   return (
-    <div className="container-fluid py-4">
-      <h1 className="mb-4 gradient-heading">Task Management</h1>
+    <div className="p-3">
+      <h2 className="mb-4 gradient-heading">Task Management</h2>
 
       {/* Timer Card - Similar to the image */}
       <div className="card mb-4 bg-card   ">
