@@ -5,7 +5,7 @@ export const TaskDashboard = () => {
   const [selectedTab, setSelectedTab] = useState('all');
   const [sortColumn, setSortColumn] = useState('dueDate');
   const [sortDirection, setSortDirection] = useState('asc');
-   const [showEditModal, setShowEditModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [editTask, setEditTask] = useState(null);
 
   // Sample data for tasks
@@ -73,7 +73,7 @@ export const TaskDashboard = () => {
       priority: 'Medium',
       timeSpent: '4h 10m',
     },
-    
+
 
 
   ];
@@ -211,7 +211,7 @@ export const TaskDashboard = () => {
     );
   };
 
-   const handleEditClick = (task) => {
+  const handleEditClick = (task) => {
     setEditTask(task);
     setShowEditModal(true);
   };
@@ -221,92 +221,92 @@ export const TaskDashboard = () => {
     setShowEditModal(false);
     setEditTask(null);
   };
-const handleEditChange = (e) => {
-  const { name, value } = e.target;
-  setEditTask((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
-};
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditTask((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   return (
-    <div className="min-vh-100 bg-light bg-main py-4 px-2 px-md-4">
-      <div className="container-fluid" style={{ maxWidth: 1200 }}>
+    <div className="min-vh-100 bg-light bg-main">
+      <div className="p-3" style={{ maxWidth: 1200 }}>
         <header className="mb-4">
-          <h1 className="gradient-heading">My Task Dashboard</h1>
+          <h2 className="gradient-heading">My Task Dashboard</h2>
           <p className="text-white">
             Today is {today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         </header>
 
         {/* KPI Section */}
-       <div className="row g-4 mb-4">
-  {/* Tasks Due Today */}
-  <div className="col-12 col-md-4">
-    <div className="card bg-primary  text-white shadow-sm h-100 rounded-4">
-      <div className="card-body d-flex align-items-center">
-        <div className="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 50, height: 50 }}>
-          <i className="bi bi-clock fs-4 text-white"></i>
-        </div>
-        <div>
-          <div className="small">Tasks Due Today</div>
-          <h3 className="fw-bold mb-0">{tasksDueToday}</h3>
-        </div>
-      </div>
-      <div className="card-footer bg-white bg-opacity-10 border-0 rounded-bottom-4">
-        <a href="#"
-           className="text-white small fw-semibold text-decoration-none"
-           onClick={e => { e.preventDefault(); setSelectedTab('dueToday'); }}>
-          View all due tasks <i className="bi bi-arrow-right ms-1"></i>
-        </a>
-      </div>
-    </div>
-  </div>
+        <div className="row g-4 mb-4">
+          {/* Tasks Due Today */}
+          <div className="col-12 col-md-4">
+            <div className="card bg-primary  text-white shadow-sm h-100 rounded-4">
+              <div className="card-body d-flex align-items-center">
+                <div className="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 50, height: 50 }}>
+                  <i className="bi bi-clock fs-4 text-white"></i>
+                </div>
+                <div>
+                  <div className="small">Tasks Due Today</div>
+                  <h3 className="fw-bold mb-0">{tasksDueToday}</h3>
+                </div>
+              </div>
+              <div className="card-footer bg-white bg-opacity-10 border-0 rounded-bottom-4">
+                <a href="#"
+                  className="text-white small fw-semibold text-decoration-none"
+                  onClick={e => { e.preventDefault(); setSelectedTab('dueToday'); }}>
+                  View all due tasks <i className="bi bi-arrow-right ms-1"></i>
+                </a>
+              </div>
+            </div>
+          </div>
 
-  {/* Overdue Tasks */}
-  <div className="col-12 col-md-4">
-    <div className="card bg-danger  text-white shadow-sm h-100 rounded-4">
-      <div className="card-body d-flex align-items-center">
-        <div className="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 50, height: 50 }}>
-          <i className="bi bi-exclamation-triangle fs-4 text-white"></i>
-        </div>
-        <div>
-          <div className="small">Overdue Tasks</div>
-          <h3 className="fw-bold mb-0">{overdueTasks}</h3>
-        </div>
-      </div>
-      <div className="card-footer bg-white bg-opacity-10 border-0 rounded-bottom-4">
-        <a href="#"
-           className="text-white small fw-semibold text-decoration-none"
-           onClick={e => { e.preventDefault(); setSelectedTab('overdue'); }}>
-          View all overdue tasks <i className="bi bi-arrow-right ms-1"></i>
-        </a>
-      </div>
-    </div>
-  </div>
+          {/* Overdue Tasks */}
+          <div className="col-12 col-md-4">
+            <div className="card bg-danger  text-white shadow-sm h-100 rounded-4">
+              <div className="card-body d-flex align-items-center">
+                <div className="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 50, height: 50 }}>
+                  <i className="bi bi-exclamation-triangle fs-4 text-white"></i>
+                </div>
+                <div>
+                  <div className="small">Overdue Tasks</div>
+                  <h3 className="fw-bold mb-0">{overdueTasks}</h3>
+                </div>
+              </div>
+              <div className="card-footer bg-white bg-opacity-10 border-0 rounded-bottom-4">
+                <a href="#"
+                  className="text-white small fw-semibold text-decoration-none"
+                  onClick={e => { e.preventDefault(); setSelectedTab('overdue'); }}>
+                  View all overdue tasks <i className="bi bi-arrow-right ms-1"></i>
+                </a>
+              </div>
+            </div>
+          </div>
 
-  {/* Tasks In Progress */}
-  <div className="col-12 col-md-4">
-    <div className="card bg-info  text-white shadow-sm h-100 rounded-4">
-      <div className="card-body d-flex align-items-center">
-        <div className="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 50, height: 50 }}>
-          <i className="bi bi-arrow-repeat fs-4 text-white"></i>
+          {/* Tasks In Progress */}
+          <div className="col-12 col-md-4">
+            <div className="card bg-info  text-white shadow-sm h-100 rounded-4">
+              <div className="card-body d-flex align-items-center">
+                <div className="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 50, height: 50 }}>
+                  <i className="bi bi-arrow-repeat fs-4 text-white"></i>
+                </div>
+                <div>
+                  <div className="small">Tasks In Progress</div>
+                  <h3 className="fw-bold mb-0">{tasksInProgress}</h3>
+                </div>
+              </div>
+              <div className="card-footer bg-white bg-opacity-10 border-0 rounded-bottom-4">
+                <a href="#"
+                  className="text-white small fw-semibold text-decoration-none"
+                  onClick={e => { e.preventDefault(); setSelectedTab('inProgress'); }}>
+                  View all in-progress tasks <i className="bi bi-arrow-right ms-1"></i>
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
-        <div>
-          <div className="small">Tasks In Progress</div>
-          <h3 className="fw-bold mb-0">{tasksInProgress}</h3>
-        </div>
-      </div>
-      <div className="card-footer bg-white bg-opacity-10 border-0 rounded-bottom-4">
-        <a href="#"
-           className="text-white small fw-semibold text-decoration-none"
-           onClick={e => { e.preventDefault(); setSelectedTab('inProgress'); }}>
-          View all in-progress tasks <i className="bi bi-arrow-right ms-1"></i>
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
 
 
         {/* Task Table Section */}
@@ -373,206 +373,206 @@ const handleEditChange = (e) => {
             </ul>
           </div>
           <div className="card-body p-0">
-            <div  className="table-responsive"
-    style={{ maxHeight: "400px", overflowY: "auto" }}>
-       <table className="table table-hover table-gradient-bg align-middle mb-0">
-  <thead className="table-light bg-dark sticky-top">
-    <tr>
-      <th>S. No.</th> {/* Changed from ID to Serial Number */}
-      <th
-        className="cursor-pointer"
-        style={{ cursor: 'pointer' }}
-        onClick={() => handleSort('project')}
-      >
-        Project Title
-        {sortColumn === 'project' && (
-          <span className="ms-1">
-            {sortDirection === 'asc' ? (
-              <i className="bi bi-caret-up-fill"></i>
-            ) : (
-              <i className="bi bi-caret-down-fill"></i>
-            )}
-          </span>
-        )}
-      </th>
-      <th
-        className="cursor-pointer"
-        style={{ cursor: 'pointer' }}
-        onClick={() => handleSort('task')}
-      >
-        Task
-        {sortColumn === 'task' && (
-          <span className="ms-1">
-            {sortDirection === 'asc' ? (
-              <i className="bi bi-caret-up-fill"></i>
-            ) : (
-              <i className="bi bi-caret-down-fill"></i>
-            )}
-          </span>
-        )}
-      </th>
-      <th
-        className="cursor-pointer"
-        style={{ cursor: 'pointer' }}
-        onClick={() => handleSort('dueDate')}
-      >
-        Due Date &amp; Time
-        {sortColumn === 'dueDate' && (
-          <span className="ms-1">
-            {sortDirection === 'asc' ? (
-              <i className="bi bi-caret-up-fill"></i>
-            ) : (
-              <i className="bi bi-caret-down-fill"></i>
-            )}
-          </span>
-        )}
-      </th>
-      <th
-        className="cursor-pointer"
-        style={{ cursor: 'pointer' }}
-        onClick={() => handleSort('status')}
-      >
-        Status
-        {sortColumn === 'status' && (
-          <span className="ms-1">
-            {sortDirection === 'asc' ? (
-              <i className="bi bi-caret-up-fill"></i>
-            ) : (
-              <i className="bi bi-caret-down-fill"></i>
-            )}
-          </span>
-        )}
-      </th>
-      <th
-        className="cursor-pointer"
-        style={{ cursor: 'pointer' }}
-        onClick={() => handleSort('priority')}
-      >
-        Priority
-        {sortColumn === 'priority' && (
-          <span className="ms-1">
-            {sortDirection === 'asc' ? (
-              <i className="bi bi-caret-up-fill"></i>
-            ) : (
-              <i className="bi bi-caret-down-fill"></i>
-            )}
-          </span>
-        )}
-      </th>
-      <th
-        className="cursor-pointer"
-        style={{ cursor: 'pointer' }}
-        onClick={() => handleSort('timeSpent')}
-      >
-        Time Spent
-        {sortColumn === 'timeSpent' && (
-          <span className="ms-1">
-            {sortDirection === 'asc' ? (
-              <i className="bi bi-caret-up-fill"></i>
-            ) : (
-              <i className="bi bi-caret-down-fill"></i>
-            )}
-          </span>
-        )}
-      </th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {sortedTasks.length > 0 ? (
-      sortedTasks.map((task, index) => (
-        <tr key={task.id}>
-          <td>{index + 1}</td> {/* Serial Number */}
-          <td>{task.project}</td>
-          <td>{task.task}</td>
-          <td>{formatDateTime(task.dueDate)}</td>
-          <td>{renderStatusBadge(task.status)}</td>
-          <td>{renderPriorityBadge(task.priority)}</td>
-          <td>{task.timeSpent}</td>
-          <td>
-            <button
-              className="btn btn-link text-primary p-0 me-2"
-              onClick={() => handleEditClick(task)}
-            >
-              <i className="bi bi-pencil-square"></i>
-            </button>
-            <button className="btn btn-link text-danger p-0">
-              <i className="bi bi-trash"></i>
-            </button>
-          </td>
-        </tr>
-      ))
-    ) : (
-      <tr>
-        <td colSpan={8} className="text-center text-muted">
-          No tasks found matching your criteria
-        </td>
-      </tr>
-    )}
-  </tbody>
-</table>
+            <div className="table-responsive"
+              style={{ maxHeight: "400px", overflowY: "auto" }}>
+              <table className="table table-hover table-gradient-bg align-middle mb-0">
+                <thead className="table-light bg-dark sticky-top">
+                  <tr>
+                    <th>S. No.</th> {/* Changed from ID to Serial Number */}
+                    <th
+                      className="cursor-pointer"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleSort('project')}
+                    >
+                      Project Title
+                      {sortColumn === 'project' && (
+                        <span className="ms-1">
+                          {sortDirection === 'asc' ? (
+                            <i className="bi bi-caret-up-fill"></i>
+                          ) : (
+                            <i className="bi bi-caret-down-fill"></i>
+                          )}
+                        </span>
+                      )}
+                    </th>
+                    <th
+                      className="cursor-pointer"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleSort('task')}
+                    >
+                      Task
+                      {sortColumn === 'task' && (
+                        <span className="ms-1">
+                          {sortDirection === 'asc' ? (
+                            <i className="bi bi-caret-up-fill"></i>
+                          ) : (
+                            <i className="bi bi-caret-down-fill"></i>
+                          )}
+                        </span>
+                      )}
+                    </th>
+                    <th
+                      className="cursor-pointer"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleSort('dueDate')}
+                    >
+                      Due Date &amp; Time
+                      {sortColumn === 'dueDate' && (
+                        <span className="ms-1">
+                          {sortDirection === 'asc' ? (
+                            <i className="bi bi-caret-up-fill"></i>
+                          ) : (
+                            <i className="bi bi-caret-down-fill"></i>
+                          )}
+                        </span>
+                      )}
+                    </th>
+                    <th
+                      className="cursor-pointer"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleSort('status')}
+                    >
+                      Status
+                      {sortColumn === 'status' && (
+                        <span className="ms-1">
+                          {sortDirection === 'asc' ? (
+                            <i className="bi bi-caret-up-fill"></i>
+                          ) : (
+                            <i className="bi bi-caret-down-fill"></i>
+                          )}
+                        </span>
+                      )}
+                    </th>
+                    <th
+                      className="cursor-pointer"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleSort('priority')}
+                    >
+                      Priority
+                      {sortColumn === 'priority' && (
+                        <span className="ms-1">
+                          {sortDirection === 'asc' ? (
+                            <i className="bi bi-caret-up-fill"></i>
+                          ) : (
+                            <i className="bi bi-caret-down-fill"></i>
+                          )}
+                        </span>
+                      )}
+                    </th>
+                    <th
+                      className="cursor-pointer"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() => handleSort('timeSpent')}
+                    >
+                      Time Spent
+                      {sortColumn === 'timeSpent' && (
+                        <span className="ms-1">
+                          {sortDirection === 'asc' ? (
+                            <i className="bi bi-caret-up-fill"></i>
+                          ) : (
+                            <i className="bi bi-caret-down-fill"></i>
+                          )}
+                        </span>
+                      )}
+                    </th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedTasks.length > 0 ? (
+                    sortedTasks.map((task, index) => (
+                      <tr key={task.id}>
+                        <td>{index + 1}</td> {/* Serial Number */}
+                        <td>{task.project}</td>
+                        <td>{task.task}</td>
+                        <td>{formatDateTime(task.dueDate)}</td>
+                        <td>{renderStatusBadge(task.status)}</td>
+                        <td>{renderPriorityBadge(task.priority)}</td>
+                        <td>{task.timeSpent}</td>
+                        <td>
+                          <button
+                            className="btn btn-link text-primary p-0 me-2"
+                            onClick={() => handleEditClick(task)}
+                          >
+                            <i className="bi bi-pencil-square"></i>
+                          </button>
+                          <button className="btn btn-link text-danger p-0">
+                            <i className="bi bi-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={8} className="text-center text-muted">
+                        No tasks found matching your criteria
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
 
             </div>
-      <Modal show={showEditModal} onHide={handleCloseModal} centered className="custom-modal-dark">
-  <Modal.Header closeButton>
-    <Modal.Title>Edit Task</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    {editTask && (
-      <Form>
-        <Form.Group className="mb-3">
-          <Form.Label>Project</Form.Label>
-          <Form.Control type="text" value={editTask.project}  />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Task</Form.Label>
-          <Form.Control type="text" value={editTask.task}  />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Due Date</Form.Label>
-          <Form.Control type="date" value={formatDateTime(editTask.dueDate)}  />
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Status</Form.Label>
-          <Form.Select
-            name="status"
-            value={editTask.status}
-            onChange={handleEditChange}
-          >
-            <option value="YTS">Yet to Start</option>
-            <option value="WIP">In Progress</option>
-            <option value="QC">Quality Check</option>
-          </Form.Select>
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Priority</Form.Label>
-          <Form.Select
-            name="priority"
-            value={editTask.priority}
-            onChange={handleEditChange}
-          >
-            <option value="High">High</option>
-            <option value="Medium">Medium</option>
-            <option value="Low">Low</option>
-          </Form.Select>
-        </Form.Group>
-        <Form.Group className="mb-3">
-          <Form.Label>Time Spent</Form.Label>
-          <Form.Control type="text" value={editTask.timeSpent}  />
-        </Form.Group>
-      </Form>
-    )}
-  </Modal.Body>
-  <Modal.Footer>
-    <Button variant="secondary" onClick={handleCloseModal} className='rounded-5'>
-      Close
-    </Button>
-    <Button variant="" className='gradient-button' >
-      Save
-    </Button>
-    {/* Add Save button if you want to save changes */}
-  </Modal.Footer>
-</Modal>
+            <Modal show={showEditModal} onHide={handleCloseModal} centered className="custom-modal-dark">
+              <Modal.Header closeButton>
+                <Modal.Title>Edit Task</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                {editTask && (
+                  <Form>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Project</Form.Label>
+                      <Form.Control type="text" value={editTask.project} />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Task</Form.Label>
+                      <Form.Control type="text" value={editTask.task} />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Due Date</Form.Label>
+                      <Form.Control type="date" value={formatDateTime(editTask.dueDate)} />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Status</Form.Label>
+                      <Form.Select
+                        name="status"
+                        value={editTask.status}
+                        onChange={handleEditChange}
+                      >
+                        <option value="YTS">Yet to Start</option>
+                        <option value="WIP">In Progress</option>
+                        <option value="QC">Quality Check</option>
+                      </Form.Select>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Priority</Form.Label>
+                      <Form.Select
+                        name="priority"
+                        value={editTask.priority}
+                        onChange={handleEditChange}
+                      >
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                      </Form.Select>
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Time Spent</Form.Label>
+                      <Form.Control type="text" value={editTask.timeSpent} />
+                    </Form.Group>
+                  </Form>
+                )}
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="secondary" onClick={handleCloseModal} className='rounded-5'>
+                  Close
+                </Button>
+                <Button variant="" className='gradient-button' >
+                  Save
+                </Button>
+                {/* Add Save button if you want to save changes */}
+              </Modal.Footer>
+            </Modal>
           </div>
           {/* Pagination */}
           <div className="card-footer table-gradient-bg d-flex flex-column flex-sm-row align-items-center justify-content-between gap-2">
