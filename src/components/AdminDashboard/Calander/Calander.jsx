@@ -63,28 +63,28 @@ const Calander = () => {
   const calendarRows = generateCalendarGrid();
 
   return (
-    <div className="container py-4">
-      <div className="bg-light p-3 rounded shadow ">
+    <div className="container py-4 ">
+      <div className=" p-3 rounded shadow bg-card">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h3>Calendar</h3>
           <div>
-            <button className="btn btn-outline-primary btn-sm me-2" onClick={() => toggleFilter('dob')}>DOB</button>
-            <button className="btn btn-outline-primary btn-sm me-2" onClick={() => toggleFilter('doj')}>DOJ</button>
-            <button className="btn btn-outline-success btn-sm me-2" onClick={() => toggleFilter('companyHoliday')}>Holiday</button>
-            <button className="btn btn-outline-warning btn-sm" onClick={() => toggleFilter('approvedLeave')}>Leave</button>
+            <button className="btn btn-primary btn-sm me-2" onClick={() => toggleFilter('dob')}>Date of Birth</button>
+            <button className="btn btn-danger btn-sm me-2" onClick={() => toggleFilter('doj')}>Date of Joining</button>
+            <button className="btn btn-success btn-sm me-2" onClick={() => toggleFilter('companyHoliday')}>Company Holiday</button>
+            <button className="btn btn-warning btn-sm" onClick={() => toggleFilter('approvedLeave')}>Approved Leave</button>
           </div>
         </div>
 
-        <div className="d-flex justify-content-between align-items-center mb-3">
+        <div className="d-flex justify-content-between align-items-center mb-3 ">
           <button className="btn btn-sm btn-secondary" onClick={handleTodayClick}>Today</button>
           <h5>{currentMonth}</h5>
-          <div className="d-flex gap-2">
-            <select className="form-select form-select-sm" value={viewMode} onChange={e => setViewMode(e.target.value)}>
+          <div className="d-flex gap-3">
+            <select className="form-select form-select-sm " value={viewMode} onChange={e => setViewMode(e.target.value)}>
               <option value="month">Month</option>
               <option value="week">Week</option>
               <option value="day">Day</option>
             </select>
-            <select className="form-select form-select-sm" value={selectedDate.getMonth()} onChange={e => {
+            <select className="form-select form-select-sm " value={selectedDate.getMonth()} onChange={e => {
               const newDate = new Date(selectedDate);
               newDate.setMonth(parseInt(e.target.value));
               setSelectedDate(newDate);
@@ -94,7 +94,7 @@ const Calander = () => {
                 <option key={month} value={i}>{month}</option>
               ))}
             </select>
-            <select className="form-select form-select-sm" value={selectedDate.getFullYear()} onChange={e => {
+            <select className="form-select form-select-sm " value={selectedDate.getFullYear()} onChange={e => {
               const newDate = new Date(selectedDate);
               newDate.setFullYear(parseInt(e.target.value));
               setSelectedDate(newDate);
@@ -107,9 +107,9 @@ const Calander = () => {
           </div>
         </div>
 
-        <div className="table-responsive">
+        <div className="table-responsive  table-gradient-bg ">
           <table className="table table-bordered text-center">
-            <thead className="table-light">
+            <thead className="table">
               <tr>
                 {weekdays.map(day => <th key={day}>{day}</th>)}
               </tr>
