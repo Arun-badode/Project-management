@@ -282,7 +282,7 @@ const getStatusColor = (status) => {
               <div className="col-md-4 text-md-end">
                 <span className="text-light small me-3">Today: 2025-06-24, Tuesday</span>
           <button 
-  className="btn btn-primary"
+  className="btn gradient-button"
   onClick={() => setIsNewTaskModalOpen(true)}
 >
   <i className="fas fa-plus me-2"></i>New Task
@@ -622,14 +622,14 @@ const getStatusColor = (status) => {
         <div className="modal-footer">
           <button 
             type="button" 
-            className="btn btn-secondary" 
+            className="btn btn-secondary rounded-5" 
             onClick={() => setIsNewTaskModalOpen(false)}
           >
             Cancel
           </button>
           <button 
             type="button" 
-            className="btn btn-primary"
+            className="btn gradient-button"
           >
             Save Task
           </button>
