@@ -222,87 +222,49 @@ const AdminDashboard = () => {
       </div>
 
       {/* KPIs */}
-      <Row className="mb-3 g-2">
-        <Col xs={12} sm={6} md={2}>
-          <Card
-            className={`bg-card text-white p-2 h-75 ${activeFilter === 'active' ? 'border-primary border-2' : ''}`}
-            onClick={() => handleCardFilter('active')}
-            style={{ cursor: 'pointer' }}
-          >
-            <Card.Body>
-              <Card.Title>Active Projects</Card.Title>
-              <h4>{countFiltered('active')}</h4>
+<Row className="mb-4 g-3">
+  {[
+    { key: 'active', title: 'Active Projects', icon: 'bi-rocket-takeoff', color: 'primary' },
+    { key: 'nearDue', title: 'Near Due', icon: 'bi-hourglass-split', color: 'warning text-dark' },
+    { key: 'overdue', title: 'Overdue', icon: 'bi-exclamation-octagon', color: 'danger' },
+    { key: 'teamOnDuty', title: 'Team On-Duty', icon: 'bi-people-fill', color: 'info' },
+    { key: 'eventsToday', title: 'Events Today', icon: 'bi-calendar-event', color: 'success', link: '/Attendance' },
+    { key: 'pendingApproval', title: 'Pending Approval', icon: 'bi-clock-history', color: 'secondary' }
+  ].map(({ key, title, icon, color, link }) => (
+    <Col xs={12} sm={6} md={2} key={key}>
+      <Card
+        className={`bg-${color} bg-gradient text-white p-3 rounded-4 shadow-sm border-0 w-100 ${
+          activeFilter === key ? 'border border-3 border-light' : ''
+        }`}
+        onClick={() => !link && handleCardFilter(key)}
+        style={{ cursor: 'pointer', minHeight: '150px', height: '150px' }}
+      >
+        {link ? (
+          <Link to={link} className="text-white text-decoration-none d-flex flex-column h-100 justify-content-between">
+            <Card.Body className="d-flex flex-column justify-content-between h-100">
+              <div className="d-flex align-items-center gap-2">
+                <i className={`bi ${icon} fs-4`}></i>
+                <Card.Title className="fs-6 fw-semibold mb-0">{title}</Card.Title>
+              </div>
+              <h3 className="fw-bold text-end m-0">{countFiltered(key)}</h3>
             </Card.Body>
-          </Card>
-        </Col>
+          </Link>
+        ) : (
+          <Card.Body className="d-flex flex-column justify-content-between h-100">
+            <div className="d-flex align-items-center gap-2">
+              <i className={`bi ${icon} fs-4`}></i>
+              <Card.Title className="fs-6 fw-semibold mb-0">{title}</Card.Title>
+            </div>
+            <h3 className="fw-bold text-end m-0">{countFiltered(key)}</h3>
+          </Card.Body>
+        )}
+      </Card>
+    </Col>
+  ))}
+</Row>
 
-        <Col xs={12} sm={6} md={2}>
-          <Card
-            className={`bg-card text-white p-2 h-75 ${activeFilter === 'nearDue' ? 'border-primary border-2' : ''}`}
-            onClick={() => handleCardFilter('nearDue')}
-            style={{ cursor: 'pointer' }}
-          >
-            <Card.Body>
-              <Card.Title>Near Due</Card.Title>
-              <h4>{countFiltered('nearDue')}</h4>
-            </Card.Body>
-          </Card>
-        </Col>
 
-        <Col xs={12} sm={6} md={2}>
-          <Card
-            className={`bg-card text-white p-2 h-75 ${activeFilter === 'overdue' ? 'border-primary border-2' : ''}`}
-            onClick={() => handleCardFilter('overdue')}
-            style={{ cursor: 'pointer' }}
-          >
-            <Card.Body>
-              <Card.Title>Overdue</Card.Title>
-              <h4>{countFiltered('overdue')}</h4>
-            </Card.Body>
-          </Card>
-        </Col>
 
-        <Col xs={12} sm={6} md={2}>
-          <Card
-            className={`bg-card text-white p-2 h-75 ${activeFilter === 'teamOnDuty' ? 'border-primary border-2' : ''}`}
-            onClick={() => handleCardFilter('teamOnDuty')}
-            style={{ cursor: 'pointer' }}
-          >
-            <Card.Body>
-              <Card.Title>Team On-Duty</Card.Title>
-              <h4>{countFiltered('teamOnDuty')}</h4>
-            </Card.Body>
-          </Card>
-        </Col>
-
-        <Col xs={12} sm={6} md={2}>
-          <Card
-            className={`bg-card text-white p-2 h-75 ${activeFilter === 'eventsToday' ? 'border-primary border-2' : ''}`}
-            onClick={() => handleCardFilter('eventsToday')}
-            style={{ cursor: 'pointer' }}
-          >
-            <Link to="/Attendance" className="text-white text-decoration-none">
-              <Card.Body>
-                <Card.Title>Events Today</Card.Title>
-                <h4>{countFiltered('eventsToday')}</h4>
-              </Card.Body>
-            </Link>
-          </Card>
-        </Col>
-
-        <Col xs={12} sm={6} md={2}>
-          <Card
-            className={`bg-card text-white p-2 h-75 ${activeFilter === 'pendingApproval' ? 'border-primary border-2' : ''}`}
-            onClick={() => handleCardFilter('pendingApproval')}
-            style={{ cursor: 'pointer' }}
-          >
-            <Card.Body>
-              <Card.Title>Pending Approval</Card.Title>
-              <h4>{countFiltered('pendingApproval')}</h4>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
 
       {/* Show All button */}
       {activeFilter !== 'all' && (
