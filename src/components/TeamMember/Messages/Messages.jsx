@@ -110,30 +110,32 @@ function Messages() {
           {filteredMessages.map((message) => (
             <li
               key={message.id}
-              className="list-group-item bg-dark border-secondary text-white d-flex justify-content-between align-items-start flex-wrap"
+              className="list-group-item bg-dark border-secondary text-white px-2 py-3"
+              style={{ minHeight: 70 }}
             >
-              <div className="d-flex align-items-start gap-3 flex-grow-1">
+              <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 w-100">
+                {/* Avatar */}
                 <img
                   src={message.avatar}
                   alt={message.sender}
-                  className="rounded-circle"
-                  style={{ width: '50px', height: '50px' }}
+                  className="rounded-circle flex-shrink-0"
+                  style={{ width: '48px', height: '48px', objectFit: 'cover' }}
                 />
-                <div className="flex-grow-1">
-                  <div className="d-flex justify-content-between align-items-center flex-wrap">
+                {/* Message Content */}
+                <div className="flex-grow-1 w-100">
+                  <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100">
                     <strong className="text-white">{message.sender}</strong>
+                    <div className="d-flex align-items-center gap-2 mt-1 mt-md-0">
+                      <span className={`badge ${message.unread ? 'bg-primary' : 'bg-secondary'}`}>
+                        {message.unread ? 'Unread' : 'Read'}
+                      </span>
+                      <small className="text-white">{message.timestamp}</small>
+                    </div>
                   </div>
-                  <p className="mb-1 text-truncate text-white" style={{ maxWidth: '100%' }}>
+                  <p className="mb-0 mt-1 text-break text-white" style={{ wordBreak: 'break-word' }}>
                     {message.preview}
                   </p>
                 </div>
-              </div>
-              <div className="text-end mt-2 mt-sm-0 ms-sm-3">
-                <span className={`badge ${message.unread ? 'bg-primary' : 'bg-secondary'} mb-1`}>
-                  {message.unread ? 'Unread' : 'Read'}
-                </span>
-                <br />
-                <small className="text-white">{message.timestamp}</small>
               </div>
             </li>
           ))}
