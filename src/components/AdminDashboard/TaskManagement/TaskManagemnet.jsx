@@ -243,7 +243,7 @@ const getStatusColor = (status) => {
       {/* Main Content */}
       <div className="container py-4">
         <div className="mb-4">
-          <h1 className="gradient-heading">Task Management</h1>
+          <h2 className="gradient-heading">Task Management</h2>
           <p className="text-light">Active Projects Only</p>
         </div>
 
