@@ -186,7 +186,7 @@ const ActiveProject= () => {
     <div className="container-fluid py-4">
       {/* Edit Project Modal */}
       {showEditModal && editedProject && (
-        <div className="modal fade show" style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.5)'}}>
+        <div className="modal fade show custom-modal-dark" style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.5)'}}>
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
@@ -453,8 +453,8 @@ const ActiveProject= () => {
                 {/* Expanded row with project details */}
                 {expandedRow === project.id && (
                   <tr>
-                    <td colSpan={10} className="p-0 border-top-0">
-                      <div className="p-4 bg-light">
+                    <td colSpan={10} className="p-0 border-top-0 ">
+                      <div className="p-4">
                         <div className="mb-4">
                           <div className="d-flex justify-content-between align-items-center mb-3">
                             <h5 className="mb-0">Project Files</h5>
