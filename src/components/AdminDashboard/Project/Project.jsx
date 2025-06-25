@@ -392,13 +392,13 @@ const App = () => {
   };
 
   return (
-    <div className="min-vh-100 bg-main">
+    <div className="min-vh-100 bg-main mt-4">
       {/* Header */}
       <div className="bg-white shadow-sm bg-main">
         <div className="container-fluid py-2">
           <div className="d-flex align-items-center justify-content-between">
             <div className="d-flex align-items-center ">
-              <h1 className="h4 mb-0 gradient-heading">Projects</h1>
+              <h2 className=" mb-0 gradient-heading">Projects</h2>
               <div className="d-flex ms-3">
                 <button className="btn btn-success text-light  me-2">
                   <i className="fas fa-file-excel text-light me-2"></i>

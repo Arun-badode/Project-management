@@ -1,4 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import {
+  Search,
+  Download,
+  Eye,
+  Users,
+  Activity,
+  FileText,
+  Calendar,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 const Attendance = () => {
   // Mock data for attendance records
@@ -16,9 +28,9 @@ const Attendance = () => {
       earlyDepartures: 1,
       leaves: [
         { date: "2025-05-05", type: "Sick Leave", status: "Approved" },
-        { date: "2025-05-06", type: "Sick Leave", status: "Approved" }
+        { date: "2025-05-06", type: "Sick Leave", status: "Approved" },
       ],
-      dailyRecords: generateDailyRecords(1)
+      dailyRecords: generateDailyRecords(1),
     },
     {
       id: 2,
@@ -32,7 +44,7 @@ const Attendance = () => {
       lateArrivals: 1,
       earlyDepartures: 0,
       leaves: [],
-      dailyRecords: generateDailyRecords(2)
+      dailyRecords: generateDailyRecords(2),
     },
     {
       id: 3,
@@ -49,9 +61,9 @@ const Attendance = () => {
         { date: "2025-05-12", type: "Vacation", status: "Approved" },
         { date: "2025-05-13", type: "Vacation", status: "Approved" },
         { date: "2025-05-14", type: "Vacation", status: "Approved" },
-        { date: "2025-05-15", type: "Vacation", status: "Approved" }
+        { date: "2025-05-15", type: "Vacation", status: "Approved" },
       ],
-      dailyRecords: generateDailyRecords(3)
+      dailyRecords: generateDailyRecords(3),
     },
     {
       id: 4,
@@ -65,9 +77,9 @@ const Attendance = () => {
       lateArrivals: 0,
       earlyDepartures: 2,
       leaves: [
-        { date: "2025-05-20", type: "Personal Leave", status: "Approved" }
+        { date: "2025-05-20", type: "Personal Leave", status: "Approved" },
       ],
-      dailyRecords: generateDailyRecords(4)
+      dailyRecords: generateDailyRecords(4),
     },
     {
       id: 5,
@@ -83,10 +95,10 @@ const Attendance = () => {
       leaves: [
         { date: "2025-05-07", type: "Sick Leave", status: "Approved" },
         { date: "2025-05-26", type: "Personal Leave", status: "Approved" },
-        { date: "2025-05-27", type: "Personal Leave", status: "Approved" }
+        { date: "2025-05-27", type: "Personal Leave", status: "Approved" },
       ],
-      dailyRecords: generateDailyRecords(5)
-    }
+      dailyRecords: generateDailyRecords(5),
+    },
   ]);
 
   // Function to generate daily attendance records
@@ -94,18 +106,22 @@ const Attendance = () => {
     const records = [];
     // Generate records from 28th of previous month to 27th of current month
     const startDate = new Date(2025, 3, 28); // April 28, 2025
-    const endDate = new Date(2025, 4, 27);   // May 27, 2025
-    
-    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+    const endDate = new Date(2025, 4, 27); // May 27, 2025
+
+    for (
+      let d = new Date(startDate);
+      d <= endDate;
+      d.setDate(d.getDate() + 1)
+    ) {
       const isWeekend = d.getDay() === 0 || d.getDay() === 6;
       const date = new Date(d);
-      
+
       // Use seed to create some variation in the data
       const random = (seed * date.getDate()) % 10;
       let status = "Present";
       let checkIn = null;
       let checkOut = null;
-      
+
       if (isWeekend) {
         status = "Weekend";
       } else if (random === 1) {
@@ -116,36 +132,43 @@ const Attendance = () => {
         // Normal working day
         const baseCheckIn = 9 * 60; // 9:00 AM in minutes
         const baseCheckOut = 17 * 60; // 5:00 PM in minutes
-        
+
         // Add some variation
         const checkInVariation = (random - 5) * 10;
         const checkOutVariation = (random - 3) * 10;
-        
+
         const checkInMinutes = baseCheckIn + checkInVariation;
         const checkOutMinutes = baseCheckOut + checkOutVariation;
-        
+
         const checkInHour = Math.floor(checkInMinutes / 60);
         const checkInMin = checkInMinutes % 60;
         const checkOutHour = Math.floor(checkOutMinutes / 60);
         const checkOutMin = checkOutMinutes % 60;
-        
-        checkIn = `${checkInHour.toString().padStart(2, '0')}:${checkInMin.toString().padStart(2, '0')}`;
-        checkOut = `${checkOutHour.toString().padStart(2, '0')}:${checkOutMin.toString().padStart(2, '0')}`;
-        
-        if (checkInMinutes > 9 * 60 + 15) { // If check-in after 9:15
+
+        checkIn = `${checkInHour.toString().padStart(2, "0")}:${checkInMin
+          .toString()
+          .padStart(2, "0")}`;
+        checkOut = `${checkOutHour.toString().padStart(2, "0")}:${checkOutMin
+          .toString()
+          .padStart(2, "0")}`;
+
+        if (checkInMinutes > 9 * 60 + 15) {
+          // If check-in after 9:15
           status = "Late";
-        } else if (checkOutMinutes < 17 * 60 - 15) { // If check-out before 4:45
+        } else if (checkOutMinutes < 17 * 60 - 15) {
+          // If check-out before 4:45
           status = "Early Departure";
         }
       }
-      
+
       records.push({
-        date: date.toISOString().split('T')[0],
-        day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()],
+        date: date.toISOString().split("T")[0],
+        day: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()],
         status,
         checkIn,
         checkOut,
-        workHours: checkIn && checkOut ? calculateWorkHours(checkIn, checkOut) : 0
+        workHours:
+          checkIn && checkOut ? calculateWorkHours(checkIn, checkOut) : 0,
       });
     }
     return records;
@@ -153,11 +176,11 @@ const Attendance = () => {
 
   // Calculate work hours from check-in and check-out times
   function calculateWorkHours(checkIn, checkOut) {
-    const [inHour, inMin] = checkIn.split(':').map(Number);
-    const [outHour, outMin] = checkOut.split(':').map(Number);
+    const [inHour, inMin] = checkIn.split(":").map(Number);
+    const [outHour, outMin] = checkOut.split(":").map(Number);
     const inMinutes = inHour * 60 + inMin;
     const outMinutes = outHour * 60 + outMin;
-    
+
     // Calculate difference in hours, rounded to 1 decimal place
     return Math.round((outMinutes - inMinutes) / 6) / 10;
   }
@@ -165,25 +188,34 @@ const Attendance = () => {
   // State for filters and selected employee
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("All");
-  const [dateRange, setDateRange] = useState({ start: "2025-04-28", end: "2025-05-27" });
+  const [dateRange, setDateRange] = useState({
+    start: "2025-04-28",
+    end: "2025-05-27",
+  });
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [viewMode, setViewMode] = useState("summary");
 
   // Get unique departments for filter dropdown
-  const departments = ["All", ...new Set(attendanceData.map(emp => emp.department))];
+  const departments = [
+    "All",
+    ...new Set(attendanceData.map((emp) => emp.department)),
+  ];
 
   // Filter employees based on search and department
-  const filteredEmployees = attendanceData.filter(employee => {
-    const matchesSearch = employee.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment = departmentFilter === "All" || employee.department === departmentFilter;
+  const filteredEmployees = attendanceData.filter((employee) => {
+    const matchesSearch =
+      employee.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDepartment =
+      departmentFilter === "All" || employee.department === departmentFilter;
     return matchesSearch && matchesDepartment;
   });
 
   // Get selected employee data
-  const selectedEmployeeData = selectedEmployee !== null 
-    ? attendanceData.find(emp => emp.id === selectedEmployee)
-    : null;
+  const selectedEmployeeData =
+    selectedEmployee !== null
+      ? attendanceData.find((emp) => emp.id === selectedEmployee)
+      : null;
 
   // Function to handle employee selection
   const handleEmployeeSelect = (id) => {
@@ -200,13 +232,20 @@ const Attendance = () => {
   // Function to get status color
   const getStatusColor = (status) => {
     switch (status) {
-      case "Present": return "success";
-      case "Absent": return "danger";
-      case "Late": return "warning";
-      case "Early Departure": return "warning";
-      case "Leave": return "info";
-      case "Weekend": return "secondary";
-      default: return "secondary";
+      case "Present":
+        return "success";
+      case "Absent":
+        return "danger";
+      case "Late":
+        return "warning";
+      case "Early Departure":
+        return "warning";
+      case "Leave":
+        return "info";
+      case "Weekend":
+        return "secondary";
+      default:
+        return "secondary";
     }
   };
 
@@ -214,7 +253,7 @@ const Attendance = () => {
     <div className="container-fluid py-4">
       <div className="row mb-4">
         <div className="col-12">
-          <h1 className="h2  gradient-heading ">Attendance Management</h1>
+          <h2 className="h2  gradient-heading ">Attendance Management</h2>
           <p className="text-white">Cycle: April 28, 2025 - May 27, 2025</p>
         </div>
       </div>
@@ -246,7 +285,9 @@ const Attendance = () => {
                     onChange={(e) => setDepartmentFilter(e.target.value)}
                   >
                     {departments.map((dept, index) => (
-                      <option key={index} value={dept}>{dept}</option>
+                      <option key={index} value={dept}>
+                        {dept}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -258,7 +299,9 @@ const Attendance = () => {
                         type="date"
                         className="form-control"
                         value={dateRange.start}
-                        onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
+                        onChange={(e) =>
+                          setDateRange({ ...dateRange, start: e.target.value })
+                        }
                       />
                     </div>
                     <div className="col-6">
@@ -267,7 +310,9 @@ const Attendance = () => {
                         type="date"
                         className="form-control "
                         value={dateRange.end}
-                        onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
+                        onChange={(e) =>
+                          setDateRange({ ...dateRange, end: e.target.value })
+                        }
                       />
                     </div>
                   </div>
@@ -334,13 +379,20 @@ const Attendance = () => {
                         <div className="d-flex align-items-center">
                           <div className="avatar avatar-sm bg-light-primary rounded me-3">
                             <span className="avatar-text">
-                              {employee.employeeName.split(' ').map(n => n[0]).join('')}
+                              {employee.employeeName
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
                             </span>
                           </div>
                           <div>
-                            <div className="fw-semibold">{employee.employeeName}</div>
+                            <div className="fw-semibold">
+                              {employee.employeeName}
+                            </div>
                             <div className="small ">{employee.employeeId}</div>
-                            <div className="small text-white">{employee.employeeId}</div>
+                            <div className="small text-white">
+                              {employee.employeeId}
+                            </div>
                           </div>
                         </div>
                       </td>
@@ -373,12 +425,12 @@ const Attendance = () => {
                           {employee.leaves.length}
                         </span>
                       </td>
-                      <td className="text-end">
+                      <td className="text-center mt-2">
                         <button
                           onClick={() => handleEmployeeSelect(employee.id)}
-                          className="btn btn-sm btn-light"
+                          className="btn btn-sm btn-info "
                         >
-                          View Details
+                          <Eye size={14} className="me-1 " />
                         </button>
                       </td>
                     </tr>
@@ -398,8 +450,11 @@ const Attendance = () => {
               <i className="fas fa-user-clock fa-3x "></i>
             </div>
             <h3 className="h4 mb-3">Select an Employee</h3>
-            <p className="">Please select an employee to view their detailed attendance records.</p>
-            
+            <p className="">
+              Please select an employee to view their detailed attendance
+              records.
+            </p>
+
             <div className="row mt-4">
               {filteredEmployees.map((employee) => (
                 <div key={employee.id} className="col-md-4 mb-3">
@@ -409,11 +464,16 @@ const Attendance = () => {
                         <div className="d-flex align-items-center">
                           <div className="avatar avatar-sm bg-light-primary rounded me-3">
                             <span className="avatar-text">
-                              {employee.employeeName.split(' ').map(n => n[0]).join('')}
+                              {employee.employeeName
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
                             </span>
                           </div>
                           <div>
-                            <div className="fw-semibold">{employee.employeeName}</div>
+                            <div className="fw-semibold">
+                              {employee.employeeName}
+                            </div>
                             <div className="small ">{employee.employeeId}</div>
                           </div>
                         </div>
@@ -426,10 +486,12 @@ const Attendance = () => {
                       </div>
                       <div className="row mt-3 small">
                         <div className="col-6">
-                          <span className="">Department:</span> {employee.department}
+                          <span className="">Department:</span>{" "}
+                          {employee.department}
                         </div>
                         <div className="col-6">
-                          <span className="">Position:</span> {employee.position}
+                          <span className="">Position:</span>{" "}
+                          {employee.position}
                         </div>
                       </div>
                     </div>
@@ -449,13 +511,20 @@ const Attendance = () => {
               <div className="d-flex align-items-center">
                 <div className="avatar avatar-lg bg-light-primary rounded me-3">
                   <span className="avatar-text fs-4">
-                    {selectedEmployeeData.employeeName.split(' ').map(n => n[0]).join('')}
+                    {selectedEmployeeData.employeeName
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
                   </span>
                 </div>
                 <div>
-                  <h2 className="h4 mb-0">{selectedEmployeeData.employeeName}</h2>
+                  <h2 className="h4 mb-0">
+                    {selectedEmployeeData.employeeName}
+                  </h2>
                   <div className="text-white">
-                    {selectedEmployeeData.employeeId} • {selectedEmployeeData.department} • {selectedEmployeeData.position}
+                    {selectedEmployeeData.employeeId} •{" "}
+                    {selectedEmployeeData.department} •{" "}
+                    {selectedEmployeeData.position}
                   </div>
                 </div>
               </div>
@@ -473,7 +542,9 @@ const Attendance = () => {
                 <div className="card bg-card border-success-subtle mb-3 mb-md-0">
                   <div className="card-body">
                     <div className="small text-success">Present Days</div>
-                    <div className="h3 text-success">{selectedEmployeeData.daysPresent}</div>
+                    <div className="h3 text-success">
+                      {selectedEmployeeData.daysPresent}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -481,7 +552,9 @@ const Attendance = () => {
                 <div className="card bg-danger-subtle bg-card  border-danger-subtle mb-3 mb-md-0">
                   <div className="card-body">
                     <div className="small text-danger">Absent Days</div>
-                    <div className="h3 text-danger">{selectedEmployeeData.daysAbsent}</div>
+                    <div className="h3 text-danger">
+                      {selectedEmployeeData.daysAbsent}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -489,7 +562,9 @@ const Attendance = () => {
                 <div className="card bg-warning-subtle bg-card  border-warning-subtle mb-3 mb-md-0">
                   <div className="card-body">
                     <div className="small text-warning">Late Arrivals</div>
-                    <div className="h3 text-warning">{selectedEmployeeData.lateArrivals}</div>
+                    <div className="h3 text-warning">
+                      {selectedEmployeeData.lateArrivals}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -497,7 +572,9 @@ const Attendance = () => {
                 <div className="card bg-warning-subtle bg-card  border-warning-subtle mb-3 mb-md-0">
                   <div className="card-body">
                     <div className="small text-warning">Early Departures</div>
-                    <div className="h3 text-warning">{selectedEmployeeData.earlyDepartures}</div>
+                    <div className="h3 text-warning">
+                      {selectedEmployeeData.earlyDepartures}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -505,7 +582,9 @@ const Attendance = () => {
                 <div className="card bg-info-subtle  bg-card  border-info-subtle">
                   <div className="card-body">
                     <div className="small text-info">Leaves Taken</div>
-                    <div className="h3 text-info">{selectedEmployeeData.leaves.length}</div>
+                    <div className="h3 text-info">
+                      {selectedEmployeeData.leaves.length}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -532,7 +611,17 @@ const Attendance = () => {
                               <td>{leave.date}</td>
                               <td>{leave.type}</td>
                               <td>
-                                <span className={`badge bg-${leave.status === "Approved" ? "success" : "warning"}-subtle text-${leave.status === "Approved" ? "success" : "warning"}`}>
+                                <span
+                                  className={`badge bg-${
+                                    leave.status === "Approved"
+                                      ? "success"
+                                      : "warning"
+                                  }-subtle text-${
+                                    leave.status === "Approved"
+                                      ? "success"
+                                      : "warning"
+                                  }`}
+                                >
                                   {leave.status}
                                 </span>
                               </td>
@@ -564,20 +653,32 @@ const Attendance = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {selectedEmployeeData.dailyRecords.map((record, index) => (
-                          <tr key={index}>
-                            <td>{record.date}</td>
-                            <td>{record.day}</td>
-                            <td>
-                              <span className={`badge bg-${getStatusColor(record.status)}-subtle text-${getStatusColor(record.status)}`}>
-                                {record.status}
-                              </span>
-                            </td>
-                            <td>{record.checkIn || "-"}</td>
-                            <td>{record.checkOut || "-"}</td>
-                            <td>{record.workHours > 0 ? `${record.workHours} hrs` : "-"}</td>
-                          </tr>
-                        ))}
+                        {selectedEmployeeData.dailyRecords.map(
+                          (record, index) => (
+                            <tr key={index}>
+                              <td>{record.date}</td>
+                              <td>{record.day}</td>
+                              <td>
+                                <span
+                                  className={`badge bg-${getStatusColor(
+                                    record.status
+                                  )}-subtle text-${getStatusColor(
+                                    record.status
+                                  )}`}
+                                >
+                                  {record.status}
+                                </span>
+                              </td>
+                              <td>{record.checkIn || "-"}</td>
+                              <td>{record.checkOut || "-"}</td>
+                              <td>
+                                {record.workHours > 0
+                                  ? `${record.workHours} hrs`
+                                  : "-"}
+                              </td>
+                            </tr>
+                          )
+                        )}
                       </tbody>
                     </table>
                   </div>

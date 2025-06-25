@@ -118,7 +118,7 @@ function UserManagement() {
                     setShowModal(true);
                   }}
                 >
-                  View
+                    <i className="fas fa-chevron-up fa-eye"></i>
                 </button>
                 <button
                   className="btn btn-sm btn-info me-2"
@@ -128,9 +128,9 @@ function UserManagement() {
                     setShowModal(true);
                   }}
                 >
-                  Edit
+                  <i className="fas fa-edit"></i>
                 </button>
-                <button className="btn btn-sm btn-danger">Delete</button>
+                <button className="btn btn-sm btn-danger"> <i className="fas fa-trash"></i></button>
               </td>
             </tr>
           ))}
@@ -297,7 +297,7 @@ function UserManagement() {
   return (
     <div className="p-4">
       <div className="d-flex justify-content-between">
-      <h3 className="gradient-heading mt-2 ">User Management</h3>
+      <h2 className="gradient-heading mt-2 ">User Management</h2>
       <div className="text-end mb-3">
       <button
         className="btn gradient-button"

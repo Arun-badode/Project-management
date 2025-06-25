@@ -75,7 +75,7 @@ function ActivitySummary() {
       <div className="row p-3">
         {/* Header with notifications */}
         <div className="col-12 d-flex justify-content-between align-items-center mb-4">
-          <h1 className=" gradient-heading ">Activity Summary</h1>
+          <h2 className=" gradient-heading ">Activity Summary</h2>
           <div className="dropdown">
             
 

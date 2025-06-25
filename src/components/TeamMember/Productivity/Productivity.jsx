@@ -6,7 +6,7 @@ const Productivity = () => {
   const [currentTime, setCurrentTime] = useState('');
   const [timeFilter, setTimeFilter] = useState('Day');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
+
   const timeDistributionChartRef = useRef(null);
   const productivityTrendChartRef = useRef(null);
   const focusTimeChartRef = useRef(null);
@@ -21,12 +21,12 @@ const Productivity = () => {
     };
     updateDateTime();
     const interval = setInterval(updateDateTime, 60000);
-    
+
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
     window.addEventListener('resize', handleResize);
-    
+
     return () => {
       clearInterval(interval);
       window.removeEventListener('resize', handleResize);
@@ -62,16 +62,16 @@ const Productivity = () => {
             borderColor: '#fff',
             borderWidth: 2
           },
-          label: { 
-            show: false, 
+          label: {
+            show: false,
             position: 'center',
             fontSize: isMobile ? 12 : 14
           },
           emphasis: {
-            label: { 
-              show: true, 
-              fontSize: isMobile ? 14 : 18, 
-              fontWeight: 'bold' 
+            label: {
+              show: true,
+              fontSize: isMobile ? 14 : 18,
+              fontWeight: 'bold'
             }
           },
           labelLine: { show: false },
@@ -249,13 +249,13 @@ const Productivity = () => {
   ];
 
   return (
-    <div className="m">
+    <div className="p-3">
       {/* Header Section */}
-     
 
-      <div className="container-fluid"  >
-         <header className="mb-4">
-          <h1 className="gradient-heading">Productivity</h1>
+
+      <div className=""  >
+        <header className="mb-4">
+          <h2 className="gradient-heading">Productivity</h2>
           <p className="text-white">
 
           </p>
@@ -318,8 +318,8 @@ const Productivity = () => {
                   </div>
                 </div>
                 <div className="progress mt-3" style={{ height: 8 }}>
-                  <div 
-                    className={`progress-bar bg-${card.color}`} 
+                  <div
+                    className={`progress-bar bg-${card.color}`}
                     style={{ width: `${card.progress}%` }}
                     role="progressbar"
                     aria-valuenow={card.progress}
@@ -350,13 +350,13 @@ const Productivity = () => {
                   </ul>
                 </div>
               </div>
-              <div 
+              <div
                 ref={timeDistributionChartRef}
-                style={{ 
+                style={{
                   color: 'white',
-                  height: isMobile ? 300 : 400, 
+                  height: isMobile ? 300 : 400,
                   width: '100%',
-                  minWidth: 0 
+                  minWidth: 0
                 }}
               ></div>
             </div>
@@ -380,8 +380,8 @@ const Productivity = () => {
                       </div>
                       <div className="small text-secondary">{item.task}</div>
                       <div className="progress mt-1" style={{ height: 6 }}>
-                        <div 
-                          className={`progress-bar ${item.color}`} 
+                        <div
+                          className={`progress-bar ${item.color}`}
                           style={{ width: `${Math.random() * 40 + 60}%` }}
                           role="progressbar"
                         ></div>
@@ -399,12 +399,12 @@ const Productivity = () => {
           <div className="col-12 col-md-6 mb-2">
             <div className="bg-card rounded shadow-sm p-3 h-100">
               <h5 className="mb-3">Weekly Productivity Trend</h5>
-              <div 
+              <div
                 ref={productivityTrendChartRef}
-                style={{ 
-                  height: 300, 
+                style={{
+                  height: 300,
                   width: '100%',
-                  minWidth: 0 
+                  minWidth: 0
                 }}
               ></div>
             </div>
@@ -412,12 +412,12 @@ const Productivity = () => {
           <div className="col-12 col-md-6 mb-2">
             <div className="bg-card rounded shadow-sm p-3 h-100">
               <h5 className="">Focus Time by Hour</h5>
-              <div 
+              <div
                 ref={focusTimeChartRef}
-                style={{ 
-                  height: 300, 
+                style={{
+                  height: 300,
                   width: '100%',
-                  minWidth: 0 
+                  minWidth: 0
                 }}
               ></div>
             </div>

@@ -153,7 +153,7 @@ const App = () => {
             <header className="bg-white shadow-sm bg-card">
                 <div className="container">
                     <div className="d-flex justify-content-between align-items-center py-3">
-                        <h1 className="h2 fw-bold  mb-0 gradient-heading">Action Center</h1>
+                        <h2 className="h2 fw-bold  mb-0 gradient-heading">Action Center</h2>
                         <div className="d-flex gap-2">
                             <button
                                 onClick={() => handleExport('csv')}

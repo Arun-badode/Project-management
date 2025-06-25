@@ -343,10 +343,10 @@ const AuditLog = () => {
           <div className="card bg-main shadow-sm border-0">
             <div className="card-header  border-bottom">
               <div className="d-flex justify-content-between  align-items-center">
-                <h4 className=" gradient-heading">
+                <h2 className=" gradient-heading">
                   <Activity className="me-2 text-primary" size={24} />
                   Audit Logs Dashboard
-                </h4>
+                </h2>
                 <div className="d-flex gap-2">
                   <button
                     className="btn btn-outline-primary "
@@ -560,11 +560,11 @@ const AuditLog = () => {
                               </td>
                               <td>
                                 <button
-                                  className="btn btn-outline-primary btn-sm"
+                                  className="btn btn-info btn-sm ms-3"
                                   onClick={() => handleViewDetails(item)}
                                 >
-                                  <Eye size={14} className="me-1" />
-                                  Details
+                                  <Eye size={14} className="me-1 " />
+                                
                                 </button>
                               </td>
                             </>
