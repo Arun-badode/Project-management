@@ -65,13 +65,13 @@ const Calander = () => {
   return (
     <div className="container py-4 ">
       <div className=" p-3 rounded shadow bg-card">
-        <div className="d-flex justify-content-between align-items-center mb-3">
+        <div className="d-flex justify-content-between align-items-center mb-3 gap-2">
           <h2 className='gradient-heading'>Calendar</h2>
-          <div>
-            <button className="btn btn-primary btn-sm me-2" onClick={() => toggleFilter('dob')}>Date of Birth</button>
-            <button className="btn btn-danger btn-sm me-2" onClick={() => toggleFilter('doj')}>Date of Joining</button>
-            <button className="btn btn-success btn-sm me-2" onClick={() => toggleFilter('companyHoliday')}>Company Holiday</button>
-            <button className="btn btn-warning btn-sm" onClick={() => toggleFilter('approvedLeave')}>Approved Leave</button>
+          <div className='gap-2 '>
+            <button className="btn btn-primary btn-sm me-2 mb-2" onClick={() => toggleFilter('dob')}>Date of Birth</button>
+            <button className="btn btn-danger btn-sm me-2 mb-2" onClick={() => toggleFilter('doj')}>Date of Joining</button>
+            <button className="btn btn-success btn-sm me-2 mb-2" onClick={() => toggleFilter('companyHoliday')}>Company Holiday</button>
+            <button className="btn btn-warning btn-sm mb-2" onClick={() => toggleFilter('approvedLeave')}>Approved Leave</button>
           </div>
         </div>
 

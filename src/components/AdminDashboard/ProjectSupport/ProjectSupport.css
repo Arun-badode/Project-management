@@ -2,12 +2,12 @@
           scroll-margin-top: 100px;
         }
         
-        .sticky-top {
+        .. {
           position: sticky;
         }
         
         @media (max-width: 768px) {
-          .sticky-top {
+          .. {
             position: relative;
           }
         }

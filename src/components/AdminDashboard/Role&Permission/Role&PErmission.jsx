@@ -193,7 +193,7 @@ const RoleManagementSystem = () => {
         <div className="table-responsive"
     style={{ maxHeight: "400px", overflowY: "auto" }}>
           <table className="table align-middle table-hover table-borderless mb-0 text-center table-gradient-bg">
-            <thead className="table-light bg-dark  sticky-top">
+            <thead className="table-light bg-dark  ">
               <tr>
                 <th>Role</th>
                 <th>Type</th>
