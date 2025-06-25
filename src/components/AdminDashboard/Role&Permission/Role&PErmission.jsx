@@ -179,7 +179,7 @@ const RoleManagementSystem = () => {
       <div className="card-header bg-white border-bottom pb-0 bg-card">
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2 ">
           <h2 className="card-title h4 m-0">Permissions</h2>
-          <button className="btn btn-primary btn-sm d-flex align-items-center gap-1" onClick={handleOpenAddRoleModal}>
+          <button className="btn gradient-button btn-sm d-flex align-items-center gap-1" onClick={handleOpenAddRoleModal}>
             <Plus size={16} /> Add Role
           </button>
 
@@ -284,10 +284,10 @@ const RoleManagementSystem = () => {
         </div>
       ))}
       <div className="border-top pt-4 mt-4 d-flex justify-content-end gap-3">
-        <button className="btn btn-outline-secondary" onClick={handleClosePermissionsModal}>
+        <button className="btn btn-outline-secondary rounded-5" onClick={handleClosePermissionsModal}>
           Cancel
         </button>
-        <button className="btn btn-primary" onClick={() => alert('Permissions saved')}>
+        <button className="btn gradient-button" onClick={() => alert('Permissions saved')}>
           Save Permissions
         </button>
       </div>
@@ -304,7 +304,7 @@ const RoleManagementSystem = () => {
         className="mb-4 border-0 mybg text-white bg-card"
         style={{ borderRadius: '12px', padding: '1.2rem', height: '80px',  }}
       >
-        <h2 className="mb-0">Permission Management</h2>
+        <h2 className="mb-0 gradient-heading">Permission Management</h2>
       </div>
 
       <div className="row justify-content-center">
@@ -362,10 +362,10 @@ const RoleManagementSystem = () => {
 
         
         <Modal.Footer>
-          <button className="btn btn-secondary" onClick={handleCloseAddRoleModal}>
+          <button className="btn btn-secondary rounded-5" onClick={handleCloseAddRoleModal}>
             Cancel
           </button>
-          <button className="btn btn-primary" onClick={handleAddRole}>
+          <button className="btn gradient-button" onClick={handleAddRole}>
             Add Role
           </button>
         </Modal.Footer>

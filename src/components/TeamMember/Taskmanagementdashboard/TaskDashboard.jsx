@@ -240,68 +240,74 @@ const handleEditChange = (e) => {
         </header>
 
         {/* KPI Section */}
-        <div className="row g-3 mb-4">
-          <div className="col-12 col-md-4">
-            <div className="card bg-card shadow-sm h-100">
-              <div className="card-body d-flex align-items-center">
-                <div className="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 48, height: 48 }}>
-                  <i className="bi bi-clock text-primary fs-4"></i>
-                </div>
-                <div>
-                  <div className="text-white small">Tasks Due Today</div>
-                  <div className="h3 mb-0">{tasksDueToday}</div>
-                </div>
-              </div>
-              <div className="card-footer bg-primary bg-opacity-10">
-                <a href="#"
-                  className="text-white small fw-semibold text-decoration-none"
-                  onClick={e => { e.preventDefault(); setSelectedTab('dueToday'); }}>
-                  View all due tasks <i className="bi bi-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="col-12 col-md-4">
-            <div className="card bg-card shadow-sm h-100">
-              <div className="card-body d-flex align-items-center">
-                <div className="bg-danger bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 48, height: 48 }}>
-                  <i className="bi bi-exclamation-triangle text-danger fs-4"></i>
-                </div>
-                <div>
-                  <div className="text-white small">Overdue Tasks</div>
-                  <div className="h3 mb-0">{overdueTasks}</div>
-                </div>
-              </div>
-              <div className="card-footer bg-danger bg-opacity-10">
-                <a href="#"
-                  className="text-danger small fw-semibold text-decoration-none"
-                  onClick={e => { e.preventDefault(); setSelectedTab('overdue'); }}>
-                  View all overdue tasks <i className="bi bi-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="col-12 col-md-4">
-            <div className="card bg-card shadow-sm h-100">
-              <div className="card-body d-flex align-items-center">
-                <div className="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 48, height: 48 }}>
-                  <i className="bi bi-arrow-repeat text-info fs-4"></i>
-                </div>
-                <div>
-                  <div className="text-white small">Tasks In Progress</div>
-                  <div className="h3 mb-0">{tasksInProgress}</div>
-                </div>
-              </div>
-              <div className="card-footer bg-info bg-opacity-10">
-                <a href="#"
-                  className="text-info small fw-semibold text-decoration-none"
-                  onClick={e => { e.preventDefault(); setSelectedTab('inProgress'); }}>
-                  View all in-progress tasks <i className="bi bi-arrow-right"></i>
-                </a>
-              </div>
-            </div>
-          </div>
+       <div className="row g-4 mb-4">
+  {/* Tasks Due Today */}
+  <div className="col-12 col-md-4">
+    <div className="card bg-primary  text-white shadow-sm h-100 rounded-4">
+      <div className="card-body d-flex align-items-center">
+        <div className="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 50, height: 50 }}>
+          <i className="bi bi-clock fs-4 text-white"></i>
         </div>
+        <div>
+          <div className="small">Tasks Due Today</div>
+          <h3 className="fw-bold mb-0">{tasksDueToday}</h3>
+        </div>
+      </div>
+      <div className="card-footer bg-white bg-opacity-10 border-0 rounded-bottom-4">
+        <a href="#"
+           className="text-white small fw-semibold text-decoration-none"
+           onClick={e => { e.preventDefault(); setSelectedTab('dueToday'); }}>
+          View all due tasks <i className="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {/* Overdue Tasks */}
+  <div className="col-12 col-md-4">
+    <div className="card bg-danger  text-white shadow-sm h-100 rounded-4">
+      <div className="card-body d-flex align-items-center">
+        <div className="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 50, height: 50 }}>
+          <i className="bi bi-exclamation-triangle fs-4 text-white"></i>
+        </div>
+        <div>
+          <div className="small">Overdue Tasks</div>
+          <h3 className="fw-bold mb-0">{overdueTasks}</h3>
+        </div>
+      </div>
+      <div className="card-footer bg-white bg-opacity-10 border-0 rounded-bottom-4">
+        <a href="#"
+           className="text-white small fw-semibold text-decoration-none"
+           onClick={e => { e.preventDefault(); setSelectedTab('overdue'); }}>
+          View all overdue tasks <i className="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {/* Tasks In Progress */}
+  <div className="col-12 col-md-4">
+    <div className="card bg-info  text-white shadow-sm h-100 rounded-4">
+      <div className="card-body d-flex align-items-center">
+        <div className="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: 50, height: 50 }}>
+          <i className="bi bi-arrow-repeat fs-4 text-white"></i>
+        </div>
+        <div>
+          <div className="small">Tasks In Progress</div>
+          <h3 className="fw-bold mb-0">{tasksInProgress}</h3>
+        </div>
+      </div>
+      <div className="card-footer bg-white bg-opacity-10 border-0 rounded-bottom-4">
+        <a href="#"
+           className="text-white small fw-semibold text-decoration-none"
+           onClick={e => { e.preventDefault(); setSelectedTab('inProgress'); }}>
+          View all in-progress tasks <i className="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 
         {/* Task Table Section */}
         <div className="card shadow-sm">
@@ -558,10 +564,10 @@ const handleEditChange = (e) => {
     )}
   </Modal.Body>
   <Modal.Footer>
-    <Button variant="secondary" onClick={handleCloseModal}>
+    <Button variant="secondary" onClick={handleCloseModal} className='rounded-5'>
       Close
     </Button>
-    <Button variant="primary" >
+    <Button variant="" className='gradient-button' >
       Save
     </Button>
     {/* Add Save button if you want to save changes */}

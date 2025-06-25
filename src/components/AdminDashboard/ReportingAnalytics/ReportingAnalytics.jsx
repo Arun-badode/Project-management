@@ -166,10 +166,10 @@ const ReportingAnalytics = () => {
       <div className="d-flex justify-content-between align-items-center mb-4 bg-card">
         <h4 className="analytics-report-title gradient-heading">Project Status Report</h4>
         <div className="analytics-export-buttons">
-          <button className="btn btn-outline-primary btn-sm me-2 analytics-export-btn" onClick={exportToPDF}>
+          <button className="btn btn-outline-primary  me-2 analytics-export-btn" onClick={exportToPDF}>
             <Download size={16} className="me-1" /> PDF
           </button>
-          <button className="btn btn-outline-success btn-sm analytics-export-btn" onClick={exportToExcel}>
+          <button className="btn btn-outline-primary  analytics-export-btn" onClick={exportToExcel}>
             <Download size={16} className="me-1" /> Excel
           </button>
         </div>
@@ -271,7 +271,7 @@ const ReportingAnalytics = () => {
         <h4 className="analytics-report-title gradient-heading">Feedback Log</h4>
         <div>
           <button 
-            className="btn btn-primary btn-sm me-2 analytics-add-btn"
+            className="btn btn-primary  me-2 analytics-add-btn"
             onClick={() => setShowFeedbackForm(true)}
           >
             <Plus size={16} className="me-1" /> Add Feedback
@@ -293,7 +293,7 @@ const ReportingAnalytics = () => {
       </div>
 
       {showFeedbackForm && (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal show d-block custom-modal-dark" tabIndex="-1" >
           <div className="modal-dialog modal-lg">
             <div className="modal-content bg-card">
               <div className="modal-header">
@@ -384,8 +384,8 @@ const ReportingAnalytics = () => {
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setShowFeedbackForm(false)}>Cancel</button>
-                <button type="button" className="btn btn-primary" onClick={submitFeedback}>Submit Feedback</button>
+                <button type="button" className="btn btn-secondary rounded-5" onClick={() => setShowFeedbackForm(false)}>Cancel</button>
+                <button type="button" className="btn gradient-button" onClick={submitFeedback}>Submit Feedback</button>
               </div>
             </div>
           </div>
