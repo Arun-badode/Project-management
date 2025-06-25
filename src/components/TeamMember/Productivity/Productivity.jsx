@@ -409,7 +409,7 @@ const Productivity = () => {
               ></div>
             </div>
           </div>
-          <div className="col-12 col-md-6 mb-5">
+          <div className="col-12 col-md-6 mb-2">
             <div className="bg-card rounded shadow-sm p-3 h-100">
               <h5 className="">Focus Time by Hour</h5>
               <div 
