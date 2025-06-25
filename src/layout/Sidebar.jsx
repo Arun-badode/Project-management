@@ -25,6 +25,7 @@ const Sidebar = ({ collapsed }) => {
           {/* Admin Only */}
           {role === "Admin" && (
             <>
+              {/* Dashboard */}
               <li
                 className={`menu-item ${
                   isActive("/admin-dashboard") ? "active" : ""
@@ -41,6 +42,7 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Dashboard</span>
                 </div>
               </li>
+              {/* Active Projects */}
               <li
                 className={`menu-item ${
                   isActive("/LeadDashboard") ? "active" : ""
@@ -54,10 +56,11 @@ const Sidebar = ({ collapsed }) => {
                   }}
                 >
                   <i className="fa-solid fa-diagram-project"></i>
-                  <span className="menu-text">Active Projects </span>
+                  <span className="menu-text">Active Projects</span>
                 </div>
               </li>
-               <li
+              {/* Task Management */}
+              <li
                 className={`menu-item ${
                   isActive("/taskmanagement") ? "active" : ""
                 }`}
@@ -70,26 +73,10 @@ const Sidebar = ({ collapsed }) => {
                   }}
                 >
                   <i className="fa-solid fa-tasks"></i>
-                  <span className="menu-text">Task Management </span>
+                  <span className="menu-text">Task Management</span>
                 </div>
               </li>
-              <li
-                className={`menu-item ${
-                  isActive("/calendar") ? "active" : ""
-                }`}
-              >
-                <div
-                  className="menu-link menu-i"
-                  onClick={() => {
-                    navigate("/calendar");
-                    menuItemClick();
-                  }}
-                >
-                  <i className="fa-solid fa-tasks"></i>
-                  <span className="menu-text">Calander </span>
-                </div>
-              </li>
-
+              {/* Projects */}
               <li
                 className={`menu-item ${
                   isActive("/project") ? "active" : ""
@@ -103,10 +90,28 @@ const Sidebar = ({ collapsed }) => {
                   }}
                 >
                   <i className="fa-solid fa-diagram-project"></i>
-                  <span className="menu-text">Projects </span>
+                  <span className="menu-text">Projects</span>
                 </div>
               </li>
-               <li
+              {/* Action Center */}
+              <li
+                className={`menu-item ${
+                  isActive("/actioncenter") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/actioncenter");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-bolt"></i>
+                  <span className="menu-text">Action Center</span>
+                </div>
+              </li>
+              {/* Reporting & Analytics */}
+              <li
                 className={`menu-item ${
                   isActive("/reportinganalytics") ? "active" : ""
                 }`}
@@ -122,7 +127,8 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Reporting & Analytics</span>
                 </div>
               </li>
-               <li
+              {/* Audit Logs */}
+              <li
                 className={`menu-item ${isActive("/auditlog") ? "active" : ""}`}
               >
                 <div
@@ -136,6 +142,7 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Audit Logs</span>
                 </div>
               </li>
+              {/* Attendance */}
               <li
                 className={`menu-item ${
                   isActive("/attendance") ? "active" : ""
@@ -148,13 +155,28 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
-                  <i class="fa-solid fa-calendar-days"></i>
+                  <i className="fa-solid fa-calendar-days"></i>
                   <span className="menu-text">Attendance</span>
                 </div>
               </li>
-
-
-
+              {/* Calendar */}
+              <li
+                className={`menu-item ${
+                  isActive("/calendar") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/calendar");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-calendar"></i>
+                  <span className="menu-text">Calendar</span>
+                </div>
+              </li>
+              {/* User */}
               <li
                 className={`menu-item ${
                   isActive("/usermanage") ? "active" : ""
@@ -168,122 +190,10 @@ const Sidebar = ({ collapsed }) => {
                   }}
                 >
                   <i className="fa-solid fa-users-gear"></i>
-                  <span className="menu-text">User </span>
+                  <span className="menu-text">User</span>
                 </div>
               </li>
-
-              
-
-             
-
-              {/* <li
-                className={`menu-item ${
-                  isActive("/resourcemanagement") ? "active" : ""
-                }`}
-              >
-                <div
-                  className="menu-link menu-i"
-                  onClick={() => {
-                    navigate("/resourcemanagement");
-                    menuItemClick();
-                  }}
-                >
-                  <i className="fa-solid fa-toolbox"></i>
-                  <span className="menu-text">Resource </span>
-                </div>
-              </li> */}
-
-              <li
-                className={`menu-item ${
-                  isActive("/timetracker") ? "active" : ""
-                }`}
-              >
-                <div
-                  className="menu-link menu-i"
-                  onClick={() => {
-                    navigate("/timetracker");
-                    menuItemClick();
-                  }}
-                >
-                  <i className="fa-solid fa-clock"></i>
-                  <span className="menu-text">Time Tracking</span>
-                </div>
-              </li>
-
-              <li
-                className={`menu-item ${
-                  isActive("/filemanagementsystem") ? "active" : ""
-                }`}
-              >
-                <div
-                  className="menu-link menu-i"
-                  onClick={() => {
-                    navigate("/filemanagementsystem");
-                    menuItemClick();
-                  }}
-                >
-                  <i className="fa-solid fa-folder-open"></i>
-                  <span className="menu-text">File Management</span>
-                </div>
-              </li>
-
-              <li
-                className={`menu-item ${
-                  isActive("/qamanagement") ? "active" : ""
-                }`}
-              >
-                <div
-                  className="menu-link menu-i"
-                  onClick={() => {
-                    navigate("/qamanagement");
-                    menuItemClick();
-                  }}
-                >
-                  <i className="fa-solid fa-check-to-slot"></i>
-                  <span className="menu-text">QA Management</span>
-                </div>
-              </li>
-
-             
-             
-              {/* <li
-                className={`menu-item ${isActive("/profile") ? "active" : ""}`}
-              >
-                <div
-                  className="menu-link menu-i"
-                  onClick={() => {
-                    navigate("/profile");
-                    menuItemClick();
-                  }}
-                >
-                  <i className="fa-solid fa-user-circle"></i>
-                  <span className="menu-text">Profile & Account</span>
-                </div>
-              </li> */}
-
-              {/* <li
-                className={`menu-item ${
-                  isActive("/projectsupport") ? "active" : ""
-                }`}
-              >
-                <div
-                  className="menu-link menu-i"
-                  onClick={() => {
-                    navigate("/projectsupport");
-                    menuItemClick();
-                  }}
-                >
-                  <i className="fa-solid fa-life-ring"></i>
-                  <span className="menu-text">Support</span>
-                </div>
-              </li> */
-              
-              
-              
-              
-              
-              }
-
+              {/* Role & Permission */}
               <li
                 className={`menu-item ${
                   isActive("/role&permission") ? "active" : ""
@@ -299,15 +209,8 @@ const Sidebar = ({ collapsed }) => {
                   <i className="fa-solid fa-gear"></i>
                   <span className="menu-text">Role & Permission</span>
                 </div>
-
-
-
-
-                
               </li>
-
-
-
+              {/* Chat Room */}
               <li
                 className={`menu-item ${
                   isActive("/collaboration") ? "active" : ""
@@ -320,7 +223,7 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
-                  <i class="fa-solid fa-comments"></i>
+                  <i className="fa-solid fa-comments"></i>
                   <span className="menu-text">Chat Room</span>
                 </div>
               </li>
