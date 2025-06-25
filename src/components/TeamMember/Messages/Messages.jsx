@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 function Messages() {
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Mock data for messages
   const messages = [
     {
@@ -78,76 +78,75 @@ function Messages() {
       status: 'sent'
     }
   ];
-  
-  // Filter messages based on search term
+
   const filteredMessages = messages.filter(message =>
     message.sender.toLowerCase().includes(searchTerm.toLowerCase()) ||
     message.preview.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="container py-5">
-        <h1 className="gradient-heading ">Messages</h1>
-      {/* Header */}
-      <header className="bg-light p-3 bg-card mb-4 rounded shadow-sm">
-        <div className="d-flex justify-content-between align-items-center">
-        
-          <div className="input-group">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search messages..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <div className="input-group-append">
-              <button className="btn btn-outline-secondary" type="button">
-                <i className="fas fa-search"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="container py-3">
+      <h2 className="text-white mb-4 gradient-heading">Messages</h2>
 
-      {/* Main content */}
-      <div>
-        {filteredMessages.length > 0 ? (
-          <ul className="list-group ">
-            {filteredMessages.map((message) => (
-              <li key={message.id} className=" table-gradient-bg list-group-item d-flex justify-content-between align-items-center">
-                <div className="d-flex align-items-center">
-                  <img
-                    src={message.avatar}
-                    alt={message.sender}
-                    className="rounded-circle mr-3"
-                    style={{ width: '50px', height: '50px' }}
-                  />
-                  <div>
-                    <div className="d-flex justify-content-between">
-                      <strong>{message.sender}</strong>
-                      <span className="text-muted small">{message.timestamp}</span>
-                    </div>
-                    <p className="mb-0 text-truncate" style={{ maxWidth: '200px' }}>
-                      {message.preview}
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <span className={`badge ${message.unread ? 'bg-primary' : 'bg-secondary'}`}>
-                    {message.unread ? 'Unread' : 'Read'}
-                  </span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="text-center py-5">
-            <i className="fas fa-inbox fa-3x text-muted"></i>
-            <h4 className="mt-3">No messages found</h4>
-            <p>{searchTerm ? 'Try adjusting your search terms.' : 'Start a conversation with your team.'}</p>
-          </div>
-        )}
+      {/* Search Bar */}
+      <div className="bg-dark p-3 mb-4 rounded shadow-sm">
+        <div className="input-group">
+          <input
+            type="text"
+            className="form-control bg-dark text-white border-secondary"
+            placeholder="Search messages..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button className="btn btn-outline-secondary text-white border-secondary" type="button">
+            <i className="fas fa-search"></i>
+          </button>
+        </div>
       </div>
+
+      {/* Message List */}
+      {filteredMessages.length > 0 ? (
+        <ul className="list-group">
+          {filteredMessages.map((message) => (
+            <li
+              key={message.id}
+              className="list-group-item bg-dark border-secondary text-white px-2 py-3"
+              style={{ minHeight: 70 }}
+            >
+              <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3 w-100">
+                {/* Avatar */}
+                <img
+                  src={message.avatar}
+                  alt={message.sender}
+                  className="rounded-circle flex-shrink-0"
+                  style={{ width: '48px', height: '48px', objectFit: 'cover' }}
+                />
+                {/* Message Content */}
+                <div className="flex-grow-1 w-100">
+                  <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center w-100">
+                    <strong className="text-white">{message.sender}</strong>
+                    <div className="d-flex align-items-center gap-2 mt-1 mt-md-0">
+                      <span className={`badge ${message.unread ? 'bg-primary' : 'bg-secondary'}`}>
+                        {message.unread ? 'Unread' : 'Read'}
+                      </span>
+                      <small className="text-white">{message.timestamp}</small>
+                    </div>
+                  </div>
+                  <p className="mb-0 mt-1 text-break text-white" style={{ wordBreak: 'break-word' }}>
+                    {message.preview}
+                  </p>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="text-center py-5 text-white">
+          <i className="fas fa-inbox fa-3x text-muted"></i>
+          <h4 className="mt-3">No messages found</h4>
+          <p>{searchTerm ? 'Try adjusting your search terms.' : 'Start a conversation with your team.'}</p>
+        </div>
+      )}
     </div>
   );
 }

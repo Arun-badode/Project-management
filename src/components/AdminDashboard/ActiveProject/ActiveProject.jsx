@@ -286,7 +286,7 @@ const ActiveProject= () => {
       {/* Header with action buttons */}
       <div className="row mb-4">
         <div className="col-md-6">
-          <h2 className="mb-0 gradient-heading">Active Projects</h2>
+          <h2 className="gradient-heading">Active Projects</h2>
         </div>
         {/* <div className="col-md-6 text-md-end">
           <div className="d-flex flex-wrap justify-content-md-end gap-2">

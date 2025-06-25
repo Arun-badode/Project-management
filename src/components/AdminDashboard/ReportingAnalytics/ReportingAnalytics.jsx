@@ -682,7 +682,7 @@ const ReportingAnalytics = () => {
                   <button
                     key={tab.id}
                     className={`list-group-item list-group-item-action bg-card analytics-nav-item ${
-                      activeReportTab === tab.id ? 'active analytics-nav-active' : ''
+                      activeReportTab === tab.id ? '' : ''
                     }`}
                     onClick={() => setActiveReportTab(tab.id)}
                   >
