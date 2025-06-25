@@ -242,7 +242,7 @@ const App = () => {
                     </div>
 
                     {showFilters && (
-                        <div className="card mb-4 ">
+                        <div className="card mb-4 bg-card">
                             <div className="card-body ">
                                 <div className="row g-3">
                                     <div className="col-md-6 col-lg-4">
