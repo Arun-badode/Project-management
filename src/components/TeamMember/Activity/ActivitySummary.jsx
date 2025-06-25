@@ -124,9 +124,10 @@ function ActivitySummary() {
                 <h4 className="font-weight-bold">{monthData.month}</h4>
 
                 {/* Task table */}
-                <div className="table-responsive">
+                <div className="table-responsive"
+    style={{ maxHeight: "400px", overflowY: "auto" }}>
                   <table className="table table-striped table-gradient-bg table-bordered">
-  <thead className="table-light">
+  <thead className="table-light bg-dark sticky-top">
     <tr>
       <th className="text-start">ID</th> {/* New ID column */}
       <th className="text-start">Task Name</th>

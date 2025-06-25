@@ -34,6 +34,8 @@ import Assigned from "./components/ProjectManager/Assigne/Assigned";
 import Task from "./components/TeamMember/Task/Task";
 import ChangesPassword from "./components/AdminDashboard/ChangePassword/ChangesPassword";
 import RoleManagementSystem from "./components/AdminDashboard/Role&Permission/Role&PErmission";
+import Project from "./components/AdminDashboard/Project/Project";
+import Calander from "./components/AdminDashboard/Calander/Calander";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -81,6 +83,7 @@ function App() {
             {/* Admin routes */}
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/taskmanagement" element={<TaskManagement />} />
+            <Route path="/calendar" element={<Calander/>}/>
             <Route path="/usermanage" element={<UserManagement />} />
             <Route path="/resourcemanagement" element={<ResourceManagement />} />
             <Route path="/projectsupport" element={<ProjectSupportPortal />} />
@@ -93,6 +96,8 @@ function App() {
             <Route path="/qamanagement" element={<QAManagement />} />
             <Route path="/changepassword" element={<ChangesPassword/>}/>
             <Route path="/role&permission" element={<RoleManagementSystem/>}/>
+            <Route path="/project" element={<Project/>}/>
+
 
             {/* Lead routes */}
             <Route path="/LeadDashboard" element={<LeadDashboard />} />

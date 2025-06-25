@@ -1,1384 +1,645 @@
-import React, { useState, useEffect } from "react";
-import {
-  CheckCircle2,
-  Clock,
-  User,
-  Calendar,
-  Plus,
-  Edit3,
-  Trash2,
-  Play,
-  Pause,
-  RotateCcw,
-  Filter,
-  Search,
-  UserCheck,
-  AlertCircle,
-  Target,
-  Timer,
-  Eye,
-} from "lucide-react";
+// The exported code now uses Bootstrap instead of Tailwind CSS
+import React, { useState } from 'react';
 
-const TaskManagement = () => {
-  const [activeTab, setActiveTab] = useState("all-tasks");
-  const [tasks, setTasks] = useState([
+
+
+const TaskManagemnet = () => {
+  const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
+  // Mock data for active projects
+  const [projects, setProjects] = useState([
     {
       id: 1,
-      title: "Design System Update",
-      description: "Update design system components",
-      assignee: "Sarah Chen",
+      title: "Website Redesign",
       status: "In Progress",
-      priority: "High",
-      dueDate: "2025-04-25",
-      timeSpent: 240,
-      isTimerRunning: false,
-      timerStart: null,
-      category: "Design",
-      qaStatus: "Pending",
-      project: "Brand Refresh Project",
-      module: "UI Components",
-      createdBy: "Emma Davis",
-      createdAt: "2025-04-20",
+      handlers: 3,
+      qaReviewers: 2,
+      fileCount: 24,
+      progress: 65,
+      handlerNote: "Working on homepage layout. Need feedback on color scheme.",
+      qaNote: "Initial review completed for navigation. Found some responsive issues.",
+      timeline: [
+        { stage: "Task Assigned", timestamp: "2025-06-20 09:30 AM" },
+        { stage: "In Progress", timestamp: "2025-06-21 11:15 AM" },
+        { stage: "QA Started", timestamp: "2025-06-23 02:45 PM" }
+      ],
+      timeSpent: [
+        { role: "Handler", name: "Alex Johnson", hours: 12.5 },
+        { role: "Handler", name: "Maria Garcia", hours: 8.0 },
+        { role: "Handler", name: "David Kim", hours: 6.5 },
+        { role: "QA", name: "Sarah Williams", hours: 4.0 },
+        { role: "QA", name: "James Brown", hours: 3.5 }
+      ]
     },
     {
       id: 2,
-      title: "Quote PDF Export Feature",
-      description: "Implement PDF export for quotes",
-      assignee: "Mike Ross",
-      status: "In Progress",
-      priority: "High",
-      dueDate: "2025-04-26",
-      timeSpent: 180,
-      isTimerRunning: false,
-      timerStart: null,
-      category: "Development",
-      qaStatus: "Pending",
-      project: "Invoice System",
-      module: "Quotes Module",
-      createdBy: "John Smith",
-      createdAt: "2025-04-18",
+      title: "Mobile App Development",
+      status: "QA Review",
+      handlers: 2,
+      qaReviewers: 3,
+      fileCount: 38,
+      progress: 80,
+      handlerNote: "Core functionality complete. Working on final UI polish.",
+      qaNote: "Testing user authentication flows. Some edge cases need fixing.",
+      timeline: [
+        { stage: "Task Assigned", timestamp: "2025-06-15 10:00 AM" },
+        { stage: "In Progress", timestamp: "2025-06-16 09:30 AM" },
+        { stage: "QA Started", timestamp: "2025-06-22 01:15 PM" }
+      ],
+      timeSpent: [
+        { role: "Handler", name: "Emily Chen", hours: 18.5 },
+        { role: "Handler", name: "Michael Rodriguez", hours: 16.0 },
+        { role: "QA", name: "Lisa Taylor", hours: 7.5 },
+        { role: "QA", name: "Robert Wilson", hours: 6.0 },
+        { role: "QA", name: "Jennifer Lee", hours: 5.5 }
+      ]
     },
     {
       id: 3,
-      title: "Implement User Authentication",
-      description: "Set up login/logout functionality with JWT tokens",
-      assignee: "Mike Chen",
-      status: "Completed",
-      priority: "High",
-      dueDate: "2025-06-18",
-      timeSpent: 480,
-      isTimerRunning: false,
-      timerStart: null,
-      category: "Development",
-      qaStatus: "Passed",
-      project: "Website Redesign",
-      module: "Auth Service",
-      createdBy: "Lisa Wong",
-      createdAt: "2025-06-10",
+      title: "E-commerce Integration",
+      status: "Ready for QA",
+      handlers: 4,
+      qaReviewers: 1,
+      fileCount: 42,
+      progress: 75,
+      handlerNote: "Payment gateway integration complete. Documentation in progress.",
+      qaNote: "Preparing test cases for checkout flow.",
+      timeline: [
+        { stage: "Task Assigned", timestamp: "2025-06-18 08:45 AM" },
+        { stage: "In Progress", timestamp: "2025-06-19 10:30 AM" },
+        { stage: "Ready for QA", timestamp: "2025-06-24 09:15 AM" }
+      ],
+      timeSpent: [
+        { role: "Handler", name: "Thomas Martin", hours: 14.0 },
+        { role: "Handler", name: "Sophia Anderson", hours: 12.5 },
+        { role: "Handler", name: "Daniel Clark", hours: 10.0 },
+        { role: "Handler", name: "Olivia Wright", hours: 9.5 },
+        { role: "QA", name: "William Scott", hours: 2.0 }
+      ]
     },
     {
       id: 4,
-      title: "Write API Documentation",
-      description: "Document all REST API endpoints",
-      assignee: "Alex Rivera",
-      status: "To Do",
-      priority: "Medium",
-      dueDate: "2025-06-25",
-      timeSpent: 60,
-      isTimerRunning: false,
-      timerStart: null,
-      category: "Documentation",
-      qaStatus: "Not Started",
-      project: "Mobile App",
-      module: "Backend API",
-      createdBy: "Sarah Chen",
-      createdAt: "2025-06-20",
+      title: "CRM System Update",
+      status: "In Progress",
+      handlers: 2,
+      qaReviewers: 2,
+      fileCount: 31,
+      progress: 45,
+      handlerNote: "Database migration in progress. Estimated completion by tomorrow.",
+      qaNote: "Preparing test environment for initial review.",
+      timeline: [
+        { stage: "Task Assigned", timestamp: "2025-06-22 11:00 AM" },
+        { stage: "In Progress", timestamp: "2025-06-23 09:45 AM" }
+      ],
+      timeSpent: [
+        { role: "Handler", name: "Ryan Johnson", hours: 8.0 },
+        { role: "Handler", name: "Emma Davis", hours: 7.5 },
+        { role: "QA", name: "Christopher Lee", hours: 1.5 },
+        { role: "QA", name: "Ava Martinez", hours: 1.0 }
+      ]
     },
+    {
+      id: 5,
+      title: "Analytics Dashboard",
+      status: "In Progress",
+      handlers: 1,
+      qaReviewers: 1,
+      fileCount: 18,
+      progress: 30,
+      handlerNote: "Working on data visualization components. Need access to API.",
+      qaNote: "Reviewing requirements documentation.",
+      timeline: [
+        { stage: "Task Assigned", timestamp: "2025-06-23 02:30 PM" },
+        { stage: "In Progress", timestamp: "2025-06-24 08:30 AM" }
+      ],
+      timeSpent: [
+        { role: "Handler", name: "Noah Thompson", hours: 5.5 },
+        { role: "QA", name: "Isabella White", hours: 2.0 }
+      ]
+    },
+    {
+      id: 6,
+      title: "Content Management System",
+      status: "QA Review",
+      handlers: 3,
+      qaReviewers: 2,
+      fileCount: 27,
+      progress: 85,
+      handlerNote: "All features implemented. Addressing feedback from initial review.",
+      qaNote: "Testing user roles and permissions. Found some security concerns.",
+      timeline: [
+        { stage: "Task Assigned", timestamp: "2025-06-17 09:00 AM" },
+        { stage: "In Progress", timestamp: "2025-06-18 10:15 AM" },
+        { stage: "QA Started", timestamp: "2025-06-21 03:30 PM" }
+      ],
+      timeSpent: [
+        { role: "Handler", name: "Liam Wilson", hours: 15.0 },
+        { role: "Handler", name: "Charlotte Brown", hours: 13.5 },
+        { role: "Handler", name: "Ethan Davis", hours: 12.0 },
+        { role: "QA", name: "Amelia Garcia", hours: 8.5 },
+        { role: "QA", name: "Benjamin Martinez", hours: 7.0 }
+      ]
+    }
   ]);
 
+  // State for search and filter
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
-  const [filterPriority, setFilterPriority] = useState("all");
-  const [showAddTask, setShowAddTask] = useState(false);
-  const [editingTask, setEditingTask] = useState(null);
-  const [viewMode, setViewMode] = useState("table"); // 'table' or 'card'
-  const [quickViewTask, setQuickViewTask] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [isTimeLogOpen, setIsTimeLogOpen] = useState(false);
+  const [isManager, setIsManager] = useState(true); // Toggle for manager view
+  const [activeTab, setActiveTab] = useState("team"); // "team" or "my"
 
-  const [newTask, setNewTask] = useState({
-    title: "",
-    description: "",
-    assignee: "",
-    status: "To Do",
-    priority: "Medium",
-    dueDate: "",
-    category: "Development",
-    project: "",
-    module: "",
-    createdBy: "",
+  // Filter projects based on search term and status filter
+  const filteredProjects = projects.filter(project => {
+    const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "All" || project.status === statusFilter;
+    return matchesSearch && matchesStatus;
   });
 
-  const teamMembers = [
-    "Sarah Chen",
-    "Mike Ross",
-    "Mike Chen",
-    "Alex Rivera",
-    "Emma Davis",
-    "John Smith",
-    "Lisa Wong",
-  ];
-  const statuses = [
-    "To Do",
-    "In Progress",
-    "In Review",
-    "Completed",
-    "Cancelled",
-  ];
-  const priorities = ["Low", "Medium", "High", "Critical"];
-  const categories = [
-    "Development",
-    "Design",
-    "Documentation",
-    "Testing",
-    "Planning",
-  ];
-  const projects = [
-    "Brand Refresh Project",
-    "Invoice System",
-    "Website Redesign",
-    "Mobile App",
-    "Marketing Campaign",
-  ];
-  const modules = [
-    "UI Components",
-    "Quotes Module",
-    "Auth Service",
-    "Backend API",
-    "Dashboard",
-    "Settings",
-  ];
-
-  // Timer functionality
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTasks((prevTasks) =>
-        prevTasks.map((task) => {
-          if (task.isTimerRunning && task.timerStart) {
-            const elapsed = Math.floor((Date.now() - task.timerStart) / 60000);
-            return {
-              ...task,
-              timeSpent: task.timeSpent + elapsed,
-              timerStart: Date.now(),
-            };
-          }
-          return task;
-        })
-      );
-    }, 60000); // Update every minute
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const formatTime = (minutes) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours}h ${mins}m`;
-  };
-
-  const toggleTimer = (taskId) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) => {
-        if (task.id === taskId) {
-          if (task.isTimerRunning) {
-            // Stop timer
-            const elapsed = task.timerStart
-              ? Math.floor((Date.now() - task.timerStart) / 60000)
-              : 0;
-            return {
-              ...task,
-              isTimerRunning: false,
-              timerStart: null,
-              timeSpent: task.timeSpent + elapsed,
-            };
-          } else {
-            // Start timer
-            return {
-              ...task,
-              isTimerRunning: true,
-              timerStart: Date.now(),
-            };
-          }
-        }
-        return task;
-      })
-    );
-  };
-
-  const addTask = () => {
-    if (newTask.title && newTask.assignee) {
-      const task = {
-        id: Date.now(),
-        ...newTask,
-        timeSpent: 0,
-        isTimerRunning: false,
-        timerStart: null,
-        qaStatus: "Not Started",
-        createdAt: new Date().toISOString().split("T")[0],
-      };
-      setTasks([...tasks, task]);
-      setNewTask({
-        title: "",
-        description: "",
-        assignee: "",
-        status: "To Do",
-        priority: "Medium",
-        dueDate: "",
-        category: "Development",
-        project: "",
-        module: "",
-        createdBy: "",
-      });
-      setShowAddTask(false);
+  // Mock data for "My Tasks" (for manager view)
+  const myTasks = [
+    {
+      id: 7,
+      title: "Marketing Strategy",
+      status: "In Progress",
+      handlers: 1,
+      qaReviewers: 1,
+      fileCount: 12,
+      progress: 40,
+      handlerNote: "Developing Q3 marketing plan. Need budget approval.",
+      qaNote: "Awaiting initial draft for review.",
+      timeline: [
+        { stage: "Task Assigned", timestamp: "2025-06-21 01:00 PM" },
+        { stage: "In Progress", timestamp: "2025-06-22 09:30 AM" }
+      ],
+      timeSpent: [
+        { role: "Handler", name: "You", hours: 6.5 },
+        { role: "QA", name: "Sophia Miller", hours: 1.0 }
+      ]
+    },
+    {
+      id: 8,
+      title: "Quarterly Report",
+      status: "Ready for QA",
+      handlers: 1,
+      qaReviewers: 2,
+      fileCount: 8,
+      progress: 70,
+      handlerNote: "Financial section complete. Working on executive summary.",
+      qaNote: "Preparing to review financial data accuracy.",
+      timeline: [
+        { stage: "Task Assigned", timestamp: "2025-06-19 11:30 AM" },
+        { stage: "In Progress", timestamp: "2025-06-20 09:15 AM" },
+        { stage: "Ready for QA", timestamp: "2025-06-24 10:45 AM" }
+      ],
+      timeSpent: [
+        { role: "Handler", name: "You", hours: 9.0 },
+        { role: "QA", name: "Jacob Anderson", hours: 0.5 },
+        { role: "QA", name: "Mia Thompson", hours: 0.5 }
+      ]
     }
-  };
+  ];
 
-  const updateTask = (taskId, updates) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.id === taskId ? { ...task, ...updates } : task
-      )
-    );
-  };
+// Function to open time log modal
+const openTimeLog = (projectId) => {
+  setSelectedProject(projectId);
+  setIsTimeLogOpen(true);
+};
 
-  // const deleteTask = (taskId) => {
-  //   setTasks(tasks.filter(task => task.id !== taskId));
-  // };
-  const saveEditedTask = () => {
-    if (editingTask) {
-      updateTask(editingTask.id, editingTask);
-      setEditingTask(null);
-    }
-  };
+// Function to close time log modal
+const closeTimeLog = () => {
+  setSelectedProject(null);
+  setIsTimeLogOpen(false);
+};
 
-  const deleteTask = (taskId) => {
-    setTasks(tasks.filter((task) => task.id !== taskId));
-  };
+// Get project by ID
+const getProjectById = (id) => {
+  return projects.find(project => project.id === id) ||
+         myTasks.find(task => task.id === id);
+};
 
-  const reassignTask = (taskId, newAssignee) => {
-    updateTask(taskId, { assignee: newAssignee });
-  };
+// Status badge color mapping
+const getStatusColor = (status) => {
+  switch (status) {
+    case "In Progress":
+      return "bg-primary";
+    case "QA Review":
+      return "bg-info";
+    case "Ready for QA":
+      return "bg-warning";
+    case "Completed":
+      return "bg-success";
+    default:
+      return "bg-secondary";
+  }
+};
 
-  const filteredTasks = tasks.filter((task) => {
-    const matchesSearch =
-      task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      task.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      task.assignee.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      filterStatus === "all" || task.status === filterStatus;
-    const matchesPriority =
-      filterPriority === "all" || task.priority === filterPriority;
 
-    return matchesSearch && matchesStatus && matchesPriority;
-  });
+  return (
+    <div className="min-vh-100 bg-main">
+      {/* Header/Navigation */}
+ 
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "To Do":
-        return "bg-secondary text-white";
-      case "In Progress":
-        return "bg-primary text-white";
-      case "In Review":
-        return "bg-warning text-dark";
-      case "Completed":
-        return "bg-success text-white";
-      case "Cancelled":
-        return "bg-danger text-white";
-      default:
-        return "bg-secondary text-white";
-    }
-  };
-
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case "Low":
-        return "bg-success text-white";
-      case "Medium":
-        return "bg-warning text-dark";
-      case "High":
-        return "bg-orange text-white";
-      case "Critical":
-        return "bg-danger text-white";
-      default:
-        return "bg-secondary text-white";
-    }
-  };
-
-  const getQAStatusColor = (qaStatus) => {
-    switch (qaStatus) {
-      case "Not Started":
-        return "bg-secondary text-white";
-      case "Pending":
-        return "bg-primary text-white";
-      case "In Review":
-        return "bg-warning text-dark";
-      case "Passed":
-        return "bg-success text-white";
-      case "Failed":
-        return "bg-danger text-white";
-      default:
-        return "bg-secondary text-white";
-    }
-  };
-
-  const renderTaskCard = (task) => (
-    <div key={task.id} className="card mb-3 bg-card">
-      <div className="card-body">
-        <div className="d-flex justify-content-between align-items-start mb-2">
-          <div>
-            <h5 className="card-title mb-1">{task.title}</h5>
-            <p className="card-text text-muted small mb-2">
-              {task.description}
-            </p>
-          </div>
-          <div className="d-flex gap-2">
-            <button
-              onClick={() => setQuickViewTask(task)}
-              className="btn btn-sm btn-outline-info"
-            >
-              <Eye size={16} />
-            </button>
-            <button
-              onClick={() => setEditingTask(task)}
-              className="btn btn-sm btn-outline-primary"
-            >
-              <Edit3 size={16} />
-            </button>
-            <button
-              onClick={() => deleteTask(task.id)}
-              className="btn btn-sm btn-outline-danger"
-            >
-              <Trash2 size={16} />
-            </button>
-          </div>
+      {/* Main Content */}
+      <div className="container py-4">
+        <div className="mb-4">
+          <h1 className="gradient-heading">Task Management</h1>
+          <p className="text-light">Active Projects Only</p>
         </div>
 
-        <div className="d-flex flex-wrap gap-2 mb-3">
-          <span className={`badge ${getStatusColor(task.status)}`}>
-            {task.status}
-          </span>
-          <span className={`badge ${getPriorityColor(task.priority)}`}>
-            {task.priority}
-          </span>
-          <span className="badge bg-info text-dark">{task.category}</span>
-          <span className="badge bg-secondary">{task.project}</span>
-        </div>
-
-        <div className="d-flex flex-wrap justify-content-between align-items-center">
-          <div className="d-flex align-items-center gap-2">
-            <User size={16} className="text-muted" />
-            <span>{task.assignee}</span>
-          </div>
-          <div className="d-flex align-items-center gap-2">
-            <Calendar size={16} className="text-muted" />
-            <span>{task.dueDate}</span>
-          </div>
-          <div className="d-flex align-items-center gap-2">
-            <Clock size={16} className="text-muted" />
-            <span>{formatTime(task.timeSpent)}</span>
-          </div>
-          <button
-            onClick={() => toggleTimer(task.id)}
-            className={`btn btn-sm d-flex align-items-center gap-1 ${
-              task.isTimerRunning ? "btn-danger" : "btn-success"
-            }`}
-          >
-            {task.isTimerRunning ? <Pause size={14} /> : <Play size={14} />}
-            {task.isTimerRunning ? "Stop" : "Start"}
-          </button>
-        </div>
-      </div>
-
-      {/* <div className="d-flex flex-row  flex-md-column gap-2 ms-md-4 mt-3 mt-md-0 w-50 w-md-auto">
-        <button
-          onClick={() => setEditingTask(task)}
-          className="btn btn-sm btn-outline-secondary ms-5  w-50 md-auto" 
-        >
-          <Edit3 className="w-4 h-4" />
-        </button>
-        <button
-          
-          className="btn btn-sm btn-outline-danger ms-5 w-50 w-md-auto"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-      </div> */}
-    </div>
-  );
-
-  const renderTaskTable = () => (
-    <div className="table-responsive">
-      <table className="table table-hover align-middle table-gradient-bg">
-        <thead className="table-light">
-          <tr>
-            <th>Task</th>
-            <th>Project</th>
-            <th>Status</th>
-            <th>Priority</th>
-            <th>Assignee</th>
-            <th>Due Date</th>
-            <th>Time Spent</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredTasks.map((task) => (
-            <tr key={task.id}>
-              <td>
-                <div className="fw-bold">{task.title}</div>
-                <div className="text-muted small">{task.description}</div>
-              </td>
-              <td>{task.project}</td>
-              <td>
-                <span className={`badge ${getStatusColor(task.status)}`}>
-                  {task.status}
-                </span>
-              </td>
-              <td>
-                <span className={`badge ${getPriorityColor(task.priority)}`}>
-                  {task.priority}
-                </span>
-              </td>
-              <td>{task.assignee}</td>
-              <td>{task.dueDate}</td>
-              <td>{formatTime(task.timeSpent)}</td>
-              <td>
-                <div className="d-flex gap-2">
-                  <button
-                    onClick={() => toggleTimer(task.id)}
-                    className={`btn btn-sm ${
-                      task.isTimerRunning ? "btn-danger" : "btn-success"
-                    }`}
-                  >
-                    {task.isTimerRunning ? (
-                      <Pause size={14} />
-                    ) : (
-                      <Play size={14} />
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setQuickViewTask(task)}
-                    className="btn btn-sm btn-info"
-                  >
-                    <Eye size={14} />
-                  </button>
-                  <button
-                    onClick={() => setEditingTask(task)}
-                    className="btn btn-sm btn-primary"
-                  >
-                    <Edit3 size={14} />
-                  </button>
-                  <button
-                    onClick={() => deleteTask(task.id)}
-                    className="btn btn-sm btn-danger"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-
-  const renderTaskList = () => (
-    <div className="mb-4">
-      {/* Filters and Search */}
-      <div className="card mb-3 bg-card">
-        <div className="card-body">
-          <div className="row g-3 align-items-center">
-            <div className="col-md-5">
-              <div className="input-group">
-                <span className="input-group-text">
-                  <Search size={16} />
-                </span>
-                <input
-                  type="text"
-                  placeholder="Search tasks..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="form-control"
-                />
-              </div>
-            </div>
-
-            <div className="col-md-3">
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="form-select"
-              >
-                <option value="all">All Status</option>
-                {statuses.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="col-md-3">
-              <select
-                value={filterPriority}
-                onChange={(e) => setFilterPriority(e.target.value)}
-                className="form-select"
-              >
-                <option value="all">All Priority</option>
-                {priorities.map((priority) => (
-                  <option key={priority} value={priority}>
-                    {priority}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="col-md-1">
-              <button
-                onClick={() => setShowAddTask(true)}
-                className="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-1"
-              >
-                <Plus size={16} />
-                Add
-              </button>
-            </div>
-          </div>
-
-          {/* View Mode Toggle */}
-          <div className="mt-3 d-flex justify-content-end">
-            <div className="btn-group" role="group">
-              <button
-                type="button"
-                className={`btn ${
-                  viewMode === "table" ? "btn-primary" : "btn-outline-primary"
-                }`}
-                onClick={() => setViewMode("table")}
-              >
-                Table View
-              </button>
-              <button
-                type="button"
-                className={`btn ${
-                  viewMode === "card" ? "btn-primary" : "btn-outline-primary"
-                }`}
-                onClick={() => setViewMode("card")}
-              >
-                Card View
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Task View */}
-      {viewMode === "table" ? (
-        renderTaskTable()
-      ) : (
-        <div className="row row-cols-1 row-cols-md-2 g-4">
-          {filteredTasks.map((task) => (
-            <div key={task.id} className="col">
-              {renderTaskCard(task)}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {filteredTasks.length === 0 && (
-        <div className="text-center py-5">
-          <Target size={48} className="mx-auto mb-3 text-muted" />
-          <p className="text-muted">No tasks found matching your criteria</p>
-        </div>
-      )}
-    </div>
-  );
-
-  const renderTimeLog = () => (
-    <div className="mb-4">
-      <div className="card mb-3 bg-card">
-        <div className="card-body">
-          <h5 className="card-title mb-4">Time Tracking Summary</h5>
-
-          <div className="row mb-4">
-            <div className="col-md-4 mb-3 mb-md-0">
-              <div className="card bg-card">
-                <div className="card-body">
-                  <div className="d-flex align-items-center gap-2 mb-2">
-                    <Timer size={20} />
-                    <span className="fw-medium">Total Time</span>
+        {/* Filters and Search */}
+        <div className="card mb-4 bg-card ">
+          <div className="card-body">
+            <div className="row align-items-center">
+              <div className="col-md-8 mb-3 mb-md-0">
+                <div className="row g-3 align-items-center">
+                  <div className="col-md-5">
+                    <div className="input-group">
+                      <span className="input-group-text"><i className="fas fa-search"></i></span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search projects..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
                   </div>
-                  <h3 className="fw-bold">
-                    {formatTime(
-                      tasks.reduce((total, task) => total + task.timeSpent, 0)
-                    )}
-                  </h3>
+                  <div className="col-md-4">
+                    <select
+                      className="form-select"
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                      <option value="All">All Statuses</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Ready for QA">Ready for QA</option>
+                      <option value="QA Review">QA Review</option>
+                    </select>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div className="col-md-4 mb-3 mb-md-0">
-              <div className="card bg-card">
-                <div className="card-body">
-                  <div className="d-flex align-items-center gap-2 mb-2">
-                    <CheckCircle2 size={20} />
-                    <span className="fw-medium">Completed Tasks</span>
-                  </div>
-                  <h3 className="fw-bold">
-                    {tasks.filter((task) => task.status === "Completed").length}
-                  </h3>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-4">
-              <div className="card bg-card">
-                <div className="card-body">
-                  <div className="d-flex align-items-center gap-2 mb-2">
-                    <Clock size={20} />
-                    <span className="fw-medium">Active Timers</span>
-                  </div>
-                  <h3 className="fw-bold">
-                    {tasks.filter((task) => task.isTimerRunning).length}
-                  </h3>
-                </div>
+              <div className="col-md-4 text-md-end">
+                <span className="text-light small me-3">Today: 2025-06-24, Tuesday</span>
+          <button 
+  className="btn btn-primary"
+  onClick={() => setIsNewTaskModalOpen(true)}
+>
+  <i className="fas fa-plus me-2"></i>New Task
+</button>
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="table-responsive table-gradient-bg">
-            <table className="table table-hover">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Task</th>
-                  <th>Assignee</th>
-                  <th>Time Spent</th>
-                  <th>Status</th>
-                  <th>Timer</th>
-                </tr>
-              </thead>
-              <tbody>
-                {tasks.map((task) => (
-                  <tr key={task.id}>
-                    <td>{task.id}</td>
-                    <td>
-                      <div className="fw-bold">{task.title}</div>
-                      <div className="small text-muted">{task.category}</div>
-                    </td>
-                    <td>{task.assignee}</td>
-                    <td className="fw-bold">{formatTime(task.timeSpent)}</td>
-                    <td>
+        {/* Manager View Tabs (only shown for managers) */}
+        {isManager && (
+          <div className="mb-4 ">
+            <ul className="nav nav-tabs">
+              <li className="nav-item">
+                <button
+                  onClick={() => setActiveTab("team")}
+                  className={`nav-link ${activeTab === "team" ? "active" : ""}`}
+                >
+                  <i className="fas fa-users me-2"></i>Team Tasks
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
+                  onClick={() => setActiveTab("my")}
+                  className={`nav-link ${activeTab === "my" ? "active" : ""}`}
+                >
+                  <i className="fas fa-tasks me-2"></i>My Tasks
+                </button>
+              </li>
+            </ul>
+          </div>
+        )}
+
+        {/* Projects Grid */}
+        {(activeTab === "team" || !isManager) && (
+          <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {filteredProjects.map((project) => (
+              <div key={project.id} className="col">
+                <div className="card h-100 bg-card">
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between align-items-start mb-3">
+                      <h5 className="card-title mb-0 text-truncate" style={{ maxWidth: '200px' }}>{project.title}</h5>
+                      <span className={`badge ${getStatusColor(project.status)}`}>
+                        {project.status}
+                      </span>
+                    </div>
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                      <div className="d-flex">
+                        <div className="me-4">
+                          <div className="text-light small mb-1">Handlers</div>
+                          <div className="d-flex align-items-center">
+                            <span className="badge bg-primary bg-opacity-10 text-primary">
+                              {project.handlers}
+                            </span>
+                            <button className="btn btn-link btn-sm text-light ms-2 p-0">
+                              <i className="fas fa-user-plus small"></i>
+                            </button>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-dark small mb-1">QA Reviewers</div>
+                          <div className="d-flex align-items-center">
+                            <span className="badge bg-info bg-opacity-10 text-info">
+                              {project.qaReviewers}
+                            </span>
+                            <button className="btn btn-link btn-sm text-light ms-2 p-0">
+                              <i className="fas fa-user-plus small"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-light small mb-1">Files</div>
+                        <span className="badge bg-secondary bg-opacity-10 text-secondary">
+                          {project.fileCount}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="d-flex justify-content-between mb-1">
+                        <span className="small fw-medium">Progress</span>
+                        <span className="small fw-medium">{project.progress}%</span>
+                      </div>
+                      <div className="progress">
+                        <div
+                          className="progress-bar bg-primary"
+                          style={{ width: `${project.progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="mb-2">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <span className="small fw-medium">Handler Notes</span>
+                          <button className="btn btn-link btn-sm text-light p-0">
+                            <i className="fas fa-edit small"></i>
+                          </button>
+                        </div>
+                        <p className="small text-dark bg-card p-2 rounded mt-1">{project.handlerNote}</p>
+                      </div>
+                      <div>
+                        <div className="d-flex justify-content-between align-items-center">
+                          <span className="small fw-medium">QA Notes</span>
+                          <button className="btn btn-link btn-sm text-light p-0">
+                            <i className="fas fa-edit small"></i>
+                          </button>
+                        </div>
+                        <p className="small text-dark bg-card p-2 rounded mt-1">{project.qaNote}</p>
+                      </div>
+                    </div>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <button
+                        onClick={() => openTimeLog(project.id)}
+                        className="btn btn-link text-primary p-0 small"
+                      >
+                        <i className="fas fa-clock me-1"></i> View Time Log
+                      </button>
+                      <div className="d-flex">
+                        <button className="btn btn-link text-light p-0 me-2">
+                          <i className="fas fa-exchange-alt"></i>
+                        </button>
+                        <button className="btn btn-link text-light p-0">
+                          <i className="fas fa-ellipsis-v"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* My Tasks Grid (only for manager view) */}
+        {isManager && activeTab === "my" && (
+          <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 ">
+            {myTasks.map((task) => (
+              <div key={task.id} className="col ">
+                <div className="card h-100 bg-card">
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between align-items-start mb-3">
+                      <h5 className="card-title mb-0 text-truncate" style={{ maxWidth: '200px' }}>{task.title}</h5>
                       <span className={`badge ${getStatusColor(task.status)}`}>
                         {task.status}
                       </span>
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => toggleTimer(task.id)}
-                        className={`btn btn-sm ${
-                          task.isTimerRunning ? "btn-danger" : "btn-success"
-                        }`}
-                      >
-                        {task.isTimerRunning ? (
-                          <Pause size={14} />
-                        ) : (
-                          <Play size={14} />
-                        )}
-                        {task.isTimerRunning ? "Stop" : "Start"}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderQAOverview = () => (
-    <div className="mb-4">
-      <div className="card mb-3 bg-card">
-        <div className="card-body">
-          <h5 className="card-title mb-4">QA Tasks Overview</h5>
-
-          <div className="d-none d-lg-block">
-            <div className="table-responsive">
-              <table className="table table-gradient-bg">
-                <thead className="text-white">
-                  <tr>
-                    <th>Task ID</th>
-                    <th>Title</th>
-                    <th>Module</th>
-                    <th>Priority</th>
-                    <th>Created By</th>
-                    <th>Created At</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="text-white">
-                  {filteredTasks.map((task) => (
-                    <tr key={task.id}>
-                      <td>
-                        <code>{task.id}</code>
-                      </td>
-                      <td>{task.title}</td>
-                      <td>{task.module}</td>
-                      <td>
-                        <span
-                          className={`badge ${getPriorityColor(task.priority)}`}
-                        >
-                          {task.priority}
+                    </div>
+                    <div className="d-flex justify-content-between align-items-center mb-3">
+                      <div className="d-flex">
+                        <div className="me-4">
+                          <div className="text-light small mb-1">Handlers</div>
+                          <div className="d-flex align-items-center">
+                            <span className="badge bg-primary bg-opacity-10 text-primary">
+                              {task.handlers}
+                            </span>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-light small mb-1">QA Reviewers</div>
+                          <div className="d-flex align-items-center">
+                            <span className="badge bg-info bg-opacity-10 text-info">
+                              {task.qaReviewers}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-light small mb-1">Files</div>
+                        <span className="badge bg-secondary bg-opacity-10 text-secondary">
+                          {task.fileCount}
                         </span>
-                      </td>
-                      <td>{task.createdBy}</td>
-                      <td>{task.createdAt}</td>
-                      <td>
-                        <span
-                          className={`badge ${getStatusColor(task.status)}`}
-                        >
-                          {task.status}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          className="btn btn-sm btn-outline-primary me-1"
-                          onClick={() => setQuickViewTask(task)}
-                        >
-                          <Eye size={14} /> View
-                        </button>
-                        {task.status === "To Do" && (
-                          <button
-                            className="btn btn-sm btn-success"
-                            onClick={() =>
-                              updateTask(task.id, { status: "In Progress" })
-                            }
-                          >
-                            ✋ Self-Assign
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="d-flex justify-content-between mb-1">
+                        <span className="small fw-medium">Progress</span>
+                        <span className="small fw-medium">{task.progress}%</span>
+                      </div>
+                      <div className="progress">
+                        <div
+                          className="progress-bar bg-primary"
+                          style={{ width: `${task.progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="mb-2">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <span className="small fw-medium">Handler Notes</span>
+                          <button className="btn btn-link btn-sm text-light p-0">
+                            <i className="fas fa-edit small"></i>
                           </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        </div>
+                        <p className="small text-dark
+                         bg-card p-2 rounded mt-1">{task.handlerNote}</p>
+                      </div>
+                      <div>
+                        <div className="d-flex justify-content-between align-items-center">
+                          <span className="small fw-medium">QA Notes</span>
+                          <button className="btn btn-link btn-sm text-light p-0">
+                            <i className="fas fa-edit small"></i>
+                          </button>
+                        </div>
+                        <p className="small text-light bg-card p-2 rounded mt-1">{task.qaNote}</p>
+                      </div>
+                    </div>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <button
+                        onClick={() => openTimeLog(task.id)}
+                        className="btn btn-link text-primary p-0 small"
+                      >
+                        <i className="fas fa-clock me-1"></i> View Time Log
+                      </button>
+                      <div className="d-flex">
+                        <button className="btn btn-link text-light p-0 me-2">
+                          <i className="fas fa-exchange-alt"></i>
+                        </button>
+                        <button className="btn btn-link text-light p-0">
+                          <i className="fas fa-ellipsis-v"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Time Log Modal */}
+        {isTimeLogOpen && selectedProject && (
+          <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            <div className="modal-dialog modal-lg">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title fw-bold">
+                    Time Log: {getProjectById(selectedProject)?.title}
+                  </h5>
+                  <button
+                    onClick={closeTimeLog}
+                    className="btn-close"
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  <div className="mb-4">
+                    <h6 className="fw-medium mb-3">Project Timeline</h6>
+                    <div className="position-relative ps-3">
+                      <div className="position-absolute h-100 border-start" style={{ left: '10px', top: 0 }}></div>
+                      {getProjectById(selectedProject)?.timeline.map((item, index) => (
+                        <div key={index} className="mb-3 d-flex">
+                          <div className="position-relative">
+                            <div className="rounded-circle bg-primary d-flex align-items-center justify-content-center" style={{ width: '20px', height: '20px' }}>
+                              <i className="fas fa-check text-white small"></i>
+                            </div>
+                          </div>
+                          <div className="ms-3">
+                            <div className="small fw-medium">{item.stage}</div>
+                            <div className="text-light small">{item.timestamp}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h6 className="fw-medium mb-3">Resource Time Allocation</h6>
+                    <div className="bg-light rounded p-3">
+                      <div className="row g-3 mb-2 small fw-medium text-light">
+                        <div className="col-md-4">Role</div>
+                        <div className="col-md-4">Team Member</div>
+                        <div className="col-md-4">Hours Spent</div>
+                      </div>
+                      {getProjectById(selectedProject)?.timeSpent.map((resource, index) => (
+                        <div key={index} className="row g-3 py-2 border-top small">
+                          <div className="col-md-4">{resource.role}</div>
+                          <div className="col-md-4 fw-medium">{resource.name}</div>
+                          <div className="col-md-4">{resource.hours} hrs</div>
+                        </div>
+                      ))}
+                      <div className="row g-3 py-2 border-top fw-medium mt-2 small">
+                        <div className="col-md-8">Total Hours</div>
+                        <div className="col-md-4 text-primary">
+                          {getProjectById(selectedProject)?.timeSpent.reduce((total, resource) => total + resource.hours, 0)} hrs
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    onClick={closeTimeLog}
+                    className="btn btn-primary"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
+        )}
+      </div>
+      {/* New Task Modal */}
+{isNewTaskModalOpen && (
+  <div className="modal fade show d-block custom-modal-dark" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+    <div className="modal-dialog ">
+      <div className="modal-content ">
+        <div className="modal-header  ">
+          <h5 className="modal-title">Create New Task</h5>
+          <button 
+            type="button" 
+            className="btn-close" 
+            onClick={() => setIsNewTaskModalOpen(false)}
+          ></button>
+        </div>
+        <div className="modal-body">
+          {/* यहां Form Fields आएंगे */}
+          <div className="mb-3">
+            <label className="form-label">Task Title</label>
+            <input type="text" className="form-control" />
+          </div>
+          <div className="mb-3">
+  <label className="form-label">Description</label>
+  <textarea className="form-control" rows={3}></textarea>
+</div>
+<div className="mb-3">
+  <label className="form-label">Deadline</label>
+  <input type="date" className="form-control" />
+</div>
+          <div className="mb-3">
+            <label className="form-label">Assign To</label>
+            <select className="form-select">
+              <option>Select Team Member</option>
+              <option>Alex Johnson</option>
+              <option>Maria Garcia</option>
+            </select>
+          </div>
+          {/* और Fields... */}
+        </div>
+        <div className="modal-footer">
+          <button 
+            type="button" 
+            className="btn btn-secondary" 
+            onClick={() => setIsNewTaskModalOpen(false)}
+          >
+            Cancel
+          </button>
+          <button 
+            type="button" 
+            className="btn btn-primary"
+          >
+            Save Task
+          </button>
         </div>
       </div>
     </div>
-  );
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case "all-tasks":
-        return renderTaskList();
-      case "time-logs":
-        return renderTimeLog();
-      case "qa-overview":
-        return renderQAOverview();
-      default:
-        return renderTaskList();
-    }
-  };
-
-  return (
-    <div className="container-fluid py-4">
-      {/* Header */}
-      <div className="mb-4">
-        <h2 className="fw-bold text-white">Task Management</h2>
-        <p className="text-white">
-          Manage tasks, track time, and monitor progress
-        </p>
-      </div>
-
-      {/* Navigation Tabs */}
-      <ul className="nav nav-tabs mb-4">
-        {[
-          { id: "all-tasks", label: "All Tasks", icon: CheckCircle2 },
-          { id: "time-logs", label: "Time Logs", icon: Clock },
-          { id: "qa-overview", label: "QA Overview", icon: UserCheck },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <li className="nav-item" key={tab.id}>
-              <button
-                onClick={() => setActiveTab(tab.id)}
-                className={`nav-link d-flex align-items-center gap-1 ${
-                  activeTab === tab.id ? "active" : ""
-                }`}
-              >
-                <Icon size={16} />
-                {tab.label}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-
-      {/* Content */}
-      {renderContent()}
-
-      {/* Add Task Modal */}
-      {showAddTask && (
-        <div
-          className="modal show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-        >
-          <div className="modal-dialog modal-lg custom-modal-dark">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Add New Task</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowAddTask(false)}
-                ></button>
-              </div>
-
-              <div className="modal-body">
-                <div className="mb-3">
-                  <label className="form-label">Task Title</label>
-                  <input
-                    type="text"
-                    placeholder="Enter task title"
-                    value={newTask.title}
-                    onChange={(e) =>
-                      setNewTask({ ...newTask, title: e.target.value })
-                    }
-                    className="form-control"
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">Description</label>
-                  <textarea
-                    placeholder="Enter task description"
-                    value={newTask.description}
-                    onChange={(e) =>
-                      setNewTask({ ...newTask, description: e.target.value })
-                    }
-                    className="form-control"
-                    rows="3"
-                  />
-                </div>
-
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label className="form-label">Project</label>
-                    <select
-                      value={newTask.project}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, project: e.target.value })
-                      }
-                      className="form-select"
-                    >
-                      <option value="">Select project</option>
-                      {projects.map((project) => (
-                        <option key={project} value={project}>
-                          {project}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="col-md-6">
-                    <label className="form-label">Assignee</label>
-                    <select
-                      value={newTask.assignee}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, assignee: e.target.value })
-                      }
-                      className="form-select"
-                    >
-                      <option value="">Select assignee</option>
-                      {teamMembers.map((member) => (
-                        <option key={member} value={member}>
-                          {member}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="row mb-3">
-                  <div className="col-md-4">
-                    <label className="form-label">Status</label>
-                    <select
-                      value={newTask.status}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, status: e.target.value })
-                      }
-                      className="form-select"
-                    >
-                      {statuses.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="col-md-4">
-                    <label className="form-label">Priority</label>
-                    <select
-                      value={newTask.priority}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, priority: e.target.value })
-                      }
-                      className="form-select"
-                    >
-                      {priorities.map((priority) => (
-                        <option key={priority} value={priority}>
-                          {priority}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="col-md-4">
-                    <label className="form-label">Category</label>
-                    <select
-                      value={newTask.category}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, category: e.target.value })
-                      }
-                      className="form-select"
-                    >
-                      {categories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label className="form-label">Module</label>
-                    <select
-                      value={newTask.module}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, module: e.target.value })
-                      }
-                      className="form-select"
-                    >
-                      <option value="">Select module</option>
-                      {modules.map((module) => (
-                        <option key={module} value={module}>
-                          {module}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="col-md-6">
-                    <label className="form-label">Created By</label>
-                    <select
-                      value={newTask.createdBy}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, createdBy: e.target.value })
-                      }
-                      className="form-select"
-                    >
-                      <option value="">Select creator</option>
-                      {teamMembers.map((member) => (
-                        <option key={member} value={member}>
-                          {member}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label className="form-label">Due Date</label>
-                    <input
-                      type="date"
-                      value={newTask.dueDate}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, dueDate: e.target.value })
-                      }
-                      className="form-control"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="modal-footer">
-                <button
-                  onClick={() => setShowAddTask(false)}
-                  className="btn btn-secondary"
-                >
-                  Cancel
-                </button>
-                <button onClick={addTask} className="btn btn-primary">
-                  Add Task
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Task Modal */}
-      {editingTask && (
-        <div
-          className="modal show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-        >
-          <div className="modal-dialog modal-lg custom-modal-dark">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Edit Task</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setEditingTask(null)}
-                ></button>
-              </div>
-
-              <div className="modal-body">
-                <div className="mb-3">
-                  <label className="form-label">Task Title</label>
-                  <input
-                    type="text"
-                    value={editingTask.title}
-                    onChange={(e) =>
-                      setEditingTask({ ...editingTask, title: e.target.value })
-                    }
-                    className="form-control"
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">Description</label>
-                  <textarea
-                    value={editingTask.description}
-                    onChange={(e) =>
-                      setEditingTask({
-                        ...editingTask,
-                        description: e.target.value,
-                      })
-                    }
-                    className="form-control"
-                    rows="3"
-                  />
-                </div>
-
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label className="form-label">Project</label>
-                    <select
-                      value={editingTask.project}
-                      onChange={(e) =>
-                        setEditingTask({
-                          ...editingTask,
-                          project: e.target.value,
-                        })
-                      }
-                      className="form-select"
-                    >
-                      {projects.map((project) => (
-                        <option key={project} value={project}>
-                          {project}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="col-md-6">
-                    <label className="form-label">Assignee</label>
-                    <select
-                      value={editingTask.assignee}
-                      onChange={(e) =>
-                        setEditingTask({
-                          ...editingTask,
-                          assignee: e.target.value,
-                        })
-                      }
-                      className="form-select"
-                    >
-                      {teamMembers.map((member) => (
-                        <option key={member} value={member}>
-                          {member}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="row mb-3">
-                  <div className="col-md-4">
-                    <label className="form-label">Status</label>
-                    <select
-                      value={editingTask.status}
-                      onChange={(e) =>
-                        setEditingTask({
-                          ...editingTask,
-                          status: e.target.value,
-                        })
-                      }
-                      className="form-select"
-                    >
-                      {statuses.map((status) => (
-                        <option key={status} value={status}>
-                          {status}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="col-md-4">
-                    <label className="form-label">Priority</label>
-                    <select
-                      value={editingTask.priority}
-                      onChange={(e) =>
-                        setEditingTask({
-                          ...editingTask,
-                          priority: e.target.value,
-                        })
-                      }
-                      className="form-select"
-                    >
-                      {priorities.map((priority) => (
-                        <option key={priority} value={priority}>
-                          {priority}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="col-md-4">
-                    <label className="form-label">Category</label>
-                    <select
-                      value={editingTask.category}
-                      onChange={(e) =>
-                        setEditingTask({
-                          ...editingTask,
-                          category: e.target.value,
-                        })
-                      }
-                      className="form-select"
-                    >
-                      {categories.map((category) => (
-                        <option key={category} value={category}>
-                          {category}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label className="form-label">Module</label>
-                    <select
-                      value={editingTask.module}
-                      onChange={(e) =>
-                        setEditingTask({
-                          ...editingTask,
-                          module: e.target.value,
-                        })
-                      }
-                      className="form-select"
-                    >
-                      {modules.map((module) => (
-                        <option key={module} value={module}>
-                          {module}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="col-md-6">
-                    <label className="form-label">Created By</label>
-                    <select
-                      value={editingTask.createdBy}
-                      onChange={(e) =>
-                        setEditingTask({
-                          ...editingTask,
-                          createdBy: e.target.value,
-                        })
-                      }
-                      className="form-select"
-                    >
-                      {teamMembers.map((member) => (
-                        <option key={member} value={member}>
-                          {member}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label className="form-label">Due Date</label>
-                    <input
-                      type="date"
-                      value={editingTask.dueDate}
-                      onChange={(e) =>
-                        setEditingTask({
-                          ...editingTask,
-                          dueDate: e.target.value,
-                        })
-                      }
-                      className="form-control"
-                    />
-                  </div>
-
-                  <div className="col-md-6">
-                    <label className="form-label">QA Status</label>
-                    <select
-                      value={editingTask.qaStatus}
-                      onChange={(e) =>
-                        setEditingTask({
-                          ...editingTask,
-                          qaStatus: e.target.value,
-                        })
-                      }
-                      className="form-select"
-                    >
-                      <option value="Not Started">Not Started</option>
-                      <option value="Pending">Pending</option>
-                      <option value="In Review">In Review</option>
-                      <option value="Passed">Passed</option>
-                      <option value="Failed">Failed</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <div className="modal-footer">
-                <button
-                  onClick={() => setEditingTask(null)}
-                  className="btn btn-secondary"
-                >
-                  Cancel
-                </button>
-                <button onClick={saveEditedTask} className="btn btn-primary">
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Quick View Modal */}
-      {quickViewTask && (
-        <div
-          className="modal show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
-        >
-          <div className="modal-dialog">
-            <div className="modal-content bg-card">
-              <div className="modal-header">
-                <h5 className="modal-title">Task Details</h5>
-                <button
-                  type="button"
-                  className="btn-close text-white"
-                  onClick={() => setQuickViewTask(null)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <div className="mb-3">
-                  <h5>{quickViewTask.title}</h5>
-                  <p className="">{quickViewTask.description}</p>
-                </div>
-
-                <div className="mb-3">
-                  <div className="d-flex justify-content-between mb-2">
-                    <span className="fw-medium">Status:</span>
-                    <span
-                      className={`badge ${getStatusColor(
-                        quickViewTask.status
-                      )}`}
-                    >
-                      {quickViewTask.status}
-                    </span>
-                  </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span className="fw-medium">Priority:</span>
-                    <span
-                      className={`badge ${getPriorityColor(
-                        quickViewTask.priority
-                      )}`}
-                    >
-                      {quickViewTask.priority}
-                    </span>
-                  </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span className="fw-medium">Assignee:</span>
-                    <span>{quickViewTask.assignee}</span>
-                  </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span className="fw-medium">Project:</span>
-                    <span>{quickViewTask.project}</span>
-                  </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span className="fw-medium">Category:</span>
-                    <span>{quickViewTask.category}</span>
-                  </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span className="fw-medium">Module:</span>
-                    <span>{quickViewTask.module}</span>
-                  </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span className="fw-medium">Created By:</span>
-                    <span>{quickViewTask.createdBy}</span>
-                  </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span className="fw-medium">Created At:</span>
-                    <span>{quickViewTask.createdAt}</span>
-                  </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span className="fw-medium">Due Date:</span>
-                    <span>{quickViewTask.dueDate}</span>
-                  </div>
-                  <div className="d-flex justify-content-between mb-2">
-                    <span className="fw-medium">Time Spent:</span>
-                    <span>{formatTime(quickViewTask.timeSpent)}</span>
-                  </div>
-                  <div className="d-flex justify-content-between">
-                    <span className="fw-medium">QA Status:</span>
-                    <span
-                      className={`badge ${getQAStatusColor(
-                        quickViewTask.qaStatus
-                      )}`}
-                    >
-                      {quickViewTask.qaStatus}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  onClick={() => setQuickViewTask(null)}
-                  className="btn btn-secondary"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+  </div>
+)}
     </div>
   );
 };
 
-export default TaskManagement;
+export default TaskManagemnet;

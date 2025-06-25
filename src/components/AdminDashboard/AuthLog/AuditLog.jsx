@@ -81,6 +81,28 @@ const AuditLog = () => {
       device: "Chrome 125.0 / Linux",
       details: "Generated monthly performance analytics report",
     },
+      {
+      id: 4,
+      timestamp: "2024-06-17 14:15:33",
+      user: "Emily Davis",
+      role: "Admin",
+      activity: "Settings Changed",
+      module: "System Settings",
+      ipAddress: "192.168.1.115",
+      device: "Edge 124.0 / Windows 11",
+      details: "Modified security settings and password policies",
+    },
+    {
+      id: 5,
+      timestamp: "2024-06-17 14:10:15",
+      user: "Robert Brown",
+      role: "Manager",
+      activity: "Report Generated",
+      module: "Analytics",
+      ipAddress: "192.168.1.120",
+      device: "Chrome 125.0 / Linux",
+      details: "Generated monthly performance analytics report",
+    },
   ];
 
   const loginLogoutData = [
@@ -134,6 +156,7 @@ const AuditLog = () => {
       ipAddress: "192.168.1.120",
       device: "Chrome 125.0 / Linux",
     },
+    
   ];
 
   const changesHistoryData = [
@@ -202,6 +225,8 @@ const AuditLog = () => {
         after: { role: "Manager", permissions: ["read", "write", "manage"] },
       },
     },
+
+    
   ];
 
   const roles = ["Admin", "Manager", "User"];
@@ -464,9 +489,10 @@ const AuditLog = () => {
 
               {/* Table - Desktop View */}
               <div className="card  d-none  d-lg-block">
-                <div className="table-responsive ">
+                <div  className="table-responsive"
+    style={{ maxHeight: "400px", overflowY: "auto" }}>
                   <table className="table table-hover mb-0 table-gradient-bg">
-                    <thead className="table-light">
+                    <thead className="table-light bg-dark  sticky-top">
                       <tr>
                         {activeTab === "all-activities" && (
                           <>

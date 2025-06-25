@@ -269,9 +269,13 @@ function ResourceWorkload() {
                 <h2 className="h5 mb-0">Task Workload</h2>
               </div>
               <div className="card-body p-0">
-                <div className="table-responsive table-gradient-bg">
-                  <table className="table table-hover mb-0">
-  <thead>
+                <div className="table-responsive table-gradient-bg"
+                 
+    style={{ maxHeight: "400px", overflowY: "auto" }}
+                
+                >
+                  <table className="table table-hover  mb-0">
+  <thead className='bg-dark  sticky-top'>
     <tr>
       <th>ID</th>
       <th>Task</th>

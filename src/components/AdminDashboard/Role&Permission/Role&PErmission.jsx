@@ -13,8 +13,9 @@ const RoleManagementSystem = () => {
   const [newRole, setNewRole] = useState({ roleName: '', description: '' });
 
   const [roles, setRoles] = useState([
-    { _id: '1', roleName: 'Admin', description: 'Full Access' },
-    { _id: '2', roleName: 'Manager', description: 'Limited Access' },
+    { _id: "1", roleName: "Admin", description: "Full Access" },
+    { _id: "2", roleName: "Manager", description: "Limited Access" },
+    { _id: "3", roleName: "Team Member", description: "Custom Access" },
   ]);
 
   const dummyPermissions = {
@@ -181,13 +182,18 @@ const RoleManagementSystem = () => {
           <button className="btn btn-primary btn-sm d-flex align-items-center gap-1" onClick={handleOpenAddRoleModal}>
             <Plus size={16} /> Add Role
           </button>
+
+        
+          
         </div>
+        
       </div>
 
       <div className="card-body p-0">
-        <div className="table-responsive">
+        <div className="table-responsive"
+    style={{ maxHeight: "400px", overflowY: "auto" }}>
           <table className="table align-middle table-hover table-borderless mb-0 text-center table-gradient-bg">
-            <thead className="table-light">
+            <thead className="table-light bg-dark  sticky-top">
               <tr>
                 <th>Role</th>
                 <th>Type</th>
@@ -340,8 +346,21 @@ const RoleManagementSystem = () => {
                 onChange={(e) => setNewRole({ ...newRole, description: e.target.value })}
               />
             </div>
+
+       
+
+
+
+
+
+
           </form>
         </Modal.Body>
+
+
+
+
+        
         <Modal.Footer>
           <button className="btn btn-secondary" onClick={handleCloseAddRoleModal}>
             Cancel

@@ -14,7 +14,9 @@ const ReportingAnalytics = () => {
     { id: 2, name: 'Mobile App Development', owner: 'Jane Smith', progress: 45, status: 'Delayed', priority: 'Critical', dueDate: '2025-06-30' },
     { id: 3, name: 'Database Migration', owner: 'Mike Johnson', progress: 100, status: 'Completed', priority: 'Medium', dueDate: '2025-06-10' },
     { id: 4, name: 'API Integration', owner: 'Sarah Wilson', progress: 70, status: 'On Track', priority: 'High', dueDate: '2025-07-20' },
-    { id: 5, name: 'Security Audit', owner: 'David Brown', progress: 25, status: 'Delayed', priority: 'Critical', dueDate: '2025-06-25' }
+    { id: 5, name: 'Security Audit', owner: 'David Brown', progress: 25, status: 'Delayed', priority: 'Critical', dueDate: '2025-06-25' },
+        
+    
   ];
 
   const workloadData = [
@@ -32,7 +34,8 @@ const ReportingAnalytics = () => {
     { name: 'Jane Smith', completedTasks: 42, onTimePercentage: 88, hoursLogged: 155, role: 'Full Stack Developer', performance: 'High Performer' },
     { name: 'Mike Johnson', completedTasks: 35, onTimePercentage: 85, hoursLogged: 140, role: 'Backend Developer', performance: 'Good Performer' },
     { name: 'Sarah Wilson', completedTasks: 38, onTimePercentage: 90, hoursLogged: 150, role: 'UI/UX Designer', performance: 'High Performer' },
-    { name: 'David Brown', completedTasks: 30, onTimePercentage: 78, hoursLogged: 135, role: 'DevOps Engineer', performance: 'Average Performer' }
+    { name: 'David Brown', completedTasks: 30, onTimePercentage: 78, hoursLogged: 135, role: 'DevOps Engineer', performance: 'Average Performer' },
+    
   ];
 
   const missedDeadlineData = [
@@ -144,43 +147,55 @@ const ReportingAnalytics = () => {
         </div>
       </div>
 
-      <div className="table-responsive ">
-       <table className="table text-white analytics-project-table table-gradient-bg ">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Project Name</th>
-      <th>Owner</th>
-      <th>Progress</th>
-      <th>Status</th>
-      <th>Priority</th>
-      <th>Due Date</th>
-    </tr>
-  </thead>
-  <tbody>
-    {projectData.map(project => (
-      <tr key={project.id} className="analytics-project-row">
-        <td>{project.id}</td>
-        <td className="text-dark analytics-project-name">{project.name}</td>
-        <td>{project.owner}</td>
-        <td>
-          <div className="progress analytics-progress-bar" style={{height: '20px'}}>
-            <div 
-              className="progress-bar analytics-progress-fill bg-primary" 
-              style={{width: `${project.progress}%`}}
-            >
-              {project.progress}%
-            </div>
-          </div>
-        </td>
-        <td><span className={getStatusBadgeClass(project.status)}>{project.status}</span></td>
-        <td><span className={getPriorityBadgeClass(project.priority)}>{project.priority}</span></td>
-        <td>{project.dueDate}</td>
+    <div
+  className="table-responsive"
+    style={{ maxHeight: "400px", overflowY: "auto" }}
+>
+  <table className="table text-white analytics-project-table table-gradient-bg table-hover table-bordered mb-0">
+    <thead className="table-light bg-dark sticky-top">
+      <tr>
+        <th>ID</th>
+        <th>Project Name</th>
+        <th>Owner</th>
+        <th>Progress</th>
+        <th>Status</th>
+        <th>Priority</th>
+        <th>Due Date</th>
       </tr>
-    ))}
-  </tbody>
-</table>
-      </div>
+    </thead>
+    <tbody>
+      {projectData.map(project => (
+        <tr key={project.id} className="analytics-project-row">
+          <td>{project.id}</td>
+          <td className="text-dark analytics-project-name">{project.name}</td>
+          <td>{project.owner}</td>
+          <td>
+            <div className="progress analytics-progress-bar" style={{ height: '20px' }}>
+              <div
+                className="progress-bar analytics-progress-fill bg-primary"
+                style={{ width: `${project.progress}%` }}
+              >
+                {project.progress}%
+              </div>
+            </div>
+          </td>
+          <td>
+            <span className={getStatusBadgeClass(project.status)}>
+              {project.status}
+            </span>
+          </td>
+          <td>
+            <span className={getPriorityBadgeClass(project.priority)}>
+              {project.priority}
+            </span>
+          </td>
+          <td>{project.dueDate}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
     </div>
   );
 
@@ -275,9 +290,10 @@ const ReportingAnalytics = () => {
 
       <div className="row">
         <div className="col-lg-8">
-          <div className="table-responsive">
+          <div className="table-responsive"
+    style={{ maxHeight: "400px", overflowY: "auto" }}>
           <table className="table analytics-performance-table table-gradient-bg">
-  <thead className="text-white">
+  <thead className="text-white bg-dark  sticky-top">
     <tr>
       <th>ID</th>
       <th>Team Member</th>
@@ -354,9 +370,10 @@ const ReportingAnalytics = () => {
         </div>
       </div>
 
-      <div className="table-responsive">
+      <div  className="table-responsive"
+    style={{ maxHeight: "400px", overflowY: "auto" }}>
         <table className="table table-striped analytics-deadline-table table-gradient-bg">
-  <thead className="text-white">
+  <thead className="text-white bg-dark  sticky-top">
     <tr>
       <th>ID</th>
       <th>Task Name</th>
@@ -586,9 +603,10 @@ const ReportingAnalytics = () => {
               </div>
             </div>
             <div className="card-body bg-card">
-              <div className="table-responsive">
+              <div  className="table-responsive"
+    style={{ maxHeight: "400px", overflowY: "auto" }}>
                <table className="table table-sm analytics-preview-table table-gradient-bg">
-  <thead className="text-white">
+  <thead className="text-white bg-dark  sticky-top">
     <tr>
       <th>ID</th>
       <th>Task Name</th>
