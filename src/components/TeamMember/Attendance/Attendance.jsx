@@ -426,12 +426,13 @@ const Attendance = () => {
                         </span>
                       </td>
                       <td className="text-center mt-2">
-                        <button
-                          onClick={() => handleEmployeeSelect(employee.id)}
-                          className="btn btn-sm btn-info "
-                        >
-                          <Eye size={14} className="me-1 " />
-                        </button>
+                       <button
+  onClick={() => handleEmployeeSelect(employee.id)}
+  className="btn btn-sm btn-info"
+>
+  <i className="fas fa-eye me-1"></i> View
+</button>
+
                       </td>
                     </tr>
                   ))}
