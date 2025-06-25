@@ -302,7 +302,7 @@ function Collaboration() {
                                         
                                         {/* Attachments */}
                                         {message.attachments.length > 0 && (
-                                            <div className="mb-2 text-dark">
+                                            <div className="mb-2 text-white">
                                                 {message.attachments.map((file, idx) => (
                                                     <div 
                                                         key={idx} 
@@ -311,12 +311,12 @@ function Collaboration() {
                                                         <i className="fas fa-file me-2"></i>
                                                         <div className="flex-grow-1">
                                                             <div>{file.name}</div>
-                                                            <small className={message.sender === 'You' ? 'text-dark' : 'text-dark'}>
+                                                            <small className={message.sender === 'You' ? 'text-white' : 'text-white'}>
                                                                 {formatFileSize(file.size)}
                                                             </small>
                                                         </div>
                                                         <button className="btn btn-link p-0 ms-2">
-                                                            <i className={`fas fa-download ${message.sender === 'You' ? 'text-white-50' : 'text-muted'}`}></i>
+                                                            <i className={`fas fa-download ${message.sender === 'You' ? 'text-white' : 'text-white'}`}></i>
                                                         </button>
                                                     </div>
                                                 ))}
@@ -329,7 +329,7 @@ function Collaboration() {
                                                 {message.reactions.map((reaction, idx) => (
                                                     <button 
                                                         key={idx} 
-                                                        className={`btn btn-sm p-0 px-1 rounded-pill ${reaction.reacted ? 'bg-white text-dark' : message.sender === 'You' ? 'bg-white-10' : 'bg-light'}`}
+                                                        className={`btn btn-sm p-0 px-1 rounded-pill ${reaction.reacted ? 'bg-white ' : message.sender === 'You' ? 'bg-white-10' : 'bg-light'}`}
                                                         onClick={() => handleReaction(message.id, reaction.emoji)}
                                                     >
                                                         <span>{reaction.emoji}</span> 
@@ -360,7 +360,7 @@ function Collaboration() {
                                             <div className="typing-dot"></div>
                                             <div className="typing-dot"></div>
                                         </div>
-                                        <small className="ms-2 text-muted">typing...</small>
+                                        <small className="ms-2">typing...</small>
                                     </div>
                                 </div>
                             </div>
@@ -376,10 +376,10 @@ function Collaboration() {
                                 value={newMessage}
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 onKeyDown={handleKeyDown}
-                                className="form-control mb-2 bg-card"
+                                className="form-control text-white mb-2 bg-card"
                                 rows="2"
                                 placeholder="Type your message here..."
-                                style={{ resize: 'none' }}
+                                style={{ color: 'white' , resize: 'none' }}
                             ></textarea>
                             <div className="d-flex justify-content-between align-items-center">
                                 <div>

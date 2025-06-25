@@ -211,102 +211,97 @@ const Assigned = () => {
 
   return (
     <div className="min-vh-100 bg-main p-3 mt-0">
-      <div className="d-flex flex-column  flex-md-row align-items-center justify-content-between py-3">
-        <h1 className=" gradient-heading ms-3 mt-3  ">
+      {/* Header */}
+      <div className="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between py-3 gap-2 gap-md-0">
+        <h1 className="gradient-heading ms-0 ms-md-3 mt-2 mt-md-3 mb-2 mb-md-0 text-center text-md-start">
           Assigned Projects
         </h1>
-        <Form.Group
-          controlId="searchProjects"
-          className="position-relative w-25 justify-content-center justify-content-end"
-        >
-          <Form.Control
-            type="text"
-            placeholder="Search projects..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="ps-4"
-          />
-        </Form.Group>
-
-        <div className="d-flex  align-items-center gap-2">
-          <Button
-            variant="btn btn-secondary"
-            onClick={() => setShowFilters(!showFilters)}
-            className="d-flex align-items-center rounded-5"
+        <div className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2 w-100 w-md-auto">
+          <Form.Group
+            controlId="searchProjects"
+            className="position-relative flex-grow-1"
           >
-            <Filter className="me-2" />
-            Filters
-          </Button>
-          <Button
-        
-            onClick={() => setShowAddModal(true)}
-            className="d-flex align-items-center gradient-button"
-          >
-            <Plus className="me-2" />
-            Assined Project
-          </Button>
-        </div>
-      </div>
-      {/* Header */}
-      <header className=" shadow-sm  ">
-        <div>
-          {/* Search and filters */}
-          <div className="">
-            {showFilters && (
-              <Row className="g-3">
-                <Col md={4}>
-                  <Form.Group controlId="sortBy">
-                    <Form.Label className="text-white">Sort by</Form.Label>
-                    <Form.Select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                    >
-                      <option value="dueDate">Due Date</option>
-                      <option value="priority">Priority</option>
-                      <option value="progress">Progress</option>
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group controlId="filterStatus">
-                    <Form.Label className="text-white">Status</Form.Label>
-                    <Form.Select
-                      value={filterStatus}
-                      onChange={(e) => setFilterStatus(e.target.value)}
-                    >
-                      <option value="All">All Statuses</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="Planning">Planning</option>
-                      <option value="On Hold">On Hold</option>
-                      <option value="Completed">Completed</option>
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group controlId="filterPriority">
-                    <Form.Label className="text-white">Priority</Form.Label>
-                    <Form.Select
-                      value={filterPriority}
-                      onChange={(e) => setFilterPriority(e.target.value)}
-                    >
-                      <option value="All">All Priorities</option>
-                      <option value="High">High</option>
-                      <option value="Medium">Medium</option>
-                      <option value="Low">Low</option>
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-              </Row>
-            )}
+            <Form.Control
+              type="text"
+              placeholder="Search projects..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              className="ps-4"
+            />
+          </Form.Group>
+          <div className="d-flex gap-2 mt-2 mt-sm-0">
+            <Button
+              variant="btn btn-secondary"
+              onClick={() => setShowFilters(!showFilters)}
+              className="d-flex align-items-center rounded-5"
+            >
+              <Filter className="me-2" />
+              Filters
+            </Button>
+            <Button
+              onClick={() => setShowAddModal(true)}
+              className="d-flex align-items-center gradient-button"
+            >
+              <Plus className="me-2" />
+              Assigned Project
+            </Button>
           </div>
         </div>
-      </header>
+      </div>
+
+      {/* Filters */}
+      {showFilters && (
+        <Row className="g-3 mb-3">
+          <Col xs={12} md={4}>
+            <Form.Group controlId="sortBy">
+              <Form.Label className="text-white">Sort by</Form.Label>
+              <Form.Select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="dueDate">Due Date</option>
+                <option value="priority">Priority</option>
+                <option value="progress">Progress</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col xs={12} md={4}>
+            <Form.Group controlId="filterStatus">
+              <Form.Label className="text-white">Status</Form.Label>
+              <Form.Select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <option value="All">All Statuses</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Planning">Planning</option>
+                <option value="On Hold">On Hold</option>
+                <option value="Completed">Completed</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col xs={12} md={4}>
+            <Form.Group controlId="filterPriority">
+              <Form.Label className="text-white">Priority</Form.Label>
+              <Form.Select
+                value={filterPriority}
+                onChange={(e) => setFilterPriority(e.target.value)}
+              >
+                <option value="All">All Priorities</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+        </Row>
+      )}
 
       {/* Main content */}
-      <div className="py-4 ">
-        <Container>
+      <div className="py-4">
+        <Container fluid>
           {filteredProjects.length > 0 ? (
-            <Row xs={1} md={2} lg={3} className="g-4">
+            <Row xs={1} sm={2} md={3} className="g-4">
               {filteredProjects.map((project) => (
                 <Col key={project.id}>
                   <Card className="h-100 shadow-sm bg-card">
