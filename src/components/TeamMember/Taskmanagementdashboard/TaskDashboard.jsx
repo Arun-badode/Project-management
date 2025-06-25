@@ -233,7 +233,7 @@ const handleEditChange = (e) => {
     <div className="min-vh-100 bg-light bg-main py-4 px-2 px-md-4">
       <div className="container-fluid" style={{ maxWidth: 1200 }}>
         <header className="mb-4">
-          <h1 className="gradient-heading">My Task Dashboard</h1>
+          <h2 className="gradient-heading">My Task Dashboard</h2>
           <p className="text-white">
             Today is {today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
