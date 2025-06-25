@@ -1,9 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const Navbar = ({ toggleSidebar }) => {
+const Navbar = ({ toggleSidebar, role }) => {
   return (
+    
     <nav className="navbar navbar-expand-lg navbar-light bg-card sticky-top">
+      
       <div className="container-fluid px-3">
         {/* Brand and Toggle Button */}
         <div className="d-flex align-items-center">
@@ -27,7 +29,7 @@ const Navbar = ({ toggleSidebar }) => {
         {/* Search Bar - Hidden on small screens, shown on medium and up */}
          <div className="d-none d-md-flex flex-grow-1 justify-content-center mx-3">
       {/* Desktop Search */}
-      <div className="position-relative" style={{ maxWidth: "500px", width: "100%" }}>
+      {/* <div className="position-relative" style={{ maxWidth: "500px", width: "100%" }}>
         <input
           type="text"
           placeholder="Search..."
@@ -48,10 +50,10 @@ const Navbar = ({ toggleSidebar }) => {
             pointerEvents: "none"
           }}
         ></i>
-      </div>
+      </div> */}
 
       {/* Mobile Search (collapsed by default) */}
-      <div
+      {/* <div
         className="collapse d-md-none position-absolute top-100 start-50 translate-middle-x mt-1"
         id="mobileSearch"
         style={{ zIndex: 1050, width: "90%" }}
@@ -78,7 +80,7 @@ const Navbar = ({ toggleSidebar }) => {
             }}
           ></i>
         </div>
-      </div>
+      </div> */}
     </div>
 
         {/* Mobile Search Bar - Shows in center space when toggled */}
@@ -87,7 +89,7 @@ const Navbar = ({ toggleSidebar }) => {
         {/* Right Side Icons */}
         <div className="d-flex align-items-center">
           {/* Search Icon for Mobile - Only shown on small screens */}
-          <button
+          {/* <button
             className="btn btn-link text-white p-2 d-md-none me-2"
             style={{ fontSize: "20px", textDecoration: "none" }}
             data-bs-toggle="collapse"
@@ -97,10 +99,10 @@ const Navbar = ({ toggleSidebar }) => {
             aria-label="Toggle Search"
           >
             <i className="fa fa-search"></i>
-          </button>
+          </button> */}
 
           {/* Notification Bell */}
-
+  {(role === "Manager" || role === "Team Member") && (
           <div class="form-check form-switch">
             <input
               class="form-check-input"
@@ -115,7 +117,7 @@ const Navbar = ({ toggleSidebar }) => {
               id="statusLabel"
             ></label>
           </div>
-
+  )}
           <a
             className="btn btn-link text-white p-2 me-2"
             href="#"
@@ -155,6 +157,7 @@ const Navbar = ({ toggleSidebar }) => {
                   Profile
                 </Link>
               </li>
+              
               <li>
                 <Link className="dropdown-item py-2" to="/changepassword">
                   <i className="fa fa-lock me-2"></i>
