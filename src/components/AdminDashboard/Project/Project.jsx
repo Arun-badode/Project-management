@@ -1,472 +1,390 @@
-import React, { useState } from "react";
-import {
-  Card,
-  Button,
-  Table,
-  Badge,
-  Modal,
-  Form,
-} from "react-bootstrap";
-import { FaPlus, FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import React, { useState, useEffect } from 'react';
+import { 
+  Container, Button, Form, InputGroup, Row, Col, 
+  Card, Nav, Tab, Table, Badge, Modal 
+} from 'react-bootstrap';
 
-// Define arrays used in random project generation
-const platforms = ["Web", "Mobile", "Desktop"];
-const statuses = ["In Progress", "Completed", "On Hold"];
-const handlers = ["Alice", "Bob", "Charlie", "David"];
-// const processStatuses = ["Pending", "Completed", "Delayed"];
-const qaReviewers = ["Eve", "Mallory", "Trent"];
-const qaStatuses = ["Passed", "Failed", "In Review"];
+function Project() {
+  // State for projects data
+  const [projects, setProjects] = useState([]);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('created');
+  
+  // State for file count modal
+  const [showFileModal, setShowFileModal] = useState(false);
+  const [currentProject, setCurrentProject] = useState(null);
+  const [fileCount, setFileCount] = useState(0);
+  
+  // State for new project form
+  const [projectData, setProjectData] = useState({
+    name: '',
+    description: '',
+    dueDate: '',
+    team: []
+  });
+  const [teamMember, setTeamMember] = useState('');
 
-const Project = () => {
-  const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [editProject, setEditProject] = useState(null);
-
-  const handleShow = () => setShowModal(true);
-  const handleClose = () => setShowModal(false);
-
-  const handleView = (project) => {
-    setSelectedProject(project);
-    setShowViewModal(true);
-  };
-
-  const handleEdit = (project) => {
-    setEditProject(project);
-    setShowEditModal(true);
-  };
-
-  const generateRandomProjects = (count) => {
-    const clients = [
-      "Acme Corp",
-      "Globex",
-      "Soylent",
-      "Initech",
-      "Umbrella",
-      "Wayne Ent",
-      "Stark Ind",
-      "Oscorp",
+  // Load sample data on component mount
+  useEffect(() => {
+    const sampleProjects = [
+      {
+        id: 1,
+        name: 'E-commerce Website',
+        description: 'Development of online shopping platform',
+        status: 'created',
+        files: 24,
+        createdDate: '2023-05-15',
+        dueDate: '2023-08-30',
+        team: ['John', 'Sarah', 'Mike']
+      },
+      {
+        id: 2,
+        name: 'Mobile App Redesign',
+        description: 'UI/UX overhaul for customer app',
+        status: 'completed',
+        files: 18,
+        createdDate: '2023-03-10',
+        completedDate: '2023-06-25',
+        team: ['Sarah', 'David']
+      },
+      {
+        id: 3,
+        name: 'Database Migration',
+        description: 'Moving from MySQL to PostgreSQL',
+        status: 'created',
+        files: 32,
+        createdDate: '2023-06-01',
+        dueDate: '2023-09-15',
+        team: ['Mike', 'Lisa', 'John']
+      }
     ];
+    setProjects(sampleProjects);
+  }, []);
 
-    const projects = [];
-    const today = new Date();
+  // Add Ctrl+F shortcut for search
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        document.getElementById('projectSearch').focus();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
-    for (let i = 0; i < count; i++) {
-      const randomDays = Math.floor(Math.random() * 30) + 1;
-      const dueDate = new Date(today);
-      dueDate.setDate(today.getDate() + randomDays);
-
-      const qcDeadline = new Date(dueDate);
-      qcDeadline.setDate(dueDate.getDate() - 2);
-
-      const qcDueDate = new Date(qcDeadline);
-      qcDueDate.setDate(qcDeadline.getDate() + 1);
-
-      projects.push({
-        id: i + 1,
-        title: `Project ${i + 1}`,
-        client: clients[Math.floor(Math.random() * clients.length)],
-        tasks: Math.floor(Math.random() * 10) + 1,
-        languages: Math.floor(Math.random() * 5) + 1,
-        platform: platforms[Math.floor(Math.random() * platforms.length)],
-        pages: Math.floor(Math.random() * 200) + 50,
-        dueDate: dueDate.toISOString().split("T")[0],
-        qcDeadline: qcDeadline.toISOString().split("T")[0],
-        qcHours: Math.floor(Math.random() * 24) + 1,
-        qcDueDate: qcDueDate.toISOString().split("T")[0],
-        status: statuses[Math.floor(Math.random() * statuses.length)],
-        handler: handlers[Math.floor(Math.random() * handlers.length)],
-        // processStatus:
-        //   processStatuses[Math.floor(Math.random() * processStatuses.length)],
-        qaReviewer: qaReviewers[Math.floor(Math.random() * qaReviewers.length)],
-        qaStatus: qaStatuses[Math.floor(Math.random() * qaStatuses.length)],
-        serverPath: `/server/path/project${i + 1}`,
-      });
-    }
-
-    return projects;
+  // Handle project creation
+  const handleCreateProject = (e) => {
+    e.preventDefault();
+    setProjects([...projects, {
+      ...projectData,
+      id: projects.length + 1,
+      status: 'created',
+      files: 0,
+      createdDate: new Date().toISOString().split('T')[0]
+    }]);
+    setProjectData({
+      name: '',
+      description: '',
+      dueDate: '',
+      team: []
+    });
+    setShowCreateModal(false);
   };
 
-  const projects = generateRandomProjects(15);
+  // Mark project as completed
+  const markAsCompleted = (projectId) => {
+    setProjects(projects.map(project => 
+      project.id === projectId 
+        ? { ...project, status: 'completed', completedDate: new Date().toISOString().split('T')[0] } 
+        : project
+    ));
+  };
+
+  // Update file count for a project
+  const updateFileCount = () => {
+    setProjects(projects.map(project => 
+      project.id === currentProject.id 
+        ? { ...project, files: fileCount } 
+        : project
+    ));
+    setShowFileModal(false);
+  };
+
+  // Add team member to new project
+  const addTeamMember = () => {
+    if (teamMember && !projectData.team.includes(teamMember)) {
+      setProjectData({
+        ...projectData,
+        team: [...projectData.team, teamMember]
+      });
+      setTeamMember('');
+    }
+  };
+
+  // Remove team member from new project
+  const removeTeamMember = (member) => {
+    setProjectData({
+      ...projectData,
+      team: projectData.team.filter(m => m !== member)
+    });
+  };
+
+  // Filter projects based on search term and active tab
+  const filteredProjects = projects.filter(project => {
+    const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         project.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTab = activeTab === 'created' ? project.status === 'created' : project.status === 'completed';
+    return matchesSearch && matchesTab;
+  });
 
   return (
-    <div className="admin-dashboard text-white p-3 p-md-4 bg-main">
-      {/* Header */}
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-        <h2 className="gradient-heading">All Project</h2>
-        <div className="d-flex flex-column flex-sm-row gap-2">
-          <Button className="gradient-button"><i class="fa-solid fa-download me-2"></i>Black Excel Download</Button>  
-          <Button className="gradient-button"><i class="fa-solid fa-upload me-2"></i>Import Excel</Button>
-           <Button className="gradient-button"><i class="fa-solid fa-download me-2"></i>Download Excel</Button>
-          <Button className="gradient-button" onClick={handleShow}>
-            <FaPlus className="me-2" /> Create New Project
+    <Container fluid className="p-4">
+      {/* Header with Search and Create Button */}
+      <Row className="mb-4 align-items-center">
+        <Col md={8}>
+          <InputGroup>
+            <InputGroup.Text>
+              <i className="bi bi-search"></i>
+            </InputGroup.Text>
+            <Form.Control
+              id="projectSearch"
+              type="text"
+              placeholder="Search projects (Ctrl+F)"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </InputGroup>
+        </Col>
+        <Col md={4} className="text-end">
+          <Button 
+            variant="primary" 
+            onClick={() => setShowCreateModal(true)}
+            className="ms-2"
+          >
+            <i className="bi bi-plus-lg me-2"></i>Create New Project
           </Button>
-         
-        </div>
-      </div>
-
-      {/* Main Table */}
-      <Card className="text-white p-3 mb-5 table-gradient-bg">
-        <h4 className="mb-3">Project List</h4>
-        <div className="table-responsive table-gradient-bg">
-          <Table className="table-gradient-bg align-middle mb-0">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Project Title</th>
-                <th>Client</th>
-                <th>Tasks</th>
-                <th>Languages</th>
-                <th>Platform</th>
-                <th>Total Pages</th>
-                <th>Actual Due Date</th>
-                <th>Ready for QC Deadline</th>
-                <th>QC Hrs</th>
-                <th>QC Due Date</th>
-                <th>Status</th>
-                <th>Handler</th>
-                {/* <th>Process Status</th> */}
-                <th>QA Reviewer</th>
-                <th>QA Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map((project) => (
-                <tr key={project.id}>
-                  <td>{project.id}</td>
-                  <td>{project.title}</td>
-                  <td>{project.client}</td>
-                  <td>{project.tasks}</td>
-                  <td>{project.languages}</td>
-                  <td>{project.platform}</td>
-                  <td>{project.pages}</td>
-                  <td>{project.dueDate}</td>
-                  <td>{project.qcDeadline}</td>
-                  <td>{project.qcHours}</td>
-                  <td>{project.qcDueDate}</td>
-                  <td>
-                    <Badge
-                      bg={
-                        project.status === "Completed"
-                          ? "success"
-                          : project.status === "On Hold"
-                          ? "warning"
-                          : "info"
-                      }
-                    >
-                      {project.status}
-                    </Badge>
-                  </td>
-                  <td>{project.handler}</td>
-                  {/* <td>
-                    <Badge
-                      bg={
-                        project.processStatus === "Completed"
-                          ? "success"
-                          : project.processStatus === "Delayed"
-                          ? "danger"
-                          : project.processStatus === "Pending"
-                          ? "warning"
-                          : "primary"
-                      }
-                    >
-                      {project.processStatus}
-                    </Badge>
-                  </td> */}
-                  <td>{project.qaReviewer}</td>
-                  <td>
-                    <Badge
-                      bg={
-                        project.qaStatus === "Passed"
-                          ? "success"
-                          : project.qaStatus === "Failed"
-                          ? "danger"
-                          : project.qaStatus === "In Review"
-                          ? "info"
-                          : "secondary"
-                      }
-                    >
-                      {project.qaStatus}
-                    </Badge>
-                  </td>
-                  <td>
-                    <Button
-                      variant="link"
-                      className="text-info p-0 ms-3"
-                      title="View"
-                      onClick={() => handleView(project)}
-                    >
-                      <FaEye />
-                    </Button>
-                    {/* <Button
-                      variant="link"
-                      className="text-warning p-0 me-2"
-                      title="Edit"
-                      onClick={() => handleEdit(project)}
-                    >
-                      <FaEdit />
-                    </Button>
-                    <Button
-                      variant="link"
-                      className="text-danger p-0"
-                      title="Delete"
-                    >
-                      <FaTrash />
-                    </Button> */}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </div>
+        </Col>
+      </Row>
+      
+      {/* Projects Tabs */}
+      <Card>
+        <Card.Header>
+          <Nav variant="tabs" defaultActiveKey="created">
+            <Nav.Item>
+              <Nav.Link 
+                eventKey="created" 
+                active={activeTab === 'created'}
+                onClick={() => setActiveTab('created')}
+              >
+                Created Projects <Badge bg="secondary">{projects.filter(p => p.status === 'created').length}</Badge>
+              </Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link 
+                eventKey="completed" 
+                active={activeTab === 'completed'}
+                onClick={() => setActiveTab('completed')}
+              >
+                Completed Projects <Badge bg="success">{projects.filter(p => p.status === 'completed').length}</Badge>
+              </Nav.Link>
+            </Nav.Item>
+          </Nav>
+        </Card.Header>
+        <Card.Body>
+          <Tab.Content>
+            <Tab.Pane eventKey={activeTab}>
+              {filteredProjects.length === 0 ? (
+                <div className="text-center py-4">
+                  <i className="bi bi-folder-x" style={{ fontSize: '3rem', color: '#6c757d' }}></i>
+                  <p className="mt-3">No projects found</p>
+                </div>
+              ) : (
+                <Table striped hover responsive>
+                  <thead>
+                    <tr>
+                      <th>Project Name</th>
+                      <th>Description</th>
+                      <th>Files</th>
+                      <th>Dates</th>
+                      <th>Team</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredProjects.map(project => (
+                      <tr key={project.id}>
+                        <td>
+                          <strong>{project.name}</strong>
+                          {project.status === 'completed' && (
+                            <Badge bg="success" className="ms-2">Completed</Badge>
+                          )}
+                        </td>
+                        <td>{project.description}</td>
+                        <td>
+                          {project.files}
+                          <Button 
+                            variant="link" 
+                            size="sm" 
+                            onClick={() => {
+                              setCurrentProject(project);
+                              setFileCount(project.files);
+                              setShowFileModal(true);
+                            }}
+                          >
+                            <i className="bi bi-pencil-square"></i>
+                          </Button>
+                        </td>
+                        <td>
+                          <div>Created: {project.createdDate}</div>
+                          {project.dueDate && <div>Due: {project.dueDate}</div>}
+                          {project.completedDate && <div>Completed: {project.completedDate}</div>}
+                        </td>
+                        <td>
+                          {project.team.join(', ')}
+                        </td>
+                        <td>
+                          {project.status === 'created' && (
+                            <Button 
+                              variant="success" 
+                              size="sm" 
+                              onClick={() => markAsCompleted(project.id)}
+                              className="me-2"
+                            >
+                              Complete
+                            </Button>
+                          )}
+                          <Button variant="outline-primary" size="sm" className="me-2">
+                            <i className="bi bi-download"></i>
+                          </Button>
+                          <Button variant="outline-secondary" size="sm">
+                            <i className="bi bi-gear"></i>
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              )}
+            </Tab.Pane>
+          </Tab.Content>
+        </Card.Body>
       </Card>
-
+      
       {/* Create Project Modal */}
-      <Modal
-        show={showModal}
-        onHide={handleClose}
-        centered
-        className="custom-modal-dark"
-      >
-        <Modal.Header closeButton className="bg-dark text-white">
+      <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)} size="lg">
+        <Modal.Header closeButton>
           <Modal.Title>Create New Project</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="bg-dark text-white">
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Project Name</Form.Label>
-              <Form.Control type="text" placeholder="Enter title" />
+        <Form onSubmit={handleCreateProject}>
+          <Modal.Body>
+            <Row className="mb-3">
+              <Form.Group as={Col} controlId="projectName">
+                <Form.Label>Project Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter project name"
+                  value={projectData.name}
+                  onChange={(e) => setProjectData({...projectData, name: e.target.value})}
+                  required
+                />
+              </Form.Group>
+
+              <Form.Group as={Col} controlId="dueDate">
+                <Form.Label>Due Date</Form.Label>
+                <Form.Control
+                  type="date"
+                  value={projectData.dueDate}
+                  onChange={(e) => setProjectData({...projectData, dueDate: e.target.value})}
+                />
+              </Form.Group>
+            </Row>
+
+            <Form.Group className="mb-3" controlId="projectDescription">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Enter project description"
+                value={projectData.description}
+                onChange={(e) => setProjectData({...projectData, description: e.target.value})}
+              />
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Client Name</Form.Label>
-              <Form.Control type="text" placeholder="Enter client name" />
+
+            <Form.Group className="mb-3" controlId="projectTeam">
+              <Form.Label>Team Members</Form.Label>
+              <div className="d-flex mb-2">
+                <Form.Control
+                  type="text"
+                  placeholder="Add team member"
+                  value={teamMember}
+                  onChange={(e) => setTeamMember(e.target.value)}
+                />
+                <Button variant="outline-secondary" onClick={addTeamMember} className="ms-2">
+                  Add
+                </Button>
+              </div>
+              <div className="d-flex flex-wrap gap-2">
+                {projectData.team.map(member => (
+                  <Badge key={member} bg="light" text="dark" className="p-2 d-flex align-items-center">
+                    {member}
+                    <Button 
+                      variant="link" 
+                      size="sm" 
+                      onClick={() => removeTeamMember(member)}
+                      className="p-0 ms-2"
+                    >
+                      <i className="bi bi-x"></i>
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
             </Form.Group>
+
             <Form.Group className="mb-3">
-              <Form.Label>Platform</Form.Label>
-              <Form.Select className="text-white border-secondary">
-                <option>Web</option>
-                <option>Mobile</option>
-                <option>Desktop</option>
-              </Form.Select>
+              <Form.Label>Upload Files (Excel/CSV)</Form.Label>
+              <Form.Control type="file" accept=".xlsx,.xls,.csv" />
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Total Pages</Form.Label>
-              <Form.Control type="number" placeholder="Enter page count" />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Actual Due Date</Form.Label>
-              <Form.Control type="datetime-local" />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Ready for QC Deadline</Form.Label>
-              <Form.Control type="datetime-local" />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>QC Hours Allocated</Form.Label>
-              <Form.Control type="number" />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>QC Due Date</Form.Label>
-              <Form.Control type="datetime-local" />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Status</Form.Label>
-              <Form.Select>
-                <option>In Progress</option>
-                <option>Completed</option>
-                <option>On Hold</option>
-              </Form.Select>
-            </Form.Group>
-            <Button
-              variant="primary"
-              type="submit"
-              className="w-100 gradient-button"
-            >
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowCreateModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" type="submit">
               Create Project
             </Button>
-          </Form>
-        </Modal.Body>
+          </Modal.Footer>
+        </Form>
       </Modal>
-
-      {/* View Project Details Modal */}
-      <Modal
-        show={showViewModal}
-        onHide={() => setShowViewModal(false)}
-        centered
-        className="custom-modal-dark"
-      >
+      
+      {/* File Count Modal */}
+      <Modal show={showFileModal} onHide={() => setShowFileModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Project Details</Modal.Title>
+          <Modal.Title>Update File Count</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {selectedProject && (
-            <div>
-              <p>
-                <strong>Title:</strong> {selectedProject.title}
-              </p>
-              <p>
-                <strong>Client:</strong> {selectedProject.client}
-              </p>
-              <p>
-                <strong>Platform:</strong> {selectedProject.platform}
-              </p>
-              <p>
-                <strong>Pages:</strong> {selectedProject.pages}
-              </p>
-              <p>
-                <strong>Due Date:</strong> {selectedProject.dueDate}
-              </p>
-              <p>
-                <strong>Status:</strong> {selectedProject.status}
-              </p>
-              <p>
-                <strong>Handler:</strong> {selectedProject.handler}
-              </p>
-              <p>
-                <strong>QA Reviewer:</strong> {selectedProject.qaReviewer}
-              </p>
-              <p>
-                <strong>QA Status:</strong> {selectedProject.qaStatus}
-              </p>
-              {/* <p>
-                <strong>Server Path:</strong> {selectedProject.serverPath}
-              </p> */}
-            </div>
-          )}
+          <Form.Group className="mb-3">
+            <Form.Label>Number of Files for {currentProject?.name}</Form.Label>
+            <Form.Control 
+              type="number" 
+              value={fileCount} 
+              onChange={(e) => setFileCount(parseInt(e.target.value) || 0)} 
+            />
+          </Form.Group>
+          <div className="d-flex justify-content-between">
+            <Button variant="secondary" onClick={() => setShowFileModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={updateFileCount}>
+              Save Changes
+            </Button>
+          </div>
         </Modal.Body>
       </Modal>
-
-      {/* Edit Project Modal */}
-      {/* <Modal
-        show={showEditModal}
-        onHide={() => setShowEditModal(false)}
-        centered
-        className="custom-modal-dark"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Project</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {editProject && (
-            <Form>
-              <Form.Group className="mb-3">
-                <Form.Label>Project Title</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={editProject.title}
-                  onChange={(e) =>
-                    setEditProject({ ...editProject, title: e.target.value })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Client</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={editProject.client}
-                  onChange={(e) =>
-                    setEditProject({ ...editProject, client: e.target.value })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Platform</Form.Label>
-                <Form.Select
-                  className="text-white border-secondary"
-                  value={editProject.platform}
-                  onChange={(e) =>
-                    setEditProject({ ...editProject, platform: e.target.value })
-                  }
-                >
-                  <option>Web</option>
-                  <option>Mobile</option>
-                  <option>Desktop</option>
-                </Form.Select>
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Total Pages</Form.Label>
-                <Form.Control
-                  type="number"
-                  value={editProject.pages}
-                  onChange={(e) =>
-                    setEditProject({ ...editProject, pages: e.target.value })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Actual Due Date</Form.Label>
-                <Form.Control
-                  type="datetime-local"
-                  value={editProject.dueDate}
-                  onChange={(e) =>
-                    setEditProject({ ...editProject, dueDate: e.target.value })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Ready for QC Deadline</Form.Label>
-                <Form.Control
-                  type="datetime-local"
-                  value={editProject.qcDeadline}
-                  onChange={(e) =>
-                    setEditProject({
-                      ...editProject,
-                      qcDeadline: e.target.value,
-                    })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>QC Hours Allocated</Form.Label>
-                <Form.Control
-                  type="number"
-                  value={editProject.qcHours}
-                  onChange={(e) =>
-                    setEditProject({ ...editProject, qcHours: e.target.value })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>QC Due Date</Form.Label>
-                <Form.Control
-                  type="datetime-local"
-                  value={editProject.qcDueDate}
-                  onChange={(e) =>
-                    setEditProject({
-                      ...editProject,
-                      qcDueDate: e.target.value,
-                    })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Status</Form.Label>
-                <Form.Select
-                  value={editProject.status}
-                  onChange={(e) =>
-                    setEditProject({ ...editProject, status: e.target.value })
-                  }
-                >
-                  <option>In Progress</option>
-                  <option>Completed</option>
-                  <option>On Hold</option>
-                </Form.Select>
-              </Form.Group>
-              <Button
-                variant="primary"
-                type="submit"
-                className="w-100 gradient-button"
-              >
-                Save Changes
-              </Button>
-            </Form>
-          )}
-        </Modal.Body>
-      </Modal> */}
-    </div>
+    </Container>
   );
-};
+}
 
 export default Project;
