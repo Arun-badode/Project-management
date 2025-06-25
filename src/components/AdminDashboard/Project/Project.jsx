@@ -392,29 +392,29 @@ const App = () => {
   };
 
   return (
-    <div className="min-vh-100 bg-light">
+    <div className="min-vh-100 bg-main">
       {/* Header */}
-      <div className="bg-white shadow-sm ">
+      <div className="bg-white shadow-sm bg-main">
         <div className="container-fluid py-2">
           <div className="d-flex align-items-center justify-content-between">
-            <div className="d-flex align-items-center">
-              <h1 className="h4 mb-0 text-dark">Projects</h1>
+            <div className="d-flex align-items-center ">
+              <h1 className="h4 mb-0 gradient-heading">Projects</h1>
               <div className="d-flex ms-3">
-                <button className="btn btn-outline-secondary btn-sm me-2">
-                  <i className="fas fa-file-excel text-success me-2"></i>
+                <button className="btn btn-success text-light  me-2">
+                  <i className="fas fa-file-excel text-light me-2"></i>
                   Blank Excel
                 </button>
-                <button className="btn btn-outline-secondary btn-sm me-2">
-                  <i className="fas fa-file-import text-primary me-2"></i>
+                <button className="btn btn-primary  me-2">
+                  <i className="fas fa-file-import text-light me-2"></i>
                   Import Excel
                 </button>
-                <button className="btn btn-outline-secondary btn-sm">
+                <button className="btn btn-dark">
                   <i className="fas fa-file-download text-indigo me-2"></i>
                   Download Excel
                 </button>
               </div>
             </div>
-            <div className="d-flex align-items-center">
+            <div className="d-flex align-items-center ">
               <div className="position-relative me-3">
                 <div className="position-absolute top-50 start-0 translate-middle-y ps-3">
                   <i className="fas fa-search text-muted"></i>
@@ -435,13 +435,13 @@ const App = () => {
                 <>
                   <button
                     onClick={() => setShowCreateModal(true)}
-                    className="btn btn-primary btn-sm ms-2"
+                    className="gradient-button "
                   >
                     <i className="fas fa-plus me-2"></i> Create New Project
                   </button>
                   <button
                     onClick={() => setShowSettings(true)}
-                    className="btn btn-outline-secondary btn-sm ms-2"
+                    className="btn btn-light btn-sm ms-2"
                   >
                     <i className="fas fa-cog text-muted"></i>
                   </button>
@@ -451,7 +451,7 @@ const App = () => {
           </div>
         </div>
         {/* Tabs */}
-        <div className="border-bottom">
+        <div className="border-bottom mt-2">
           <div className="container-fluid">
             <ul className="nav nav-tabs border-bottom-0">
               <li className="nav-item">
@@ -519,7 +519,7 @@ const App = () => {
         {/* Created Projects Tab */}
         {activeTab === 'created' && (
           <div className="mb-4">
-            <h2 className="h5 mb-3">Draft Projects</h2>
+            <h2 className="h5 mb-3 text-light">Draft Projects</h2>
             {filteredProjects.length === 0 ? (
               <div className="text-center py-5">
                 <i className="fas fa-folder-open text-muted fa-4x mb-3"></i>
@@ -538,9 +538,9 @@ const App = () => {
               </div>
             ) : (
               <div className="card">
-                <div className="table-responsive">
-                  <table className="table table-hover mb-0">
-                    <thead className="bg-light">
+                <div className="table-responsive table-gradient-bg">
+                  <table className="table table-hover mb-0 ">
+                    <thead className="bg-light table-gradient-bg">
                       <tr>
                         <th>Project Title</th>
                         <th>Client</th>
@@ -612,11 +612,11 @@ const App = () => {
                               </button>
                               <button
                                 onClick={() => handleEditProject(project.id)}
-                                className="btn btn-sm btn-outline-secondary"
+                                className="btn btn-sm btn-success"
                               >
                                 <i className="fas fa-edit"></i>
                               </button>
-                              <button className="btn btn-sm btn-outline-secondary">
+                              <button className="btn btn-sm btn-danger">
                                 <i className="fas fa-trash-alt"></i>
                               </button>
                             </div>
@@ -634,7 +634,7 @@ const App = () => {
         {/* Active Projects Tab */}
         {activeTab === 'active' && (
           <div className="mb-4">
-            <h2 className="h5 mb-3">Active Projects</h2>
+            <h2 className="h5 mb-3 text-light">Active Projects</h2>
             {filteredProjects.length === 0 ? (
               <div className="text-center py-5">
                 <i className="fas fa-tasks text-muted fa-4x mb-3"></i>
@@ -645,9 +645,9 @@ const App = () => {
               </div>
             ) : (
               <div className="card">
-                <div className="table-responsive">
-                  <table className="table table-hover mb-0">
-                    <thead className="bg-light">
+                <div className="table-responsive ">
+                  <table className="table table-hover mb-0 table-gradient-bg">
+                    <thead className="bg-light table-gradient-bg">
                       <tr>
                         <th>Project Title</th>
                         <th>Client</th>
@@ -718,12 +718,12 @@ const App = () => {
                               </button>
                               <button
                                 onClick={() => handleEditProject(project.id)}
-                                className="btn btn-sm btn-outline-secondary"
+                                className="btn btn-sm btn-success"
                               >
                                 <i className="fas fa-edit"></i>
                               </button>
-                              <button className="btn btn-sm btn-outline-secondary">
-                                <i className="fas fa-info-circle"></i>
+                              <button className="btn btn-sm btn-danger">
+                                <i className="fas fa-trash-alt"></i>
                               </button>
                             </div>
                           </td>
@@ -741,8 +741,8 @@ const App = () => {
         {activeTab === 'completed' && (
           <div className="mb-4">
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h2 className="h5 mb-0">Completed Projects</h2>
-              <button className="btn btn-outline-success btn-sm">
+              <h2 className="h5 mb-0 text-light">Completed Projects</h2>
+              <button className="btn btn-success btn-sm">
                 <i className="fas fa-file-excel me-2"></i> Export to Excel
               </button>
             </div>
@@ -757,16 +757,16 @@ const App = () => {
             ) : (
               <>
                 {/* Performance Chart */}
-                <div className="card mb-4">
+                <div className="card mb-4 bg-card text-light">
                   <div className="card-body">
                     <div ref={chartRef} style={{ height: '400px' }}></div>
                   </div>
                 </div>
                 {/* Project Cards */}
                 <div className="card">
-                  <div className="table-responsive">
+                  <div className="table-responsive table-gradient-bg">
                     <table className="table table-hover mb-0">
-                      <thead className="bg-light">
+                      <thead className="table-gradient-bg">
                         <tr>
                           <th>Project Title</th>
                           <th>Client</th>
@@ -829,10 +829,10 @@ const App = () => {
                             <td>{project.cost} {project.currency}</td>
                             <td className="text-end">
                               <div className="d-flex justify-content-end gap-2">
-                                <button className="btn btn-sm btn-outline-secondary">
+                                <button className="btn btn-sm btn-danger">
                                   <i className="fas fa-file-alt me-1"></i> View Report
                                 </button>
-                                <button className="btn btn-sm btn-outline-secondary">
+                                <button className="btn btn-sm btn-primary">
                                   <i className="fas fa-archive me-1"></i> Archive
                                 </button>
                               </div>
@@ -851,7 +851,7 @@ const App = () => {
 
       {/* Create/Edit Project Modal */}
       {(showCreateModal || showEditModal !== false) && (
-        <div className="modal fade show d-block" tabIndex="-1" aria-modal="true" role="dialog">
+        <div className="modal fade show d-block custom-modal-dark" tabIndex="-1" aria-modal="true" role="dialog">
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
@@ -1247,7 +1247,7 @@ const App = () => {
                   <div className="modal-footer border-top-0">
                     <button
                       type="button"
-                      className="btn btn-outline-secondary"
+                      className="btn btn-secondary"
                       onClick={() => {
                         setShowCreateModal(false);
                         setShowEditModal(false);
@@ -1299,7 +1299,7 @@ const App = () => {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="modal fade show d-block" tabIndex="-1" aria-modal="true" role="dialog">
+        <div className="modal fade show d-block custom-modal-dark" tabIndex="-1" aria-modal="true" role="dialog">
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
@@ -1316,7 +1316,7 @@ const App = () => {
                   <div className="border rounded p-2 mb-2" style={{ maxHeight: '200px', overflowY: 'auto' }}>
                     <ul className="list-group list-group-flush">
                       {clientOptions.map(client => (
-                        <li key={client} className="list-group-item d-flex justify-content-between align-items-center py-2 px-0">
+                        <li key={client} className="list-group-item d-flex justify-content-between align-items-center py-2 px-0 bg-card">
                           <span>{client}</span>
                           <div className="btn-group btn-group-sm">
                             <button className="btn btn-outline-primary">
@@ -1330,7 +1330,7 @@ const App = () => {
                       ))}
                     </ul>
                   </div>
-                  <button className="btn btn-sm btn-outline-primary">
+                  <button className="btn btn-sm btn-primary">
                     <i className="fas fa-plus me-1"></i> Add Client
                   </button>
                 </div>
@@ -1339,7 +1339,7 @@ const App = () => {
                   <div className="border rounded p-2 mb-2" style={{ maxHeight: '200px', overflowY: 'auto' }}>
                     <ul className="list-group list-group-flush">
                       {projectManagerOptions.map(pm => (
-                        <li key={pm} className="list-group-item d-flex justify-content-between align-items-center py-2 px-0">
+                        <li key={pm} className="list-group-item d-flex justify-content-between align-items-center py-2 px-0 bg-card">
                           <span>{pm}</span>
                           <div className="btn-group btn-group-sm">
                             <button className="btn btn-outline-primary">
@@ -1353,7 +1353,7 @@ const App = () => {
                       ))}
                     </ul>
                   </div>
-                  <button className="btn btn-sm btn-outline-primary">
+                  <button className="btn btn-sm btn-primary">
                     <i className="fas fa-plus me-1"></i> Add Project Manager
                   </button>
                 </div>
@@ -1398,7 +1398,7 @@ const App = () => {
               <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn btn-outline-secondary"
+                  className="btn btn-secondary"
                   onClick={() => setShowSettings(false)}
                 >
                   Close
