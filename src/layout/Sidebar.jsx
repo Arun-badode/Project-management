@@ -193,7 +193,119 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">User</span>
                 </div>
               </li>
-              {/* Role & Permission */}
+
+              
+
+             
+
+              {/* <li
+                className={`menu-item ${
+                  isActive("/resourcemanagement") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/resourcemanagement");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-toolbox"></i>
+                  <span className="menu-text">Resource </span>
+                </div>
+              </li> */}
+{/* 
+              <li
+                className={`menu-item ${
+                  isActive("/timetracker") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/timetracker");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-clock"></i>
+                  <span className="menu-text">Time Tracking</span>
+                </div>
+              </li> */}
+
+              {/* <li
+                className={`menu-item ${
+                  isActive("/filemanagementsystem") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/filemanagementsystem");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-folder-open"></i>
+                  <span className="menu-text">File Management</span>
+                </div>
+              </li> */}
+
+              {/* <li
+                className={`menu-item ${
+                  isActive("/qamanagement") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/qamanagement");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-check-to-slot"></i>
+                  <span className="menu-text">QA Management</span>
+                </div>
+              </li> */}
+
+             
+             
+              {/* <li
+                className={`menu-item ${isActive("/profile") ? "active" : ""}`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/profile");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-user-circle"></i>
+                  <span className="menu-text">Profile & Account</span>
+                </div>
+              </li> */}
+
+              {/* <li
+                className={`menu-item ${
+                  isActive("/projectsupport") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/projectsupport");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-life-ring"></i>
+                  <span className="menu-text">Support</span>
+                </div>
+              </li> */
+              
+              
+              
+              
+              
+              }
+
               <li
                 className={`menu-item ${
                   isActive("/role&permission") ? "active" : ""

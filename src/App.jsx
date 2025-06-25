@@ -7,7 +7,7 @@ import { useState } from "react";
 import LoginPage from "./authtication/Login";
 import SignupPage from "./authtication/singup";
 
-import LeadDashboard from "./components/AdminDashboard/Lead/LeadDashboard";
+import LeadDashboard from "./components/AdminDashboard/ActiveProject/ActiveProject";
 import AdminDashboard from "./components/AdminDashboard/AdminDashboard";
 import TaskManagement from "./components/AdminDashboard/TaskManagement/TaskManagemnet";
 import UserManagement from "./components/AdminDashboard/UserManagement/UserManagement";
