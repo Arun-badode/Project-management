@@ -659,14 +659,14 @@ const ActiveProject= () => {
                         {/* Action buttons for expanded row */}
                       <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 bg-card px-3 py-2 rounded-3 border">
   {/* Ready for QC Due */}
-  <div className="text-center border border-dark rounded bg-white px-3 py-2">
+  <div className="text-center border border-dark rounded bg-card px-3 py-2 ">
     <div className="fw-semibold bg-info  border-bottom small py-1">Ready for QC Due</div>
-    <div className="fw-semibold ">hh:mm:tt &nbsp; DD-MM-YY</div>
+    <div className="fw-semibold text-light">hh:mm:tt &nbsp; DD-MM-YY</div>
     <div className="text-success small fw-semibold">Early (20 minutes)</div>
   </div>
 
   {/* QC Allocated hours */}
-  <div className="text-center">
+  <div className="text-center bg-card px-2" >
     <div className="fw-bold">QC Allocated hours</div>
     <div>h.mm</div>
     <button className="btn btn-sm text-white fw-bold px-3 py-1 mt-1" style={{ backgroundColor: '#006400' }}>
@@ -675,9 +675,9 @@ const ActiveProject= () => {
   </div>
 
   {/* QC Due */}
-  <div className="text-center border border-dark rounded bg-white px-3 py-2">
+  <div className="text-center border border-dark rounded bg-card px-3 py-2 ">
     <div className="fw-semibold bg-info  border-bottom small py-1">QC Due</div>
-    <div className="fw-semibold">
+    <div className="fw-semibold text-light">
       hh:mm:tt &nbsp; DD-MM-YY <span className="text-warning">(Auto)</span>
     </div>
     <div className="text-danger small fw-semibold">Delay by 30 minutes</div>
