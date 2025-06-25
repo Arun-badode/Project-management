@@ -175,77 +175,76 @@ function ResourceWorkload() {
         {/* Resource Status Overview */}
         <section className="mb-4 ">
           <h2 className="h5 mb-3">Resource Status Overview</h2>
-          <div className="row">
-            <div className="col-md-6 col-lg-3 mb-3">
-              <div className="card h-100 bg-card">
-                <div className="card-body">
-                  <div className="d-flex justify-content-between">
-                    <div>
-                      <h6 className="card-subtitle mb-2 ">Total Resources</h6>
-                      <h3 className="card-title">{resourceStats.total}</h3>
-                    </div>
-                    <div className="bg-primary bg-opacity-10 rounded p-3">
-                      <i className="fas fa-server text-primary"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div className="row g-3">
+  {/* Total Resources */}
+  <div className="col-md-6 col-lg-3">
+    <div className="card h-100 text-white bg-primary  rounded-4 shadow-sm">
+      <div className="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <p className="small mb-1">Total Resources</p>
+          <h3 className="fw-bold mb-0">{resourceStats.total}</h3>
+        </div>
+        <div className="p-3 bg-white bg-opacity-25 rounded">
+          <i className="fas fa-server fs-4 text-white"></i>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            <div className="col-md-6 col-lg-3 mb-3">
-              <div className="card h-100 bg-card">
-                <div className="card-body">
-                  <div className="d-flex justify-content-between">
-                    <div>
-                      <h6 className="card-subtitle mb-2 ">Resources In Use</h6>
-                      <h3 className="card-title">{resourceStats.inUse}</h3>
-                    </div>
-                    <div className="bg-success bg-opacity-10 rounded p-3">
-                      <i className="fas fa-cogs text-success"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+  {/* Resources In Use */}
+  <div className="col-md-6 col-lg-3">
+    <div className="card h-100 text-white bg-success  rounded-4 shadow-sm">
+      <div className="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <p className="small mb-1">Resources In Use</p>
+          <h3 className="fw-bold mb-0">{resourceStats.inUse}</h3>
+        </div>
+        <div className="p-3 bg-white bg-opacity-25 rounded">
+          <i className="fas fa-cogs fs-4 text-white"></i>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            <div className="col-md-6 col-lg-3 mb-3">
-              <div className="card h-100 bg-card">
-                <div className="card-body">
-                  <div className="d-flex justify-content-between">
-                    <div>
-                      <h6 className="card-subtitle mb-2">Utilization</h6>
-                      <h3 className="card-title">{resourceStats.utilization}%</h3>
-                    </div>
-                    <div className="bg-warning bg-opacity-10 rounded p-3">
-                      <i className="fas fa-chart-pie text-warning"></i>
-                    </div>
-                  </div>
-                  <div className="progress mt-3">
-                    <div 
-                      className={`progress-bar ${getUtilizationColor(resourceStats.utilization)}`} 
-                      style={{ width: `${resourceStats.utilization}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-6 col-lg-3 mb-3">
-              <div className="card h-100 bg-card">
-                <div className="card-body">
-                  <div className="d-flex justify-content-between">
-                    <div>
-                      <h6 className="card-subtitle mb-2 ">Critical Alerts</h6>
-                      <h3 className="card-title">{resourceStats.alerts}</h3>
-                    </div>
-                    <div className="bg-danger bg-opacity-10 rounded p-3">
-                      <i className="fas fa-exclamation-triangle text-danger"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+  {/* Utilization */}
+  <div className="col-md-6 col-lg-3">
+    <div className="card h-100 text-dark bg-warning  rounded-4 shadow-sm">
+      <div className="card-body d-flex flex-column justify-content-between">
+        <div className="d-flex justify-content-between align-items-center">
+          <div>
+            <p className="small mb-1 text-light">Utilization</p>
+            <h3 className="fw-bold mb-0 text-light">{resourceStats.utilization}%</h3>
           </div>
+          <div className="p-3 bg-dark bg-opacity-10 rounded">
+            <i className="fas fa-chart-pie fs-4 text-light"></i>
+          </div>
+        </div>
+        <div className="progress mt-3 bg-dark bg-opacity-10" style={{ height: "6px" }}>
+          <div
+            className={`progress-bar ${getUtilizationColor(resourceStats.utilization)}`}
+            style={{ width: `${resourceStats.utilization}%` }}
+          ></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Critical Alerts */}
+  <div className="col-md-6 col-lg-3">
+    <div className="card h-100 text-white bg-danger  rounded-4 shadow-sm">
+      <div className="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <p className="small mb-1">Critical Alerts</p>
+          <h3 className="fw-bold mb-0">{resourceStats.alerts}</h3>
+        </div>
+        <div className="p-3 bg-white bg-opacity-25 rounded">
+          <i className="fas fa-exclamation-triangle fs-4 text-white"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
         </section>
 
         {/* Resource Distribution and Task Workload */}
