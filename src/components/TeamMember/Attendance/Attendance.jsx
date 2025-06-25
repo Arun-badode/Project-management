@@ -339,13 +339,13 @@ const Attendance = () => {
                           </div>
                           <div>
                             <div className="fw-semibold">{employee.employeeName}</div>
-                            <div className="small text-muted">{employee.employeeId}</div>
+                            <div className="small text-white">{employee.employeeId}</div>
                           </div>
                         </div>
                       </td>
                       <td>
                         <div>{employee.department}</div>
-                        <div className="small text-muted">{employee.position}</div>
+                        <div className="small ">{employee.position}</div>
                       </td>
                       <td>
                         <span className="badge bg-success-subtle text-success">

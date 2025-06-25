@@ -776,7 +776,7 @@ const Project = () => {
                 <div className="file-details-dropdown p-3 bg-carrd">
                   <h5 className="text-wrap">File Details for {project.title}</h5>
                   <div className="table-responsive">
-                    <Table striped bordered hover variant="dark" className="mt-2 w-100">
+                    <Table   className="mt-2 w-100 table-gradient-bg">
                       <thead>
                         <tr>
                           <th>File Name</th>
@@ -846,7 +846,7 @@ const Project = () => {
       </Card>
 
       {/* File Edit Modal */}
-      <Modal  show={showFileEditModal} onHide={() => setShowFileEditModal(false)} centered>
+      <Modal    className="custom-modal-dark"  show={showFileEditModal} onHide={() => setShowFileEditModal(false)} centered>
         <Modal.Header closeButton className="bg-dark text-white">
           <Modal.Title>Edit File Details</Modal.Title>
         </Modal.Header>
@@ -898,7 +898,7 @@ const Project = () => {
             </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer className="bg-dark">
+        <Modal.Footer className="">
           <Button variant="secondary" onClick={() => setShowFileEditModal(false)}>
             Cancel
           </Button>
@@ -988,7 +988,7 @@ const Project = () => {
               </div>
               
               <h5>Files</h5>
-              <Table striped bordered hover variant="dark" className="mt-2">
+              <Table striped bordered hover  className="mt-2 table-gradient-bg ">
                 <thead>
                   <tr>
                     <th>File Name</th>
