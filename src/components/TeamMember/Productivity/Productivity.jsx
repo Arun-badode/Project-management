@@ -353,6 +353,7 @@ const Productivity = () => {
               <div 
                 ref={timeDistributionChartRef}
                 style={{ 
+                  color: 'white',
                   height: isMobile ? 300 : 400, 
                   width: '100%',
                   minWidth: 0 
@@ -364,9 +365,9 @@ const Productivity = () => {
             <div className="bg-card rounded shadow-sm p-3 h-100">
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="mb-0">Today's Timeline</h5>
-                <button className="btn btn-sm btn-outline-primary">
+                {/* <button className="btn btn-sm btn-outline-primary">
                   <i className="bi bi-plus"></i> Add Task
-                </button>
+                </button> */}
               </div>
               <div className="d-flex flex-column gap-3">
                 {timeline.map((item, idx) => (
@@ -395,7 +396,7 @@ const Productivity = () => {
 
         {/* Detailed Statistics */}
         <div className="row g-3">
-          <div className="col-12 col-md-6 mb-5">
+          <div className="col-12 col-md-6 mb-2">
             <div className="bg-card rounded shadow-sm p-3 h-100">
               <h5 className="mb-3">Weekly Productivity Trend</h5>
               <div 
@@ -408,9 +409,9 @@ const Productivity = () => {
               ></div>
             </div>
           </div>
-          <div className="col-12 col-md-6 mb-5">
+          <div className="col-12 col-md-6 mb-2">
             <div className="bg-card rounded shadow-sm p-3 h-100">
-              <h5 className="mb-3">Focus Time by Hour</h5>
+              <h5 className="">Focus Time by Hour</h5>
               <div 
                 ref={focusTimeChartRef}
                 style={{ 
