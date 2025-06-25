@@ -70,7 +70,7 @@ const LoginPage = () => {
           onEnded={() => setShowVideo(false)}
         >
           <source 
-            src={isMobile ? "../public/video/Eminoids - Logo Animation Blue.mp4" : "../public/video/Eminoids - Logo Animation Blue_Mob.mp4"} 
+            src={isMobile ? "https://ik.imagekit.io/wycpoxj6v/Eminoids%20-%20Logo%20Animation%20Blue.mp4?updatedAt=1750835869196" : "https://ik.imagekit.io/wycpoxj6v/Eminoids%20-%20Logo%20Animation%20Blue_Mob.mp4?updatedAt=1750835971964"} 
             type="video/mp4" 
           />
           Your browser does not support the video tag.
