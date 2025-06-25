@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-
-const ActiveProject = () => {
+const ActiveProject= () => {
   // Project data state
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
@@ -14,9 +13,11 @@ const ActiveProject = () => {
   
   // Modal states
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [editedProject, setEditedProject] = useState(null);
   
   // Batch edit states
   const [batchEditValues, setBatchEditValues] = useState({
@@ -27,7 +28,7 @@ const ActiveProject = () => {
     qcAllocatedHours: '',
     priority: ''
   });
-
+  
   // Expanded row state
   const [expandedRow, setExpandedRow] = useState(null);
 
@@ -91,7 +92,6 @@ const ActiveProject = () => {
       qcAllocatedHours: '',
       priority: ''
     });
-    
     // Toggle expanded row
     setExpandedRow(expandedRow === project.id ? null : project.id);
   };
@@ -132,7 +132,6 @@ const ActiveProject = () => {
       setSelectedProject(updatedProject);
       // Update the project in the main projects array
       setProjects(projects.map(p => p.id === updatedProject.id ? updatedProject : p));
-      
       // Reset batch edit values
       setBatchEditValues({
         platform: '',
@@ -163,35 +162,149 @@ const ActiveProject = () => {
     return Array.from(new Set(projects.map(project => project[key])));
   };
 
-  // Save changes for inline editing
-  const saveInlineChanges = (projectId) => {
-    // Update the project in the main projects array
-    setProjects(projects.map(p => p.id === projectId ? selectedProject : p));
-    setHasUnsavedChanges(false);
+  
+
+  const handleEditProject = (project) => {
+    setEditedProject({...project});
+    setShowEditModal(true);
+  };
+
+  const handleSaveProjectEdit = () => {
+    if (editedProject) {
+      setProjects(projects.map(p => p.id === editedProject.id ? editedProject : p));
+      setShowEditModal(false);
+      setEditedProject(null);
+    }
   };
 
   return (
-    <div className="container-fluid py-4 min-vh-100">
-      {/* Header with action buttons */}
-      <div className="row mb-4 align-items-center">
-        <div className="col-md-6">
-          <h2 className="mb-0">Active Projects</h2>
+    <div className="container-fluid py-4">
+      {/* Edit Project Modal */}
+      {showEditModal && editedProject && (
+        <div className="modal fade show custom-modal-dark" style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.5)'}}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Edit Project</h5>
+                <button type="button" className="btn-close" onClick={() => setShowEditModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                <div className="row g-3">
+                  <div className="col-md-12">
+                    <label className="form-label">Project Title</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={editedProject.title}
+                      onChange={(e) => setEditedProject({...editedProject, title: e.target.value})}
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">Client</label>
+                    <select
+                      className="form-select"
+                      value={editedProject.client}
+                      onChange={(e) => setEditedProject({...editedProject, client: e.target.value})}
+                    >
+                      {getUniqueValues('client').map((client, index) => (
+                        <option key={index} value={client}>{client}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">Task</label>
+                    <select
+                      className="form-select"
+                      value={editedProject.task}
+                      onChange={(e) => setEditedProject({...editedProject, task: e.target.value})}
+                    >
+                      {getUniqueValues('task').map((task, index) => (
+                        <option key={index} value={task}>{task}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">Language</label>
+                    <select
+                      className="form-select"
+                      value={editedProject.language}
+                      onChange={(e) => setEditedProject({...editedProject, language: e.target.value})}
+                    >
+                      {getUniqueValues('language').map((language, index) => (
+                        <option key={index} value={language}>{language}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">Platform</label>
+                    <select
+                      className="form-select"
+                      value={editedProject.platform}
+                      onChange={(e) => setEditedProject({...editedProject, platform: e.target.value})}
+                    >
+                      <option value="Web">Web</option>
+                      <option value="Mobile">Mobile</option>
+                      <option value="Desktop">Desktop</option>
+                    </select>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">Due Date & Time</label>
+                    <input
+                      type="datetime-local"
+                      className="form-control"
+                      value={customToInputDate(editedProject.dueDate)}
+                      onChange={(e) => {
+                        setEditedProject({
+                          ...editedProject,
+                          dueDate: inputToCustomDate(e.target.value)
+                        });
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="col-md-6 d-flex justify-content-md-end gap-2 flex-wrap">
-          <button className="btn btn-dark">
-            <i className="fas fa-file-excel me-2"></i>Download Excel
-          </button>
-          <button className="btn btn-primary">
-            <i className="fas fa-file-import me-2"></i>Import Excel
-          </button>
-          <button className="btn btn-success">
-            <i className="fas fa-download me-2"></i>Download Excel
-          </button>
+      )}
+
+      {/* Header with action buttons */}
+      <div className="row mb-4">
+        <div className="col-md-6">
+          <h2 className="mb-0 text-white">Active Projects</h2>
+        </div>
+        <div className="col-md-6 text-md-end">
+          <div className="d-flex flex-wrap justify-content-md-end gap-2">
+            <button className="btn btn-dark">
+              <i className="fas fa-file-excel me-2"></i>Download Excel
+            </button>
+            <button className="btn btn-primary">
+              <i className="fas fa-file-import me-2"></i>Import Excel
+            </button>
+            <button className="btn btn-success">
+              <i className="fas fa-download me-2"></i>Download Excel
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="row mb-4 g-3">
+      <div className="row mb-4">
         <div className="col-md-4">
           <select
             className="form-select"
@@ -251,8 +364,8 @@ const ActiveProject = () => {
       </ul>
 
       {/* Projects Table */}
-      <div className="table-responsive bg-white rounded shadow">
-        <table className="table table-hover mb-0">
+      <div className="table-responsive">
+        <table className="table table-striped table-hover table-gradient-bg">
           <thead className="table-light">
             <tr>
               <th>S. No.</th>
@@ -279,18 +392,18 @@ const ActiveProject = () => {
                   <td>{project.platform}</td>
                   <td>{project.totalPages}</td>
                   <td>{project.dueDate}</td>
-                  <td className="min-w-150">
+                  <td>
                     <div 
-                      className="progress cursor-pointer"
+                      className="progress cursor-pointer" 
+                      style={{height: '24px'}}
                       onClick={() => handleViewProject(project)}
                     >
                       <div
-                        className={`progress-bar ${
-                          project.progress < 30 ? 'bg-danger' :
-                          project.progress < 70 ? 'bg-warning' : 'bg-success'
-                        }`}
-                        style={{ width: `${project.progress}%` }}
+                        className={`progress-bar 
+                          ${project.progress < 30 ? 'bg-danger' : 
+                            project.progress < 70 ? 'bg-warning' : 'bg-success'}`}
                         role="progressbar"
+                        style={{width: `${project.progress}%`}}
                         aria-valuenow={project.progress}
                         aria-valuemin={0}
                         aria-valuemax={100}
@@ -302,24 +415,27 @@ const ActiveProject = () => {
                   <td>
                     <div className="d-flex gap-2">
                       <button
-                        className="btn btn-primary btn-sm"
+                        className="btn btn-sm btn-primary"
                         onClick={() => handleViewProject(project)}
                       >
                         <i className={`fas ${expandedRow === project.id ? 'fa-chevron-up' : 'fa-eye'}`}></i>
                       </button>
-                      <button className="btn btn-secondary btn-sm">
+                      <button
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => handleEditProject(project)}
+                      >
                         <i className="fas fa-edit"></i>
                       </button>
                       {project.progress === 100 && (
                         <button
-                          className="btn btn-success btn-sm"
+                          className="btn btn-sm btn-success"
                           onClick={() => handleMarkComplete(project.id)}
                         >
                           <i className="fas fa-check"></i>
                         </button>
                       )}
                       <button
-                        className="btn btn-danger btn-sm"
+                        className="btn btn-sm btn-danger"
                         onClick={() => handleDeleteProject(project.id)}
                       >
                         <i className="fas fa-trash"></i>
@@ -331,110 +447,110 @@ const ActiveProject = () => {
                 {/* Expanded row with project details */}
                 {expandedRow === project.id && (
                   <tr>
-                    <td colSpan="10" className="p-0 border-top-0">
-                      <div className="bg-light p-4 border-top">
+                    <td colSpan={10} className="p-0 border-top-0 ">
+                      <div className="p-4">
                         <div className="mb-4">
                           <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5>Project Files</h5>
+                            <h5 className="mb-0">Project Files</h5>
                             {selectedFiles.length > 0 && (
-                              <div className="d-flex gap-2 align-items-center">
-                                <span className="badge bg-primary">
-                                  {selectedFiles.length} files selected
-                                </span>
-                              </div>
+                              <span className="badge bg-primary">
+                                {selectedFiles.length} files selected
+                              </span>
                             )}
                           </div>
                           
                           {/* Batch Edit Controls */}
                           {selectedFiles.length > 0 && (
-                            <div className="mb-4 p-3 bg-white rounded shadow-sm">
-                              <h6 className="mb-3">Batch Edit</h6>
-                              <div className="row g-3">
-                                <div className="col-md-4 col-lg-2">
-                                  <label className="form-label">Platform</label>
-                                  <select
-                                    className="form-select form-select-sm"
-                                    value={batchEditValues.platform}
-                                    onChange={(e) => setBatchEditValues({...batchEditValues, platform: e.target.value})}
+                            <div className="card mb-4">
+                              <div className="card-body">
+                                <h6 className="card-title mb-3">Batch Edit</h6>
+                                <div className="row g-3">
+                                  <div className="col-md-4 col-lg-2">
+                                    <label className="form-label">Platform</label>
+                                    <select
+                                      className="form-select form-select-sm"
+                                      value={batchEditValues.platform}
+                                      onChange={(e) => setBatchEditValues({...batchEditValues, platform: e.target.value})}
+                                    >
+                                      <option value="">Select</option>
+                                      <option value="Web">Web</option>
+                                      <option value="Mobile">Mobile</option>
+                                      <option value="Desktop">Desktop</option>
+                                    </select>
+                                  </div>
+                                  <div className="col-md-4 col-lg-2">
+                                    <label className="form-label">Handler</label>
+                                    <select
+                                      className="form-select form-select-sm"
+                                      value={batchEditValues.handler}
+                                      onChange={(e) => setBatchEditValues({...batchEditValues, handler: e.target.value})}
+                                    >
+                                      <option value="">Select</option>
+                                      <option value="John Doe">John Doe</option>
+                                      <option value="Jane Smith">Jane Smith</option>
+                                      <option value="Mike Johnson">Mike Johnson</option>
+                                    </select>
+                                  </div>
+                                  <div className="col-md-4 col-lg-2">
+                                    <label className="form-label">QA Reviewer</label>
+                                    <select
+                                      className="form-select form-select-sm"
+                                      value={batchEditValues.qaReviewer}
+                                      onChange={(e) => setBatchEditValues({...batchEditValues, qaReviewer: e.target.value})}
+                                    >
+                                      <option value="">Select</option>
+                                      <option value="Sarah Williams">Sarah Williams</option>
+                                      <option value="David Brown">David Brown</option>
+                                      <option value="Emily Davis">Emily Davis</option>
+                                    </select>
+                                  </div>
+                                  <div className="col-md-4 col-lg-2">
+                                    <label className="form-label">QC Due</label>
+                                    <input
+                                      type="date"
+                                      className="form-control form-control-sm"
+                                      value={batchEditValues.qcDue}
+                                      onChange={(e) => setBatchEditValues({...batchEditValues, qcDue: e.target.value})}
+                                    />
+                                  </div>
+                                  <div className="col-md-4 col-lg-2">
+                                    <label className="form-label">QC Hours</label>
+                                    <input
+                                      type="text"
+                                      className="form-control form-control-sm"
+                                      value={batchEditValues.qcAllocatedHours}
+                                      onChange={(e) => setBatchEditValues({...batchEditValues, qcAllocatedHours: e.target.value})}
+                                    />
+                                  </div>
+                                  <div className="col-md-4 col-lg-2">
+                                    <label className="form-label">Priority</label>
+                                    <select
+                                      className="form-select form-select-sm"
+                                      value={batchEditValues.priority}
+                                      onChange={(e) => setBatchEditValues({...batchEditValues, priority: e.target.value})}
+                                    >
+                                      <option value="">Select</option>
+                                      <option value="High">High</option>
+                                      <option value="Medium">Medium</option>
+                                      <option value="Low">Low</option>
+                                    </select>
+                                  </div>
+                                </div>
+                                <div className="mt-3">
+                                  <button
+                                    className="btn btn-sm btn-primary"
+                                    onClick={applyBatchEdits}
                                   >
-                                    <option value="">Select</option>
-                                    <option value="Web">Web</option>
-                                    <option value="Mobile">Mobile</option>
-                                    <option value="Desktop">Desktop</option>
-                                  </select>
+                                    Apply to Selected Files
+                                  </button>
                                 </div>
-                                <div className="col-md-4 col-lg-2">
-                                  <label className="form-label">Handler</label>
-                                  <select
-                                    className="form-select form-select-sm"
-                                    value={batchEditValues.handler}
-                                    onChange={(e) => setBatchEditValues({...batchEditValues, handler: e.target.value})}
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="John Doe">John Doe</option>
-                                    <option value="Jane Smith">Jane Smith</option>
-                                    <option value="Mike Johnson">Mike Johnson</option>
-                                  </select>
-                                </div>
-                                <div className="col-md-4 col-lg-2">
-                                  <label className="form-label">QA Reviewer</label>
-                                  <select
-                                    className="form-select form-select-sm"
-                                    value={batchEditValues.qaReviewer}
-                                    onChange={(e) => setBatchEditValues({...batchEditValues, qaReviewer: e.target.value})}
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="Sarah Williams">Sarah Williams</option>
-                                    <option value="David Brown">David Brown</option>
-                                    <option value="Emily Davis">Emily Davis</option>
-                                  </select>
-                                </div>
-                                <div className="col-md-4 col-lg-2">
-                                  <label className="form-label">QC Due</label>
-                                  <input
-                                    type="date"
-                                    className="form-control form-control-sm"
-                                    value={batchEditValues.qcDue}
-                                    onChange={(e) => setBatchEditValues({...batchEditValues, qcDue: e.target.value})}
-                                  />
-                                </div>
-                                <div className="col-md-4 col-lg-2">
-                                  <label className="form-label">QC Hours</label>
-                                  <input
-                                    type="text"
-                                    className="form-control form-control-sm"
-                                    value={batchEditValues.qcAllocatedHours}
-                                    onChange={(e) => setBatchEditValues({...batchEditValues, qcAllocatedHours: e.target.value})}
-                                  />
-                                </div>
-                                <div className="col-md-4 col-lg-2">
-                                  <label className="form-label">Priority</label>
-                                  <select
-                                    className="form-select form-select-sm"
-                                    value={batchEditValues.priority}
-                                    onChange={(e) => setBatchEditValues({...batchEditValues, priority: e.target.value})}
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="High">High</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="Low">Low</option>
-                                  </select>
-                                </div>
-                              </div>
-                              <div className="mt-3">
-                                <button
-                                  className="btn btn-primary btn-sm"
-                                  onClick={applyBatchEdits}
-                                >
-                                  Apply to Selected Files
-                                </button>
                               </div>
                             </div>
                           )}
                           
                           {/* Files Table */}
-                          <div className="table-responsive bg-white rounded shadow">
-                            <table className="table table-sm mb-0">
+                          <div className="table-responsive">
+                            <table className="table table-sm table-striped table-hover">
                               <thead className="table-light">
                                 <tr>
                                   <th>
@@ -541,10 +657,10 @@ const ActiveProject = () => {
                         </div>
                         
                         {/* Action buttons for expanded row */}
-                        <div className="d-flex justify-content-end gap-3">
+                        <div className="d-flex justify-content-end gap-2">
                           <button
                             type="button"
-                            className="btn btn-outline-secondary"
+                            className="btn btn-secondary"
                             onClick={() => setExpandedRow(null)}
                           >
                             Close
@@ -553,7 +669,6 @@ const ActiveProject = () => {
                             <button
                               type="button"
                               className="btn btn-primary"
-                              onClick={() => saveInlineChanges(project.id)}
                             >
                               Save Changes
                             </button>
@@ -571,120 +686,116 @@ const ActiveProject = () => {
 
       {/* Project Detail Modal - Keeping this for potential future use */}
       {showDetailModal && selectedProject && (
-        <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-xl" role="document">
+        <div className="modal fade show" style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.5)'}}>
+          <div className="modal-dialog modal-xl">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">{selectedProject.title} - Details</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={handleCloseModal}
-                ></button>
+                <button type="button" className="btn-close" onClick={handleCloseModal}></button>
               </div>
               <div className="modal-body">
                 <div className="mb-4">
                   <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h5>Project Files</h5>
+                    <h5 className="mb-0">Project Files</h5>
                     {selectedFiles.length > 0 && (
-                      <div className="d-flex gap-2 align-items-center">
-                        <span className="badge bg-primary">
-                          {selectedFiles.length} files selected
-                        </span>
-                      </div>
+                      <span className="badge bg-primary">
+                        {selectedFiles.length} files selected
+                      </span>
                     )}
                   </div>
                   
                   {/* Batch Edit Controls */}
                   {selectedFiles.length > 0 && (
-                    <div className="mb-4 p-3 bg-light rounded">
-                      <h6 className="mb-3">Batch Edit</h6>
-                      <div className="row g-3">
-                        <div className="col-md-4 col-lg-2">
-                          <label className="form-label">Platform</label>
-                          <select
-                            className="form-select form-select-sm"
-                            value={batchEditValues.platform}
-                            onChange={(e) => setBatchEditValues({...batchEditValues, platform: e.target.value})}
+                    <div className="card mb-4">
+                      <div className="card-body">
+                        <h6 className="card-title mb-3">Batch Edit</h6>
+                        <div className="row g-3">
+                          <div className="col-md-4 col-lg-2">
+                            <label className="form-label">Platform</label>
+                            <select
+                              className="form-select form-select-sm"
+                              value={batchEditValues.platform}
+                              onChange={(e) => setBatchEditValues({...batchEditValues, platform: e.target.value})}
+                            >
+                              <option value="">Select</option>
+                              <option value="Web">Web</option>
+                              <option value="Mobile">Mobile</option>
+                              <option value="Desktop">Desktop</option>
+                            </select>
+                          </div>
+                          <div className="col-md-4 col-lg-2">
+                            <label className="form-label">Handler</label>
+                            <select
+                              className="form-select form-select-sm"
+                              value={batchEditValues.handler}
+                              onChange={(e) => setBatchEditValues({...batchEditValues, handler: e.target.value})}
+                            >
+                              <option value="">Select</option>
+                              <option value="John Doe">John Doe</option>
+                              <option value="Jane Smith">Jane Smith</option>
+                              <option value="Mike Johnson">Mike Johnson</option>
+                            </select>
+                          </div>
+                          <div className="col-md-4 col-lg-2">
+                            <label className="form-label">QA Reviewer</label>
+                            <select
+                              className="form-select form-select-sm"
+                              value={batchEditValues.qaReviewer}
+                              onChange={(e) => setBatchEditValues({...batchEditValues, qaReviewer: e.target.value})}
+                            >
+                              <option value="">Select</option>
+                              <option value="Sarah Williams">Sarah Williams</option>
+                              <option value="David Brown">David Brown</option>
+                              <option value="Emily Davis">Emily Davis</option>
+                            </select>
+                          </div>
+                          <div className="col-md-4 col-lg-2">
+                            <label className="form-label">QC Due</label>
+                            <input
+                              type="date"
+                              className="form-control form-control-sm"
+                              value={batchEditValues.qcDue}
+                              onChange={(e) => setBatchEditValues({...batchEditValues, qcDue: e.target.value})}
+                            />
+                          </div>
+                          <div className="col-md-4 col-lg-2">
+                            <label className="form-label">QC Hours</label>
+                            <input
+                              type="text"
+                              className="form-control form-control-sm"
+                              value={batchEditValues.qcAllocatedHours}
+                              onChange={(e) => setBatchEditValues({...batchEditValues, qcAllocatedHours: e.target.value})}
+                            />
+                          </div>
+                          <div className="col-md-4 col-lg-2">
+                            <label className="form-label">Priority</label>
+                            <select
+                              className="form-select form-select-sm"
+                              value={batchEditValues.priority}
+                              onChange={(e) => setBatchEditValues({...batchEditValues, priority: e.target.value})}
+                            >
+                              <option value="">Select</option>
+                              <option value="High">High</option>
+                              <option value="Medium">Medium</option>
+                              <option value="Low">Low</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="mt-3">
+                          <button
+                            className="btn btn-sm btn-primary"
+                            onClick={applyBatchEdits}
                           >
-                            <option value="">Select</option>
-                            <option value="Web">Web</option>
-                            <option value="Mobile">Mobile</option>
-                            <option value="Desktop">Desktop</option>
-                          </select>
+                            Apply to Selected Files
+                          </button>
                         </div>
-                        <div className="col-md-4 col-lg-2">
-                          <label className="form-label">Handler</label>
-                          <select
-                            className="form-select form-select-sm"
-                            value={batchEditValues.handler}
-                            onChange={(e) => setBatchEditValues({...batchEditValues, handler: e.target.value})}
-                          >
-                            <option value="">Select</option>
-                            <option value="John Doe">John Doe</option>
-                            <option value="Jane Smith">Jane Smith</option>
-                            <option value="Mike Johnson">Mike Johnson</option>
-                          </select>
-                        </div>
-                        <div className="col-md-4 col-lg-2">
-                          <label className="form-label">QA Reviewer</label>
-                          <select
-                            className="form-select form-select-sm"
-                            value={batchEditValues.qaReviewer}
-                            onChange={(e) => setBatchEditValues({...batchEditValues, qaReviewer: e.target.value})}
-                          >
-                            <option value="">Select</option>
-                            <option value="Sarah Williams">Sarah Williams</option>
-                            <option value="David Brown">David Brown</option>
-                            <option value="Emily Davis">Emily Davis</option>
-                          </select>
-                        </div>
-                        <div className="col-md-4 col-lg-2">
-                          <label className="form-label">QC Due</label>
-                          <input
-                            type="date"
-                            className="form-control form-control-sm"
-                            value={batchEditValues.qcDue}
-                            onChange={(e) => setBatchEditValues({...batchEditValues, qcDue: e.target.value})}
-                          />
-                        </div>
-                        <div className="col-md-4 col-lg-2">
-                          <label className="form-label">QC Hours</label>
-                          <input
-                            type="text"
-                            className="form-control form-control-sm"
-                            value={batchEditValues.qcAllocatedHours}
-                            onChange={(e) => setBatchEditValues({...batchEditValues, qcAllocatedHours: e.target.value})}
-                          />
-                        </div>
-                        <div className="col-md-4 col-lg-2">
-                          <label className="form-label">Priority</label>
-                          <select
-                            className="form-select form-select-sm"
-                            value={batchEditValues.priority}
-                            onChange={(e) => setBatchEditValues({...batchEditValues, priority: e.target.value})}
-                          >
-                            <option value="">Select</option>
-                            <option value="High">High</option>
-                            <option value="Medium">Medium</option>
-                            <option value="Low">Low</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="mt-3">
-                        <button
-                          className="btn btn-primary btn-sm"
-                          onClick={applyBatchEdits}
-                        >
-                          Apply to Selected Files
-                        </button>
                       </div>
                     </div>
                   )}
                   
                   {/* Files Table */}
                   <div className="table-responsive">
-                    <table className="table table-sm">
+                    <table className="table table-sm table-striped table-hover">
                       <thead className="table-light">
                         <tr>
                           <th>
@@ -793,7 +904,7 @@ const ActiveProject = () => {
               <div className="modal-footer">
                 <button
                   type="button"
-                  className="btn btn-outline-secondary"
+                  className="btn btn-secondary"
                   onClick={handleCloseModal}
                 >
                   Cancel
@@ -801,12 +912,7 @@ const ActiveProject = () => {
                 <button
                   type="button"
                   className="btn btn-primary"
-                  onClick={() => {
-                    // Update the project in the main projects array
-                    setProjects(projects.map(p => p.id === selectedProject.id ? selectedProject : p));
-                    setShowDetailModal(false);
-                    setHasUnsavedChanges(false);
-                  }}
+               
                 >
                   Save Changes
                 </button>
@@ -819,8 +925,41 @@ const ActiveProject = () => {
   );
 };
 
+// Converts "hh:mm AM/PM DD-MM-YY" to "YYYY-MM-DDTHH:mm"
+function customToInputDate(str) {
+  // Example input: "01:23 PM 25-06-25"
+  if (!str) return '';
+  const match = str.match(/(\d{2}):(\d{2}) (AM|PM) (\d{2})-(\d{2})-(\d{2})/);
+  if (!match) return '';
+  let [_, hour, min, ampm, day, month, year] = match;
+  hour = parseInt(hour, 10);
+  if (ampm === 'PM' && hour !== 12) hour += 12;
+  if (ampm === 'AM' && hour === 12) hour = 0;
+  // Pad hour
+  hour = hour.toString().padStart(2, '0');
+  // Compose ISO string
+  return `20${year}-${month}-${day}T${hour}:${min}`;
+}
+
+// Converts "YYYY-MM-DDTHH:mm" to "hh:mm AM/PM DD-MM-YY"
+function inputToCustomDate(str) {
+  // Example input: "2025-06-25T13:23"
+  if (!str) return '';
+  const d = new Date(str);
+  if (isNaN(d)) return '';
+  let hour = d.getHours();
+  const min = d.getMinutes().toString().padStart(2, '0');
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  hour = hour % 12;
+  if (hour === 0) hour = 12;
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const year = d.getFullYear().toString().slice(2);
+  return `${hour.toString().padStart(2, '0')}:${min} ${ampm} ${day}-${month}-${year}`;
+}
+
 // Generate dummy data function
-const generateDummyProjects = (count) => {
+const generateDummyProjects = (count)=> {
   const clients = ['Acme Corp', 'Globex', 'Initech', 'Umbrella Inc', 'Stark Industries'];
   const tasks = ['Translation', 'Proofreading', 'QA Review', 'Editing', 'Formatting'];
   const languages = ['English', 'Spanish', 'French', 'German', 'Chinese', 'Japanese'];
