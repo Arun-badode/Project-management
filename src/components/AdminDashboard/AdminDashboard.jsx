@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   Card,
   Button,
@@ -9,26 +10,28 @@ import {
   Row,
   Col,
 } from "react-bootstrap";
-import { FaPlus, FaFileExport, FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaEye } from "react-icons/fa";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts';
 
-
 const AdminDashboard = () => {
+ 
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [editProject, setEditProject] = useState(null);
-  
-  //   client: "",
-  //   platform: "",
-  //   pages: "",
-  //   handler: "",
-  //   status: "",
-  // });
+  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [projects, setProjects] = useState([]);
+
+  // Generate projects on component mount
+  useEffect(() => {
+    setProjects(generateRandomProjects(15));
+    setFilteredProjects(generateRandomProjects(15));
+  }, []);
 
   const handleShow = () => setShowModal(true);
   const handleClose = () => setShowModal(false);
@@ -38,10 +41,98 @@ const AdminDashboard = () => {
     setShowViewModal(true);
   };
 
-  const handleEdit = (project) => {
-    setEditProject(project);
-    setShowEditModal(true);
+  // Unified filter handler
+  const handleCardFilter = (type) => {
+    let filtered = [];
+    const today = new Date();
+    const nearDueDate = new Date();
+    nearDueDate.setDate(today.getDate() + 3);
+
+    switch (type) {
+      case 'active':
+        filtered = projects.filter(p => p.status === 'Active');
+        break;
+      case 'nearDue':
+        filtered = projects.filter(project => {
+          const dueDate = new Date(project.dueDate);
+          return dueDate > today && dueDate <= nearDueDate && project.status !== 'Completed';
+        });
+        break;
+      case 'overdue':
+        filtered = projects.filter(project => {
+          const dueDate = new Date(project.dueDate);
+          return dueDate < today && project.status !== 'Completed';
+        });
+        break;
+      case 'teamOnDuty':
+        filtered = projects.filter(p => p.status === 'Team On-Duty');
+        break;
+      case 'eventsToday':
+        const todayStr = today.toISOString().split('T')[0];
+        filtered = projects.filter(project => {
+          return project.dueDate === todayStr || project.qcDueDate === todayStr;
+        });
+        break;
+      case 'pendingApproval':
+        filtered = projects.filter(p => p.qaStatus === 'Pending');
+        break;
+      default:
+        filtered = projects;
+    }
+    setFilteredProjects(filtered);
+    setActiveFilter(type);
   };
+
+  // Card counts based on filteredProjects (so cards always match table)
+  const countFiltered = (type) => {
+    const today = new Date();
+    const nearDueDate = new Date();
+    nearDueDate.setDate(today.getDate() + 3);
+
+    switch (type) {
+      case 'active':
+        return filteredProjects.filter(p => p.status === 'Active').length;
+      case 'nearDue':
+        return filteredProjects.filter(project => {
+          const dueDate = new Date(project.dueDate);
+          return dueDate > today && dueDate <= nearDueDate && project.status !== 'Completed';
+        }).length;
+      case 'overdue':
+        return filteredProjects.filter(project => {
+          const dueDate = new Date(project.dueDate);
+          return dueDate < today && project.status !== 'Completed';
+        }).length;
+      case 'teamOnDuty':
+        return filteredProjects.filter(p => p.status === 'Team On-Duty').length;
+      case 'eventsToday':
+        const todayStr = today.toISOString().split('T')[0];
+        return filteredProjects.filter(project => {
+          return project.dueDate === todayStr || project.qcDueDate === todayStr;
+        }).length;
+      case 'pendingApproval':
+        return filteredProjects.filter(p => p.qaStatus === 'Pending').length;
+      default:
+        return filteredProjects.length;
+    }
+  };
+
+  // Show all projects
+  const showAllProjects = () => {
+    setFilteredProjects(projects);
+    setActiveFilter('all');
+  };
+
+  const [ setAllProjects] = useState([]);
+
+  useEffect(() => {
+    // Example fetch - replace with your actual logic
+    fetch('/api/projects')
+      .then(res => res.json())
+      .then(data => {
+        setAllProjects(data);
+        setFilteredProjects(data); // default view
+      });
+  }, []);
 
   const generateRandomProjects = (count) => {
     const clients = [
@@ -55,7 +146,7 @@ const AdminDashboard = () => {
       "Oscorp",
     ];
     const platforms = ["Web", "Mobile", "Desktop"];
-    const statuses = ["In Progress", "Completed", "On Hold"];
+    const statuses = ["Active", "Near Due", "Overdue", "Team On-Duty"];
     const handlers = ["Jane", "John", "Alice", "Bob", "Charlie", "Eve"];
     const qaReviewers = ["Alan", "Sarah", "Mike", "Lisa", "David"];
     const qaStatuses = ["Passed", "Failed", "Pending", "In Review"];
@@ -65,7 +156,7 @@ const AdminDashboard = () => {
     const today = new Date();
 
     for (let i = 0; i < count; i++) {
-      const randomDays = Math.floor(Math.random() * 30) + 1;
+      const randomDays = Math.floor(Math.random() * 30) - 5; // Some will be overdue
       const dueDate = new Date(today);
       dueDate.setDate(today.getDate() + randomDays);
 
@@ -100,27 +191,23 @@ const AdminDashboard = () => {
     return projects;
   };
 
-  const projects = generateRandomProjects(15);
-
-
   const barData = [
-  { name: 'Mon', Design: 20, Development: 40, Testing: 10, Deployment: 10 },
-  { name: 'Tue', Design: 30, Development: 35, Testing: 15, Deployment: 10 },
-  { name: 'Wed', Design: 40, Development: 30, Testing: 10, Deployment: 15 },
-  { name: 'Thu', Design: 30, Development: 35, Testing: 10, Deployment: 10 },
-  { name: 'Fri', Design: 25, Development: 35, Testing: 15, Deployment: 10 }
-];
+    { name: 'Mon', Design: 20, Development: 40, Testing: 10, Deployment: 10 },
+    { name: 'Tue', Design: 30, Development: 35, Testing: 15, Deployment: 10 },
+    { name: 'Wed', Design: 40, Development: 30, Testing: 10, Deployment: 15 },
+    { name: 'Thu', Design: 30, Development: 35, Testing: 10, Deployment: 10 },
+    { name: 'Fri', Design: 25, Development: 35, Testing: 15, Deployment: 10 }
+  ];
 
-const pieData = [
-  { name: 'Development', value: 60 },
-  { name: 'Meetings', value: 30 },
-  { name: 'Planning', value: 20 },
-  { name: 'QA', value: 25 },
-  { name: 'Documentation', value: 10 }
-];
+  const pieData = [
+    { name: 'Development', value: 60 },
+    { name: 'Meetings', value: 30 },
+    { name: 'Planning', value: 20 },
+    { name: 'QA', value: 25 },
+    { name: 'Documentation', value: 10 }
+  ];
 
-const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
-
+  const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
   return (
     <div className="admin-dashboard text-white p-3 p-md-4 bg-main">
@@ -131,125 +218,101 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
           <Button className="gradient-button" onClick={handleShow}>
             <FaPlus className="me-2" /> Create New Project
           </Button>
-          {/* <Button className="gradient-button">
-            <FaFileExport className="me-2" /> Export Data
-          </Button> */}
         </div>
       </div>
 
       {/* KPIs */}
       <Row className="mb-3 g-2">
         <Col xs={12} sm={6} md={2}>
-          <Card className="bg-card text-white p-2  h-75" >
+          <Card
+            className={`bg-card text-white p-2 h-75 ${activeFilter === 'active' ? 'border-primary border-2' : ''}`}
+            onClick={() => handleCardFilter('active')}
+            style={{ cursor: 'pointer' }}
+          >
             <Card.Body>
-              <Card.Title> Active Projects</Card.Title>
-              <h4>{projects.length}</h4>
+              <Card.Title>Active Projects</Card.Title>
+              <h4>{countFiltered('active')}</h4>
             </Card.Body>
           </Card>
         </Col>
-       
+
         <Col xs={12} sm={6} md={2}>
-          <Card className="bg-card text-white p-2  h-75">
+          <Card
+            className={`bg-card text-white p-2 h-75 ${activeFilter === 'nearDue' ? 'border-primary border-2' : ''}`}
+            onClick={() => handleCardFilter('nearDue')}
+            style={{ cursor: 'pointer' }}
+          >
             <Card.Body>
-              <Card.Title> Near Due</Card.Title>
-              <h4>4</h4>
+              <Card.Title>Near Due</Card.Title>
+              <h4>{countFiltered('nearDue')}</h4>
             </Card.Body>
           </Card>
         </Col>
+
         <Col xs={12} sm={6} md={2}>
-          <Card className="bg-card text-white p-2  h-75">
+          <Card
+            className={`bg-card text-white p-2 h-75 ${activeFilter === 'overdue' ? 'border-primary border-2' : ''}`}
+            onClick={() => handleCardFilter('overdue')}
+            style={{ cursor: 'pointer' }}
+          >
             <Card.Body>
-              <Card.Title>Overdue </Card.Title>
-              <h4>2</h4>
+              <Card.Title>Overdue</Card.Title>
+              <h4>{countFiltered('overdue')}</h4>
             </Card.Body>
           </Card>
         </Col>
+
         <Col xs={12} sm={6} md={2}>
-          <Card className="bg-card text-white p-2  h-75">
+          <Card
+            className={`bg-card text-white p-2 h-75 ${activeFilter === 'teamOnDuty' ? 'border-primary border-2' : ''}`}
+            onClick={() => handleCardFilter('teamOnDuty')}
+            style={{ cursor: 'pointer' }}
+          >
             <Card.Body>
               <Card.Title>Team On-Duty</Card.Title>
-              <h4>{projects.length}</h4>
+              <h4>{countFiltered('teamOnDuty')}</h4>
             </Card.Body>
           </Card>
         </Col>
+
         <Col xs={12} sm={6} md={2}>
-          <Card className="bg-card text-white p-2  h-75">
-            <Card.Body>
-              <Card.Title>Events Today </Card.Title>
-              <h4>{projects.length}</h4>
-            </Card.Body>
+          <Card
+            className={`bg-card text-white p-2 h-75 ${activeFilter === 'eventsToday' ? 'border-primary border-2' : ''}`}
+            onClick={() => handleCardFilter('eventsToday')}
+            style={{ cursor: 'pointer' }}
+          >
+            <Link to="/Attendance" className="text-white text-decoration-none">
+              <Card.Body>
+                <Card.Title>Events Today</Card.Title>
+                <h4>{countFiltered('eventsToday')}</h4>
+              </Card.Body>
+            </Link>
           </Card>
         </Col>
+
         <Col xs={12} sm={6} md={2}>
-          <Card className="bg-card text-white p-2  h-75">
+          <Card
+            className={`bg-card text-white p-2 h-75 ${activeFilter === 'pendingApproval' ? 'border-primary border-2' : ''}`}
+            onClick={() => handleCardFilter('pendingApproval')}
+            style={{ cursor: 'pointer' }}
+          >
             <Card.Body>
-              <Card.Title>Pending Approval  </Card.Title>
-              <h4>{projects.length}</h4>
+              <Card.Title>Pending Approval</Card.Title>
+              <h4>{countFiltered('pendingApproval')}</h4>
             </Card.Body>
           </Card>
         </Col>
       </Row>
 
-      {/* Filters */}
-      {/* <Card className="bg-card text-white p-3 mb-4">
-        <h5>Filters</h5>
-        <Row className="gy-3">
-          <Col xs={12} sm={6} md={2}>
-            <Form.Control
-              type="text"
-              name="client"
-              placeholder="Client"
-             
-              
-            />
-          </Col>
-          <Col xs={12} sm={6} md={2}>
-            <Form.Select
-              name="platform"
-             
-            >
-              <option value="">Platform</option>
-              <option>Web</option>
-              <option>Mobile</option>
-              <option>Desktop</option>
-            </Form.Select>
-          </Col>
-          <Col xs={12} sm={6} md={2}>
-            <Form.Control
-              type="number"
-              name="pages"
-              placeholder="Total Pages"
-             
-             
-            />
-          </Col>
-          <Col xs={12} sm={6} md={2}>
-            <Form.Control
-              type="text"
-              name="handler"
-              placeholder="Handler"
-             
-             
-            />
-          </Col>
-          <Col xs={12} sm={6} md={2}>
-            <Form.Select
-              name="status"
-              
-              
-            >
-              <option value="">Status</option>
-              <option>In Progress</option>
-              <option>Completed</option>
-              <option>On Hold</option>
-            </Form.Select>
-          </Col>
-        </Row>
-      </Card> */}
+      {/* Show All button */}
+      {activeFilter !== 'all' && (
+        <Button variant="outline-light" size="sm" onClick={showAllProjects}>
+          Show All
+        </Button>
+      )}
 
-
- <div className="row g-4 mb-4">
-
+      {/* Charts */}
+      <div className="row g-4 mb-4">
         {/* Resource Utilization */}
         <div className="col-md-6">
           <div className="card p-3 shadow-sm h-100 bg-card">
@@ -279,7 +342,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
         </div>
 
         {/* Time Tracking Summary */}
-        <div className="col-md-6 ">
+        <div className="col-md-6">
           <div className="card p-3 shadow-sm h-100 bg-card">
             <h5>Time Tracking Summary</h5>
             <ResponsiveContainer width="100%" height={250}>
@@ -300,7 +363,7 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
             </ResponsiveContainer>
             <div className="row text-center mt-3">
               <div className="col-6 border-end">
-                <p className="mb-1 ">Total Hours This Week</p>
+                <p className="mb-1">Total Hours This Week</p>
                 <h5 className="text-primary fw-bold">187 hours</h5>
               </div>
               <div className="col-6">
@@ -310,105 +373,112 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
             </div>
           </div>
         </div>
-
       </div>
 
-
       {/* Main Table */}
-     <Card className="text-white p-3 mb-5 table-gradient-bg">
-  <h4 className="mb-3">Project List</h4>
+      <Card className="text-white p-3 mb-5 table-gradient-bg">
+        <h4 className="mb-3">Project List</h4>
+        {activeFilter !== 'active' && (
+          <div className="mb-3">
+          </div>
+        )}
 
-  {/* SCROLLABLE CONTAINER */}
-  <div
-    className="table-responsive"
-    style={{ maxHeight: "500px", overflowY: "auto" }}
-  >
-    <Table className="table-gradient-bg align-middle mt-0 table table-bordered table-hover">
-      <thead className="table-light bg-dark sticky-top">
-        <tr>
-          <th>ID</th>
-          <th>Project Title</th>
-          <th>Client</th>
-          <th>Tasks</th>
-          <th>Languages</th>
-          <th>Platform</th>
-          <th>Total Pages</th>
-          <th>Actual Due Date</th>
-          <th>Ready for QC Deadline</th>
-          <th>QC Hrs</th>
-          <th>QC Due Date</th>
-          <th>Status</th>
-          <th>Handler</th>
-          <th>QA Reviewer</th>
-          <th>QA Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
+        {/* SCROLLABLE CONTAINER */}
+        <div
+          className="table-responsive"
+          style={{ maxHeight: "500px", overflowY: "auto" }}
+        >
+          <Table className="table-gradient-bg align-middle mt-0 table table-bordered table-hover">
+            <thead className="table-light bg-dark sticky-top">
+              <tr>
+                <th>ID</th>
+                <th>Project Title</th>
+                <th>Client</th>
+                <th>Tasks</th>
+                <th>Languages</th>
+                <th>Platform</th>
+                <th>Total Pages</th>
+                <th>Actual Due Date</th>
+                <th>Ready for QC Deadline</th>
+                <th>QC Hrs</th>
+                <th>QC Due Date</th>
+                <th>Status</th>
+                <th>Handler</th>
+                <th>QA Reviewer</th>
+                <th>QA Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
 
-      <tbody>
-        {projects.map((project) => (
-          <tr key={project.id}>
-            <td>{project.id}</td>
-            <td>{project.title}</td>
-            <td>{project.client}</td>
-            <td>{project.tasks}</td>
-            <td>{project.languages}</td>
-            <td>{project.platform}</td>
-            <td>{project.pages}</td>
-            <td>{project.dueDate}</td>
-            <td>{project.qcDeadline}</td>
-            <td>{project.qcHours}</td>
-            <td>{project.qcDueDate}</td>
-            <td>
-              <Badge
-                bg={
-                  project.status === "Completed"
-                    ? "success"
-                    : project.status === "On Hold"
-                    ? "warning"
-                    : "info"
-                }
-              >
-                {project.status}
-              </Badge>
-            </td>
-            <td>{project.handler}</td>
-            <td>{project.qaReviewer}</td>
-            <td>
-              <Badge
-                bg={
-                  project.qaStatus === "Passed"
-                    ? "success"
-                    : project.qaStatus === "Failed"
-                    ? "danger"
-                    : project.qaStatus === "In Review"
-                    ? "info"
-                    : "secondary"
-                }
-              >
-                {project.qaStatus}
-              </Badge>
-            </td>
-            <td>
-              <Button
-                variant="link"
-                className="text-info p-0 ms-3"
-                title="View"
-                onClick={() => handleView(project)}
-              >
-                <FaEye />
-              </Button>
-              
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
+            <tbody>
+              {filteredProjects.map((project) => (
+                <tr key={project.id}>
+                  <td>{project.id}</td>
+                  <td>{project.title}</td>
+                  <td>{project.client}</td>
+                  <td>{project.tasks}</td>
+                  <td>{project.languages}</td>
+                  <td>{project.platform}</td>
+                  <td>{project.pages}</td>
+                  <td>{project.dueDate}</td>
+                  <td>{project.qcDeadline}</td>
+                  <td>{project.qcHours}</td>
+                  <td>{project.qcDueDate}</td>
+                  <td>
+                    <Badge
+                      bg={
+                        project.status === "Completed"
+                          ? "success"
+                          : project.status === "On Hold"
+                            ? "warning"
+                            : project.status === "Active"
+                              ? "primary"
+                              : project.status === "Near Due"
+                                ? "info"
+                                : project.status === "Overdue"
+                                  ? "danger"
+                                  : project.status === "Team On-Duty"
+                                    ? "secondary"
+                                    : "dark"
+                      }
+                    >
+                      {project.status}
+                    </Badge>
+                  </td>
 
-    
-  </div>
-</Card>
-
+                  <td>{project.handler}</td>
+                  <td>{project.qaReviewer}</td>
+                  <td>
+                    <Badge
+                      bg={
+                        project.qaStatus === "Passed"
+                          ? "success"
+                          : project.qaStatus === "Failed"
+                            ? "danger"
+                            : project.qaStatus === "In Review"
+                              ? "info"
+                              : "secondary"
+                      }
+                    >
+                      {project.qaStatus}
+                    </Badge>
+                  </td>
+                  <td>
+                    <Button
+                      variant="link"
+                      className="text-info p-0 ms-3"
+                      title="View"
+                      onClick={() => handleView(project)}
+                    >
+                      <FaEye />
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+      </Card>
 
       {/* Create Project Modal */}
       <Modal
@@ -430,9 +500,9 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
               <Form.Label>Client</Form.Label>
               <Form.Control type="text" placeholder="Enter client name" />
             </Form.Group>
-            <Form.Group className="mb-3 ">
+            <Form.Group className="mb-3">
               <Form.Label>Platform</Form.Label>
-              <Form.Select className="text-white border-secondary ">
+              <Form.Select className="text-white border-secondary">
                 <option>Web</option>
                 <option>Mobile</option>
                 <option>Desktop</option>
@@ -500,15 +570,13 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
               <p><strong>Handler:</strong> {selectedProject.handler}</p>
               <p><strong>QA Reviewer:</strong> {selectedProject.qaReviewer}</p>
               <p><strong>QA Status:</strong> {selectedProject.qaStatus}</p>
-              {/* <p><strong>Server Path:</strong> {selectedProject.serverPath}</p> */}
-              {/* Add more fields as needed */}
             </div>
           )}
         </Modal.Body>
       </Modal>
 
       {/* Edit Project Modal */}
-      <Modal
+      {/* <Modal
         show={showEditModal}
         onHide={() => setShowEditModal(false)}
         centered
@@ -540,10 +608,10 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
                   }
                 />
               </Form.Group>
-              <Form.Group className="mb-3 ">
+              <Form.Group className="mb-3">
                 <Form.Label>Platform</Form.Label>
                 <Form.Select
-                  className="text-white border-secondary "
+                  className="text-white border-secondary"
                   defaultValue={editProject.platform}
                 >
                   <option>Web</option>
@@ -606,11 +674,13 @@ const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
             </Form>
           )}
         </Modal.Body>
-      </Modal>
+      </Modal> */}
 
-       <Col md={12} className="text-end">
-  <Button className="gradient-button me-2">Go To</Button>
-</Col>
+      <Col md={12} className="text-end">
+        <Link to='/Project' className="text-decoration-none">
+          <Button className="gradient-button me-2">Go To</Button>
+        </Link>
+      </Col>
     </div>
   );
 };
