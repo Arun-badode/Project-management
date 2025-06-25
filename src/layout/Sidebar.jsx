@@ -25,6 +25,7 @@ const Sidebar = ({ collapsed }) => {
           {/* Admin Only */}
           {role === "Admin" && (
             <>
+              {/* Dashboard */}
               <li
                 className={`menu-item ${
                   isActive("/admin-dashboard") ? "active" : ""
@@ -41,6 +42,7 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Dashboard</span>
                 </div>
               </li>
+              {/* Active Projects */}
               <li
                 className={`menu-item ${
                   isActive("/LeadDashboard") ? "active" : ""
@@ -54,10 +56,11 @@ const Sidebar = ({ collapsed }) => {
                   }}
                 >
                   <i className="fa-solid fa-diagram-project"></i>
-                  <span className="menu-text">Active Projects </span>
+                  <span className="menu-text">Active Projects</span>
                 </div>
               </li>
-               <li
+              {/* Task Management */}
+              <li
                 className={`menu-item ${
                   isActive("/taskmanagement") ? "active" : ""
                 }`}
@@ -70,11 +73,10 @@ const Sidebar = ({ collapsed }) => {
                   }}
                 >
                   <i className="fa-solid fa-tasks"></i>
-                  <span className="menu-text">Task Management </span>
+                  <span className="menu-text">Task Management</span>
                 </div>
               </li>
-              
-
+              {/* Projects */}
               <li
                 className={`menu-item ${
                   isActive("/project") ? "active" : ""
@@ -88,11 +90,11 @@ const Sidebar = ({ collapsed }) => {
                   }}
                 >
                   <i className="fa-solid fa-diagram-project"></i>
-                  <span className="menu-text">Projects </span>
+                  <span className="menu-text">Projects</span>
                 </div>
               </li>
-
-               <li
+              {/* Action Center */}
+              <li
                 className={`menu-item ${
                   isActive("/actioncenter") ? "active" : ""
                 }`}
@@ -104,12 +106,12 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
-                  <i class="fa-solid fa-hexagon-nodes"></i>
+                  <i className="fa-solid fa-bolt"></i>
                   <span className="menu-text">Action Center</span>
                 </div>
               </li>
-
-               <li
+              {/* Reporting & Analytics */}
+              <li
                 className={`menu-item ${
                   isActive("/reportinganalytics") ? "active" : ""
                 }`}
@@ -125,7 +127,8 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Reporting & Analytics</span>
                 </div>
               </li>
-               <li
+              {/* Audit Logs */}
+              <li
                 className={`menu-item ${isActive("/auditlog") ? "active" : ""}`}
               >
                 <div
@@ -139,6 +142,7 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Audit Logs</span>
                 </div>
               </li>
+              {/* Attendance */}
               <li
                 className={`menu-item ${
                   isActive("/attendance") ? "active" : ""
@@ -151,12 +155,12 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
-                  <i class="fa-solid fa-clipboard-user"></i>
+                  <i className="fa-solid fa-calendar-days"></i>
                   <span className="menu-text">Attendance</span>
                 </div>
               </li>
-
-               <li
+              {/* Calendar */}
+              <li
                 className={`menu-item ${
                   isActive("/calendar") ? "active" : ""
                 }`}
@@ -168,11 +172,11 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
-                 <i class="fa-solid fa-calendar-days"></i>
-                  <span className="menu-text">Calander </span>
+                  <i className="fa-solid fa-calendar"></i>
+                  <span className="menu-text">Calendar</span>
                 </div>
               </li>
-
+              {/* User */}
               <li
                 className={`menu-item ${
                   isActive("/usermanage") ? "active" : ""
@@ -186,7 +190,7 @@ const Sidebar = ({ collapsed }) => {
                   }}
                 >
                   <i className="fa-solid fa-users-gear"></i>
-                  <span className="menu-text">User </span>
+                  <span className="menu-text">User</span>
                 </div>
               </li>
 
@@ -317,15 +321,8 @@ const Sidebar = ({ collapsed }) => {
                   <i className="fa-solid fa-gear"></i>
                   <span className="menu-text">Role & Permission</span>
                 </div>
-
-
-
-
-                
               </li>
-
-
-
+              {/* Chat Room */}
               <li
                 className={`menu-item ${
                   isActive("/collaboration") ? "active" : ""
@@ -338,7 +335,7 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
-                  <i class="fa-solid fa-comments"></i>
+                  <i className="fa-solid fa-comments"></i>
                   <span className="menu-text">Chat Room</span>
                 </div>
               </li>
