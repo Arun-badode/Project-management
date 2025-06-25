@@ -36,6 +36,7 @@ import ChangesPassword from "./components/AdminDashboard/ChangePassword/ChangesP
 import RoleManagementSystem from "./components/AdminDashboard/Role&Permission/Role&PErmission";
 import Project from "./components/AdminDashboard/Project/Project";
 import Calander from "./components/AdminDashboard/Calander/Calander";
+import ActionCenter from "./components/AdminDashboard/ActionCenter/ActionCenter";
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -71,9 +72,8 @@ function App() {
 
         {/* right side content */}
         <div
-          className={`right-side-content ${
-            isSidebarCollapsed && !hideLayout ? "collapsed" : ""
-          }`}
+          className={`right-side-content ${isSidebarCollapsed && !hideLayout ? "collapsed" : ""
+            }`}
         >
           <Routes>
             {/* Authentication routes (no navbar/sidebar) */}
@@ -83,7 +83,7 @@ function App() {
             {/* Admin routes */}
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/taskmanagement" element={<TaskManagement />} />
-            <Route path="/calendar" element={<Calander/>}/>
+            <Route path="/calendar" element={<Calander />} />
             <Route path="/usermanage" element={<UserManagement />} />
             <Route path="/resourcemanagement" element={<ResourceManagement />} />
             <Route path="/projectsupport" element={<ProjectSupportPortal />} />
@@ -94,10 +94,10 @@ function App() {
             <Route path="/reportinganalytics" element={<ReportingAnalytics />} />
             <Route path="/filemanagementsystem" element={<FileManagementSystem />} />
             <Route path="/qamanagement" element={<QAManagement />} />
-            <Route path="/changepassword" element={<ChangesPassword/>}/>
-            <Route path="/role&permission" element={<RoleManagementSystem/>}/>
-            <Route path="/project" element={<Project/>}/>
-
+            <Route path="/changepassword" element={<ChangesPassword />} />
+            <Route path="/role&permission" element={<RoleManagementSystem />} />
+            <Route path="/project" element={<Project />} />
+            <Route path="/actioncenter" element={<ActionCenter />} />
 
             {/* Lead routes */}
             <Route path="/LeadDashboard" element={<LeadDashboard />} />
@@ -107,36 +107,36 @@ function App() {
             <Route path="/attendance" element={<Attendance />} />
 
             {/* team Member */}
-            <Route path="/task" element={<Task/>}/>
-            <Route path="/team-dashboard" element={<TaskDashboard/>} />
-            <Route path='/messages'element={<Messages/>}/>
-            <Route path="/activity" element={<ActivitySummary/>}/>
-              <Route path="/attendance" element={<Attendance/>} />
+            <Route path="/task" element={<Task />} />
+            <Route path="/team-dashboard" element={<TaskDashboard />} />
+            <Route path='/messages' element={<Messages />} />
+            <Route path="/activity" element={<ActivitySummary />} />
+            <Route path="/attendance" element={<Attendance />} />
 
             {/* Add your other routes here */}
 
             {/*manager project */}
 
-            <Route path="/manager-dashboard" element={<ManagerDashboard/>}/>
-            <Route path="/createproject" element={<CreateProject/>}/>
-            <Route path="/attendance" element={<Attendance/>} />
-               <Route path="/assigned" element={<Assigned/>} />
+            <Route path="/manager-dashboard" element={<ManagerDashboard />} />
+            <Route path="/createproject" element={<CreateProject />} />
+            <Route path="/attendance" element={<Attendance />} />
+            <Route path="/assigned" element={<Assigned />} />
 
-            <Route path="/taskrequest" element={<TaskRequest/>}/>
-            <Route path="/sourcework" element={<ResourceWorkload/>}/>
-            <Route path="/collaboration" element={<Collaboration/>}/>
-          
-             {/* <Route path="/task" element={<Task/>} /> */}
+            <Route path="/taskrequest" element={<TaskRequest />} />
+            <Route path="/sourcework" element={<ResourceWorkload />} />
+            <Route path="/collaboration" element={<Collaboration />} />
+
+            {/* <Route path="/task" element={<Task/>} /> */}
 
 
             {/* productivity */}
 
-             <Route path="/productivity" element={<Productivity/>} />
+            <Route path="/productivity" element={<Productivity />} />
 
 
 
             {/* Add your other routes here */}
-             {/* End team Member */}
+            {/* End team Member */}
 
 
 
@@ -145,7 +145,7 @@ function App() {
 
 
             {/* End Manager */}
-            
+
           </Routes>
         </div>
       </div>
