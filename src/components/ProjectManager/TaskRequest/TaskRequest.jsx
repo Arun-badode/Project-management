@@ -123,7 +123,7 @@ function TaskRequest() {
       <div className="container py-4">
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h1 className="h2 mb-0 gradient-heading">Task Reassignment Requests</h1>
+          <h2 className="h2 mb-0 gradient-heading">Task Reassignment Requests</h2 >
           <div className="dropdown">
             <button 
               className="btn btn-outline-primary ms-2 dropdown-toggle"

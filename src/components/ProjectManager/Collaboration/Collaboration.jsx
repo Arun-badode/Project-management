@@ -189,7 +189,7 @@ function Collaboration() {
                 <div className="d-none d-lg-block col-lg-3 border-end bg-card p-3 overflow-auto">
                     {/* Filters */}
                     <div className="mb-4">
-                        <h6 className="text-muted mb-3">FILTERS</h6>
+                        <h6 className="mb-3">FILTERS</h6>
                         <div className="d-grid gap-2">
                             {['All', 'Unread', 'Mentions', 'Files'].map(filter => (
                                 <button
@@ -294,7 +294,7 @@ function Collaboration() {
                                     >
                                         <div className="d-flex   justify-content-between align-items-center mb-1">
                                             <strong>{message.sender}</strong>
-                                            <small className={message.sender === 'You' ? 'text-white-50' : 'text-muted'}>
+                                            <small className={message.sender === 'You' ? 'text-white-50' : ''}>
                                                 {message.timestamp}
                                             </small>
                                         </div>
@@ -316,7 +316,7 @@ function Collaboration() {
                                                             </small>
                                                         </div>
                                                         <button className="btn btn-link p-0 ms-2">
-                                                            <i className={`fas fa-download ${message.sender === 'You' ? 'text-white-50' : 'text-muted'}`}></i>
+                                                            <i className={`fas fa-download ${message.sender === 'You' ? 'text-white-50' : ''}`}></i>
                                                         </button>
                                                     </div>
                                                 ))}
@@ -360,7 +360,7 @@ function Collaboration() {
                                             <div className="typing-dot"></div>
                                             <div className="typing-dot"></div>
                                         </div>
-                                        <small className="ms-2 text-muted">typing...</small>
+                                        <small className="ms-2 ">typing...</small>
                                     </div>
                                 </div>
                             </div>
