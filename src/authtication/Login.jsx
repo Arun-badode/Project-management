@@ -12,6 +12,19 @@ const LoginPage = () => {
   const [role, setRole] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  // Additional state for animation
+const [fadeOut, setFadeOut] = useState(false);
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setFadeOut(true); // Start fade out
+    setTimeout(() => {
+      setShowVideo(false); // Remove video after fade
+    }, 1000); // Wait for animation to finish
+  }, 7000);
+  return () => clearTimeout(timer);
+}, []);
+
 
   const roleCredentials = {
     Admin: { email: "admin123", password: "admin@123" },
@@ -59,25 +72,44 @@ const LoginPage = () => {
     setPassword(roleCredentials[selectedRole].password);
   };
 
+  // if (showVideo) {
+  //   return (
+  //     <div className="video-splash-screen">
+  //       <video 
+  //         autoPlay 
+  //         muted 
+  //         playsInline 
+  //         className="splash-video"
+  //         onEnded={() => setShowVideo(false)}
+  //       >
+  //         <source 
+  //           src={isMobile ? "../../public/Video/Eminoids - Logo Animation Blue_Mob.mp4" : "../../public/Video/Eminoids - Logo Animation Blue.mp4" } 
+  //           type="video/mp4" 
+  //         />
+  //         Your browser does not support the video tag.
+  //       </video>
+  //     </div>
+  //   );
+  // }
+
   if (showVideo) {
-    return (
-      <div className="video-splash-screen">
-        <video 
-          autoPlay 
-          muted 
-          playsInline 
-          className="splash-video"
-          onEnded={() => setShowVideo(false)}
-        >
-          <source 
-            src={isMobile ? "../../public/Video/Eminoids - Logo Animation Blue_Mob.mp4" : "../../public/Video/Eminoids - Logo Animation Blue.mp4" } 
-            type="video/mp4" 
-          />
-          Your browser does not support the video tag.
-        </video>
-      </div>
-    );
-  }
+  return (
+    <div className={`video-splash-screen ${fadeOut ? "fade-out" : ""}`}>
+      <video 
+        autoPlay 
+        muted 
+        playsInline 
+        className="splash-video"
+      >
+        <source 
+          src={isMobile ? "/Video/Eminoids - Logo Animation Blue_Mob.mp4" : "/Video/Eminoids - Logo Animation Blue.mp4"}
+          type="video/mp4"
+        />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  );
+}
 
   return (
     <div

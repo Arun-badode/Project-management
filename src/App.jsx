@@ -40,126 +40,7 @@ import ActionCenter from "./components/AdminDashboard/ActionCenter/ActionCenter"
 import AuthLayout from "./layout/authLayout";
 import MainLayout from "./layout/MainLayout";
 
-// function App() {
-//   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-//   const menusidebarcollaps = () => {
-//     setIsSidebarCollapsed(true);
-//   };
-
-//   const toggleSidebar = () => {
-//     setIsSidebarCollapsed((prev) => !prev);
-//   };
-
-//   const location = useLocation();
-
-//   // Define routes where navbar and sidebar should be hidden
-//   const NO_LAYOUT_ROUTES = ["/", "/singup"];
-//   const hideLayout = NO_LAYOUT_ROUTES.includes(location.pathname);
-
-//   return (
-//     <>
-//       {/* navbar - hidden on login/signup page */}
-
-//       <Routes>
-//        <Route path="/" element={<LoginPage />} />
-//        <Route path="/signup" element={<SignupPage />} />
-        
-//       </Routes>
-
-//       {!hideLayout && <Navbar toggleSidebar={toggleSidebar} />}
-
-//       {/* main content area */}
-//       <div className={`main-content ${hideLayout ? "full-width" : ""}`}>
-//         {/* sidebar - hidden on login/signup page */}
-//         {!hideLayout && (
-//           <Sidebar
-//             collapsed={isSidebarCollapsed}
-//             menuItemClick={menusidebarcollaps}
-//           />
-//         )}
-
-//         {/* right side content */}
-//         <div
-//           className={`right-side-content ${isSidebarCollapsed && !hideLayout ? "collapsed" : ""
-//             }`}
-//         >
-//           <Routes>
-//             {/* Authentication routes (no navbar/sidebar) */}
-           
-      
-//             {/* Admin routes */}
-//             <Route path="/admin-dashboard" element={<AdminDashboard />} />
-//             <Route path="/taskmanagement" element={<TaskManagement />} />
-//             <Route path="/calendar" element={<Calander />} />
-//             <Route path="/usermanage" element={<UserManagement />} />
-//             <Route path="/resourcemanagement" element={<ResourceManagement />} />
-//             <Route path="/projectsupport" element={<ProjectSupportPortal />} />
-//             <Route path="/settingpage" element={<SettingsPage />} />
-//             <Route path="/profile" element={<ProfileAcc />} />
-//             <Route path="/auditlog" element={<AuditLog />} />
-//             <Route path="/timetracker" element={<TimeTracker />} />
-//             <Route path="/reportinganalytics" element={<ReportingAnalytics />} />
-//             <Route path="/filemanagementsystem" element={<FileManagementSystem />} />
-//             <Route path="/qamanagement" element={<QAManagement />} />
-//             <Route path="/changepassword" element={<ChangesPassword />} />
-//             <Route path="/role&permission" element={<RoleManagementSystem />} />
-//             <Route path="/project" element={<Project />} />
-//             <Route path="/actioncenter" element={<ActionCenter />} />
-
-//             {/* Lead routes */}
-//             <Route path="/LeadDashboard" element={<LeadDashboard />} />
-
-//             {/* Team Member routes */}
-//             <Route path="/team-dashboard" element={<TaskDashboard />} />
-//             <Route path="/attendance" element={<Attendance />} />
-
-//             {/* team Member */}
-//             <Route path="/task" element={<Task />} />
-//             <Route path="/team-dashboard" element={<TaskDashboard />} />
-//             <Route path='/messages' element={<Messages />} />
-//             <Route path="/activity" element={<ActivitySummary />} />
-//             <Route path="/attendance" element={<Attendance />} />
-
-//             {/* Add your other routes here */}
-
-//             {/*manager project */}
-
-//             <Route path="/manager-dashboard" element={<ManagerDashboard />} />
-//             <Route path="/createproject" element={<CreateProject />} />
-//             <Route path="/attendance" element={<Attendance />} />
-//             <Route path="/assigned" element={<Assigned />} />
-
-//             <Route path="/taskrequest" element={<TaskRequest />} />
-//             <Route path="/sourcework" element={<ResourceWorkload />} />
-//             <Route path="/collaboration" element={<Collaboration />} />
-
-//             {/* <Route path="/task" element={<Task/>} /> */}
-
-
-//             {/* productivity */}
-
-//             <Route path="/productivity" element={<Productivity />} />
-
-
-
-//             {/* Add your other routes here */}
-//             {/* End team Member */}
-
-
-
-//             {/* Manager */}
-
-
-
-//             {/* End Manager */}
-
-//           </Routes>
-//         </div>
-//       </div>
-//     </>
-//   );
-// }
 
 
 function App() {
@@ -256,4 +137,48 @@ function App() {
   );
 }
 
+
+// App.js
+
+
+// function App() {
+//   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+//   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
+//   const menusidebarcollaps = () => setIsSidebarCollapsed(true);
+//   const role = localStorage.getItem("userRole");
+
+//   const roleRoutes = routesByRole[role] || [];
+
+//   return (
+//     <Routes>
+//       {/* Auth */}
+//       <Route element={<AuthLayout />}>
+//         <Route path="/" element={<LoginPage />} />
+//         <Route path="/signup" element={<SignupPage />} />
+//       </Route>
+
+//       {/* Protected App Routes */}
+//       <Route
+//         element={
+//           <ProtectedRoute allowedRoles={["Admin", "Manager", "Employee"]}>
+//             <MainLayout
+//               isSidebarCollapsed={isSidebarCollapsed}
+//               toggleSidebar={toggleSidebar}
+//               menusidebarcollaps={menusidebarcollaps}
+//             />
+//           </ProtectedRoute>
+//         }
+//       >
+//         {roleRoutes.map(({ path, element }) => (
+//           <Route key={path} path={path} element={element} />
+//         ))}
+//       </Route>
+
+//       {/* Fallback */}
+//       <Route path="*" element={<h1>404 - Not Found</h1>} />
+//     </Routes>
+//   );
+// }
+
 export default App;
+

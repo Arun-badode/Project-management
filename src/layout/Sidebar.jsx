@@ -93,6 +93,23 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Projects</span>
                 </div>
               </li>
+{/* REsoure wrokload in V2 */}
+              <li
+                className={`menu-item ${
+                  isActive("/team-dashboard") ? "active" : ""
+                }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/sourcework");
+                    menuItemClick();
+                  }}
+                >
+                  <i class="fa-solid fa-chart-line"></i>
+                  <span className="menu-text">Resource Workload</span>
+                </div>
+              </li>
               {/* Action Center */}
               <li
                 className={`menu-item ${

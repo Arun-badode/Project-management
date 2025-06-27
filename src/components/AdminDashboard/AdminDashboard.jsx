@@ -215,6 +215,296 @@ const AdminDashboard = () => {
     return projects;
   };
 
+
+  const staticProjects = [
+  {
+    id: 1,
+    title: "Project 1",
+    client: "Acme Corp",
+    tasks: 8,
+    languages: 3,
+    platform: "Web",
+    pages: 120,
+    dueDate: "2025-06-28",
+    qcDeadline: "2025-06-26",
+    qcHours: 14,
+    qcDueDate: "2025-06-27",
+    status: "Active",
+    handler: "Jane",
+    processStatus: "Ongoing",
+    qaReviewer: "Alan",
+    qaStatus: "Pending",
+    serverPath: "/mnt/server/project/project-1",
+  },
+  {
+    id: 2,
+    title: "Project 2",
+    client: "Globex",
+    tasks: 6,
+    languages: 4,
+    platform: "Mobile",
+    pages: 180,
+    dueDate: "2025-07-05",
+    qcDeadline: "2025-07-03",
+    qcHours: 8,
+    qcDueDate: "2025-07-04",
+    status: "Team On-Duty",
+    handler: "John",
+    processStatus: "Delayed",
+    qaReviewer: "Sarah",
+    qaStatus: "Failed",
+    serverPath: "/mnt/server/project/project-2",
+  },
+  {
+    id: 3,
+    title: "Project 3",
+    client: "Soylent",
+    tasks: 10,
+    languages: 2,
+    platform: "Desktop",
+    pages: 95,
+    dueDate: "2025-06-20",
+    qcDeadline: "2025-06-18",
+    qcHours: 12,
+    qcDueDate: "2025-06-19",
+    status: "Overdue",
+    handler: "Alice",
+    processStatus: "Completed",
+    qaReviewer: "Mike",
+    qaStatus: "Passed",
+    serverPath: "/mnt/server/project/project-3",
+  },
+  {
+    id: 4,
+    title: "Project 4",
+    client: "Initech",
+    tasks: 5,
+    languages: 1,
+    platform: "Web",
+    pages: 60,
+    dueDate: "2025-06-29",
+    qcDeadline: "2025-06-27",
+    qcHours: 6,
+    qcDueDate: "2025-06-28",
+    status: "Near Due",
+    handler: "Bob",
+    processStatus: "Ongoing",
+    qaReviewer: "Lisa",
+    qaStatus: "In Review",
+    serverPath: "/mnt/server/project/project-4",
+  },
+  {
+    id: 5,
+    title: "Project 5",
+    client: "Umbrella",
+    tasks: 3,
+    languages: 3,
+    platform: "Mobile",
+    pages: 130,
+    dueDate: "2025-07-10",
+    qcDeadline: "2025-07-08",
+    qcHours: 10,
+    qcDueDate: "2025-07-09",
+    status: "Active",
+    handler: "Charlie",
+    processStatus: "Ongoing",
+    qaReviewer: "David",
+    qaStatus: "Pending",
+    serverPath: "/mnt/server/project/project-5",
+  },
+  {
+    id: 6,
+    title: "Project 6",
+    client: "Wayne Ent",
+    tasks: 7,
+    languages: 4,
+    platform: "Desktop",
+    pages: 110,
+    dueDate: "2025-06-22",
+    qcDeadline: "2025-06-20",
+    qcHours: 11,
+    qcDueDate: "2025-06-21",
+    status: "Overdue",
+    handler: "Eve",
+    processStatus: "Completed",
+    qaReviewer: "Alan",
+    qaStatus: "Passed",
+    serverPath: "/mnt/server/project/project-6",
+  },
+  {
+    id: 7,
+    title: "Project 7",
+    client: "Stark Ind",
+    tasks: 4,
+    languages: 5,
+    platform: "Web",
+    pages: 150,
+    dueDate: "2025-07-02",
+    qcDeadline: "2025-06-30",
+    qcHours: 7,
+    qcDueDate: "2025-07-01",
+    status: "Near Due",
+    handler: "Jane",
+    processStatus: "Ongoing",
+    qaReviewer: "Sarah",
+    qaStatus: "In Review",
+    serverPath: "/mnt/server/project/project-7",
+  },
+  {
+    id: 8,
+    title: "Project 8",
+    client: "Oscorp",
+    tasks: 9,
+    languages: 3,
+    platform: "Mobile",
+    pages: 200,
+    dueDate: "2025-07-15",
+    qcDeadline: "2025-07-13",
+    qcHours: 20,
+    qcDueDate: "2025-07-14",
+    status: "Active",
+    handler: "John",
+    processStatus: "Pending",
+    qaReviewer: "Mike",
+    qaStatus: "Failed",
+    serverPath: "/mnt/server/project/project-8",
+  },
+  {
+    id: 9,
+    title: "Project 9",
+    client: "Acme Corp",
+    tasks: 2,
+    languages: 1,
+    platform: "Desktop",
+    pages: 80,
+    dueDate: "2025-06-19",
+    qcDeadline: "2025-06-17",
+    qcHours: 3,
+    qcDueDate: "2025-06-18",
+    status: "Overdue",
+    handler: "Alice",
+    processStatus: "Delayed",
+    qaReviewer: "Lisa",
+    qaStatus: "In Review",
+    serverPath: "/mnt/server/project/project-9",
+  },
+  {
+    id: 10,
+    title: "Project 10",
+    client: "Globex",
+    tasks: 6,
+    languages: 2,
+    platform: "Web",
+    pages: 105,
+    dueDate: "2025-07-01",
+    qcDeadline: "2025-06-29",
+    qcHours: 5,
+    qcDueDate: "2025-06-30",
+    status: "Team On-Duty",
+    handler: "Bob",
+    processStatus: "Ongoing",
+    qaReviewer: "David",
+    qaStatus: "Passed",
+    serverPath: "/mnt/server/project/project-10",
+  },
+  {
+    id: 11,
+    title: "Project 11",
+    client: "Soylent",
+    tasks: 4,
+    languages: 5,
+    platform: "Mobile",
+    pages: 140,
+    dueDate: "2025-06-30",
+    qcDeadline: "2025-06-28",
+    qcHours: 9,
+    qcDueDate: "2025-06-29",
+    status: "Near Due",
+    handler: "Eve",
+    processStatus: "Ongoing",
+    qaReviewer: "Alan",
+    qaStatus: "Passed",
+    serverPath: "/mnt/server/project/project-11",
+  },
+  {
+    id: 12,
+    title: "Project 12",
+    client: "Initech",
+    tasks: 7,
+    languages: 3,
+    platform: "Web",
+    pages: 90,
+    dueDate: "2025-06-21",
+    qcDeadline: "2025-06-19",
+    qcHours: 6,
+    qcDueDate: "2025-06-20",
+    status: "Overdue",
+    handler: "Charlie",
+    processStatus: "Completed",
+    qaReviewer: "Sarah",
+    qaStatus: "Failed",
+    serverPath: "/mnt/server/project/project-12",
+  },
+  {
+    id: 13,
+    title: "Project 13",
+    client: "Umbrella",
+    tasks: 8,
+    languages: 2,
+    platform: "Desktop",
+    pages: 160,
+    dueDate: "2025-07-03",
+    qcDeadline: "2025-07-01",
+    qcHours: 13,
+    qcDueDate: "2025-07-02",
+    status: "Team On-Duty",
+    handler: "David",
+    processStatus: "Pending",
+    qaReviewer: "Lisa",
+    qaStatus: "In Review",
+    serverPath: "/mnt/server/project/project-13",
+  },
+  {
+    id: 14,
+    title: "Project 14",
+    client: "Wayne Ent",
+    tasks: 5,
+    languages: 4,
+    platform: "Mobile",
+    pages: 115,
+    dueDate: "2025-07-07",
+    qcDeadline: "2025-07-05",
+    qcHours: 10,
+    qcDueDate: "2025-07-06",
+    status: "Active",
+    handler: "Jane",
+    processStatus: "Ongoing",
+    qaReviewer: "Mike",
+    qaStatus: "Pending",
+    serverPath: "/mnt/server/project/project-14",
+  },
+  {
+    id: 15,
+    title: "Project 15",
+    client: "Stark Ind",
+    tasks: 3,
+    languages: 1,
+    platform: "Web",
+    pages: 70,
+    dueDate: "2025-06-23",
+    qcDeadline: "2025-06-21",
+    qcHours: 4,
+    qcDueDate: "2025-06-22",
+    status: "Overdue",
+    handler: "John",
+    processStatus: "Delayed",
+    qaReviewer: "David",
+    qaStatus: "Failed",
+    serverPath: "/mnt/server/project/project-15",
+  },
+];
+
+
   const barData = [
     { name: 'Mon', Design: 20, Development: 40, Testing: 10, Deployment: 10 },
     { name: 'Tue', Design: 30, Development: 35, Testing: 15, Deployment: 10 },
@@ -239,9 +529,9 @@ const AdminDashboard = () => {
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <h2 className="gradient-heading">Admin Dashboard</h2>
         <div className="d-flex flex-column flex-sm-row gap-2">
-          <Button className="gradient-button" onClick={handleShow}>
+          {/* <Button className="gradient-button" onClick={handleShow}>
             <FaPlus className="me-2" /> Create New Project
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -293,72 +583,7 @@ const AdminDashboard = () => {
         </Button>
       )}
 
-      {/* Charts */}
-      <div className="row g-4 mb-4">
-        {/* Resource Utilization */}
-        <div className="col-md-6">
-          <div className="card p-3 shadow-sm h-100 bg-card">
-            <h5>Resource Utilization</h5>
-            <p className="text-muted">Utilization %</p>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={barData} stackOffset="expand">
-                <XAxis dataKey="name" />
-                <YAxis tickFormatter={(value) => `${value * 100}%`} />
-                <Tooltip formatter={(value) => `${(value * 100).toFixed(0)}%`} />
-                <Legend />
-                <Bar dataKey="Design" stackId="a" fill="#6366F1" />
-                <Bar dataKey="Development" stackId="a" fill="#10B981" />
-                <Bar dataKey="Testing" stackId="a" fill="#F59E0B" />
-                <Bar dataKey="Deployment" stackId="a" fill="#EF4444" />
-              </BarChart>
-            </ResponsiveContainer>
-            <div className="d-flex justify-content-between align-items-center mt-3">
-              <p className="mb-0">Average utilization: <strong className="text-primary">76%</strong></p>
-              <div className="btn-group">
-                <button className="btn btn-sm btn-outline-primary">Daily</button>
-                <button className="btn btn-sm btn-primary">Weekly</button>
-                <button className="btn btn-sm btn-outline-primary">Monthly</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Time Tracking Summary */}
-        <div className="col-md-6">
-          <div className="card p-3 shadow-sm h-100 bg-card">
-            <h5>Time Tracking Summary</h5>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={3}
-                  dataKey="value"
-                  label={false}
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="row text-center mt-3">
-              <div className="col-6 border-end">
-                <p className="mb-1">Total Hours This Week</p>
-                <h5 className="text-primary fw-bold">187 hours</h5>
-              </div>
-              <div className="col-6">
-                <p className="mb-1">Productivity Score</p>
-                <h5 className="text-success fw-bold">92%</h5>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Table */}
-      <Card className="text-white p-3 mb-5 table-gradient-bg">
+       <Card className="text-white p-3 mb-5 table-gradient-bg">
         <h4 className="mb-3">Project List</h4>
         {activeFilter !== 'active' && (
           <div className="mb-3">
@@ -576,8 +801,75 @@ const AdminDashboard = () => {
         </div>
       </Card>
 
+      {/* Charts */}
+      <div className="row g-4 mb-4">
+        {/* Resource Utilization */}
+        <div className="col-md-6">
+          <div className="card p-3 shadow-sm h-100 bg-card">
+            <h5>Resource Utilization</h5>
+            <p className="text-muted">Utilization %</p>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={barData} stackOffset="expand">
+                <XAxis dataKey="name" />
+                <YAxis tickFormatter={(value) => `${value * 100}%`} />
+                <Tooltip formatter={(value) => `${(value * 100).toFixed(0)}%`} />
+                <Legend />
+                <Bar dataKey="Design" stackId="a" fill="#6366F1" />
+                <Bar dataKey="Development" stackId="a" fill="#10B981" />
+                <Bar dataKey="Testing" stackId="a" fill="#F59E0B" />
+                <Bar dataKey="Deployment" stackId="a" fill="#EF4444" />
+              </BarChart>
+            </ResponsiveContainer>
+            <div className="d-flex justify-content-between align-items-center mt-3">
+              <p className="mb-0">Average utilization: <strong className="text-primary">76%</strong></p>
+              <div className="btn-group">
+                <button className="btn btn-sm btn-outline-primary">Daily</button>
+                <button className="btn btn-sm btn-primary">Weekly</button>
+                <button className="btn btn-sm btn-outline-primary">Monthly</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Time Tracking Summary */}
+        <div className="col-md-6">
+          <div className="card p-3 shadow-sm h-100 bg-card">
+            <h5>Time Tracking Summary</h5>
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  innerRadius={60}
+                  outerRadius={90}
+                  paddingAngle={3}
+                  dataKey="value"
+                  label={false}
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="row text-center mt-3">
+              <div className="col-6 border-end">
+                <p className="mb-1">Total Hours This Week</p>
+                <h5 className="text-primary fw-bold">187 hours</h5>
+              </div>
+              <div className="col-6">
+                <p className="mb-1">Productivity Score</p>
+                <h5 className="text-success fw-bold">92%</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Table */}
+     
+
       {/* Create Project Modal */}
-      <Modal
+      {/* <Modal
         show={showModal}
         onHide={handleClose}
         centered
@@ -642,7 +934,7 @@ const AdminDashboard = () => {
             </Button>
           </Form>
         </Modal.Body>
-      </Modal>
+      </Modal> */}
 
       {/* View Project Details Modal */}
       <Modal
