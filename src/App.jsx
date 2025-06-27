@@ -42,7 +42,6 @@ import MainLayout from "./layout/MainLayout";
 
 
 
-
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -50,90 +49,89 @@ function App() {
   const menusidebarcollaps = () => setIsSidebarCollapsed(true);
 
   return (
-   
-      <Routes>
-        {/* Auth Routes */}
-        <Route element={<AuthLayout />}>
-          <Route path="/" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-        </Route>
 
-        {/* App Routes */}
-        <Route
-          element={
-            <MainLayout
-              isSidebarCollapsed={isSidebarCollapsed}
-              toggleSidebar={toggleSidebar}
-              menusidebarcollaps={menusidebarcollaps}
-            />
-          }
-        >
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          <Route path="/calendar" element={<Calander />} />
-          <Route path="/attendance" element={<Attendance />} />
+    <Routes>
+      {/* Auth Routes */}
+      <Route element={<AuthLayout />}>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+      </Route>
 
-            <Route path="/admin-dashboard" element={<AdminDashboard />} />
-            <Route path="/taskmanagement" element={<TaskManagement />} />
-            <Route path="/calendar" element={<Calander />} />
-            <Route path="/usermanage" element={<UserManagement />} />
-            <Route path="/resourcemanagement" element={<ResourceManagement />} />
-            <Route path="/projectsupport" element={<ProjectSupportPortal />} />
-            <Route path="/settingpage" element={<SettingsPage />} />
-            <Route path="/profile" element={<ProfileAcc />} />
-            <Route path="/auditlog" element={<AuditLog />} />
-            <Route path="/timetracker" element={<TimeTracker />} />
-            <Route path="/reportinganalytics" element={<ReportingAnalytics />} />
-            <Route path="/filemanagementsystem" element={<FileManagementSystem />} />
-            <Route path="/qamanagement" element={<QAManagement />} />
-            <Route path="/changepassword" element={<ChangesPassword />} />
-            <Route path="/role&permission" element={<RoleManagementSystem />} />
-            <Route path="/project" element={<Project />} />
-            <Route path="/actioncenter" element={<ActionCenter />} />
+      {/* App Routes */}
+      <Route
+        element={
+          <MainLayout
+            isSidebarCollapsed={isSidebarCollapsed}
+            toggleSidebar={toggleSidebar}
+            menusidebarcollaps={menusidebarcollaps}
+          />
+        }
+      >
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/calendar" element={<Calander />} />
+        <Route path="/attendance" element={<Attendance />} />
 
-            {/* Lead routes */}
-            <Route path="/LeadDashboard" element={<LeadDashboard />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/taskmanagement" element={<TaskManagement />} />
+        <Route path="/calendar" element={<Calander />} />
+        <Route path="/usermanage" element={<UserManagement />} />
+        <Route path="/resourcemanagement" element={<ResourceManagement />} />
+        <Route path="/projectsupport" element={<ProjectSupportPortal />} />
+        <Route path="/settingpage" element={<SettingsPage />} />
+        <Route path="/profile" element={<ProfileAcc />} />
+        <Route path="/auditlog" element={<AuditLog />} />
+        <Route path="/timetracker" element={<TimeTracker />} />
+        <Route path="/reportinganalytics" element={<ReportingAnalytics />} />
+        <Route path="/filemanagementsystem" element={<FileManagementSystem />} />
+        <Route path="/qamanagement" element={<QAManagement />} />
+        <Route path="/changepassword" element={<ChangesPassword />} />
+        <Route path="/role&permission" element={<RoleManagementSystem />} />
+        <Route path="/project" element={<Project />} />
+        <Route path="/actioncenter" element={<ActionCenter />} />
 
-            {/* Team Member routes */}
-            <Route path="/team-dashboard" element={<TaskDashboard />} />
-            <Route path="/attendance" element={<Attendance />} />
+        {/* Lead routes */}
+        <Route path="/LeadDashboard" element={<LeadDashboard />} />
 
-            {/* team Member */}
-            <Route path="/task" element={<Task />} />
-            <Route path="/team-dashboard" element={<TaskDashboard />} />
-            <Route path='/messages' element={<Messages />} />
-            <Route path="/activity" element={<ActivitySummary />} />
-            <Route path="/attendance" element={<Attendance />} />
+        {/* Team Member routes */}
+        <Route path="/team-dashboard" element={<TaskDashboard />} />
+        <Route path="/attendance" element={<Attendance />} />
 
-            {/* Add your other routes here */}
+        {/* team Member */}
+        <Route path="/task" element={<Task />} />
+        <Route path="/team-dashboard" element={<TaskDashboard />} />
+        <Route path='/messages' element={<Messages />} />
+        <Route path="/activity" element={<ActivitySummary />} />
 
-            {/*manager project */}
+        {/* Add your other routes here */}
 
-            <Route path="/manager-dashboard" element={<ManagerDashboard />} />
-            <Route path="/createproject" element={<CreateProject />} />
-            <Route path="/attendance" element={<Attendance />} />
-            <Route path="/assigned" element={<Assigned />} />
+        {/*manager project */}
 
-            <Route path="/taskrequest" element={<TaskRequest />} />
-            <Route path="/sourcework" element={<ResourceWorkload />} />
-            <Route path="/collaboration" element={<Collaboration />} />
+        <Route path="/manager-dashboard" element={<ManagerDashboard />} />
+        <Route path="/createproject" element={<CreateProject />} />
+        <Route path="/attendance" element={<Attendance />} />
+        <Route path="/assigned" element={<Assigned />} />
 
-            {/* <Route path="/task" element={<Task/>} /> */}
+        <Route path="/taskrequest" element={<TaskRequest />} />
+        <Route path="/sourcework" element={<ResourceWorkload />} />
+        <Route path="/collaboration" element={<Collaboration />} />
+
+        {/* <Route path="/task" element={<Task/>} /> */}
 
 
-            {/* productivity */}
+        {/* productivity */}
 
-            <Route path="/productivity" element={<Productivity />} />
-
+        <Route path="/productivity" element={<Productivity />} />
 
 
 
-        
-        </Route>
 
-        {/* Fallback Route */}
-        <Route path="*" element={<h1>404 - Not Found</h1>} />
-      </Routes>
-   
+
+      </Route>
+
+      {/* Fallback Route */}
+      <Route path="*" element={<h1>404 - Not Found</h1>} />
+    </Routes>
+
   );
 }
 
