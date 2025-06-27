@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   Card,
@@ -15,9 +15,9 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts';
-
 const AdminDashboard = () => {
- 
+  const scrollContainerRef = useRef(null);
+  const fakeScrollbarRef = useRef(null);
   const [showModal, setShowModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -26,6 +26,30 @@ const AdminDashboard = () => {
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [activeFilter, setActiveFilter] = useState('all');
   const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    const fakeScrollbar = fakeScrollbarRef.current;
+
+    if (scrollContainer && fakeScrollbar) {
+      fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
+
+      const syncScroll = () => {
+        fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
+      };
+      const syncFakeScroll = () => {
+        scrollContainer.scrollLeft = fakeScrollbar.scrollLeft;
+      };
+
+      scrollContainer.addEventListener("scroll", syncScroll);
+      fakeScrollbar.addEventListener("scroll", syncFakeScroll);
+
+      return () => {
+        scrollContainer.removeEventListener("scroll", syncScroll);
+        fakeScrollbar.removeEventListener("scroll", syncFakeScroll);
+      };
+    }
+  }, []);
 
   // Generate projects on component mount
   useEffect(() => {
@@ -122,7 +146,7 @@ const AdminDashboard = () => {
     setActiveFilter('all');
   };
 
-  const [ setAllProjects] = useState([]);
+  const [setAllProjects] = useState([]);
 
   useEffect(() => {
     // Example fetch - replace with your actual logic
@@ -222,49 +246,45 @@ const AdminDashboard = () => {
       </div>
 
       {/* KPIs */}
-<Row className="mb-4 g-3">
-  {[
-    { key: 'active', title: 'Active Projects', icon: 'bi-rocket-takeoff', color: 'primary' },
-    { key: 'nearDue', title: 'Near Due', icon: 'bi-hourglass-split', color: 'warning text-dark' },
-    { key: 'overdue', title: 'Overdue', icon: 'bi-exclamation-octagon', color: 'danger' },
-    { key: 'teamOnDuty', title: 'Team On-Duty', icon: 'bi-people-fill', color: 'info' },
-    { key: 'eventsToday', title: 'Events Today', icon: 'bi-calendar-event', color: 'success', link: '/Attendance' },
-    { key: 'pendingApproval', title: 'Pending Approval', icon: 'bi-clock-history', color: 'secondary' }
-  ].map(({ key, title, icon, color, link }) => (
-    <Col xs={12} sm={6} md={2} key={key}>
-      <Card
-        className={`bg-${color} bg-gradient text-white p-3 rounded-4 shadow-sm border-0 w-100 ${
-          activeFilter === key ? 'border border-3 border-light' : ''
-        }`}
-        onClick={() => !link && handleCardFilter(key)}
-        style={{ cursor: 'pointer', minHeight: '150px', height: '150px' }}
-      >
-        {link ? (
-          <Link to={link} className="text-white text-decoration-none d-flex flex-column h-100 justify-content-between">
-            <Card.Body className="d-flex flex-column justify-content-between h-100">
-              <div className="d-flex align-items-center gap-2">
-                <i className={`bi ${icon} fs-4`}></i>
-                <Card.Title className="fs-6 fw-semibold mb-0">{title}</Card.Title>
-              </div>
-              <h3 className="fw-bold text-end m-0">{countFiltered(key)}</h3>
-            </Card.Body>
-          </Link>
-        ) : (
-          <Card.Body className="d-flex flex-column justify-content-between h-100">
-            <div className="d-flex align-items-center gap-2">
-              <i className={`bi ${icon} fs-4`}></i>
-              <Card.Title className="fs-6 fw-semibold mb-0">{title}</Card.Title>
-            </div>
-            <h3 className="fw-bold text-end m-0">{countFiltered(key)}</h3>
-          </Card.Body>
-        )}
-      </Card>
-    </Col>
-  ))}
-</Row>
-
-
-
+      <Row className="mb-4 g-3">
+        {[
+          { key: 'active', title: 'Active Projects', icon: 'bi-rocket-takeoff', color: 'primary' },
+          { key: 'nearDue', title: 'Near Due', icon: 'bi-hourglass-split', color: 'warning text-dark' },
+          { key: 'overdue', title: 'Overdue', icon: 'bi-exclamation-octagon', color: 'danger' },
+          { key: 'teamOnDuty', title: 'Team On-Duty', icon: 'bi-people-fill', color: 'info' },
+          { key: 'eventsToday', title: 'Events Today', icon: 'bi-calendar-event', color: 'success', link: '/Attendance' },
+          { key: 'pendingApproval', title: 'Pending Approval', icon: 'bi-clock-history', color: 'secondary' }
+        ].map(({ key, title, icon, color, link }) => (
+          <Col xs={12} sm={6} md={2} key={key}>
+            <Card
+              className={`bg-${color} bg-gradient text-white p-3 rounded-4 shadow-sm border-0 w-100 ${activeFilter === key ? 'border border-3 border-light' : ''
+                }`}
+              onClick={() => !link && handleCardFilter(key)}
+              style={{ cursor: 'pointer', minHeight: '150px', height: '150px' }}
+            >
+              {link ? (
+                <Link to={link} className="text-white text-decoration-none d-flex flex-column h-100 justify-content-between">
+                  <Card.Body className="d-flex flex-column justify-content-between h-100">
+                    <div className="d-flex align-items-center gap-2">
+                      <i className={`bi ${icon} fs-4`}></i>
+                      <Card.Title className="fs-6 fw-semibold mb-0">{title}</Card.Title>
+                    </div>
+                    <h3 className="fw-bold text-end m-0">{countFiltered(key)}</h3>
+                  </Card.Body>
+                </Link>
+              ) : (
+                <Card.Body className="d-flex flex-column justify-content-between h-100">
+                  <div className="d-flex align-items-center gap-2">
+                    <i className={`bi ${icon} fs-4`}></i>
+                    <Card.Title className="fs-6 fw-semibold mb-0">{title}</Card.Title>
+                  </div>
+                  <h3 className="fw-bold text-end m-0">{countFiltered(key)}</h3>
+                </Card.Body>
+              )}
+            </Card>
+          </Col>
+        ))}
+      </Row>
 
       {/* Show All button */}
       {activeFilter !== 'all' && (
@@ -346,12 +366,12 @@ const AdminDashboard = () => {
         )}
 
         {/* SCROLLABLE CONTAINER */}
-        <div
+        {/* <div
           className="table-responsive"
-          style={{ maxHeight: "500px", overflowY: "auto" }}
+          style={{ maxHeight: "500px", overflowY: "auto", zIndex: 0 }}
         >
           <Table className="table-gradient-bg align-middle  table table-bordered table-hover">
-            <thead className="table bg-dark p-2  .">
+            <thead className="table bg-dark p-2  sticky-top">
               <tr>
                 <th>ID</th>
                 <th>Project Title</th>
@@ -408,6 +428,120 @@ const AdminDashboard = () => {
                     </Badge>
                   </td>
 
+                  <td>{project.handler}</td>
+                  <td>{project.qaReviewer}</td>
+                  <td>
+                    <Badge
+                      bg={
+                        project.qaStatus === "Passed"
+                          ? "success"
+                          : project.qaStatus === "Failed"
+                            ? "danger"
+                            : project.qaStatus === "In Review"
+                              ? "info"
+                              : "secondary"
+                      }
+                    >
+                      {project.qaStatus}
+                    </Badge>
+                  </td>
+                  <td>
+                    <Button
+                      variant="link"
+                      className="text-info p-0 ms-3"
+                      title="View"
+                      onClick={() => handleView(project)}
+                    >
+                      <FaEye />
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div> */}
+        <div
+          ref={fakeScrollbarRef}
+          style={{
+            overflowX: "auto",
+            overflowY: "hidden",
+            height: 16,
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1050,
+          }}
+        >
+          <div style={{ width: "2000px", height: 1 }} />
+        </div>
+
+        {/* Actual Table Container with horizontal scroll */}
+        <div
+          ref={scrollContainerRef}
+          className="table-responsive"
+          style={{
+            maxHeight: "500px",
+            overflowY: "auto",
+            overflowX: "auto",
+          }}
+        >
+          <Table className="table-gradient-bg align-middle table table-bordered table-hover">
+            <thead className="table bg-dark p-2 sticky-top">
+              <tr>
+                <th>ID</th>
+                <th>Project Title</th>
+                <th>Client</th>
+                <th>Tasks</th>
+                <th>Languages</th>
+                <th>Platform</th>
+                <th>Total Pages</th>
+                <th>Actual Due Date</th>
+                <th>Ready for QC Deadline</th>
+                <th>QC Hrs</th>
+                <th>QC Due Date</th>
+                <th>Status</th>
+                <th>Handler</th>
+                <th>QA Reviewer</th>
+                <th>QA Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredProjects.map((project) => (
+                <tr key={project.id}>
+                  <td>{project.id}</td>
+                  <td>{project.title}</td>
+                  <td>{project.client}</td>
+                  <td>{project.tasks}</td>
+                  <td>{project.languages}</td>
+                  <td>{project.platform}</td>
+                  <td>{project.pages}</td>
+                  <td>{project.dueDate}</td>
+                  <td>{project.qcDeadline}</td>
+                  <td>{project.qcHours}</td>
+                  <td>{project.qcDueDate}</td>
+                  <td>
+                    <Badge
+                      bg={
+                        project.status === "Completed"
+                          ? "success"
+                          : project.status === "On Hold"
+                            ? "warning"
+                            : project.status === "Active"
+                              ? "primary"
+                              : project.status === "Near Due"
+                                ? "info"
+                                : project.status === "Overdue"
+                                  ? "danger"
+                                  : project.status === "Team On-Duty"
+                                    ? "secondary"
+                                    : "dark"
+                      }
+                    >
+                      {project.status}
+                    </Badge>
+                  </td>
                   <td>{project.handler}</td>
                   <td>{project.qaReviewer}</td>
                   <td>

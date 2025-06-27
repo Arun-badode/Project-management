@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-const ActiveProject= () => {
+const ActiveProject = () => {
   // Project data state
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
-  
+
   // Filter states
   const [clientFilter, setClientFilter] = useState('');
   const [taskFilter, setTaskFilter] = useState('');
   const [languageFilter, setLanguageFilter] = useState('');
-  
+
   // Modal states
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -18,7 +18,7 @@ const ActiveProject= () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [editedProject, setEditedProject] = useState(null);
-  
+
   // Batch edit states
   const [batchEditValues, setBatchEditValues] = useState({
     platform: '',
@@ -28,9 +28,88 @@ const ActiveProject= () => {
     qcAllocatedHours: '',
     priority: ''
   });
-  
+
   // Expanded row state
   const [expandedRow, setExpandedRow] = useState(null);
+
+
+  const scrollContainerRef = useRef(null);
+  const fakeScrollbarRef = useRef(null);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    const fakeScrollbar = fakeScrollbarRef.current;
+
+    if (scrollContainer && fakeScrollbar) {
+      const updateScrollbarVisibility = () => {
+        const needsHorizontalScroll =
+          scrollContainer.scrollWidth > scrollContainer.clientWidth;
+
+        fakeScrollbar.style.display = needsHorizontalScroll ? "block" : "none";
+      };
+
+      // Sync scroll positions
+      const syncScroll = () => {
+        fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
+      };
+      const syncFakeScroll = () => {
+        scrollContainer.scrollLeft = fakeScrollbar.scrollLeft;
+      };
+
+      scrollContainer.addEventListener("scroll", syncScroll);
+      fakeScrollbar.addEventListener("scroll", syncFakeScroll);
+
+      updateScrollbarVisibility();
+      window.addEventListener("resize", updateScrollbarVisibility);
+
+      return () => {
+        scrollContainer.removeEventListener("scroll", syncScroll);
+        fakeScrollbar.removeEventListener("scroll", syncFakeScroll);
+        window.removeEventListener("resize", updateScrollbarVisibility);
+      };
+    }
+  }, []);
+
+
+  const tabScrollContainerRef = useRef(null);
+  const tabFakeScrollbarRef = useRef(null);
+  const tabFakeScrollbarInnerRef = useRef(null);
+  useEffect(() => {
+    const scrollContainer = tabScrollContainerRef.current;
+    const fakeScrollbar = tabFakeScrollbarRef.current;
+    const fakeScrollbarInner = tabFakeScrollbarInnerRef.current;
+
+    if (scrollContainer && fakeScrollbar && fakeScrollbarInner) {
+      const updateScrollbar = () => {
+        const needsHorizontalScroll =
+          scrollContainer.scrollWidth > scrollContainer.clientWidth;
+
+        fakeScrollbar.style.display = needsHorizontalScroll ? "block" : "none";
+        fakeScrollbarInner.style.width = `${scrollContainer.scrollWidth}px`;
+      };
+
+      const syncScroll = () => {
+        fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
+      };
+      const syncFakeScroll = () => {
+        scrollContainer.scrollLeft = fakeScrollbar.scrollLeft;
+      };
+
+      scrollContainer.addEventListener("scroll", syncScroll);
+      fakeScrollbar.addEventListener("scroll", syncFakeScroll);
+      window.addEventListener("resize", updateScrollbar);
+
+      // Delay to handle tabs rendering
+      setTimeout(updateScrollbar, 100);
+
+      return () => {
+        scrollContainer.removeEventListener("scroll", syncScroll);
+        fakeScrollbar.removeEventListener("scroll", syncFakeScroll);
+        window.removeEventListener("resize", updateScrollbar);
+      };
+    }
+  }, [selectedProject]); // rerun when project changes
+
 
   // Generate dummy data
   useEffect(() => {
@@ -42,12 +121,12 @@ const ActiveProject= () => {
   // Apply filters
   useEffect(() => {
     let result = [...projects];
-    
+
     // Apply tab filter
     if (activeTab === 'unhandled') {
       result = result.filter(project => !project.handler || project.handler === '');
     }
-    
+
     // Apply dropdown filters
     if (clientFilter) {
       result = result.filter(project => project.client === clientFilter);
@@ -58,7 +137,7 @@ const ActiveProject= () => {
     if (languageFilter) {
       result = result.filter(project => project.language === languageFilter);
     }
-    
+
     // Sort by due date
     result.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
     setFilteredProjects(result);
@@ -123,12 +202,12 @@ const ActiveProject= () => {
         }
         return file;
       });
-      
+
       const updatedProject = {
         ...selectedProject,
         files: updatedFiles
       };
-      
+
       setSelectedProject(updatedProject);
       // Update the project in the main projects array
       setProjects(projects.map(p => p.id === updatedProject.id ? updatedProject : p));
@@ -162,10 +241,10 @@ const ActiveProject= () => {
     return Array.from(new Set(projects.map(project => project[key])));
   };
 
-  
+
 
   const handleEditProject = (project) => {
-    setEditedProject({...project});
+    setEditedProject({ ...project });
     setShowEditModal(true);
   };
 
@@ -181,7 +260,7 @@ const ActiveProject= () => {
     <div className="container-fluid py-4">
       {/* Edit Project Modal */}
       {showEditModal && editedProject && (
-        <div className="modal fade show custom-modal-dark" style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.5)'}}>
+        <div className="modal fade show custom-modal-dark" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
@@ -196,7 +275,7 @@ const ActiveProject= () => {
                       type="text"
                       className="form-control"
                       value={editedProject.title}
-                      onChange={(e) => setEditedProject({...editedProject, title: e.target.value})}
+                      onChange={(e) => setEditedProject({ ...editedProject, title: e.target.value })}
                     />
                   </div>
                   <div className="col-md-6">
@@ -204,7 +283,7 @@ const ActiveProject= () => {
                     <select
                       className="form-select"
                       value={editedProject.client}
-                      onChange={(e) => setEditedProject({...editedProject, client: e.target.value})}
+                      onChange={(e) => setEditedProject({ ...editedProject, client: e.target.value })}
                     >
                       {getUniqueValues('client').map((client, index) => (
                         <option key={index} value={client}>{client}</option>
@@ -216,7 +295,7 @@ const ActiveProject= () => {
                     <select
                       className="form-select"
                       value={editedProject.task}
-                      onChange={(e) => setEditedProject({...editedProject, task: e.target.value})}
+                      onChange={(e) => setEditedProject({ ...editedProject, task: e.target.value })}
                     >
                       {getUniqueValues('task').map((task, index) => (
                         <option key={index} value={task}>{task}</option>
@@ -228,7 +307,7 @@ const ActiveProject= () => {
                     <select
                       className="form-select"
                       value={editedProject.language}
-                      onChange={(e) => setEditedProject({...editedProject, language: e.target.value})}
+                      onChange={(e) => setEditedProject({ ...editedProject, language: e.target.value })}
                     >
                       {getUniqueValues('language').map((language, index) => (
                         <option key={index} value={language}>{language}</option>
@@ -240,7 +319,7 @@ const ActiveProject= () => {
                     <select
                       className="form-select"
                       value={editedProject.platform}
-                      onChange={(e) => setEditedProject({...editedProject, platform: e.target.value})}
+                      onChange={(e) => setEditedProject({ ...editedProject, platform: e.target.value })}
                     >
                       <option value="Web">Web</option>
                       <option value="Mobile">Mobile</option>
@@ -364,7 +443,7 @@ const ActiveProject= () => {
       </ul>
 
       {/* Projects Table */}
-      <div className="table-responsive" style={{ maxHeight: "500px", overflowY: "auto" }}>
+      {/* <div className="table-responsive" style={{ maxHeight: "500px", overflowY: "auto" }}>
         <table className="table-gradient-bg align-middle mt-0 table table-bordered table-hover">
           <thead className="table-light">
             <tr>
@@ -393,17 +472,17 @@ const ActiveProject= () => {
                   <td>{project.totalPages}</td>
                   <td>{project.dueDate}</td>
                   <td>
-                    <div 
-                      className="progress cursor-pointer" 
-                      style={{height: '24px'}}
+                    <div
+                      className="progress cursor-pointer"
+                      style={{ height: '24px' }}
                       onClick={() => handleViewProject(project)}
                     >
                       <div
                         className={`progress-bar 
-                          ${project.progress < 30 ? 'bg-danger' : 
+                          ${project.progress < 30 ? 'bg-danger' :
                             project.progress < 70 ? 'bg-warning' : 'bg-success'}`}
                         role="progressbar"
-                        style={{width: `${project.progress}%`}}
+                        style={{ width: `${project.progress}%` }}
                         aria-valuenow={project.progress}
                         aria-valuemin={0}
                         aria-valuemax={100}
@@ -443,8 +522,7 @@ const ActiveProject= () => {
                     </div>
                   </td>
                 </tr>
-                
-                {/* Expanded row with project details */}
+
                 {expandedRow === project.id && (
                   <tr>
                     <td colSpan={10} className="p-0 border-top-0 ">
@@ -458,8 +536,7 @@ const ActiveProject= () => {
                               </span>
                             )}
                           </div>
-                          
-                          {/* Batch Edit Controls */}
+
                           {selectedFiles.length > 0 && (
                             <div className="card mb-4">
                               <div className="card-body bg-card">
@@ -470,7 +547,7 @@ const ActiveProject= () => {
                                     <select
                                       className="form-select form-select-sm"
                                       value={batchEditValues.platform}
-                                      onChange={(e) => setBatchEditValues({...batchEditValues, platform: e.target.value})}
+                                      onChange={(e) => setBatchEditValues({ ...batchEditValues, platform: e.target.value })}
                                     >
                                       <option value="">Select</option>
                                       <option value="Web">Web</option>
@@ -483,7 +560,7 @@ const ActiveProject= () => {
                                     <select
                                       className="form-select form-select-sm"
                                       value={batchEditValues.handler}
-                                      onChange={(e) => setBatchEditValues({...batchEditValues, handler: e.target.value})}
+                                      onChange={(e) => setBatchEditValues({ ...batchEditValues, handler: e.target.value })}
                                     >
                                       <option value="">Select</option>
                                       <option value="John Doe">John Doe</option>
@@ -496,7 +573,7 @@ const ActiveProject= () => {
                                     <select
                                       className="form-select form-select-sm"
                                       value={batchEditValues.qaReviewer}
-                                      onChange={(e) => setBatchEditValues({...batchEditValues, qaReviewer: e.target.value})}
+                                      onChange={(e) => setBatchEditValues({ ...batchEditValues, qaReviewer: e.target.value })}
                                     >
                                       <option value="">Select</option>
                                       <option value="Sarah Williams">Sarah Williams</option>
@@ -510,7 +587,7 @@ const ActiveProject= () => {
                                       type="date"
                                       className="form-control form-control-sm"
                                       value={batchEditValues.qcDue}
-                                      onChange={(e) => setBatchEditValues({...batchEditValues, qcDue: e.target.value})}
+                                      onChange={(e) => setBatchEditValues({ ...batchEditValues, qcDue: e.target.value })}
                                     />
                                   </div>
                                   <div className="col-md-4 col-lg-2">
@@ -519,7 +596,7 @@ const ActiveProject= () => {
                                       type="text"
                                       className="form-control form-control-sm"
                                       value={batchEditValues.qcAllocatedHours}
-                                      onChange={(e) => setBatchEditValues({...batchEditValues, qcAllocatedHours: e.target.value})}
+                                      onChange={(e) => setBatchEditValues({ ...batchEditValues, qcAllocatedHours: e.target.value })}
                                     />
                                   </div>
                                   <div className="col-md-4 col-lg-2">
@@ -527,7 +604,7 @@ const ActiveProject= () => {
                                     <select
                                       className="form-select form-select-sm"
                                       value={batchEditValues.priority}
-                                      onChange={(e) => setBatchEditValues({...batchEditValues, priority: e.target.value})}
+                                      onChange={(e) => setBatchEditValues({ ...batchEditValues, priority: e.target.value })}
                                     >
                                       <option value="">Select</option>
                                       <option value="High">High</option>
@@ -547,8 +624,7 @@ const ActiveProject= () => {
                               </div>
                             </div>
                           )}
-                          
-                          {/* Files Table */}
+
                           <div className="table-responsive">
                             <table className="table table-sm table-striped table-hover">
                               <thead className="table-light">
@@ -599,9 +675,9 @@ const ActiveProject= () => {
                                         value={file.platform}
                                         onChange={(e) => {
                                           const updatedFiles = project.files.map(f =>
-                                            f.id === file.id ? {...f, platform: e.target.value} : f
+                                            f.id === file.id ? { ...f, platform: e.target.value } : f
                                           );
-                                          setSelectedProject({...project, files: updatedFiles});
+                                          setSelectedProject({ ...project, files: updatedFiles });
                                           setHasUnsavedChanges(true);
                                         }}
                                       >
@@ -618,9 +694,9 @@ const ActiveProject= () => {
                                         value={file.handler || ''}
                                         onChange={(e) => {
                                           const updatedFiles = project.files.map(f =>
-                                            f.id === file.id ? {...f, handler: e.target.value} : f
+                                            f.id === file.id ? { ...f, handler: e.target.value } : f
                                           );
-                                          setSelectedProject({...project, files: updatedFiles});
+                                          setSelectedProject({ ...project, files: updatedFiles });
                                           setHasUnsavedChanges(true);
                                         }}
                                       >
@@ -636,9 +712,9 @@ const ActiveProject= () => {
                                         value={file.qaReviewer || ''}
                                         onChange={(e) => {
                                           const updatedFiles = project.files.map(f =>
-                                            f.id === file.id ? {...f, qaReviewer: e.target.value} : f
+                                            f.id === file.id ? { ...f, qaReviewer: e.target.value } : f
                                           );
-                                          setSelectedProject({...project, files: updatedFiles});
+                                          setSelectedProject({ ...project, files: updatedFiles });
                                           setHasUnsavedChanges(true);
                                         }}
                                       >
@@ -655,52 +731,502 @@ const ActiveProject= () => {
                             </table>
                           </div>
                         </div>
-                        
-                        {/* Action buttons for expanded row */}
-                      <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 bg-card px-3 py-2 rounded-3 border">
-  {/* Ready for QC Due */}
-  <div className="text-center border border-dark rounded bg-card px-3 py-2 ">
-    <div className="fw-semibold bg-info  border-bottom small py-1">Ready for QC Due</div>
-    <div className="fw-semibold text-light">hh:mm:tt &nbsp; DD-MM-YY</div>
-    <div className="text-success small fw-semibold">Early (20 minutes)</div>
-  </div>
 
-  {/* QC Allocated hours */}
-  <div className="text-center bg-card px-2" >
-    <div className="fw-bold">QC Allocated hours</div>
-    <div>h.mm</div>
-    <button className="btn btn-sm text-white fw-bold px-3 py-1 mt-1" style={{ backgroundColor: '#006400' }}>
-      OK
-    </button>
-  </div>
+                        <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 bg-card px-3 py-2 rounded-3 border">
+                          <div className="text-center border border-dark rounded bg-card px-3 py-2 ">
+                            <div className="fw-semibold bg-info  border-bottom small py-1">Ready for QC Due</div>
+                            <div className="fw-semibold text-light">hh:mm:tt &nbsp; DD-MM-YY</div>
+                            <div className="text-success small fw-semibold">Early (20 minutes)</div>
+                          </div>
 
-  {/* QC Due */}
-  <div className="text-center border border-dark rounded bg-card px-3 py-2 ">
-    <div className="fw-semibold bg-info  border-bottom small py-1">QC Due</div>
-    <div className="fw-semibold text-light">
-      hh:mm:tt &nbsp; DD-MM-YY <span className="text-warning">(Auto)</span>
-    </div>
-    <div className="text-danger small fw-semibold">Delay by 30 minutes</div>
-  </div>
+                          <div className="text-center bg-card px-2" >
+                            <div className="fw-bold">QC Allocated hours</div>
+                            <div>h.mm</div>
+                            <button className="btn btn-sm text-white fw-bold px-3 py-1 mt-1" style={{ backgroundColor: '#006400' }}>
+                              OK
+                            </button>
+                          </div>
 
-  {/* Priority Button */}
-  <button className="btn btn-outline-success fw-semibold px-3 py-1">
-    Priority
-  </button>
+                          <div className="text-center border border-dark rounded bg-card px-3 py-2 ">
+                            <div className="fw-semibold bg-info  border-bottom small py-1">QC Due</div>
+                            <div className="fw-semibold text-light">
+                              hh:mm:tt &nbsp; DD-MM-YY <span className="text-warning">(Auto)</span>
+                            </div>
+                            <div className="text-danger small fw-semibold">Delay by 30 minutes</div>
+                          </div>
 
-  {/* Action Buttons */}
-  <div className="d-flex gap-2">
-    <button type="button" className="btn btn-secondary rounded-5 px-4">
-      Close
-    </button>
-    {hasUnsavedChanges && (
-      <button type="button" className="btn btn-primary rounded-5 px-4">
-        Save Changes
-      </button>
-    )}
-  </div>
-</div>
+                          <button className="btn btn-outline-success fw-semibold px-3 py-1">
+                            Priority
+                          </button>
 
+                          <div className="d-flex gap-2">
+                            <button type="button" className="btn btn-secondary rounded-5 px-4">
+                              Close
+                            </button>
+                            {hasUnsavedChanges && (
+                              <button type="button" className="btn btn-primary rounded-5 px-4">
+                                Save Changes
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
+      </div> */}
+      <div
+        ref={fakeScrollbarRef}
+        style={{
+          overflowX: "auto",
+          overflowY: "hidden",
+          height: 16,
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1050,
+          display: "none", // start hidden
+        }}
+      >
+        <div style={{ width: "2000px", height: 1 }} />
+      </div>
+
+      {/* 🔻 Scrollable Table Container */}
+      <div
+        className="table-responsive"
+        ref={scrollContainerRef}
+        style={{ maxHeight: "500px", overflowY: "auto", overflowX: "auto" }}
+      >
+        <table className="table-gradient-bg align-middle mt-0 table table-bordered table-hover">
+          <thead className="table-light">
+            <tr>
+              <th>S. No.</th>
+              <th>Project Title</th>
+              <th>Client</th>
+              <th>Task</th>
+              <th>Language</th>
+              <th>Platform</th>
+              <th>Total Pages</th>
+              <th>Due Date & Time</th>
+              <th>Progress</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredProjects.map((project, index) => (
+              <React.Fragment key={project.id}>
+                <tr className={expandedRow === project.id ? "table-active" : ""}>
+                  <td>{index + 1}</td>
+                  <td>{project.title}</td>
+                  <td>{project.client}</td>
+                  <td>{project.task}</td>
+                  <td>{project.language}</td>
+                  <td>{project.platform}</td>
+                  <td>{project.totalPages}</td>
+                  <td>{project.dueDate}</td>
+                  <td>
+                    <div
+                      className="progress cursor-pointer"
+                      style={{ height: "24px" }}
+                      onClick={() => handleViewProject(project)}
+                    >
+                      <div
+                        className={`progress-bar 
+                          ${project.progress < 30
+                            ? "bg-danger"
+                            : project.progress < 70
+                              ? "bg-warning"
+                              : "bg-success"
+                          }`}
+                        role="progressbar"
+                        style={{ width: `${project.progress}%` }}
+                        aria-valuenow={project.progress}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                      >
+                        {project.progress}%
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="d-flex gap-2">
+                      <button
+                        className="btn btn-sm btn-primary"
+                        onClick={() => handleViewProject(project)}
+                      >
+                        <i
+                          className={`fas ${expandedRow === project.id
+                            ? "fa-chevron-up"
+                            : "fa-eye"
+                            }`}
+                        ></i>
+                      </button>
+                      <button
+                        className="btn btn-sm btn-secondary"
+                        onClick={() => handleEditProject(project)}
+                      >
+                        <i className="fas fa-edit"></i>
+                      </button>
+                      {project.progress === 100 && (
+                        <button
+                          className="btn btn-sm btn-success"
+                          onClick={() => handleMarkComplete(project.id)}
+                        >
+                          <i className="fas fa-check"></i>
+                        </button>
+                      )}
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleDeleteProject(project.id)}
+                      >
+                        <i className="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                {expandedRow === project.id && (
+                  <tr>
+                    <td colSpan={10} className="p-0 border-top-0">
+                      <div className="p-4">
+                        {/* Header */}
+                        <div className="mb-4">
+                          <div className="d-flex justify-content-between align-items-center mb-3">
+                            <h5 className="mb-0">Project Files</h5>
+                            {selectedFiles.length > 0 && (
+                              <span className="badge bg-primary">
+                                {selectedFiles.length} files selected
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Batch Edit */}
+                          {selectedFiles.length > 0 && (
+                            <div className="card mb-4">
+                              <div className="card-body bg-card">
+                                <h6 className="card-title mb-3">Batch Edit</h6>
+                                <div className="row g-3">
+                                  {/* Platform */}
+                                  <div className="col-md-4 col-lg-2">
+                                    <label className="form-label">Platform</label>
+                                    <select
+                                      className="form-select form-select-sm"
+                                      value={batchEditValues.platform}
+                                      onChange={(e) =>
+                                        setBatchEditValues({
+                                          ...batchEditValues,
+                                          platform: e.target.value,
+                                        })
+                                      }
+                                    >
+                                      <option value="">Select</option>
+                                      <option value="Web">Web</option>
+                                      <option value="Mobile">Mobile</option>
+                                      <option value="Desktop">Desktop</option>
+                                    </select>
+                                  </div>
+                                  {/* Handler */}
+                                  <div className="col-md-4 col-lg-2">
+                                    <label className="form-label">Handler</label>
+                                    <select
+                                      className="form-select form-select-sm"
+                                      value={batchEditValues.handler}
+                                      onChange={(e) =>
+                                        setBatchEditValues({
+                                          ...batchEditValues,
+                                          handler: e.target.value,
+                                        })
+                                      }
+                                    >
+                                      <option value="">Select</option>
+                                      <option value="John Doe">John Doe</option>
+                                      <option value="Jane Smith">Jane Smith</option>
+                                      <option value="Mike Johnson">Mike Johnson</option>
+                                    </select>
+                                  </div>
+                                  {/* QA Reviewer */}
+                                  <div className="col-md-4 col-lg-2">
+                                    <label className="form-label">QA Reviewer</label>
+                                    <select
+                                      className="form-select form-select-sm"
+                                      value={batchEditValues.qaReviewer}
+                                      onChange={(e) =>
+                                        setBatchEditValues({
+                                          ...batchEditValues,
+                                          qaReviewer: e.target.value,
+                                        })
+                                      }
+                                    >
+                                      <option value="">Select</option>
+                                      <option value="Sarah Williams">Sarah Williams</option>
+                                      <option value="David Brown">David Brown</option>
+                                      <option value="Emily Davis">Emily Davis</option>
+                                    </select>
+                                  </div>
+                                  {/* QC Due */}
+                                  <div className="col-md-4 col-lg-2">
+                                    <label className="form-label">QC Due</label>
+                                    <input
+                                      type="date"
+                                      className="form-control form-control-sm"
+                                      value={batchEditValues.qcDue}
+                                      onChange={(e) =>
+                                        setBatchEditValues({
+                                          ...batchEditValues,
+                                          qcDue: e.target.value,
+                                        })
+                                      }
+                                    />
+                                  </div>
+                                  {/* QC Hours */}
+                                  <div className="col-md-4 col-lg-2">
+                                    <label className="form-label">QC Hours</label>
+                                    <input
+                                      type="text"
+                                      className="form-control form-control-sm"
+                                      value={batchEditValues.qcAllocatedHours}
+                                      onChange={(e) =>
+                                        setBatchEditValues({
+                                          ...batchEditValues,
+                                          qcAllocatedHours: e.target.value,
+                                        })
+                                      }
+                                    />
+                                  </div>
+                                  {/* Priority */}
+                                  <div className="col-md-4 col-lg-2">
+                                    <label className="form-label">Priority</label>
+                                    <select
+                                      className="form-select form-select-sm"
+                                      value={batchEditValues.priority}
+                                      onChange={(e) =>
+                                        setBatchEditValues({
+                                          ...batchEditValues,
+                                          priority: e.target.value,
+                                        })
+                                      }
+                                    >
+                                      <option value="">Select</option>
+                                      <option value="High">High</option>
+                                      <option value="Medium">Medium</option>
+                                      <option value="Low">Low</option>
+                                    </select>
+                                  </div>
+                                </div>
+
+                                <div className="mt-3">
+                                  <button
+                                    className="btn gradient-button"
+                                    onClick={applyBatchEdits}
+                                  >
+                                    Apply to Selected Files
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Files Table */}
+                          <div className="table-responsive">
+                            <table className="table table-sm table-striped table-hover">
+                              <thead className="table-light">
+                                <tr>
+                                  <th>
+                                    <input
+                                      type="checkbox"
+                                      className="form-check-input"
+                                      checked={
+                                        selectedFiles.length === project.files.length
+                                      }
+                                      onChange={(e) => {
+                                        if (e.target.checked) {
+                                          setSelectedFiles([...project.files]);
+                                        } else {
+                                          setSelectedFiles([]);
+                                        }
+                                        setHasUnsavedChanges(true);
+                                      }}
+                                    />
+                                  </th>
+                                  <th>File Name</th>
+                                  <th>Pages</th>
+                                  <th>Language</th>
+                                  <th>Platform</th>
+                                  <th>Stage</th>
+                                  <th>Assigned</th>
+                                  <th>Handler</th>
+                                  <th>QA Reviewer</th>
+                                  <th>QA Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {project.files.map((file) => (
+                                  <tr
+                                    key={file.id}
+                                    className={
+                                      selectedFiles.some((f) => f.id === file.id)
+                                        ? "table-primary"
+                                        : ""
+                                    }
+                                  >
+                                    <td>
+                                      <input
+                                        type="checkbox"
+                                        className="form-check-input"
+                                        checked={selectedFiles.some(
+                                          (f) => f.id === file.id
+                                        )}
+                                        onChange={() => toggleFileSelection(file)}
+                                      />
+                                    </td>
+                                    <td>{file.name}</td>
+                                    <td>{file.pages}</td>
+                                    <td>{file.language}</td>
+                                    <td>
+                                      <select
+                                        className="form-select form-select-sm"
+                                        value={file.platform}
+                                        onChange={(e) => {
+                                          const updatedFiles = project.files.map((f) =>
+                                            f.id === file.id
+                                              ? { ...f, platform: e.target.value }
+                                              : f
+                                          );
+                                          setSelectedProject({
+                                            ...project,
+                                            files: updatedFiles,
+                                          });
+                                          setHasUnsavedChanges(true);
+                                        }}
+                                      >
+                                        <option value="Web">Web</option>
+                                        <option value="Mobile">Mobile</option>
+                                        <option value="Desktop">Desktop</option>
+                                      </select>
+                                    </td>
+                                    <td>{file.stage}</td>
+                                    <td>{file.assigned}</td>
+                                    <td>
+                                      <select
+                                        className="form-select form-select-sm"
+                                        value={file.handler || ""}
+                                        onChange={(e) => {
+                                          const updatedFiles = project.files.map((f) =>
+                                            f.id === file.id
+                                              ? { ...f, handler: e.target.value }
+                                              : f
+                                          );
+                                          setSelectedProject({
+                                            ...project,
+                                            files: updatedFiles,
+                                          });
+                                          setHasUnsavedChanges(true);
+                                        }}
+                                      >
+                                        <option value="">Not Assigned</option>
+                                        <option value="John Doe">John Doe</option>
+                                        <option value="Jane Smith">Jane Smith</option>
+                                        <option value="Mike Johnson">Mike Johnson</option>
+                                      </select>
+                                    </td>
+                                    <td>
+                                      <select
+                                        className="form-select form-select-sm"
+                                        value={file.qaReviewer || ""}
+                                        onChange={(e) => {
+                                          const updatedFiles = project.files.map((f) =>
+                                            f.id === file.id
+                                              ? { ...f, qaReviewer: e.target.value }
+                                              : f
+                                          );
+                                          setSelectedProject({
+                                            ...project,
+                                            files: updatedFiles,
+                                          });
+                                          setHasUnsavedChanges(true);
+                                        }}
+                                      >
+                                        <option value="">Not Assigned</option>
+                                        <option value="Sarah Williams">
+                                          Sarah Williams
+                                        </option>
+                                        <option value="David Brown">David Brown</option>
+                                        <option value="Emily Davis">Emily Davis</option>
+                                      </select>
+                                    </td>
+                                    <td>{file.qaStatus}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        {/* Footer buttons */}
+                        <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 bg-card px-3 py-2 rounded-3 border">
+                          <div className="text-center border border-dark rounded bg-card px-3 py-2">
+                            <div className="fw-semibold bg-info border-bottom small py-1">
+                              Ready for QC Due
+                            </div>
+                            <div className="fw-semibold text-light">
+                              hh:mm:tt &nbsp; DD-MM-YY
+                            </div>
+                            <div className="text-success small fw-semibold">
+                              Early (20 minutes)
+                            </div>
+                          </div>
+
+                          <div className="text-center bg-card px-2">
+                            <div className="fw-bold">QC Allocated hours</div>
+                            <div>h.mm</div>
+                            <button
+                              className="btn btn-sm text-white fw-bold px-3 py-1 mt-1"
+                              style={{ backgroundColor: "#006400" }}
+                            >
+                              OK
+                            </button>
+                          </div>
+
+                          <div className="text-center border border-dark rounded bg-card px-3 py-2">
+                            <div className="fw-semibold bg-info border-bottom small py-1">
+                              QC Due
+                            </div>
+                            <div className="fw-semibold text-light">
+                              hh:mm:tt &nbsp; DD-MM-YY{" "}
+                              <span className="text-warning">(Auto)</span>
+                            </div>
+                            <div className="text-danger small fw-semibold">
+                              Delay by 30 minutes
+                            </div>
+                          </div>
+
+                          <button className="btn btn-outline-success fw-semibold px-3 py-1">
+                            Priority
+                          </button>
+
+                          <div className="d-flex gap-2">
+                            <button
+                              type="button"
+                              className="btn btn-secondary rounded-5 px-4"
+                            >
+                              Close
+                            </button>
+                            {hasUnsavedChanges && (
+                              <button
+                                type="button"
+                                className="btn btn-primary rounded-5 px-4"
+                              >
+                                Save Changes
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -713,7 +1239,7 @@ const ActiveProject= () => {
 
       {/* Project Detail Modal - Keeping this for potential future use */}
       {showDetailModal && selectedProject && (
-        <div className="modal fade show" style={{display: 'block', backgroundColor: 'rgba(0,0,0,0.5)'}}>
+        <div className="modal fade show" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-xl">
             <div className="modal-content">
               <div className="modal-header">
@@ -730,7 +1256,7 @@ const ActiveProject= () => {
                       </span>
                     )}
                   </div>
-                  
+
                   {/* Batch Edit Controls */}
                   {selectedFiles.length > 0 && (
                     <div className="card mb-4">
@@ -742,7 +1268,7 @@ const ActiveProject= () => {
                             <select
                               className="form-select form-select-sm"
                               value={batchEditValues.platform}
-                              onChange={(e) => setBatchEditValues({...batchEditValues, platform: e.target.value})}
+                              onChange={(e) => setBatchEditValues({ ...batchEditValues, platform: e.target.value })}
                             >
                               <option value="">Select</option>
                               <option value="Web">Web</option>
@@ -755,7 +1281,7 @@ const ActiveProject= () => {
                             <select
                               className="form-select form-select-sm"
                               value={batchEditValues.handler}
-                              onChange={(e) => setBatchEditValues({...batchEditValues, handler: e.target.value})}
+                              onChange={(e) => setBatchEditValues({ ...batchEditValues, handler: e.target.value })}
                             >
                               <option value="">Select</option>
                               <option value="John Doe">John Doe</option>
@@ -768,7 +1294,7 @@ const ActiveProject= () => {
                             <select
                               className="form-select form-select-sm"
                               value={batchEditValues.qaReviewer}
-                              onChange={(e) => setBatchEditValues({...batchEditValues, qaReviewer: e.target.value})}
+                              onChange={(e) => setBatchEditValues({ ...batchEditValues, qaReviewer: e.target.value })}
                             >
                               <option value="">Select</option>
                               <option value="Sarah Williams">Sarah Williams</option>
@@ -782,7 +1308,7 @@ const ActiveProject= () => {
                               type="date"
                               className="form-control form-control-sm"
                               value={batchEditValues.qcDue}
-                              onChange={(e) => setBatchEditValues({...batchEditValues, qcDue: e.target.value})}
+                              onChange={(e) => setBatchEditValues({ ...batchEditValues, qcDue: e.target.value })}
                             />
                           </div>
                           <div className="col-md-4 col-lg-2">
@@ -791,7 +1317,7 @@ const ActiveProject= () => {
                               type="text"
                               className="form-control form-control-sm"
                               value={batchEditValues.qcAllocatedHours}
-                              onChange={(e) => setBatchEditValues({...batchEditValues, qcAllocatedHours: e.target.value})}
+                              onChange={(e) => setBatchEditValues({ ...batchEditValues, qcAllocatedHours: e.target.value })}
                             />
                           </div>
                           <div className="col-md-4 col-lg-2">
@@ -799,7 +1325,7 @@ const ActiveProject= () => {
                             <select
                               className="form-select form-select-sm"
                               value={batchEditValues.priority}
-                              onChange={(e) => setBatchEditValues({...batchEditValues, priority: e.target.value})}
+                              onChange={(e) => setBatchEditValues({ ...batchEditValues, priority: e.target.value })}
                             >
                               <option value="">Select</option>
                               <option value="High">High</option>
@@ -819,9 +1345,33 @@ const ActiveProject= () => {
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Files Table */}
-                  <div className="table-responsive">
+                  {/* Fake Scrollbar */}
+                  <div
+                    ref={tabFakeScrollbarRef}
+                    style={{
+                      overflowX: "auto",
+                      overflowY: "hidden",
+                      height: 16,
+                      position: "sticky",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      zIndex: 1050,
+                      display: "none",
+                      background: "#f8f9fa",
+                    }}
+                  >
+                    <div ref={tabFakeScrollbarInnerRef} style={{ height: 1 }} />
+                  </div>
+
+                  {/* Actual Table */}
+                  <div
+                    ref={tabScrollContainerRef}
+                    className="table-responsive"
+                    style={{ maxHeight: "500px", overflowY: "auto", overflowX: "auto" }}
+                  >
                     <table className="table table-sm table-striped table-hover">
                       <thead className="table-light">
                         <tr>
@@ -852,13 +1402,18 @@ const ActiveProject= () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {selectedProject.files.map(file => (
-                          <tr key={file.id} className={selectedFiles.some(f => f.id === file.id) ? 'table-primary' : ''}>
+                        {selectedProject.files.map((file) => (
+                          <tr
+                            key={file.id}
+                            className={
+                              selectedFiles.some((f) => f.id === file.id) ? "table-primary" : ""
+                            }
+                          >
                             <td>
                               <input
                                 type="checkbox"
                                 className="form-check-input"
-                                checked={selectedFiles.some(f => f.id === file.id)}
+                                checked={selectedFiles.some((f) => f.id === file.id)}
                                 onChange={() => toggleFileSelection(file)}
                               />
                             </td>
@@ -870,10 +1425,10 @@ const ActiveProject= () => {
                                 className="form-select form-select-sm"
                                 value={file.platform}
                                 onChange={(e) => {
-                                  const updatedFiles = selectedProject.files.map(f =>
-                                    f.id === file.id ? {...f, platform: e.target.value} : f
+                                  const updatedFiles = selectedProject.files.map((f) =>
+                                    f.id === file.id ? { ...f, platform: e.target.value } : f
                                   );
-                                  setSelectedProject({...selectedProject, files: updatedFiles});
+                                  setSelectedProject({ ...selectedProject, files: updatedFiles });
                                   setHasUnsavedChanges(true);
                                 }}
                               >
@@ -887,12 +1442,12 @@ const ActiveProject= () => {
                             <td>
                               <select
                                 className="form-select form-select-sm"
-                                value={file.handler || ''}
+                                value={file.handler || ""}
                                 onChange={(e) => {
-                                  const updatedFiles = selectedProject.files.map(f =>
-                                    f.id === file.id ? {...f, handler: e.target.value} : f
+                                  const updatedFiles = selectedProject.files.map((f) =>
+                                    f.id === file.id ? { ...f, handler: e.target.value } : f
                                   );
-                                  setSelectedProject({...selectedProject, files: updatedFiles});
+                                  setSelectedProject({ ...selectedProject, files: updatedFiles });
                                   setHasUnsavedChanges(true);
                                 }}
                               >
@@ -905,12 +1460,12 @@ const ActiveProject= () => {
                             <td>
                               <select
                                 className="form-select form-select-sm"
-                                value={file.qaReviewer || ''}
+                                value={file.qaReviewer || ""}
                                 onChange={(e) => {
-                                  const updatedFiles = selectedProject.files.map(f =>
-                                    f.id === file.id ? {...f, qaReviewer: e.target.value} : f
+                                  const updatedFiles = selectedProject.files.map((f) =>
+                                    f.id === file.id ? { ...f, qaReviewer: e.target.value } : f
                                   );
-                                  setSelectedProject({...selectedProject, files: updatedFiles});
+                                  setSelectedProject({ ...selectedProject, files: updatedFiles });
                                   setHasUnsavedChanges(true);
                                 }}
                               >
@@ -926,6 +1481,7 @@ const ActiveProject= () => {
                       </tbody>
                     </table>
                   </div>
+
                 </div>
               </div>
               <div className="modal-footer">
@@ -939,7 +1495,7 @@ const ActiveProject= () => {
                 <button
                   type="button"
                   className="btn btn-primary"
-               
+
                 >
                   Save Changes
                 </button>
@@ -986,7 +1542,7 @@ function inputToCustomDate(str) {
 }
 
 // Generate dummy data function
-const generateDummyProjects = (count)=> {
+const generateDummyProjects = (count) => {
   const clients = ['Acme Corp', 'Globex', 'Initech', 'Umbrella Inc', 'Stark Industries'];
   const tasks = ['Translation', 'Proofreading', 'QA Review', 'Editing', 'Formatting'];
   const languages = ['English', 'Spanish', 'French', 'German', 'Chinese', 'Japanese'];
@@ -995,28 +1551,28 @@ const generateDummyProjects = (count)=> {
   const qaStatuses = ['Pending', 'In Progress', 'Approved', 'Rejected'];
   const handlers = ['John Doe', 'Jane Smith', 'Mike Johnson', ''];
   const qaReviewers = ['Sarah Williams', 'David Brown', 'Emily Davis', ''];
-  
+
   const projects = [];
-  
+
   for (let i = 1; i <= count; i++) {
     const totalPages = Math.floor(Math.random() * 100) + 10;
     const progress = Math.floor(Math.random() * 101);
     const handler = handlers[Math.floor(Math.random() * handlers.length)];
-    
+
     // Generate random due date (between now and 30 days in the future)
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + Math.floor(Math.random() * 30));
     const hours = Math.floor(Math.random() * 24);
     const minutes = Math.floor(Math.random() * 60);
     dueDate.setHours(hours, minutes);
-    
+
     // Format due date as "hh:mm tt DD-MM-YY"
     const formattedDueDate = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${hours >= 12 ? 'PM' : 'AM'} ${dueDate.getDate().toString().padStart(2, '0')}-${(dueDate.getMonth() + 1).toString().padStart(2, '0')}-${dueDate.getFullYear().toString().slice(2)}`;
-    
+
     // Generate files
     const fileCount = Math.floor(Math.random() * 5) + 1;
     const files = [];
-    
+
     for (let j = 1; j <= fileCount; j++) {
       const filePages = Math.floor(Math.random() * 20) + 1;
       files.push({
@@ -1033,7 +1589,7 @@ const generateDummyProjects = (count)=> {
         priority: ['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)]
       });
     }
-    
+
     projects.push({
       id: i,
       title: `Project ${i}`,
@@ -1048,7 +1604,7 @@ const generateDummyProjects = (count)=> {
       files
     });
   }
-  
+
   return projects;
 };
 
