@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import useSyncScroll from "../Hooks/useSyncScroll";
 
 function UserManagement() {
   const [showModal, setShowModal] = useState(false);
@@ -80,63 +81,86 @@ function UserManagement() {
     }));
   };
 
+  const { scrollContainerRef, fakeScrollbarRef } = useSyncScroll(true);
+
   const renderTable = () => (
-    <div className="table-responsive">
-      <table className="table  table-bordered align-middle table-gradient-bg">
-        <thead>
-          <tr>
-            <th>Emp ID</th>
-            <th>Full Name</th>
-            <th>DOJ</th>
-            <th>DOB</th>
-            <th>Team</th>
-            <th>Role</th>
-            <th>App Skills</th>
-            <th>Username</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {teamMembers
-            .sort((a, b) => (a.empId > b.empId ? 1 : -1)) // Sort by Emp ID ascending
-            .map((member, idx) => (
-              <tr key={idx}>
-                <td>{member.empId}</td>
-                <td>{member.fullName}</td>
-                <td>{member.doj}</td>
-                <td>{member.dob}</td>
-                <td>{member.team}</td>
-                <td>{member.role}</td>
-                <td>{member.appSkills.join(", ")}</td>
-                <td>{member.username}</td>
-                <td className="">
-                  <button
-                    className="btn btn-sm btn-primary me-2"
-                    onClick={() => {
-                      setSelectedMember(member);
-                      setModalType("view");
-                      setShowModal(true);
-                    }}
-                  >
-                    <i className="fas fa-chevron-up fa-eye"></i>
-                  </button>
-                  <button
-                    className="btn btn-sm btn-info me-2"
-                    onClick={() => {
-                      setSelectedMember(member);
-                      setModalType("edit");
-                      setShowModal(true);
-                    }}
-                  >
-                    <i className="fas fa-edit"></i>
-                  </button>
-                  <button className="btn btn-sm btn-danger"> <i className="fas fa-trash"></i></button>
-                </td>
-              </tr>
-            ))}
-        </tbody>
-      </table>
-    </div>
+    <>
+      <div
+        ref={fakeScrollbarRef}
+        style={{
+          overflowX: "auto",
+          overflowY: "hidden",
+          height: 16,
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1050,
+        }}
+      >
+        <div style={{ width: "1200px", height: 1 }} />
+      </div>
+      <div
+        className="table-responsive"
+        style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }}
+        ref={scrollContainerRef}
+      >
+        <table className="table  table-bordered align-middle table-gradient-bg">
+          <thead>
+            <tr>
+              <th>Emp ID</th>
+              <th>Full Name</th>
+              <th>DOJ</th>
+              <th>DOB</th>
+              <th>Team</th>
+              <th>Role</th>
+              <th>App Skills</th>
+              <th>Username</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {teamMembers
+              .sort((a, b) => (a.empId > b.empId ? 1 : -1)) // Sort by Emp ID ascending
+              .map((member, idx) => (
+                <tr key={idx}>
+                  <td>{member.empId}</td>
+                  <td>{member.fullName}</td>
+                  <td>{member.doj}</td>
+                  <td>{member.dob}</td>
+                  <td>{member.team}</td>
+                  <td>{member.role}</td>
+                  <td>{member.appSkills.join(", ")}</td>
+                  <td>{member.username}</td>
+                  <td className="">
+                    <button
+                      className="btn btn-sm btn-primary me-2"
+                      onClick={() => {
+                        setSelectedMember(member);
+                        setModalType("view");
+                        setShowModal(true);
+                      }}
+                    >
+                      <i className="fas fa-chevron-up fa-eye"></i>
+                    </button>
+                    <button
+                      className="btn btn-sm btn-info me-2"
+                      onClick={() => {
+                        setSelectedMember(member);
+                        setModalType("edit");
+                        setShowModal(true);
+                      }}
+                    >
+                      <i className="fas fa-edit"></i>
+                    </button>
+                    <button className="btn btn-sm btn-danger"> <i className="fas fa-trash"></i></button>
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 
   const renderModalContent = () => {

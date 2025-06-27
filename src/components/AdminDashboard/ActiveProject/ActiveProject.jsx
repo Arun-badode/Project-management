@@ -74,6 +74,7 @@ const ActiveProject = () => {
   const tabScrollContainerRef = useRef(null);
   const tabFakeScrollbarRef = useRef(null);
   const tabFakeScrollbarInnerRef = useRef(null);
+
   useEffect(() => {
     const scrollContainer = tabScrollContainerRef.current;
     const fakeScrollbar = tabFakeScrollbarRef.current;

@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import useSyncScroll from "../../AdminDashboard/Hooks/useSyncScroll";
 
 const Attendance = () => {
   // Mock data for attendance records
@@ -249,6 +250,8 @@ const Attendance = () => {
     }
   };
 
+  const { scrollContainerRef, fakeScrollbarRef } = useSyncScroll(true);
+
   return (
     <div className="container-fluid py-4">
       <div className="row mb-4">
@@ -358,9 +361,31 @@ const Attendance = () => {
       {viewMode === "summary" && (
         <div className="card">
           <div className="card-body p-0 table-gradient-bg">
-            <div className="table-responsive  ">
+            <div
+              ref={fakeScrollbarRef}
+              style={{
+                overflowX: "auto",
+                overflowY: "hidden",
+                height: 16,
+                position: "fixed",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                zIndex: 1050,
+              }}
+            >
+              <div style={{ width: "1200px", height: 1 }} /> {/* Adjust width as needed */}
+            </div>
+            <div
+              className="table-responsive"
+              style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }}
+              ref={scrollContainerRef}
+            >
               <table className="table table-hover mb-0">
-                <thead className="table-light">
+                <thead
+                  className="table-light"
+                  style={{ position: "sticky", top: 0, zIndex: 2 }}
+                >
                   <tr>
                     <th>Employee</th>
                     <th>Department</th>
@@ -426,12 +451,12 @@ const Attendance = () => {
                         </span>
                       </td>
                       <td className="text-center mt-2">
-                       <button
-  onClick={() => handleEmployeeSelect(employee.id)}
-  className="btn btn-sm btn-info"
->
-  <i className="fas fa-eye me-1"></i> View
-</button>
+                        <button
+                          onClick={() => handleEmployeeSelect(employee.id)}
+                          className="btn btn-sm btn-info"
+                        >
+                          <i className="fas fa-eye me-1"></i> View
+                        </button>
 
                       </td>
                     </tr>
@@ -613,15 +638,13 @@ const Attendance = () => {
                               <td>{leave.type}</td>
                               <td>
                                 <span
-                                  className={`badge bg-${
-                                    leave.status === "Approved"
+                                  className={`badge bg-${leave.status === "Approved"
+                                    ? "success"
+                                    : "warning"
+                                    }-subtle text-${leave.status === "Approved"
                                       ? "success"
                                       : "warning"
-                                  }-subtle text-${
-                                    leave.status === "Approved"
-                                      ? "success"
-                                      : "warning"
-                                  }`}
+                                    }`}
                                 >
                                   {leave.status}
                                 </span>
