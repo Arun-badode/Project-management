@@ -376,7 +376,11 @@ export const TaskDashboard = () => {
             <div className="table-responsive"
               style={{ maxHeight: "400px", overflowY: "auto" }}>
               <table className="table table-hover table-gradient-bg align-middle mb-0">
+<<<<<<< HEAD
+                <thead className="table-light bg-dark">
+=======
                 <thead className="table-light bg-dark .">
+>>>>>>> bf23a6f65c9a6e91cd07b50dfdf6a52be73ad990
                   <tr>
                     <th>S. No.</th> {/* Changed from ID to Serial Number */}
                     <th

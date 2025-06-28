@@ -389,7 +389,7 @@ const AdminDashboard = () => {
           style={{ maxHeight: "500px", overflowY: "auto" }}
         >
           <Table className="table-gradient-bg align-middle  table table-bordered table-hover">
-            <thead className="table bg-dark p-2  .">
+            <thead className="table bg-dark p-2 ">
               <tr>
                 <th>ID</th>
                 <th>Project Title</th>

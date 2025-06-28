@@ -241,7 +241,7 @@ function Collaboration() {
                                     })}
                                 >
                                     <div className="d-flex justify-content-between">
-                                        <strong>{thread}</strong>
+                                        <strong >{thread}</strong>
                                         <small>11:32 AM</small>
                                     </div>
                                     <small className="text-truncate d-block">Last message preview...</small>
@@ -293,12 +293,12 @@ function Collaboration() {
                                         style={{ maxWidth: '75%' }}
                                     >
                                         <div className="d-flex   justify-content-between align-items-center mb-1">
-                                            <strong>{message.sender}</strong>
+                                            <strong className='text-white'>{message.sender}</strong>
                                             <small className={message.sender === 'You' ? 'text-white-50' : ''}>
                                                 {message.timestamp}
                                             </small>
                                         </div>
-                                        <p className="mb-2 ">{message.content}</p>
+                                        <p className="mb-2 text-white ">{message.content}</p>
                                         
                                         {/* Attachments */}
                                         {message.attachments.length > 0 && (
@@ -360,7 +360,7 @@ function Collaboration() {
                                             <div className="typing-dot"></div>
                                             <div className="typing-dot"></div>
                                         </div>
-                                        <small className="ms-2 ">typing...</small>
+                                        <small className="ms-2 text-white">typing...</small>
                                     </div>
                                 </div>
                             </div>
