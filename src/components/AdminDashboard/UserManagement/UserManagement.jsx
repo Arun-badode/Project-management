@@ -135,11 +135,7 @@ function UserManagement() {
                   <td className="">
                     <button
                       className="btn btn-sm btn-primary me-2"
-                      onClick={() => {
-                        setSelectedMember(member);
-                        setModalType("view");
-                        setShowModal(true);
-                      }}
+                   
                     >
                       <i className="fas fa-chevron-up fa-eye"></i>
                     </button>
