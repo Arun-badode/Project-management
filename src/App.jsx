@@ -1,4 +1,4 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Router, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 
 import Navbar from "./layout/Navbar";
@@ -37,120 +37,146 @@ import RoleManagementSystem from "./components/AdminDashboard/Role&Permission/Ro
 import Project from "./components/AdminDashboard/Project/Project";
 import Calander from "./components/AdminDashboard/Calander/Calander";
 import ActionCenter from "./components/AdminDashboard/ActionCenter/ActionCenter";
+import AuthLayout from "./layout/authLayout";
+import MainLayout from "./layout/MainLayout";
+
+
 
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
-  const menusidebarcollaps = () => {
-    setIsSidebarCollapsed(true);
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarCollapsed((prev) => !prev);
-  };
-
-  const location = useLocation();
-
-  // Define routes where navbar and sidebar should be hidden
-  const NO_LAYOUT_ROUTES = ["/", "/singup"];
-  const hideLayout = NO_LAYOUT_ROUTES.includes(location.pathname);
+  const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
+  const menusidebarcollaps = () => setIsSidebarCollapsed(true);
 
   return (
-    <>
-      {/* navbar - hidden on login/signup page */}
-      {!hideLayout && <Navbar toggleSidebar={toggleSidebar} />}
 
-      {/* main content area */}
-      <div className={`main-content ${hideLayout ? "full-width" : ""}`}>
-        {/* sidebar - hidden on login/signup page */}
-        {!hideLayout && (
-          <Sidebar
-            collapsed={isSidebarCollapsed}
-            menuItemClick={menusidebarcollaps}
+    <Routes>
+      {/* Auth Routes */}
+      <Route element={<AuthLayout />}>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+      </Route>
+
+      {/* App Routes */}
+      <Route
+        element={
+          <MainLayout
+            isSidebarCollapsed={isSidebarCollapsed}
+            toggleSidebar={toggleSidebar}
+            menusidebarcollaps={menusidebarcollaps}
           />
-        )}
+        }
+      >
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/calendar" element={<Calander />} />
+        <Route path="/attendance" element={<Attendance />} />
 
-        {/* right side content */}
-        <div
-          className={`right-side-content ${isSidebarCollapsed && !hideLayout ? "collapsed" : ""
-            }`}
-        >
-          <Routes>
-            {/* Authentication routes (no navbar/sidebar) */}
-            <Route path="/" element={<LoginPage />} />
-            <Route path="/singup" element={<SignupPage />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/taskmanagement" element={<TaskManagement />} />
+        <Route path="/calendar" element={<Calander />} />
+        <Route path="/usermanage" element={<UserManagement />} />
+        <Route path="/resourcemanagement" element={<ResourceManagement />} />
+        <Route path="/projectsupport" element={<ProjectSupportPortal />} />
+        <Route path="/settingpage" element={<SettingsPage />} />
+        <Route path="/profile" element={<ProfileAcc />} />
+        <Route path="/auditlog" element={<AuditLog />} />
+        <Route path="/timetracker" element={<TimeTracker />} />
+        <Route path="/reportinganalytics" element={<ReportingAnalytics />} />
+        <Route path="/filemanagementsystem" element={<FileManagementSystem />} />
+        <Route path="/qamanagement" element={<QAManagement />} />
+        <Route path="/changepassword" element={<ChangesPassword />} />
+        <Route path="/role&permission" element={<RoleManagementSystem />} />
+        <Route path="/project" element={<Project />} />
+        <Route path="/actioncenter" element={<ActionCenter />} />
 
-            {/* Admin routes */}
-            <Route path="/admin-dashboard" element={<AdminDashboard />} />
-            <Route path="/taskmanagement" element={<TaskManagement />} />
-            <Route path="/calendar" element={<Calander />} />
-            <Route path="/usermanage" element={<UserManagement />} />
-            <Route path="/resourcemanagement" element={<ResourceManagement />} />
-            <Route path="/projectsupport" element={<ProjectSupportPortal />} />
-            <Route path="/settingpage" element={<SettingsPage />} />
-            <Route path="/profile" element={<ProfileAcc />} />
-            <Route path="/auditlog" element={<AuditLog />} />
-            <Route path="/timetracker" element={<TimeTracker />} />
-            <Route path="/reportinganalytics" element={<ReportingAnalytics />} />
-            <Route path="/filemanagementsystem" element={<FileManagementSystem />} />
-            <Route path="/qamanagement" element={<QAManagement />} />
-            <Route path="/changepassword" element={<ChangesPassword />} />
-            <Route path="/role&permission" element={<RoleManagementSystem />} />
-            <Route path="/project" element={<Project />} />
-            <Route path="/actioncenter" element={<ActionCenter />} />
+        {/* Lead routes */}
+        <Route path="/LeadDashboard" element={<LeadDashboard />} />
 
-            {/* Lead routes */}
-            <Route path="/LeadDashboard" element={<LeadDashboard />} />
+        {/* Team Member routes */}
+        <Route path="/team-dashboard" element={<TaskDashboard />} />
+        <Route path="/attendance" element={<Attendance />} />
 
-            {/* Team Member routes */}
-            <Route path="/team-dashboard" element={<TaskDashboard />} />
-            <Route path="/attendance" element={<Attendance />} />
+        {/* team Member */}
+        <Route path="/task" element={<Task />} />
+        <Route path="/team-dashboard" element={<TaskDashboard />} />
+        <Route path='/messages' element={<Messages />} />
+        <Route path="/activity" element={<ActivitySummary />} />
 
-            {/* team Member */}
-            <Route path="/task" element={<Task />} />
-            <Route path="/team-dashboard" element={<TaskDashboard />} />
-            <Route path='/messages' element={<Messages />} />
-            <Route path="/activity" element={<ActivitySummary />} />
-            <Route path="/attendance" element={<Attendance />} />
+        {/* Add your other routes here */}
 
-            {/* Add your other routes here */}
+        {/*manager project */}
 
-            {/*manager project */}
+        <Route path="/manager-dashboard" element={<ManagerDashboard />} />
+        <Route path="/createproject" element={<CreateProject />} />
+        <Route path="/attendance" element={<Attendance />} />
+        <Route path="/assigned" element={<Assigned />} />
 
-            <Route path="/manager-dashboard" element={<ManagerDashboard />} />
-            <Route path="/createproject" element={<CreateProject />} />
-            <Route path="/attendance" element={<Attendance />} />
-            <Route path="/assigned" element={<Assigned />} />
+        <Route path="/taskrequest" element={<TaskRequest />} />
+        <Route path="/sourcework" element={<ResourceWorkload />} />
+        <Route path="/collaboration" element={<Collaboration />} />
 
-            <Route path="/taskrequest" element={<TaskRequest />} />
-            <Route path="/sourcework" element={<ResourceWorkload />} />
-            <Route path="/collaboration" element={<Collaboration />} />
-
-            {/* <Route path="/task" element={<Task/>} /> */}
+        {/* <Route path="/task" element={<Task/>} /> */}
 
 
-            {/* productivity */}
+        {/* productivity */}
 
-            <Route path="/productivity" element={<Productivity />} />
+        <Route path="/productivity" element={<Productivity />} />
 
 
 
-            {/* Add your other routes here */}
-            {/* End team Member */}
 
 
+      </Route>
 
-            {/* Manager */}
+      {/* Fallback Route */}
+      <Route path="*" element={<h1>404 - Not Found</h1>} />
+    </Routes>
 
-
-
-            {/* End Manager */}
-
-          </Routes>
-        </div>
-      </div>
-    </>
   );
 }
 
+
+// App.js
+
+
+// function App() {
+//   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+//   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
+//   const menusidebarcollaps = () => setIsSidebarCollapsed(true);
+//   const role = localStorage.getItem("userRole");
+
+//   const roleRoutes = routesByRole[role] || [];
+
+//   return (
+//     <Routes>
+//       {/* Auth */}
+//       <Route element={<AuthLayout />}>
+//         <Route path="/" element={<LoginPage />} />
+//         <Route path="/signup" element={<SignupPage />} />
+//       </Route>
+
+//       {/* Protected App Routes */}
+//       <Route
+//         element={
+//           <ProtectedRoute allowedRoles={["Admin", "Manager", "Employee"]}>
+//             <MainLayout
+//               isSidebarCollapsed={isSidebarCollapsed}
+//               toggleSidebar={toggleSidebar}
+//               menusidebarcollaps={menusidebarcollaps}
+//             />
+//           </ProtectedRoute>
+//         }
+//       >
+//         {roleRoutes.map(({ path, element }) => (
+//           <Route key={path} path={path} element={element} />
+//         ))}
+//       </Route>
+
+//       {/* Fallback */}
+//       <Route path="*" element={<h1>404 - Not Found</h1>} />
+//     </Routes>
+//   );
+// }
+
 export default App;
+

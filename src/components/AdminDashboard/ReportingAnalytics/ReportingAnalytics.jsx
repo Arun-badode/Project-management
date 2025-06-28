@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from 'recharts';
 import { Download, Filter, Search, Calendar, Users, TrendingUp, Clock, Target, Settings, Plus } from 'lucide-react';
+import useSyncScroll from '../Hooks/useSyncScroll';
 
 const ReportingAnalytics = () => {
   const [activeReportTab, setActiveReportTab] = useState('project-report');
@@ -17,6 +18,22 @@ const ReportingAnalytics = () => {
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear()
   });
+
+  const {
+    scrollContainerRef: scrollProjectRef,
+    fakeScrollbarRef: fakeProjectRef
+  } = useSyncScroll(activeReportTab === 'project-report');
+
+  const {
+    scrollContainerRef: scrollFeedbackRef,
+    fakeScrollbarRef: fakeFeedbackRef
+  } = useSyncScroll(activeReportTab === 'feedback-log');
+
+  const {
+    scrollContainerRef: scrollPerformanceRef,
+    fakeScrollbarRef: fakePerformanceRef
+  } = useSyncScroll(activeReportTab === 'team-performance');
+
 
   // Mock data for projects with QA status
   const projectData = [
@@ -211,13 +228,26 @@ const ReportingAnalytics = () => {
         </div>
       </div>
 
-      <div className="table-responsive" style={{ maxHeight: "400px", overflowY: "auto" }}>
+      <div ref={fakeProjectRef} style={{
+        overflowX: 'auto',
+        overflowY: 'hidden',
+        height: 16,
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1050
+      }}>
+        <div style={{ width: '2000px', height: 1 }} />
+      </div>
+
+      <div
+        ref={scrollProjectRef}
+        className="table-responsive"
+        style={{ overflowX: 'auto', maxHeight: '400px' }}
+      >
         <table className="table text-white analytics-project-table table-gradient-bg table-hover table-bordered mb-0">
-<<<<<<< HEAD
-          <thead className="table-light bg-dark ">
-=======
           <thead className="table-light bg-dark .">
->>>>>>> bf23a6f65c9a6e91cd07b50dfdf6a52be73ad990
             <tr>
               <th>ID</th>
               <th>Project Name</th>
@@ -396,7 +426,24 @@ const ReportingAnalytics = () => {
         </div>
       )}
 
-      <div className="table-responsive" style={{ maxHeight: "400px", overflowY: "auto" }}>
+      <div ref={fakeFeedbackRef} style={{
+        overflowX: 'auto',
+        overflowY: 'hidden',
+        height: 16,
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1050
+      }}>
+        <div style={{ width: '2000px', height: 1 }} />
+      </div>
+
+      <div
+        ref={scrollFeedbackRef}
+        className="table-responsive"
+        style={{ overflowX: 'auto', maxHeight: '400px' }}
+      >
         <table className="table text-white analytics-feedback-table table-gradient-bg">
           <thead className="text-white bg-dark .">
             <tr>
@@ -455,7 +502,24 @@ const ReportingAnalytics = () => {
 
       <div className="row">
         <div className="col-lg-12">
-          <div className="table-responsive" style={{ maxHeight: "400px", overflowY: "auto" }}>
+          <div ref={fakePerformanceRef} style={{
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            height: 16,
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1050
+          }}>
+            <div style={{ width: '2000px', height: 1 }} />
+          </div>
+
+          <div
+            ref={scrollPerformanceRef}
+            className="table-responsive"
+            style={{ overflowX: 'auto', maxHeight: '400px' }}
+          >
             <table className="table analytics-performance-table table-gradient-bg">
               <thead className="text-white bg-dark .">
                 <tr>
@@ -637,6 +701,8 @@ const ReportingAnalytics = () => {
       </div>
     </div>
   );
+
+
 
   const reportTabs = [
     { id: 'project-report', label: 'Project Report', icon: Target },
