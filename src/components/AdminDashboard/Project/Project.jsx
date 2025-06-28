@@ -584,7 +584,7 @@ const Project = () => {
                         <tr key={project.id}>
                           <td>
                             {project.title}
-                            <span className="badge bg-light text-dark ms-2">Draft</span>
+                            <span className="badge text-dark ms-2">Draft</span>
                           </td>
                           <td>{project.client}</td>
                           <td>{project.country}</td>
@@ -779,7 +779,7 @@ const Project = () => {
               <div className="card">
                 {/* <div className="table-responsive" style={{ overflowX: 'auto' }}>
                   <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                    <thead className="bg-light table-gradient-bg">
+                    <thead className=" ">
                       <tr>
                         <th>Project Title</th>
                         <th>Client</th>
@@ -1006,7 +1006,7 @@ const Project = () => {
                 <div className="card">
                   {/* <div className="table-responsive" style={{ overflowX: 'auto' }}>
                     <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                      <thead className="table-gradient-bg">
+                      <thead className="">
                         <tr>
                           <th>Project Title</th>
                           <th>Client</th>
