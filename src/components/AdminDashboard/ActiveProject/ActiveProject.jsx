@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from 'react-bootstrap';
 import moment from 'moment';
+import Select from 'react-select';
+import { ProjectsData } from '../AdminDashboard';
 
 const ActiveProject = () => {
 
@@ -94,8 +96,66 @@ const ActiveProject = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [editedProject, setEditedProject] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [ selectedApplications, setSelectedApplications] = useState([]);
 
-  const handleShow = () => setShowModal(true);
+   const [activeButton , setActivebutton]  = useState('');
+
+   console.log("Projects", projects);
+
+   console.log("filteredProjects", filteredProjects)
+
+    const handleCardFilter = (type) => {
+    let filtered = [];
+    const today = new Date();
+    const nearDueDate = new Date();
+    nearDueDate.setDate(today.getDate() + 3);
+
+    switch (type) {
+      case 'all':
+        filtered = projects;
+        break;
+      case 'nearDue':
+        filtered = projects.filter(project => {
+          if (project.status !== 'Active') return false;
+          const dueDate = new Date(project.dueDate);
+          const now = new Date();
+          const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+          return dueDate > now && dueDate <= thirtyMinsFromNow;
+        });
+        break;
+      case 'overdue':
+        filtered = projects.filter(project => {
+          const dueDate = new Date(project.dueDate);
+          return dueDate < today && project.status !== 'Completed';
+        });
+        break;
+      case 'teamOnDuty':
+        filtered = projects.filter(p => p.status === 'Team On-Duty');
+        break;
+      case 'eventsToday':
+        const todayStr = today.toISOString().split('T')[0];
+        filtered = projects.filter(project => {
+          return project.dueDate === todayStr || project.qcDueDate === todayStr;
+        });
+        break;
+      case 'pendingApproval':
+        filtered = projects.filter(p => p.qaStatus === 'Pending');
+        break;
+      default:
+        filtered = projects;
+    }
+    setFilteredProjects(filtered);
+    setActivebutton(type);
+    // setActiveFilter(type);
+  };
+
+ const applicationsOptio = [
+  { value: 'Adobe', label: 'Adobe' },
+  { value: 'MS Office', label: 'MS Office' },
+
+];
+
+  const handleShow = () => setShowModal(true);  
   const handleClose = () => setShowModal(false);
 
   // Batch edit states
@@ -272,13 +332,52 @@ const ActiveProject = () => {
       };
     }
   }, [selectedProject]); // rerun when project changes
+    
+  const staticProjects = ProjectsData;
 
+  const statuses =  [ 
+
+    {
+      key: "allstatus",
+      label: "All Status "
+    },
+    {
+      key: "yts",
+      label: "YTS"
+    },
+    {
+      key: "wip",
+      label: "WIP"
+    },
+    {
+      key: "readyforqc",
+      label: "Ready for QC"
+    },
+    {
+      key: "qareview",
+      label: "QA Review"
+    },
+    {
+      key: "corryts",
+      label: "Corr YTS"
+    },
+    {
+      key: "corrwip,",
+      label: "Corr WIP"
+      },
+        {
+      key: "rfd,",
+      label: "RFD"
+      },
+
+
+  ]
 
   // Generate dummy data
   useEffect(() => {
-    const dummyProjects = generateDummyProjects(15);
-    setProjects(dummyProjects);
-    setFilteredProjects(dummyProjects);
+    // const dummyProjects = generateDummyProjects(15);
+    setProjects(staticProjects);
+    setFilteredProjects(staticProjects);
   }, []);
 
   // Apply filters
@@ -404,6 +503,10 @@ const ActiveProject = () => {
     return Array.from(new Set(projects.map(project => project[key])));
   };
 
+  const applicationOptions = getUniqueValues('application').map((app) => ({
+  value: app,
+  label: app
+}));
 
 
   const handleEditProject = (project) => {
@@ -1003,7 +1106,41 @@ const ActiveProject = () => {
 
       {/* Filters */}
       <div className="row mb-4">
-        <div className="col-md-4">
+        <div className='col-md-6'>
+        <div className='d-flex  gap-2'>
+             <button 
+              className="btn btn-light" onClick={() => handleCardFilter('all')} >
+                All
+             </button>
+
+              <button 
+              className="btn btn-light" onClick={() => handleCardFilter('nearDue')} >
+                Near Due
+             </button>
+
+                <button 
+              className="btn btn-light"  onClick={() => handleCardFilter('overDue')}  >
+                Over  Due
+             </button>
+
+
+               <button 
+              className="btn btn-light" >
+                Adobe
+             </button>
+
+              <button 
+              className="btn btn-light" >
+               MS Office
+             </button>
+
+          </div>
+          
+
+        </div>
+        <div className="col-md-6
+         d-flex gap-2">
+        <div className=" ">
           <select
             className="form-select"
             value={clientFilter}
@@ -1015,7 +1152,7 @@ const ActiveProject = () => {
             ))}
           </select>
         </div>
-        <div className="col-md-4 mt-2">
+        <div className="">
           <select
             className="form-select"
             value={taskFilter}
@@ -1027,17 +1164,45 @@ const ActiveProject = () => {
             ))}
           </select>
         </div>
-        <div className="col-md-4 mt-2">
+        <div className="  ">
           <select
             className="form-select"
             value={languageFilter}
             onChange={(e) => setLanguageFilter(e.target.value)}
           >
-            <option value="">All Languages</option>
-            {getUniqueValues('language').map((language, index) => (
+            {
+              statuses.map((status, index) => (
+                <option key={index} value={status.key}>{status.label}</option>
+              ))
+            }
+
+
+
+
+            {/* {getUniqueValues('language').map((language, index) => (
               <option key={index} value={language}>{language}</option>
-            ))}
+            ))} */}
           </select>
+        </div>
+      
+        
+         <div className="">
+   
+    <Select
+   
+      options={applicationsOptio}
+      isMulti
+      className="basic-multi-select"
+      classNamePrefix="select"
+      value={selectedApplications}
+      placeholder="Select"
+      onChange={(selected) => setSelectedApplications(selected)}
+    />
+    {/* <div className="mt-1 text-muted small">
+      Selected: {selectedApplications.map((app) => app.label).join(', ')}
+    </div> */}
+  </div>
+
         </div>
       </div>
 
