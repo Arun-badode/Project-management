@@ -15,49 +15,8 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts';
-const AdminDashboard = () => {
-  const scrollContainerRef = useRef(null);
-  const fakeScrollbarRef = useRef(null);
-  const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [editProject, setEditProject] = useState(null);
-  const [filteredProjects, setFilteredProjects] = useState([]);
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [projects, setProjects] = useState([]);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [viewMode, setViewMode] = useState("summary");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [departmentFilter, setDepartmentFilter] = useState("All");
 
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    const fakeScrollbar = fakeScrollbarRef.current;
-
-    if (scrollContainer && fakeScrollbar) {
-      fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
-
-      const syncScroll = () => {
-        fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
-      };
-      const syncFakeScroll = () => {
-        scrollContainer.scrollLeft = fakeScrollbar.scrollLeft;
-      };
-
-      scrollContainer.addEventListener("scroll", syncScroll);
-      fakeScrollbar.addEventListener("scroll", syncFakeScroll);
-
-      return () => {
-        scrollContainer.removeEventListener("scroll", syncScroll);
-        fakeScrollbar.removeEventListener("scroll", syncFakeScroll);
-      };
-    }
-  }, []);
-
-  const staticProjects = [
+export const ProjectsData = [
     {
       id: 1,
       title: "Project 1",
@@ -345,223 +304,44 @@ const AdminDashboard = () => {
     },
   ];
 
-  const [attendanceData, setAttendanceData] = useState([
-    {
-      id: 1,
-      employeeName: "John Doe",
-      employeeId: "EMP001",
-      department: "Engineering",
-      position: "Senior Developer",
-      month: "May 2025",
-      daysPresent: 18,
-      daysAbsent: 2,
-      lateArrivals: 3,
-      earlyDepartures: 1,
-      leaves: [
-        { date: "2025-05-05", type: "Sick Leave", status: "Approved" },
-        { date: "2025-05-06", type: "Sick Leave", status: "Approved" },
-      ],
-      dailyRecords: generateDailyRecords(1),
-    },
-    {
-      id: 2,
-      employeeName: "Jane Smith",
-      employeeId: "EMP002",
-      department: "Design",
-      position: "UI/UX Designer",
-      month: "May 2025",
-      daysPresent: 20,
-      daysAbsent: 0,
-      lateArrivals: 1,
-      earlyDepartures: 0,
-      leaves: [],
-      dailyRecords: generateDailyRecords(2),
-    },
-    {
-      id: 3,
-      employeeName: "Michael Johnson",
-      employeeId: "EMP003",
-      department: "Marketing",
-      position: "Marketing Specialist",
-      month: "May 2025",
-      daysPresent: 16,
-      daysAbsent: 4,
-      lateArrivals: 2,
-      earlyDepartures: 3,
-      leaves: [
-        { date: "2025-05-12", type: "Vacation", status: "Approved" },
-        { date: "2025-05-13", type: "Vacation", status: "Approved" },
-        { date: "2025-05-14", type: "Vacation", status: "Approved" },
-        { date: "2025-05-15", type: "Vacation", status: "Approved" },
-      ],
-      dailyRecords: generateDailyRecords(3),
-    },
-    {
-      id: 4,
-      employeeName: "Emily Davis",
-      employeeId: "EMP004",
-      department: "HR",
-      position: "HR Manager",
-      month: "May 2025",
-      daysPresent: 19,
-      daysAbsent: 1,
-      lateArrivals: 0,
-      earlyDepartures: 2,
-      leaves: [
-        { date: "2025-05-20", type: "Personal Leave", status: "Approved" },
-      ],
-      dailyRecords: generateDailyRecords(4),
-    },
-    {
-      id: 5,
-      employeeName: "Robert Wilson",
-      employeeId: "EMP005",
-      department: "Finance",
-      position: "Financial Analyst",
-      month: "May 2025",
-      daysPresent: 17,
-      daysAbsent: 3,
-      lateArrivals: 4,
-      earlyDepartures: 1,
-      leaves: [
-        { date: "2025-05-07", type: "Sick Leave", status: "Approved" },
-        { date: "2025-05-26", type: "Personal Leave", status: "Approved" },
-        { date: "2025-05-27", type: "Personal Leave", status: "Approved" },
-      ],
-      dailyRecords: generateDailyRecords(5),
-    },
-  ]);
 
-  const tasksToday = [
-    {
-      id: 1,
-      title: "Prepare Report",
-      description: "Compile monthly sales data and generate report.",
-      deadline: "2025-06-28 17:00",
-      assignedTo: "John Doe",
-    },
-    {
-      id: 2,
-      title: "Team Meeting",
-      description: "Weekly team sync to discuss progress.",
-      deadline: "2025-06-28 10:30",
-      assignedTo: "Sarah Khan",
-    },
-    {
-      id: 3,
-      title: "Client Follow-up",
-      description: "Call client for feedback and renewal discussion.",
-      deadline: "2025-06-28 15:00",
-      assignedTo: "Amit Patel",
-    },
-    {
-      id: 4,
-      title: "Design Review",
-      description: "Review new UI mockups from design team.",
-      deadline: "2025-06-28 12:00",
-      assignedTo: "Emily Smith",
-    },
-  ];
+const AdminDashboard = () => {
+  const scrollContainerRef = useRef(null);
+  const fakeScrollbarRef = useRef(null);
+  const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [editProject, setEditProject] = useState(null);
+  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [projects, setProjects] = useState([]);
 
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    const fakeScrollbar = fakeScrollbarRef.current;
 
-  function generateDailyRecords(seed) {
-    const records = [];
-    // Generate records from 28th of previous month to 27th of current month
-    const startDate = new Date(2025, 3, 28); // April 28, 2025
-    const endDate = new Date(2025, 4, 27); // May 27, 2025
+    if (scrollContainer && fakeScrollbar) {
+      fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
 
-    for (
-      let d = new Date(startDate);
-      d <= endDate;
-      d.setDate(d.getDate() + 1)
-    ) {
-      const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-      const date = new Date(d);
+      const syncScroll = () => {
+        fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
+      };
+      const syncFakeScroll = () => {
+        scrollContainer.scrollLeft = fakeScrollbar.scrollLeft;
+      };
 
-      // Use seed to create some variation in the data
-      const random = (seed * date.getDate()) % 10;
-      let status = "Present";
-      let checkIn = null;
-      let checkOut = null;
+      scrollContainer.addEventListener("scroll", syncScroll);
+      fakeScrollbar.addEventListener("scroll", syncFakeScroll);
 
-      if (isWeekend) {
-        status = "Weekend";
-      } else if (random === 1) {
-        status = "Absent";
-      } else if (random === 2) {
-        status = "Leave";
-      } else {
-        // Normal working day
-        const baseCheckIn = 9 * 60; // 9:00 AM in minutes
-        const baseCheckOut = 17 * 60; // 5:00 PM in minutes
-
-        // Add some variation
-        const checkInVariation = (random - 5) * 10;
-        const checkOutVariation = (random - 3) * 10;
-
-        const checkInMinutes = baseCheckIn + checkInVariation;
-        const checkOutMinutes = baseCheckOut + checkOutVariation;
-
-        const checkInHour = Math.floor(checkInMinutes / 60);
-        const checkInMin = checkInMinutes % 60;
-        const checkOutHour = Math.floor(checkOutMinutes / 60);
-        const checkOutMin = checkOutMinutes % 60;
-
-        checkIn = `${checkInHour.toString().padStart(2, "0")}:${checkInMin
-          .toString()
-          .padStart(2, "0")}`;
-        checkOut = `${checkOutHour.toString().padStart(2, "0")}:${checkOutMin
-          .toString()
-          .padStart(2, "0")}`;
-
-        if (checkInMinutes > 9 * 60 + 15) {
-          // If check-in after 9:15
-          status = "Late";
-        } else if (checkOutMinutes < 17 * 60 - 15) {
-          // If check-out before 4:45
-          status = "Early Departure";
-        }
-      }
-
-      records.push({
-        date: date.toISOString().split("T")[0],
-        day: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()],
-        status,
-        checkIn,
-        checkOut,
-        workHours:
-          checkIn && checkOut ? calculateWorkHours(checkIn, checkOut) : 0,
-      });
+      return () => {
+        scrollContainer.removeEventListener("scroll", syncScroll);
+        fakeScrollbar.removeEventListener("scroll", syncFakeScroll);
+      };
     }
-    return records;
-  }
+  }, []);
 
-  function calculateWorkHours(checkIn, checkOut) {
-    const [inHour, inMin] = checkIn.split(":").map(Number);
-    const [outHour, outMin] = checkOut.split(":").map(Number);
-    const inMinutes = inHour * 60 + inMin;
-    const outMinutes = outHour * 60 + outMin;
-
-    // Calculate difference in hours, rounded to 1 decimal place
-    return Math.round((outMinutes - inMinutes) / 6) / 10;
-  }
-
-  // Function to handle employee selection
-  const handleEmployeeSelect = (id) => {
-    setSelectedEmployee(id);
-    setViewMode("detailed");
-  };
-
-  // Filter employees based on search and department
-  const filteredEmployees = attendanceData.filter((employee) => {
-    const matchesSearch =
-      employee.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment =
-      departmentFilter === "All" || employee.department === departmentFilter;
-    return matchesSearch && matchesDepartment;
-  });
-
+const staticProjects = ProjectsData;
 
   // Generate projects on component mount
   useEffect(() => {
@@ -737,7 +517,15 @@ const AdminDashboard = () => {
 
   const [setAllProjects] = useState([]);
 
-  
+  // useEffect(() => {
+  //   // Example fetch - replace with your actual logic
+  //   fetch('/api/projects')
+  //     .then(res => res.json())
+  //     .then(data => {
+  //       setAllProjects(data);
+  //       setFilteredProjects(data); // default view
+  //     });
+  // }, []);
 
   // const generateRandomProjects = (count) => {
   //   const clients = [
