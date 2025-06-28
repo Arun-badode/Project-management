@@ -3,7 +3,9 @@ import { Button } from 'react-bootstrap';
 import moment from 'moment';
 
 const ActiveProject = () => {
-  // Project data state
+
+
+
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
@@ -28,6 +30,39 @@ const ActiveProject = () => {
     cost: 0,
     inrCost: 0
   });
+
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const filter = params.get('filter');
+    const due = params.get('due');
+
+    let result = [...projects];
+
+    // Filter for "active" projects
+    if (filter === 'active') {
+      result = result.filter(project => project.progress < 100); // or use your own status logic
+    }
+
+    // Filter for "near due" (due in next 30 minutes)
+    if (due === '30min') {
+      const now = new Date();
+      const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+      result = result.filter(project => {
+        // Parse your dueDate string to Date
+        const match = project.dueDate.match(/(\d{2}):(\d{2}) (AM|PM) (\d{2})-(\d{2})-(\d{2})/);
+        if (!match) return false;
+        let [_, hour, min, ampm, day, month, year] = match;
+        hour = parseInt(hour, 10);
+        if (ampm === 'PM' && hour !== 12) hour += 12;
+        if (ampm === 'AM' && hour === 12) hour = 0;
+        const dueDateObj = new Date(`20${year}-${month}-${day}T${hour.toString().padStart(2, '0')}:${min}`);
+        return dueDateObj > now && dueDateObj <= thirtyMinsFromNow;
+      });
+    }
+
+    setFilteredProjects(result);
+  }, [location.search, projects]);
 
   const clientOptions = ['Acme Corp', 'TechStart', 'RetailPlus', 'GlobalMedia', 'FinTech Solutions'];
   const countryOptions = ['United States', 'Canada', 'UK', 'Australia', 'Germany', 'India'];

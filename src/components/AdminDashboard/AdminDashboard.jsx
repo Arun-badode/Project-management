@@ -51,171 +51,6 @@ const AdminDashboard = () => {
     }
   }, []);
 
-  // Generate projects on component mount
-  useEffect(() => {
-    setProjects(generateRandomProjects(15));
-    setFilteredProjects(generateRandomProjects(15));
-  }, []);
-
-  const handleShow = () => setShowModal(true);
-  const handleClose = () => setShowModal(false);
-
-  const handleView = (project) => {
-    setSelectedProject(project);
-    setShowViewModal(true);
-  };
-
-  // Unified filter handler
-  const handleCardFilter = (type) => {
-    let filtered = [];
-    const today = new Date();
-    const nearDueDate = new Date();
-    nearDueDate.setDate(today.getDate() + 3);
-
-    switch (type) {
-      case 'active':
-        filtered = projects.filter(p => p.status === 'Active');
-        break;
-      case 'nearDue':
-        filtered = projects.filter(project => {
-          const dueDate = new Date(project.dueDate);
-          return dueDate > today && dueDate <= nearDueDate && project.status !== 'Completed';
-        });
-        break;
-      case 'overdue':
-        filtered = projects.filter(project => {
-          const dueDate = new Date(project.dueDate);
-          return dueDate < today && project.status !== 'Completed';
-        });
-        break;
-      case 'teamOnDuty':
-        filtered = projects.filter(p => p.status === 'Team On-Duty');
-        break;
-      case 'eventsToday':
-        const todayStr = today.toISOString().split('T')[0];
-        filtered = projects.filter(project => {
-          return project.dueDate === todayStr || project.qcDueDate === todayStr;
-        });
-        break;
-      case 'pendingApproval':
-        filtered = projects.filter(p => p.qaStatus === 'Pending');
-        break;
-      default:
-        filtered = projects;
-    }
-    setFilteredProjects(filtered);
-    setActiveFilter(type);
-  };
-
-  // Card counts based on filteredProjects (so cards always match table)
-  const countFiltered = (type) => {
-    const today = new Date();
-    const nearDueDate = new Date();
-    nearDueDate.setDate(today.getDate() + 3);
-
-    switch (type) {
-      case 'active':
-        return filteredProjects.filter(p => p.status === 'Active').length;
-      case 'nearDue':
-        return filteredProjects.filter(project => {
-          const dueDate = new Date(project.dueDate);
-          return dueDate > today && dueDate <= nearDueDate && project.status !== 'Completed';
-        }).length;
-      case 'overdue':
-        return filteredProjects.filter(project => {
-          const dueDate = new Date(project.dueDate);
-          return dueDate < today && project.status !== 'Completed';
-        }).length;
-      case 'teamOnDuty':
-        return filteredProjects.filter(p => p.status === 'Team On-Duty').length;
-      case 'eventsToday':
-        const todayStr = today.toISOString().split('T')[0];
-        return filteredProjects.filter(project => {
-          return project.dueDate === todayStr || project.qcDueDate === todayStr;
-        }).length;
-      case 'pendingApproval':
-        return filteredProjects.filter(p => p.qaStatus === 'Pending').length;
-      default:
-        return filteredProjects.length;
-    }
-  };
-
-  // Show all projects
-  const showAllProjects = () => {
-    setFilteredProjects(projects);
-    setActiveFilter('all');
-  };
-
-  const [setAllProjects] = useState([]);
-
-  useEffect(() => {
-    // Example fetch - replace with your actual logic
-    fetch('/api/projects')
-      .then(res => res.json())
-      .then(data => {
-        setAllProjects(data);
-        setFilteredProjects(data); // default view
-      });
-  }, []);
-
-  const generateRandomProjects = (count) => {
-    const clients = [
-      "Acme Corp",
-      "Globex",
-      "Soylent",
-      "Initech",
-      "Umbrella",
-      "Wayne Ent",
-      "Stark Ind",
-      "Oscorp",
-    ];
-    const platforms = ["Web", "Mobile", "Desktop"];
-    const statuses = ["Active", "Near Due", "Overdue", "Team On-Duty"];
-    const handlers = ["Jane", "John", "Alice", "Bob", "Charlie", "Eve"];
-    const qaReviewers = ["Alan", "Sarah", "Mike", "Lisa", "David"];
-    const qaStatuses = ["Passed", "Failed", "Pending", "In Review"];
-    const processStatuses = ["Ongoing", "Completed", "Pending", "Delayed"];
-
-    const projects = [];
-    const today = new Date();
-
-    for (let i = 0; i < count; i++) {
-      const randomDays = Math.floor(Math.random() * 30) - 5; // Some will be overdue
-      const dueDate = new Date(today);
-      dueDate.setDate(today.getDate() + randomDays);
-
-      const qcDeadline = new Date(dueDate);
-      qcDeadline.setDate(dueDate.getDate() - 2);
-
-      const qcDueDate = new Date(qcDeadline);
-      qcDueDate.setDate(qcDeadline.getDate() + 1);
-
-      projects.push({
-        id: i + 1,
-        title: `Project ${i + 1}`,
-        client: clients[Math.floor(Math.random() * clients.length)],
-        tasks: Math.floor(Math.random() * 10) + 1,
-        languages: Math.floor(Math.random() * 5) + 1,
-        platform: platforms[Math.floor(Math.random() * platforms.length)],
-        pages: Math.floor(Math.random() * 200) + 50,
-        dueDate: dueDate.toISOString().split("T")[0],
-        qcDeadline: qcDeadline.toISOString().split("T")[0],
-        qcHours: Math.floor(Math.random() * 24) + 1,
-        qcDueDate: qcDueDate.toISOString().split("T")[0],
-        status: statuses[Math.floor(Math.random() * statuses.length)],
-        handler: handlers[Math.floor(Math.random() * handlers.length)],
-        processStatus:
-          processStatuses[Math.floor(Math.random() * processStatuses.length)],
-        qaReviewer: qaReviewers[Math.floor(Math.random() * qaReviewers.length)],
-        qaStatus: qaStatuses[Math.floor(Math.random() * qaStatuses.length)],
-        serverPath: `/mnt/server/project/project-${i + 1}`,
-      });
-    }
-
-    return projects;
-  };
-
-
   const staticProjects = [
     {
       id: 1,
@@ -503,6 +338,213 @@ const AdminDashboard = () => {
       serverPath: "/mnt/server/project/project-15",
     },
   ];
+
+  // Generate projects on component mount
+  useEffect(() => {
+    setProjects(staticProjects);
+    setFilteredProjects(staticProjects);
+
+  }, []);
+
+  const handleShow = () => setShowModal(true);
+  const handleClose = () => setShowModal(false);
+
+
+
+  const handleView = (project) => {
+    setSelectedProject(project);
+    setShowViewModal(true);
+  };
+
+  // Unified filter handler
+  const handleCardFilter = (type) => {
+    let filtered = [];
+    const today = new Date();
+    const nearDueDate = new Date();
+    nearDueDate.setDate(today.getDate() + 3);
+
+    switch (type) {
+      case 'active':
+        filtered = projects.filter(p => p.status === 'Active');
+        break;
+      case 'nearDue':
+        filtered = projects.filter(project => {
+          if (project.status !== 'Active') return false;
+          const dueDate = new Date(project.dueDate);
+          const now = new Date();
+          const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+          return dueDate > now && dueDate <= thirtyMinsFromNow;
+        });
+        break;
+      case 'overdue':
+        filtered = projects.filter(project => {
+          const dueDate = new Date(project.dueDate);
+          return dueDate < today && project.status !== 'Completed';
+        });
+        break;
+      case 'teamOnDuty':
+        filtered = projects.filter(p => p.status === 'Team On-Duty');
+        break;
+      case 'eventsToday':
+        const todayStr = today.toISOString().split('T')[0];
+        filtered = projects.filter(project => {
+          return project.dueDate === todayStr || project.qcDueDate === todayStr;
+        });
+        break;
+      case 'pendingApproval':
+        filtered = projects.filter(p => p.qaStatus === 'Pending');
+        break;
+      default:
+        filtered = projects;
+    }
+    setFilteredProjects(filtered);
+    setActiveFilter(type);
+  };
+
+  // Card counts based on filteredProjects (so cards always match table)
+  // const countFiltered = (type) => {
+  //   const today = new Date();
+  //   const nearDueDate = new Date();
+  //   nearDueDate.setDate(today.getDate() + 3);
+
+  //   switch (type) {
+  //     case 'active':
+  //       return filteredProjects.filter(p => p.status === 'Active').length;
+  //     case 'nearDue':
+  //       return filteredProjects.filter(project => {
+  //         const dueDate = new Date(project.dueDate);
+  //         return dueDate > today && dueDate <= nearDueDate && project.status !== 'Completed';
+  //       }).length;
+  //     case 'overdue':
+  //       return filteredProjects.filter(project => {
+  //         const dueDate = new Date(project.dueDate);
+  //         return dueDate < today && project.status !== 'Completed';
+  //       }).length;
+  //     case 'teamOnDuty':
+  //       return filteredProjects.filter(p => p.status === 'Team On-Duty').length;
+  //     case 'eventsToday':
+  //       const todayStr = today.toISOString().split('T')[0];
+  //       return filteredProjects.filter(project => {
+  //         return project.dueDate === todayStr || project.qcDueDate === todayStr;
+  //       }).length;
+  //     case 'pendingApproval':
+  //       return filteredProjects.filter(p => p.qaStatus === 'Pending').length;
+  //     default:
+  //       return filteredProjects.length;
+  //   }
+  // };
+
+  const countFiltered = (type) => {
+    const today = new Date();
+    const nearDueDate = new Date();
+    nearDueDate.setDate(today.getDate() + 3);
+
+    switch (type) {
+      case 'active':
+        return projects.filter(p => p.status === 'Active').length;
+      case 'nearDue':
+        return projects.filter(project => {
+          if (project.status !== 'Active') return false;
+          const dueDate = new Date(project.dueDate);
+          const now = new Date();
+          const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+          return dueDate > now && dueDate <= thirtyMinsFromNow;
+        }).length;
+      case 'overdue':
+        return projects.filter(project => {
+          const dueDate = new Date(project.dueDate);
+          return dueDate < today && project.status !== 'Completed';
+        }).length;
+      case 'teamOnDuty':
+        return projects.filter(p => p.status === 'Team On-Duty').length;
+      case 'eventsToday':
+        const todayStr = today.toISOString().split('T')[0];
+        return projects.filter(project => {
+          return project.dueDate === todayStr || project.qcDueDate === todayStr;
+        }).length;
+      case 'pendingApproval':
+        return projects.filter(p => p.qaStatus === 'Pending').length;
+      default:
+        return projects.length;
+    }
+  };
+  // Show all projects
+  const showAllProjects = () => {
+    setFilteredProjects(projects);
+    setActiveFilter('all');
+  };
+
+  const [setAllProjects] = useState([]);
+
+  // useEffect(() => {
+  //   // Example fetch - replace with your actual logic
+  //   fetch('/api/projects')
+  //     .then(res => res.json())
+  //     .then(data => {
+  //       setAllProjects(data);
+  //       setFilteredProjects(data); // default view
+  //     });
+  // }, []);
+
+  // const generateRandomProjects = (count) => {
+  //   const clients = [
+  //     "Acme Corp",
+  //     "Globex",
+  //     "Soylent",
+  //     "Initech",
+  //     "Umbrella",
+  //     "Wayne Ent",
+  //     "Stark Ind",
+  //     "Oscorp",
+  //   ];
+  //   const platforms = ["Web", "Mobile", "Desktop"];
+  //   const statuses = ["Active", "Near Due", "Overdue", "Team On-Duty"];
+  //   const handlers = ["Jane", "John", "Alice", "Bob", "Charlie", "Eve"];
+  //   const qaReviewers = ["Alan", "Sarah", "Mike", "Lisa", "David"];
+  //   const qaStatuses = ["Passed", "Failed", "Pending", "In Review"];
+  //   const processStatuses = ["Ongoing", "Completed", "Pending", "Delayed"];
+
+  //   const projects = [];
+  //   const today = new Date();
+
+  //   for (let i = 0; i < count; i++) {
+  //     const randomDays = Math.floor(Math.random() * 30) - 5; // Some will be overdue
+  //     const dueDate = new Date(today);
+  //     dueDate.setDate(today.getDate() + randomDays);
+
+  //     const qcDeadline = new Date(dueDate);
+  //     qcDeadline.setDate(dueDate.getDate() - 2);
+
+  //     const qcDueDate = new Date(qcDeadline);
+  //     qcDueDate.setDate(qcDeadline.getDate() + 1);
+
+  //     projects.push({
+  //       id: i + 1,
+  //       title: `Project ${i + 1}`,
+  //       client: clients[Math.floor(Math.random() * clients.length)],
+  //       tasks: Math.floor(Math.random() * 10) + 1,
+  //       languages: Math.floor(Math.random() * 5) + 1,
+  //       platform: platforms[Math.floor(Math.random() * platforms.length)],
+  //       pages: Math.floor(Math.random() * 200) + 50,
+  //       dueDate: dueDate.toISOString().split("T")[0],
+  //       qcDeadline: qcDeadline.toISOString().split("T")[0],
+  //       qcHours: Math.floor(Math.random() * 24) + 1,
+  //       qcDueDate: qcDueDate.toISOString().split("T")[0],
+  //       status: statuses[Math.floor(Math.random() * statuses.length)],
+  //       handler: handlers[Math.floor(Math.random() * handlers.length)],
+  //       processStatus:
+  //         processStatuses[Math.floor(Math.random() * processStatuses.length)],
+  //       qaReviewer: qaReviewers[Math.floor(Math.random() * qaReviewers.length)],
+  //       qaStatus: qaStatuses[Math.floor(Math.random() * qaStatuses.length)],
+  //       serverPath: `/mnt/server/project/project-${i + 1}`,
+  //     });
+  //   }
+
+  //   return projects;
+  // };
+
+
+
 
 
   const barData = [
@@ -1065,9 +1107,41 @@ const AdminDashboard = () => {
       </Modal> */}
 
       <Col md={12} className="text-end">
-        <Link to='/Project' className="text-decoration-none">
+        {activeFilter === 'teamOnDuty' ? (
+          <Link to="/Attendance?tab=today" className="text-decoration-none">
+            <Button className="gradient-button me-2">Go To</Button>
+          </Link>
+        ) : activeFilter === 'eventsToday' ? (
+          <Link to="/calendar" className="text-decoration-none">
+            <Button className="gradient-button me-2">Go To</Button>
+          </Link>
+        ) : activeFilter === 'nearDue' ? (
+          <Link to="/LeadDashboard?filter=nearDue" className="text-decoration-none">
+            <Button className="gradient-button me-2">Go To</Button>
+          </Link>
+        ) : activeFilter === 'active' ? (
+          <Link to="/LeadDashboard?filter=active" className="text-decoration-none">
+            <Button className="gradient-button me-2">Go To</Button>
+          </Link>
+        ) :
+
+          activeFilter === 'pendingApproval' ? (
+            <Link to="/actioncenter" className="text-decoration-none">
+              <Button className="gradient-button me-2">Go To</Button>
+            </Link>
+          )
+            :
+
+            (
+              <Link to="/LeadDashboard" className="text-decoration-none">
+                <Button className="gradient-button me-2">Go To</Button>
+              </Link>
+            )}
+
+
+        {/* <Link to='/Project' className="text-decoration-none">
           <Button className="gradient-button me-2">Go To</Button>
-        </Link>
+        </Link> */}
       </Col>
     </div>
   );
