@@ -545,6 +545,47 @@ case 'Adobe': {
     }
   };
 
+
+    const gradientSelectStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      background: 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
+      color: 'white',
+      borderColor: state.isFocused ? '#ffffff66' : '#ffffff33',
+      boxShadow: state.isFocused ? '0 0 0 1px #ffffff66' : 'none',
+      minHeight: '38px',
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: 'white',
+    }),
+    multiValue: (provided) => ({
+      ...provided,
+      backgroundColor: '#1b2f6e',
+    }),
+    multiValueLabel: (provided) => ({
+      ...provided,
+      color: 'white',
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: 'white',
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: 'white',
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? '#293d80' : 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
+      color: 'white',
+    }),
+    menu: (provided) => ({
+      ...provided,
+      background: 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
+      color: 'white',
+    }),
+  };
   return (
     <div className="container-fluid py-4">
       {/* Edit Project Modal */}
@@ -705,6 +746,7 @@ case 'Adobe': {
                   onChange={opt => setFormData(prev => ({ ...prev, client: opt ? opt.value : '' }))}
                   isSearchable
                   placeholder="Select Client"
+                   styles={gradientSelectStyles}
                 />
               </div>
               <div className="col-md-4">
@@ -730,6 +772,7 @@ case 'Adobe': {
                   onChange={opt => setFormData(prev => ({ ...prev, projectManager: opt ? opt.value : '' }))}
                   isSearchable
                   placeholder="Refined Searchable Dropdown"
+                   styles={gradientSelectStyles}
                 />
               </div>
             </div>
@@ -738,7 +781,7 @@ case 'Adobe': {
             <div className="row g-3 mb-3">
               <div className="col-md-6">
                 <label htmlFor="task" className="form-label">Task <span className="text-danger">*</span></label>
-                <Select
+                <Select 
                   id="task"
                   name="task"
                   options={taskOptions.map(t => ({ value: t, label: t }))}
@@ -747,6 +790,7 @@ case 'Adobe': {
                   isMulti
                   isSearchable
                   placeholder="Select Task(s)"
+                   styles={gradientSelectStyles}
                 />
               </div>
               <div className="col-md-6">
@@ -760,6 +804,7 @@ case 'Adobe': {
                   isMulti
                   isSearchable
                   placeholder="Select Application(s)"
+                   styles={gradientSelectStyles}
                 />
               </div>
             </div>
@@ -774,6 +819,7 @@ case 'Adobe': {
                 isMulti
                 isSearchable
                 placeholder="Select Languages"
+                 styles={gradientSelectStyles}
               />
               <div className="form-text">{formData.languages.length} selected</div>
             </div>
@@ -781,7 +827,7 @@ case 'Adobe': {
             {/* File Details */}
             <div className="mb-3">
               <label className="form-label">File Details*:</label>
-              <div className="d-flex align-items-center gap-2 mb-2">
+              <div className="d-flex align-items-center gap-2 mb-2 bg-[#201E7E]">
                 <span>Count</span>
                 <input
                   type="number"
@@ -805,10 +851,10 @@ case 'Adobe': {
                   Upload Excel
                 </button>
               </div>
-              <div className="table-responsive">
-                <table className="table table-bordered">
-                  <thead>
-                    <tr>
+              <div className="table-responsive " >
+                <table className="table table-bordered  ">
+                  <thead  style={{backgroundColor: '#201E7E', color: 'white'}}>
+                    <tr style={{backgroundColor: '#201E7E', color: 'white'}}>
                       <th>S.No.</th>
                       <th>File Name</th>
                       <th>Pages</th>
