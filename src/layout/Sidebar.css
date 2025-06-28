@@ -1,7 +1,7 @@
 .sidebar-container {
   width: 275px;
   scrollbar-width: none;
-  background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e) !important;
+  background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e) !important;  
   height: 89vh;
   overflow-y: auto;
   transition: width 0.3s ease;

@@ -305,7 +305,7 @@ const ActiveProject= () => {
 
       {/* Filters */}
       <div className="row mb-4">
-        <div className="col-md-4">
+        <div className="col-md-4 mt-2">
           <select
             className="form-select"
             value={clientFilter}

@@ -422,9 +422,9 @@ const AuditLog = () => {
                     />
                   </div>
                 </div>
-                <div className="col-md-2 mb-3">
+                <div className="col-md-2 mb-3 ">
                   <select
-                    className="form-select"
+                    className="form-select p-2"
                     value={selectedRole}
                     onChange={(e) => setSelectedRole(e.target.value)}
                   >

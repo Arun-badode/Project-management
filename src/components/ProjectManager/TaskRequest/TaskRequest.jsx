@@ -122,53 +122,57 @@ function TaskRequest() {
     <div className="min-vh-100 bg-main">
       <div className="container py-4">
         {/* Header */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2 className="h2 mb-0 gradient-heading">Task Reassignment Requests</h2 >
-          <div className="dropdown">
-            <button 
-              className="btn btn-outline-primary ms-2 dropdown-toggle"
-              type="button"
-              id="filterDropdown"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              <i className="fas fa-filter me-2"></i>
-              Filter: {filter === 'all' ? 'All Requests' : filter.charAt(0).toUpperCase() + filter.slice(1)}
-            </button>
-            <ul className="dropdown-menu" aria-labelledby="filterDropdown">
-              <li>
-                <button 
-                  className={`dropdown-item ${filter === 'all' ? 'active' : ''}`}
-                  onClick={() => setFilter('all')}
-                >
-                  All Requests
-                </button>
-              </li>
-              <li>
-                <button 
-                  className={`dropdown-item ${filter === 'pending' ? 'active' : ''}`}
-                  onClick={() => setFilter('pending')}
-                >
-                  Pending
-                </button>
-              </li>
-              <li>
-                <button 
-                  className={`dropdown-item ${filter === 'approved' ? 'active' : ''}`}
-                  onClick={() => setFilter('approved')}
-                >
-                  Approved
-                </button>
-              </li>
-              <li>
-                <button 
-                  className={`dropdown-item ${filter === 'rejected' ? 'active' : ''}`}
-                  onClick={() => setFilter('rejected')}
-                >
-                  Rejected
-                </button>
-              </li>
-            </ul>
+        <div className="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between mb-4 gap-2">
+          <h1 className="h2 mb-2 mb-md-0 gradient-heading text-center text-md-start">
+            Task Reassignment Requests
+          </h1>
+          <div className="d-flex justify-content-md-end">
+            <div className="dropdown w-100 w-md-auto">
+              <button 
+                className="btn btn-outline-primary dropdown-toggle w-100"
+                type="button"
+                id="filterDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i className="fas fa-filter me-2"></i>
+                Filter: {filter === 'all' ? 'All Requests' : filter.charAt(0).toUpperCase() + filter.slice(1)}
+              </button>
+              <ul className="dropdown-menu" aria-labelledby="filterDropdown">
+                <li>
+                  <button 
+                    className={`dropdown-item ${filter === 'all' ? 'active' : ''}`}
+                    onClick={() => setFilter('all')}
+                  >
+                    All Requests
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    className={`dropdown-item ${filter === 'pending' ? 'active' : ''}`}
+                    onClick={() => setFilter('pending')}
+                  >
+                    Pending
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    className={`dropdown-item ${filter === 'approved' ? 'active' : ''}`}
+                    onClick={() => setFilter('approved')}
+                  >
+                    Approved
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    className={`dropdown-item ${filter === 'rejected' ? 'active' : ''}`}
+                    onClick={() => setFilter('rejected')}
+                  >
+                    Rejected
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
@@ -188,11 +192,11 @@ function TaskRequest() {
           {filteredRequests.length > 0 ? (
             <div className="row g-4">
               {filteredRequests.map(request => (
-                <div key={request.id} className="col-md-6 col-lg-4">
+                <div key={request.id} className="col-12 col-md-6 col-lg-4">
                   <div className="card h-100 bg-card">
-                    <div className="card-body">
+                    <div className="card-body d-flex flex-column">
                       {/* Header with requester info and date */}
-                      <div className="d-flex justify-content-between align-items-start mb-3">
+                      <div className="d-flex justify-content-between align-items-start mb-3 flex-wrap">
                         <div className="d-flex align-items-center">
                           <img 
                             src={request.requester.avatar} 
@@ -203,10 +207,10 @@ function TaskRequest() {
                           />
                           <div>
                             <h5 className="mb-0">{request.requester.name}</h5>
-                            <small className="">{formatDate(request.requestDate)}</small>
+                            <small>{formatDate(request.requestDate)}</small>
                           </div>
                         </div>
-                        <div>
+                        <div className="mt-2 mt-md-0">
                           <span className={`badge ${
                             request.status === 'pending' ? 'bg-warning text-dark' :
                             request.status === 'approved' ? 'bg-success' :
@@ -220,19 +224,19 @@ function TaskRequest() {
                       {/* Task details */}
                       <div className="mb-3">
                         <h6 className="card-title mb-1">{request.task.name}</h6>
-                        <p className="card-text  small">{request.task.description}</p>
+                        <p className="card-text small">{request.task.description}</p>
                       </div>
                       
                       {/* Reason (only shown when details are expanded) */}
                       {showDetails === request.id && (
                         <div className="mb-3 bg-light p-3 rounded">
                           <h6 className="small fw-bold mb-1">Reason for reassignment:</h6>
-                          <p className="small  mb-0">{request.reason}</p>
+                          <p className="small mb-0">{request.reason}</p>
                         </div>
                       )}
                       
                       {/* Action buttons */}
-                      <div className="d-flex flex-column">
+                      <div className="d-flex flex-column mt-auto">
                         <div className="d-flex justify-content-between mb-2">
                           <button
                             className="btn btn-link p-0 text-primary small"

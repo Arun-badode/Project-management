@@ -78,9 +78,7 @@ const Sidebar = ({ collapsed }) => {
               </li>
               {/* Projects */}
               <li
-                className={`menu-item ${
-                  isActive("/project") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/project") ? "active" : ""}`}
               >
                 <div
                   className="menu-link menu-i"
@@ -161,9 +159,7 @@ const Sidebar = ({ collapsed }) => {
               </li>
               {/* Calendar */}
               <li
-                className={`menu-item ${
-                  isActive("/calendar") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/calendar") ? "active" : ""}`}
               >
                 <div
                   className="menu-link menu-i"
@@ -194,10 +190,6 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
 
-              
-
-             
-
               {/* <li
                 className={`menu-item ${
                   isActive("/resourcemanagement") ? "active" : ""
@@ -214,7 +206,7 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Resource </span>
                 </div>
               </li> */}
-{/* 
+              {/* 
               <li
                 className={`menu-item ${
                   isActive("/timetracker") ? "active" : ""
@@ -266,8 +258,6 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li> */}
 
-             
-             
               {/* <li
                 className={`menu-item ${isActive("/profile") ? "active" : ""}`}
               >
@@ -298,13 +288,7 @@ const Sidebar = ({ collapsed }) => {
                   <i className="fa-solid fa-life-ring"></i>
                   <span className="menu-text">Support</span>
                 </div>
-              </li> */
-              
-              
-              
-              
-              
-              }
+              </li> */}
 
               <li
                 className={`menu-item ${

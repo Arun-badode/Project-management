@@ -540,9 +540,9 @@ const App = () => {
               </div>
             ) : (
               <div className="card">
-                <div className="table-responsive" style={{ overflowX: 'auto' }}>
-                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                    <thead className="bg-light table-gradient-bg">
+                <div className="table-responsive table-gradient-bg" style={{ overflowX: 'auto' }}>
+                  <table className="table table-hover mb-0 " style={{ minWidth: 900 }}>
+                    <thead className="table-gradient-bg">
                       <tr>
                         <th>Project Title</th>
                         <th>Client</th>
@@ -564,7 +564,7 @@ const App = () => {
                         <tr key={project.id}>
                           <td>
                             {project.title}
-                            <span className="badge bg-light text-dark ms-2">Draft</span>
+                            <span className="badge text-dark ms-2">Draft</span>
                           </td>
                           <td>{project.client}</td>
                           <td>{project.country}</td>
@@ -647,9 +647,9 @@ const App = () => {
               </div>
             ) : (
               <div className="card">
-                <div className="table-responsive" style={{ overflowX: 'auto' }}>
+                <div className="table-responsive table-gradient-bg" style={{ overflowX: 'auto' }}>
                   <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                    <thead className="bg-light table-gradient-bg">
+                    <thead className=" ">
                       <tr>
                         <th>Project Title</th>
                         <th>Client</th>
@@ -766,9 +766,9 @@ const App = () => {
                 </div>
                 {/* Project Cards */}
                 <div className="card">
-                  <div className="table-responsive" style={{ overflowX: 'auto' }}>
+                  <div className="table-responsive table-gradient-bg" style={{ overflowX: 'auto' }}>
                     <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                      <thead className="table-gradient-bg">
+                      <thead className="">
                         <tr>
                           <th>Project Title</th>
                           <th>Client</th>

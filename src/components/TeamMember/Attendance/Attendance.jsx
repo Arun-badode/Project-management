@@ -264,7 +264,7 @@ const Attendance = () => {
           <div className="row">
             <div className="col-md-8">
               <div className="row">
-                <div className="col-md-4 mt-4 py-1 ">
+                <div className="col-md-4 mt-4">
                   <div className="input-group">
                     <span className="input-group-text">
                       <i className="fas fa-search"></i>
@@ -278,7 +278,7 @@ const Attendance = () => {
                     />
                   </div>
                 </div>
-                <div className="col-md-4 py-1 mt-4">
+                <div className="col-md-4 mt-4">
                   <select
                     className="form-select"
                     value={departmentFilter}
@@ -293,7 +293,7 @@ const Attendance = () => {
                 </div>
                 <div className="col-md-4">
                   <div className="row g-2">
-                    <div className="col-6">
+                    <div className="col-6 ">
                       <label className="form-label small">Start Date</label>
                       <input
                         type="date"
