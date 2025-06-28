@@ -739,15 +739,7 @@ const AdminDashboard = () => {
 
   const [setAllProjects] = useState([]);
 
-  // useEffect(() => {
-  //   // Example fetch - replace with your actual logic
-  //   fetch('/api/projects')
-  //     .then(res => res.json())
-  //     .then(data => {
-  //       setAllProjects(data);
-  //       setFilteredProjects(data); // default view
-  //     });
-  // }, []);
+  
 
   // const generateRandomProjects = (count) => {
   //   const clients = [
