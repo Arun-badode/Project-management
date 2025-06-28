@@ -1,10 +1,106 @@
 import React, { useState } from "react";
-import useSyncScroll from "../Hooks/useSyncScroll";
+import Select from "react-select";
 
 function UserManagement() {
+  // State for modal and member management
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState(""); // "view" or "edit"
-  const [selectedMember, setSelectedMember] = useState(null);
+  const [modalType, setModalType] = useState(""); // "view", "edit", or "add"
+  const [selectedApplications, setSelectedApplications] = useState([]);
+  const [activeTab, setActiveTab] = useState("live");
+  
+  // State for team members data
+  const [teamMembers, setTeamMembers] = useState([
+    {
+      empId: "E001",
+      fullName: "John Doe",
+      doj: "2022-01-01",
+      dob: "1990-05-10",
+      team: "Dev",
+      role: "Frontend",
+      appSkills: ["React", "JS"],
+      username: "johnd",
+      status: "active",
+    },
+    {
+      empId: "E002",
+      fullName: "Jane Smith",
+      doj: "2021-07-15",
+      dob: "1992-04-22",
+      team: "QA",
+      role: "Tester",
+      appSkills: ["Selenium"],
+      username: "janes",
+      status: "freezed",
+    },
+    {
+      empId: "E003",
+      fullName: "Amit Sharma",
+      doj: "2020-11-12",
+      dob: "1988-02-10",
+      team: "Design",
+      role: "UI/UX",
+      appSkills: ["Figma", "Adobe XD"],
+      username: "amitsh",
+      status: "active",
+    },
+    {
+      empId: "E004",
+      fullName: "Priya Mehra",
+      doj: "2019-06-21",
+      dob: "1993-09-18",
+      team: "DevOps",
+      role: "Engineer",
+      appSkills: ["Docker", "Kubernetes", "AWS"],
+      username: "priyam",
+      status: "freezed",
+    },
+    {
+      empId: "E005",
+      fullName: "Rahul Verma",
+      doj: "2023-03-10",
+      dob: "1995-11-23",
+      team: "Dev",
+      role: "Backend",
+      appSkills: ["Node.js", "MongoDB", "Express"],
+      username: "rahulv",
+      status: "active",
+    },
+    {
+      empId: "E006",
+      fullName: "Neha Kaur",
+      doj: "2022-09-05",
+      dob: "1991-12-05",
+      team: "HR",
+      role: "Recruiter",
+      appSkills: ["Excel", "LinkedIn", "HRMS"],
+      username: "nehak",
+      status: "active",
+    },
+    {
+      empId: "E007",
+      fullName: "Arjun Nair",
+      doj: "2018-04-17",
+      dob: "1987-03-30",
+      team: "IT Support",
+      role: "Tech Support",
+      appSkills: ["Windows", "Networking", "VPN"],
+      username: "arjunn",
+      status: "freezed",
+    },
+    {
+      empId: "E008",
+      fullName: "Sneha Roy",
+      doj: "2021-02-25",
+      dob: "1994-06-12",
+      team: "Marketing",
+      role: "Content Writer",
+      appSkills: ["SEO", "Content Writing", "Canva"],
+      username: "snehar",
+      status: "active",
+    }
+  ]);
+
+  // Form state for adding/editing members
   const [form, setForm] = useState({
     empId: "",
     fullName: "",
@@ -17,31 +113,82 @@ function UserManagement() {
     password: "",
   });
 
-  const teamMembers = [
-    {
-      empId: "E001",
-      fullName: "John Doe",
-      doj: "01-01-2020",
-      dob: "15-08-1990",
-      team: "Adobe",
-      role: "Lead",
-      appSkills: ["Word", "Excel", "PPT"],
-      username: "johndoe",
-      password: "123456", // Ideally encrypted or masked
-    },
-    {
-      empId: "E002",
-      fullName: "Meena Sharma",
-      doj: "15-03-2021",
-      dob: "20-12-1992",
-      team: "MS Office",
-      role: "DTP Specialist",
-      appSkills: ["Visio", "PPT"],
-      username: "meenasharma",
-      password: "secure@123",
-    },
+  // Filter members based on active tab
+  const liveMembers = teamMembers.filter((m) => m.status === "active");
+  const freezedMembers = teamMembers.filter((m) => m.status === "freezed");
+
+  // Custom styles for react-select component
+  const gradientSelectStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      background: 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
+      color: 'white',
+      borderColor: state.isFocused ? '#ffffff66' : '#ffffff33',
+      boxShadow: state.isFocused ? '0 0 0 1px #ffffff66' : 'none',
+      minHeight: '38px',
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: 'white',
+    }),
+    multiValue: (provided) => ({
+      ...provided,
+      backgroundColor: '#1b2f6e',
+    }),
+    multiValueLabel: (provided) => ({
+      ...provided,
+      color: 'white',
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: 'white',
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: 'white',
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? '#293d80' : 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
+      color: 'white',
+    }),
+    menu: (provided) => ({
+      ...provided,
+      background: 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
+      color: 'white',
+    }),
+  };
+
+  // Application options for skills select
+  const applicationsOptions = [
+    { value: "Word", label: "Word" },
+    { value: "PPT", label: "PPT" },
+    { value: "Excel", label: "Excel" },
+    { value: "INDD", label: "INDD" },
+    { value: "AI", label: "AI" },
+    { value: "PSD", label: "PSD" },
+    { value: "AE", label: "AE" },
+    { value: "CDR", label: "CDR" },
+    { value: "Visio", label: "Visio" },
+    { value: "Project", label: "Project" },
+    { value: "FM", label: "FM" },
   ];
 
+  // Toggle member status between active and freezed
+  const toggleFreezeMember = (empId) => {
+    setTeamMembers(prevMembers =>
+      prevMembers.map(member =>
+        member.empId === empId
+          ? {
+              ...member,
+              status: member.status === "active" ? "freezed" : "active"
+            }
+          : member
+      )
+    );
+  };
+
+  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     // Add logic to add member to teamMembers (currently static)
@@ -53,12 +200,13 @@ function UserManagement() {
       dob: "",
       team: "",
       role: "",
-      appSkills: [java],
+      appSkills: [],
       username: "",
       password: "",
     });
   };
 
+  // Handle form field changes
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
     setForm((prevForm) => ({
@@ -67,102 +215,166 @@ function UserManagement() {
     }));
   };
 
-  const handleMultiSelectChange = (e) => {
-    const { options } = e.target;
-    const selectedSkills = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selectedSkills.push(options[i].value);
-      }
-    }
-    setForm((prevForm) => ({
-      ...prevForm,
-      appSkills: selectedSkills,
-    }));
-  };
-
-  const { scrollContainerRef, fakeScrollbarRef } = useSyncScroll(true);
-
+  // Render the members table
   const renderTable = () => (
-    <>
-      <div
-        ref={fakeScrollbarRef}
-        style={{
-          overflowX: "auto",
-          overflowY: "hidden",
-          height: 16,
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1050,
-        }}
-      >
-        <div style={{ width: "1200px", height: 1 }} />
-      </div>
-      <div
-        className="table-responsive"
-        style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }}
-        ref={scrollContainerRef}
-      >
-        <table className="table  table-bordered align-middle table-gradient-bg">
-          <thead>
-            <tr>
-              <th>Emp ID</th>
-              <th>Full Name</th>
-              <th>DOJ</th>
-              <th>DOB</th>
-              <th>Team</th>
-              <th>Role</th>
-              <th>App Skills</th>
-              <th>Username</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {teamMembers
-              .sort((a, b) => (a.empId > b.empId ? 1 : -1)) // Sort by Emp ID ascending
-              .map((member, idx) => (
-                <tr key={idx}>
-                  <td>{member.empId}</td>
-                  <td>{member.fullName}</td>
-                  <td>{member.doj}</td>
-                  <td>{member.dob}</td>
-                  <td>{member.team}</td>
-                  <td>{member.role}</td>
-                  <td>{member.appSkills.join(", ")}</td>
-                  <td>{member.username}</td>
-                  <td className="">
-                    <button
-                      className="btn btn-sm btn-primary me-2"
-                   
-                    >
-                      <i className="fas fa-chevron-up fa-eye"></i>
-                    </button>
-                    <button
-                      className="btn btn-sm btn-info me-2"
-                      onClick={() => {
-                        setSelectedMember(member);
-                        setModalType("edit");
-                        setShowModal(true);
-                      }}
-                    >
-                      <i className="fas fa-edit"></i>
-                    </button>
-                    <button className="btn btn-sm btn-danger"> <i className="fas fa-trash"></i></button>
+    <div className="table-container">
+      {/* Tabs */}
+      <ul className="nav nav-tabs mb-3">
+        <li className="nav-item">
+          <button
+            className={`nav-link ${activeTab === "live" ? "active" : ""}`}
+            onClick={() => setActiveTab("live")}
+          >
+            Live
+          </button>
+        </li>
+        <li className="nav-item">
+          <button
+            className={`nav-link ${activeTab === "freezed" ? "active" : ""}`}
+            onClick={() => setActiveTab("freezed")}
+          >
+            Freezed
+          </button>
+        </li>
+      </ul>
+
+      {/* Live Members Table */}
+      {activeTab === "live" && (
+        <div className="table-responsive table-gradient-bg" style={{ maxHeight: "400px", overflowY: "auto" }}>
+          <table className="table table-bordered align-middle">
+            <thead>
+              <tr>
+                <th>Emp ID</th>
+                <th>Full Name</th>
+                <th>DOJ</th>
+                <th>DOB</th>
+                <th>Team</th>
+                <th>Role</th>
+                <th>App Skills</th>
+                <th>Username</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {liveMembers.length === 0 ? (
+                <tr>
+                  <td colSpan="10" className="text-center text-muted">
+                    No active members found.
                   </td>
                 </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
-    </>
+              ) : (
+                liveMembers.map((member, idx) => (
+                  <tr key={idx}>
+                    <td>{member.empId}</td>
+                    <td>{member.fullName}</td>
+                    <td>{member.doj}</td>
+                    <td>{member.dob}</td>
+                    <td>{member.team}</td>
+                    <td>{member.role}</td>
+                    <td>{member.appSkills.join(", ")}</td>
+                    <td>{member.username}</td>
+                    <td>
+                      <span className="badge bg-success">Active</span>
+                    </td>
+                    <td>
+                      <button className="btn btn-sm btn-primary me-2">
+                        <i className="fas fa-eye"></i>
+                      </button>
+                      <button className="btn btn-sm btn-info me-2">
+                        <i className="fas fa-edit"></i>
+                      </button>
+                      <button 
+                        className="btn btn-sm btn-warning me-2"
+                        onClick={() => toggleFreezeMember(member.empId)}
+                        title="Freeze Account"
+                      >
+                        <i className="fas fa-snowflake"></i>
+                      </button>
+                      <button className="btn btn-sm btn-danger">
+                        <i className="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Freezed Members Table */}
+      {activeTab === "freezed" && (
+        <div className="table-responsive table-gradient-bg" style={{ maxHeight: "400px", overflowY: "auto" }}>
+          <table className="table table-bordered align-middle">
+            <thead>
+              <tr>
+                <th>Emp ID</th>
+                <th>Full Name</th>
+                <th>DOJ</th>
+                <th>DOB</th>
+                <th>Team</th>
+                <th>Role</th>
+                <th>App Skills</th>
+                <th>Username</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {freezedMembers.length === 0 ? (
+                <tr>
+                  <td colSpan="10" className="text-center text-muted">
+                    No freezed members found.
+                  </td>
+                </tr>
+              ) : (
+                freezedMembers.map((member, idx) => (
+                  <tr key={idx}>
+                    <td>{member.empId}</td>
+                    <td>{member.fullName}</td>
+                    <td>{member.doj}</td>
+                    <td>{member.dob}</td>
+                    <td>{member.team}</td>
+                    <td>{member.role}</td>
+                    <td>{member.appSkills.join(", ")}</td>
+                    <td>{member.username}</td>
+                    <td>
+                      <span className="badge bg-secondary">Freezed</span>
+                    </td>
+                    <td>
+                      <button className="btn btn-sm btn-primary me-2">
+                        <i className="fas fa-eye"></i>
+                      </button>
+                      <button className="btn btn-sm btn-info me-2">
+                        <i className="fas fa-edit"></i>
+                      </button>
+                      <button 
+                        className="btn btn-sm btn-success me-2"
+                        onClick={() => toggleFreezeMember(member.empId)}
+                        title="Activate Account"
+                      >
+                        <i className="fas fa-sun"></i>
+                      </button>
+                      <button className="btn btn-sm btn-danger">
+                        <i className="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
   );
 
+  // Render modal content based on modal type
   const renderModalContent = () => {
     const isEditMode = modalType === "edit" || modalType === "view";
     return (
-      <form onSubmit={handleSubmit} >
+      <form onSubmit={handleSubmit}>
         <div className="modal-body">
           <div className="mb-3">
             <label className="form-label">Emp ID</label>
@@ -173,7 +385,7 @@ function UserManagement() {
               value={form.empId}
               onChange={handleFieldChange}
               required
-              disabled={isEditMode} // Disable if viewing/editing
+              disabled={isEditMode}
             />
           </div>
           <div className="mb-3">
@@ -237,43 +449,17 @@ function UserManagement() {
               required
             />
           </div>
-          {/* <div className="mb-3">
-  <label className="form-label">App Skills</label>
-  <select
-    className="form-select"
-    name="appSkills"
-    value={form.appSkills}
-    onChange={handleFieldChange}
-    multiple
-    size={1} // Keep it closed until clicked
-    style={{ overflowY: 'hidden' }} // Optional, to reduce height
-    required
-  >
-    <option value="Word">Word</option>
-    <option value="Excel">Excel</option>
-    <option value="PPT">PPT</option>
-    <option value="Visio">Visio</option>
-  </select>
-</div> */}
-
           <div className="mb-3">
-            <label className="form-label">App Skills</label>
-            <select
-              className="form-select"
-              name="appSkills"
-              value={form.appSkills}
-              onChange={handleFieldChange}
-              required
-            >
-              <option value="">Select Skills</option>
-              <option value="Word">Word</option>
-              <option value="Excel">Excel</option>
-              <option value="PPT">PPT</option>
-              <option value="Visio">Visio</option>
-
-            </select>
+            <label className="form-label text-white">App Skills</label>
+            <Select
+              options={applicationsOptions}
+              isMulti
+              value={selectedApplications}
+              onChange={setSelectedApplications}
+              placeholder="Select"
+              styles={gradientSelectStyles}
+            />
           </div>
-
           <div className="mb-3">
             <label className="form-label">Username</label>
             <input
@@ -310,14 +496,14 @@ function UserManagement() {
           </button>
         </div>
       </form>
-
     );
   };
 
+  // Main component render
   return (
     <div className="p-4">
       <div className="d-flex justify-content-between">
-        <h2 className="gradient-heading mt-2 ">User Management</h2>
+        <h2 className="gradient-heading mt-2">User Management</h2>
         <div className="text-end mb-3">
           <button
             className="btn gradient-button"
@@ -330,11 +516,15 @@ function UserManagement() {
           </button>
         </div>
       </div>
+      
       {renderTable()}
 
-      {/* Modal */}
+      {/* Modal for adding/editing members */}
       {showModal && (
-        <div className="modal custom-modal-dark" style={{ display: "block", background: "rgba(0,0,0,0.5)" }}>
+        <div
+          className="modal custom-modal-dark"
+          style={{ display: "block", background: "rgba(0,0,0,0.5)" }}
+        >
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content">
               <div className="modal-header">
@@ -342,8 +532,8 @@ function UserManagement() {
                   {modalType === "edit"
                     ? "Edit Member"
                     : modalType === "view"
-                      ? "View Member"
-                      : "Add Member"}
+                    ? "View Member"
+                    : "Add Member"}
                 </h5>
                 <button
                   type="button"
