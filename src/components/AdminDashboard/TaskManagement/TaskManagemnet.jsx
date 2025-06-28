@@ -5,6 +5,27 @@ import React, { useState } from 'react';
 
 const TaskManagemnet = () => {
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
+  const [date, setDate] = useState('');
+  const [hour, setHour] = useState('01');
+  const [minute, setMinute] = useState('00');
+  const [period, setPeriod] = useState('AM');
+
+  const handleDateChange = (e) => {
+    setDate(e.target.value);
+  };
+
+  const handleHourChange = (e) => {
+    setHour(e.target.value);
+  };
+
+  const handleMinuteChange = (e) => {
+    setMinute(e.target.value);
+  };
+
+  const handlePeriodChange = (e) => {
+    setPeriod(e.target.value);
+  };
+
   // Mock data for active projects
   const [projects, setProjects] = useState([
     {
@@ -200,45 +221,45 @@ const TaskManagemnet = () => {
     }
   ];
 
-// Function to open time log modal
-const openTimeLog = (projectId) => {
-  setSelectedProject(projectId);
-  setIsTimeLogOpen(true);
-};
+  // Function to open time log modal
+  const openTimeLog = (projectId) => {
+    setSelectedProject(projectId);
+    setIsTimeLogOpen(true);
+  };
 
-// Function to close time log modal
-const closeTimeLog = () => {
-  setSelectedProject(null);
-  setIsTimeLogOpen(false);
-};
+  // Function to close time log modal
+  const closeTimeLog = () => {
+    setSelectedProject(null);
+    setIsTimeLogOpen(false);
+  };
 
-// Get project by ID
-const getProjectById = (id) => {
-  return projects.find(project => project.id === id) ||
-         myTasks.find(task => task.id === id);
-};
+  // Get project by ID
+  const getProjectById = (id) => {
+    return projects.find(project => project.id === id) ||
+      myTasks.find(task => task.id === id);
+  };
 
-// Status badge color mapping
-const getStatusColor = (status) => {
-  switch (status) {
-    case "In Progress":
-      return "bg-primary";
-    case "QA Review":
-      return "bg-info";
-    case "Ready for QA":
-      return "bg-warning";
-    case "Completed":
-      return "bg-success";
-    default:
-      return "bg-secondary";
-  }
-};
+  // Status badge color mapping
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "In Progress":
+        return "bg-primary";
+      case "QA Review":
+        return "bg-info";
+      case "Ready for QA":
+        return "bg-warning";
+      case "Completed":
+        return "bg-success";
+      default:
+        return "bg-secondary";
+    }
+  };
 
 
   return (
     <div className="min-vh-100 bg-main">
       {/* Header/Navigation */}
- 
+
 
       {/* Main Content */}
       <div className="container py-4">
@@ -281,12 +302,12 @@ const getStatusColor = (status) => {
               </div>
               <div className="col-md-4 text-md-end">
                 <span className="text-light small me-3">Today: 2025-06-24, Tuesday</span>
-          <button 
-  className="btn gradient-button"
-  onClick={() => setIsNewTaskModalOpen(true)}
->
-  <i className="fas fa-plus me-2"></i>New Task
-</button>
+                <button
+                  className="btn gradient-button"
+                  onClick={() => setIsNewTaskModalOpen(true)}
+                >
+                  <i className="fas fa-plus me-2"></i>New Task
+                </button>
               </div>
             </div>
           </div>
@@ -583,61 +604,99 @@ const getStatusColor = (status) => {
         )}
       </div>
       {/* New Task Modal */}
-{isNewTaskModalOpen && (
-  <div className="modal fade show d-block custom-modal-dark" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-    <div className="modal-dialog ">
-      <div className="modal-content ">
-        <div className="modal-header  ">
-          <h5 className="modal-title">Create New Task</h5>
-          <button 
-            type="button" 
-            className="btn-close" 
-            onClick={() => setIsNewTaskModalOpen(false)}
-          ></button>
-        </div>
-        <div className="modal-body">
-          {/* यहां Form Fields आएंगे */}
-          <div className="mb-3">
-            <label className="form-label">Task Title</label>
-            <input type="text" className="form-control" />
+      {isNewTaskModalOpen && (
+        <div className="modal fade show d-block custom-modal-dark" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog ">
+            <div className="modal-content ">
+              <div className="modal-header  ">
+                <h5 className="modal-title">Create New Task</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setIsNewTaskModalOpen(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                {/* यहां Form Fields आएंगे */}
+                <div className="mb-3">
+                  <label className="form-label">Task Title</label>
+                  <input type="text" className="form-control" />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Description</label>
+                  <textarea className="form-control" rows={3}></textarea>
+                </div>
+                {/* <div className="mb-3">
+                  <label className="form-label">Deadline</label>
+                  <div className='d-flex gap-2'>
+                    <input type="date" className="form-control" />
+                    <input type="time" className="form-control" />
+                  </div>
+                </div> */}
+                <div className="mb-3">
+                  <label className="form-label">Deadline</label>
+                  <div className="row g-2">
+                    <div className="col-6 col-md-4">
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={date}
+                        onChange={handleDateChange}
+                      />
+                    </div>
+                    <div className="col-3 col-md-2">
+                      <select className="form-select" value={hour} onChange={handleHourChange}>
+                        {Array.from({ length: 12 }, (_, i) => (
+                          <option key={i} value={String(i + 1).padStart(2, '0')}>
+                            {String(i + 1).padStart(2, '0')}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-3 col-md-2">
+                      <select className="form-select" value={minute} onChange={handleMinuteChange}>
+                        {['00', '15', '30', '45'].map(min => (
+                          <option key={min} value={min}>{min}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="col-3 col-md-2">
+                      <select className="form-select" value={period} onChange={handlePeriodChange}>
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <label className="form-label">Assign To</label>
+                  <select className="form-select">
+                    <option>Select Team Member</option>
+                    <option>Alex Johnson</option>
+                    <option>Maria Garcia</option>
+                  </select>
+                </div>
+                {/* और Fields... */}
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary rounded-5"
+                  onClick={() => setIsNewTaskModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="btn gradient-button"
+                >
+                  Save Task
+                </button>
+              </div>
+            </div>
           </div>
-          <div className="mb-3">
-  <label className="form-label">Description</label>
-  <textarea className="form-control" rows={3}></textarea>
-</div>
-<div className="mb-3">
-  <label className="form-label">Deadline</label>
-  <input type="date" className="form-control" />
-</div>
-          <div className="mb-3">
-            <label className="form-label">Assign To</label>
-            <select className="form-select">
-              <option>Select Team Member</option>
-              <option>Alex Johnson</option>
-              <option>Maria Garcia</option>
-            </select>
-          </div>
-          {/* और Fields... */}
         </div>
-        <div className="modal-footer">
-          <button 
-            type="button" 
-            className="btn btn-secondary rounded-5" 
-            onClick={() => setIsNewTaskModalOpen(false)}
-          >
-            Cancel
-          </button>
-          <button 
-            type="button" 
-            className="btn gradient-button"
-          >
-            Save Task
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
     </div>
   );
 };

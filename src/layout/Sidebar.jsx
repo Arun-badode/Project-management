@@ -27,9 +27,8 @@ const Sidebar = ({ collapsed }) => {
             <>
               {/* Dashboard */}
               <li
-                className={`menu-item ${
-                  isActive("/admin-dashboard") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/admin-dashboard") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -44,9 +43,8 @@ const Sidebar = ({ collapsed }) => {
               </li>
               {/* Active Projects */}
               <li
-                className={`menu-item ${
-                  isActive("/LeadDashboard") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/LeadDashboard") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -61,9 +59,8 @@ const Sidebar = ({ collapsed }) => {
               </li>
               {/* Task Management */}
               <li
-                className={`menu-item ${
-                  isActive("/taskmanagement") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/taskmanagement") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -78,7 +75,8 @@ const Sidebar = ({ collapsed }) => {
               </li>
               {/* Projects */}
               <li
-                className={`menu-item ${isActive("/project") ? "active" : ""}`}
+                className={`menu-item ${isActive("/project") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -91,11 +89,26 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Projects</span>
                 </div>
               </li>
+              {/* REsoure wrokload in V2 */}
+              <li
+                className={`menu-item ${isActive("/team-dashboard") ? "active" : ""
+                  }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/sourcework");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-chart-line"></i>
+                  <span className="menu-text">Resource Workload</span>
+                </div>
+              </li>
               {/* Action Center */}
               <li
-                className={`menu-item ${
-                  isActive("/actioncenter") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/actioncenter") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -110,9 +123,8 @@ const Sidebar = ({ collapsed }) => {
               </li>
               {/* Reporting & Analytics */}
               <li
-                className={`menu-item ${
-                  isActive("/reportinganalytics") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/reportinganalytics") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -142,9 +154,8 @@ const Sidebar = ({ collapsed }) => {
               </li>
               {/* Attendance */}
               <li
-                className={`menu-item ${
-                  isActive("/attendance") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/attendance") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -159,7 +170,8 @@ const Sidebar = ({ collapsed }) => {
               </li>
               {/* Calendar */}
               <li
-                className={`menu-item ${isActive("/calendar") ? "active" : ""}`}
+                className={`menu-item ${isActive("/calendar") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -174,9 +186,8 @@ const Sidebar = ({ collapsed }) => {
               </li>
               {/* User */}
               <li
-                className={`menu-item ${
-                  isActive("/usermanage") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/usermanage") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -189,6 +200,10 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">User</span>
                 </div>
               </li>
+
+
+
+
 
               {/* <li
                 className={`menu-item ${
@@ -258,6 +273,8 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li> */}
 
+
+
               {/* <li
                 className={`menu-item ${isActive("/profile") ? "active" : ""}`}
               >
@@ -288,12 +305,17 @@ const Sidebar = ({ collapsed }) => {
                   <i className="fa-solid fa-life-ring"></i>
                   <span className="menu-text">Support</span>
                 </div>
-              </li> */}
+              </li> */
+
+
+
+
+
+              }
 
               <li
-                className={`menu-item ${
-                  isActive("/role&permission") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/role&permission") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -308,9 +330,8 @@ const Sidebar = ({ collapsed }) => {
               </li>
               {/* Chat Room */}
               <li
-                className={`menu-item ${
-                  isActive("/collaboration") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/collaboration") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -330,9 +351,8 @@ const Sidebar = ({ collapsed }) => {
           {role === "Manager" && (
             <>
               <li
-                className={`menu-item ${
-                  isActive("/manager-dashboard") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/manager-dashboard") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -360,9 +380,8 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
               <li
-                className={`menu-item ${
-                  isActive("/createproject") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/createproject") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -376,9 +395,8 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
               <li
-                className={`menu-item ${
-                  isActive("/team-dashboard") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/team-dashboard") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -392,9 +410,8 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
               <li
-                className={`menu-item ${
-                  isActive("/team-dashboard") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/team-dashboard") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -408,9 +425,8 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
               <li
-                className={`menu-item ${
-                  isActive("/collaboration") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/collaboration") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -430,9 +446,8 @@ const Sidebar = ({ collapsed }) => {
           {role === "Team Member" && (
             <>
               <li
-                className={`menu-item ${
-                  isActive("/team-dashboard") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/team-dashboard") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -458,9 +473,8 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
               <li
-                className={`menu-item ${
-                  isActive("/attendance") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/attendance") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -474,9 +488,8 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
               <li
-                className={`menu-item ${
-                  isActive("/productivity") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/productivity") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -490,9 +503,8 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
               <li
-                className={`menu-item ${
-                  isActive("/taskdashboard") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/taskdashboard") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"
@@ -506,9 +518,8 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
               <li
-                className={`menu-item ${
-                  isActive("/taskdashboard") ? "active" : ""
-                }`}
+                className={`menu-item ${isActive("/taskdashboard") ? "active" : ""
+                  }`}
               >
                 <div
                   className="menu-link menu-i"

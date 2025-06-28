@@ -37,9 +37,9 @@ const SignupPage = () => {
   return (
     <div
       className="login-page container"
-      style={{ justifyContent: "flex-start",}}
+    
     >
-      <div className="login-container row" style={{height:"100%",  marginTop:"-10px"}}>
+      <div className="login-container row h-100" >
         {/* Left Panel */}
         <div className="col-md-6 login-left d-flex justify-content-center align-items-center">
           <div className="login-left-content">
@@ -50,7 +50,7 @@ const SignupPage = () => {
             />
             <h1 className="text-white">Join Us!</h1>
             <p>
-              Create your account and start managing your projects efficiently with our platform.
+              Create your account and start managing your projects efficiently with our Application.
             </p>
           </div>
         </div>
@@ -136,7 +136,7 @@ const SignupPage = () => {
                 SIGN UP
               </button>
 
-              <div className="text-center mt-3">
+              <div className="text-center mt-2 mb-2">
                 <p className="text-muted">
                   Already have an account? <Link to="/" style={{ color: "#6e8efb" }}><span>Login</span></Link>
                 </p>

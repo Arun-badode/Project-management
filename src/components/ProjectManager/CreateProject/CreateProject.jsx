@@ -13,7 +13,7 @@ function CreateProject() {
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const [isPriorityDropdownOpen, setIsPriorityDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState({}); 
+  const [errors, setErrors] = useState({});
 
   const projectTypes = [
     'Web Development',
@@ -91,71 +91,71 @@ function CreateProject() {
 
   return (
     <div >
-     <div className="container mt-3 p-4  text-white rounded shadow custom-modal-dark">
-      <h2 className="mb-4 gradient-heading">Create New Project</h2>
-      <Form>
-        <Form.Group className="mb-3">
-          <Form.Label>Project Name</Form.Label>
-          <Form.Control type="text" placeholder="Enter title" />
-        </Form.Group>
+      <div className="container mt-3 p-4  text-white rounded shadow custom-modal-dark">
+        <h2 className="mb-4 gradient-heading">Create New Project</h2>
+        <Form>
+          <Form.Group className="mb-3">
+            <Form.Label>Project Name</Form.Label>
+            <Form.Control type="text" placeholder="Enter title" />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Client Name</Form.Label>
-          <Form.Control type="text" placeholder="Enter client name" />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Client Name</Form.Label>
+            <Form.Control type="text" placeholder="Enter client name" />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Platform</Form.Label>
-          <Form.Select className="text-white border-secondary bg-dark">
-            <option>Web</option>
-            <option>Mobile</option>
-            <option>Desktop</option>
-          </Form.Select>
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Application</Form.Label>
+            <Form.Select className="text-white border-secondary bg-dark">
+              <option>Web</option>
+              <option>Mobile</option>
+              <option>Desktop</option>
+            </Form.Select>
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Total Pages</Form.Label>
-          <Form.Control type="number" placeholder="Enter page count" />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Total Pages</Form.Label>
+            <Form.Control type="number" placeholder="Enter page count" />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Actual Due Date</Form.Label>
-          <Form.Control type="datetime-local" />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Actual Due Date</Form.Label>
+            <Form.Control type="datetime-local" />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Ready for QC Deadline</Form.Label>
-          <Form.Control type="datetime-local" />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Ready for QC Deadline</Form.Label>
+            <Form.Control type="datetime-local" />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>QC Hours Allocated</Form.Label>
-          <Form.Control type="number" />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>QC Hours Allocated</Form.Label>
+            <Form.Control type="number" />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>QC Due Date</Form.Label>
-          <Form.Control type="datetime-local" />
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>QC Due Date</Form.Label>
+            <Form.Control type="datetime-local" />
+          </Form.Group>
 
-        <Form.Group className="mb-3">
-          <Form.Label>Status</Form.Label>
-          <Form.Select>
-            <option>In Progress</option>
-            <option>Completed</option>
-            <option>On Hold</option>
-          </Form.Select>
-        </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Status</Form.Label>
+            <Form.Select>
+              <option>In Progress</option>
+              <option>Completed</option>
+              <option>On Hold</option>
+            </Form.Select>
+          </Form.Group>
 
-        <Button
-          variant="primary"
-          type="submit"
-          className="w-100 gradient-button"
-        >
-          Create Project
-        </Button>
-      </Form>
-    </div>
+          <Button
+            variant="primary"
+            type="submit"
+            className="w-100 gradient-button"
+          >
+            Create Project
+          </Button>
+        </Form>
+      </div>
     </div>
   );
 }

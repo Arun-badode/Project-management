@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
+import useSyncScroll from '../Hooks/useSyncScroll';
 
-const App = () => {
+const Project = () => {
   const [activeTab, setActiveTab] = useState('created');
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -10,6 +11,8 @@ const App = () => {
   const [showSettings, setShowSettings] = useState(false);
   const searchInputRef = useRef(null);
   const chartRef = useRef(null);
+
+
 
   // Sample data for projects
   const [projects, setProjects] = useState([
@@ -391,6 +394,23 @@ const App = () => {
     ));
   };
 
+
+  const {
+    scrollContainerRef: scrollContainerRef1,
+    fakeScrollbarRef: fakeScrollbarRef1,
+  } = useSyncScroll(activeTab === "created");
+
+  const {
+    scrollContainerRef: scrollContainerRef2,
+    fakeScrollbarRef: fakeScrollbarRef2
+  } = useSyncScroll(activeTab === "active");
+
+  const {
+    scrollContainerRef: scrollContainerRef4,
+    fakeScrollbarRef: fakeScrollbarRef4
+  } = useSyncScroll(activeTab === "completed");
+
+
   return (
     <div className="min-vh-100 bg-main mt-4">
       {/* Header */}
@@ -540,9 +560,9 @@ const App = () => {
               </div>
             ) : (
               <div className="card">
-                <div className="table-responsive table-gradient-bg" style={{ overflowX: 'auto' }}>
-                  <table className="table table-hover mb-0 " style={{ minWidth: 900 }}>
-                    <thead className="table-gradient-bg">
+                {/* <div className="table-responsive" style={{ overflowX: 'auto' }}>
+                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
+                    <thead className="bg-light table-gradient-bg">
                       <tr>
                         <th>Project Title</th>
                         <th>Client</th>
@@ -627,6 +647,116 @@ const App = () => {
                       ))}
                     </tbody>
                   </table>
+                </div> */}
+                {/* Fake Scrollbar */}
+                <div
+                  ref={fakeScrollbarRef1}
+                  style={{
+                    overflowX: "auto",
+                    overflowY: "hidden",
+                    height: 16,
+                    position: "fixed",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1050,
+                  }}
+                >
+                  <div style={{ width: "2000px", height: 1 }} />
+                </div>
+
+                {/* Scrollable Table */}
+                <div
+                  className="table-responsive"
+                  ref={scrollContainerRef1}
+                  style={{ overflowX: 'auto', maxHeight: '500px' }}
+                >
+                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
+                    <thead className="bg-light table-gradient-bg">
+                      <tr>
+                        <th>Project Title</th>
+                        <th>Client</th>
+                        <th>Country</th>
+                        <th>Project Manager</th>
+                        <th>Tasks</th>
+                        <th>Languages</th>
+                        <th>Application</th>
+                        <th>Total Pages</th>
+                        <th>Server Path</th>
+                        <th>Received Date</th>
+                        <th>Rate</th>
+                        <th>Cost</th>
+                        <th className="text-end">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredProjects.map(project => (
+                        <tr key={project.id}>
+                          <td>
+                            {project.title}
+                            <span className="badge bg-light text-dark ms-2">Draft</span>
+                          </td>
+                          <td>{project.client}</td>
+                          <td>{project.country}</td>
+                          <td>{project.projectManager}</td>
+                          <td>
+                            <div className="d-flex flex-wrap gap-1">
+                              {project.tasks.map((task) => (
+                                <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
+                                  {task}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="d-flex flex-wrap gap-1">
+                              {project.languages.map((language) => (
+                                <span key={language} className="badge bg-success bg-opacity-10 text-success">
+                                  {language}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td>
+                            <span className="badge bg-purple bg-opacity-10 text-purple">
+                              {project.platform}
+                            </span>
+                          </td>
+                          <td>{project.totalPages}</td>
+                          <td>
+                            <span className="badge bg-light text-dark">
+                              {project.serverPath}
+                            </span>
+                          </td>
+                          <td>{new Date(project.receivedDate).toLocaleDateString()}</td>
+                          <td>{project.rate} {project.currency}</td>
+                          <td>{project.cost} {project.currency}</td>
+                          <td className="text-end">
+                            <div className="d-flex justify-content-end gap-2">
+                              <button
+                                onClick={() => {
+                                  const dueDate = prompt('Enter due date (YYYY-MM-DD):', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+                                  if (dueDate) markAsYTS(project.id, dueDate);
+                                }}
+                                className="btn btn-sm btn-primary"
+                              >
+                                Mark as YTS
+                              </button>
+                              <button
+                                onClick={() => handleEditProject(project.id)}
+                                className="btn btn-sm btn-success"
+                              >
+                                <i className="fas fa-edit"></i>
+                              </button>
+                              <button className="btn btn-sm btn-danger">
+                                <i className="fas fa-trash-alt"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
@@ -647,7 +777,7 @@ const App = () => {
               </div>
             ) : (
               <div className="card">
-                <div className="table-responsive table-gradient-bg" style={{ overflowX: 'auto' }}>
+                {/* <div className="table-responsive" style={{ overflowX: 'auto' }}>
                   <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
                     <thead className=" ">
                       <tr>
@@ -733,6 +863,114 @@ const App = () => {
                       ))}
                     </tbody>
                   </table>
+                </div> */}
+                <div
+                  ref={fakeScrollbarRef2}
+                  style={{
+                    overflowX: "auto",
+                    overflowY: "hidden",
+                    height: 16,
+                    position: "fixed",
+                    bottom: 0, // Adjust as needed
+                    left: 0,
+                    right: 0,
+                    zIndex: 1050,
+                  }}
+                >
+                  <div style={{ width: "2000px", height: 1 }} />
+                </div>
+                {/* Scrollable Table 2 */}
+                <div
+                  className="table-responsive"
+                  ref={scrollContainerRef2}
+                  style={{ overflowX: 'auto', maxHeight: '500px' }}
+                >
+                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
+                    <thead className="bg-light table-gradient-bg">
+                      <tr>
+                        <th>Project Title</th>
+                        <th>Client</th>
+                        <th>Country</th>
+                        <th>Project Manager</th>
+                        <th>Tasks</th>
+                        <th>Languages</th>
+                        <th>Application</th>
+                        <th>Total Pages</th>
+                        <th>Server Path</th>
+                        <th>Received Date</th>
+                        <th>Rate</th>
+                        <th>Cost</th>
+                        <th className="text-end">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredProjects.map(project => (
+                        <tr key={project.id}>
+                          <td>
+                            {project.title}
+                            <span className="badge bg-light text-dark ms-2">Draft</span>
+                          </td>
+                          <td>{project.client}</td>
+                          <td>{project.country}</td>
+                          <td>{project.projectManager}</td>
+                          <td>
+                            <div className="d-flex flex-wrap gap-1">
+                              {project.tasks.map((task) => (
+                                <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
+                                  {task}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="d-flex flex-wrap gap-1">
+                              {project.languages.map((language) => (
+                                <span key={language} className="badge bg-success bg-opacity-10 text-success">
+                                  {language}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td>
+                            <span className="badge bg-purple bg-opacity-10 text-purple">
+                              {project.platform}
+                            </span>
+                          </td>
+                          <td>{project.totalPages}</td>
+                          <td>
+                            <span className="badge bg-light text-dark">
+                              {project.serverPath}
+                            </span>
+                          </td>
+                          <td>{new Date(project.receivedDate).toLocaleDateString()}</td>
+                          <td>{project.rate} {project.currency}</td>
+                          <td>{project.cost} {project.currency}</td>
+                          <td className="text-end">
+                            <div className="d-flex justify-content-end gap-2">
+                              <button
+                                onClick={() => {
+                                  const dueDate = prompt('Enter due date (YYYY-MM-DD):', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+                                  if (dueDate) markAsYTS(project.id, dueDate);
+                                }}
+                                className="btn btn-sm btn-primary"
+                              >
+                                Mark as YTS
+                              </button>
+                              <button
+                                onClick={() => handleEditProject(project.id)}
+                                className="btn btn-sm btn-success"
+                              >
+                                <i className="fas fa-edit"></i>
+                              </button>
+                              <button className="btn btn-sm btn-danger">
+                                <i className="fas fa-trash-alt"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
@@ -766,7 +1004,7 @@ const App = () => {
                 </div>
                 {/* Project Cards */}
                 <div className="card">
-                  <div className="table-responsive table-gradient-bg" style={{ overflowX: 'auto' }}>
+                  {/* <div className="table-responsive" style={{ overflowX: 'auto' }}>
                     <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
                       <thead className="">
                         <tr>
@@ -778,6 +1016,104 @@ const App = () => {
                           <th>Tasks</th>
                           <th>Languages</th>
                           <th>Platform</th>
+                          <th>Total Pages</th>
+                          <th>Expected Hours</th>
+                          <th>Actual Hours</th>
+                          <th>Efficiency</th>
+                          <th>Cost</th>
+                          <th className="text-end">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredProjects.map(project => (
+                          <tr key={project.id}>
+                            <td>
+                              {project.title}
+                              <span className="badge bg-success bg-opacity-10 text-success ms-2">Completed</span>
+                            </td>
+                            <td>{project.client}</td>
+                            <td>{project.country}</td>
+                            <td>{project.projectManager}</td>
+                            <td>{new Date(project.completedDate).toLocaleDateString()}</td>
+                            <td>
+                              <div className="d-flex flex-wrap gap-1">
+                                {project.tasks.map((task) => (
+                                  <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
+                                    {task}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td>
+                              <div className="d-flex flex-wrap gap-1">
+                                {project.languages.map((language) => (
+                                  <span key={language} className="badge bg-success bg-opacity-10 text-success">
+                                    {language}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td>
+                              <span className="badge bg-purple bg-opacity-10 text-purple">
+                                {project.platform}
+                              </span>
+                            </td>
+                            <td>{project.totalPages}</td>
+                            <td>{project.performance.expectedHours}</td>
+                            <td>{project.performance.actualHours}</td>
+                            <td className="fw-bold">
+                              <span className={`${project.performance.expectedHours > project.performance.actualHours ? 'text-success' : 'text-danger'}`}>
+                                {Math.round((project.performance.expectedHours / project.performance.actualHours) * 100)}%
+                              </span>
+                            </td>
+                            <td>{project.cost} {project.currency}</td>
+                            <td className="text-end">
+                              <div className="d-flex justify-content-end gap-2">
+                                <button className="btn btn-sm btn-danger">
+                                  <i className="fas fa-file-alt me-1"></i> View Report
+                                </button>
+                                <button className="btn btn-sm btn-primary">
+                                  <i className="fas fa-archive me-1"></i> Archive
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div> */}
+                  <div
+                    ref={fakeScrollbarRef4}
+                    style={{
+                      overflowX: "auto",
+                      overflowY: "hidden",
+                      height: 16,
+                      position: "fixed",
+                      bottom: 0, // Adjust as needed
+                      left: 0,
+                      right: 0,
+                      zIndex: 1050,
+                    }}
+                  >
+                    <div style={{ width: "2000px", height: 1 }} />
+                  </div>
+                  {/* Scrollable Table 3 */}
+                  <div
+                    className="table-responsive"
+                    ref={scrollContainerRef4}
+                    style={{ overflowX: 'auto', maxHeight: '500px' }}
+                  >
+                    <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
+                      <thead className="table-gradient-bg">
+                        <tr>
+                          <th>Project Title</th>
+                          <th>Client</th>
+                          <th>Country</th>
+                          <th>Project Manager</th>
+                          <th>Completed Date</th>
+                          <th>Tasks</th>
+                          <th>Languages</th>
+                          <th>Application</th>
                           <th>Total Pages</th>
                           <th>Expected Hours</th>
                           <th>Actual Hours</th>
@@ -994,7 +1330,7 @@ const App = () => {
                         )}
                       </div>
                       <div className="col-12">
-                        <label className="form-label">Platform *</label>
+                        <label className="form-label">Application *</label>
                         <div className="d-flex flex-wrap gap-2">
                           {platformOptions.map(platform => (
                             <button
@@ -1011,7 +1347,7 @@ const App = () => {
                           ))}
                         </div>
                         {formData.platform.length === 0 && (
-                          <div className="text-danger small mt-1">Please select at least one platform</div>
+                          <div className="text-danger small mt-1">Please select at least one Application</div>
                         )}
                       </div>
                     </div>
@@ -1425,4 +1761,4 @@ const App = () => {
   );
 }
 
-export default App;
+export default Project;
