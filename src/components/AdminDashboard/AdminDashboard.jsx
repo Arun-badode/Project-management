@@ -15,43 +15,8 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts';
-const AdminDashboard = () => {
-  const scrollContainerRef = useRef(null);
-  const fakeScrollbarRef = useRef(null);
-  const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [editProject, setEditProject] = useState(null);
-  const [filteredProjects, setFilteredProjects] = useState([]);
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [projects, setProjects] = useState([]);
 
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    const fakeScrollbar = fakeScrollbarRef.current;
-
-    if (scrollContainer && fakeScrollbar) {
-      fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
-
-      const syncScroll = () => {
-        fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
-      };
-      const syncFakeScroll = () => {
-        scrollContainer.scrollLeft = fakeScrollbar.scrollLeft;
-      };
-
-      scrollContainer.addEventListener("scroll", syncScroll);
-      fakeScrollbar.addEventListener("scroll", syncFakeScroll);
-
-      return () => {
-        scrollContainer.removeEventListener("scroll", syncScroll);
-        fakeScrollbar.removeEventListener("scroll", syncFakeScroll);
-      };
-    }
-  }, []);
-
-  const staticProjects = [
+export const ProjectsData = [
     {
       id: 1,
       title: "Project 1",
@@ -338,6 +303,45 @@ const AdminDashboard = () => {
       serverPath: "/mnt/server/project/project-15",
     },
   ];
+
+
+const AdminDashboard = () => {
+  const scrollContainerRef = useRef(null);
+  const fakeScrollbarRef = useRef(null);
+  const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [editProject, setEditProject] = useState(null);
+  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    const fakeScrollbar = fakeScrollbarRef.current;
+
+    if (scrollContainer && fakeScrollbar) {
+      fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
+
+      const syncScroll = () => {
+        fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
+      };
+      const syncFakeScroll = () => {
+        scrollContainer.scrollLeft = fakeScrollbar.scrollLeft;
+      };
+
+      scrollContainer.addEventListener("scroll", syncScroll);
+      fakeScrollbar.addEventListener("scroll", syncFakeScroll);
+
+      return () => {
+        scrollContainer.removeEventListener("scroll", syncScroll);
+        fakeScrollbar.removeEventListener("scroll", syncFakeScroll);
+      };
+    }
+  }, []);
+
+const staticProjects = ProjectsData;
 
   // Generate projects on component mount
   useEffect(() => {
