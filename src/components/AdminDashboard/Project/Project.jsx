@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import * as echarts from 'echarts';
-import useSyncScroll from '../Hooks/useSyncScroll';
+import React, { useState, useEffect, useRef } from "react";
+import * as echarts from "echarts";
+import useSyncScroll from "../Hooks/useSyncScroll";
 
 const Project = () => {
-  const [activeTab, setActiveTab] = useState('created');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState("created");
+  const [searchQuery, setSearchQuery] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(true);
@@ -12,186 +12,348 @@ const Project = () => {
   const searchInputRef = useRef(null);
   const chartRef = useRef(null);
 
+  const applicationOptions = ["Web", "Mobile Responsive", "iOS", "Android"];
+  const currencyRates = [
+    { name: "USD", rate: 83 },
+    { name: "EUR", rate: 90 },
+    { name: "GBP", rate: 90 },
+  ];
 
+  const [clients, setClients] = useState([
+    {
+      alias: "Client Alpha (Alias)",
+      actualName: "Actual Client Alpha Inc.",
+      country: "USA",
+      managers: "Jane Doe, John Smith",
+    },
+    {
+      alias: "Company Beta (Alias)",
+      actualName: "Actual Company Beta Ltd.",
+      country: "UK",
+      managers: "Peter Jones",
+    },
+    {
+      alias: "Service Gamma (Alias)",
+      actualName: "Actual Service Gamma LLC",
+      country: "Canada",
+      managers: "Alice Brown, Bob White",
+    },
+  ]);
+
+  const [tasks, setTasks] = useState([
+    "Backend Dev",
+    "API Integration",
+    "Frontend Dev",
+    "QA Testing",
+  ]);
+
+  const [languages, setLanguages] = useState([
+    "English",
+    "Spanish",
+    "French",
+    "German",
+  ]);
+
+  const [platforms, setPlatforms] = useState([
+    "Web",
+    "Mobile Responsive",
+    "iOS",
+    "Android",
+  ]);
+
+  const [currencies, setCurrencies] = useState([
+    { name: "USD", rate: "83" },
+    { name: "EUR", rate: "90" },
+    { name: "GBP", rate: "90" },
+  ]);
+
+  const [newClient, setNewClient] = useState({
+    alias: "",
+    actualName: "",
+    country: "",
+    managers: "",
+  });
+
+  const [newTask, setNewTask] = useState("");
+  const [newLanguage, setNewLanguage] = useState("");
+  const [newPlatform, setNewPlatform] = useState("");
+  const [newCurrency, setNewCurrency] = useState({ name: "", rate: "" });
+
+  const handleAddClient = () => {
+    if (newClient.alias && newClient.actualName && newClient.country) {
+      setClients([...clients, newClient]);
+      setNewClient({ alias: "", actualName: "", country: "", managers: "" });
+    }
+  };
+
+  const handleAddTask = () => {
+    if (newTask) {
+      setTasks([...tasks, newTask]);
+      setNewTask("");
+    }
+  };
+
+  const handleAddLanguage = () => {
+    if (newLanguage) {
+      setLanguages([...languages, newLanguage]);
+      setNewLanguage("");
+    }
+  };
+
+  const handleAddPlatform = () => {
+    if (newPlatform) {
+      setPlatforms([...platforms, newPlatform]);
+      setNewPlatform("");
+    }
+  };
+
+  const handleAddCurrency = () => {
+    if (newCurrency.name && newCurrency.rate) {
+      setCurrencies([...currencies, newCurrency]);
+      setNewCurrency({ name: "", rate: "" });
+    }
+  };
+
+  const handleDeleteItem = (list, setList, index) => {
+    const newList = [...list];
+    newList.splice(index, 1);
+    setList(newList);
+  };
 
   // Sample data for projects
   const [projects, setProjects] = useState([
     {
       id: 1,
-      title: 'Website Redesign',
-      client: 'Acme Corp',
-      country: 'United States',
-      projectManager: 'John Smith',
-      tasks: ['Design', 'Development'],
-      languages: ['English', 'Spanish'],
-      platform: 'Web',
+      title: "Website Redesign",
+      client: "Acme Corp",
+      country: "United States",
+      projectManager: "John Smith",
+      tasks: ["Design", "Development"],
+      languages: ["English", "Spanish"],
+      platform: "Web",
       files: [
-        { name: 'Homepage.psd', pageCount: 5 },
-        { name: 'About.psd', pageCount: 3 },
+        { name: "Homepage.psd", pageCount: 5 },
+        { name: "About.psd", pageCount: 3 },
       ],
       totalPages: 16,
-      receivedDate: '2025-06-20',
-      status: 'created',
-      serverPath: '/projects/acme/redesign',
-      notes: 'Priority project for Q3',
+      receivedDate: "2025-06-20",
+      status: "created",
+      serverPath: "/projects/acme/redesign",
+      notes: "Priority project for Q3",
       rate: 25,
-      currency: 'USD',
+      currency: "USD",
       cost: 400,
       inrCost: 33200,
     },
     {
       id: 2,
-      title: 'Mobile App Development',
-      client: 'TechStart',
-      country: 'Canada',
-      projectManager: 'Emily Johnson',
-      tasks: ['Development', 'Testing'],
-      languages: ['English', 'French'],
-      platform: 'Mobile',
+      title: "Mobile App Development",
+      client: "TechStart",
+      country: "Canada",
+      projectManager: "Emily Johnson",
+      tasks: ["Development", "Testing"],
+      languages: ["English", "French"],
+      platform: "Mobile",
       files: [
-        { name: 'Login.sketch', pageCount: 2 },
-        { name: 'Dashboard.sketch', pageCount: 7 },
+        { name: "Login.sketch", pageCount: 2 },
+        { name: "Dashboard.sketch", pageCount: 7 },
       ],
       totalPages: 18,
-      receivedDate: '2025-06-15',
-      status: 'active',
+      receivedDate: "2025-06-15",
+      status: "active",
       progress: 65,
-      serverPath: '/projects/techstart/mobile',
-      notes: 'Beta release scheduled for August',
+      serverPath: "/projects/techstart/mobile",
+      notes: "Beta release scheduled for August",
       rate: 30,
-      currency: 'USD',
+      currency: "USD",
       cost: 540,
       inrCost: 44820,
     },
     {
       id: 3,
-      title: 'E-commerce Platform',
-      client: 'RetailPlus',
-      country: 'UK',
-      projectManager: 'Michael Brown',
-      tasks: ['Design', 'Development', 'Testing'],
-      languages: ['English'],
-      platform: 'Web',
+      title: "E-commerce Platform",
+      client: "RetailPlus",
+      country: "UK",
+      projectManager: "Michael Brown",
+      tasks: ["Design", "Development", "Testing"],
+      languages: ["English"],
+      platform: "Web",
       files: [
-        { name: 'ProductPage.fig', pageCount: 4 },
-        { name: 'Checkout.fig', pageCount: 3 },
+        { name: "ProductPage.fig", pageCount: 4 },
+        { name: "Checkout.fig", pageCount: 3 },
       ],
       totalPages: 7,
-      receivedDate: '2025-05-10',
-      status: 'completed',
-      completedDate: '2025-06-10',
-      serverPath: '/projects/retailplus/ecommerce',
-      notes: 'Successfully launched',
+      receivedDate: "2025-05-10",
+      status: "completed",
+      completedDate: "2025-06-10",
+      serverPath: "/projects/retailplus/ecommerce",
+      notes: "Successfully launched",
       rate: 28,
-      currency: 'GBP',
+      currency: "GBP",
       cost: 196,
       inrCost: 20776,
       performance: {
         expectedHours: 42,
         actualHours: 38,
         stages: [
-          { name: 'Design', start: '2025-05-12', end: '2025-05-20', handler: 'Sarah Wilson' },
-          { name: 'Development', start: '2025-05-21', end: '2025-06-05', handler: 'David Lee' },
-          { name: 'Testing', start: '2025-06-06', end: '2025-06-10', handler: 'Rachel Chen' }
-        ]
-      }
-    }
+          {
+            name: "Design",
+            start: "2025-05-12",
+            end: "2025-05-20",
+            handler: "Sarah Wilson",
+          },
+          {
+            name: "Development",
+            start: "2025-05-21",
+            end: "2025-06-05",
+            handler: "David Lee",
+          },
+          {
+            name: "Testing",
+            start: "2025-06-06",
+            end: "2025-06-10",
+            handler: "Rachel Chen",
+          },
+        ],
+      },
+    },
   ]);
 
   // Form state
   const [formData, setFormData] = useState({
-    title: '',
-    client: '',
-    country: '',
-    projectManager: '',
+    title: "",
+    client: "",
+    country: "",
+    projectManager: "",
     tasks: [],
     languages: [],
     platform: [],
-    files: [{ name: '', pageCount: 0 }],
+    files: [{ name: "", pageCount: 0 }],
     totalPages: 0,
-    receivedDate: new Date().toISOString().split('T')[0],
-    serverPath: '',
-    notes: '',
+    receivedDate: new Date().toISOString().split("T")[0],
+    serverPath: "",
+    notes: "",
     rate: 0,
-    currency: 'USD',
+    currency: "USD",
     cost: 0,
-    inrCost: 0
+    inrCost: 0,
   });
 
   // Options for dropdowns
-  const clientOptions = ['Acme Corp', 'TechStart', 'RetailPlus', 'GlobalMedia', 'FinTech Solutions'];
-  const countryOptions = ['United States', 'Canada', 'UK', 'Australia', 'Germany', 'India'];
-  const projectManagerOptions = ['John Smith', 'Emily Johnson', 'Michael Brown', 'Sarah Wilson', 'David Lee'];
-  const taskOptions = ['Design', 'Development', 'Testing', 'Content', 'QA', 'Localization'];
-  const languageOptions = ['English', 'Spanish', 'French', 'German', 'Chinese', 'Japanese'];
-  const platformOptions = ['Web', 'Mobile', 'Desktop', 'Cross-platform'];
-  const currencyOptions = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'INR'];
+  const clientOptions = [
+    "Acme Corp",
+    "TechStart",
+    "RetailPlus",
+    "GlobalMedia",
+    "FinTech Solutions",
+  ];
+  const countryOptions = [
+    "United States",
+    "Canada",
+    "UK",
+    "Australia",
+    "Germany",
+    "India",
+  ];
+  const projectManagerOptions = [
+    "John Smith",
+    "Emily Johnson",
+    "Michael Brown",
+    "Sarah Wilson",
+    "David Lee",
+  ];
+  const taskOptions = [
+    "Design",
+    "Development",
+    "Testing",
+    "Content",
+    "QA",
+    "Localization",
+  ];
+  const languageOptions = [
+    "English",
+    "Spanish",
+    "French",
+    "German",
+    "Chinese",
+    "Japanese",
+  ];
+  const platformOptions = ["Web", "Mobile", "Desktop", "Cross-platform"];
+  const currencyOptions = ["USD", "EUR", "GBP", "CAD", "AUD", "INR"];
 
   // Filter projects based on active tab and search query
-  const filteredProjects = projects.filter(project => {
+  const filteredProjects = projects.filter((project) => {
     const matchesTab = project.status === activeTab;
-    const matchesSearch = searchQuery === '' ||
+    const matchesSearch =
+      searchQuery === "" ||
       project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (project.projectManager && project.projectManager.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      project.files.some((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase()));
+      (project.projectManager &&
+        project.projectManager
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())) ||
+      project.files.some((file) =>
+        file.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     return matchesTab && matchesSearch;
   });
 
   // Handle keyboard shortcut for search
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+      if ((e.ctrlKey || e.metaKey) && e.key === "f") {
         e.preventDefault();
         if (searchInputRef.current) {
           searchInputRef.current.focus();
         }
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   // Initialize chart for completed projects
   useEffect(() => {
-    if (activeTab === 'completed' && chartRef.current) {
+    if (activeTab === "completed" && chartRef.current) {
       const chart = echarts.init(chartRef.current);
       const option = {
         animation: false,
         title: {
-          text: 'Project Performance',
-          left: 'center'
+          text: "Project Performance",
+          left: "center",
         },
         tooltip: {
-          trigger: 'axis'
+          trigger: "axis",
         },
         legend: {
-          data: ['Expected Hours', 'Actual Hours'],
-          bottom: 10
+          data: ["Expected Hours", "Actual Hours"],
+          bottom: 10,
         },
         xAxis: {
-          type: 'category',
-          data: filteredProjects.map(p => p.title)
+          type: "category",
+          data: filteredProjects.map((p) => p.title),
         },
         yAxis: {
-          type: 'value',
-          name: 'Hours'
+          type: "value",
+          name: "Hours",
         },
         series: [
           {
-            name: 'Expected Hours',
-            type: 'bar',
-            data: filteredProjects.map(p => p.performance?.expectedHours || 0),
-            color: '#4F46E5'
+            name: "Expected Hours",
+            type: "bar",
+            data: filteredProjects.map(
+              (p) => p.performance?.expectedHours || 0
+            ),
+            color: "#4F46E5",
           },
           {
-            name: 'Actual Hours',
-            type: 'bar',
-            data: filteredProjects.map(p => p.performance?.actualHours || 0),
-            color: '#10B981'
-          }
-        ]
+            name: "Actual Hours",
+            type: "bar",
+            data: filteredProjects.map((p) => p.performance?.actualHours || 0),
+            color: "#10B981",
+          },
+        ],
       };
       chart.setOption(option);
       return () => {
@@ -202,15 +364,18 @@ const Project = () => {
 
   // Calculate total pages
   const calculateTotalPages = () => {
-    const totalFilePages = formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0);
+    const totalFilePages = formData.files.reduce(
+      (sum, file) => sum + (file.pageCount || 0),
+      0
+    );
     return totalFilePages * formData.languages.length * formData.tasks.length;
   };
 
   // Update total pages when form changes
   useEffect(() => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      totalPages: calculateTotalPages()
+      totalPages: calculateTotalPages(),
     }));
   }, [formData.files, formData.languages, formData.tasks]);
 
@@ -225,68 +390,68 @@ const Project = () => {
       GBP: 106,
       CAD: 61,
       AUD: 55,
-      INR: 1
+      INR: 1,
     };
     inrCost = cost * conversionRates[formData.currency];
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       cost,
-      inrCost
+      inrCost,
     }));
   }, [formData.rate, formData.totalPages, formData.currency]);
 
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   // Handle multi-select changes
   const handleMultiSelectChange = (name, value) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const currentValues = [...prev[name]];
       const newValues = currentValues.includes(value)
-        ? currentValues.filter(v => v !== value)
+        ? currentValues.filter((v) => v !== value)
         : [...currentValues, value];
       return {
         ...prev,
-        [name]: newValues
+        [name]: newValues,
       };
     });
   };
 
   // Handle file input changes
   const handleFileChange = (index, field, value) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const newFiles = [...prev.files];
       newFiles[index] = {
         ...newFiles[index],
-        [field]: field === 'pageCount' ? Number(value) : value
+        [field]: field === "pageCount" ? Number(value) : value,
       };
       return {
         ...prev,
-        files: newFiles
+        files: newFiles,
       };
     });
   };
 
   // Add new file row
   const addFileRow = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      files: [...prev.files, { name: '', pageCount: 0 }]
+      files: [...prev.files, { name: "", pageCount: 0 }],
     }));
   };
 
   // Remove file row
   const removeFileRow = (index) => {
     if (formData.files.length > 1) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        files: prev.files.filter((_, i) => i !== index)
+        files: prev.files.filter((_, i) => i !== index),
       }));
     }
   };
@@ -296,68 +461,75 @@ const Project = () => {
     e.preventDefault();
     if (showEditModal !== false) {
       // Update existing project
-      setProjects(projects.map(project =>
-        project.id === showEditModal ? {
-          ...project,
-          ...formData,
-          status: project.status,
-          id: project.id
-        } : project
-      ));
+      setProjects(
+        projects.map((project) =>
+          project.id === showEditModal
+            ? {
+                ...project,
+                ...formData,
+                status: project.status,
+                id: project.id,
+              }
+            : project
+        )
+      );
       setShowEditModal(false);
     } else {
       // Create new project
       const newProject = {
         ...formData,
         id: projects.length + 1,
-        status: 'created',
-        receivedDate: formData.receivedDate || new Date().toISOString().split('T')[0]
+        status: "created",
+        receivedDate:
+          formData.receivedDate || new Date().toISOString().split("T")[0],
       };
       setProjects([...projects, newProject]);
       setShowCreateModal(false);
     }
     // Reset form
     setFormData({
-      title: '',
-      client: '',
-      country: '',
-      projectManager: '',
+      title: "",
+      client: "",
+      country: "",
+      projectManager: "",
       tasks: [],
       languages: [],
       platform: [],
-      files: [{ name: '', pageCount: 0 }],
+      files: [{ name: "", pageCount: 0 }],
       totalPages: 0,
-      receivedDate: new Date().toISOString().split('T')[0],
-      serverPath: '',
-      notes: '',
+      receivedDate: new Date().toISOString().split("T")[0],
+      serverPath: "",
+      notes: "",
       rate: 0,
-      currency: 'USD',
+      currency: "USD",
       cost: 0,
-      inrCost: 0
+      inrCost: 0,
     });
   };
 
   // Handle edit project
   const handleEditProject = (projectId) => {
-    const projectToEdit = projects.find(p => p.id === projectId);
+    const projectToEdit = projects.find((p) => p.id === projectId);
     if (projectToEdit) {
       setFormData({
         title: projectToEdit.title,
         client: projectToEdit.client,
         country: projectToEdit.country,
-        projectManager: projectToEdit.projectManager || '',
+        projectManager: projectToEdit.projectManager || "",
         tasks: projectToEdit.tasks,
         languages: projectToEdit.languages,
-        platform: Array.isArray(projectToEdit.platform) ? projectToEdit.platform : [projectToEdit.platform],
+        platform: Array.isArray(projectToEdit.platform)
+          ? projectToEdit.platform
+          : [projectToEdit.platform],
         files: projectToEdit.files,
         totalPages: projectToEdit.totalPages,
         receivedDate: projectToEdit.receivedDate,
         serverPath: projectToEdit.serverPath,
-        notes: projectToEdit.notes || '',
+        notes: projectToEdit.notes || "",
         rate: projectToEdit.rate || 0,
-        currency: projectToEdit.currency || 'USD',
+        currency: projectToEdit.currency || "USD",
         cost: projectToEdit.cost || 0,
-        inrCost: projectToEdit.inrCost || 0
+        inrCost: projectToEdit.inrCost || 0,
       });
       setShowEditModal(projectId);
     }
@@ -365,35 +537,53 @@ const Project = () => {
 
   // Mark project as YTS (Yet to Start)
   const markAsYTS = (projectId, dueDate) => {
-    setProjects(projects.map(project =>
-      project.id === projectId
-        ? { ...project, status: 'active', dueDate, progress: 0 }
-        : project
-    ));
+    setProjects(
+      projects.map((project) =>
+        project.id === projectId
+          ? { ...project, status: "active", dueDate, progress: 0 }
+          : project
+      )
+    );
   };
 
   // Mark project as completed
   const markAsCompleted = (projectId) => {
-    setProjects(projects.map(project =>
-      project.id === projectId
-        ? {
-          ...project,
-          status: 'completed',
-          completedDate: new Date().toISOString().split('T')[0],
-          performance: {
-            expectedHours: Math.round(project.totalPages * 1.5),
-            actualHours: Math.round(project.totalPages * 1.3),
-            stages: [
-              { name: 'Design', start: project.receivedDate, end: new Date().toISOString().split('T')[0], handler: 'Sarah Wilson' },
-              { name: 'Development', start: project.receivedDate, end: new Date().toISOString().split('T')[0], handler: 'David Lee' },
-              { name: 'Testing', start: project.receivedDate, end: new Date().toISOString().split('T')[0], handler: 'Rachel Chen' }
-            ]
-          }
-        }
-        : project
-    ));
+    setProjects(
+      projects.map((project) =>
+        project.id === projectId
+          ? {
+              ...project,
+              status: "completed",
+              completedDate: new Date().toISOString().split("T")[0],
+              performance: {
+                expectedHours: Math.round(project.totalPages * 1.5),
+                actualHours: Math.round(project.totalPages * 1.3),
+                stages: [
+                  {
+                    name: "Design",
+                    start: project.receivedDate,
+                    end: new Date().toISOString().split("T")[0],
+                    handler: "Sarah Wilson",
+                  },
+                  {
+                    name: "Development",
+                    start: project.receivedDate,
+                    end: new Date().toISOString().split("T")[0],
+                    handler: "David Lee",
+                  },
+                  {
+                    name: "Testing",
+                    start: project.receivedDate,
+                    end: new Date().toISOString().split("T")[0],
+                    handler: "Rachel Chen",
+                  },
+                ],
+              },
+            }
+          : project
+      )
+    );
   };
-
 
   const {
     scrollContainerRef: scrollContainerRef1,
@@ -402,14 +592,13 @@ const Project = () => {
 
   const {
     scrollContainerRef: scrollContainerRef2,
-    fakeScrollbarRef: fakeScrollbarRef2
+    fakeScrollbarRef: fakeScrollbarRef2,
   } = useSyncScroll(activeTab === "active");
 
   const {
     scrollContainerRef: scrollContainerRef4,
-    fakeScrollbarRef: fakeScrollbarRef4
+    fakeScrollbarRef: fakeScrollbarRef4,
   } = useSyncScroll(activeTab === "completed");
-
 
   return (
     <div className="min-vh-100 bg-main mt-4">
@@ -478,34 +667,40 @@ const Project = () => {
             <ul className="nav nav-tabs border-bottom-0 flex-wrap">
               <li className="nav-item">
                 <button
-                  className={`nav-link ${activeTab === 'created' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('created')}
+                  className={`nav-link ${
+                    activeTab === "created" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("created")}
                 >
                   Created Projects
                   <span className="badge bg-light text-dark ms-2">
-                    {projects.filter(p => p.status === 'created').length}
+                    {projects.filter((p) => p.status === "created").length}
                   </span>
                 </button>
               </li>
               <li className="nav-item">
                 <button
-                  className={`nav-link ${activeTab === 'active' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('active')}
+                  className={`nav-link ${
+                    activeTab === "active" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("active")}
                 >
                   Active Projects
                   <span className="badge bg-light text-dark ms-2">
-                    {projects.filter(p => p.status === 'active').length}
+                    {projects.filter((p) => p.status === "active").length}
                   </span>
                 </button>
               </li>
               <li className="nav-item">
                 <button
-                  className={`nav-link ${activeTab === 'completed' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('completed')}
+                  className={`nav-link ${
+                    activeTab === "completed" ? "active" : ""
+                  }`}
+                  onClick={() => setActiveTab("completed")}
                 >
                   Completed Projects
                   <span className="badge bg-light text-dark ms-2">
-                    {projects.filter(p => p.status === 'completed').length}
+                    {projects.filter((p) => p.status === "completed").length}
                   </span>
                 </button>
               </li>
@@ -528,7 +723,7 @@ const Project = () => {
                   Showing results for "{searchQuery}" in {activeTab} projects
                 </div>
                 <button
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => setSearchQuery("")}
                   className="btn btn-link p-0"
                 >
                   Clear <span className="visually-hidden">search</span>
@@ -539,7 +734,7 @@ const Project = () => {
         )}
 
         {/* Created Projects Tab */}
-        {activeTab === 'created' && (
+        {activeTab === "created" && (
           <div className="mb-4">
             <h2 className="h5 mb-3 text-light">Draft Projects</h2>
             {filteredProjects.length === 0 ? (
@@ -667,12 +862,15 @@ const Project = () => {
 
                 {/* Scrollable Table */}
                 <div
-                  className="table-responsive"
+                  className="table-responsive table-gradient-bg"
                   ref={scrollContainerRef1}
-                  style={{ overflowX: 'auto', maxHeight: '500px' }}
+                  style={{ overflowX: "auto", maxHeight: "500px" }}
                 >
-                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                    <thead className="bg-light table-gradient-bg">
+                  <table
+                    className="table table-hover mb-0"
+                    style={{ minWidth: 900 }}
+                  >
+                    <thead className=" table-gradient-bg">
                       <tr>
                         <th>Project Title</th>
                         <th>Client</th>
@@ -690,11 +888,13 @@ const Project = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredProjects.map(project => (
+                      {filteredProjects.map((project) => (
                         <tr key={project.id}>
                           <td>
                             {project.title}
-                            <span className="badge bg-light text-dark ms-2">Draft</span>
+                            <span className="badge bg-light text-dark ms-2">
+                              Draft
+                            </span>
                           </td>
                           <td>{project.client}</td>
                           <td>{project.country}</td>
@@ -702,7 +902,10 @@ const Project = () => {
                           <td>
                             <div className="d-flex flex-wrap gap-1">
                               {project.tasks.map((task) => (
-                                <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
+                                <span
+                                  key={task}
+                                  className="badge bg-primary bg-opacity-10 text-primary"
+                                >
                                   {task}
                                 </span>
                               ))}
@@ -711,7 +914,10 @@ const Project = () => {
                           <td>
                             <div className="d-flex flex-wrap gap-1">
                               {project.languages.map((language) => (
-                                <span key={language} className="badge bg-success bg-opacity-10 text-success">
+                                <span
+                                  key={language}
+                                  className="badge bg-success bg-opacity-10 text-success"
+                                >
                                   {language}
                                 </span>
                               ))}
@@ -728,14 +934,29 @@ const Project = () => {
                               {project.serverPath}
                             </span>
                           </td>
-                          <td>{new Date(project.receivedDate).toLocaleDateString()}</td>
-                          <td>{project.rate} {project.currency}</td>
-                          <td>{project.cost} {project.currency}</td>
+                          <td>
+                            {new Date(
+                              project.receivedDate
+                            ).toLocaleDateString()}
+                          </td>
+                          <td>
+                            {project.rate} {project.currency}
+                          </td>
+                          <td>
+                            {project.cost} {project.currency}
+                          </td>
                           <td className="text-end">
                             <div className="d-flex justify-content-end gap-2">
                               <button
                                 onClick={() => {
-                                  const dueDate = prompt('Enter due date (YYYY-MM-DD):', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+                                  const dueDate = prompt(
+                                    "Enter due date (YYYY-MM-DD):",
+                                    new Date(
+                                      Date.now() + 7 * 24 * 60 * 60 * 1000
+                                    )
+                                      .toISOString()
+                                      .split("T")[0]
+                                  );
                                   if (dueDate) markAsYTS(project.id, dueDate);
                                 }}
                                 className="btn btn-sm btn-primary"
@@ -764,7 +985,7 @@ const Project = () => {
         )}
 
         {/* Active Projects Tab */}
-        {activeTab === 'active' && (
+        {activeTab === "active" && (
           <div className="mb-4">
             <h2 className="h5 mb-3 text-light">Active Projects</h2>
             {filteredProjects.length === 0 ? (
@@ -881,12 +1102,15 @@ const Project = () => {
                 </div>
                 {/* Scrollable Table 2 */}
                 <div
-                  className="table-responsive"
+                  className="table-responsive table-gradient-bg"
                   ref={scrollContainerRef2}
-                  style={{ overflowX: 'auto', maxHeight: '500px' }}
+                  style={{ overflowX: "auto", maxHeight: "500px" }}
                 >
-                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                    <thead className="bg-light table-gradient-bg">
+                  <table
+                    className="table table-hover mb-0"
+                    style={{ minWidth: 900 }}
+                  >
+                    <thead className=" table-gradient-bg">
                       <tr>
                         <th>Project Title</th>
                         <th>Client</th>
@@ -904,11 +1128,13 @@ const Project = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredProjects.map(project => (
+                      {filteredProjects.map((project) => (
                         <tr key={project.id}>
                           <td>
                             {project.title}
-                            <span className="badge bg-light text-dark ms-2">Draft</span>
+                            <span className="badge bg-light text-dark ms-2">
+                              Draft
+                            </span>
                           </td>
                           <td>{project.client}</td>
                           <td>{project.country}</td>
@@ -916,7 +1142,10 @@ const Project = () => {
                           <td>
                             <div className="d-flex flex-wrap gap-1">
                               {project.tasks.map((task) => (
-                                <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
+                                <span
+                                  key={task}
+                                  className="badge bg-primary bg-opacity-10 text-primary"
+                                >
                                   {task}
                                 </span>
                               ))}
@@ -925,7 +1154,10 @@ const Project = () => {
                           <td>
                             <div className="d-flex flex-wrap gap-1">
                               {project.languages.map((language) => (
-                                <span key={language} className="badge bg-success bg-opacity-10 text-success">
+                                <span
+                                  key={language}
+                                  className="badge bg-success bg-opacity-10 text-success"
+                                >
                                   {language}
                                 </span>
                               ))}
@@ -942,14 +1174,29 @@ const Project = () => {
                               {project.serverPath}
                             </span>
                           </td>
-                          <td>{new Date(project.receivedDate).toLocaleDateString()}</td>
-                          <td>{project.rate} {project.currency}</td>
-                          <td>{project.cost} {project.currency}</td>
+                          <td>
+                            {new Date(
+                              project.receivedDate
+                            ).toLocaleDateString()}
+                          </td>
+                          <td>
+                            {project.rate} {project.currency}
+                          </td>
+                          <td>
+                            {project.cost} {project.currency}
+                          </td>
                           <td className="text-end">
                             <div className="d-flex justify-content-end gap-2">
                               <button
                                 onClick={() => {
-                                  const dueDate = prompt('Enter due date (YYYY-MM-DD):', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+                                  const dueDate = prompt(
+                                    "Enter due date (YYYY-MM-DD):",
+                                    new Date(
+                                      Date.now() + 7 * 24 * 60 * 60 * 1000
+                                    )
+                                      .toISOString()
+                                      .split("T")[0]
+                                  );
                                   if (dueDate) markAsYTS(project.id, dueDate);
                                 }}
                                 className="btn btn-sm btn-primary"
@@ -978,7 +1225,7 @@ const Project = () => {
         )}
 
         {/* Completed Projects Tab */}
-        {activeTab === 'completed' && (
+        {activeTab === "completed" && (
           <div className="mb-4">
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
               <h2 className="h5 mb-0 text-light">Completed Projects</h2>
@@ -999,7 +1246,10 @@ const Project = () => {
                 {/* Performance Chart */}
                 <div className="card mb-4 bg-card text-light">
                   <div className="card-body">
-                    <div ref={chartRef} style={{ height: '400px', minWidth: '300px' }}></div>
+                    <div
+                      ref={chartRef}
+                      style={{ height: "400px", minWidth: "300px" }}
+                    ></div>
                   </div>
                 </div>
                 {/* Project Cards */}
@@ -1099,11 +1349,14 @@ const Project = () => {
                   </div>
                   {/* Scrollable Table 3 */}
                   <div
-                    className="table-responsive"
+                    className="table-responsive table-gradient-bg"
                     ref={scrollContainerRef4}
-                    style={{ overflowX: 'auto', maxHeight: '500px' }}
+                    style={{ overflowX: "auto", maxHeight: "500px" }}
                   >
-                    <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
+                    <table
+                      className="table table-hover mb-0"
+                      style={{ minWidth: 900 }}
+                    >
                       <thead className="table-gradient-bg">
                         <tr>
                           <th>Project Title</th>
@@ -1123,20 +1376,29 @@ const Project = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredProjects.map(project => (
+                        {filteredProjects.map((project) => (
                           <tr key={project.id}>
                             <td>
                               {project.title}
-                              <span className="badge bg-success bg-opacity-10 text-success ms-2">Completed</span>
+                              <span className="badge bg-success bg-opacity-10 text-success ms-2">
+                                Completed
+                              </span>
                             </td>
                             <td>{project.client}</td>
                             <td>{project.country}</td>
                             <td>{project.projectManager}</td>
-                            <td>{new Date(project.completedDate).toLocaleDateString()}</td>
+                            <td>
+                              {new Date(
+                                project.completedDate
+                              ).toLocaleDateString()}
+                            </td>
                             <td>
                               <div className="d-flex flex-wrap gap-1">
                                 {project.tasks.map((task) => (
-                                  <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
+                                  <span
+                                    key={task}
+                                    className="badge bg-primary bg-opacity-10 text-primary"
+                                  >
                                     {task}
                                   </span>
                                 ))}
@@ -1145,7 +1407,10 @@ const Project = () => {
                             <td>
                               <div className="d-flex flex-wrap gap-1">
                                 {project.languages.map((language) => (
-                                  <span key={language} className="badge bg-success bg-opacity-10 text-success">
+                                  <span
+                                    key={language}
+                                    className="badge bg-success bg-opacity-10 text-success"
+                                  >
                                     {language}
                                   </span>
                                 ))}
@@ -1160,18 +1425,34 @@ const Project = () => {
                             <td>{project.performance.expectedHours}</td>
                             <td>{project.performance.actualHours}</td>
                             <td className="fw-bold">
-                              <span className={`${project.performance.expectedHours > project.performance.actualHours ? 'text-success' : 'text-danger'}`}>
-                                {Math.round((project.performance.expectedHours / project.performance.actualHours) * 100)}%
+                              <span
+                                className={`${
+                                  project.performance.expectedHours >
+                                  project.performance.actualHours
+                                    ? "text-success"
+                                    : "text-danger"
+                                }`}
+                              >
+                                {Math.round(
+                                  (project.performance.expectedHours /
+                                    project.performance.actualHours) *
+                                    100
+                                )}
+                                %
                               </span>
                             </td>
-                            <td>{project.cost} {project.currency}</td>
+                            <td>
+                              {project.cost} {project.currency}
+                            </td>
                             <td className="text-end">
                               <div className="d-flex justify-content-end gap-2">
                                 <button className="btn btn-sm btn-danger">
-                                  <i className="fas fa-file-alt me-1"></i> View Report
+                                  <i className="fas fa-file-alt me-1"></i> View
+                                  Report
                                 </button>
                                 <button className="btn btn-sm btn-primary">
-                                  <i className="fas fa-archive me-1"></i> Archive
+                                  <i className="fas fa-archive me-1"></i>{" "}
+                                  Archive
                                 </button>
                               </div>
                             </td>
@@ -1189,12 +1470,19 @@ const Project = () => {
 
       {/* Create/Edit Project Modal */}
       {(showCreateModal || showEditModal !== false) && (
-        <div className="modal fade show d-block custom-modal-dark" tabIndex="-1" aria-modal="true" role="dialog">
+        <div
+          className="modal fade show d-block custom-modal-dark"
+          tabIndex="-1"
+          aria-modal="true"
+          role="dialog"
+        >
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">
-                  {showEditModal !== false ? 'Edit Project Details' : 'Create New Project'}
+                  {showEditModal !== false
+                    ? "Edit Project Details"
+                    : "Create New Project"}
                 </h5>
                 <button
                   type="button"
@@ -1209,7 +1497,9 @@ const Project = () => {
                 <form onSubmit={handleSubmit}>
                   {/* Basic Info Section */}
                   <div className="mb-4">
-                    <h6 className="border-bottom pb-2 mb-3">Basic Information</h6>
+                    <h6 className="border-bottom pb-2 mb-3">
+                      Basic Information
+                    </h6>
                     <div className="row g-3">
                       <div className="col-md-8">
                         <label htmlFor="title" className="form-label">
@@ -1238,8 +1528,10 @@ const Project = () => {
                           onChange={handleInputChange}
                         >
                           <option value="">Select Client</option>
-                          {clientOptions.map(client => (
-                            <option key={client} value={client}>{client}</option>
+                          {clientOptions.map((client) => (
+                            <option key={client} value={client}>
+                              {client}
+                            </option>
                           ))}
                         </select>
                       </div>
@@ -1256,14 +1548,19 @@ const Project = () => {
                           onChange={handleInputChange}
                         >
                           <option value="">Select Country</option>
-                          {countryOptions.map(country => (
-                            <option key={country} value={country}>{country}</option>
+                          {countryOptions.map((country) => (
+                            <option key={country} value={country}>
+                              {country}
+                            </option>
                           ))}
                         </select>
                       </div>
                       {isAdmin && (
                         <div className="col-md-4">
-                          <label htmlFor="projectManager" className="form-label">
+                          <label
+                            htmlFor="projectManager"
+                            className="form-label"
+                          >
                             Project Manager
                           </label>
                           <select
@@ -1274,8 +1571,10 @@ const Project = () => {
                             onChange={handleInputChange}
                           >
                             <option value="">Select Project Manager</option>
-                            {projectManagerOptions.map(pm => (
-                              <option key={pm} value={pm}>{pm}</option>
+                            {projectManagerOptions.map((pm) => (
+                              <option key={pm} value={pm}>
+                                {pm}
+                              </option>
                             ))}
                           </select>
                         </div>
@@ -1290,12 +1589,18 @@ const Project = () => {
                       <div className="col-12">
                         <label className="form-label">Tasks *</label>
                         <div className="d-flex flex-wrap gap-2">
-                          {taskOptions.map(task => (
+                          {taskOptions.map((task) => (
                             <button
                               key={task}
                               type="button"
-                              onClick={() => handleMultiSelectChange('tasks', task)}
-                              className={`btn btn-sm ${formData.tasks.includes(task) ? 'btn-primary' : 'btn-outline-primary'}`}
+                              onClick={() =>
+                                handleMultiSelectChange("tasks", task)
+                              }
+                              className={`btn btn-sm ${
+                                formData.tasks.includes(task)
+                                  ? "btn-primary"
+                                  : "btn-outline-primary"
+                              }`}
                             >
                               {task}
                               {formData.tasks.includes(task) && (
@@ -1305,18 +1610,26 @@ const Project = () => {
                           ))}
                         </div>
                         {formData.tasks.length === 0 && (
-                          <div className="text-danger small mt-1">Please select at least one task</div>
+                          <div className="text-danger small mt-1">
+                            Please select at least one task
+                          </div>
                         )}
                       </div>
                       <div className="col-12">
                         <label className="form-label">Languages *</label>
                         <div className="d-flex flex-wrap gap-2">
-                          {languageOptions.map(language => (
+                          {languageOptions.map((language) => (
                             <button
                               key={language}
                               type="button"
-                              onClick={() => handleMultiSelectChange('languages', language)}
-                              className={`btn btn-sm ${formData.languages.includes(language) ? 'btn-success' : 'btn-outline-success'}`}
+                              onClick={() =>
+                                handleMultiSelectChange("languages", language)
+                              }
+                              className={`btn btn-sm ${
+                                formData.languages.includes(language)
+                                  ? "btn-success"
+                                  : "btn-outline-success"
+                              }`}
                             >
                               {language}
                               {formData.languages.includes(language) && (
@@ -1326,18 +1639,26 @@ const Project = () => {
                           ))}
                         </div>
                         {formData.languages.length === 0 && (
-                          <div className="text-danger small mt-1">Please select at least one language</div>
+                          <div className="text-danger small mt-1">
+                            Please select at least one language
+                          </div>
                         )}
                       </div>
                       <div className="col-12">
                         <label className="form-label">Application *</label>
                         <div className="d-flex flex-wrap gap-2">
-                          {platformOptions.map(platform => (
+                          {platformOptions.map((platform) => (
                             <button
                               key={platform}
                               type="button"
-                              onClick={() => handleMultiSelectChange('platform', platform)}
-                              className={`btn btn-sm ${formData.platform.includes(platform) ? 'btn-purple' : 'btn-outline-purple'}`}
+                              onClick={() =>
+                                handleMultiSelectChange("platform", platform)
+                              }
+                              className={`btn btn-sm ${
+                                formData.platform.includes(platform)
+                                  ? "btn-purple"
+                                  : "btn-outline-purple"
+                              }`}
                             >
                               {platform}
                               {formData.platform.includes(platform) && (
@@ -1347,7 +1668,9 @@ const Project = () => {
                           ))}
                         </div>
                         {formData.platform.length === 0 && (
-                          <div className="text-danger small mt-1">Please select at least one Application</div>
+                          <div className="text-danger small mt-1">
+                            Please select at least one Application
+                          </div>
                         )}
                       </div>
                     </div>
@@ -1360,18 +1683,26 @@ const Project = () => {
                       <div className="btn-group">
                         <button
                           type="button"
-                          className={`btn btn-sm ${showCreateModal === 'manual' ? 'btn-primary' : 'btn-outline-primary'}`}
+                          className={`btn btn-sm ${
+                            showCreateModal === "manual"
+                              ? "btn-primary"
+                              : "btn-outline-primary"
+                          }`}
                         >
                           Manual Input
                         </button>
                         <button
                           type="button"
-                          className={`btn btn-sm ${showCreateModal === 'excel' ? 'btn-primary' : 'btn-outline-primary'}`}
+                          className={`btn btn-sm ${
+                            showCreateModal === "excel"
+                              ? "btn-primary"
+                              : "btn-outline-primary"
+                          }`}
                         >
                           Excel Upload
                         </button>
                       </div>
-                      {showCreateModal === 'manual' && (
+                      {showCreateModal === "manual" && (
                         <button
                           type="button"
                           onClick={addFileRow}
@@ -1381,7 +1712,7 @@ const Project = () => {
                         </button>
                       )}
                     </div>
-                    {showCreateModal === 'manual' ? (
+                    {showCreateModal === "manual" ? (
                       <div className="table-responsive">
                         <table className="table table-bordered">
                           <thead className="bg-light">
@@ -1399,7 +1730,13 @@ const Project = () => {
                                     type="text"
                                     className="form-control form-control-sm"
                                     value={file.name}
-                                    onChange={(e) => handleFileChange(index, 'name', e.target.value)}
+                                    onChange={(e) =>
+                                      handleFileChange(
+                                        index,
+                                        "name",
+                                        e.target.value
+                                      )
+                                    }
                                     placeholder="Enter file name"
                                     required
                                   />
@@ -1409,8 +1746,14 @@ const Project = () => {
                                     type="number"
                                     min="1"
                                     className="form-control form-control-sm"
-                                    value={file.pageCount || ''}
-                                    onChange={(e) => handleFileChange(index, 'pageCount', e.target.value)}
+                                    value={file.pageCount || ""}
+                                    onChange={(e) =>
+                                      handleFileChange(
+                                        index,
+                                        "pageCount",
+                                        e.target.value
+                                      )
+                                    }
                                     placeholder="Pages"
                                     required
                                   />
@@ -1440,10 +1783,17 @@ const Project = () => {
                           >
                             Upload Excel file
                           </label>
-                          <input id="file-upload" name="file-upload" type="file" className="d-none" />
+                          <input
+                            id="file-upload"
+                            name="file-upload"
+                            type="file"
+                            className="d-none"
+                          />
                           <span className="text-muted">or drag and drop</span>
                         </div>
-                        <p className="small text-muted">Excel files only (XLS, XLSX)</p>
+                        <p className="small text-muted">
+                          Excel files only (XLS, XLSX)
+                        </p>
                       </div>
                     )}
                     <div className="bg-light p-3 rounded mt-3">
@@ -1451,7 +1801,12 @@ const Project = () => {
                         <div className="fw-medium">Total Pages Calculation</div>
                         <div className="text-end">
                           <div className="small text-muted">
-                            {formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0)} pages × {formData.languages.length || 0} languages × {formData.tasks.length || 0} tasks
+                            {formData.files.reduce(
+                              (sum, file) => sum + (file.pageCount || 0),
+                              0
+                            )}{" "}
+                            pages × {formData.languages.length || 0} languages ×{" "}
+                            {formData.tasks.length || 0} tasks
                           </div>
                           <div className="h5 fw-bold text-primary">
                             {formData.totalPages} Total Pages
@@ -1464,7 +1819,9 @@ const Project = () => {
                   {/* Financial Section (Admin Only) */}
                   {isAdmin && (
                     <div className="mb-4">
-                      <h6 className="border-bottom pb-2 mb-3">Financial Details</h6>
+                      <h6 className="border-bottom pb-2 mb-3">
+                        Financial Details
+                      </h6>
                       <div className="row g-3">
                         <div className="col-md-4">
                           <label htmlFor="rate" className="form-label">
@@ -1478,7 +1835,7 @@ const Project = () => {
                               name="rate"
                               min="0"
                               step="0.01"
-                              value={formData.rate || ''}
+                              value={formData.rate || ""}
                               onChange={handleInputChange}
                               placeholder="0.00"
                             />
@@ -1488,9 +1845,9 @@ const Project = () => {
                               name="currency"
                               value={formData.currency}
                               onChange={handleInputChange}
-                              style={{ maxWidth: '100px' }}
+                              style={{ maxWidth: "100px" }}
                             >
-                              {currencyOptions.map(currency => (
+                              {currencyOptions.map((currency) => (
                                 <option key={currency}>{currency}</option>
                               ))}
                             </select>
@@ -1509,7 +1866,9 @@ const Project = () => {
                               value={formData.cost.toFixed(2)}
                               readOnly
                             />
-                            <span className="input-group-text">{formData.currency}</span>
+                            <span className="input-group-text">
+                              {formData.currency}
+                            </span>
                           </div>
                         </div>
                         <div className="col-md-4">
@@ -1534,7 +1893,9 @@ const Project = () => {
 
                   {/* Additional Info Section */}
                   <div className="mb-4">
-                    <h6 className="border-bottom pb-2 mb-3">Additional Information</h6>
+                    <h6 className="border-bottom pb-2 mb-3">
+                      Additional Information
+                    </h6>
                     <div className="row g-3">
                       <div className="col-md-4">
                         <label htmlFor="receivedDate" className="form-label">
@@ -1590,22 +1951,22 @@ const Project = () => {
                         setShowCreateModal(false);
                         setShowEditModal(false);
                         setFormData({
-                          title: '',
-                          client: '',
-                          country: '',
-                          projectManager: '',
+                          title: "",
+                          client: "",
+                          country: "",
+                          projectManager: "",
                           tasks: [],
                           languages: [],
                           platform: [],
-                          files: [{ name: '', pageCount: 0 }],
+                          files: [{ name: "", pageCount: 0 }],
                           totalPages: 0,
-                          receivedDate: new Date().toISOString().split('T')[0],
-                          serverPath: '',
-                          notes: '',
+                          receivedDate: new Date().toISOString().split("T")[0],
+                          serverPath: "",
+                          notes: "",
                           rate: 0,
-                          currency: 'USD',
+                          currency: "USD",
                           cost: 0,
-                          inrCost: 0
+                          inrCost: 0,
                         });
                       }}
                     >
@@ -1621,11 +1982,15 @@ const Project = () => {
                         formData.tasks.length === 0 ||
                         formData.languages.length === 0 ||
                         formData.platform.length === 0 ||
-                        formData.files.some(file => !file.name || !file.pageCount) ||
+                        formData.files.some(
+                          (file) => !file.name || !file.pageCount
+                        ) ||
                         !formData.serverPath
                       }
                     >
-                      {showEditModal !== false ? 'Save Changes' : 'Create Project'}
+                      {showEditModal !== false
+                        ? "Save Changes"
+                        : "Create Project"}
                     </button>
                   </div>
                 </form>
@@ -1637,103 +2002,337 @@ const Project = () => {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="modal fade show d-block custom-modal-dark" tabIndex="-1" aria-modal="true" role="dialog">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Project Settings</h5>
+        <div
+          className="modal fade show d-block custom-modal-dark"
+          tabIndex="-1"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content bg-dark text-white">
+              <div className="modal-header bg-dark border-secondary">
+                <h5 className="modal-title text-white">Settings</h5>
                 <button
                   type="button"
-                  className="btn-close"
+                  className="btn-close btn-close-white"
                   onClick={() => setShowSettings(false)}
                 ></button>
               </div>
               <div className="modal-body">
+                <h6 className="text-white-50">
+                  Manage predefined lists for project creation and other
+                  application settings.
+                </h6>
+
+                {/* Manage Clients */}
                 <div className="mb-4">
-                  <h6 className="mb-3">Manage Clients</h6>
-                  <div className="border rounded p-2 mb-2" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                    <ul className="list-group list-group-flush">
-                      {clientOptions.map(client => (
-                        <li key={client} className="list-group-item d-flex justify-content-between align-items-center py-2 px-0 bg-card">
-                          <span>{client}</span>
+                  <h6 className="mb-3 text-white">Manage Clients</h6>
+                  <div className="input-group mb-2">
+                    <input
+                      type="text"
+                      className="form-control bg-secondary text-white border-secondary"
+                      placeholder="New Client Alias Name"
+                      value={newClient.alias}
+                      onChange={(e) =>
+                        setNewClient({ ...newClient, alias: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="row g-2 mb-2">
+                    <div className="col-md-6">
+                      <input
+                        type="text"
+                        className="form-control bg-secondary text-white border-secondary"
+                        placeholder="Actual Client Name*"
+                        value={newClient.actualName}
+                        onChange={(e) =>
+                          setNewClient({
+                            ...newClient,
+                            actualName: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <input
+                        type="text"
+                        className="form-control bg-secondary text-white border-secondary"
+                        placeholder="Country*"
+                        value={newClient.country}
+                        onChange={(e) =>
+                          setNewClient({
+                            ...newClient,
+                            country: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="input-group mb-2">
+                    <input
+                      type="text"
+                      className="form-control bg-secondary text-white border-secondary"
+                      placeholder="Project Managers (comma-sep)"
+                      value={newClient.managers}
+                      onChange={(e) =>
+                        setNewClient({ ...newClient, managers: e.target.value })
+                      }
+                    />
+                    <button className="btn btn-primary">+</button>
+                  </div>
+                  <div className="border rounded p-2 mb-2 border-secondary">
+                    {clients.map((client, index) => (
+                      <div key={index}>
+                        <div className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-2 rounded">
+                          <span className="text-white">
+                            <strong>{client.alias}</strong> ({client.actualName}
+                            )<br />
+                            Country: {client.country}
+                            <br />
+                            PMs: {client.managers}
+                          </span>
                           <div className="btn-group btn-group-sm">
-                            <button className="btn btn-outline-primary">
-                              <i className="fas fa-edit"></i>
-                            </button>
-                            <button className="btn btn-outline-danger">
+                            <button
+                              className="btn btn-outline-danger"
+                              onClick={() =>
+                                handleDeleteItem(clients, setClients, index)
+                              }
+                            >
                               <i className="fas fa-trash-alt"></i>
                             </button>
                           </div>
-                        </li>
-                      ))}
-                    </ul>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <button className="btn btn-sm btn-primary">
+                  <button
+                    className="btn btn-sm btn-primary"
+                    onClick={handleAddClient}
+                    disabled={
+                      !newClient.alias ||
+                      !newClient.actualName ||
+                      !newClient.country
+                    }
+                  >
                     <i className="fas fa-plus me-1"></i> Add Client
                   </button>
                 </div>
+
+                {/* Manage Tasks List */}
                 <div className="mb-4">
-                  <h6 className="mb-3">Manage Project Managers</h6>
-                  <div className="border rounded p-2 mb-2" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                    <ul className="list-group list-group-flush">
-                      {projectManagerOptions.map(pm => (
-                        <li key={pm} className="list-group-item d-flex justify-content-between align-items-center py-2 px-0 bg-card">
-                          <span>{pm}</span>
-                          <div className="btn-group btn-group-sm">
-                            <button className="btn btn-outline-primary">
-                              <i className="fas fa-edit"></i>
-                            </button>
-                            <button className="btn btn-outline-danger">
-                              <i className="fas fa-trash-alt"></i>
-                            </button>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+                  <h6 className="mb-3 text-white">Manage Tasks List</h6>
+                  <div className="input-group mb-2">
+                    <input
+                      type="text"
+                      className="form-control bg-secondary text-white border-secondary"
+                      placeholder="New task..."
+                      value={newTask}
+                      onChange={(e) => setNewTask(e.target.value)}
+                    />
+                    <button className="btn btn-primary">+</button>
                   </div>
-                  <button className="btn btn-sm btn-primary">
-                    <i className="fas fa-plus me-1"></i> Add Project Manager
+                  <div className="border rounded p-2 mb-2 border-secondary">
+                    {tasks.map((task, index) => (
+                      <div
+                        key={index}
+                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
+                      >
+                        <span className="text-white">{task}</span>
+                        <div className="btn-group btn-group-sm">
+                          <button
+                            className="btn btn-outline-danger"
+                            onClick={() =>
+                              handleDeleteItem(tasks, setTasks, index)
+                            }
+                          >
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    className="btn btn-sm btn-primary"
+                    onClick={handleAddTask}
+                    disabled={!newTask}
+                  >
+                    <i className="fas fa-plus me-1"></i> Add Task
                   </button>
                 </div>
-                <div>
-                  <h6 className="mb-3">Currency Conversion Rates</h6>
-                  <div className="row g-2 mb-3">
-                    <div className="col-4">
-                      <label className="form-label small">Currency</label>
+
+                {/* Manage Application List */}
+                <div className="mb-4">
+                  <h6 className="mb-3 text-white">Manage Application List</h6>
+                  <div className="input-group mb-2">
+                    <input
+                      type="text"
+                      className="form-control bg-secondary text-white border-secondary"
+                      placeholder="New platform..."
+                      value={newPlatform}
+                      onChange={(e) => setNewPlatform(e.target.value)}
+                    />
+                    <button className="btn btn-primary">+</button>
+                  </div>
+                  <div className="border rounded p-2 mb-2 border-secondary">
+                    {platforms.map((platform, index) => (
+                      <div
+                        key={index}
+                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
+                      >
+                        <span className="text-white">{platform}</span>
+                        <div className="btn-group btn-group-sm">
+                          <button
+                            className="btn btn-outline-danger"
+                            onClick={() =>
+                              handleDeleteItem(platforms, setPlatforms, index)
+                            }
+                          >
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    className="btn btn-sm btn-primary"
+                    onClick={handleAddPlatform}
+                    disabled={!newPlatform}
+                  >
+                    <i className="fas fa-plus me-1"></i> Add Platform
+                  </button>
+                </div>
+
+                {/* Manage Languages List */}
+                <div className="mb-4">
+                  <h6 className="mb-3 text-white">Manage Languages List</h6>
+                  <div className="input-group mb-2">
+                    <input
+                      type="text"
+                      className="form-control bg-secondary text-white border-secondary"
+                      placeholder="New language..."
+                      value={newLanguage}
+                      onChange={(e) => setNewLanguage(e.target.value)}
+                    />
+                    <button className="btn btn-primary">+</button>
+                  </div>
+                  <div className="border rounded p-2 mb-2 border-secondary">
+                    {languages.map((language, index) => (
+                      <div
+                        key={index}
+                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
+                      >
+                        <span className="text-white">{language}</span>
+                        <div className="btn-group btn-group-sm">
+                          <button
+                            className="btn btn-outline-danger"
+                            onClick={() =>
+                              handleDeleteItem(languages, setLanguages, index)
+                            }
+                          >
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    className="btn btn-sm btn-primary"
+                    onClick={handleAddLanguage}
+                    disabled={!newLanguage}
+                  >
+                    <i className="fas fa-plus me-1"></i> Add Language
+                  </button>
+                </div>
+
+                {/* Currency Conversion Rates */}
+                <div className="mb-4">
+                  <h6 className="mb-3 text-white">Currency Conversion Rates</h6>
+                  <div className="row g-2 mb-2">
+                    <div className="col-md-6">
                       <input
                         type="text"
-                        className="form-control form-control-sm"
-                        value="USD"
-                        readOnly
+                        className="form-control bg-card text-white border-secondary"
+                        placeholder="Currency (e.g. USD)"
+                        value={newCurrency.name}
+                        onChange={(e) =>
+                          setNewCurrency({
+                            ...newCurrency,
+                            name: e.target.value,
+                          })
+                        }
                       />
                     </div>
-                    <div className="col-8">
-                      <label className="form-label small">Rate to INR</label>
-                      <input
-                        type="number"
-                        className="form-control form-control-sm"
-                        value="83"
-                      />
-                    </div>
-                    <div className="col-4">
+                    <div className="col-md-6">
                       <input
                         type="text"
-                        className="form-control form-control-sm"
-                        value="EUR"
-                        readOnly
+                        className="form-control bg-card text-white border-secondary"
+                        placeholder="Rate to INR"
+                        value={newCurrency.rate}
+                        onChange={(e) =>
+                          setNewCurrency({
+                            ...newCurrency,
+                            rate: e.target.value,
+                          })
+                        }
                       />
                     </div>
-                    <div className="col-8">
-                      <input
-                        type="number"
-                        className="form-control form-control-sm"
-                        value="90"
-                      />
-                    </div>
+                  </div>
+                  <div className="border rounded p-2 mb-2 border-secondary table-gradient-bg">
+                    <table className="table table-dark table-sm mb-0">
+                      <thead>
+                        <tr>
+                          <th>Currency</th>
+                          <th>Rate to INR</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currencies.map((currency, index) => (
+                          <tr key={index}>
+                            <td>{currency.name}</td>
+                            <td>{currency.rate}</td>
+                            <td>
+                              <div className="btn-group btn-group-sm">
+                                <button
+                                  className="btn btn-outline-danger"
+                                  onClick={() =>
+                                    handleDeleteItem(
+                                      currencies,
+                                      setCurrencies,
+                                      index
+                                    )
+                                  }
+                                >
+                                  <i className="fas fa-trash-alt"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <button
+                    className="btn btn-sm btn-primary"
+                    onClick={handleAddCurrency}
+                    disabled={!newCurrency.name || !newCurrency.rate}
+                  >
+                    <i className="fas fa-plus me-1"></i> Add Currency
+                  </button>
+                </div>
+
+                {/* Save All Settings */}
+                <div className="mb-4">
+                  <h6 className="mb-3 text-white">Save All Settings</h6>
+                  <div className="border rounded p-2 mb-2 border-secondary">
+                    <p className="small text-white-50 mb-0">
+                      Remember to save your changes. Settings are stored
+                      locally.
+                    </p>
                   </div>
                 </div>
               </div>
-              <div className="modal-footer">
+              <div className="modal-footer  border-secondary">
                 <button
                   type="button"
                   className="btn btn-secondary"
@@ -1741,10 +2340,7 @@ const Project = () => {
                 >
                   Close
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                >
+                <button type="button" className="btn btn-primary">
                   Save Changes
                 </button>
               </div>
@@ -1759,6 +2355,6 @@ const Project = () => {
       )}
     </div>
   );
-}
+};
 
 export default Project;
