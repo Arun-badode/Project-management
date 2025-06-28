@@ -680,7 +680,7 @@ const Project = () => {
                         <th>Project Manager</th>
                         <th>Tasks</th>
                         <th>Languages</th>
-                        <th>Platform</th>
+                        <th>Application</th>
                         <th>Total Pages</th>
                         <th>Server Path</th>
                         <th>Received Date</th>
@@ -894,7 +894,7 @@ const Project = () => {
                         <th>Project Manager</th>
                         <th>Tasks</th>
                         <th>Languages</th>
-                        <th>Platform</th>
+                        <th>Application</th>
                         <th>Total Pages</th>
                         <th>Server Path</th>
                         <th>Received Date</th>
@@ -1113,7 +1113,7 @@ const Project = () => {
                           <th>Completed Date</th>
                           <th>Tasks</th>
                           <th>Languages</th>
-                          <th>Platform</th>
+                          <th>Application</th>
                           <th>Total Pages</th>
                           <th>Expected Hours</th>
                           <th>Actual Hours</th>
@@ -1330,7 +1330,7 @@ const Project = () => {
                         )}
                       </div>
                       <div className="col-12">
-                        <label className="form-label">Platform *</label>
+                        <label className="form-label">Application *</label>
                         <div className="d-flex flex-wrap gap-2">
                           {platformOptions.map(platform => (
                             <button
@@ -1347,7 +1347,7 @@ const Project = () => {
                           ))}
                         </div>
                         {formData.platform.length === 0 && (
-                          <div className="text-danger small mt-1">Please select at least one platform</div>
+                          <div className="text-danger small mt-1">Please select at least one Application</div>
                         )}
                       </div>
                     </div>

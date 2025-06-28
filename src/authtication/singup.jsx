@@ -50,7 +50,7 @@ const SignupPage = () => {
             />
             <h1 className="text-white">Join Us!</h1>
             <p>
-              Create your account and start managing your projects efficiently with our platform.
+              Create your account and start managing your projects efficiently with our Application.
             </p>
           </div>
         </div>

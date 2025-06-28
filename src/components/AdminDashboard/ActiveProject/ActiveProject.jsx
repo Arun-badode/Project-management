@@ -1,34 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from 'react-bootstrap';
+import moment from 'moment';
 
 const ActiveProject = () => {
   // Project data state
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [activeTab, setActiveTab] = useState('all');
-    const userRole =  localStorage.getItem('userRole') ;
-    const isAdmin = userRole === 'Admin';
+  const userRole = localStorage.getItem('userRole');
+  const isAdmin = userRole === 'Admin';
 
-   const [formData, setFormData] = useState({
-      title: '',
-      client: '',
-      country: '',
-      projectManager: '',
-      tasks: [],
-      languages: [],
-      platform: [],
-      files: [{ name: '', pageCount: 0 }],
-      totalPages: 0,
-      receivedDate: new Date().toISOString().split('T')[0],
-      serverPath: '',
-      notes: '',
-      rate: 0,
-      currency: 'USD',
-      cost: 0,
-      inrCost: 0
-    });
+  const [formData, setFormData] = useState({
+    title: '',
+    client: '',
+    country: '',
+    projectManager: '',
+    tasks: [],
+    languages: [],
+    platform: [],
+    files: [{ name: '', pageCount: 0 }],
+    totalPages: 0,
+    receivedDate: new Date().toISOString().split('T')[0],
+    serverPath: '',
+    notes: '',
+    rate: 0,
+    currency: 'USD',
+    cost: 0,
+    inrCost: 0
+  });
 
-     const clientOptions = ['Acme Corp', 'TechStart', 'RetailPlus', 'GlobalMedia', 'FinTech Solutions'];
+  const clientOptions = ['Acme Corp', 'TechStart', 'RetailPlus', 'GlobalMedia', 'FinTech Solutions'];
   const countryOptions = ['United States', 'Canada', 'UK', 'Australia', 'Germany', 'India'];
   const projectManagerOptions = ['John Smith', 'Emily Johnson', 'Michael Brown', 'Sarah Wilson', 'David Lee'];
   const taskOptions = ['Design', 'Development', 'Testing', 'Content', 'QA', 'Localization'];
@@ -36,7 +37,7 @@ const ActiveProject = () => {
   const platformOptions = ['Web', 'Mobile', 'Desktop', 'Cross-platform'];
   const currencyOptions = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'INR'];
 
-     const handleInputChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -44,7 +45,7 @@ const ActiveProject = () => {
     }));
   };
 
-   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   // Filter states
   const [clientFilter, setClientFilter] = useState('');
   const [taskFilter, setTaskFilter] = useState('');
@@ -57,9 +58,9 @@ const ActiveProject = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [editedProject, setEditedProject] = useState(null);
-   const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
-    const handleShow = () => setShowModal(true);
+  const handleShow = () => setShowModal(true);
   const handleClose = () => setShowModal(false);
 
   // Batch edit states
@@ -71,11 +72,50 @@ const ActiveProject = () => {
     qcAllocatedHours: '',
     priority: ''
   });
+  const [date, setDate] = useState('');
+  const [hour, setHour] = useState('01');
+  const [minute, setMinute] = useState('00');
+  const [period, setPeriod] = useState('AM');
+
+  const handleDateChange = (e) => {
+    setDate(e.target.value);
+  };
+
+  const handleHourChange = (e) => {
+    setHour(e.target.value);
+  };
+
+  const handleMinuteChange = (e) => {
+    setMinute(e.target.value);
+  };
+
+  const handlePeriodChange = (e) => {
+    setPeriod(e.target.value);
+  };
+
+  // const handleQcDateTimeChange = (field, value) => {
+  //   const updatedValues = {
+  //     ...batchEditValues,
+  //     [field]: value
+  //   };
+
+  //   const { qcDate, qcTime } = {
+  //     ...updatedValues,
+  //     [field]: value
+  //   };
+
+  //   if (qcDate && qcTime) {
+  //     const formatted = moment(`${qcDate} ${qcTime}`, 'YYYY-MM-DD HH:mm').format('hh:mm A DD-MM-YY');
+  //     updatedValues.qcDue = formatted;
+  //   }
+
+  //   setBatchEditValues(updatedValues);
+  // };
 
   // Expanded row state
   const [expandedRow, setExpandedRow] = useState(null);
 
-    const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (showEditModal !== false) {
       // Update existing project
@@ -403,7 +443,7 @@ const ActiveProject = () => {
                     </select>
                   </div>
                   <div className="col-md-6">
-                    <label className="form-label">Platform</label>
+                    <label className="form-label">Application</label>
                     <select
                       className="form-select"
                       value={editedProject.platform}
@@ -592,7 +632,7 @@ const ActiveProject = () => {
                         )}
                       </div>
                       <div className="col-12">
-                        <label className="form-label">Platform *</label>
+                        <label className="form-label">Application *</label>
                         <div className="d-flex flex-wrap gap-2">
                           {platformOptions.map(platform => (
                             <button
@@ -609,7 +649,7 @@ const ActiveProject = () => {
                           ))}
                         </div>
                         {formData.platform.length === 0 && (
-                          <div className="text-danger small mt-1">Please select at least one platform</div>
+                          <div className="text-danger small mt-1">Please select at least one Application</div>
                         )}
                       </div>
                     </div>
@@ -898,21 +938,21 @@ const ActiveProject = () => {
       )}
 
 
-      
+
       {/* Header with action buttons */}
       <div className="row mb-4">
-       
 
-          <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-                <h2 className="gradient-heading">Active Projects</h2>
-                <div className="d-flex flex-column flex-sm-row gap-2">
-                  <Button className="gradient-button"
-                    onClick={() => setShowCreateModal(true)}
-                  >
-                      <i className="fas fa-plus me-2"></i> Create New Project
-                  </Button>
-                </div>
-              </div>
+
+        <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+          <h2 className="gradient-heading">Active Projects</h2>
+          <div className="d-flex flex-column flex-sm-row gap-2">
+            <Button className="gradient-button"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <i className="fas fa-plus me-2"></i> Create New Project
+            </Button>
+          </div>
+        </div>
         {/* <div className="col-md-6 text-md-end">
           <div className="d-flex flex-wrap justify-content-md-end gap-2">
             <button className="btn btn-dark">
@@ -1357,7 +1397,7 @@ const ActiveProject = () => {
               <th>Client</th>
               <th>Task</th>
               <th>Language</th>
-              <th>Platform</th>
+              <th>Application</th>
               <th>Total Pages</th>
               <th>Due Date & Time</th>
               <th>Progress</th>
@@ -1460,7 +1500,7 @@ const ActiveProject = () => {
                                 <div className="row g-3">
                                   {/* Platform */}
                                   <div className="col-md-4 col-lg-2">
-                                    <label className="form-label">Platform</label>
+                                    <label className="form-label">Application</label>
                                     <select
                                       className="form-select form-select-sm"
                                       value={batchEditValues.platform}
@@ -1497,7 +1537,7 @@ const ActiveProject = () => {
                                     </select>
                                   </div>
                                   {/* QA Reviewer */}
-                                  <div className="col-md-4 col-lg-2">
+                                  {/* <div className="col-md-4 col-lg-2">
                                     <label className="form-label">QA Reviewer</label>
                                     <select
                                       className="form-select form-select-sm"
@@ -1515,7 +1555,6 @@ const ActiveProject = () => {
                                       <option value="Emily Davis">Emily Davis</option>
                                     </select>
                                   </div>
-                                  {/* QC Due */}
                                   <div className="col-md-4 col-lg-2">
                                     <label className="form-label">QC Due</label>
                                     <input
@@ -1529,9 +1568,45 @@ const ActiveProject = () => {
                                         })
                                       }
                                     />
+                                  </div> */}
+                                  <div className="col-md-4 col-lg-2" style={{ marginRight: '4rem' }}>
+                                    <label className="form-label">QC Due</label>
+                                    <div className="row g-2">
+                                      <div className="col-6 col-md-4">
+                                        <input
+                                          type="date"
+                                          className="form-control"
+                                          value={date}
+                                          onChange={handleDateChange}
+                                        />
+                                      </div>
+                                      <div className="col-3 col-md-2">
+                                        <select className="form-select" value={hour} onChange={handleHourChange}>
+                                          {Array.from({ length: 12 }, (_, i) => (
+                                            <option key={i} value={String(i + 1).padStart(2, '0')}>
+                                              {String(i + 1).padStart(2, '0')}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                      <div className="col-3 col-md-2">
+                                        <select className="form-select" value={minute} onChange={handleMinuteChange}>
+                                          {['00', '15', '30', '45'].map(min => (
+                                            <option key={min} value={min}>{min}</option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                      <div className="col-3 col-md-2">
+                                        <select className="form-select" value={period} onChange={handlePeriodChange}>
+                                          <option value="AM">AM</option>
+                                          <option value="PM">PM</option>
+                                        </select>
+                                      </div>
+                                    </div>
                                   </div>
+
                                   {/* QC Hours */}
-                                  <div className="col-md-4 col-lg-2">
+                                  {/* <div className="col-md-4 col-lg-2">
                                     <label className="form-label">QC Hours</label>
                                     <input
                                       type="text"
@@ -1544,7 +1619,7 @@ const ActiveProject = () => {
                                         })
                                       }
                                     />
-                                  </div>
+                                  </div> */}
                                   {/* Priority */}
                                   <div className="col-md-4 col-lg-2">
                                     <label className="form-label">Priority</label>
@@ -1603,7 +1678,7 @@ const ActiveProject = () => {
                                   <th>File Name</th>
                                   <th>Pages</th>
                                   <th>Language</th>
-                                  <th>Platform</th>
+                                  <th>Application</th>
                                   <th>Stage</th>
                                   <th>Assigned</th>
                                   <th>Handler</th>
@@ -1810,7 +1885,7 @@ const ActiveProject = () => {
                         <h6 className="card-title mb-3">Batch Edit</h6>
                         <div className="row g-3">
                           <div className="col-md-4 col-lg-2">
-                            <label className="form-label">Platform</label>
+                            <label className="form-label">Application</label>
                             <select
                               className="form-select form-select-sm"
                               value={batchEditValues.platform}
@@ -1939,7 +2014,7 @@ const ActiveProject = () => {
                           <th>File Name</th>
                           <th>Pages</th>
                           <th>Language</th>
-                          <th>Platform</th>
+                          <th>Application</th>
                           <th>Stage</th>
                           <th>Assigned</th>
                           <th>Handler</th>

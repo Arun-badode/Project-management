@@ -44,7 +44,7 @@ function Task() {
       id: 3,
       name: "QA Testing for Payment Module",
       status: "QC YTS",
-      project: "E-commerce Platform",
+      project: "E-commerce Application",
       dueDate: "2025-06-21",
       assignee: "Unassigned",
       priority: "Medium",
@@ -462,9 +462,8 @@ function Task() {
                     id="serverPath"
                     value={serverPath}
                     onChange={(e) => setServerPath(e.target.value)}
-                    className={`form-control ${
-                      serverPathError ? "is-invalid" : ""
-                    }`}
+                    className={`form-control ${serverPathError ? "is-invalid" : ""
+                      }`}
                     placeholder="Enter server path"
                   />
                   {serverPathError && (
@@ -695,7 +694,7 @@ function Task() {
                   <div className="form-control">
                     {activeTaskId
                       ? tasks.find((t) => t.id === activeTaskId)?.name ||
-                        "No task selected"
+                      "No task selected"
                       : "No task selected"}
                   </div>
                 </div>
