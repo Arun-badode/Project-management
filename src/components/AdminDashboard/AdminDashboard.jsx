@@ -57,6 +57,8 @@ const AdminDashboard = () => {
     }
   }, []);
 
+  // kundan
+
   const staticProjects = [
     {
       id: 1,
