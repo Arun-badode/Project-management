@@ -2046,7 +2046,7 @@ function inputToCustomDate(str) {
   return `${hour.toString().padStart(2, '0')}:${min} ${ampm} ${day}-${month}-${year}`;
 }
 
-// Generate dummy data function
+// Generate dummy  datafunction
 const generateDummyProjects = (count) => {
   const clients = ['Acme Corp', 'Globex', 'Initech', 'Umbrella Inc', 'Stark Industries'];
   const tasks = ['Translation', 'Proofreading', 'QA Review', 'Editing', 'Formatting'];
