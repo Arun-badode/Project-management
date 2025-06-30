@@ -37,11 +37,34 @@ const TaskManagement = () => {
       qaReviewers: 2,
       fileCount: 24,
       handlerNote: "Working on homepage layout. Need feedback on color scheme.",
-      qaNote: "Initial review completed for navigation. Found some responsive issues.",
+      qaNote:
+        "Initial review completed for navigation. Found some responsive issues.",
       files: [
-        { id: 1, name: "homepage.html", pages: 5, language: "English", platform: "Web", stage: "In Progress", assigned: "20-06-25", handler: "John Doe", qaReviewer: "Sarah Williams", qaStatus: "Pending" },
-        { id: 2, name: "contact.html", pages: 3, language: "English", platform: "Web", stage: "In Progress", assigned: "21-06-25", handler: "Jane Smith", qaReviewer: "", qaStatus: "Pending" }
-      ]
+        {
+          id: 1,
+          name: "homepage.html",
+          pages: 5,
+          language: "English",
+          platform: "Web",
+          stage: "In Progress",
+          assigned: "20-06-25",
+          handler: "John Doe",
+          qaReviewer: "Sarah Williams",
+          qaStatus: "Pending",
+        },
+        {
+          id: 2,
+          name: "contact.html",
+          pages: 3,
+          language: "English",
+          platform: "Web",
+          stage: "In Progress",
+          assigned: "21-06-25",
+          handler: "Jane Smith",
+          qaReviewer: "",
+          qaStatus: "Pending",
+        },
+      ],
     },
     {
       id: 2,
@@ -57,11 +80,23 @@ const TaskManagement = () => {
       handlers: 2,
       qaReviewers: 1,
       fileCount: 8,
-      handlerNote: "Finalizing financial section. Need to add executive summary.",
+      handlerNote:
+        "Finalizing financial section. Need to add executive summary.",
       qaNote: "Reviewing for consistency in formatting.",
       files: [
-        { id: 1, name: "report.docx", pages: 42, language: "Spanish", platform: "MS Office", stage: "QA Review", assigned: "15-06-25", handler: "Mike Johnson", qaReviewer: "David Brown", qaStatus: "In Progress" }
-      ]
+        {
+          id: 1,
+          name: "report.docx",
+          pages: 42,
+          language: "Spanish",
+          platform: "MS Office",
+          stage: "QA Review",
+          assigned: "15-06-25",
+          handler: "Mike Johnson",
+          qaReviewer: "David Brown",
+          qaStatus: "In Progress",
+        },
+      ],
     },
     {
       id: 3,
@@ -80,9 +115,20 @@ const TaskManagement = () => {
       handlerNote: "Working on product descriptions. Need high-res images.",
       qaNote: "Waiting for first draft to start review.",
       files: [
-        { id: 1, name: "brochure.indd", pages: 12, language: "French", platform: "Adobe", stage: "In Progress", assigned: "22-06-25", handler: "Emily Chen", qaReviewer: "", qaStatus: "Pending" }
-      ]
-    }
+        {
+          id: 1,
+          name: "brochure.indd",
+          pages: 12,
+          language: "French",
+          platform: "Adobe",
+          stage: "In Progress",
+          assigned: "22-06-25",
+          handler: "Emily Chen",
+          qaReviewer: "",
+          qaStatus: "Pending",
+        },
+      ],
+    },
   ]);
 
   // State for search and filter
@@ -94,12 +140,19 @@ const TaskManagement = () => {
 
   // Filter projects based on search term, status filter and platform filter
   const filteredProjects = projects.filter((project) => {
-    const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "All" || project.status === statusFilter;
-    const matchesPlatform = activeFilter === "All" || 
-                          (activeFilter === "MS Office" && project.platform === "MS Office") || 
-                          (activeFilter === "Adobe" && project.platform === "Adobe") ||
-                          (activeFilter === "All" && (project.platform === "Web" || project.platform === "Mobile" || project.platform === "Desktop"));
+    const matchesSearch = project.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "All" || project.status === statusFilter;
+    const matchesPlatform =
+      activeFilter === "All" ||
+      (activeFilter === "MS Office" && project.platform === "MS Office") ||
+      (activeFilter === "Adobe" && project.platform === "Adobe") ||
+      (activeFilter === "All" &&
+        (project.platform === "Web" ||
+          project.platform === "Mobile" ||
+          project.platform === "Desktop"));
     return matchesSearch && matchesStatus && matchesPlatform;
   });
 
@@ -122,9 +175,20 @@ const TaskManagement = () => {
       handlerNote: "Developing Q3 marketing plan. Need budget approval.",
       qaNote: "Awaiting initial draft for review.",
       files: [
-        { id: 1, name: "strategy.docx", pages: 15, language: "English", platform: "MS Office", stage: "In Progress", assigned: "21-06-25", handler: "You", qaReviewer: "Sophia Miller", qaStatus: "Pending" }
-      ]
-    }
+        {
+          id: 1,
+          name: "strategy.docx",
+          pages: 15,
+          language: "English",
+          platform: "MS Office",
+          stage: "In Progress",
+          assigned: "21-06-25",
+          handler: "You",
+          qaReviewer: "Sophia Miller",
+          qaStatus: "Pending",
+        },
+      ],
+    },
   ];
 
   // Status badge color mapping
@@ -173,7 +237,9 @@ const TaskManagement = () => {
 
   // Handle marking project as complete
   const handleMarkComplete = (id) => {
-    if (window.confirm("Are you sure you want to mark this project as complete?")) {
+    if (
+      window.confirm("Are you sure you want to mark this project as complete?")
+    ) {
       setProjects(projects.filter((project) => project.id !== id));
     }
   };
@@ -283,42 +349,13 @@ const TaskManagement = () => {
             <h2 className="gradient-heading">Task Management</h2>
             <p className="text-light">Active Projects Only</p>
           </div>
-          <div className="d-flex gap-2">
-            <div className="text-align-center gradient-heading align-item-center">
-              <h3>Filters</h3>
-            </div>
-            <div>
-              <button 
-                className={`btn ${activeFilter === "All" ? "gradient-button" : "btn-outline-secondary"}`}
-                onClick={() => setActiveFilter("All")}
-              >
-                All
-              </button>
-            </div>
-            <div>
-              <button 
-                className={`btn ${activeFilter === "MS Office" ? "gradient-button" : "btn-outline-secondary"}`}
-                onClick={() => setActiveFilter("MS Office")}
-              >
-                Ms Office
-              </button>
-            </div>
-            <div>
-              <button 
-                className={`btn ${activeFilter === "Adobe" ? "gradient-button" : "btn-outline-secondary"}`}
-                onClick={() => setActiveFilter("Adobe")}
-              >
-                Adobe
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Filters and Search */}
         <div className="card mb-4 bg-card">
           <div className="card-body">
             <div className="row align-items-center">
-              <div className="col-md-8 mb-3 mb-md-0">
+              <div className="col-md-6 mb-3 mb-md-0 d-flex justify-content-between">
                 <div className="row g-3 align-items-center">
                   <div className="col-md-5">
                     <div className="input-group">
@@ -328,7 +365,7 @@ const TaskManagement = () => {
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Search projects..."
+                        placeholder="Search.."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                       />
@@ -348,8 +385,47 @@ const TaskManagement = () => {
                   </div>
                 </div>
               </div>
-              <div className="col-md-4 text-md-end">
-                <span className="text-light small me-3">
+
+              <div className="col-md-6 text-md-end d-flex justify-content-between">
+                <div className="d-flex gap-2">
+                  <div>
+                    <button
+                      className={`btn ${
+                        activeFilter === "All"
+                          ? "gradient-button"
+                          : "btn-outline-secondary"
+                      }`}
+                      onClick={() => setActiveFilter("All")}
+                    >
+                      All
+                    </button>
+                  </div>
+                  <div>
+                    <button
+                      className={`btn ${
+                        activeFilter === "MS Office"
+                          ? "gradient-button"
+                          : "btn-outline-secondary"
+                      }`}
+                      onClick={() => setActiveFilter("MS Office")}
+                    >
+                      Ms Office
+                    </button>
+                  </div>
+                  <div>
+                    <button
+                      className={`btn ${
+                        activeFilter === "Adobe"
+                          ? "gradient-button"
+                          : "btn-outline-secondary"
+                      }`}
+                      onClick={() => setActiveFilter("Adobe")}
+                    >
+                      Adobe
+                    </button>
+                  </div>
+                </div>
+                <span className="text-light small ">
                   Today: 2025-06-24, Tuesday
                 </span>
               </div>
@@ -361,7 +437,9 @@ const TaskManagement = () => {
         <ul className="nav nav-tabs mb-4">
           <li className="nav-item">
             <button
-              className={`nav-link ${activeProjectTab === "all" ? "active" : ""}`}
+              className={`nav-link ${
+                activeProjectTab === "all" ? "active" : ""
+              }`}
               onClick={() => setActiveProjectTab("all")}
             >
               All Active Projects
@@ -370,7 +448,9 @@ const TaskManagement = () => {
           {isManager && (
             <li className="nav-item">
               <button
-                className={`nav-link ${activeProjectTab === "my" ? "active" : ""}`}
+                className={`nav-link ${
+                  activeProjectTab === "my" ? "active" : ""
+                }`}
                 onClick={() => setActiveProjectTab("my")}
               >
                 My Tasks
@@ -421,27 +501,32 @@ const TaskManagement = () => {
               </tr>
             </thead>
             <tbody>
-              {(activeProjectTab === "all" ? filteredProjects : myTasks).map((project, index) => (
-                <React.Fragment key={project.id}>
-                  <tr className={expandedRow === project.id ? "table-active" : ""}>
-                    <td>{index + 1}</td>
-                    <td>{project.title}</td>
-                    <td>{project.client}</td>
-                    <td>{project.task}</td>
-                    <td>{project.language}</td>
-                    <td>{project.platform}</td>
-                    <td>{project.totalPages}</td>
-                    <td>{project.dueDate}</td>
-                    <td>{project.handlers}</td>
-                    <td>{project.qaReviewers}</td>
-                    <td>
-                      <div
-                        className="progress cursor-pointer"
-                        style={{ height: "24px" }}
-                        onClick={() => handleViewProject(project)}
-                      >
+              {(activeProjectTab === "all" ? filteredProjects : myTasks).map(
+                (project, index) => (
+                  <React.Fragment key={project.id}>
+                    <tr
+                      className={
+                        expandedRow === project.id ? "table-active" : ""
+                      }
+                    >
+                      <td>{index + 1}</td>
+                      <td>{project.title}</td>
+                      <td>{project.client}</td>
+                      <td>{project.task}</td>
+                      <td>{project.language}</td>
+                      <td>{project.platform}</td>
+                      <td>{project.totalPages}</td>
+                      <td>{project.dueDate}</td>
+                      <td>{project.handlers}</td>
+                      <td>{project.qaReviewers}</td>
+                      <td>
                         <div
-                          className={`progress-bar 
+                          className="progress cursor-pointer"
+                          style={{ height: "24px" }}
+                          onClick={() => handleViewProject(project)}
+                        >
+                          <div
+                            className={`progress-bar 
                           ${
                             project.progress < 30
                               ? "bg-danger"
@@ -449,322 +534,387 @@ const TaskManagement = () => {
                               ? "bg-warning"
                               : "bg-success"
                           }`}
-                          role="progressbar"
-                          style={{ width: `${project.progress}%` }}
-                          aria-valuenow={project.progress}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                        >
-                          {project.progress}%
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="d-flex gap-2">
-                        <button
-                          className="btn btn-sm btn-primary"
-                          onClick={() => handleViewProject(project)}
-                        >
-                          <i
-                            className={`fas ${
-                              expandedRow === project.id
-                                ? "fa-chevron-up"
-                                : "fa-eye"
-                            }`}
-                          ></i>
-                        </button>
-                        <button
-                          className="btn btn-sm btn-secondary"
-                          onClick={() => handleEditProject(project)}
-                        >
-                          <i className="fas fa-edit"></i>
-                        </button>
-                        {project.progress === 100 && (
-                          <button
-                            className="btn btn-sm btn-success"
-                            onClick={() => handleMarkComplete(project.id)}
+                            role="progressbar"
+                            style={{ width: `${project.progress}%` }}
+                            aria-valuenow={project.progress}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
                           >
-                            <i className="fas fa-check"></i>
-                          </button>
-                        )}
-                        <button
-                          className="btn btn-sm btn-danger"
-                          onClick={() => handleDeleteProject(project.id)}
-                        >
-                          <i className="fas fa-trash"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-
-                  {expandedRow === project.id && (
-                    <tr>
-                      <td colSpan={12} className="p-0 border-top-0">
-                        <div className="p-4">
-                          {/* Project Notes */}
-                          <div className="row mb-4">
-                            <div className="col-md-6">
-                              <div className="card h-100">
-                                <div className="card-header bg-primary text-white">
-                                  Handler Notes
-                                </div>
-                                <div className="card-body">
-                                  <p>{project.handlerNote}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="col-md-6">
-                              <div className="card h-100">
-                                <div className="card-header bg-info text-white">
-                                  QA Notes
-                                </div>
-                                <div className="card-body">
-                                  <p>{project.qaNote}</p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Batch Edit */}
-                          {selectedFiles.length > 0 && (
-                            <div className="card mb-4">
-                              <div className="card-body bg-card">
-                                <h6 className="card-title mb-3">Batch Edit</h6>
-                                <div className="row g-3">
-                                  {/* Platform */}
-                                  <div className="col-md-4 col-lg-2">
-                                    <label className="form-label">Application</label>
-                                    <select
-                                      className="form-select form-select-sm"
-                                      value={batchEditValues.platform}
-                                      onChange={(e) =>
-                                        setBatchEditValues({
-                                          ...batchEditValues,
-                                          platform: e.target.value,
-                                        })
-                                      }
-                                    >
-                                      <option value="">Select</option>
-                                      <option value="Web">Web</option>
-                                      <option value="Mobile">Mobile</option>
-                                      <option value="Desktop">Desktop</option>
-                                      <option value="MS Office">MS Office</option>
-                                      <option value="Adobe">Adobe</option>
-                                    </select>
-                                  </div>
-                                  {/* Handler */}
-                                  <div className="col-md-4 col-lg-2">
-                                    <label className="form-label">Handler</label>
-                                    <select
-                                      className="form-select form-select-sm"
-                                      value={batchEditValues.handler}
-                                      onChange={(e) =>
-                                        setBatchEditValues({
-                                          ...batchEditValues,
-                                          handler: e.target.value,
-                                        })
-                                      }
-                                    >
-                                      <option value="">Select</option>
-                                      <option value="John Doe">John Doe</option>
-                                      <option value="Jane Smith">Jane Smith</option>
-                                      <option value="Mike Johnson">Mike Johnson</option>
-                                      <option value="Emily Chen">Emily Chen</option>
-                                    </select>
-                                  </div>
-                                  {/* QA Reviewer */}
-                                  <div className="col-md-4 col-lg-2">
-                                    <label className="form-label">QA Reviewer</label>
-                                    <select
-                                      className="form-select form-select-sm"
-                                      value={batchEditValues.qaReviewer}
-                                      onChange={(e) =>
-                                        setBatchEditValues({
-                                          ...batchEditValues,
-                                          qaReviewer: e.target.value,
-                                        })
-                                      }
-                                    >
-                                      <option value="">Select</option>
-                                      <option value="Sarah Williams">Sarah Williams</option>
-                                      <option value="David Brown">David Brown</option>
-                                      <option value="Emily Davis">Emily Davis</option>
-                                    </select>
-                                  </div>
-                                  {/* Priority */}
-                                  <div className="col-md-4 col-lg-2">
-                                    <label className="form-label">Priority</label>
-                                    <select
-                                      className="form-select form-select-sm"
-                                      value={batchEditValues.priority}
-                                      onChange={(e) =>
-                                        setBatchEditValues({
-                                          ...batchEditValues,
-                                          priority: e.target.value,
-                                        })
-                                      }
-                                    >
-                                      <option value="">Select</option>
-                                      <option value="High">High</option>
-                                      <option value="Medium">Medium</option>
-                                      <option value="Low">Low</option>
-                                    </select>
-                                  </div>
-                                </div>
-
-                                <div className="mt-3">
-                                  <button
-                                    className="btn gradient-button"
-                                    onClick={applyBatchEdits}
-                                  >
-                                    Apply to Selected Files
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Files Table */}
-                          <div className="table-responsive">
-                            <table className="table table-sm table-striped table-hover">
-                              <thead className="table-light">
-                                <tr>
-                                  <th>
-                                    <input
-                                      type="checkbox"
-                                      className="form-check-input"
-                                      checked={
-                                        selectedFiles.length === project.files.length
-                                      }
-                                      onChange={(e) => {
-                                        if (e.target.checked) {
-                                          setSelectedFiles([...project.files]);
-                                        } else {
-                                          setSelectedFiles([]);
-                                        }
-                                        setHasUnsavedChanges(true);
-                                      }}
-                                    />
-                                  </th>
-                                  <th>File Name</th>
-                                  <th>Pages</th>
-                                  <th>Language</th>
-                                  <th>Application</th>
-                                  <th>Stage</th>
-                                  <th>Assigned</th>
-                                  <th>Handler</th>
-                                  <th>QA Reviewer</th>
-                                  <th>QA Status</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {project.files.map((file) => (
-                                  <tr
-                                    key={file.id}
-                                    className={
-                                      selectedFiles.some((f) => f.id === file.id)
-                                        ? "table-primary"
-                                        : ""
-                                    }
-                                  >
-                                    <td>
-                                      <input
-                                        type="checkbox"
-                                        className="form-check-input"
-                                        checked={selectedFiles.some(
-                                          (f) => f.id === file.id
-                                        )}
-                                        onChange={() => toggleFileSelection(file)}
-                                      />
-                                    </td>
-                                    <td>{file.name}</td>
-                                    <td>{file.pages}</td>
-                                    <td>{file.language}</td>
-                                    <td>
-                                      <select
-                                        className="form-select form-select-sm"
-                                        value={file.platform}
-                                        onChange={(e) => {
-                                          const updatedFiles = project.files.map((f) =>
-                                            f.id === file.id
-                                              ? { ...f, platform: e.target.value }
-                                              : f
-                                          );
-                                          setSelectedProject({
-                                            ...project,
-                                            files: updatedFiles,
-                                          });
-                                          setHasUnsavedChanges(true);
-                                        }}
-                                      >
-                                        <option value="Web">Web</option>
-                                        <option value="Mobile">Mobile</option>
-                                        <option value="Desktop">Desktop</option>
-                                        <option value="MS Office">MS Office</option>
-                                        <option value="Adobe">Adobe</option>
-                                      </select>
-                                    </td>
-                                    <td>{file.stage}</td>
-                                    <td>{file.assigned}</td>
-                                    <td>
-                                      <select
-                                        className="form-select form-select-sm"
-                                        value={file.handler || ""}
-                                        onChange={(e) => {
-                                          const updatedFiles = project.files.map((f) =>
-                                            f.id === file.id
-                                              ? { ...f, handler: e.target.value }
-                                              : f
-                                          );
-                                          setSelectedProject({
-                                            ...project,
-                                            files: updatedFiles,
-                                          });
-                                          setHasUnsavedChanges(true);
-                                        }}
-                                      >
-                                        <option value="">Not Assigned</option>
-                                        <option value="John Doe">John Doe</option>
-                                        <option value="Jane Smith">Jane Smith</option>
-                                        <option value="Mike Johnson">Mike Johnson</option>
-                                        <option value="Emily Chen">Emily Chen</option>
-                                      </select>
-                                    </td>
-                                    <td>
-                                      <select
-                                        className="form-select form-select-sm"
-                                        value={file.qaReviewer || ""}
-                                        onChange={(e) => {
-                                          const updatedFiles = project.files.map((f) =>
-                                            f.id === file.id
-                                              ? { ...f, qaReviewer: e.target.value }
-                                              : f
-                                          );
-                                          setSelectedProject({
-                                            ...project,
-                                            files: updatedFiles,
-                                          });
-                                          setHasUnsavedChanges(true);
-                                        }}
-                                      >
-                                        <option value="">Not Assigned</option>
-                                        <option value="Sarah Williams">Sarah Williams</option>
-                                        <option value="David Brown">David Brown</option>
-                                        <option value="Emily Davis">Emily Davis</option>
-                                      </select>
-                                    </td>
-                                    <td>{file.qaStatus}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                            {project.progress}%
                           </div>
                         </div>
                       </td>
+                      <td>
+                        <div className="d-flex gap-2">
+                          <button
+                            className="btn btn-sm btn-primary"
+                            onClick={() => handleViewProject(project)}
+                          >
+                            <i
+                              className={`fas ${
+                                expandedRow === project.id
+                                  ? "fa-chevron-up"
+                                  : "fa-eye"
+                              }`}
+                            ></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => handleEditProject(project)}
+                          >
+                            <i className="fas fa-edit"></i>
+                          </button>
+                          {project.progress === 100 && (
+                            <button
+                              className="btn btn-sm btn-success"
+                              onClick={() => handleMarkComplete(project.id)}
+                            >
+                              <i className="fas fa-check"></i>
+                            </button>
+                          )}
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleDeleteProject(project.id)}
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </td>
                     </tr>
-                  )}
-                </React.Fragment>
-              ))}
+
+                    {expandedRow === project.id && (
+                      <tr>
+                        <td colSpan={12} className="p-0 border-top-0">
+                          <div className="p-4">
+                            {/* Project Notes */}
+                            <div className="row mb-4">
+                              <div className="col-md-6">
+                                <div className="card h-100">
+                                  <div className="card-header bg-primary text-white">
+                                    Handler Notes
+                                  </div>
+                                  <div className="card-body">
+                                    <p>{project.handlerNote}</p>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="col-md-6">
+                                <div className="card h-100">
+                                  <div className="card-header bg-info text-white">
+                                    QA Notes
+                                  </div>
+                                  <div className="card-body">
+                                    <p>{project.qaNote}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Batch Edit */}
+                            {selectedFiles.length > 0 && (
+                              <div className="card mb-4">
+                                <div className="card-body bg-card">
+                                  <h6 className="card-title mb-3">
+                                    Batch Edit
+                                  </h6>
+                                  <div className="row g-3">
+                                    {/* Platform */}
+                                    <div className="col-md-4 col-lg-2">
+                                      <label className="form-label">
+                                        Application
+                                      </label>
+                                      <select
+                                        className="form-select form-select-sm"
+                                        value={batchEditValues.platform}
+                                        onChange={(e) =>
+                                          setBatchEditValues({
+                                            ...batchEditValues,
+                                            platform: e.target.value,
+                                          })
+                                        }
+                                      >
+                                        <option value="">Select</option>
+                                        <option value="Web">Web</option>
+                                        <option value="Mobile">Mobile</option>
+                                        <option value="Desktop">Desktop</option>
+                                        <option value="MS Office">
+                                          MS Office
+                                        </option>
+                                        <option value="Adobe">Adobe</option>
+                                      </select>
+                                    </div>
+                                    {/* Handler */}
+                                    <div className="col-md-4 col-lg-2">
+                                      <label className="form-label">
+                                        Handler
+                                      </label>
+                                      <select
+                                        className="form-select form-select-sm"
+                                        value={batchEditValues.handler}
+                                        onChange={(e) =>
+                                          setBatchEditValues({
+                                            ...batchEditValues,
+                                            handler: e.target.value,
+                                          })
+                                        }
+                                      >
+                                        <option value="">Select</option>
+                                        <option value="John Doe">
+                                          John Doe
+                                        </option>
+                                        <option value="Jane Smith">
+                                          Jane Smith
+                                        </option>
+                                        <option value="Mike Johnson">
+                                          Mike Johnson
+                                        </option>
+                                        <option value="Emily Chen">
+                                          Emily Chen
+                                        </option>
+                                      </select>
+                                    </div>
+                                    {/* QA Reviewer */}
+                                    <div className="col-md-4 col-lg-2">
+                                      <label className="form-label">
+                                        QA Reviewer
+                                      </label>
+                                      <select
+                                        className="form-select form-select-sm"
+                                        value={batchEditValues.qaReviewer}
+                                        onChange={(e) =>
+                                          setBatchEditValues({
+                                            ...batchEditValues,
+                                            qaReviewer: e.target.value,
+                                          })
+                                        }
+                                      >
+                                        <option value="">Select</option>
+                                        <option value="Sarah Williams">
+                                          Sarah Williams
+                                        </option>
+                                        <option value="David Brown">
+                                          David Brown
+                                        </option>
+                                        <option value="Emily Davis">
+                                          Emily Davis
+                                        </option>
+                                      </select>
+                                    </div>
+                                    {/* Priority */}
+                                    <div className="col-md-4 col-lg-2">
+                                      <label className="form-label">
+                                        Priority
+                                      </label>
+                                      <select
+                                        className="form-select form-select-sm"
+                                        value={batchEditValues.priority}
+                                        onChange={(e) =>
+                                          setBatchEditValues({
+                                            ...batchEditValues,
+                                            priority: e.target.value,
+                                          })
+                                        }
+                                      >
+                                        <option value="">Select</option>
+                                        <option value="High">High</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="Low">Low</option>
+                                      </select>
+                                    </div>
+                                  </div>
+
+                                  <div className="mt-3">
+                                    <button
+                                      className="btn gradient-button"
+                                      onClick={applyBatchEdits}
+                                    >
+                                      Apply to Selected Files
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Files Table */}
+                            <div className="table-responsive">
+                              <table className="table table-sm table-striped table-hover">
+                                <thead className="table-light">
+                                  <tr>
+                                    <th>
+                                      <input
+                                        type="checkbox"
+                                        className="form-check-input"
+                                        checked={
+                                          selectedFiles.length ===
+                                          project.files.length
+                                        }
+                                        onChange={(e) => {
+                                          if (e.target.checked) {
+                                            setSelectedFiles([
+                                              ...project.files,
+                                            ]);
+                                          } else {
+                                            setSelectedFiles([]);
+                                          }
+                                          setHasUnsavedChanges(true);
+                                        }}
+                                      />
+                                    </th>
+                                    <th>File Name</th>
+                                    <th>Pages</th>
+                                    <th>Language</th>
+                                    <th>Application</th>
+                                    <th>Stage</th>
+                                    <th>Assigned</th>
+                                    <th>Handler</th>
+                                    <th>QA Reviewer</th>
+                                    <th>QA Status</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {project.files.map((file) => (
+                                    <tr
+                                      key={file.id}
+                                      className={
+                                        selectedFiles.some(
+                                          (f) => f.id === file.id
+                                        )
+                                          ? "table-primary"
+                                          : ""
+                                      }
+                                    >
+                                      <td>
+                                        <input
+                                          type="checkbox"
+                                          className="form-check-input"
+                                          checked={selectedFiles.some(
+                                            (f) => f.id === file.id
+                                          )}
+                                          onChange={() =>
+                                            toggleFileSelection(file)
+                                          }
+                                        />
+                                      </td>
+                                      <td>{file.name}</td>
+                                      <td>{file.pages}</td>
+                                      <td>{file.language}</td>
+                                      <td>
+                                        <select
+                                          className="form-select form-select-sm"
+                                          value={file.platform}
+                                          onChange={(e) => {
+                                            const updatedFiles =
+                                              project.files.map((f) =>
+                                                f.id === file.id
+                                                  ? {
+                                                      ...f,
+                                                      platform: e.target.value,
+                                                    }
+                                                  : f
+                                              );
+                                            setSelectedProject({
+                                              ...project,
+                                              files: updatedFiles,
+                                            });
+                                            setHasUnsavedChanges(true);
+                                          }}
+                                        >
+                                          <option value="Web">Web</option>
+                                          <option value="Mobile">Mobile</option>
+                                          <option value="Desktop">
+                                            Desktop
+                                          </option>
+                                          <option value="MS Office">
+                                            MS Office
+                                          </option>
+                                          <option value="Adobe">Adobe</option>
+                                        </select>
+                                      </td>
+                                      <td>{file.stage}</td>
+                                      <td>{file.assigned}</td>
+                                      <td>
+                                        <select
+                                          className="form-select form-select-sm"
+                                          value={file.handler || ""}
+                                          onChange={(e) => {
+                                            const updatedFiles =
+                                              project.files.map((f) =>
+                                                f.id === file.id
+                                                  ? {
+                                                      ...f,
+                                                      handler: e.target.value,
+                                                    }
+                                                  : f
+                                              );
+                                            setSelectedProject({
+                                              ...project,
+                                              files: updatedFiles,
+                                            });
+                                            setHasUnsavedChanges(true);
+                                          }}
+                                        >
+                                          <option value="">Not Assigned</option>
+                                          <option value="John Doe">
+                                            John Doe
+                                          </option>
+                                          <option value="Jane Smith">
+                                            Jane Smith
+                                          </option>
+                                          <option value="Mike Johnson">
+                                            Mike Johnson
+                                          </option>
+                                          <option value="Emily Chen">
+                                            Emily Chen
+                                          </option>
+                                        </select>
+                                      </td>
+                                      <td>
+                                        <select
+                                          className="form-select form-select-sm"
+                                          value={file.qaReviewer || ""}
+                                          onChange={(e) => {
+                                            const updatedFiles =
+                                              project.files.map((f) =>
+                                                f.id === file.id
+                                                  ? {
+                                                      ...f,
+                                                      qaReviewer:
+                                                        e.target.value,
+                                                    }
+                                                  : f
+                                              );
+                                            setSelectedProject({
+                                              ...project,
+                                              files: updatedFiles,
+                                            });
+                                            setHasUnsavedChanges(true);
+                                          }}
+                                        >
+                                          <option value="">Not Assigned</option>
+                                          <option value="Sarah Williams">
+                                            Sarah Williams
+                                          </option>
+                                          <option value="David Brown">
+                                            David Brown
+                                          </option>
+                                          <option value="Emily Davis">
+                                            Emily Davis
+                                          </option>
+                                        </select>
+                                      </td>
+                                      <td>{file.qaStatus}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                )
+              )}
             </tbody>
           </table>
         </div>
@@ -777,9 +927,28 @@ export default TaskManagement;
 
 // Generate dummy data function
 const generateDummyProjects = (count) => {
-  const clients = ["Acme Corp", "Globex", "Initech", "Umbrella Inc", "Stark Industries"];
-  const tasks = ["Translation", "Proofreading", "QA Review", "Editing", "Formatting"];
-  const languages = ["English", "Spanish", "French", "German", "Chinese", "Japanese"];
+  const clients = [
+    "Acme Corp",
+    "Globex",
+    "Initech",
+    "Umbrella Inc",
+    "Stark Industries",
+  ];
+  const tasks = [
+    "Translation",
+    "Proofreading",
+    "QA Review",
+    "Editing",
+    "Formatting",
+  ];
+  const languages = [
+    "English",
+    "Spanish",
+    "French",
+    "German",
+    "Chinese",
+    "Japanese",
+  ];
   const platforms = ["Web", "Mobile", "Desktop", "MS Office", "Adobe"];
   const stages = ["In Progress", "Review", "Completed", "On Hold"];
   const qaStatuses = ["Pending", "In Progress", "Approved", "Rejected"];
@@ -819,13 +988,20 @@ const generateDummyProjects = (count) => {
       const filePages = Math.floor(Math.random() * 20) + 1;
       files.push({
         id: j,
-        name: `File_${i}_${j}.${platform === "MS Office" ? "docx" : platform === "Adobe" ? "indd" : "html"}`,
+        name: `File_${i}_${j}.${
+          platform === "MS Office"
+            ? "docx"
+            : platform === "Adobe"
+            ? "indd"
+            : "html"
+        }`,
         pages: filePages,
         language: languages[Math.floor(Math.random() * languages.length)],
         platform: platform,
         stage: stages[Math.floor(Math.random() * stages.length)],
         assigned: new Date(
-          dueDate.getTime() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
+          dueDate.getTime() -
+            Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
         ).toLocaleDateString(),
         handler: handler,
         qaReviewer: qaReviewers[Math.floor(Math.random() * qaReviewers.length)],
@@ -844,7 +1020,14 @@ const generateDummyProjects = (count) => {
       totalPages,
       dueDate: formattedDueDate,
       progress,
-      status: progress === 100 ? "Completed" : progress > 80 ? "QA Review" : progress > 50 ? "Ready for QA" : "In Progress",
+      status:
+        progress === 100
+          ? "Completed"
+          : progress > 80
+          ? "QA Review"
+          : progress > 50
+          ? "Ready for QA"
+          : "In Progress",
       handlers: Math.floor(Math.random() * 3) + 1,
       qaReviewers: Math.floor(Math.random() * 2) + 1,
       fileCount,

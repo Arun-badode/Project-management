@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from 'react-bootstrap';
 import moment from 'moment';
 import Select from 'react-select';
-import { ProjectsData } from '../AdminDashboard';
+// import { ProjectsData } from '../AdminDashboard';
 
 const ActiveProject = () => {
 
@@ -21,7 +21,7 @@ const ActiveProject = () => {
     projectManager: '',
     tasks: [],
     languages: [],
-    platform: [],
+    application: [],
     files: [{ name: '', pageCount: 0 }],
     totalPages: 0,
     receivedDate: new Date().toISOString().split('T')[0],
@@ -66,13 +66,17 @@ const ActiveProject = () => {
     setFilteredProjects(result);
   }, [location.search, projects]);
 
-  const clientOptions = ['Acme Corp', 'TechStart', 'RetailPlus', 'GlobalMedia', 'FinTech Solutions'];
+ 
+
+  const clientOptions = ['PN','MMP Auburn','MMP Eastlake','MMP Kirkland','GN','DM','RN','NI','LB','SSS','Cpea','CV'];
   const countryOptions = ['United States', 'Canada', 'UK', 'Australia', 'Germany', 'India'];
   const projectManagerOptions = ['John Smith', 'Emily Johnson', 'Michael Brown', 'Sarah Wilson', 'David Lee'];
-  const taskOptions = ['Design', 'Development', 'Testing', 'Content', 'QA', 'Localization'];
-  const languageOptions = ['English', 'Spanish', 'French', 'German', 'Chinese', 'Japanese'];
-  const platformOptions = ['Web', 'Mobile', 'Desktop', 'Cross-platform'];
+  const taskOptions = ['Source Creation', 'Callout', 'Prep', 'Image Creation', 'DTP', 'Image Localization', 'OVA'];
+  const languageOptions = ['af','am','ar','az','be','bg','bn','bs','ca','cs','cy','da','de','el','en','en-US','en-GB','es','es-ES','es-MX','et','eu','fa','fi','fil','fr','fr-FR','fr-CA','ga','gl','gu','ha','he','hi','hr','hu','hy','id','ig','is','it','ja','jv','ka','kk','km','kn','ko','ku','ky','lo','lt','lv','mk','ml','mn','mr','ms','mt','my','ne','nl','no','or','pa','pl','ps','pt','pt-BR','pt-PT','ro','ru','sd','si','sk','sl','so','sq','sr','sr-Cyrl','sr-Latn','sv','sw','ta','te','th','tl','tr','uk','ur','uz','vi','xh','yo','zh','zh-Hans','zh-Hant','zh-TW'];
+  const applicationOptions = ['Word', 'PPT', 'Excel', 'INDD','AI','PSD','AE','CDR','Visio','Project','FM'];
   const currencyOptions = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'INR'];
+
+ 
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -129,6 +133,24 @@ const ActiveProject = () => {
           return dueDate < today && project.status !== 'Completed';
         });
         break;
+
+      case 'MSOffice': {
+  const msOfficeApps = ['Word', 'PPT', 'Excel', 'Visio', 'Project', 'Canva', 'MS Office'];
+  filtered = projects.filter(project =>
+    msOfficeApps.includes(project.application) 
+  );
+  break;
+}
+case 'Adobe': {
+  const adobeApps = ['INDD', 'AI', 'PSD', 'AE', 'CDR', 'FM', 'Adobe'];
+  filtered = projects.filter(project =>
+    adobeApps.includes(project.application) 
+   
+  );
+  break;
+}
+
+
       case 'teamOnDuty':
         filtered = projects.filter(p => p.status === 'Team On-Duty');
         break;
@@ -151,7 +173,7 @@ const ActiveProject = () => {
 
  const applicationsOptio = [
   { value: 'Adobe', label: 'Adobe' },
-  { value: 'MS Office', label: 'MS Office' },
+  { value: 'MSOffice', label: 'MS Office' },
 
 ];
 
@@ -160,7 +182,7 @@ const ActiveProject = () => {
 
   // Batch edit states
   const [batchEditValues, setBatchEditValues] = useState({
-    platform: '',
+    application: '',
     handler: '',
     qaReviewer: '',
     qcDue: '',
@@ -242,7 +264,7 @@ const ActiveProject = () => {
       projectManager: '',
       tasks: [],
       languages: [],
-      platform: [],
+      application: [],
       files: [{ name: '', pageCount: 0 }],
       totalPages: 0,
       receivedDate: new Date().toISOString().split('T')[0],
@@ -333,7 +355,7 @@ const ActiveProject = () => {
     }
   }, [selectedProject]); // rerun when project changes
     
-  const staticProjects = ProjectsData;
+  // const staticProjects = ProjectsData;
 
   const statuses =  [ 
 
@@ -376,8 +398,9 @@ const ActiveProject = () => {
   // Generate dummy data
   useEffect(() => {
     // const dummyProjects = generateDummyProjects(15);
-    setProjects(staticProjects);
-    setFilteredProjects(staticProjects);
+    setProjects(generateDummyProjects(15));
+    setFilteredProjects(generateDummyProjects(15));
+    // setFilteredProjects(staticProjects);
   }, []);
 
   // Apply filters
@@ -426,7 +449,7 @@ const ActiveProject = () => {
     setShowDetailModal(false); // Don't show modal
     setHasUnsavedChanges(false);
     setBatchEditValues({
-      platform: '',
+      application: '',
       handler: '',
       qaReviewer: '',
       qcDue: '',
@@ -454,7 +477,7 @@ const ActiveProject = () => {
         if (selectedFiles.some(f => f.id === file.id)) {
           return {
             ...file,
-            platform: batchEditValues.platform || file.platform,
+            application: batchEditValues.application || file.application,
             handler: batchEditValues.handler || file.handler,
             qaReviewer: batchEditValues.qaReviewer || file.qaReviewer,
             qcDue: batchEditValues.qcDue || file.qcDue,
@@ -475,7 +498,7 @@ const ActiveProject = () => {
       setProjects(projects.map(p => p.id === updatedProject.id ? updatedProject : p));
       // Reset batch edit values
       setBatchEditValues({
-        platform: '',
+        application: '',
         handler: '',
         qaReviewer: '',
         qcDue: '',
@@ -503,7 +526,7 @@ const ActiveProject = () => {
     return Array.from(new Set(projects.map(project => project[key])));
   };
 
-  const applicationOptions = getUniqueValues('application').map((app) => ({
+  const applicationOptio = getUniqueValues('application').map((app) => ({
   value: app,
   label: app
 }));
@@ -522,6 +545,47 @@ const ActiveProject = () => {
     }
   };
 
+
+    const gradientSelectStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      background: 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
+      color: 'white',
+      borderColor: state.isFocused ? '#ffffff66' : '#ffffff33',
+      boxShadow: state.isFocused ? '0 0 0 1px #ffffff66' : 'none',
+      minHeight: '38px',
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: 'white',
+    }),
+    multiValue: (provided) => ({
+      ...provided,
+      backgroundColor: '#1b2f6e',
+    }),
+    multiValueLabel: (provided) => ({
+      ...provided,
+      color: 'white',
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: 'white',
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: 'white',
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isFocused ? '#293d80' : 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
+      color: 'white',
+    }),
+    menu: (provided) => ({
+      ...provided,
+      background: 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
+      color: 'white',
+    }),
+  };
   return (
     <div className="container-fluid py-4">
       {/* Edit Project Modal */}
@@ -584,8 +648,8 @@ const ActiveProject = () => {
                     <label className="form-label">Application</label>
                     <select
                       className="form-select"
-                      value={editedProject.platform}
-                      onChange={(e) => setEditedProject({ ...editedProject, platform: e.target.value })}
+                      value={editedProject.application}
+                      onChange={(e) => setEditedProject({ ...editedProject, application: e.target.value })}
                     >
                       <option value="Web">Web</option>
                       <option value="Mobile">Mobile</option>
@@ -627,454 +691,368 @@ const ActiveProject = () => {
           </div>
         </div>
       )}
+ {/* Old */}
+     
 
-      {(showCreateModal || showEditModal !== false) && (
-        <div className="modal fade show d-block custom-modal-dark" tabIndex="-1" aria-modal="true" role="dialog">
-          <div className="modal-dialog modal-lg">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  {showEditModal !== false ? 'Edit Project Details' : 'Create New Project'}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setShowEditModal(false);
-                  }}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <form onSubmit={handleSubmit}>
-                  {/* Basic Info Section */}
-                  <div className="mb-4">
-                    <h6 className="border-bottom pb-2 mb-3">Basic Information</h6>
-                    <div className="row g-3">
-                      <div className="col-md-8">
-                        <label htmlFor="title" className="form-label">
-                          Project Title *
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id="title"
-                          name="title"
-                          required
-                          value={formData.title}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                      <div className="col-md-4">
-                        <label htmlFor="client" className="form-label">
-                          Client *
-                        </label>
-                        <select
-                          className="form-select"
-                          id="client"
-                          name="client"
-                          required
-                          value={formData.client}
-                          onChange={handleInputChange}
-                        >
-                          <option value="">Select Client</option>
-                          {clientOptions.map(client => (
-                            <option key={client} value={client}>{client}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="col-md-4">
-                        <label htmlFor="country" className="form-label">
-                          Country *
-                        </label>
-                        <select
-                          className="form-select"
-                          id="country"
-                          name="country"
-                          required
-                          value={formData.country}
-                          onChange={handleInputChange}
-                        >
-                          <option value="">Select Country</option>
-                          {countryOptions.map(country => (
-                            <option key={country} value={country}>{country}</option>
-                          ))}
-                        </select>
-                      </div>
-                      {isAdmin && (
-                        <div className="col-md-4">
-                          <label htmlFor="projectManager" className="form-label">
-                            Project Manager
-                          </label>
-                          <select
-                            className="form-select"
-                            id="projectManager"
-                            name="projectManager"
-                            value={formData.projectManager}
-                            onChange={handleInputChange}
-                          >
-                            <option value="">Select Project Manager</option>
-                            {projectManagerOptions.map(pm => (
-                              <option key={pm} value={pm}>{pm}</option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Project Details Section */}
-                  <div className="mb-4">
-                    <h6 className="border-bottom pb-2 mb-3">Project Details</h6>
-                    <div className="row g-3">
-                      <div className="col-12">
-                        <label className="form-label">Tasks *</label>
-                        <div className="d-flex flex-wrap gap-2">
-                          {taskOptions.map(task => (
-                            <button
-                              key={task}
-                              type="button"
-                              onClick={() => handleMultiSelectChange('tasks', task)}
-                              className={`btn btn-sm ${formData.tasks.includes(task) ? 'btn-primary' : 'btn-outline-primary'}`}
-                            >
-                              {task}
-                              {formData.tasks.includes(task) && (
-                                <i className="fas fa-check ms-2"></i>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                        {formData.tasks.length === 0 && (
-                          <div className="text-danger small mt-1">Please select at least one task</div>
-                        )}
-                      </div>
-                      <div className="col-12">
-                        <label className="form-label">Languages *</label>
-                        <div className="d-flex flex-wrap gap-2">
-                          {languageOptions.map(language => (
-                            <button
-                              key={language}
-                              type="button"
-                              onClick={() => handleMultiSelectChange('languages', language)}
-                              className={`btn btn-sm ${formData.languages.includes(language) ? 'btn-success' : 'btn-outline-success'}`}
-                            >
-                              {language}
-                              {formData.languages.includes(language) && (
-                                <i className="fas fa-check ms-2"></i>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                        {formData.languages.length === 0 && (
-                          <div className="text-danger small mt-1">Please select at least one language</div>
-                        )}
-                      </div>
-                      <div className="col-12">
-                        <label className="form-label">Application *</label>
-                        <div className="d-flex flex-wrap gap-2">
-                          {platformOptions.map(platform => (
-                            <button
-                              key={platform}
-                              type="button"
-                              onClick={() => handleMultiSelectChange('platform', platform)}
-                              className={`btn btn-sm ${formData.platform.includes(platform) ? 'btn-purple' : 'btn-outline-purple'}`}
-                            >
-                              {platform}
-                              {formData.platform.includes(platform) && (
-                                <i className="fas fa-check ms-2"></i>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                        {formData.platform.length === 0 && (
-                          <div className="text-danger small mt-1">Please select at least one Application</div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* File Details Section */}
-                  <div className="mb-4">
-                    <h6 className="border-bottom pb-2 mb-3">File Details</h6>
-                    <div className="d-flex justify-content-between align-items-center mb-3">
-                      <div className="btn-group">
-                        <button
-                          type="button"
-                          className={`btn btn-sm ${showCreateModal === 'manual' ? 'btn-primary' : 'btn-outline-primary'}`}
-                        >
-                          Manual Input
-                        </button>
-                        <button
-                          type="button"
-                          className={`btn btn-sm ${showCreateModal === 'excel' ? 'btn-primary' : 'btn-outline-primary'}`}
-                        >
-                          Excel Upload
-                        </button>
-                      </div>
-                      {showCreateModal === 'manual' && (
-                        <button
-                          type="button"
-                          onClick={addFileRow}
-                          className="btn btn-sm btn-outline-secondary"
-                        >
-                          <i className="fas fa-plus me-1"></i> Add File
-                        </button>
-                      )}
-                    </div>
-                    {showCreateModal === 'manual' ? (
-                      <div className="table-responsive">
-                        <table className="table table-bordered">
-                          <thead className="bg-light">
-                            <tr>
-                              <th>File Name</th>
-                              <th>Page Count</th>
-                              <th width="50"></th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {formData.files.map((file, index) => (
-                              <tr key={index}>
-                                <td>
-                                  <input
-                                    type="text"
-                                    className="form-control form-control-sm"
-                                    value={file.name}
-                                    onChange={(e) => handleFileChange(index, 'name', e.target.value)}
-                                    placeholder="Enter file name"
-                                    required
-                                  />
-                                </td>
-                                <td>
-                                  <input
-                                    type="number"
-                                    min="1"
-                                    className="form-control form-control-sm"
-                                    value={file.pageCount || ''}
-                                    onChange={(e) => handleFileChange(index, 'pageCount', e.target.value)}
-                                    placeholder="Pages"
-                                    required
-                                  />
-                                </td>
-                                <td className="text-center">
-                                  <button
-                                    type="button"
-                                    onClick={() => removeFileRow(index)}
-                                    className="btn btn-sm btn-link text-danger"
-                                    disabled={formData.files.length === 1}
-                                  >
-                                    <i className="fas fa-trash-alt"></i>
-                                  </button>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ) : (
-                      <div className="border-2 border-dashed rounded p-5 text-center">
-                        <i className="fas fa-file-excel text-muted fa-3x mb-3"></i>
-                        <div className="mb-3">
-                          <label
-                            htmlFor="file-upload"
-                            className="btn btn-link text-decoration-none"
-                          >
-                            Upload Excel file
-                          </label>
-                          <input id="file-upload" name="file-upload" type="file" className="d-none" />
-                          <span className="text-muted">or drag and drop</span>
-                        </div>
-                        <p className="small text-muted">Excel files only (XLS, XLSX)</p>
-                      </div>
-                    )}
-                    <div className="bg-light p-3 rounded mt-3">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <div className="fw-medium">Total Pages Calculation</div>
-                        <div className="text-end">
-                          <div className="small text-muted">
-                            {formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0)} pages × {formData.languages.length || 0} languages × {formData.tasks.length || 0} tasks
-                          </div>
-                          <div className="h5 fw-bold text-primary">
-                            {formData.totalPages} Total Pages
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Financial Section (Admin Only) */}
-                  {isAdmin && (
-                    <div className="mb-4">
-                      <h6 className="border-bottom pb-2 mb-3">Financial Details</h6>
-                      <div className="row g-3">
-                        <div className="col-md-4">
-                          <label htmlFor="rate" className="form-label">
-                            Rate per Page
-                          </label>
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              id="rate"
-                              name="rate"
-                              min="0"
-                              step="0.01"
-                              value={formData.rate || ''}
-                              onChange={handleInputChange}
-                              placeholder="0.00"
-                            />
-                            <select
-                              className="form-select"
-                              id="currency"
-                              name="currency"
-                              value={formData.currency}
-                              onChange={handleInputChange}
-                              style={{ maxWidth: '100px' }}
-                            >
-                              {currencyOptions.map(currency => (
-                                <option key={currency}>{currency}</option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-                        <div className="col-md-4">
-                          <label htmlFor="cost" className="form-label">
-                            Total Cost
-                          </label>
-                          <div className="input-group">
-                            <input
-                              type="text"
-                              className="form-control"
-                              id="cost"
-                              name="cost"
-                              value={formData.cost.toFixed(2)}
-                              readOnly
-                            />
-                            <span className="input-group-text">{formData.currency}</span>
-                          </div>
-                        </div>
-                        <div className="col-md-4">
-                          <label htmlFor="inrCost" className="form-label">
-                            Cost in INR
-                          </label>
-                          <div className="input-group">
-                            <input
-                              type="text"
-                              className="form-control"
-                              id="inrCost"
-                              name="inrCost"
-                              value={formData.inrCost.toFixed(2)}
-                              readOnly
-                            />
-                            <span className="input-group-text">INR</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Additional Info Section */}
-                  <div className="mb-4">
-                    <h6 className="border-bottom pb-2 mb-3">Additional Information</h6>
-                    <div className="row g-3">
-                      <div className="col-md-4">
-                        <label htmlFor="receivedDate" className="form-label">
-                          Received Date *
-                        </label>
-                        <input
-                          type="date"
-                          className="form-control"
-                          id="receivedDate"
-                          name="receivedDate"
-                          required
-                          value={formData.receivedDate}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                      <div className="col-12">
-                        <label htmlFor="serverPath" className="form-label">
-                          Server Path *
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id="serverPath"
-                          name="serverPath"
-                          required
-                          value={formData.serverPath}
-                          onChange={handleInputChange}
-                          placeholder="/projects/client/project-name"
-                        />
-                      </div>
-                      <div className="col-12">
-                        <label htmlFor="notes" className="form-label">
-                          Notes
-                        </label>
-                        <textarea
-                          className="form-control"
-                          id="notes"
-                          name="notes"
-                          rows="3"
-                          value={formData.notes}
-                          onChange={handleInputChange}
-                          placeholder="Add any additional notes or instructions..."
-                        ></textarea>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="modal-footer border-top-0">
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => {
-                        setShowCreateModal(false);
-                        setShowEditModal(false);
-                        setFormData({
-                          title: '',
-                          client: '',
-                          country: '',
-                          projectManager: '',
-                          tasks: [],
-                          languages: [],
-                          platform: [],
-                          files: [{ name: '', pageCount: 0 }],
-                          totalPages: 0,
-                          receivedDate: new Date().toISOString().split('T')[0],
-                          serverPath: '',
-                          notes: '',
-                          rate: 0,
-                          currency: 'USD',
-                          cost: 0,
-                          inrCost: 0
-                        });
-                      }}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="btn btn-primary"
-                      disabled={
-                        !formData.title ||
-                        !formData.client ||
-                        !formData.country ||
-                        formData.tasks.length === 0 ||
-                        formData.languages.length === 0 ||
-                        formData.platform.length === 0 ||
-                        formData.files.some(file => !file.name || !file.pageCount) ||
-                        !formData.serverPath
-                      }
-                    >
-                      {showEditModal !== false ? 'Save Changes' : 'Create Project'}
-                    </button>
-                  </div>
-                </form>
+ {(showCreateModal || showEditModal !== false) && (
+  <div className="modal fade show d-block custom-modal-dark" tabIndex="-1" aria-modal="true" role="dialog">
+    <div className="modal-dialog modal-lg">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title">
+            {showEditModal !== false ? 'Edit Project Details' : 'Create New Project'}
+          </h5>
+          <button
+            type="button"
+            className="btn-close"
+            onClick={() => {
+              setShowCreateModal(false);
+              setShowEditModal(false);
+            }}
+          ></button>
+        </div>
+        <div className="modal-body">
+          <form onSubmit={handleSubmit}>
+            {/* Project Title */}
+            <div className=" row mb-3 col-md-12">
+              <label htmlFor="title" className="form-label">
+                Project Title <span className="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="title"
+                name="title"
+                maxLength={80}
+                required
+                value={formData.title}
+                onChange={handleInputChange}
+                placeholder="Enter project title (max 80 chars)"
+              />
+              <div className="form-text">
+                Max allowed Character length – 80, (ignore or remove any special character by itself)
               </div>
             </div>
-          </div>
-        </div>
-      )}
 
+            {/* Client, Country, Project Manager */}
+            <div className="row g-3 mb-3">
+              <div className="col-md-4">
+                <label htmlFor="client" className="form-label">Client <span className="text-danger">*</span></label>
+                <Select
+                  id="client"
+                  name="client"
+                  options={clientOptions.map(c => ({ value: c, label: c }))}
+                  value={formData.client ? { value: formData.client, label: formData.client } : null}
+                  onChange={opt => setFormData(prev => ({ ...prev, client: opt ? opt.value : '' }))}
+                  isSearchable
+                  placeholder="Select Client"
+                   styles={gradientSelectStyles}
+                />
+              </div>
+              <div className="col-md-4">
+                <label htmlFor="country" className="form-label">Country</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="country"
+                  name="country"
+                  value={formData.country}
+                  onChange={handleInputChange}
+                  placeholder="Auto update with Client"
+                  readOnly
+                />
+              </div>
+              <div className="col-md-4">
+                <label htmlFor="projectManager" className="form-label">Project Manager</label>
+                <Select
+                  id="projectManager"
+                  name="projectManager"
+                  options={projectManagerOptions.map(pm => ({ value: pm, label: pm }))}
+                  value={formData.projectManager ? { value: formData.projectManager, label: formData.projectManager } : null}
+                  onChange={opt => setFormData(prev => ({ ...prev, projectManager: opt ? opt.value : '' }))}
+                  isSearchable
+                  placeholder="Refined Searchable Dropdown"
+                   styles={gradientSelectStyles}
+                />
+              </div>
+            </div>
+
+            {/* Task & Applications */}
+            <div className="row g-3 mb-3">
+              <div className="col-md-6">
+                <label htmlFor="task" className="form-label">Task <span className="text-danger">*</span></label>
+                <Select 
+                  id="task"
+                  name="task"
+                  options={taskOptions.map(t => ({ value: t, label: t }))}
+                  value={formData.tasks.length ? formData.tasks.map(t => ({ value: t, label: t })) : []}
+                  onChange={opts => setFormData(prev => ({ ...prev, tasks: opts ? opts.map(o => o.value) : [] }))}
+                  isMulti
+                  isSearchable
+                  placeholder="Select Task(s)"
+                   styles={gradientSelectStyles}
+                />
+              </div>
+              <div className="col-md-6">
+                <label htmlFor="application" className="form-label">Applications <span className="text-danger">*</span></label>
+                <Select
+                  id="application"
+                  name="application"
+                  options={applicationOptions.map(a => ({ value: a, label: a }))}
+                  value={formData.application.length ? formData.application.map(a => ({ value: a, label: a })) : []}
+                  onChange={opts => setFormData(prev => ({ ...prev, application: opts ? opts.map(o => o.value) : [] }))}
+                  isMulti
+                  isSearchable
+                  placeholder="Select Application(s)"
+                   styles={gradientSelectStyles}
+                />
+              </div>
+            </div>
+
+            {/* Languages */}
+            <div className="mb-3">
+              <label className="form-label">Languages <span className="text-danger">*</span></label>
+              <Select
+                options={languageOptions.map(l => ({ value: l, label: l }))}
+                value={formData.languages.length ? formData.languages.map(l => ({ value: l, label: l })) : []}
+                onChange={opts => setFormData(prev => ({ ...prev, languages: opts ? opts.map(o => o.value) : [] }))}
+                isMulti
+                isSearchable
+                placeholder="Select Languages"
+                 styles={gradientSelectStyles}
+              />
+              <div className="form-text">{formData.languages.length} selected</div>
+            </div>
+
+            {/* File Details */}
+            <div className="mb-3">
+              <label className="form-label">File Details*:</label>
+              <div className="d-flex align-items-center gap-2 mb-2 bg-[#201E7E]">
+                <span>Count</span>
+                <input
+                  type="number"
+                  min={1}
+                  className="form-control"
+                  style={{ width: 80 }}
+                  value={formData.files.length}
+                  onChange={e => {
+                    const count = Math.max(1, Number(e.target.value));
+                    setFormData(prev => ({
+                      ...prev,
+                      files: Array.from({ length: count }, (_, i) => prev.files[i] || { name: '', pageCount: 0, application: '' })
+                    }));
+                  }}
+                />
+                <button
+                  type="button"
+                  className="btn btn-success btn-sm"
+                  onClick={() => {/* handle excel upload */}}
+                >
+                  Upload Excel
+                </button>
+              </div>
+              <div className="table-responsive " >
+                <table className="table table-bordered  ">
+                  <thead  style={{backgroundColor: '#201E7E', color: 'white'}}>
+                    <tr style={{backgroundColor: '#201E7E', color: 'white'}}>
+                      <th>S.No.</th>
+                      <th>File Name</th>
+                      <th>Pages</th>
+                      <th>Application</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {formData.files.map((file, idx) => (
+                      <tr key={idx}>
+                        <td>{idx + 1}</td>
+                        <td>
+                          <input
+                            type="text"
+                            className="form-control"
+                            value={file.name}
+                            onChange={e => {
+                              const files = [...formData.files];
+                              files[idx].name = e.target.value;
+                              setFormData(prev => ({ ...prev, files }));
+                            }}
+                            placeholder="File Name"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            min={1}
+                            className="form-control"
+                            value={file.pageCount || ''}
+                            onChange={e => {
+                              const files = [...formData.files];
+                              files[idx].pageCount = Number(e.target.value);
+                              setFormData(prev => ({ ...prev, files }));
+                            }}
+                            placeholder="Pages"
+                          />
+                        </td>
+                        <td>
+                          <select
+                            className="form-select"
+                            value={file.application || ''}
+                            onChange={e => {
+                              const files = [...formData.files];
+                              files[idx].application = e.target.value;
+                              setFormData(prev => ({ ...prev, files }));
+                            }}
+                          >
+                            <option value="">Select</option>
+                            {applicationOptions.map(app => (
+                              <option key={app} value={app}>{app}</option>
+                            ))}
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Total Pages */}
+            <div className="mb-3">
+              <div className="row g-3">
+                <div className="col-md-4">
+                  <label className="form-label">Total Pages Per Lang</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0)}
+                    readOnly
+                  />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label">Total Project Pages</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    value={
+                      formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0) *
+                      (formData.languages.length || 1)
+                    }
+                    readOnly
+                  />
+                </div>
+              </div>
+              <div className="form-text">
+                Total Project Pages = Total Pages × Language Count
+              </div>
+            </div>
+
+            {/* Received Date, Server Path, Notes */}
+            <div className="row g-3 mb-3">
+              <div className="col-md-4">
+                <label className="form-label">Received Date <span className="text-danger">*</span></label>
+                <input
+                  type="date"
+                  className="form-control"
+                  name="receivedDate"
+                  value={formData.receivedDate}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="col-md-8">
+                <label className="form-label">Server Path <span className="text-danger">*</span></label>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="serverPath"
+                  value={formData.serverPath}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="/projects/client/project-name"
+                />
+              </div>
+              <div className="col-12">
+                <label className="form-label">Notes</label>
+                <textarea
+                  className="form-control"
+                  name="notes"
+                  rows={3}
+                  value={formData.notes}
+                  onChange={handleInputChange}
+                  placeholder="Add any additional notes or instructions..."
+                />
+              </div>
+            </div>
+
+            {/* Financial Section */}
+            <div className="row g-3 mb-3">
+              <div className="col-md-3">
+                <label className="form-label">Estimated Hrs</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  step="0.25"
+                  value={formData.estimatedHrs || ''}
+                  onChange={e => setFormData(prev => ({ ...prev, estimatedHrs: e.target.value }))}
+                  placeholder="00.00"
+                />
+                <div className="form-text">(in multiple of 0.25 only)</div>
+              </div>
+              <div className="col-md-3">
+                <label className="form-label">Per page Page Rate</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  step="0.01"
+                  value={formData.rate || ''}
+                  onChange={e => setFormData(prev => ({ ...prev, rate: e.target.value }))}
+                  placeholder="00.00"
+                />
+                <div className="form-text">(with only 2 decimals)</div>
+              </div>
+              <div className="col-md-2">
+                <label className="form-label">Currency</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.currency}
+                  readOnly
+                  placeholder="Auto updated from Client details"
+                />
+              </div>
+              <div className="col-md-2">
+                <label className="form-label">Total Cost</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.cost.toFixed(2)}
+                  readOnly
+                  placeholder="Auto Calculated"
+                />
+              </div>
+              <div className="col-md-2">
+                <label className="form-label">Cost in INR</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={formData.inrCost.toFixed(2)}
+                  readOnly
+                  placeholder="Auto Calculated"
+                />
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <div className="text-end">
+              <button type="submit" className="btn btn-warning fw-bold">
+                Save changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
       {/* Header with action buttons */}
       <div className="row mb-4">
 
@@ -1125,12 +1103,12 @@ const ActiveProject = () => {
 
 
                <button 
-              className="btn btn-light" >
+              className="btn btn-light" onClick={() => handleCardFilter('Adobe')} >
                 Adobe
              </button>
 
               <button 
-              className="btn btn-light" >
+              className="btn btn-light" onClick={() => handleCardFilter('MSOffice')} >
                MS Office
              </button>
 
@@ -1274,7 +1252,7 @@ const ActiveProject = () => {
                   <td>{project.client}</td>
                   <td>{project.task}</td>
                   <td>{project.language}</td>
-                  <td>{project.platform}</td>
+                  <td>{project.application}</td>
                   <td>{project.totalPages}</td>
                   <td>{project.dueDate}</td>
                   <td>
@@ -1303,7 +1281,7 @@ const ActiveProject = () => {
                   </td>
                   <td>
                     <div className="d-flex gap-2">
-                      <button
+                       <button
                         className="btn btn-sm btn-primary"
                         onClick={() => handleViewProject(project)}
                       >
@@ -1359,16 +1337,16 @@ const ActiveProject = () => {
                               <div className="card-body bg-card">
                                 <h6 className="card-title mb-3">Batch Edit</h6>
                                 <div className="row g-3">
-                                  {/* Platform */}
+                                  {/* application */}
                                   <div className="col-md-4 col-lg-2">
                                     <label className="form-label">Application</label>
                                     <select
                                       className="form-select form-select-sm"
-                                      value={batchEditValues.platform}
+                                      value={batchEditValues.application}
                                       onChange={(e) =>
                                         setBatchEditValues({
                                           ...batchEditValues,
-                                          platform: e.target.value,
+                                          application: e.target.value,
                                         })
                                       }
                                     >
@@ -1547,7 +1525,7 @@ const ActiveProject = () => {
                                       type="checkbox"
                                       className="form-check-input"
                                       checked={
-                                        selectedFiles.length === project.files.length
+                                        selectedFiles.length === project?.files?.length
                                       }
                                       onChange={(e) => {
                                         if (e.target.checked) {
@@ -1596,11 +1574,11 @@ const ActiveProject = () => {
                                     <td>
                                       <select
                                         className="form-select form-select-sm"
-                                        value={file.platform}
+                                        value={file.application}
                                         onChange={(e) => {
                                           const updatedFiles = project.files.map((f) =>
                                             f.id === file.id
-                                              ? { ...f, platform: e.target.value }
+                                              ? { ...f, application: e.target.value }
                                               : f
                                           );
                                           setSelectedProject({
@@ -1772,8 +1750,8 @@ const ActiveProject = () => {
                             <label className="form-label">Application</label>
                             <select
                               className="form-select form-select-sm"
-                              value={batchEditValues.platform}
-                              onChange={(e) => setBatchEditValues({ ...batchEditValues, platform: e.target.value })}
+                              value={batchEditValues.application}
+                              onChange={(e) => setBatchEditValues({ ...batchEditValues, application: e.target.value })}
                             >
                               <option value="">Select</option>
                               <option value="Web">Web</option>
@@ -1928,10 +1906,10 @@ const ActiveProject = () => {
                             <td>
                               <select
                                 className="form-select form-select-sm"
-                                value={file.platform}
+                                value={file.application}
                                 onChange={(e) => {
                                   const updatedFiles = selectedProject.files.map((f) =>
-                                    f.id === file.id ? { ...f, platform: e.target.value } : f
+                                    f.id === file.id ? { ...f, application: e.target.value } : f
                                   );
                                   setSelectedProject({ ...selectedProject, files: updatedFiles });
                                   setHasUnsavedChanges(true);
@@ -2046,12 +2024,16 @@ function inputToCustomDate(str) {
   return `${hour.toString().padStart(2, '0')}:${min} ${ampm} ${day}-${month}-${year}`;
 }
 
+
+;
+
 // Generate dummy  datafunction
 const generateDummyProjects = (count) => {
-  const clients = ['Acme Corp', 'Globex', 'Initech', 'Umbrella Inc', 'Stark Industries'];
-  const tasks = ['Translation', 'Proofreading', 'QA Review', 'Editing', 'Formatting'];
-  const languages = ['English', 'Spanish', 'French', 'German', 'Chinese', 'Japanese'];
-  const platforms = ['Web', 'Mobile', 'Desktop'];
+  const clients = ['PN','MMP Auburn','MMP Eastlake','MMP Kirkland','GN','DM','RN','NI','LB','SSS','Cpea','CV'];
+  const tasks = ['Source Creation', 'Callout', 'Prep', 'Image Creation', 'DTP','Image Localization','OVA'
+  ];
+  const languages = ['af','am','ar','az','be','bg','bn','bs','ca','cs','cy','da','de','el','en','en-US','en-GB','es','es-ES','es-MX','et','eu','fa','fi','fil','fr','fr-FR','fr-CA','ga','gl','gu','ha','he','hi','hr','hu','hy','id','ig','is','it','ja','jv','ka','kk','km','kn','ko','ku','ky','lo','lt','lv','mk','ml','mn','mr','ms','mt','my','ne','nl','no','or','pa','pl','ps','pt','pt-BR','pt-PT','ro','ru','sd','si','sk','sl','so','sq','sr','sr-Cyrl','sr-Latn','sv','sw','ta','te','th','tl','tr','uk','ur','uz','vi','xh','yo','zh','zh-Hans','zh-Hant','zh-TW'];
+  const applications =  ['Word', 'PPT', 'Excel', 'INDD','AI','PSD','AE','CDR','Visio','Project','FM'];
   const stages = ['In Progress', 'Review', 'Completed', 'On Hold'];
   const qaStatuses = ['Pending', 'In Progress', 'Approved', 'Rejected'];
   const handlers = ['John Doe', 'Jane Smith', 'Mike Johnson', ''];
@@ -2085,7 +2067,7 @@ const generateDummyProjects = (count) => {
         name: `File_${i}_${j}.docx`,
         pages: filePages,
         language: languages[Math.floor(Math.random() * languages.length)],
-        platform: platforms[Math.floor(Math.random() * platforms.length)],
+        application: applications[Math.floor(Math.random() * applications.length)],
         stage: stages[Math.floor(Math.random() * stages.length)],
         assigned: new Date(dueDate.getTime() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)).toLocaleDateString(),
         handler: handler,
@@ -2101,7 +2083,7 @@ const generateDummyProjects = (count) => {
       client: clients[Math.floor(Math.random() * clients.length)],
       task: tasks[Math.floor(Math.random() * tasks.length)],
       language: languages[Math.floor(Math.random() * languages.length)],
-      platform: platforms[Math.floor(Math.random() * platforms.length)],
+      application: applications[Math.floor(Math.random() * applications.length)],
       totalPages,
       dueDate: formattedDueDate,
       progress,
