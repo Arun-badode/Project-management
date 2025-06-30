@@ -758,7 +758,7 @@ case 'Adobe': {
                   name="country"
                   value={formData.country}
                   onChange={handleInputChange}
-                  placeholder="Auto update with Client"
+                  placeholder=""
                   readOnly
                 />
               </div>
@@ -771,7 +771,7 @@ case 'Adobe': {
                   value={formData.projectManager ? { value: formData.projectManager, label: formData.projectManager } : null}
                   onChange={opt => setFormData(prev => ({ ...prev, projectManager: opt ? opt.value : '' }))}
                   isSearchable
-                  placeholder="Refined Searchable Dropdown"
+                  placeholder=" Searchable Dropdown"
                    styles={gradientSelectStyles}
                 />
               </div>
@@ -1338,7 +1338,7 @@ case 'Adobe': {
                                 <h6 className="card-title mb-3">Batch Edit</h6>
                                 <div className="row g-3">
                                   {/* application */}
-                                  <div className="col-md-4 col-lg-2">
+                                  {/* <div className="col-md-4 col-lg-2">
                                     <label className="form-label">Application</label>
                                     <select
                                       className="form-select form-select-sm"
@@ -1355,7 +1355,7 @@ case 'Adobe': {
                                       <option value="Mobile">Mobile</option>
                                       <option value="Desktop">Desktop</option>
                                     </select>
-                                  </div>
+                                  </div> */}
                                   {/* Handler */}
                                   <div className="col-md-4 col-lg-2">
                                     <label className="form-label">Handler</label>
@@ -1572,7 +1572,8 @@ case 'Adobe': {
                                     <td>{file.pages}</td>
                                     <td>{file.language}</td>
                                     <td>
-                                      <select
+                                      {file.application}
+                                      {/* <select
                                         className="form-select form-select-sm"
                                         value={file.application}
                                         onChange={(e) => {
@@ -1591,7 +1592,7 @@ case 'Adobe': {
                                         <option value="Web">Web</option>
                                         <option value="Mobile">Mobile</option>
                                         <option value="Desktop">Desktop</option>
-                                      </select>
+                                      </select> */}
                                     </td>
                                     <td>{file.stage}</td>
                                     <td>{file.assigned}</td>
@@ -1657,9 +1658,23 @@ case 'Adobe': {
                             <div className="fw-semibold bg-info border-bottom small py-1">
                               Ready for QC Due
                             </div>
-                            <div className="fw-semibold text-light">
+
+
+                             <input
+                      type="datetime-local"
+                      className="form-control"
+                      // value={customToInputDate(editedProject.dueDate)}
+                      // onChange={(e) => {
+                      //   setEditedProject({
+                      //     ...editedProject,
+                      //     dueDate: inputToCustomDate(e.target.value)
+                      //   });
+                      // }}
+                    />
+
+                            {/* <div className="fw-semibold text-light">
                               hh:mm:tt &nbsp; DD-MM-YY
-                            </div>
+                            </div> */}
                             <div className="text-success small fw-semibold">
                               Early (20 minutes)
                             </div>
@@ -1904,6 +1919,7 @@ case 'Adobe': {
                             <td>{file.pages}</td>
                             <td>{file.language}</td>
                             <td>
+                              {file.application}
                               <select
                                 className="form-select form-select-sm"
                                 value={file.application}
