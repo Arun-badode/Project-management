@@ -4,6 +4,14 @@ import moment from 'moment';
 import Select from 'react-select';
 // import { ProjectsData } from '../AdminDashboard';
 
+
+import Datetime from "react-datetime";
+import "react-datetime/css/react-datetime.css";
+
+
+
+
+
 const ActiveProject = () => {
 
 
@@ -13,6 +21,8 @@ const ActiveProject = () => {
   const [activeTab, setActiveTab] = useState('all');
   const userRole = localStorage.getItem('userRole');
   const isAdmin = userRole === 'Admin';
+
+  const [ isEdit, setIsEdit ] = useState(null)
 
   const [formData, setFormData] = useState({
     title: '',
@@ -33,6 +43,7 @@ const ActiveProject = () => {
     inrCost: 0
   });
 
+  const [qcAllocatedHours, setQcAllocatedHours] = useState(0.25);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -180,6 +191,9 @@ case 'Adobe': {
   const handleShow = () => setShowModal(true);  
   const handleClose = () => setShowModal(false);
 
+  const [readyForQcDueInput, setReadyForQcDueInput] = useState('');
+const [priorityAll, setPriorityAll] = useState('Mid');
+
   // Batch edit states
   const [batchEditValues, setBatchEditValues] = useState({
     application: '',
@@ -277,6 +291,7 @@ case 'Adobe': {
     });
   };
 
+  const [qcDueDelay, setQcDueDelay] = useState('');
   const scrollContainerRef = useRef(null);
   const fakeScrollbarRef = useRef(null);
 
@@ -356,6 +371,8 @@ case 'Adobe': {
   }, [selectedProject]); // rerun when project changes
     
   // const staticProjects = ProjectsData;
+
+    const [selectedDate, setSelectedDate] = useState(null);
 
   const statuses =  [ 
 
@@ -534,7 +551,9 @@ case 'Adobe': {
 
   const handleEditProject = (project) => {
     setEditedProject({ ...project });
-    setShowEditModal(true);
+    setIsEdit(project.id)
+
+    // setShowEditModal(true);
   };
 
   const handleSaveProjectEdit = () => {
@@ -586,6 +605,40 @@ case 'Adobe': {
       color: 'white',
     }),
   };
+
+
+  useEffect(() => {
+  if (!readyForQcDueInput) {
+    setQcDueDelay('');
+    return;
+  }
+
+  const updateDelay = () => {
+    const delayText = calculateTimeDiff(readyForQcDueInput);
+    setQcDueDelay(delayText);
+  };
+
+  updateDelay();
+  const interval = setInterval(updateDelay, 60000); // Update every 1 min
+  return () => clearInterval(interval);
+}, [readyForQcDueInput]);
+
+
+function calculateTimeDiff(targetDateStr) {
+  const now = new Date();
+  const target = new Date(targetDateStr);
+  const diffMs = now - target;
+  const diffMinutes = Math.floor(Math.abs(diffMs) / (1000 * 60));
+  const isPast = diffMs > 0;
+  if (diffMinutes < 1) return isPast ? "Just now" : "In a few seconds";
+  const hours = Math.floor(diffMinutes / 60);
+  const minutes = diffMinutes % 60;
+  let timeStr = "";
+  if (hours > 0) timeStr += `${hours}h `;
+  timeStr += `${minutes}m`;
+  return isPast ? `Delayed by ${timeStr}` : `Due in ${timeStr}`;
+}
+
   return (
     <div className="container-fluid py-4">
       {/* Edit Project Modal */}
@@ -1254,7 +1307,20 @@ case 'Adobe': {
                   <td>{project.language}</td>
                   <td>{project.application}</td>
                   <td>{project.totalPages}</td>
-                  <td>{project.dueDate}</td>
+                  <td>{isEdit === project.id ? (
+    <input
+      type="datetime-local"
+      value={customToInputDate(project.dueDate)} // 🛠️ convert custom → input format
+      onChange={(e) =>
+        setEditedProject({
+          ...project,
+          dueDate: inputToCustomDate(e.target.value) // 🛠️ convert input → custom format
+        })
+      }
+    />
+  ) : (
+    project.dueDate
+  )}</td>
                   <td>
                     <div
                       className="progress cursor-pointer"
@@ -1653,78 +1719,150 @@ case 'Adobe': {
                         </div>
 
                         {/* Footer buttons */}
+                     
+
                         <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 bg-card px-3 py-2 rounded-3 border">
-                          <div className="text-center border border-dark rounded bg-card px-3 py-2">
-                            <div className="fw-semibold bg-info border-bottom small py-1">
-                              Ready for QC Due
-                            </div>
+  {/* Ready for QC Due */}
+  <div className="text-center border border-dark rounded bg-card px-3 py-2">
+    <div className="fw-semibold bg-info border-bottom small py-1">
+      Ready for QC Due
+    </div>
+    <input
+      type="datetime-local"
+      className="form-control"
+      value={readyForQcDueInput}
+      onChange={e => {
+        setReadyForQcDueInput(e.target.value);
+        // Format and apply to all files in the expanded project
+        const formatted = inputToCustomDate(e.target.value);
+        const updatedProjects = projects.map(p =>
+          p.id === project.id
+            ? {
+                ...p,
+                files: p.files.map(f => ({
+                  ...f,
+                  readyForQcDue: formatted
+                }))
+              }
+            : p
+        );
+        setProjects(updatedProjects);
+      }}
+    />
+    <div className=" small">Format: hh:mm  DD-MM-YY</div>
+  </div>
 
 
-                             <input
-                      type="datetime-local"
-                      className="form-control"
-                      // value={customToInputDate(editedProject.dueDate)}
-                      // onChange={(e) => {
-                      //   setEditedProject({
-                      //     ...editedProject,
-                      //     dueDate: inputToCustomDate(e.target.value)
-                      //   });
-                      // }}
-                    />
 
-                            {/* <div className="fw-semibold text-light">
-                              hh:mm:tt &nbsp; DD-MM-YY
-                            </div> */}
-                            <div className="text-success small fw-semibold">
-                              Early (20 minutes)
-                            </div>
-                          </div>
 
-                          <div className="text-center bg-card px-2">
-                            <div className="fw-bold">QC Allocated hours</div>
-                            <div>h.mm</div>
-                            <button
-                              className="btn btn-sm text-white fw-bold px-3 py-1 mt-1"
-                              style={{ backgroundColor: "#006400" }}
-                            >
-                              OK
-                            </button>
-                          </div>
 
-                          <div className="text-center border border-dark rounded bg-card px-3 py-2">
-                            <div className="fw-semibold bg-info border-bottom small py-1">
-                              QC Due
-                            </div>
-                            <div className="fw-semibold text-light">
-                              hh:mm:tt &nbsp; DD-MM-YY{" "}
-                              <span className="text-warning">(Auto)</span>
-                            </div>
-                            <div className="text-danger small fw-semibold">
-                              Delay by 30 minutes
-                            </div>
-                          </div>
+  {/* QC Allocated Hours */}
+  <div className="text-center bg-card px-2">
+    <div className="fw-bold">QC Allocated hours</div>
+    <input
+      type="number"
+      className="form-control"
+      step="0.25"
+      min="0"
+      value={qcAllocatedHours}
+      onChange={e => {
+        const val = parseFloat(e.target.value);
+        if (val >= 0 && val % 0.25 === 0) {
+          setQcAllocatedHours(val);
+          // Apply to all files in the expanded project
+          const updatedProjects = projects.map(p =>
+            p.id === project.id
+              ? {
+                  ...p,
+                  files: p.files.map(f => ({
+                    ...f,
+                    qcAllocatedHours: val
+                  }))
+                }
+              : p
+          );
+          setProjects(updatedProjects);
+        }
+      }}
+      placeholder="0.00"
+    />
+    <div className=" small">(in multiple of 0.25 only)</div>
+  </div>
 
-                          <button className="btn btn-outline-success fw-semibold px-3 py-1">
-                            Priority
-                          </button>
 
-                          <div className="d-flex gap-2">
-                            <button
-                              type="button"
-                              className="btn btn-secondary rounded-5 px-4"
-                            >
-                              Close
-                            </button>
-                            {hasUnsavedChanges && (
-                              <button
-                                type="button"
-                                className="btn btn-primary rounded-5 px-4"
-                              >
-                                Save Changes
-                              </button>
-                            )}
-                          </div>
-                        </div>
+
+                            <div className="text-center border border-dark rounded bg-card px-3 py-2">
+    <div className="fw-semibold bg-info border-bottom small py-1">
+      QC Due
+    </div>
+    <div className="fw-semibold text-light">
+      {readyForQcDueInput
+        ? inputToCustomDate(readyForQcDueInput)
+        : "hh:mm AM/PM DD-MM-YY"}{" "}
+      <span className="text-warning">(Auto)</span>
+    </div>
+    {qcDueDelay && (
+      <div
+        className={`small fw-semibold ${
+          qcDueDelay.startsWith("Delayed") ? "text-danger" : "text-success"
+        }`}
+      >
+        {qcDueDelay}
+      </div>
+    )}
+  </div>
+
+  {/* Priority */}
+  <div className="text-center border border-dark rounded bg-card px-3 py-2">
+    <div className="fw-semibold bg-info border-bottom small py-1">
+      Priority
+    </div>
+    <select
+      className="form-select"
+      value={priorityAll}
+      onChange={e => {
+        setPriorityAll(e.target.value);
+        // Apply to all files in the expanded project
+        const updatedProjects = projects.map(p =>
+          p.id === project.id
+            ? {
+                ...p,
+                files: p.files.map(f => ({
+                  ...f,
+                  priority: e.target.value
+                }))
+              }
+            : p
+        );
+        setProjects(updatedProjects);
+      }}
+    >
+      <option value="Low">Low</option>
+      <option value="Mid">Mid</option>
+      <option value="High">High</option>
+    </select>
+  </div>
+
+  {/* Footer action buttons */}
+  <div className="d-flex gap-2">
+    <button
+      type="button"
+      className="btn btn-secondary rounded-5 px-4"
+      onClick={() => setExpandedRow(null)}
+    >
+      Close
+    </button>
+    {hasUnsavedChanges && (
+      <button
+        type="button"
+        className="btn btn-primary rounded-5 px-4"
+        // Add your save handler here
+      >
+        Save Changes
+      </button>
+    )}
+  </div>
+</div>
                       </div>
                     </td>
                   </tr>
