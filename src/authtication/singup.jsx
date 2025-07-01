@@ -44,7 +44,7 @@ const SignupPage = () => {
         <div className="col-md-6 login-left d-flex justify-content-center align-items-center">
           <div className="login-left-content">
             <img
-              src="https://i.ibb.co/XZNS87Gm/icon-project-removebg-preview.png"
+              src="https://ik.imagekit.io/43o9qlnbg/Eminoids%20-%20Logo_W.png"
               alt="Logo"
               className="login-logo"
             />

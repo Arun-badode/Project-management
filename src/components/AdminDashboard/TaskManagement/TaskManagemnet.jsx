@@ -390,11 +390,7 @@ const TaskManagement = () => {
                 <div className="d-flex gap-2">
                   <div>
                     <button
-                      className={`btn ${
-                        activeFilter === "All"
-                          ? "gradient-button"
-                          : "btn-outline-secondary"
-                      }`}
+                      className="gradient-button"
                       onClick={() => setActiveFilter("All")}
                     >
                       All
@@ -402,11 +398,7 @@ const TaskManagement = () => {
                   </div>
                   <div>
                     <button
-                      className={`btn ${
-                        activeFilter === "MS Office"
-                          ? "gradient-button"
-                          : "btn-outline-secondary"
-                      }`}
+                      className="gradient-button"
                       onClick={() => setActiveFilter("MS Office")}
                     >
                       Ms Office
@@ -414,11 +406,7 @@ const TaskManagement = () => {
                   </div>
                   <div>
                     <button
-                      className={`btn ${
-                        activeFilter === "Adobe"
-                          ? "gradient-button"
-                          : "btn-outline-secondary"
-                      }`}
+                      className="gradient-button"
                       onClick={() => setActiveFilter("Adobe")}
                     >
                       Adobe
@@ -479,9 +467,14 @@ const TaskManagement = () => {
 
         {/* Scrollable Table Container */}
         <div
-          className="table-responsive"
+          className=""
           ref={scrollContainerRef}
-          style={{ maxHeight: "500px", overflowY: "auto", overflowX: "auto" }}
+          style={{
+            maxHeight: "500px",
+            overflowX: "auto",
+            scrollbarWidth: "none", // Firefox
+            msOverflowStyle: "none", // IE/Edge
+          }}
         >
           <table className="table-gradient-bg align-middle mt-0 table table-bordered table-hover">
             <thead className="table-light">

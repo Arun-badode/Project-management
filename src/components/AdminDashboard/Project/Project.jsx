@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import * as echarts from "echarts";
 import useSyncScroll from "../Hooks/useSyncScroll";
 
-import Select from 'react-select';
+import Select from "react-select";
 
 const Project = () => {
   const [activeTab, setActiveTab] = useState("created");
@@ -14,7 +14,6 @@ const Project = () => {
   const searchInputRef = useRef(null);
   const chartRef = useRef(null);
 
-  
   const currencyRates = [
     { name: "USD", rate: 83 },
     { name: "EUR", rate: 90 },
@@ -242,13 +241,158 @@ const Project = () => {
   });
 
   // Options for dropdowns
-     const clientOptions = ['PN','MMP Auburn','MMP Eastlake','MMP Kirkland','GN','DM','RN','NI','LB','SSS','Cpea','CV'];
-  const countryOptions = ['United States', 'Canada', 'UK', 'Australia', 'Germany', 'India'];
-  const projectManagerOptions = ['John Smith', 'Emily Johnson', 'Michael Brown', 'Sarah Wilson', 'David Lee'];
-  const taskOptions = ['Source Creation', 'Callout', 'Prep', 'Image Creation', 'DTP', 'Image Localization', 'OVA'];
-  const languageOptions = ['af','am','ar','az','be','bg','bn','bs','ca','cs','cy','da','de','el','en','en-US','en-GB','es','es-ES','es-MX','et','eu','fa','fi','fil','fr','fr-FR','fr-CA','ga','gl','gu','ha','he','hi','hr','hu','hy','id','ig','is','it','ja','jv','ka','kk','km','kn','ko','ku','ky','lo','lt','lv','mk','ml','mn','mr','ms','mt','my','ne','nl','no','or','pa','pl','ps','pt','pt-BR','pt-PT','ro','ru','sd','si','sk','sl','so','sq','sr','sr-Cyrl','sr-Latn','sv','sw','ta','te','th','tl','tr','uk','ur','uz','vi','xh','yo','zh','zh-Hans','zh-Hant','zh-TW'];
-  const applicationOptions = ['Word', 'PPT', 'Excel', 'INDD','AI','PSD','AE','CDR','Visio','Project','FM'];
-  const currencyOptions = ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'INR'];
+  const clientOptions = [
+    "PN",
+    "MMP Auburn",
+    "MMP Eastlake",
+    "MMP Kirkland",
+    "GN",
+    "DM",
+    "RN",
+    "NI",
+    "LB",
+    "SSS",
+    "Cpea",
+    "CV",
+  ];
+  const countryOptions = [
+    "United States",
+    "Canada",
+    "UK",
+    "Australia",
+    "Germany",
+    "India",
+  ];
+  const projectManagerOptions = [
+    "John Smith",
+    "Emily Johnson",
+    "Michael Brown",
+    "Sarah Wilson",
+    "David Lee",
+  ];
+  const taskOptions = [
+    "Source Creation",
+    "Callout",
+    "Prep",
+    "Image Creation",
+    "DTP",
+    "Image Localization",
+    "OVA",
+  ];
+  const languageOptions = [
+    "af",
+    "am",
+    "ar",
+    "az",
+    "be",
+    "bg",
+    "bn",
+    "bs",
+    "ca",
+    "cs",
+    "cy",
+    "da",
+    "de",
+    "el",
+    "en",
+    "en-US",
+    "en-GB",
+    "es",
+    "es-ES",
+    "es-MX",
+    "et",
+    "eu",
+    "fa",
+    "fi",
+    "fil",
+    "fr",
+    "fr-FR",
+    "fr-CA",
+    "ga",
+    "gl",
+    "gu",
+    "ha",
+    "he",
+    "hi",
+    "hr",
+    "hu",
+    "hy",
+    "id",
+    "ig",
+    "is",
+    "it",
+    "ja",
+    "jv",
+    "ka",
+    "kk",
+    "km",
+    "kn",
+    "ko",
+    "ku",
+    "ky",
+    "lo",
+    "lt",
+    "lv",
+    "mk",
+    "ml",
+    "mn",
+    "mr",
+    "ms",
+    "mt",
+    "my",
+    "ne",
+    "nl",
+    "no",
+    "or",
+    "pa",
+    "pl",
+    "ps",
+    "pt",
+    "pt-BR",
+    "pt-PT",
+    "ro",
+    "ru",
+    "sd",
+    "si",
+    "sk",
+    "sl",
+    "so",
+    "sq",
+    "sr",
+    "sr-Cyrl",
+    "sr-Latn",
+    "sv",
+    "sw",
+    "ta",
+    "te",
+    "th",
+    "tl",
+    "tr",
+    "uk",
+    "ur",
+    "uz",
+    "vi",
+    "xh",
+    "yo",
+    "zh",
+    "zh-Hans",
+    "zh-Hant",
+    "zh-TW",
+  ];
+  const applicationOptions = [
+    "Word",
+    "PPT",
+    "Excel",
+    "INDD",
+    "AI",
+    "PSD",
+    "AE",
+    "CDR",
+    "Visio",
+    "Project",
+    "FM",
+  ];
+  const currencyOptions = ["USD", "EUR", "GBP", "CAD", "AUD", "INR"];
 
   // Filter projects based on active tab and search query
   const filteredProjects = projects.filter((project) => {
@@ -476,47 +620,46 @@ const Project = () => {
     });
   };
 
-
- 
-
-     const gradientSelectStyles = {
+  const gradientSelectStyles = {
     control: (provided, state) => ({
       ...provided,
-      background: 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
-      color: 'white',
-      borderColor: state.isFocused ? '#ffffff66' : '#ffffff33',
-      boxShadow: state.isFocused ? '0 0 0 1px #ffffff66' : 'none',
-      minHeight: '38px',
+      background: "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
+      color: "white",
+      borderColor: state.isFocused ? "#ffffff66" : "#ffffff33",
+      boxShadow: state.isFocused ? "0 0 0 1px #ffffff66" : "none",
+      minHeight: "38px",
     }),
     singleValue: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     multiValue: (provided) => ({
       ...provided,
-      backgroundColor: '#1b2f6e',
+      backgroundColor: "#1b2f6e",
     }),
     multiValueLabel: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     placeholder: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     input: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     option: (provided, state) => ({
       ...provided,
-      backgroundColor: state.isFocused ? '#293d80' : 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
-      color: 'white',
+      backgroundColor: state.isFocused
+        ? "#293d80"
+        : "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
+      color: "white",
     }),
     menu: (provided) => ({
       ...provided,
-      background: 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
-      color: 'white',
+      background: "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
+      color: "white",
     }),
   };
   // Handle edit project
@@ -876,7 +1019,12 @@ const Project = () => {
                 <div
                   className="table-responsive table-gradient-bg"
                   ref={scrollContainerRef1}
-                  style={{ overflowX: "auto", maxHeight: "500px" }}
+                  style={{
+                    maxHeight: "500px",
+                    overflowX: "auto",
+                    scrollbarWidth: "none", // Firefox
+                    msOverflowStyle: "none", // IE/Edge
+                  }}
                 >
                   <table
                     className="table table-hover mb-0"
@@ -1116,7 +1264,12 @@ const Project = () => {
                 <div
                   className="table-responsive table-gradient-bg"
                   ref={scrollContainerRef2}
-                  style={{ overflowX: "auto", maxHeight: "500px" }}
+                  style={{
+                    maxHeight: "500px",
+                    overflowX: "auto",
+                    scrollbarWidth: "none", // Firefox
+                    msOverflowStyle: "none", // IE/Edge
+                  }}
                 >
                   <table
                     className="table table-hover mb-0"
@@ -1363,7 +1516,12 @@ const Project = () => {
                   <div
                     className="table-responsive table-gradient-bg"
                     ref={scrollContainerRef4}
-                    style={{ overflowX: "auto", maxHeight: "500px" }}
+                    style={{
+                      maxHeight: "500px",
+                      overflowX: "auto",
+                      scrollbarWidth: "none", // Firefox
+                      msOverflowStyle: "none", // IE/Edge
+                    }}
                   >
                     <table
                       className="table table-hover mb-0"
@@ -1481,365 +1639,505 @@ const Project = () => {
       </div>
 
       {/* Create/Edit Project Modal */}
-    {(showCreateModal || showEditModal !== false) && (
-  <div className="modal fade show d-block custom-modal-dark" tabIndex="-1" aria-modal="true" role="dialog">
-    <div className="modal-dialog modal-lg">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h5 className="modal-title">
-            {showEditModal !== false ? 'Edit Project Details' : 'Create New Project'}
-          </h5>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={() => {
-              setShowCreateModal(false);
-              setShowEditModal(false);
-            }}
-          ></button>
-        </div>
-        <div className="modal-body">
-          <form onSubmit={handleSubmit}>
-            {/* Project Title */}
-            <div className=" row mb-3 col-md-12">
-              <label htmlFor="title" className="form-label">
-                Project Title <span className="text-danger">*</span>
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="title"
-                name="title"
-                maxLength={80}
-                required
-                value={formData.title}
-                onChange={handleInputChange}
-                placeholder="Enter project title (max 80 chars)"
-              />
-              <div className="form-text">
-                Max allowed Character length – 80, (ignore or remove any special character by itself)
-              </div>
-            </div>
-
-            {/* Client, Country, Project Manager */}
-            <div className="row g-3 mb-3">
-              <div className="col-md-4">
-                <label htmlFor="client" className="form-label">Client <span className="text-danger">*</span></label>
-                <Select
-                  id="client"
-                  name="client"
-                  options={clientOptions.map(c => ({ value: c, label: c }))}
-                  value={formData.client ? { value: formData.client, label: formData.client } : null}
-                  onChange={opt => setFormData(prev => ({ ...prev, client: opt ? opt.value : '' }))}
-                  isSearchable
-                  placeholder="Select Client"
-                   styles={gradientSelectStyles}
-                />
-              </div>
-              <div className="col-md-4">
-                <label htmlFor="country" className="form-label">Country</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="country"
-                  name="country"
-                  value={formData.country}
-                  onChange={handleInputChange}
-                  placeholder="Auto update with Client"
-                  readOnly
-                />
-              </div>
-              <div className="col-md-4">
-                <label htmlFor="projectManager" className="form-label">Project Manager</label>
-                <Select
-                  id="projectManager"
-                  name="projectManager"
-                  options={projectManagerOptions.map(pm => ({ value: pm, label: pm }))}
-                  value={formData.projectManager ? { value: formData.projectManager, label: formData.projectManager } : null}
-                  onChange={opt => setFormData(prev => ({ ...prev, projectManager: opt ? opt.value : '' }))}
-                  isSearchable
-                  placeholder="Refined Searchable Dropdown"
-                   styles={gradientSelectStyles}
-                />
-              </div>
-            </div>
-
-            {/* Task & Applications */}
-            <div className="row g-3 mb-3">
-              <div className="col-md-6">
-                <label htmlFor="task" className="form-label">Task <span className="text-danger">*</span></label>
-                <Select 
-                  id="task"
-                  name="task"
-                  options={taskOptions.map(t => ({ value: t, label: t }))}
-                  value={formData.tasks.length ? formData.tasks.map(t => ({ value: t, label: t })) : []}
-                  onChange={opts => setFormData(prev => ({ ...prev, tasks: opts ? opts.map(o => o.value) : [] }))}
-                  isMulti
-                  isSearchable
-                  placeholder="Select Task(s)"
-                   styles={gradientSelectStyles}
-                />
-              </div>
-              <div className="col-md-6">
-                <label htmlFor="application" className="form-label">Applications <span className="text-danger">*</span></label>
-                <Select
-                  id="application"
-                  name="application"
-                  options={applicationOptions.map(a => ({ value: a, label: a }))}
-                  value={formData.application.length ? formData.application.map(a => ({ value: a, label: a })) : []}
-                  onChange={opts => setFormData(prev => ({ ...prev, application: opts ? opts.map(o => o.value) : [] }))}
-                  isMulti
-                  isSearchable
-                  placeholder="Select Application(s)"
-                   styles={gradientSelectStyles}
-                />
-              </div>
-            </div>
-
-            {/* Languages */}
-            <div className="mb-3">
-              <label className="form-label">Languages <span className="text-danger">*</span></label>
-              <Select
-                options={languageOptions.map(l => ({ value: l, label: l }))}
-                value={formData.languages.length ? formData.languages.map(l => ({ value: l, label: l })) : []}
-                onChange={opts => setFormData(prev => ({ ...prev, languages: opts ? opts.map(o => o.value) : [] }))}
-                isMulti
-                isSearchable
-                placeholder="Select Languages"
-                 styles={gradientSelectStyles}
-              />
-              <div className="form-text">{formData.languages.length} selected</div>
-            </div>
-
-            {/* File Details */}
-            <div className="mb-3">
-              <label className="form-label">File Details*:</label>
-              <div className="d-flex align-items-center gap-2 mb-2 bg-[#201E7E]">
-                <span>Count</span>
-                <input
-                  type="number"
-                  min={1}
-                  className="form-control"
-                  style={{ width: 80 }}
-                  value={formData.files.length}
-                  onChange={e => {
-                    const count = Math.max(1, Number(e.target.value));
-                    setFormData(prev => ({
-                      ...prev,
-                      files: Array.from({ length: count }, (_, i) => prev.files[i] || { name: '', pageCount: 0, application: '' })
-                    }));
-                  }}
-                />
+      {(showCreateModal || showEditModal !== false) && (
+        <div
+          className="modal fade show d-block custom-modal-dark"
+          tabIndex="-1"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">
+                  {showEditModal !== false
+                    ? "Edit Project Details"
+                    : "Create New Project"}
+                </h5>
                 <button
                   type="button"
-                  className="btn btn-success btn-sm"
-                  onClick={() => {/* handle excel upload */}}
-                >
-                  Upload Excel
-                </button>
+                  className="btn-close"
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setShowEditModal(false);
+                  }}
+                ></button>
               </div>
-              <div className="table-responsive " >
-                <table className="table table-bordered  ">
-                  <thead  style={{backgroundColor: '#201E7E', color: 'white'}}>
-                    <tr style={{backgroundColor: '#201E7E', color: 'white'}}>
-                      <th>S.No.</th>
-                      <th>File Name</th>
-                      <th>Pages</th>
-                      <th>Application</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {formData.files.map((file, idx) => (
-                      <tr key={idx}>
-                        <td>{idx + 1}</td>
-                        <td>
-                          <input
-                            type="text"
-                            className="form-control"
-                            value={file.name}
-                            onChange={e => {
-                              const files = [...formData.files];
-                              files[idx].name = e.target.value;
-                              setFormData(prev => ({ ...prev, files }));
-                            }}
-                            placeholder="File Name"
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            min={1}
-                            className="form-control"
-                            value={file.pageCount || ''}
-                            onChange={e => {
-                              const files = [...formData.files];
-                              files[idx].pageCount = Number(e.target.value);
-                              setFormData(prev => ({ ...prev, files }));
-                            }}
-                            placeholder="Pages"
-                          />
-                        </td>
-                        <td>
-                          <select
-                            className="form-select"
-                            value={file.application || ''}
-                            onChange={e => {
-                              const files = [...formData.files];
-                              files[idx].application = e.target.value;
-                              setFormData(prev => ({ ...prev, files }));
+              <div className="modal-body">
+                <form onSubmit={handleSubmit}>
+                  {/* Project Title */}
+                  <div className=" row mb-3 col-md-12">
+                    <label htmlFor="title" className="form-label">
+                      Project Title <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="title"
+                      name="title"
+                      maxLength={80}
+                      required
+                      value={formData.title}
+                      onChange={handleInputChange}
+                      placeholder="Enter project title (max 80 chars)"
+                    />
+                    <div className="form-text">
+                      Max allowed Character length – 80, (ignore or remove any
+                      special character by itself)
+                    </div>
+                  </div>
+
+                  {/* Client, Country, Project Manager */}
+                  <div className="row g-3 mb-3">
+                    <div className="col-md-4">
+                      <label htmlFor="client" className="form-label">
+                        Client <span className="text-danger">*</span>
+                      </label>
+                      <Select
+                        id="client"
+                        name="client"
+                        options={clientOptions.map((c) => ({
+                          value: c,
+                          label: c,
+                        }))}
+                        value={
+                          formData.client
+                            ? { value: formData.client, label: formData.client }
+                            : null
+                        }
+                        onChange={(opt) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            client: opt ? opt.value : "",
+                          }))
+                        }
+                        isSearchable
+                        placeholder="Select Client"
+                        styles={gradientSelectStyles}
+                      />
+                    </div>
+                    <div className="col-md-4">
+                      <label htmlFor="country" className="form-label">
+                        Country
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="country"
+                        name="country"
+                        value={formData.country}
+                        onChange={handleInputChange}
+                        placeholder="Auto update with Client"
+                        readOnly
+                      />
+                    </div>
+                    <div className="col-md-4">
+                      <label htmlFor="projectManager" className="form-label">
+                        Project Manager
+                      </label>
+                      <Select
+                        id="projectManager"
+                        name="projectManager"
+                        options={projectManagerOptions.map((pm) => ({
+                          value: pm,
+                          label: pm,
+                        }))}
+                        value={
+                          formData.projectManager
+                            ? {
+                                value: formData.projectManager,
+                                label: formData.projectManager,
+                              }
+                            : null
+                        }
+                        onChange={(opt) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            projectManager: opt ? opt.value : "",
+                          }))
+                        }
+                        isSearchable
+                        placeholder="Refined Searchable Dropdown"
+                        styles={gradientSelectStyles}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Task & Applications */}
+                  <div className="row g-3 mb-3">
+                    <div className="col-md-6">
+                      <label htmlFor="task" className="form-label">
+                        Task <span className="text-danger">*</span>
+                      </label>
+                      <Select
+                        id="task"
+                        name="task"
+                        options={taskOptions.map((t) => ({
+                          value: t,
+                          label: t,
+                        }))}
+                        value={
+                          formData.tasks.length
+                            ? formData.tasks.map((t) => ({
+                                value: t,
+                                label: t,
+                              }))
+                            : []
+                        }
+                        onChange={(opts) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            tasks: opts ? opts.map((o) => o.value) : [],
+                          }))
+                        }
+                        isMulti
+                        isSearchable
+                        placeholder="Select Task(s)"
+                        styles={gradientSelectStyles}
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label htmlFor="application" className="form-label">
+                        Applications <span className="text-danger">*</span>
+                      </label>
+                      <Select
+                        id="application"
+                        name="application"
+                        options={applicationOptions.map((a) => ({
+                          value: a,
+                          label: a,
+                        }))}
+                        value={
+                          formData.application.length
+                            ? formData.application.map((a) => ({
+                                value: a,
+                                label: a,
+                              }))
+                            : []
+                        }
+                        onChange={(opts) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            application: opts ? opts.map((o) => o.value) : [],
+                          }))
+                        }
+                        isMulti
+                        isSearchable
+                        placeholder="Select Application(s)"
+                        styles={gradientSelectStyles}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Languages */}
+                  <div className="mb-3">
+                    <label className="form-label">
+                      Languages <span className="text-danger">*</span>
+                    </label>
+                    <Select
+                      options={languageOptions.map((l) => ({
+                        value: l,
+                        label: l,
+                      }))}
+                      value={
+                        formData.languages.length
+                          ? formData.languages.map((l) => ({
+                              value: l,
+                              label: l,
+                            }))
+                          : []
+                      }
+                      onChange={(opts) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          languages: opts ? opts.map((o) => o.value) : [],
+                        }))
+                      }
+                      isMulti
+                      isSearchable
+                      placeholder="Select Languages"
+                      styles={gradientSelectStyles}
+                    />
+                    <div className="form-text">
+                      {formData.languages.length} selected
+                    </div>
+                  </div>
+
+                  {/* File Details */}
+                  <div className="mb-3">
+                    <label className="form-label">File Details*:</label>
+                    <div className="d-flex align-items-center gap-2 mb-2 bg-[#201E7E]">
+                      <span>Count</span>
+                      <input
+                        type="number"
+                        min={1}
+                        className="form-control"
+                        style={{ width: 80 }}
+                        value={formData.files.length}
+                        onChange={(e) => {
+                          const count = Math.max(1, Number(e.target.value));
+                          setFormData((prev) => ({
+                            ...prev,
+                            files: Array.from(
+                              { length: count },
+                              (_, i) =>
+                                prev.files[i] || {
+                                  name: "",
+                                  pageCount: 0,
+                                  application: "",
+                                }
+                            ),
+                          }));
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-success btn-sm"
+                        onClick={() => {
+                          /* handle excel upload */
+                        }}
+                      >
+                        Upload Excel
+                      </button>
+                    </div>
+                    <div className="table-responsive ">
+                      <table className="table table-bordered  ">
+                        <thead
+                          style={{ backgroundColor: "#201E7E", color: "white" }}
+                        >
+                          <tr
+                            style={{
+                              backgroundColor: "#201E7E",
+                              color: "white",
                             }}
                           >
-                            <option value="">Select</option>
-                            {applicationOptions.map(app => (
-                              <option key={app} value={app}>{app}</option>
-                            ))}
-                          </select>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                            <th>S.No.</th>
+                            <th>File Name</th>
+                            <th>Pages</th>
+                            <th>Application</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {formData.files.map((file, idx) => (
+                            <tr key={idx}>
+                              <td>{idx + 1}</td>
+                              <td>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  value={file.name}
+                                  onChange={(e) => {
+                                    const files = [...formData.files];
+                                    files[idx].name = e.target.value;
+                                    setFormData((prev) => ({ ...prev, files }));
+                                  }}
+                                  placeholder="File Name"
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="number"
+                                  min={1}
+                                  className="form-control"
+                                  value={file.pageCount || ""}
+                                  onChange={(e) => {
+                                    const files = [...formData.files];
+                                    files[idx].pageCount = Number(
+                                      e.target.value
+                                    );
+                                    setFormData((prev) => ({ ...prev, files }));
+                                  }}
+                                  placeholder="Pages"
+                                />
+                              </td>
+                              <td>
+                                <select
+                                  className="form-select"
+                                  value={file.application || ""}
+                                  onChange={(e) => {
+                                    const files = [...formData.files];
+                                    files[idx].application = e.target.value;
+                                    setFormData((prev) => ({ ...prev, files }));
+                                  }}
+                                >
+                                  <option value="">Select</option>
+                                  {applicationOptions.map((app) => (
+                                    <option key={app} value={app}>
+                                      {app}
+                                    </option>
+                                  ))}
+                                </select>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
 
-            {/* Total Pages */}
-            <div className="mb-3">
-              <div className="row g-3">
-                <div className="col-md-4">
-                  <label className="form-label">Total Pages Per Lang</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0)}
-                    readOnly
-                  />
-                </div>
-                <div className="col-md-4">
-                  <label className="form-label">Total Project Pages</label>
-                  <input
-                    type="number"
-                    className="form-control"
-                    value={
-                      formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0) *
-                      (formData.languages.length || 1)
-                    }
-                    readOnly
-                  />
-                </div>
-              </div>
-              <div className="form-text">
-                Total Project Pages = Total Pages × Language Count
-              </div>
-            </div>
+                  {/* Total Pages */}
+                  <div className="mb-3">
+                    <div className="row g-3">
+                      <div className="col-md-4">
+                        <label className="form-label">
+                          Total Pages Per Lang
+                        </label>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={formData.files.reduce(
+                            (sum, file) => sum + (file.pageCount || 0),
+                            0
+                          )}
+                          readOnly
+                        />
+                      </div>
+                      <div className="col-md-4">
+                        <label className="form-label">
+                          Total Project Pages
+                        </label>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={
+                            formData.files.reduce(
+                              (sum, file) => sum + (file.pageCount || 0),
+                              0
+                            ) * (formData.languages.length || 1)
+                          }
+                          readOnly
+                        />
+                      </div>
+                    </div>
+                    <div className="form-text">
+                      Total Project Pages = Total Pages × Language Count
+                    </div>
+                  </div>
 
-            {/* Received Date, Server Path, Notes */}
-            <div className="row g-3 mb-3">
-              <div className="col-md-4">
-                <label className="form-label">Received Date <span className="text-danger">*</span></label>
-                <input
-                  type="date"
-                  className="form-control"
-                  name="receivedDate"
-                  value={formData.receivedDate}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="col-md-8">
-                <label className="form-label">Server Path <span className="text-danger">*</span></label>
-                <input
-                  type="text"
-                  className="form-control"
-                  name="serverPath"
-                  value={formData.serverPath}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="/projects/client/project-name"
-                />
-              </div>
-              <div className="col-12">
-                <label className="form-label">Notes</label>
-                <textarea
-                  className="form-control"
-                  name="notes"
-                  rows={3}
-                  value={formData.notes}
-                  onChange={handleInputChange}
-                  placeholder="Add any additional notes or instructions..."
-                />
-              </div>
-            </div>
+                  {/* Received Date, Server Path, Notes */}
+                  <div className="row g-3 mb-3">
+                    <div className="col-md-4">
+                      <label className="form-label">
+                        Received Date <span className="text-danger">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        name="receivedDate"
+                        value={formData.receivedDate}
+                        onChange={handleInputChange}
+                        required
+                      />
+                    </div>
+                    <div className="col-md-8">
+                      <label className="form-label">
+                        Server Path <span className="text-danger">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="serverPath"
+                        value={formData.serverPath}
+                        onChange={handleInputChange}
+                        required
+                        placeholder="/projects/client/project-name"
+                      />
+                    </div>
+                    <div className="col-12">
+                      <label className="form-label">Notes</label>
+                      <textarea
+                        className="form-control"
+                        name="notes"
+                        rows={3}
+                        value={formData.notes}
+                        onChange={handleInputChange}
+                        placeholder="Add any additional notes or instructions..."
+                      />
+                    </div>
+                  </div>
 
-            {/* Financial Section */}
-            <div className="row g-3 mb-3">
-              <div className="col-md-3">
-                <label className="form-label">Estimated Hrs</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  step="0.25"
-                  value={formData.estimatedHrs || ''}
-                  onChange={e => setFormData(prev => ({ ...prev, estimatedHrs: e.target.value }))}
-                  placeholder="00.00"
-                />
-                <div className="form-text">(in multiple of 0.25 only)</div>
-              </div>
-              <div className="col-md-3">
-                <label className="form-label">Per page Page Rate</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  step="0.01"
-                  value={formData.rate || ''}
-                  onChange={e => setFormData(prev => ({ ...prev, rate: e.target.value }))}
-                  placeholder="00.00"
-                />
-                <div className="form-text">(with only 2 decimals)</div>
-              </div>
-              <div className="col-md-2">
-                <label className="form-label">Currency</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.currency}
-                  readOnly
-                  placeholder="Auto updated from Client details"
-                />
-              </div>
-              <div className="col-md-2">
-                <label className="form-label">Total Cost</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.cost.toFixed(2)}
-                  readOnly
-                  placeholder="Auto Calculated"
-                />
-              </div>
-              <div className="col-md-2">
-                <label className="form-label">Cost in INR</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={formData.inrCost.toFixed(2)}
-                  readOnly
-                  placeholder="Auto Calculated"
-                />
-              </div>
-            </div>
+                  {/* Financial Section */}
+                  <div className="row g-3 mb-3">
+                    <div className="col-md-3">
+                      <label className="form-label">Estimated Hrs</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        step="0.25"
+                        value={formData.estimatedHrs || ""}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            estimatedHrs: e.target.value,
+                          }))
+                        }
+                        placeholder="00.00"
+                      />
+                      <div className="form-text">
+                        (in multiple of 0.25 only)
+                      </div>
+                    </div>
+                    <div className="col-md-3">
+                      <label className="form-label">Per page Page Rate</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        step="0.01"
+                        value={formData.rate || ""}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            rate: e.target.value,
+                          }))
+                        }
+                        placeholder="00.00"
+                      />
+                      <div className="form-text">(with only 2 decimals)</div>
+                    </div>
+                    <div className="col-md-2">
+                      <label className="form-label">Currency</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={formData.currency}
+                        readOnly
+                        placeholder="Auto updated from Client details"
+                      />
+                    </div>
+                    <div className="col-md-2">
+                      <label className="form-label">Total Cost</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={formData.cost.toFixed(2)}
+                        readOnly
+                        placeholder="Auto Calculated"
+                      />
+                    </div>
+                    <div className="col-md-2">
+                      <label className="form-label">Cost in INR</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={formData.inrCost.toFixed(2)}
+                        readOnly
+                        placeholder="Auto Calculated"
+                      />
+                    </div>
+                  </div>
 
-            {/* Save Button */}
-            <div className="text-end">
-              <button type="submit" className="btn btn-warning fw-bold">
-                Save changes
-              </button>
+                  {/* Save Button */}
+                  <div className="text-end">
+                    <button type="submit" className="btn btn-warning fw-bold">
+                      Save changes
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
-          </form>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
 
       {/* Settings Modal */}
       {showSettings && (
@@ -2025,7 +2323,11 @@ const Project = () => {
                           <button
                             className="btn btn-outline-danger"
                             onClick={() =>
-                              handleDeleteItem(applications, setapplications, index)
+                              handleDeleteItem(
+                                applications,
+                                setapplications,
+                                index
+                              )
                             }
                           >
                             <i className="fas fa-trash-alt"></i>

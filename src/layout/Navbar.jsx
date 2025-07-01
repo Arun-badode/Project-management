@@ -53,7 +53,7 @@ const Navbar = ({ toggleSidebar }) => {
           <div className="d-flex align-items-center gap-3 flex-shrink-0">
             <img
               // src="https://ik.imagekit.io/wycpoxj6v/Eminoids%20-%20Logo_B.png?updatedAt=1750836038955"
-              src="../../public/Logo/Eminoids - Logo_W.png"
+              src="https://ik.imagekit.io/43o9qlnbg/Eminoids%20-%20Logo_W.png"
               alt="Logo"
               style={{
                 width: window.innerWidth >= 992 ? "250px" : "120px",

@@ -1058,12 +1058,13 @@ const staticProjects =  ProjectsData;
 
         {/* Actual Table Container with horizontal scroll */}
         <div
+          className=""
           ref={scrollContainerRef}
-          className="table-responsive"
           style={{
             maxHeight: "500px",
-            overflowY: "auto",
             overflowX: "auto",
+            scrollbarWidth: "none", // Firefox
+            msOverflowStyle: "none", // IE/Edge
           }}
         >
           <Table className="table-gradient-bg align-middle table table-bordered table-hover">

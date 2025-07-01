@@ -72,7 +72,7 @@ function App() {
         <Route path="/attendance" element={<Attendance />} />
 
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
-        <Route path="/taskmanagement" element={<TaskManagement />} />
+        <Route path="/task-management" element={<TaskManagement />} />
         <Route path="/calendar" element={<Calander />} />
         <Route path="/usermanage" element={<UserManagement />} />
         <Route path="/resourcemanagement" element={<ResourceManagement />} />
@@ -85,12 +85,12 @@ function App() {
         <Route path="/filemanagementsystem" element={<FileManagementSystem />} />
         <Route path="/qamanagement" element={<QAManagement />} />
         <Route path="/changepassword" element={<ChangesPassword />} />
-        <Route path="/role&permission" element={<RoleManagementSystem />} />
+        <Route path="/role-permission" element={<RoleManagementSystem />} />
         <Route path="/project" element={<Project />} />
         <Route path="/actioncenter" element={<ActionCenter />} />
 
         {/* Lead routes */}
-        <Route path="/LeadDashboard" element={<LeadDashboard />} />
+        <Route path="/active-project" element={<LeadDashboard />} />
 
         {/* Team Member routes */}
         <Route path="/team-dashboard" element={<TaskDashboard />} />

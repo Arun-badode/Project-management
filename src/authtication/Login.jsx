@@ -102,7 +102,7 @@ useEffect(() => {
         className="splash-video"
       >
         <source 
-          src={isMobile ? "/Video/Eminoids - Logo Animation Blue_Mob.mp4" : "/Video/Eminoids - Logo Animation Blue.mp4"}
+          src={isMobile ? "/Video/Eminoids - Logo Animation Blue.mp4" : "/Video/Eminoids - Logo Animation Blue_Mob.mp4"}
           type="video/mp4"
         />
         Your browser does not support the video tag.
@@ -121,7 +121,7 @@ useEffect(() => {
         <div className="col-md-6 login-left d-flex justify-content-center align-items-center">
           <div className="login-left-content">
             <img
-              src="../../public/Logo/Eminoids - Logo_W.png"
+              src="https://ik.imagekit.io/43o9qlnbg/Eminoids%20-%20Logo_W.png"
               alt="Logo"
               className="login-logo"
             />

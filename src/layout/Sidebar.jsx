@@ -43,13 +43,13 @@ const Sidebar = ({ collapsed }) => {
               </li>
               {/* Active Projects */}
               <li
-                className={`menu-item ${isActive("/LeadDashboard") ? "active" : ""
+                className={`menu-item ${isActive("/active-project") ? "active" : ""
                   }`}
               >
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("/LeadDashboard");
+                    navigate("/active-project");
                     menuItemClick();
                   }}
                 >
@@ -59,13 +59,13 @@ const Sidebar = ({ collapsed }) => {
               </li>
               {/* Task Management */}
               <li
-                className={`menu-item ${isActive("/taskmanagement") ? "active" : ""
+                className={`menu-item ${isActive("/task-management") ? "active" : ""
                   }`}
               >
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("/taskmanagement");
+                    navigate("/task-management");
                     menuItemClick();
                   }}
                 >
@@ -314,13 +314,13 @@ const Sidebar = ({ collapsed }) => {
               }
 
               <li
-                className={`menu-item ${isActive("/role&permission") ? "active" : ""
+                className={`menu-item ${isActive("/role-permission") ? "active" : ""
                   }`}
               >
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("/role&permission");
+                    navigate("/role-permission");
                     menuItemClick();
                   }}
                 >
@@ -503,7 +503,7 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
               <li
-                className={`menu-item ${isActive("/taskdashboard") ? "active" : ""
+                className={`menu-item ${isActive("/activity") ? "active" : ""
                   }`}
               >
                 <div
@@ -518,7 +518,7 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
               <li
-                className={`menu-item ${isActive("/taskdashboard") ? "active" : ""
+                className={`menu-item ${isActive("/messages") ? "active" : ""
                   }`}
               >
                 <div
