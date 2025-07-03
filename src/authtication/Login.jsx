@@ -12,6 +12,19 @@ const LoginPage = () => {
   const [role, setRole] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  // Additional state for animation
+const [fadeOut, setFadeOut] = useState(false);
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setFadeOut(true); // Start fade out
+    setTimeout(() => {
+      setShowVideo(false); // Remove video after fade
+    }, 1000); // Wait for animation to finish
+  }, 7000);
+  return () => clearTimeout(timer);
+}, []);
+
 
   const roleCredentials = {
     Admin: { email: "admin123", password: "admin@123" },
@@ -22,7 +35,7 @@ const LoginPage = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowVideo(false);
-    }, 4000); // 4 seconds video duration
+    }, 7000); 
 
     return () => clearTimeout(timer);
   }, []);
@@ -59,43 +72,62 @@ const LoginPage = () => {
     setPassword(roleCredentials[selectedRole].password);
   };
 
+  // if (showVideo) {
+  //   return (
+  //     <div className="video-splash-screen">
+  //       <video 
+  //         autoPlay 
+  //         muted 
+  //         playsInline 
+  //         className="splash-video"
+  //         onEnded={() => setShowVideo(false)}
+  //       >
+  //         <source 
+  //           src={isMobile ? "../../public/Video/Eminoids - Logo Animation Blue_Mob.mp4" : "../../public/Video/Eminoids - Logo Animation Blue.mp4" } 
+  //           type="video/mp4" 
+  //         />
+  //         Your browser does not support the video tag.
+  //       </video>
+  //     </div>
+  //   );
+  // }
+
   if (showVideo) {
-    return (
-      <div className="video-splash-screen">
-        <video 
-          autoPlay 
-          muted 
-          playsInline 
-          className="splash-video"
-          onEnded={() => setShowVideo(false)}
-        >
-          <source 
-            src={isMobile ? "https://ik.imagekit.io/wycpoxj6v/Eminoids%20-%20Logo%20Animation%20Blue.mp4?updatedAt=1750835869196" : "https://ik.imagekit.io/wycpoxj6v/Eminoids%20-%20Logo%20Animation%20Blue_Mob.mp4?updatedAt=1750835971964"} 
-            type="video/mp4" 
-          />
-          Your browser does not support the video tag.
-        </video>
-      </div>
-    );
-  }
+  return (
+    <div className={`video-splash-screen ${fadeOut ? "fade-out" : ""}`}>
+      <video 
+        autoPlay 
+        muted 
+        playsInline 
+        className="splash-video"
+      >
+        <source 
+          src={isMobile ? "/Video/Eminoids - Logo Animation Blue.mp4" : "/Video/Eminoids - Logo Animation Blue_Mob.mp4"}
+          type="video/mp4"
+        />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  );
+}
 
   return (
     <div
-      className="login-page container"
-      style={{ justifyContent: "center", marginTop:"30px",}}
+      className="login-page "
+     
     >
       <div className="login-container row">
         {/* Left Panel */}
         <div className="col-md-6 login-left d-flex justify-content-center align-items-center">
           <div className="login-left-content">
             <img
-              src="https://i.ibb.co/XZNS87Gm/icon-project-removebg-preview.png"
+              src="https://ik.imagekit.io/43o9qlnbg/Eminoids%20-%20Logo_W.png"
               alt="Logo"
               className="login-logo"
             />
             <h1 className="text-white">Welcome Back!</h1>
-            <p className="fw-bold">
-              “Let’s turn tasks into triumphs!” 
+            <p className="fw-bold text-strong">
+              Let’s turn tasks into triumphs! 
             </p>
           </div>
         </div>
@@ -161,12 +193,14 @@ const LoginPage = () => {
               </div>
 
               <button type="submit" className="btn login-submit-btn mt-3">
-                LOGIN IN
+                LOG IN
               </button>
               <div className="text-center mt-3">
                 <p className="text-muted">
-                 Version Build 1.0 <Link to="/singup" style={{ color: "#6e8efb" }}>Sign up</Link>
+                 Version Build 1.0 
                 </p>
+
+             <Link to="/signup" style={{ color: "#6e8efb" }}>Sign up</Link>
               </div>
             </form>
           </div>

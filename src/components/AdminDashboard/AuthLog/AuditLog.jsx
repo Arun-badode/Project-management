@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import useSyncScroll from "../Hooks/useSyncScroll";
 
 const AuditLog = () => {
   const [activeTab, setActiveTab] = useState("all-activities");
@@ -81,7 +82,7 @@ const AuditLog = () => {
       device: "Chrome 125.0 / Linux",
       details: "Generated monthly performance analytics report",
     },
-      {
+    {
       id: 4,
       timestamp: "2024-06-17 14:15:33",
       user: "Emily Davis",
@@ -156,7 +157,7 @@ const AuditLog = () => {
       ipAddress: "192.168.1.120",
       device: "Chrome 125.0 / Linux",
     },
-    
+
   ];
 
   const changesHistoryData = [
@@ -226,7 +227,7 @@ const AuditLog = () => {
       },
     },
 
-    
+
   ];
 
   const roles = ["Admin", "Manager", "User"];
@@ -336,6 +337,9 @@ const AuditLog = () => {
     return `badge ${status === "Success" ? "bg-success" : "bg-danger"}`;
   };
 
+  const { scrollContainerRef, fakeScrollbarRef } = useSyncScroll(true);
+
+
   return (
     <div className="container-fluid py-4 bg-light min-vh-100 bg-main">
       <div className="row">
@@ -364,9 +368,8 @@ const AuditLog = () => {
               <ul className="nav nav-pills mb-4" role="tablist">
                 <li className="nav-item" role="presentation">
                   <button
-                    className={`nav-link ${
-                      activeTab === "all-activities" ? "active" : ""
-                    }`}
+                    className={`nav-link ${activeTab === "all-activities" ? "active" : ""
+                      }`}
                     onClick={() => {
                       setActiveTab("all-activities");
                       setCurrentPage(1);
@@ -378,9 +381,8 @@ const AuditLog = () => {
                 </li>
                 <li className="nav-item" role="presentation">
                   <button
-                    className={`nav-link ${
-                      activeTab === "login-logout" ? "active" : ""
-                    }`}
+                    className={`nav-link ${activeTab === "login-logout" ? "active" : ""
+                      }`}
                     onClick={() => {
                       setActiveTab("login-logout");
                       setCurrentPage(1);
@@ -392,9 +394,8 @@ const AuditLog = () => {
                 </li>
                 <li className="nav-item" role="presentation">
                   <button
-                    className={`nav-link ${
-                      activeTab === "changes-history" ? "active" : ""
-                    }`}
+                    className={`nav-link ${activeTab === "changes-history" ? "active" : ""
+                      }`}
                     onClick={() => {
                       setActiveTab("changes-history");
                       setCurrentPage(1);
@@ -422,9 +423,9 @@ const AuditLog = () => {
                     />
                   </div>
                 </div>
-                <div className="col-md-2 mb-3">
+                <div className="col-md-2 mb-3 ">
                   <select
-                    className="form-select"
+                    className="form-select p-2"
                     value={selectedRole}
                     onChange={(e) => setSelectedRole(e.target.value)}
                   >
@@ -489,8 +490,27 @@ const AuditLog = () => {
 
               {/* Table - Desktop View */}
               <div className="card  d-none  d-lg-block">
-                <div  className="table-responsive"
-    style={{ maxHeight: "400px", overflowY: "auto" }}>
+                <div
+                  ref={fakeScrollbarRef}
+                  style={{
+                    overflowX: "auto",
+                    overflowY: "hidden",
+                    height: 16,
+                    position: "fixed",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1050,
+                  }}
+                >
+                  <div style={{ width: "1500px", height: 1 }} />
+                </div>
+
+                <div
+                  className="table-responsive"
+                  style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }}
+                  ref={scrollContainerRef}
+                >
                   <table className="table table-hover mb-0 table-gradient-bg">
                     <thead className="table-light bg-dark  .">
                       <tr>
@@ -564,7 +584,7 @@ const AuditLog = () => {
                                   onClick={() => handleViewDetails(item)}
                                 >
                                   <Eye size={14} className="me-1 " />
-                                
+
                                 </button>
                               </td>
                             </>
@@ -585,11 +605,10 @@ const AuditLog = () => {
                               </td>
                               <td>
                                 <span
-                                  className={`badge ${
-                                    item.action === "Login"
-                                      ? "bg-info"
-                                      : "bg-warning"
-                                  }`}
+                                  className={`badge ${item.action === "Login"
+                                    ? "bg-info"
+                                    : "bg-warning"
+                                    }`}
                                 >
                                   {item.action}
                                 </span>
@@ -699,11 +718,10 @@ const AuditLog = () => {
                                 {item.role}
                               </span>
                               <span
-                                className={`badge ${
-                                  item.action === "Login"
-                                    ? "bg-info"
-                                    : "bg-warning"
-                                }`}
+                                className={`badge ${item.action === "Login"
+                                  ? "bg-info"
+                                  : "bg-warning"
+                                  }`}
                               >
                                 {item.action}
                               </span>
@@ -775,9 +793,8 @@ const AuditLog = () => {
                 <nav>
                   <ul className="pagination pagination-sm mb-0">
                     <li
-                      className={`page-item ${
-                        currentPage === 1 ? "disabled" : ""
-                      }`}
+                      className={`page-item ${currentPage === 1 ? "disabled" : ""
+                        }`}
                     >
                       <button
                         className="page-link"
@@ -790,9 +807,8 @@ const AuditLog = () => {
                     {[...Array(getTotalPages())].map((_, index) => (
                       <li
                         key={index}
-                        className={`page-item ${
-                          currentPage === index + 1 ? "active" : ""
-                        }`}
+                        className={`page-item ${currentPage === index + 1 ? "active" : ""
+                          }`}
                       >
                         <button
                           className="page-link"
@@ -803,9 +819,8 @@ const AuditLog = () => {
                       </li>
                     ))}
                     <li
-                      className={`page-item ${
-                        currentPage === getTotalPages() ? "disabled" : ""
-                      }`}
+                      className={`page-item ${currentPage === getTotalPages() ? "disabled" : ""
+                        }`}
                     >
                       <button
                         className="page-link"
@@ -844,9 +859,9 @@ const AuditLog = () => {
                 {activeTab === "changes-history" && modalData.beforeAfter ? (
                   <div>
                     <div className="row">
-                       
+
                       <div className="col-md-6 ">
-                       <h6 className="text-danger">Before:</h6>
+                        <h6 className="text-danger">Before:</h6>
                         <div className=" p-3 rounded bg-card">
                           {modalData.beforeAfter.before ? (
                             <pre className="mb-0">

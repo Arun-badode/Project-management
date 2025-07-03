@@ -346,21 +346,8 @@ const RoleManagementSystem = () => {
                 onChange={(e) => setNewRole({ ...newRole, description: e.target.value })}
               />
             </div>
-
-       
-
-
-
-
-
-
           </form>
         </Modal.Body>
-
-
-
-
-        
         <Modal.Footer>
           <button className="btn btn-secondary rounded-5" onClick={handleCloseAddRoleModal}>
             Cancel
