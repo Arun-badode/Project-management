@@ -647,38 +647,7 @@ const staticProjects =  ProjectsData;
   };
 
 
-  // Card counts based on filteredProjects (so cards always match table)
-  // const countFiltered = (type) => {
-  //   const today = new Date();
-  //   const nearDueDate = new Date();
-  //   nearDueDate.setDate(today.getDate() + 3);
-
-  //   switch (type) {
-  //     case 'active':
-  //       return filteredProjects.filter(p => p.status === 'Active').length;
-  //     case 'nearDue':
-  //       return filteredProjects.filter(project => {
-  //         const dueDate = new Date(project.dueDate);
-  //         return dueDate > today && dueDate <= nearDueDate && project.status !== 'Completed';
-  //       }).length;
-  //     case 'overdue':
-  //       return filteredProjects.filter(project => {
-  //         const dueDate = new Date(project.dueDate);
-  //         return dueDate < today && project.status !== 'Completed';
-  //       }).length;
-  //     case 'teamOnDuty':
-  //       return filteredProjects.filter(p => p.status === 'Team On-Duty').length;
-  //     case 'eventsToday':
-  //       const todayStr = today.toISOString().split('T')[0];
-  //       return filteredProjects.filter(project => {
-  //         return project.dueDate === todayStr || project.qcDueDate === todayStr;
-  //       }).length;
-  //     case 'pendingApproval':
-  //       return filteredProjects.filter(p => p.qaStatus === 'Pending').length;
-  //     default:
-  //       return filteredProjects.length;
-  //   }
-  // };
+  
 
   const countFiltered = (type) => {
     const today = new Date();
@@ -724,72 +693,7 @@ const staticProjects =  ProjectsData;
 
   const [setAllProjects] = useState([]);
 
-  // useEffect(() => {
-  //   // Example fetch - replace with your actual logic
-  //   fetch('/api/projects')
-  //     .then(res => res.json())
-  //     .then(data => {
-  //       setAllProjects(data);
-  //       setFilteredProjects(data); // default view
-  //     });
-  // }, []);
-
-  // const generateRandomProjects = (count) => {
-  //   const clients = [
-  //     "Acme Corp",
-  //     "Globex",
-  //     "Soylent",
-  //     "Initech",
-  //     "Umbrella",
-  //     "Wayne Ent",
-  //     "Stark Ind",
-  //     "Oscorp",
-  //   ];
-  //   const applications = ["Web", "Mobile", "Desktop"];
-  //   const statuses = ["Active", "Near Due", "Overdue", "Team On-Duty"];
-  //   const handlers = ["Jane", "John", "Alice", "Bob", "Charlie", "Eve"];
-  //   const qaReviewers = ["Alan", "Sarah", "Mike", "Lisa", "David"];
-  //   const qaStatuses = ["Passed", "Failed", "Pending", "In Review"];
-  //   const processStatuses = ["Ongoing", "Completed", "Pending", "Delayed"];
-
-  //   const projects = [];
-  //   const today = new Date();
-
-  //   for (let i = 0; i < count; i++) {
-  //     const randomDays = Math.floor(Math.random() * 30) - 5; // Some will be overdue
-  //     const dueDate = new Date(today);
-  //     dueDate.setDate(today.getDate() + randomDays);
-
-  //     const qcDeadline = new Date(dueDate);
-  //     qcDeadline.setDate(dueDate.getDate() - 2);
-
-  //     const qcDueDate = new Date(qcDeadline);
-  //     qcDueDate.setDate(qcDeadline.getDate() + 1);
-
-  //     projects.push({
-  //       id: i + 1,
-  //       title: `Project ${i + 1}`,
-  //       client: clients[Math.floor(Math.random() * clients.length)],
-  //       tasks: Math.floor(Math.random() * 10) + 1,
-  //       languages: Math.floor(Math.random() * 5) + 1,
-  //       application: applications[Math.floor(Math.random() * applications.length)],
-  //       pages: Math.floor(Math.random() * 200) + 50,
-  //       dueDate: dueDate.toISOString().split("T")[0],
-  //       qcDeadline: qcDeadline.toISOString().split("T")[0],
-  //       qcHours: Math.floor(Math.random() * 24) + 1,
-  //       qcDueDate: qcDueDate.toISOString().split("T")[0],
-  //       status: statuses[Math.floor(Math.random() * statuses.length)],
-  //       handler: handlers[Math.floor(Math.random() * handlers.length)],
-  //       processStatus:
-  //         processStatuses[Math.floor(Math.random() * processStatuses.length)],
-  //       qaReviewer: qaReviewers[Math.floor(Math.random() * qaReviewers.length)],
-  //       qaStatus: qaStatuses[Math.floor(Math.random() * qaStatuses.length)],
-  //       serverPath: `/mnt/server/project/project-${i + 1}`,
-  //     });
-  //   }
-
-  //   return projects;
-  // };
+ 
 
   const barData = [
     { name: 'Mon', Design: 20, Development: 40, Testing: 10, Deployment: 10 },
@@ -821,46 +725,7 @@ const staticProjects =  ProjectsData;
         </div>
       </div>
 
-      {/* KPIs */}
-      {/* <Row className="mb-4 g-3">
-        {[
-          { key: 'active', title: 'Active Projects', icon: 'bi-rocket-takeoff', color: 'primary' },
-          { key: 'nearDue', title: 'Near Due', icon: 'bi-hourglass-split', color: 'warning text-dark' },
-          { key: 'overdue', title: 'Overdue', icon: 'bi-exclamation-octagon', color: 'danger' },
-          { key: 'teamOnDuty', title: 'Team On-Duty', icon: 'bi-people-fill', color: 'info' },
-          { key: 'eventsToday', title: 'Events Today', icon: 'bi-calendar-event', color: 'success' },
-          { key: 'pendingApproval', title: 'Pending Approval', icon: 'bi-clock-history', color: 'secondary' }
-        ].map(({ key, title, icon, color, link }) => (
-          <Col xs={12} sm={6} md={2} key={key}>
-            <Card
-              className={`bg-${color} bg-gradient text-white p-3 rounded-4 shadow-sm border-0 w-100 ${activeFilter === key ? 'border border-3 border-light' : ''
-                }`}
-              onClick={() => !link && handleCardFilter(key)}
-              style={{ cursor: 'pointer', minHeight: '150px', height: '150px' }}
-            >
-              {link ? (
-                <Link to={link} className="text-white text-decoration-none d-flex flex-column h-100 justify-content-between">
-                  <Card.Body className="d-flex flex-column justify-content-between h-100">
-                    <div className="d-flex align-items-center gap-2">
-                      <i className={`bi ${icon} fs-4`}></i>
-                      <Card.Title className="fs-6 fw-semibold mb-0">{title}</Card.Title>
-                    </div>
-                    <h3 className="fw-bold text-end m-0">{countFiltered(key)}</h3>
-                  </Card.Body>
-                </Link>
-              ) : (
-                <Card.Body className="d-flex flex-column justify-content-between h-100">
-                  <div className="d-flex align-items-center gap-2">
-                    <i className={`bi ${icon} fs-4`}></i>
-                    <Card.Title className="fs-6 fw-semibold mb-0">{title}</Card.Title>
-                  </div>
-                  <h3 className="fw-bold text-end m-0">{countFiltered(key)}</h3>
-                </Card.Body>
-              )}
-            </Card>
-          </Col>
-        ))}
-      </Row> */}
+      
 
       <Row className="mb-4 g-3">
         {[
@@ -1430,24 +1295,24 @@ const staticProjects =  ProjectsData;
             <Button className="gradient-button me-2">Go To</Button>
           </Link>
         ) : activeFilter === 'nearDue' ? (
-          <Link to="/LeadDashboard?filter=nearDue" className="text-decoration-none">
+          <Link to="/active-project?filter=nearDue" className="text-decoration-none">
             <Button className="gradient-button me-2">Go To</Button>
           </Link>
         ) : activeFilter === 'active' ? (
-          <Link to="/LeadDashboard?filter=active" className="text-decoration-none">
+          <Link to="/active-project?filter=active" className="text-decoration-none">
             <Button className="gradient-button me-2">Go To</Button>
           </Link>
         ) :
 
           activeFilter === 'pendingApproval' ? (
-            <Link to="/actioncenter" className="text-decoration-none">
+            <Link to="/action-center" className="text-decoration-none">
               <Button className="gradient-button me-2">Go To</Button>
             </Link>
           )
             :
 
             (
-              <Link to="/LeadDashboard" className="text-decoration-none">
+              <Link to="/active-project" className="text-decoration-none">
                 <Button className="gradient-button me-2">Go To</Button>
               </Link>
             )}

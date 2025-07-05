@@ -107,13 +107,13 @@ const Sidebar = ({ collapsed }) => {
               </li>
               {/* Action Center */}
               <li
-                className={`menu-item ${isActive("/actioncenter") ? "active" : ""
+                className={`menu-item ${isActive("/action-center") ? "active" : ""
                   }`}
               >
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("/actioncenter");
+                    navigate("/action-center");
                     menuItemClick();
                   }}
                 >

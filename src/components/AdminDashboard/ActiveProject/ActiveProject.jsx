@@ -782,7 +782,7 @@ const ActiveProject = () => {
                       onChange={handleInputChange}
                       placeholder="Enter project title (max 80 chars)"
                     />
-                    <div className="form-text">
+                    <div className="form-text text-white">
                       Max allowed Character length – 80, (ignore or remove any
                       special character by itself)
                     </div>
@@ -959,7 +959,7 @@ const ActiveProject = () => {
                       placeholder="Select Languages"
                       styles={gradientSelectStyles}
                     />
-                    <div className="form-text">
+                    <div className="form-text text-white">
                       {formData.languages.length} selected
                     </div>
                   </div>
@@ -972,7 +972,7 @@ const ActiveProject = () => {
                       <input
                         type="number"
                         min={1}
-                        className="form-control"
+                        className="form-control "
                         style={{ width: 80 }}
                         value={formData.files.length}
                         onChange={(e) => {
@@ -1001,7 +1001,7 @@ const ActiveProject = () => {
                         Upload Excel
                       </button>
                     </div>
-                    <div className="table-responsive ">
+                    <div className="table-responsive">
                       <table className="table table-bordered  ">
                         <thead
                           style={{ backgroundColor: "#201E7E", color: "white" }}
@@ -1110,7 +1110,7 @@ const ActiveProject = () => {
                         />
                       </div>
                     </div>
-                    <div className="form-text">
+                    <div className="form-text text-white">
                       Total Project Pages = Total Pages × Language Count
                     </div>
                   </div>
@@ -1174,7 +1174,7 @@ const ActiveProject = () => {
                         }
                         placeholder="00.00"
                       />
-                      <div className="form-text">
+                      <div className="form-text text-white">
                         (in multiple of 0.25 only)
                       </div>
                     </div>
@@ -1193,7 +1193,7 @@ const ActiveProject = () => {
                         }
                         placeholder="00.00"
                       />
-                      <div className="form-text">(with only 2 decimals)</div>
+                      <div className="form-text text-white">(with only 2 decimals)</div>
                     </div>
                     <div className="col-md-2">
                       <label className="form-label">Currency</label>

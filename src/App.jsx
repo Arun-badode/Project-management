@@ -87,7 +87,7 @@ function App() {
         <Route path="/changepassword" element={<ChangesPassword />} />
         <Route path="/role-permission" element={<RoleManagementSystem />} />
         <Route path="/project" element={<Project />} />
-        <Route path="/actioncenter" element={<ActionCenter />} />
+        <Route path="/action-center" element={<ActionCenter />} />
 
         {/* Lead routes */}
         <Route path="/active-project" element={<LeadDashboard />} />
