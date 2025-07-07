@@ -1033,3 +1033,26 @@ select.form-input {
     padding-left: 0; /* Full width even when collapsed */
   }
 }
+
+
+.rd-container {
+  z-index: 9999 !important;
+}
+
+.rdtPicker {
+  background: white !important;
+  border: 1px solid #ccc !important;
+  color: #000 !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.rdt {
+  position: relative;
+}
+
+.rdtPicker {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1050;
+}

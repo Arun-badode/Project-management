@@ -1,8 +1,8 @@
 .sidebar-container {
   width: 275px;
   scrollbar-width: none;
-  background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e) !important;
-  height: 89vh;
+  background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e) !important;  
+  height: 90vh;
   overflow-y: auto;
   transition: width 0.3s ease;
   margin-top: 85px;
@@ -18,14 +18,17 @@
   .sidebar-container.collapsed {
     width: 0px;
   }
+
   .sidebar-container.collapsed {
     width: 0px;
   }
 }
+
 @media (min-width: 375px) and (max-width: 768px) {
   .sidebar-container.collapsed {
     width: 0px;
   }
+
   .sidebar-container.collapsed {
     width: 0px;
   }
@@ -58,7 +61,7 @@
 }
 
 .menu-link {
-  
+
   display: flex;
   align-items: center;
   padding: 10px;
@@ -67,7 +70,7 @@
   color: white;
   cursor: pointer;
   transition: background 0.3s ease;
- 
+
 }
 
 .menu-text {
