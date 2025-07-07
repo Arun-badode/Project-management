@@ -91,7 +91,7 @@ const Sidebar = ({ collapsed }) => {
               </li>
               {/* REsoure wrokload in V2 */}
               <li
-                className={`menu-item ${isActive("/team-dashboard") ? "active" : ""
+                className={`menu-item ${isActive("/sourcework") ? "active" : ""
                   }`}
               >
                 <div
@@ -395,7 +395,7 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
               <li
-                className={`menu-item ${isActive("/team-dashboard") ? "active" : ""
+                className={`menu-item ${isActive("/taskrequest") ? "active" : ""
                   }`}
               >
                 <div
@@ -410,7 +410,7 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
               <li
-                className={`menu-item ${isActive("/team-dashboard") ? "active" : ""
+                className={`menu-item ${isActive("/sourcework") ? "active" : ""
                   }`}
               >
                 <div
