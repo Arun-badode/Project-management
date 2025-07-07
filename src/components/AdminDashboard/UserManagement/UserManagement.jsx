@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useState } from "react";
 import Select from "react-select";
 
@@ -108,10 +109,13 @@ function UserManagement() {
     dob: "",
     team: "",
     role: "",
-    appSkills: [],
+    skills: [],
     username: "",
     password: "",
   });
+
+
+
 
   // Filter members based on active tab
   const liveMembers = teamMembers.filter((m) => m.status === "active");
@@ -189,22 +193,30 @@ function UserManagement() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Add logic to add member to teamMembers (currently static)
-    setShowModal(false);
-    setForm({
-      empId: "",
-      fullName: "",
-      doj: "",
-      dob: "",
-      team: "",
-      role: "",
-      appSkills: [],
-      username: "",
-      password: "",
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const response = await axios.post("http://localhost:5000/api/users", {
+      emp_id: form.empId,
+      full_name: form.fullName,
+      doj: form.doj,
+      dob: form.dob,
+      team: form.team,
+      role: form.role,  // Ensure role is an integer
+      skills: form.skills.join(','), // Convert array to comma-separated string
+      username: form.username,
+      password: form.password
     });
-  };
+
+    console.log("Form submitted successfully:", response.data);
+    setActiveTab(response.data);
+    setShowModal(false);
+
+  } catch (error) {
+    console.error("Error submitting form:", error.response?.data || error.message);
+  }
+};
 
   // Handle form field changes
   const handleFieldChange = (e) => {
