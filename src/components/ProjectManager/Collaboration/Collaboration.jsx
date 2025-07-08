@@ -418,7 +418,7 @@ function Collaboration() {
   const emojis = ["👍", "❤️", "😂", "🎉", "🔥", "💯", "👏", "🙌", "A"];
 
   return (
-    <div className="d-flex flex-column">
+    <div className=" container-fluid d-flex flex-column">
       {/* Main Content */}
       <div className="flex-grow-1 d-flex overflow-hidden">
         {/* Left Sidebar */}

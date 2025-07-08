@@ -85,7 +85,7 @@ function Messages() {
   );
 
   return (
-    <div className="container py-3">
+    <div className="container-fluid py-3">
       <h2 className="text-white mb-4 gradient-heading">Messages</h2>
 
       {/* Search Bar */}

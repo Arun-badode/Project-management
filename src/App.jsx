@@ -39,6 +39,9 @@ import Calander from "./components/AdminDashboard/Calander/Calander";
 import ActionCenter from "./components/AdminDashboard/ActionCenter/ActionCenter";
 import AuthLayout from "./layout/authLayout";
 import MainLayout from "./layout/MainLayout";
+import ManagerTask from "./components/ProjectManager/ManagerTask/ManagerTask";
+import ShiftAllocation from "./components/ProjectManager/ShiftAllocation/ShiftAllocation";
+
 
 
 
@@ -110,6 +113,8 @@ function App() {
         <Route path="/createproject" element={<CreateProject />} />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/assigned" element={<Assigned />} />
+        <Route path="/managertask" element={<ManagerTask />} />
+    <Route path="/shift-allocation" element={<ShiftAllocation/>} />
 
         <Route path="/taskrequest" element={<TaskRequest />} />
         <Route path="/sourcework" element={<ResourceWorkload />} />

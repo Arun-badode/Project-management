@@ -148,10 +148,10 @@ const App = () => {
     };
 
     return (
-        <div className="min-vh-100 bg-main">
+        <div className="container-fluid bg-main">
             {/* Header */}
             <header className="bg-white shadow-sm bg-card">
-                <div className="container">
+                <div className="container-fluid">
                     <div className="d-flex justify-content-between align-items-center py-3">
                         <h2 className="h2 fw-bold  mb-0 gradient-heading">Action Center</h2>
                         <div className="d-flex gap-2">
@@ -192,40 +192,12 @@ const App = () => {
                         </li>
                     </ul>
 
-                    {/* <ul className="nav nav-tabs border-0 gap-2">
-  <li className="nav-item">
-    <button
-      className={`nav-link fw-semibold px-4 py-2 rounded-pill border ${
-        activeTab === "pending"
-          ? "bg-primary text-white border-primary"
-          : "bg-light text-dark border-secondary"
-      }`}
-      onClick={() => setActiveTab("pending")}
-      style={{ transition: "0.3s" }}
-    >
-      Pending Approval
-    </button>
-  </li>
-  <li className="nav-item">
-    <button
-      className={`nav-link fw-semibold px-4 py-2 rounded-pill border ${
-        activeTab === "history"
-          ? "bg-primary text-white border-primary"
-          : "bg-light text-dark border-secondary"
-      }`}
-      onClick={() => setActiveTab("history")}
-      style={{ transition: "0.3s" }}
-    >
-      Action History
-    </button>
-  </li>
-                        </ul> */}
-
+                  
 
                 </div>
             </header>
 
-            <div className="container py-4">
+            <div className="container-fluid py-4">
                 {/* Filters */}
                 <div className="mb-4">
                     <div className="d-flex justify-content-between align-items-center mb-3">

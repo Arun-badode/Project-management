@@ -74,56 +74,10 @@ function ManagerDashboard() {
       className="container-fluid bg-card py-3"
       style={{ minHeight: "100vh" }}
     >
-      {/* Header Section */}
-      {/* <header className="bg-white shadow-sm mb-4">
-                <div className="container">
-                    <div className="d-flex justify-content-between align-items-center py-3">
-                        <div className="d-flex align-items-center">
-                            <div className="me-3">
-                                <h1 className="h4 mb-0 text-primary fw-bold">LeadPro</h1>
-                            </div>
-                        </div>
-                        
-                        <div className="flex-grow-1 mx-4">
-                            <div className="position-relative">
-                                <div className="position-absolute top-50 start-0 translate-middle-y ps-3">
-                                    <i className="fas fa-search text-muted"></i>
-                                </div>
-                                <input
-                                    type="text"
-                                    className="form-control ps-5 bg-light border-0 rounded-pill"
-                                    placeholder="Search leads, projects, or activities..."
-                                />
-                            </div>
-                        </div>
-                        
-                        <div className="d-flex align-items-center">
-                            <div className="text-end me-3 text-muted small">
-                                <div>{formattedDate}</div>
-                            </div>
-                            <button className="btn btn-link text-muted p-1 me-2">
-                                <i className="fas fa-bell fs-5"></i>
-                            </button>
-                            <div className="d-flex align-items-center">
-                                <img
-                                    className="rounded-circle me-2"
-                                    src="https://readdy.ai/api/search-image?query=professional%20business%20portrait%20of%20a%20young%20executive%20with%20a%20confident%20smile%2C%20high%20quality%20professional%20headshot%20with%20neutral%20background%2C%20corporate%20style%2C%20linkedin%20profile%20photo&width=100&height=100&seq=1&orientation=squarish"
-                                    alt="User profile"
-                                    width="40"
-                                    height="40"
-                                />
-                                <div>
-                                    <p className="mb-0 small fw-bold">John Doe</p>
-                                    <p className="mb-0 text-muted small">Lead Manager</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </header> */}
+   
       <h2 className="gradient-heading ">Manager Dashboard</h2>
 
-      <div className="container mb-5">
+      <div className="container-fluid mb-5">
         {/* KPI Overview Cards */}
         <div className="row mb-4 g-3">
           {/* Total Leads */}

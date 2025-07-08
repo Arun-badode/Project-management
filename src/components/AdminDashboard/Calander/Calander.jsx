@@ -360,7 +360,7 @@ const Calendar = ({ userRole }) => {
   };
 
   return (
-    <div className="container py-4">
+    <div className="container-fluid py-4">
       <div className="p-3 rounded shadow bg-card">
         <div className="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
           <h2 className="gradient-heading">Calendar</h2>

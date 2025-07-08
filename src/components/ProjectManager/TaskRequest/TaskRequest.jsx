@@ -119,8 +119,8 @@ function TaskRequest() {
    };
 
   return (
-    <div className="min-vh-100 bg-main">
-      <div className="container py-4">
+    <div className="container-fluid bg-main">
+      <div className="container-fluid py-4">
         {/* Header */}
         <div className="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between mb-4 gap-2">
           <h1 className="h2 mb-2 mb-md-0 gradient-heading text-center text-md-start">

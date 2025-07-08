@@ -391,7 +391,7 @@ const Project = () => {
   } = useSyncScroll(activeTab === "completed");
 
   return (
-    <div className="min-vh-100 bg-main mt-4">
+    <div className=" container-fluid ">
       {/* Header */}
       <div className="bg-white shadow-sm bg-main">
         <div className="container-fluid py-2">
@@ -486,7 +486,7 @@ const Project = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container pt-5 pb-4">
+      <div className="container-fluid pt-5 ">
         {/* Search Results Indicator */}
         {searchQuery && (
           <div className="alert alert-info mb-4">
