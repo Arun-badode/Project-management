@@ -20,7 +20,7 @@ const Sidebar = ({ collapsed }) => {
 
   return (
     <div className={`sidebar-container ${collapsed ? "collapsed" : ""}`}>
-      <div className="sidebar bg-card " style={{ height: "101vh" }}>
+      <div className="sidebar bg-card " style={{ height: "105vh",}}>
         <ul className="menu">
           {/* Admin Only */}
           {role === "Admin" && (

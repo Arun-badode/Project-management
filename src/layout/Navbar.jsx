@@ -56,8 +56,8 @@ const Navbar = ({ toggleSidebar }) => {
               src="https://ik.imagekit.io/43o9qlnbg/Eminoids%20-%20Logo_W.png"
               alt="Logo"
               style={{
-                width: window.innerWidth >= 992 ? "250px" : "120px",
-                height: "auto",
+                width: window.innerWidth >= 992 ? "150px" : "120px",
+                height: "40px",
               }}
             />
             <button
