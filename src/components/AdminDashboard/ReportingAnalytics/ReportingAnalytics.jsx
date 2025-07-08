@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from 'recharts';
 import { Download, Filter, Search, Calendar, Users, TrendingUp, Clock, Target, Settings, Plus } from 'lucide-react';
 import useSyncScroll from '../Hooks/useSyncScroll';
+import { Tab, Tabs } from 'react-bootstrap';
 
 const ReportingAnalytics = () => {
   const [activeReportTab, setActiveReportTab] = useState('project-report');
@@ -9,6 +10,7 @@ const ReportingAnalytics = () => {
   const [selectedTeam, setSelectedTeam] = useState('all');
   const [productivityView, setProductivityView] = useState('daily');
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [searchProject, setSearchProject] = useState('');
   const [feedbackFormData, setFeedbackFormData] = useState({
     project: '',
     details: '',
@@ -34,7 +36,6 @@ const ReportingAnalytics = () => {
     fakeScrollbarRef: fakePerformanceRef
   } = useSyncScroll(activeReportTab === 'team-performance');
 
-
   // Mock data for projects with QA status
   const projectData = [
     { id: 1, name: 'Website Redesign', owner: 'John Doe', progress: 85, status: 'Delayed in Process', priority: 'High', dueDate: '2025-07-15', qaStatus: 'Pending' },
@@ -52,18 +53,52 @@ const ReportingAnalytics = () => {
   );
 
   // Feedback log data
-  const feedbackData = [
+  const [feedbackData, setFeedbackData] = useState([
     { id: 1, project: 'Website Redesign', date: '2025-06-15', feedback: 'UI needs improvement', accountable: 'John Doe', manager: 'Sarah Wilson', resolution: 'Redesigned UI components', month: 6, year: 2025 },
     { id: 2, project: 'Mobile App Development', date: '2025-06-10', feedback: 'Performance issues on Android', accountable: 'Jane Smith', manager: 'Sarah Wilson', resolution: 'Optimized rendering', month: 6, year: 2025 },
     { id: 3, project: 'Database Migration', date: '2025-05-20', feedback: 'Data validation required', accountable: 'Mike Johnson', manager: 'David Brown', resolution: 'Added validation scripts', month: 5, year: 2025 },
+  ]);
+
+  // Team members data for dropdowns
+  const teamMembers = [
+    { id: 1, name: 'John Doe', role: 'DTP Specialist' },
+    { id: 2, name: 'Jane Smith', role: 'DTP Specialist' },
+    { id: 3, name: 'Mike Johnson', role: 'DTP Specialist' },
+    { id: 4, name: 'Sarah Wilson', role: 'Quality Analyst' },
+    { id: 5, name: 'David Brown', role: 'Quality Analyst' },
   ];
 
-  // Filter feedback for current month by default
-  const currentMonthFeedback = feedbackData.filter(feedback =>
-    feedback.month === new Date().getMonth() + 1 &&
-    feedback.year === new Date().getFullYear()
-  );
+  // Managers data for dropdown
+  const managers = [
+    { id: 1, name: 'Sarah Wilson' },
+    { id: 2, name: 'David Brown' },
+    { id: 3, name: 'Alex Johnson' },
+  ];
 
+  // Filter feedback based on selected month
+  const filteredFeedback = useMemo(() => {
+    return feedbackData.filter(feedback => {
+      if (dateRange === 'current-month') {
+        return feedback.month === new Date().getMonth() + 1 && feedback.year === new Date().getFullYear();
+      } else if (dateRange === 'last-month') {
+        const lastMonth = new Date().getMonth() === 0 ? 12 : new Date().getMonth();
+        const year = new Date().getMonth() === 0 ? new Date().getFullYear() - 1 : new Date().getFullYear();
+        return feedback.month === lastMonth && feedback.year === year;
+      } else if (dateRange === 'last-3-months') {
+        const currentDate = new Date();
+        const threeMonthsAgo = new Date(currentDate.setMonth(currentDate.getMonth() - 3));
+        return new Date(feedback.year, feedback.month - 1) >= threeMonthsAgo;
+      }
+      return true;
+    });
+  }, [feedbackData, dateRange]);
+
+  // Filter projects based on search term
+  const filteredProjects = useMemo(() => {
+  if (!searchProject) return projectData;
+  return projectData.filter(project =>
+    project.name.toLowerCase().includes(searchProject.toLowerCase()))
+}, [searchProject, projectData]);
   // Team performance data with additional fields
   const teamPerformanceData = [
     { id: 1, name: 'John Doe', completedTasks: 48, onTimePercentage: 92, hoursLogged: 160, activeHours: 145, qaFailed: 0, role: 'DTP Specialist', team: 'MS Office', performance: 'Top Performer' },
@@ -147,9 +182,30 @@ const ReportingAnalytics = () => {
     }));
   };
 
+  const handleProjectSelect = (project) => {
+    setFeedbackFormData(prev => ({
+      ...prev,
+      project: project.name,
+      month: new Date(project.dueDate).getMonth() + 1,
+      year: new Date(project.dueDate).getFullYear()
+    }));
+    setSearchProject('');
+  };
+
   const submitFeedback = () => {
-    // In a real app, you would save this to your database
-    alert('Feedback submitted successfully!');
+    const newFeedback = {
+      id: feedbackData.length + 1,
+      project: feedbackFormData.project,
+      date: new Date().toISOString().split('T')[0],
+      feedback: feedbackFormData.details,
+      accountable: feedbackFormData.accountable,
+      manager: feedbackFormData.manager,
+      resolution: feedbackFormData.resolution,
+      month: feedbackFormData.month,
+      year: feedbackFormData.year
+    };
+
+    setFeedbackData([...feedbackData, newFeedback]);
     setShowFeedbackForm(false);
     setFeedbackFormData({
       project: '',
@@ -310,12 +366,16 @@ const ReportingAnalytics = () => {
           >
             <Plus size={16} className="me-1" /> Add Feedback
           </button>
-          <select className="form-select d-inline-block me-2 analytics-date-selector" style={{ width: 'auto' }}>
-            <option>Current Month</option>
-            <option>Last Month</option>
-            <option>Last 3 Months</option>
-            <option>All Time</option>
-            <option>Custom Range</option>
+          <select 
+            className="form-select d-inline-block me-2 analytics-date-selector" 
+            style={{ width: 'auto' }}
+            value={dateRange}
+            onChange={(e) => setDateRange(e.target.value)}
+          >
+            <option value="current-month">Current Month</option>
+            <option value="last-month">Last Month</option>
+            <option value="last-3-months">Last 3 Months</option>
+            <option value="all-time">All Time</option>
           </select>
           <select className="form-select d-inline-block analytics-team-selector" style={{ width: 'auto' }}>
             <option>All Team Members</option>
@@ -327,7 +387,7 @@ const ReportingAnalytics = () => {
       </div>
 
       {showFeedbackForm && (
-        <div className="modal show d-block custom-modal-dark" tabIndex="-1" >
+        <div className="modal show d-block custom-modal-dark" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-lg">
             <div className="modal-content bg-card">
               <div className="modal-header">
@@ -338,14 +398,42 @@ const ReportingAnalytics = () => {
                 <div className="row mb-3">
                   <div className="col-md-6">
                     <label className="form-label">Project</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="project"
-                      value={feedbackFormData.project}
-                      onChange={handleFeedbackInputChange}
-                      placeholder="Search and select project"
-                    />
+                    <div className="position-relative">
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="project"
+                        value={searchProject}
+                        onChange={(e) => setSearchProject(e.target.value)}
+                        placeholder="Search and select project"
+                      />
+                      {searchProject && (
+                        <div className="position-absolute top-100 start-0 end-0 bg-white shadow mt-1 z-3 rounded">
+                          {filteredProjects.map(project => (
+                            <div 
+                              key={project.id}
+                              className="p-2 border-bottom cursor-pointer hover-bg-light"
+                              onClick={() => handleProjectSelect(project)}
+                            >
+                              {project.name} (Due: {project.dueDate})
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {feedbackFormData.project && (
+                      <div className="mt-2">
+                        <span className="badge bg-primary">
+                          {feedbackFormData.project}
+                          <button 
+                            type="button" 
+                            className="btn-close btn-close-white ms-2" 
+                            onClick={() => setFeedbackFormData(prev => ({ ...prev, project: '' }))}
+                            style={{ fontSize: '0.5rem' }}
+                          ></button>
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="col-md-3">
                     <label className="form-label">Month</label>
@@ -382,28 +470,37 @@ const ReportingAnalytics = () => {
                     name="details"
                     value={feedbackFormData.details}
                     onChange={handleFeedbackInputChange}
+                    placeholder="Enter detailed feedback..."
                   ></textarea>
                 </div>
                 <div className="row mb-3">
                   <div className="col-md-6">
                     <label className="form-label">Accountable Team Member</label>
-                    <input
-                      type="text"
-                      className="form-control"
+                    <select
+                      className="form-select"
                       name="accountable"
                       value={feedbackFormData.accountable}
                       onChange={handleFeedbackInputChange}
-                    />
+                    >
+                      <option value="">Select team member</option>
+                      {teamMembers.map(member => (
+                        <option key={member.id} value={member.name}>{member.name} ({member.role})</option>
+                      ))}
+                    </select>
                   </div>
                   <div className="col-md-6">
                     <label className="form-label">Manager</label>
-                    <input
-                      type="text"
-                      className="form-control"
+                    <select
+                      className="form-select"
                       name="manager"
                       value={feedbackFormData.manager}
                       onChange={handleFeedbackInputChange}
-                    />
+                    >
+                      <option value="">Select manager</option>
+                      {managers.map(manager => (
+                        <option key={manager.id} value={manager.name}>{manager.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div className="mb-3">
@@ -414,12 +511,20 @@ const ReportingAnalytics = () => {
                     name="resolution"
                     value={feedbackFormData.resolution}
                     onChange={handleFeedbackInputChange}
+                    placeholder="Describe the resolution or action taken..."
                   ></textarea>
                 </div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary rounded-5" onClick={() => setShowFeedbackForm(false)}>Cancel</button>
-                <button type="button" className="btn gradient-button" onClick={submitFeedback}>Submit Feedback</button>
+                <button 
+                  type="button" 
+                  className="btn gradient-button" 
+                  onClick={submitFeedback}
+                  disabled={!feedbackFormData.project || !feedbackFormData.details}
+                >
+                  Submit Feedback
+                </button>
               </div>
             </div>
           </div>
@@ -457,7 +562,7 @@ const ReportingAnalytics = () => {
             </tr>
           </thead>
           <tbody>
-            {currentMonthFeedback.map(feedback => (
+            {filteredFeedback.map(feedback => (
               <tr key={feedback.id} className="text-white analytics-feedback-row">
                 <td>{feedback.id}</td>
                 <td className="text-white">{feedback.project}</td>
@@ -702,25 +807,6 @@ const ReportingAnalytics = () => {
     </div>
   );
 
-
-
-  const reportTabs = [
-    { id: 'project-report', label: 'Project Report', icon: Target },
-    { id: 'feedback-log', label: 'Feedback Log', icon: Calendar },
-    { id: 'team-performance', label: 'Team Performance', icon: Users },
-    { id: 'revenue-reporting', label: 'Revenue Reporting', icon: TrendingUp },
-  ];
-
-  const renderActiveReport = () => {
-    switch (activeReportTab) {
-      case 'project-report': return renderProjectStatusReport();
-      case 'feedback-log': return renderFeedbackReport();
-      case 'team-performance': return renderTeamPerformanceReport();
-      case 'revenue-reporting': return renderRevenueReport();
-      default: return renderProjectStatusReport();
-    }
-  };
-
   return (
     <div className="container-fluid bg-main analytics-dashboard-container py-4">
       <div className="row mb-4">
@@ -742,35 +828,46 @@ const ReportingAnalytics = () => {
         </div>
       </div>
 
-      <div className="row">
-        <div className="col-lg-2 col-md-3 mb-4">
-          <div className="bg-card shadow-sm p-2 h-100">
-            <div className="list-group analytics-nav-tabs">
-              {reportTabs.map((tab) => {
-                const IconComponent = tab.icon;
-                const isActive = activeReportTab === tab.id;
-
-                return (
-                  <button
-                    key={tab.id}
-                    className={`list-group-item list-group-item-action d-flex align-items-center gap-2 px-3 py-2 rounded mb-2 fw-semibold border-0 transition-all ${isActive ? 'bg-primary text-white' : 'bg-dark text-white'
-                      }`}
-                    onClick={() => setActiveReportTab(tab.id)}
-                    style={{ transition: 'background-color 0.3s, color 0.3s' }}
-                  >
-                    <IconComponent size={16} />
-                    <span className="flex-grow-1">{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+      {/* Horizontal Tabs */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <Tabs
+            activeKey={activeReportTab}
+            onSelect={(k) => setActiveReportTab(k)}
+            className="mb-3 analytics-horizontal-tabs"
+            variant="tabs"
+          >
+            <Tab eventKey="project-report" title={
+              <span className="d-flex align-items-center">
+                <Target size={16} className="me-1" /> Project Report
+              </span>
+            } />
+            <Tab eventKey="feedback-log" title={
+              <span className="d-flex align-items-center">
+                <Calendar size={16} className="me-1" /> Feedback Log
+              </span>
+            } />
+            <Tab eventKey="team-performance" title={
+              <span className="d-flex align-items-center">
+                <Users size={16} className="me-1" /> Team Performance
+              </span>
+            } />
+            <Tab eventKey="revenue-reporting" title={
+              <span className="d-flex align-items-center">
+                <TrendingUp size={16} className="me-1" /> Revenue Reporting
+              </span>
+            } />
+          </Tabs>
         </div>
+      </div>
 
-
-        <div className="col-lg-10 col-md-9">
+      <div className="row">
+        <div className="col-12">
           <div className="analytics-main-content bg-card">
-            {renderActiveReport()}
+            {activeReportTab === 'project-report' && renderProjectStatusReport()}
+            {activeReportTab === 'feedback-log' && renderFeedbackReport()}
+            {activeReportTab === 'team-performance' && renderTeamPerformanceReport()}
+            {activeReportTab === 'revenue-reporting' && renderRevenueReport()}
           </div>
         </div>
       </div>
@@ -931,6 +1028,31 @@ const ReportingAnalytics = () => {
           background: linear-gradient(135deg, #1e293b, #334155);
         }
         
+        .analytics-horizontal-tabs .nav-link {
+          color: #adb5bd;
+          border: none;
+          padding: 0.75rem 1.5rem;
+          font-weight: 500;
+        }
+        
+        .analytics-horizontal-tabs .nav-link.active {
+          color: #0d6efd;
+          background-color: transparent;
+          border-bottom: 3px solid #0d6efd;
+        }
+        
+        .analytics-horizontal-tabs .nav-link:hover {
+          color: #0d6efd;
+        }
+        
+        .custom-modal-dark {
+          background-color: rgba(0,0,0,0.5);
+        }
+        
+        .hover-bg-light:hover {
+          background-color: #f8f9fa;
+        }
+        
         @media (max-width: 768px) {
           .analytics-dashboard-header {
             flex-direction: column;
@@ -965,6 +1087,11 @@ const ReportingAnalytics = () => {
           .analytics-nav-item {
             margin-right: 0.25rem;
             margin-bottom: 0.25rem;
+          }
+          
+          .analytics-horizontal-tabs .nav-link {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
           }
         }
       `}</style>

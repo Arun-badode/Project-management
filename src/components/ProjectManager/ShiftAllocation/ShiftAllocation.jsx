@@ -256,7 +256,7 @@ const ShiftAllocation  =() => {
       <div className="container " style={{left:"280px"}} >
         {/* Controls */}
         <div className="card mb-4">
-          <div className="card-body">
+          <div className="card-body bg-card">
             <div className="d-flex flex-wrap justify-content-between align-items-center">
               <div className="d-flex align-items-center gap-3 mb-3 mb-md-0">
                 <button 
@@ -286,7 +286,7 @@ const ShiftAllocation  =() => {
               <div className="d-flex align-items-center gap-3">
                 <div>
                   <select
-                    className="form-select"
+                    className="form-select "
                     value={selectedDepartment}
                     onChange={(e) => setSelectedDepartment(e.target.value)}
                   >
@@ -309,9 +309,9 @@ const ShiftAllocation  =() => {
         {/* Schedule Grid */}
         <div className="">
           {/* Main Schedule */}
-          <div className={`card  ${showEmployeePanel ? 'me-3' : ''}`}>
-            <div className="table-responsive">
-              <table className="table">
+          <div className={`card table-gradient-bg ${showEmployeePanel ? 'me-3' : ''}`}>
+            <div className="table-responsive ">
+              <table className="table ">
                 <thead className="table-light">
                   <tr>
                     <th scope="col" className="w-25 sticky-start bg-white">
@@ -341,7 +341,7 @@ const ShiftAllocation  =() => {
                           </div>
                           <div>
                             <div className="fw-medium">{employee.name}</div>
-                            <div className="text-muted small">{employee.department}</div>
+                            <div className="text-white small">{employee.department}</div>
                           </div>
                         </div>
                       </td>
@@ -356,8 +356,8 @@ const ShiftAllocation  =() => {
                               <div className="small">{shift.type.charAt(0).toUpperCase() + shift.type.slice(1)} Shift</div>
                             </div>
                           ))}
-                          <button className="position-absolute bottom-0 end-0 text-muted btn btn-sm">
-                            <i className="fas fa-plus-circle"></i>
+                          <button className="position-absolute bottom-0 end-0 text-white btn btn-sm">
+                            <i className="fas fa-plus-circle "></i>
                           </button>
                         </td>
                       ))}

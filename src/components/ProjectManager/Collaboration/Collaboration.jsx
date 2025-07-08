@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
+import "./Collaboration.css"; // Import your CSS styles
 
 function Collaboration() {
   // State for messages
@@ -420,7 +421,7 @@ function Collaboration() {
   return (
     <div className=" container-fluid d-flex flex-column">
       {/* Main Content */}
-      <div className="flex-grow-1 d-flex overflow-hidden">
+      <div className="flex-grow-1 d-flex ">
         {/* Left Sidebar */}
         <div className="d-none d-lg-block col-lg-3 border-end bg-card p-3 overflow-auto">
           {/* User Profile */}
@@ -584,9 +585,11 @@ function Collaboration() {
         </div>
 
         {/* Right Content Area */}
-        <div className="col-12 col-lg-9 d-flex flex-column">
+        <div className="col-12 col-lg-9 d-flex flex-column chat-main-panel">
+          <div className="row " style={{position:"fixed"}}>
+        <div className="col-12  d-flex flex-column">
           {/* Chat Header */}
-          <div className="p-3 border-bottom bg-main d-flex justify-content-between align-items-center">
+          <div className="p-3 border-bottom bg-main d-flex justify-content-between align-items-center chat-header-sticky">
             <div>
               <h4 className="mb-0 text-white">
                 {activePrivateChat
@@ -645,9 +648,9 @@ function Collaboration() {
 
           {/* Messages Area */}
           <div
-            className="flex-grow-1 p-3 bg-main "
-            style={{ backgroundColor: "#1e1e1e" }}
+            className="chat-messages-scrollable p-3 bg-main" style={{ backgroundColor: "#1e1e1e" }}
           >
+            <div ref={messageEndRef} />
             {filteredMessages.map((message) => (
               <div
                 key={message.id}
@@ -853,7 +856,7 @@ function Collaboration() {
           </div>
 
           {/* Message Input */}
-          <div className="p-3 border-top bg-main">
+          <div className="p-3 border-top bg-main chat-footer-sticky">
             <div className="position-relative">
               {showMentionList && (
                 <div
@@ -968,6 +971,8 @@ function Collaboration() {
               )}
             </div>
           </div>
+        </div>
+        </div>
         </div>
       </div>
 

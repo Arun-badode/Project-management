@@ -4,6 +4,7 @@ import moment from "moment";
 import Select from "react-select";
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
+import useSyncScroll from "../Hooks/useSyncScroll";
 
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
@@ -654,6 +655,11 @@ const ActiveProject = () => {
     // Apply deadline logic here
     alert(`Deadline ${formData.deadline} applied to selected files.`);
   };
+
+  const {
+    scrollContainerRef: scrollContainerRef1,
+    fakeScrollbarRef: fakeScrollbarRef1,
+  } = useSyncScroll(activeTab === "created");
 
   return (
     <div className="container-fluid py-4">
@@ -1508,76 +1514,85 @@ const ActiveProject = () => {
         </li>
       </ul>
 
-      {/* Projects Table */}
-      <div
-        ref={fakeScrollbarRef}
-        style={{
-          overflowX: "auto",
-          overflowY: "hidden",
-          height: 16,
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1050,
-          display: "none",
-        }}
-      >
-        <div style={{ width: "2000px", height: 1 }} />
-      </div>
-
-      {/* Scrollable Table Container */}
-      <div
-        className="table-responsive"
-        ref={scrollContainerRef}
-        style={{ maxHeight: "500px", overflowY: "auto", overflowX: "auto" }}
-      >
-        <table className="table-gradient-bg align-middle mt-0 table table-bordered table-hover">
-          <thead className="table-light">
-            <tr>
-              <th>S. No.</th>
-              <th>Project Title</th>
-              <th>Client</th>
-              <th>Task</th>
-              <th>Language</th>
-              <th>Application</th>
-              <th>Total Pages</th>
-              <th>Deadline</th>
-              <th>Ready For Qc Deadline</th>
-              <th>Qc Hrs</th>
-              <th>Qc Due Date</th>
-              <th>Status</th>
-              <th>Progress</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProjects.map((project, index) => (
-              <React.Fragment key={project.id}>
-                <tr
-                  className={expandedRow === project.id ? "table-active" : ""}
-                >
-                  <td>{index + 1}</td>
-                  <td>{project.title}</td>
-                  <td>{project.client}</td>
-                  <td>{project.task}</td>
-                  <td>{project.language}</td>
-                  <td>{project.application}</td>
-                  <td>{project.totalPages}</td>
-                  <td>{project.deadline}</td>
-                  <td>{project.readyDeadline}</td>
-                  <td>{project.qcHrs}</td>
-                  <td>{project.qcDueDate}</td>
-                  <td>{project.status}</td>
-
-                  <td>
-                    <div
-                      className="progress cursor-pointer"
-                      style={{ height: "24px" }}
-                      onClick={() => handleViewProject(project)}
+      <div className="card">
+        <div
+          ref={fakeScrollbarRef1}
+          style={{
+            overflowX: "auto",
+            overflowY: "hidden",
+            height: 16,
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1050,
+          }}
+        >
+          <div style={{ width: "2000px", height: 1 }} />
+        </div>
+        {/* Projects Table */}
+        <div className="table-gradient-bg">
+          <div
+            className="table-responsive"
+            ref={scrollContainerRef1}
+            style={{
+              maxHeight: "500px",
+              overflowX: "auto",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
+          >
+            <table
+              className="table-gradient-bg align-middle mt-0 table table-bordered table-hover"
+              style={{ minWidth: 1000 }}
+            >
+              <thead className="table">
+                <tr>
+                  <th>S. No.</th>
+                  <th>Project Title</th>
+                  <th>Client</th>
+                  <th>Task</th>
+                  <th>Language</th>
+                  <th>Application</th>
+                  <th>Total Pages</th>
+                  <th>Deadline</th>
+                  <th>Ready For Qc Deadline</th>
+                  <th>Qc Hrs</th>
+                  <th>Qc Due Date</th>
+                  <th>Status</th>
+                  <th>Progress</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredProjects.map((project, index) => (
+                  <React.Fragment key={project.id}>
+                    <tr
+                      className={
+                        expandedRow === project.id ? "table-active" : ""
+                      }
                     >
-                      <div
-                        className={`progress-bar 
+                      <td>{index + 1}</td>
+                      <td>{project.title}</td>
+                      <td>{project.client}</td>
+                      <td>{project.task}</td>
+                      <td>{project.language}</td>
+                      <td>{project.application}</td>
+                      <td>{project.totalPages}</td>
+                      <td>{project.deadline}</td>
+                      <td>{project.readyDeadline}</td>
+                      <td>{project.qcHrs}</td>
+                      <td>{project.qcDueDate}</td>
+                      <td>{project.status}</td>
+
+                      <td>
+                        <div
+                          className="progress cursor-pointer"
+                          style={{ height: "24px" }}
+                          onClick={() => handleViewProject(project)}
+                        >
+                          <div
+                            className={`progress-bar 
                           ${
                             project.progress < 30
                               ? "bg-danger"
@@ -1585,396 +1600,379 @@ const ActiveProject = () => {
                               ? "bg-warning"
                               : "bg-success"
                           }`}
-                        role="progressbar"
-                        style={{ width: `${project.progress}%` }}
-                        aria-valuenow={project.progress}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                      >
-                        {project.progress}%
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="d-flex gap-2">
-                      <button
-                        className="btn btn-sm btn-primary"
-                        onClick={() => handleViewProject(project)}
-                      >
-                        <i
-                          className={`fas ${
-                            expandedRow === project.id
-                              ? "fa-chevron-up"
-                              : "fa-eye"
-                          }`}
-                        ></i>
-                      </button>
-                      <button
-                        className="btn btn-sm btn-secondary"
-                        onClick={() => handleEditProject(project)}
-                      >
-                        <i className="fas fa-edit"></i>
-                      </button>
-                      {project.progress === 100 && (
-                        <button
-                          className="btn btn-sm btn-success"
-                          onClick={() => handleMarkComplete(project.id)}
-                        >
-                          <i className="fas fa-check"></i>
-                        </button>
-                      )}
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => handleDeleteProject(project.id)}
-                      >
-                        <i className="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-
-                {expandedRow === project.id && (
-                  <tr>
-                    <td colSpan={14} className="p-0 border-top-0">
-                      <div className="p-4">
-                        {/* Project Files Header */}
-                        <div className="mb-4">
-                          <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5 className="mb-0">Project Files</h5>
-                            {selectedFiles.length > 0 && (
-                              <span className="badge bg-primary">
-                                {selectedFiles.length} files selected
-                              </span>
-                            )}
+                            role="progressbar"
+                            style={{ width: `${project.progress}%` }}
+                            aria-valuenow={project.progress}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                          >
+                            {project.progress}%
                           </div>
-
-                          {/* Batch Edit Controls (now always visible above table) */}
-                          <div className="row g-3 mb-3">
-                            <div className="col-md-2">
-                              <label className="form-label">
-                                Ready for QC Due
-                              </label>
-                              <input
-                                type="datetime-local"
-                                className="form-control"
-                                value={readyForQcDueInput}
-                                onChange={(e) =>
-                                  setReadyForQcDueInput(e.target.value)
-                                }
-                              />
-                              <div className="small">
-                                Format: hh:mm DD-MM-YY
-                              </div>
-                            </div>
-                            <div className="col-md-2">
-                              <label className="form-label">
-                                QC Allocated Hours
-                              </label>
-                              <input
-                                type="number"
-                                className="form-control"
-                                step="0.25"
-                                min="0"
-                                value={qcAllocatedHours}
-                                onChange={(e) => {
-                                  const val = parseFloat(e.target.value);
-                                  if (val >= 0 && val % 0.25 === 0)
-                                    setQcAllocatedHours(val);
-                                }}
-                                placeholder="0.00"
-                              />
-                              <div className="small">
-                                (in multiple of 0.25 only)
-                              </div>
-                            </div>
-                            <div className="col-md-2">
-                              <label className="form-label">Handler</label>
-                              <select
-                                className="form-select"
-                                value={batchEditValues.handler}
-                                onChange={(e) =>
-                                  setBatchEditValues({
-                                    ...batchEditValues,
-                                    handler: e.target.value,
-                                  })
-                                }
-                              >
-                                <option value="">Select</option>
-                                <option value="John Doe">John Doe</option>
-                                <option value="Jane Smith">Jane Smith</option>
-                                <option value="Mike Johnson">
-                                  Mike Johnson
-                                </option>
-                              </select>
-                            </div>
-                            <div className="col-md-2">
-                              <label className="form-label">QA Reviewer</label>
-                              <select
-                                className="form-select"
-                                value={batchEditValues.qaReviewer}
-                                onChange={(e) =>
-                                  setBatchEditValues({
-                                    ...batchEditValues,
-                                    qaReviewer: e.target.value,
-                                  })
-                                }
-                              >
-                                <option value="">Select</option>
-                                <option value="Sarah Williams">
-                                  Sarah Williams
-                                </option>
-                                <option value="David Brown">David Brown</option>
-                                <option value="Emily Davis">Emily Davis</option>
-                              </select>
-                            </div>
-                            <div className="col-md-2">
-                              <label className="form-label">Status</label>
-                              <select
-                                className="form-select"
-                                value={batchEditValues.status || ""}
-                                onChange={(e) =>
-                                  setBatchEditValues({
-                                    ...batchEditValues,
-                                    status: e.target.value,
-                                  })
-                                }
-                              >
-                                <option value="">Select</option>
-                                <option value="Pending">Pending</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="Approved">Approved</option>
-                                <option value="Rejected">Rejected</option>
-                              </select>
-                            </div>
-                            <div
-                              className="col-md-1 d-flex align-items-end"
-                              style={{ marginBottom: "22px" }}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="d-flex gap-2">
+                          <button
+                            className="btn btn-sm btn-primary"
+                            onClick={() => handleViewProject(project)}
+                          >
+                            <i
+                              className={`fas ${
+                                expandedRow === project.id
+                                  ? "fa-chevron-up"
+                                  : "fa-eye"
+                              }`}
+                            ></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => handleEditProject(project)}
+                          >
+                            <i className="fas fa-edit"></i>
+                          </button>
+                          {project.progress === 100 && (
+                            <button
+                              className="btn btn-sm btn-success"
+                              onClick={() => handleMarkComplete(project.id)}
                             >
-                              <button
-                                className="btn btn-info"
-                                disabled={selectedFiles.length === 0}
-                                onClick={() => {
-                                  // Apply batch edit to selected files
-                                  const updatedFiles = project.files.map((f) =>
-                                    selectedFiles.some((sf) => sf.id === f.id)
-                                      ? {
-                                          ...f,
-                                          handler:
-                                            batchEditValues.handler ||
-                                            f.handler,
-                                          qaReviewer:
-                                            batchEditValues.qaReviewer ||
-                                            f.qaReviewer,
-                                          qaStatus:
-                                            batchEditValues.status ||
-                                            f.qaStatus,
-                                          readyForQcDue:
-                                            readyForQcDueInput ||
-                                            f.readyForQcDue,
-                                          qcAllocatedHours:
-                                            qcAllocatedHours ||
-                                            f.qcAllocatedHours,
-                                        }
-                                      : f
-                                  );
-                                  setSelectedProject({
-                                    ...project,
-                                    files: updatedFiles,
-                                  });
-                                  setHasUnsavedChanges(true);
-                                }}
-                              >
-                                Apply to Selected Files
-                              </button>
-                            </div>
-                          </div>
+                              <i className="fas fa-check"></i>
+                            </button>
+                          )}
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleDeleteProject(project.id)}
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
 
-                          {/* Files Table */}
-                          <div className="table-responsive">
-                            <table className="table table-sm table-striped table-hover">
-                              <thead className="table-light">
-                                <tr>
-                                  <th>
-                                    <input
-                                      type="checkbox"
-                                      className="form-check-input"
-                                      checked={
-                                        selectedFiles.length ===
-                                        project?.files?.length
-                                      }
-                                      onChange={(e) => {
-                                        if (e.target.checked) {
-                                          setSelectedFiles([...project.files]);
-                                        } else {
-                                          setSelectedFiles([]);
-                                        }
-                                        setHasUnsavedChanges(true);
-                                      }}
-                                    />
-                                  </th>
-                                  <th>File Name</th>
-                                  <th>Pages</th>
-                                  <th>Language</th>
-                                  <th>Application</th>
-                                  {/* <th>Stage</th>
-                                  <th>Assigned</th> */}
-                                  <th>Handler</th>
-                                  <th>QA Reviewer</th>
-                                  <th>QA Status</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {project.files.map((file) => (
-                                  <tr
-                                    key={file.id}
-                                    className={
-                                      selectedFiles.some(
-                                        (f) => f.id === file.id
-                                      )
-                                        ? "table-primary"
-                                        : ""
+                    {expandedRow === project.id && (
+                      <tr>
+                        <td colSpan={14} className="p-0 border-top-0">
+                          <div className="p-4">
+                            {/* Project Files Header */}
+                            <div className="mb-4">
+                              <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h5 className="mb-0">Project Files</h5>
+                                {selectedFiles.length > 0 && (
+                                  <span className="badge bg-primary">
+                                    {selectedFiles.length} files selected
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Batch Edit Controls */}
+                              <div className="row g-3 mb-3">
+                                <div className="col-md-2">
+                                  <label className="form-label">
+                                    Ready for QC Due
+                                  </label>
+                                  <input
+                                    type="datetime-local"
+                                    className="form-control"
+                                    value={readyForQcDueInput}
+                                    onChange={(e) =>
+                                      setReadyForQcDueInput(e.target.value)
+                                    }
+                                  />
+                                  <div className="small">
+                                    Format: hh:mm DD-MM-YY
+                                  </div>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">
+                                    QC Allocated Hours
+                                  </label>
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    step="0.25"
+                                    min="0"
+                                    value={qcAllocatedHours}
+                                    onChange={(e) => {
+                                      const val = parseFloat(e.target.value);
+                                      if (val >= 0 && val % 0.25 === 0)
+                                        setQcAllocatedHours(val);
+                                    }}
+                                    placeholder="0.00"
+                                  />
+                                  <div className="small">
+                                    (in multiple of 0.25 only)
+                                  </div>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">Handler</label>
+                                  <select
+                                    className="form-select"
+                                    value={batchEditValues.handler}
+                                    onChange={(e) =>
+                                      setBatchEditValues({
+                                        ...batchEditValues,
+                                        handler: e.target.value,
+                                      })
                                     }
                                   >
-                                    <td>
-                                      <input
-                                        type="checkbox"
-                                        className="form-check-input"
-                                        checked={selectedFiles.some(
-                                          (f) => f.id === file.id
-                                        )}
-                                        onChange={() =>
-                                          toggleFileSelection(file)
-                                        }
-                                      />
-                                    </td>
-                                    <td>{file.name}</td>
-                                    <td>{file.pages}</td>
-                                    <td>{file.language}</td>
-                                    <td>{file.application}</td>
-                                    {/* <td>{file.stage}</td>
-                                    <td>{file.assigned}</td> */}
-                                    <td>
-                                      <select
-                                        className="form-select form-select-sm"
-                                        value={file.handler || ""}
-                                        onChange={(e) => {
-                                          const updatedFiles =
-                                            project.files.map((f) =>
-                                              f.id === file.id
-                                                ? {
-                                                    ...f,
-                                                    handler: e.target.value,
-                                                  }
-                                                : f
-                                            );
-                                          setSelectedProject({
-                                            ...project,
-                                            files: updatedFiles,
-                                          });
-                                          setHasUnsavedChanges(true);
-                                        }}
-                                      >
-                                        <option value="">Not Assigned</option>
-                                        <option value="John Doe">
-                                          John Doe
-                                        </option>
-                                        <option value="Jane Smith">
-                                          Jane Smith
-                                        </option>
-                                        <option value="Mike Johnson">
-                                          Mike Johnson
-                                        </option>
-                                      </select>
-                                    </td>
-                                    <td>
-                                      <select
-                                        className="form-select form-select-sm"
-                                        value={file.qaReviewer || ""}
-                                        onChange={(e) => {
-                                          const updatedFiles =
-                                            project.files.map((f) =>
-                                              f.id === file.id
-                                                ? {
-                                                    ...f,
-                                                    qaReviewer: e.target.value,
-                                                  }
-                                                : f
-                                            );
-                                          setSelectedProject({
-                                            ...project,
-                                            files: updatedFiles,
-                                          });
-                                          setHasUnsavedChanges(true);
-                                        }}
-                                      >
-                                        <option value="">Not Assigned</option>
-                                        <option value="Sarah Williams">
-                                          Sarah Williams
-                                        </option>
-                                        <option value="David Brown">
-                                          David Brown
-                                        </option>
-                                        <option value="Emily Davis">
-                                          Emily Davis
-                                        </option>
-                                      </select>
-                                    </td>
-                                    <td>Corr WIP</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
+                                    <option value="">Select</option>
+                                    <option value="John Doe">John Doe</option>
+                                    <option value="Jane Smith">
+                                      Jane Smith
+                                    </option>
+                                    <option value="Mike Johnson">
+                                      Mike Johnson
+                                    </option>
+                                  </select>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">
+                                    QA Reviewer
+                                  </label>
+                                  <select
+                                    className="form-select"
+                                    value={batchEditValues.qaReviewer}
+                                    onChange={(e) =>
+                                      setBatchEditValues({
+                                        ...batchEditValues,
+                                        qaReviewer: e.target.value,
+                                      })
+                                    }
+                                  >
+                                    <option value="">Select</option>
+                                    <option value="Sarah Williams">
+                                      Sarah Williams
+                                    </option>
+                                    <option value="David Brown">
+                                      David Brown
+                                    </option>
+                                    <option value="Emily Davis">
+                                      Emily Davis
+                                    </option>
+                                  </select>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">Status</label>
+                                  <select
+                                    className="form-select"
+                                    value={batchEditValues.status || ""}
+                                    onChange={(e) =>
+                                      setBatchEditValues({
+                                        ...batchEditValues,
+                                        status: e.target.value,
+                                      })
+                                    }
+                                  >
+                                    <option value="">Select</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Progress">
+                                      In Progress
+                                    </option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                  </select>
+                                </div>
+                                <div className="col-md-2 d-flex align-items-end">
+                                  <button
+                                    className="btn btn-info"
+                                    disabled={selectedFiles.length === 0}
+                                    onClick={applyBatchEdits}
+                                  >
+                                    Apply to Selected
+                                  </button>
+                                </div>
+                              </div>
 
-                        {/* Footer buttons */}
-                        <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 bg-card px-3 py-2 rounded-3 border">
-                          <div />
-                          <div className="d-flex gap-2">
-                            <button
-                              type="button"
-                              className="btn btn-secondary rounded-5 px-4"
-                              onClick={() => {
-                                setExpandedRow(null);
-                                setSelectedFiles([]);
-                                setHasUnsavedChanges(false);
-                              }}
-                            >
-                              Close
-                            </button>
-                            <button
-                              type="button"
-                              className="btn btn-primary rounded-5 px-4"
-                              disabled={!hasUnsavedChanges}
-                              onClick={() => {
-                                // Save changes to main projects list
-                                setProjects(
-                                  projects.map((p) =>
-                                    p.id === project.id
-                                      ? {
-                                          ...project,
-                                          files: selectedProject.files,
+                              {/* Files Table */}
+                              <div className="table-responsive">
+                                <table className="table table-sm table-striped table-hover">
+                                  <thead className="table-light">
+                                    <tr>
+                                      <th>
+                                        <input
+                                          type="checkbox"
+                                          className="form-check-input"
+                                          checked={
+                                            selectedFiles.length ===
+                                            project?.files?.length
+                                          }
+                                          onChange={(e) => {
+                                            if (e.target.checked) {
+                                              setSelectedFiles([
+                                                ...project.files,
+                                              ]);
+                                            } else {
+                                              setSelectedFiles([]);
+                                            }
+                                            setHasUnsavedChanges(true);
+                                          }}
+                                        />
+                                      </th>
+                                      <th>File Name</th>
+                                      <th>Pages</th>
+                                      <th>Language</th>
+                                      <th>Application</th>
+                                      <th>Handler</th>
+                                      <th>QA Reviewer</th>
+                                      <th>QA Status</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {project.files.map((file) => (
+                                      <tr
+                                        key={file.id}
+                                        className={
+                                          selectedFiles.some(
+                                            (f) => f.id === file.id
+                                          )
+                                            ? "table-primary"
+                                            : ""
                                         }
-                                      : p
-                                  )
-                                );
-                                setHasUnsavedChanges(false);
-                                setExpandedRow(null);
-                                setSelectedFiles([]);
-                              }}
-                            >
-                              Save Changes
-                            </button>
+                                      >
+                                        <td>
+                                          <input
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            checked={selectedFiles.some(
+                                              (f) => f.id === file.id
+                                            )}
+                                            onChange={() =>
+                                              toggleFileSelection(file)
+                                            }
+                                          />
+                                        </td>
+                                        <td>{file.name}</td>
+                                        <td>{file.pages}</td>
+                                        <td>{file.language}</td>
+                                        <td>{file.application}</td>
+                                        <td>
+                                          <select
+                                            className="form-select form-select-sm"
+                                            value={file.handler || ""}
+                                            onChange={(e) => {
+                                              const updatedFiles =
+                                                project.files.map((f) =>
+                                                  f.id === file.id
+                                                    ? {
+                                                        ...f,
+                                                        handler: e.target.value,
+                                                      }
+                                                    : f
+                                                );
+                                              setSelectedProject({
+                                                ...project,
+                                                files: updatedFiles,
+                                              });
+                                              setHasUnsavedChanges(true);
+                                            }}
+                                          >
+                                            <option value="">
+                                              Not Assigned
+                                            </option>
+                                            <option value="John Doe">
+                                              John Doe
+                                            </option>
+                                            <option value="Jane Smith">
+                                              Jane Smith
+                                            </option>
+                                            <option value="Mike Johnson">
+                                              Mike Johnson
+                                            </option>
+                                          </select>
+                                        </td>
+                                        <td>
+                                          <select
+                                            className="form-select form-select-sm"
+                                            value={file.qaReviewer || ""}
+                                            onChange={(e) => {
+                                              const updatedFiles =
+                                                project.files.map((f) =>
+                                                  f.id === file.id
+                                                    ? {
+                                                        ...f,
+                                                        qaReviewer:
+                                                          e.target.value,
+                                                      }
+                                                    : f
+                                                );
+                                              setSelectedProject({
+                                                ...project,
+                                                files: updatedFiles,
+                                              });
+                                              setHasUnsavedChanges(true);
+                                            }}
+                                          >
+                                            <option value="">
+                                              Not Assigned
+                                            </option>
+                                            <option value="Sarah Williams">
+                                              Sarah Williams
+                                            </option>
+                                            <option value="David Brown">
+                                              David Brown
+                                            </option>
+                                            <option value="Emily Davis">
+                                              Emily Davis
+                                            </option>
+                                          </select>
+                                        </td>
+                                        <td>Corr WIP</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+
+                            {/* Footer buttons */}
+                            <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 bg-card px-3 py-2 rounded-3 border">
+                              <div />
+                              <div className="d-flex gap-2">
+                                <button
+                                  type="button"
+                                  className="btn btn-secondary rounded-5 px-4"
+                                  onClick={() => {
+                                    setExpandedRow(null);
+                                    setSelectedFiles([]);
+                                    setHasUnsavedChanges(false);
+                                  }}
+                                >
+                                  Close
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn-primary rounded-5 px-4"
+                                  disabled={!hasUnsavedChanges}
+                                  onClick={() => {
+                                    // Save changes to main projects list
+                                    setProjects(
+                                      projects.map((p) =>
+                                        p.id === project.id
+                                          ? {
+                                              ...project,
+                                              files: selectedProject.files,
+                                            }
+                                          : p
+                                      )
+                                    );
+                                    setHasUnsavedChanges(false);
+                                    setExpandedRow(null);
+                                    setSelectedFiles([]);
+                                  }}
+                                >
+                                  Save Changes
+                                </button>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -2040,88 +2038,7 @@ const generateDummyProjects = (count) => {
     "ar",
     "az",
     "be",
-    "bg",
-    "bn",
-    "bs",
-    "ca",
-    "cs",
-    "cy",
-    "da",
-    "de",
-    "el",
-    "en",
-    "en-US",
-    "en-GB",
-    "es",
-    "es-ES",
-    "es-MX",
-    "et",
-    "eu",
-    "fa",
-    "fi",
-    "fil",
-    "fr",
-    "fr-FR",
-    "fr-CA",
-    "ga",
-    "gl",
-    "gu",
-    "ha",
-    "he",
-    "hi",
-    "hr",
-    "hu",
-    "hy",
-    "id",
-    "ig",
-    "is",
-    "it",
-    "ja",
-    "jv",
-    "ka",
-    "kk",
-    "km",
-    "kn",
-    "ko",
-    "ku",
-    "ky",
-    "lo",
-    "lt",
-    "lv",
-    "mk",
-    "ml",
-    "mn",
-    "mr",
-    "ms",
-    "mt",
-    "my",
-    "ne",
-    "nl",
-    "no",
-    "or",
-    "pa",
-    "pl",
-    "ps",
-    "pt",
-    "pt-BR",
-    "pt-PT",
-    "ro",
-    "ru",
-    "sd",
-    "si",
-    "sk",
-    "sl",
-    "so",
-    "sq",
-    "sr",
-    "sr-Cyrl",
-    "sr-Latn",
-    "sv",
-    "sw",
-    "ta",
-    "te",
-    "th",
-    "tl",
+
     "tr",
     "uk",
     "ur",
