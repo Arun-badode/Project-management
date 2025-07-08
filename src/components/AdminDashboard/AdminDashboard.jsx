@@ -23,6 +23,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import useSyncScroll from "./Hooks/useSyncScroll";
 
 export const ProjectsData = [
   {
@@ -688,9 +689,30 @@ const AdminDashboard = () => {
 
   const [setAllProjects] = useState([]);
 
- 
-
   const COLORS = ["#4F46E5", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
+
+  const {
+    scrollContainerRef: scrollContainerRef1,
+    fakeScrollbarRef: fakeScrollbarRef1,
+  } = useSyncScroll(activeFilter === "active");
+
+  const {
+    scrollContainerRef: scrollContainerRef2,
+    fakeScrollbarRef: fakeScrollbarRef2,
+  } = useSyncScroll(activeFilter === "nearDue");
+   const {
+    scrollContainerRef: scrollContainerRef3,
+    fakeScrollbarRef: fakeScrollbarRef3,
+  } = useSyncScroll(activeFilter === "overdue");
+   const {
+    scrollContainerRef: scrollContainerRef4,
+    fakeScrollbarRef: fakeScrollbarRef4,
+  } = useSyncScroll(activeFilter === "teamOnDuty");
+   const {
+    scrollContainerRef: scrollContainerRef5,
+    fakeScrollbarRef: fakeScrollbarRef5,
+  } = useSyncScroll(activeFilter === "eventsToday");
+  
 
   return (
     <div className="admin-dashboard text-white p-3 p-md-4 bg-main">
@@ -761,13 +783,27 @@ const AdminDashboard = () => {
         ))}
       </Row>
 
-
       {activeFilter == "active" && (
-          <Card className="text-white p-3 mb-4 table-gradient-bg">
+        <Card className="text-white p-3 mb-4 table-gradient-bg">
+          <div
+            ref={fakeScrollbarRef1}
+            style={{
+              overflowX: "auto",
+              overflowY: "hidden",
+              height: 16,
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 1050,
+            }}
+          >
+            <div style={{ width: "2000px", height: 1 }} />
+          </div>
           <h4 className="mb-3">Active Projects</h4>
           <div
             className=""
-            ref={scrollContainerRef}
+            ref={scrollContainerRef1}
             style={{
               maxHeight: "500px",
               overflowX: "auto",
@@ -866,13 +902,27 @@ const AdminDashboard = () => {
         </Card>
       )}
 
-
- {activeFilter === "nearDue" && (
+      {activeFilter === "nearDue" && (
         <Card className="text-white p-3 mb-4 table-gradient-bg">
+          <div
+            ref={fakeScrollbarRef2}
+            style={{
+              overflowX: "auto",
+              overflowY: "hidden",
+              height: 16,
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 1050,
+            }}
+          >
+            <div style={{ width: "2000px", height: 1 }} />
+          </div>
           <h4 className="mb-3">Near Due Projects (Next 30 Minutes)</h4>
           <div
             className=""
-            ref={scrollContainerRef}
+            ref={scrollContainerRef2}
             style={{
               maxHeight: "500px",
               overflowX: "auto",
@@ -971,12 +1021,27 @@ const AdminDashboard = () => {
         </Card>
       )}
 
-       {activeFilter === "overdue" && (
+      {activeFilter === "overdue" && (
         <Card className="text-white p-3 mb-4 table-gradient-bg">
+          <div
+            ref={fakeScrollbarRef3}
+            style={{
+              overflowX: "auto",
+              overflowY: "hidden",
+              height: 16,
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 1050,
+            }}
+          >
+            <div style={{ width: "2000px", height: 1 }} />
+          </div>
           <h4 className="mb-3">Overdue Projects</h4>
           <div
             className=""
-            ref={scrollContainerRef}
+             ref={scrollContainerRef3}
             style={{
               maxHeight: "500px",
               overflowX: "auto",
@@ -1076,15 +1141,38 @@ const AdminDashboard = () => {
       )}
 
       {activeFilter == "teamOnDuty" && (
-         <Card className="text-white p-3 mb-4 table-gradient-bg">
+        <Card className="text-white p-3 mb-4 table-gradient-bg">
+          <div
+            ref={fakeScrollbarRef4}
+            style={{
+              overflowX: "auto",
+              overflowY: "hidden",
+              height: 16,
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 1050,
+            }}
+          >
+            <div style={{ width: "2000px", height: 1 }} />
+          </div>
           <h4 className="mb-3">Today's Attendance</h4>
           <div
             className="table-responsive"
-            style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }}
-            ref={scrollContainerRef}
+            ref={scrollContainerRef4}
+            style={{
+              maxHeight: "500px",
+              overflowX: "auto",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
           >
             <table className="table table-hover mb-0">
-              <thead className="table bg-dark p-2 sticky-top" style={{ position: "sticky", top: 0, zIndex: 2 }}>
+              <thead
+                className="table bg-dark p-2 sticky-top"
+                style={{ position: "sticky", top: 0, zIndex: 2 }}
+              >
                 <tr>
                   <th>Employee</th>
                   <th>Department</th>
@@ -1154,7 +1242,22 @@ const AdminDashboard = () => {
       )}
 
       {activeFilter == "eventsToday" && (
-       <Card className="text-white p-3 mb-4 table-gradient-bg">
+        <Card className="text-white p-3 mb-4 table-gradient-bg">
+          <div
+            ref={fakeScrollbarRef5}
+            style={{
+              overflowX: "auto",
+              overflowY: "hidden",
+              height: 16,
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 1050,
+            }}
+          >
+            <div style={{ width: "2000px", height: 1 }} />
+          </div>
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h4 className="mb-0">Today's Events</h4>
             <Link to="/calendar" className="text-decoration-none">
@@ -1163,11 +1266,19 @@ const AdminDashboard = () => {
           </div>
           <div
             className="table-responsive"
-            style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }}
-            ref={scrollContainerRef}
+             ref={scrollContainerRef5}
+            style={{
+              maxHeight: "500px",
+              overflowX: "auto",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
           >
             <table className="table table-hover mb-0">
-              <thead className="table bg-dark p-2 sticky-top" style={{ position: "sticky", top: 0, zIndex: 2 }}>
+              <thead
+                className="table bg-dark p-2 sticky-top"
+                style={{ position: "sticky", top: 0, zIndex: 2 }}
+              >
                 <tr>
                   <th>Task Title</th>
                   <th>Description</th>
@@ -1190,8 +1301,6 @@ const AdminDashboard = () => {
         </Card>
       )}
 
-   
-
       {/* View Project Details Modal */}
       <Modal
         show={showViewModal}
@@ -1205,15 +1314,33 @@ const AdminDashboard = () => {
         <Modal.Body>
           {selectedProject && (
             <div>
-              <p><strong>Title:</strong> {selectedProject.title}</p>
-              <p><strong>Client:</strong> {selectedProject.client}</p>
-              <p><strong>Application:</strong> {selectedProject.application}</p>
-              <p><strong>Pages:</strong> {selectedProject.pages}</p>
-              <p><strong>Due Date:</strong> {selectedProject.dueDate}</p>
-              <p><strong>Status:</strong> {selectedProject.status}</p>
-              <p><strong>Handler:</strong> {selectedProject.handler}</p>
-              <p><strong>QA Reviewer:</strong> {selectedProject.qaReviewer}</p>
-              <p><strong>QA Status:</strong> {selectedProject.qaStatus}</p>
+              <p>
+                <strong>Title:</strong> {selectedProject.title}
+              </p>
+              <p>
+                <strong>Client:</strong> {selectedProject.client}
+              </p>
+              <p>
+                <strong>Application:</strong> {selectedProject.application}
+              </p>
+              <p>
+                <strong>Pages:</strong> {selectedProject.pages}
+              </p>
+              <p>
+                <strong>Due Date:</strong> {selectedProject.dueDate}
+              </p>
+              <p>
+                <strong>Status:</strong> {selectedProject.status}
+              </p>
+              <p>
+                <strong>Handler:</strong> {selectedProject.handler}
+              </p>
+              <p>
+                <strong>QA Reviewer:</strong> {selectedProject.qaReviewer}
+              </p>
+              <p>
+                <strong>QA Status:</strong> {selectedProject.qaStatus}
+              </p>
             </div>
           )}
         </Modal.Body>
