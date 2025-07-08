@@ -126,56 +126,55 @@ export default function SettingsPage() {
           </div>
 
           {/* Second row */}
-      <div className="row mb-3">
-  {/* Country Input */}
-  <div className="col-md-4 mb-2">
-    <input
-      className="form-control"
-      style={{ background: "#181f3a", color: "#fff" }}
-      placeholder="Country*"
-      name="country"
-      value={clientForm.country}
-      onChange={handleClientChange}
-    />
-  </div>
+          <div className="row mb-3">
+            {/* Country Input */}
+            <div className="col-md-4 mb-2">
+              <input
+                className="form-control"
+                style={{ background: "#181f3a", color: "#fff" }}
+                placeholder="Country*"
+                name="country"
+                value={clientForm.country}
+                onChange={handleClientChange}
+              />
+            </div>
 
-  {/* Currency + Hourly Rate Side-by-Side */}
-  <div className="col-md-8 mb-2">
-    <div className="row">
-      {/* Currency */}
-      <div className="col-md-3">
-        <select
-          className="form-control"
-          style={{ background: "#181f3a", color: "#fff" }}
-          name="currency"
-          value={clientForm.currency}
-          onChange={handleClientChange}
-        >
-          <option value="">Currency*</option>
-          {currencyOptions.map((cur) => (
-            <option key={cur} value={cur}>
-              {cur}
-            </option>
-          ))}
-        </select>
-      </div>
+            {/* Currency + Hourly Rate Side-by-Side */}
+            <div className="col-md-8 mb-2">
+              <div className="row">
+                {/* Currency */}
+                <div className="col-md-3">
+                  <select
+                    className="form-control"
+                    style={{ background: "#181f3a", color: "#fff" }}
+                    name="currency"
+                    value={clientForm.currency}
+                    onChange={handleClientChange}
+                  >
+                    <option value="">Currency*</option>
+                    {currencyOptions.map((cur) => (
+                      <option key={cur} value={cur}>
+                        {cur}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-      {/* Hourly Rate */}
-      <div className="col-md-5 d-flex align-items-end">
-        <input
-          type="number"
-          className="form-control"
-          placeholder="Hourly Rate*"
-          name="hourlyRate"
-          value={clientForm.hourlyRate}
-          onChange={handleClientChange}
-          style={{ background: "#181f3a", color: "#fff" }}
-        />
-      </div>
-    </div>
-  </div>
-</div>
-
+                {/* Hourly Rate */}
+                <div className="col-md-5 d-flex align-items-end">
+                  <input
+                    type="number"
+                    className="form-control"
+                    placeholder="Hourly Rate*"
+                    name="hourlyRate"
+                    value={clientForm.hourlyRate}
+                    onChange={handleClientChange}
+                    style={{ background: "#181f3a", color: "#fff" }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Third row */}
           <div className="d-flex gap-2 mb-2 flex-wrap">

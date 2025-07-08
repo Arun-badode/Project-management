@@ -4,6 +4,7 @@ import moment from "moment";
 import Select from "react-select";
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
+import useSyncScroll from "../Hooks/useSyncScroll";
 
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
@@ -654,6 +655,11 @@ const ActiveProject = () => {
     // Apply deadline logic here
     alert(`Deadline ${formData.deadline} applied to selected files.`);
   };
+
+  const {
+    scrollContainerRef: scrollContainerRef1,
+    fakeScrollbarRef: fakeScrollbarRef1,
+  } = useSyncScroll(activeTab === "created");
 
   return (
     <div className="container-fluid py-4">
@@ -1509,31 +1515,9 @@ const ActiveProject = () => {
       </ul>
 
       {/* Projects Table */}
-      <div
-        ref={fakeScrollbarRef}
-        style={{
-          overflowX: "auto",
-          overflowY: "hidden",
-          height: 16,
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1050,
-          display: "none",
-        }}
-      >
-        <div style={{ width: "2000px", height: 1 }} />
-      </div>
-
-      {/* Scrollable Table Container */}
-      <div
-        className="table-responsive"
-        ref={scrollContainerRef}
-        style={{ maxHeight: "500px", overflowY: "auto", overflowX: "auto" }}
-      >
+      <div className="table-responsive table-gradient-bg">
         <table className="table-gradient-bg align-middle mt-0 table table-bordered table-hover">
-          <thead className="table-light">
+          <thead className="table">
             <tr>
               <th>S. No.</th>
               <th>Project Title</th>
@@ -1648,7 +1632,7 @@ const ActiveProject = () => {
                             )}
                           </div>
 
-                          {/* Batch Edit Controls (now always visible above table) */}
+                          {/* Batch Edit Controls */}
                           <div className="row g-3 mb-3">
                             <div className="col-md-2">
                               <label className="form-label">
@@ -1746,45 +1730,13 @@ const ActiveProject = () => {
                                 <option value="Rejected">Rejected</option>
                               </select>
                             </div>
-                            <div
-                              className="col-md-1 d-flex align-items-end"
-                              style={{ marginBottom: "22px" }}
-                            >
+                            <div className="col-md-2 d-flex align-items-end">
                               <button
                                 className="btn btn-info"
                                 disabled={selectedFiles.length === 0}
-                                onClick={() => {
-                                  // Apply batch edit to selected files
-                                  const updatedFiles = project.files.map((f) =>
-                                    selectedFiles.some((sf) => sf.id === f.id)
-                                      ? {
-                                          ...f,
-                                          handler:
-                                            batchEditValues.handler ||
-                                            f.handler,
-                                          qaReviewer:
-                                            batchEditValues.qaReviewer ||
-                                            f.qaReviewer,
-                                          qaStatus:
-                                            batchEditValues.status ||
-                                            f.qaStatus,
-                                          readyForQcDue:
-                                            readyForQcDueInput ||
-                                            f.readyForQcDue,
-                                          qcAllocatedHours:
-                                            qcAllocatedHours ||
-                                            f.qcAllocatedHours,
-                                        }
-                                      : f
-                                  );
-                                  setSelectedProject({
-                                    ...project,
-                                    files: updatedFiles,
-                                  });
-                                  setHasUnsavedChanges(true);
-                                }}
+                                onClick={applyBatchEdits}
                               >
-                                Apply to Selected Files
+                                Apply to Selected
                               </button>
                             </div>
                           </div>
@@ -1816,8 +1768,6 @@ const ActiveProject = () => {
                                   <th>Pages</th>
                                   <th>Language</th>
                                   <th>Application</th>
-                                  {/* <th>Stage</th>
-                                  <th>Assigned</th> */}
                                   <th>Handler</th>
                                   <th>QA Reviewer</th>
                                   <th>QA Status</th>
@@ -1851,8 +1801,6 @@ const ActiveProject = () => {
                                     <td>{file.pages}</td>
                                     <td>{file.language}</td>
                                     <td>{file.application}</td>
-                                    {/* <td>{file.stage}</td>
-                                    <td>{file.assigned}</td> */}
                                     <td>
                                       <select
                                         className="form-select form-select-sm"
@@ -2040,88 +1988,7 @@ const generateDummyProjects = (count) => {
     "ar",
     "az",
     "be",
-    "bg",
-    "bn",
-    "bs",
-    "ca",
-    "cs",
-    "cy",
-    "da",
-    "de",
-    "el",
-    "en",
-    "en-US",
-    "en-GB",
-    "es",
-    "es-ES",
-    "es-MX",
-    "et",
-    "eu",
-    "fa",
-    "fi",
-    "fil",
-    "fr",
-    "fr-FR",
-    "fr-CA",
-    "ga",
-    "gl",
-    "gu",
-    "ha",
-    "he",
-    "hi",
-    "hr",
-    "hu",
-    "hy",
-    "id",
-    "ig",
-    "is",
-    "it",
-    "ja",
-    "jv",
-    "ka",
-    "kk",
-    "km",
-    "kn",
-    "ko",
-    "ku",
-    "ky",
-    "lo",
-    "lt",
-    "lv",
-    "mk",
-    "ml",
-    "mn",
-    "mr",
-    "ms",
-    "mt",
-    "my",
-    "ne",
-    "nl",
-    "no",
-    "or",
-    "pa",
-    "pl",
-    "ps",
-    "pt",
-    "pt-BR",
-    "pt-PT",
-    "ro",
-    "ru",
-    "sd",
-    "si",
-    "sk",
-    "sl",
-    "so",
-    "sq",
-    "sr",
-    "sr-Cyrl",
-    "sr-Latn",
-    "sv",
-    "sw",
-    "ta",
-    "te",
-    "th",
-    "tl",
+
     "tr",
     "uk",
     "ur",
