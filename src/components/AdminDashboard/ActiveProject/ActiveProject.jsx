@@ -5,7 +5,6 @@ import Select from "react-select";
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 
-
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
@@ -26,6 +25,9 @@ const ActiveProject = () => {
     application: [],
     files: [{ name: "", pageCount: 0 }],
     totalPages: 0,
+    deadline: "",
+    readyDeadline: "",
+    qcHrs: "",
     receivedDate: new Date().toISOString().split("T")[0],
     serverPath: "",
     notes: "",
@@ -261,7 +263,7 @@ const ActiveProject = () => {
   const [minute, setMinute] = useState("00");
   const [period, setPeriod] = useState("AM");
   const [qcDueDelay, setQcDueDelay] = useState("");
-  
+
   const scrollContainerRef = useRef(null);
   const fakeScrollbarRef = useRef(null);
   const tabScrollContainerRef = useRef(null);
@@ -321,22 +323,29 @@ const ActiveProject = () => {
     const nearDueDate = new Date();
     nearDueDate.setDate(today.getDate() + 3);
 
+    // Clear all filters when a button is clicked
+    setClientFilter("");
+    setTaskFilter("");
+    setLanguageFilter("");
+    setSelectedApplications([]);
+
     switch (type) {
       case "all":
-        filtered = projects;
+        filtered = projects
+          .slice()
+          .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
         break;
       case "nearDue":
         filtered = projects.filter((project) => {
-          if (project.status !== "Active") return false;
-          const dueDate = new Date(project.dueDate);
           const now = new Date();
           const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+          const dueDate = new Date(customToInputDate(project.deadline));
           return dueDate > now && dueDate <= thirtyMinsFromNow;
         });
         break;
       case "overdue":
         filtered = projects.filter((project) => {
-          const dueDate = new Date(project.dueDate);
+          const dueDate = new Date(customToInputDate(project.deadline));
           return dueDate < today && project.status !== "Completed";
         });
         break;
@@ -362,18 +371,6 @@ const ActiveProject = () => {
         );
         break;
       }
-      case "teamOnDuty":
-        filtered = projects.filter((p) => p.status === "Team On-Duty");
-        break;
-      case "eventsToday":
-        const todayStr = today.toISOString().split("T")[0];
-        filtered = projects.filter((project) => {
-          return project.dueDate === todayStr || project.qcDueDate === todayStr;
-        });
-        break;
-      case "pendingApproval":
-        filtered = projects.filter((p) => p.qaStatus === "Pending");
-        break;
       default:
         filtered = projects;
     }
@@ -412,13 +409,48 @@ const ActiveProject = () => {
   };
 
   const handleDeleteProject = (id) => {
+    const project = projects.find((p) => p.id === id);
+    if (!project) return;
+
     if (window.confirm("Are you sure you want to delete this project?")) {
-      setProjects(projects.filter((project) => project.id !== id));
+      // Case 1: If any file status is "YTS"
+      const ytsStatuses = ["YTS"];
+      const amendmentStatuses = [
+        "V1 YTS",
+        "V2 YTS",
+        "Amendment",
+        "Amendment YTS",
+      ];
+      let moveTo = "created";
+      let updatedFiles = project.files.map((file) => {
+        if (ytsStatuses.includes(file.qaStatus)) {
+          return { ...file, qaStatus: "" };
+        }
+        return file;
+      });
+
+      // If any file has amendment status, move to completed
+      if (
+        project.files.some((file) => amendmentStatuses.includes(file.qaStatus))
+      ) {
+        moveTo = "completed";
+        // Retain status
+      }
+
+      // TODO: Move project to Created or Completed Projects list as per your app logic
+      // For now, just remove from active list
+      setProjects(projects.filter((p) => p.id !== id));
+
+      // You can implement logic to add to created/completed lists here
+      // e.g. setCreatedProjects([...createdProjects, { ...project, files: updatedFiles }])
+      // or setCompletedProjects([...completedProjects, project])
     }
   };
 
   const handleMarkComplete = (id) => {
-    if (window.confirm("Are you sure you want to mark this project as complete?")) {
+    if (
+      window.confirm("Are you sure you want to mark this project as complete?")
+    ) {
       setProjects(projects.filter((project) => project.id !== id));
     }
   };
@@ -490,7 +522,11 @@ const ActiveProject = () => {
 
   const handleCloseModal = () => {
     if (hasUnsavedChanges) {
-      if (window.confirm("You have unsaved changes. Are you sure you want to discard them?")) {
+      if (
+        window.confirm(
+          "You have unsaved changes. Are you sure you want to discard them?"
+        )
+      ) {
         setShowDetailModal(false);
       }
     } else {
@@ -599,6 +635,24 @@ const ActiveProject = () => {
   const handleCreateNewProject = () => {
     setFormData(initialFormData);
     setShowCreateModal(true);
+  };
+
+  const handleSelectAllFiles = (e) => {
+    const updatedFiles = formData.files.map((f) => ({
+      ...f,
+      selected: e.target.checked,
+    }));
+    setFormData((prev) => ({ ...prev, files: updatedFiles }));
+  };
+
+  const handleApplyToSelectedFiles = () => {
+    const selected = formData.files.filter((f) => f.selected);
+    if (selected.length === 0) {
+      alert("No files selected.");
+      return;
+    }
+    // Apply deadline logic here
+    alert(`Deadline ${formData.deadline} applied to selected files.`);
   };
 
   return (
@@ -711,17 +765,22 @@ const ActiveProject = () => {
                   </div>
                   <div className="col-md-6">
                     <label className="form-label">Due Date & Time</label>
-                    <input
-                      type="datetime-local"
-                      className="form-control"
-                      value={customToInputDate(editedProject.dueDate)}
-                      onChange={(e) => {
-                        setEditedProject({
-                          ...editedProject,
-                          dueDate: inputToCustomDate(e.target.value),
-                        });
-                      }}
-                    />
+                    <div className="input-group">
+                      <input
+                        type="datetime-local"
+                        className="form-control"
+                        value={customToInputDate(editedProject.dueDate)}
+                        onChange={(e) => {
+                          setEditedProject({
+                            ...editedProject,
+                            dueDate: inputToCustomDate(e.target.value),
+                          });
+                        }}
+                      />
+                      <span className="input-group-text">
+                        <i className="fa fa-calendar"></i>
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -733,8 +792,8 @@ const ActiveProject = () => {
                 >
                   Cancel
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn btn-primary"
                   onClick={handleSaveProjectEdit}
                 >
@@ -782,7 +841,7 @@ const ActiveProject = () => {
                       onChange={handleInputChange}
                       placeholder="Enter project title (max 80 chars)"
                     />
-                    <div className="form-text">
+                    <div className="form-text text-white">
                       Max allowed Character length – 80, (ignore or remove any
                       special character by itself)
                     </div>
@@ -959,7 +1018,7 @@ const ActiveProject = () => {
                       placeholder="Select Languages"
                       styles={gradientSelectStyles}
                     />
-                    <div className="form-text">
+                    <div className="form-text text-white">
                       {formData.languages.length} selected
                     </div>
                   </div>
@@ -1015,7 +1074,9 @@ const ActiveProject = () => {
                             <th>S.No.</th>
                             <th>File Name</th>
                             <th>Pages</th>
+                            <th>Language</th>
                             <th>Application</th>
+                            <th>Statuts</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1035,6 +1096,7 @@ const ActiveProject = () => {
                                   placeholder="File Name"
                                 />
                               </td>
+                              <td>th</td>
                               <td>
                                 <input
                                   type="number"
@@ -1069,10 +1131,49 @@ const ActiveProject = () => {
                                   ))}
                                 </select>
                               </td>
+                              <td>TYS</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
+
+                      <div className="d-flex align-items-center gap-3 mt-3">
+                        <label
+                          className="text-white"
+                          style={{ fontWeight: "bold" }}
+                        >
+                          Deadline
+                        </label>
+                        <input
+                          type="datetime-local"
+                          className="form-control"
+                          style={{
+                            maxWidth: "250px",
+                            backgroundColor: "#181f3a",
+                            color: "white",
+                          }}
+                          value={formData.deadline || ""}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              deadline: e.target.value,
+                            }))
+                          }
+                        />
+                        <button
+                          className="btn"
+                          style={{
+                            background:
+                              "linear-gradient(90deg, rgba(123,97,255,1) 0%, rgba(217,75,255,1) 100%)",
+                            color: "white",
+                            borderRadius: "10px",
+                            padding: "6px 18px",
+                          }}
+                          onClick={handleApplyToSelectedFiles}
+                        >
+                          Apply to Selected Files
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -1110,7 +1211,7 @@ const ActiveProject = () => {
                         />
                       </div>
                     </div>
-                    <div className="form-text">
+                    <div className="form-text text-white">
                       Total Project Pages = Total Pages × Language Count
                     </div>
                   </div>
@@ -1174,7 +1275,7 @@ const ActiveProject = () => {
                         }
                         placeholder="00.00"
                       />
-                      <div className="form-text">
+                      <div className="form-text text-white">
                         (in multiple of 0.25 only)
                       </div>
                     </div>
@@ -1193,7 +1294,9 @@ const ActiveProject = () => {
                         }
                         placeholder="00.00"
                       />
-                      <div className="form-text">(with only 2 decimals)</div>
+                      <div className="form-text text-white">
+                        (with only 2 decimals)
+                      </div>
                     </div>
                     <div className="col-md-2">
                       <label className="form-label">Currency</label>
@@ -1228,7 +1331,31 @@ const ActiveProject = () => {
                   </div>
 
                   {/* Save Button */}
-                  <div className="text-end">
+                  <div className="d-flex justify-content-between">
+                    <div className="d-flex gap-3">
+                      <label
+                        className="text-white"
+                        style={{ fontWeight: "bold" }}
+                      >
+                        Deadline
+                      </label>
+                      <input
+                        type="datetime-local"
+                        className="form-control"
+                        style={{
+                          maxWidth: "250px",
+                          backgroundColor: "#181f3a",
+                          color: "white",
+                        }}
+                        value={formData.deadline || ""}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            deadline: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
                     <button type="submit" className="btn btn-warning fw-bold">
                       Save changes
                     </button>
@@ -1260,35 +1387,41 @@ const ActiveProject = () => {
         <div className="col-md-6">
           <div className="d-flex  gap-2">
             <button
-              className="gradient-button"
+              className={`gradient-button ${
+                activeButton === "all" ? "active-filter" : ""
+              }`}
               onClick={() => handleCardFilter("all")}
             >
               All
             </button>
-
             <button
-              className="gradient-button"
+              className={`gradient-button ${
+                activeButton === "nearDue" ? "active-filter" : ""
+              }`}
               onClick={() => handleCardFilter("nearDue")}
             >
               Near Due
             </button>
-
             <button
-              className="gradient-button"
-              onClick={() => handleCardFilter("overDue")}
+              className={`gradient-button ${
+                activeButton === "overdue" ? "active-filter" : ""
+              }`}
+              onClick={() => handleCardFilter("overdue")}
             >
               Over Due
             </button>
-
             <button
-              className="gradient-button"
+              className={`gradient-button ${
+                activeButton === "Adobe" ? "active-filter" : ""
+              }`}
               onClick={() => handleCardFilter("Adobe")}
             >
               Adobe
             </button>
-
             <button
-              className="gradient-button"
+              className={`gradient-button ${
+                activeButton === "MSOffice" ? "active-filter" : ""
+              }`}
               onClick={() => handleCardFilter("MSOffice")}
             >
               MS Office
@@ -1344,8 +1477,8 @@ const ActiveProject = () => {
           <div className="">
             <Select
               options={applicationsOptio}
-              isMulti
-              className="basic-multi-select"
+              isMulti={false} // Single select
+              className="basic-single-select"
               classNamePrefix="select"
               value={selectedApplications}
               placeholder="Select"
@@ -1409,7 +1542,11 @@ const ActiveProject = () => {
               <th>Language</th>
               <th>Application</th>
               <th>Total Pages</th>
-              <th>Due Date & Time</th>
+              <th>Deadline</th>
+              <th>Ready For Qc Deadline</th>
+              <th>Qc Hrs</th>
+              <th>Qc Due Date</th>
+              <th>Status</th>
               <th>Progress</th>
               <th>Actions</th>
             </tr>
@@ -1427,22 +1564,12 @@ const ActiveProject = () => {
                   <td>{project.language}</td>
                   <td>{project.application}</td>
                   <td>{project.totalPages}</td>
-                  <td>
-                    {isEdit === project.id ? (
-                      <input
-                        type="datetime-local"
-                        value={customToInputDate(project.dueDate)}
-                        onChange={(e) =>
-                          setEditedProject({
-                            ...project,
-                            dueDate: inputToCustomDate(e.target.value),
-                          })
-                        }
-                      />
-                    ) : (
-                      project.dueDate
-                    )}
-                  </td>
+                  <td>{project.deadline}</td>
+                  <td>{project.readyDeadline}</td>
+                  <td>{project.qcHrs}</td>
+                  <td>{project.qcDueDate}</td>
+                  <td>{project.status}</td>
+
                   <td>
                     <div
                       className="progress cursor-pointer"
@@ -1508,9 +1635,9 @@ const ActiveProject = () => {
 
                 {expandedRow === project.id && (
                   <tr>
-                    <td colSpan={10} className="p-0 border-top-0">
+                    <td colSpan={14} className="p-0 border-top-0">
                       <div className="p-4">
-                        {/* Header */}
+                        {/* Project Files Header */}
                         <div className="mb-4">
                           <div className="d-flex justify-content-between align-items-center mb-3">
                             <h5 className="mb-0">Project Files</h5>
@@ -1521,138 +1648,146 @@ const ActiveProject = () => {
                             )}
                           </div>
 
-                          {/* Batch Edit */}
-                          {selectedFiles.length > 0 && (
-                            <div className="card mb-4">
-                              <div className="card-body bg-card">
-                                <h6 className="card-title mb-3">Batch Edit</h6>
-                                <div className="row g-3">
-                                  <div className="col-md-4 col-lg-2">
-                                    <label className="form-label">
-                                      Handler
-                                    </label>
-                                    <select
-                                      className="form-select form-select-sm"
-                                      value={batchEditValues.handler}
-                                      onChange={(e) =>
-                                        setBatchEditValues({
-                                          ...batchEditValues,
-                                          handler: e.target.value,
-                                        })
-                                      }
-                                    >
-                                      <option value="">Select</option>
-                                      <option value="John Doe">John Doe</option>
-                                      <option value="Jane Smith">
-                                        Jane Smith
-                                      </option>
-                                      <option value="Mike Johnson">
-                                        Mike Johnson
-                                      </option>
-                                    </select>
-                                  </div>
-
-                                  <div className="col-md-5 col-lg-5 mb-3">
-                                    <label className="form-label">QC Due</label>
-                                    <div className="row gx-2 gy-2 align-items-center">
-                                      {/* Date Picker */}
-                                      <div className="col-12 col-sm-6 col-md-5">
-                                        <input
-                                          type="date"
-                                          className="form-control"
-                                          value={date}
-                                          onChange={handleDateChange}
-                                        />
-                                      </div>
-
-                                      {/* Hour Selector */}
-                                      <div className="col-4 col-sm-2 col-md-2">
-                                        <select
-                                          className="form-select"
-                                          value={hour}
-                                          onChange={handleHourChange}
-                                        >
-                                          {Array.from(
-                                            { length: 12 },
-                                            (_, i) => (
-                                              <option
-                                                key={i}
-                                                value={String(i + 1).padStart(
-                                                  2,
-                                                  "0"
-                                                )}
-                                              >
-                                                {String(i + 1).padStart(2, "0")}
-                                              </option>
-                                            )
-                                          )}
-                                        </select>
-                                      </div>
-
-                                      {/* Minute Selector */}
-                                      <div className="col-4 col-sm-2 col-md-2">
-                                        <select
-                                          className="form-select"
-                                          value={minute}
-                                          onChange={handleMinuteChange}
-                                        >
-                                          {["00", "15", "30", "45"].map(
-                                            (min) => (
-                                              <option key={min} value={min}>
-                                                {min}
-                                              </option>
-                                            )
-                                          )}
-                                        </select>
-                                      </div>
-
-                                      {/* AM/PM Selector */}
-                                      <div className="col-4 col-sm-2 col-md-2">
-                                        <select
-                                          className="form-select"
-                                          value={period}
-                                          onChange={handlePeriodChange}
-                                        >
-                                          <option value="AM">AM</option>
-                                          <option value="PM">PM</option>
-                                        </select>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div className="col-md-4 col-lg-2">
-                                    <label className="form-label">
-                                      Priority
-                                    </label>
-                                    <select
-                                      className="form-select form-select-sm"
-                                      value={batchEditValues.priority}
-                                      onChange={(e) =>
-                                        setBatchEditValues({
-                                          ...batchEditValues,
-                                          priority: e.target.value,
-                                        })
-                                      }
-                                    >
-                                      <option value="">Select</option>
-                                      <option value="High">High</option>
-                                      <option value="Medium">Medium</option>
-                                      <option value="Low">Low</option>
-                                    </select>
-                                  </div>
-                                </div>
-
-                                <div className="mt-3">
-                                  <button
-                                    className="btn gradient-button"
-                                    onClick={applyBatchEdits}
-                                  >
-                                    Apply to Selected Files
-                                  </button>
-                                </div>
+                          {/* Batch Edit Controls (now always visible above table) */}
+                          <div className="row g-3 mb-3">
+                            <div className="col-md-2">
+                              <label className="form-label">
+                                Ready for QC Due
+                              </label>
+                              <input
+                                type="datetime-local"
+                                className="form-control"
+                                value={readyForQcDueInput}
+                                onChange={(e) =>
+                                  setReadyForQcDueInput(e.target.value)
+                                }
+                              />
+                              <div className="small">
+                                Format: hh:mm DD-MM-YY
                               </div>
                             </div>
-                          )}
+                            <div className="col-md-2">
+                              <label className="form-label">
+                                QC Allocated Hours
+                              </label>
+                              <input
+                                type="number"
+                                className="form-control"
+                                step="0.25"
+                                min="0"
+                                value={qcAllocatedHours}
+                                onChange={(e) => {
+                                  const val = parseFloat(e.target.value);
+                                  if (val >= 0 && val % 0.25 === 0)
+                                    setQcAllocatedHours(val);
+                                }}
+                                placeholder="0.00"
+                              />
+                              <div className="small">
+                                (in multiple of 0.25 only)
+                              </div>
+                            </div>
+                            <div className="col-md-2">
+                              <label className="form-label">Handler</label>
+                              <select
+                                className="form-select"
+                                value={batchEditValues.handler}
+                                onChange={(e) =>
+                                  setBatchEditValues({
+                                    ...batchEditValues,
+                                    handler: e.target.value,
+                                  })
+                                }
+                              >
+                                <option value="">Select</option>
+                                <option value="John Doe">John Doe</option>
+                                <option value="Jane Smith">Jane Smith</option>
+                                <option value="Mike Johnson">
+                                  Mike Johnson
+                                </option>
+                              </select>
+                            </div>
+                            <div className="col-md-2">
+                              <label className="form-label">QA Reviewer</label>
+                              <select
+                                className="form-select"
+                                value={batchEditValues.qaReviewer}
+                                onChange={(e) =>
+                                  setBatchEditValues({
+                                    ...batchEditValues,
+                                    qaReviewer: e.target.value,
+                                  })
+                                }
+                              >
+                                <option value="">Select</option>
+                                <option value="Sarah Williams">
+                                  Sarah Williams
+                                </option>
+                                <option value="David Brown">David Brown</option>
+                                <option value="Emily Davis">Emily Davis</option>
+                              </select>
+                            </div>
+                            <div className="col-md-2">
+                              <label className="form-label">Status</label>
+                              <select
+                                className="form-select"
+                                value={batchEditValues.status || ""}
+                                onChange={(e) =>
+                                  setBatchEditValues({
+                                    ...batchEditValues,
+                                    status: e.target.value,
+                                  })
+                                }
+                              >
+                                <option value="">Select</option>
+                                <option value="Pending">Pending</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Approved">Approved</option>
+                                <option value="Rejected">Rejected</option>
+                              </select>
+                            </div>
+                            <div
+                              className="col-md-1 d-flex align-items-end"
+                              style={{ marginBottom: "22px" }}
+                            >
+                              <button
+                                className="btn btn-info"
+                                disabled={selectedFiles.length === 0}
+                                onClick={() => {
+                                  // Apply batch edit to selected files
+                                  const updatedFiles = project.files.map((f) =>
+                                    selectedFiles.some((sf) => sf.id === f.id)
+                                      ? {
+                                          ...f,
+                                          handler:
+                                            batchEditValues.handler ||
+                                            f.handler,
+                                          qaReviewer:
+                                            batchEditValues.qaReviewer ||
+                                            f.qaReviewer,
+                                          qaStatus:
+                                            batchEditValues.status ||
+                                            f.qaStatus,
+                                          readyForQcDue:
+                                            readyForQcDueInput ||
+                                            f.readyForQcDue,
+                                          qcAllocatedHours:
+                                            qcAllocatedHours ||
+                                            f.qcAllocatedHours,
+                                        }
+                                      : f
+                                  );
+                                  setSelectedProject({
+                                    ...project,
+                                    files: updatedFiles,
+                                  });
+                                  setHasUnsavedChanges(true);
+                                }}
+                              >
+                                Apply to Selected Files
+                              </button>
+                            </div>
+                          </div>
 
                           {/* Files Table */}
                           <div className="table-responsive">
@@ -1681,8 +1816,8 @@ const ActiveProject = () => {
                                   <th>Pages</th>
                                   <th>Language</th>
                                   <th>Application</th>
-                                  <th>Stage</th>
-                                  <th>Assigned</th>
+                                  {/* <th>Stage</th>
+                                  <th>Assigned</th> */}
                                   <th>Handler</th>
                                   <th>QA Reviewer</th>
                                   <th>QA Status</th>
@@ -1716,8 +1851,8 @@ const ActiveProject = () => {
                                     <td>{file.pages}</td>
                                     <td>{file.language}</td>
                                     <td>{file.application}</td>
-                                    <td>{file.stage}</td>
-                                    <td>{file.assigned}</td>
+                                    {/* <td>{file.stage}</td>
+                                    <td>{file.assigned}</td> */}
                                     <td>
                                       <select
                                         className="form-select form-select-sm"
@@ -1784,7 +1919,7 @@ const ActiveProject = () => {
                                         </option>
                                       </select>
                                     </td>
-                                    <td>{file.qaStatus}</td>
+                                    <td>Corr WIP</td>
                                   </tr>
                                 ))}
                               </tbody>
@@ -1794,141 +1929,42 @@ const ActiveProject = () => {
 
                         {/* Footer buttons */}
                         <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 bg-card px-3 py-2 rounded-3 border">
-                          {/* Ready for QC Due */}
-                          <div className="text-center border border-dark rounded bg-card px-3 py-2">
-                            <div className="fw-semibold bg-info border-bottom small py-1">
-                              Ready for QC Due
-                            </div>
-                            <input
-                              type="datetime-local"
-                              className="form-control"
-                              value={readyForQcDueInput}
-                              onChange={(e) => {
-                                setReadyForQcDueInput(e.target.value);
-                                const formatted = inputToCustomDate(
-                                  e.target.value
-                                );
-                                const updatedProjects = projects.map((p) =>
-                                  p.id === project.id
-                                    ? {
-                                        ...p,
-                                        files: p.files.map((f) => ({
-                                          ...f,
-                                          readyForQcDue: formatted,
-                                        })),
-                                      }
-                                    : p
-                                );
-                                setProjects(updatedProjects);
-                              }}
-                            />
-                            <div className=" small">Format: hh:mm DD-MM-YY</div>
-                          </div>
-
-                          {/* QC Allocated Hours */}
-                          <div className="text-center bg-card px-2">
-                            <div className="fw-bold">QC Allocated hours</div>
-                            <input
-                              type="number"
-                              className="form-control"
-                              step="0.25"
-                              min="0"
-                              value={qcAllocatedHours}
-                              onChange={(e) => {
-                                const val = parseFloat(e.target.value);
-                                if (val >= 0 && val % 0.25 === 0) {
-                                  setQcAllocatedHours(val);
-                                  const updatedProjects = projects.map((p) =>
-                                    p.id === project.id
-                                      ? {
-                                          ...p,
-                                          files: p.files.map((f) => ({
-                                            ...f,
-                                            qcAllocatedHours: val,
-                                          })),
-                                        }
-                                      : p
-                                  );
-                                  setProjects(updatedProjects);
-                                }
-                              }}
-                              placeholder="0.00"
-                            />
-                            <div className=" small">
-                              (in multiple of 0.25 only)
-                            </div>
-                          </div>
-
-                          <div className="text-center border border-dark rounded bg-card px-3 py-2">
-                            <div className="fw-semibold bg-info border-bottom small py-1">
-                              QC Due
-                            </div>
-                            <div className="fw-semibold text-light">
-                              {readyForQcDueInput
-                                ? inputToCustomDate(readyForQcDueInput)
-                                : "hh:mm AM/PM DD-MM-YY"}{" "}
-                              <span className="text-warning">(Auto)</span>
-                            </div>
-                            {qcDueDelay && (
-                              <div
-                                className={`small fw-semibold ${
-                                  qcDueDelay.startsWith("Delayed")
-                                    ? "text-danger"
-                                    : "text-success"
-                                }`}
-                              >
-                                {qcDueDelay}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Priority */}
-                          <div className="text-center border border-dark rounded bg-card px-3 py-2">
-                            <div className="fw-semibold bg-info border-bottom small py-1">
-                              Priority
-                            </div>
-                            <select
-                              className="form-select"
-                              value={priorityAll}
-                              onChange={(e) => {
-                                setPriorityAll(e.target.value);
-                                const updatedProjects = projects.map((p) =>
-                                  p.id === project.id
-                                    ? {
-                                        ...p,
-                                        files: p.files.map((f) => ({
-                                          ...f,
-                                          priority: e.target.value,
-                                        })),
-                                      }
-                                    : p
-                                );
-                                setProjects(updatedProjects);
-                              }}
-                            >
-                              <option value="Low">Low</option>
-                              <option value="Mid">Mid</option>
-                              <option value="High">High</option>
-                            </select>
-                          </div>
-
-                          {/* Footer action buttons */}
+                          <div />
                           <div className="d-flex gap-2">
                             <button
                               type="button"
                               className="btn btn-secondary rounded-5 px-4"
-                              onClick={() => setExpandedRow(null)}
+                              onClick={() => {
+                                setExpandedRow(null);
+                                setSelectedFiles([]);
+                                setHasUnsavedChanges(false);
+                              }}
                             >
                               Close
                             </button>
-                            {hasUnsavedChanges && (
-                              <button
-                                type="button"
-                                className="btn btn-primary rounded-5 px-4"
-                              >
-                                Save Changes
-                              </button>
-                            )}
+                            <button
+                              type="button"
+                              className="btn btn-primary rounded-5 px-4"
+                              disabled={!hasUnsavedChanges}
+                              onClick={() => {
+                                // Save changes to main projects list
+                                setProjects(
+                                  projects.map((p) =>
+                                    p.id === project.id
+                                      ? {
+                                          ...project,
+                                          files: selectedProject.files,
+                                        }
+                                      : p
+                                  )
+                                );
+                                setHasUnsavedChanges(false);
+                                setExpandedRow(null);
+                                setSelectedFiles([]);
+                              }}
+                            >
+                              Save Changes
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -2111,6 +2147,20 @@ const generateDummyProjects = (count) => {
     "Project",
     "FM",
   ];
+
+  const statuses = [
+    "QC YTS",
+    "WIP",
+    "QC WIP",
+    "WIP",
+    "Corr YTS",
+    "WIP",
+    "Corr YTS",
+    "Corr WIP",
+    "WIP",
+    "QC YTS",
+    "Corr YTS",
+  ];
   const stages = ["In Progress", "Review", "Completed", "On Hold"];
   const qaStatuses = ["Pending", "In Progress", "Approved", "Rejected"];
   const handlers = ["John Doe", "Jane Smith", "Mike Johnson", ""];
@@ -2138,9 +2188,28 @@ const generateDummyProjects = (count) => {
       .toString()
       .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
 
+    // Add random readyDeadline, qcHrs, qcDueDate, status
+    const readyDeadline = `${(hours + 1) % 24}:${minutes
+      .toString()
+      .padStart(2, "0")} ${hours + 1 >= 12 ? "PM" : "AM"} ${dueDate
+      .getDate()
+      .toString()
+      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+    const qcHrs = Math.floor(Math.random() * 15) + 1;
+    const qcDueDate = `${(hours + 2) % 24}:${minutes
+      .toString()
+      .padStart(2, "0")} ${hours + 2 >= 12 ? "PM" : "AM"} ${dueDate
+      .getDate()
+      .toString()
+      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+
     const fileCount = Math.floor(Math.random() * 5) + 1;
     const files = [];
-
     for (let j = 1; j <= fileCount; j++) {
       const filePages = Math.floor(Math.random() * 20) + 1;
       files.push({
@@ -2171,7 +2240,11 @@ const generateDummyProjects = (count) => {
       application:
         applications[Math.floor(Math.random() * applications.length)],
       totalPages,
-      dueDate: formattedDueDate,
+      deadline: formattedDueDate,
+      readyDeadline,
+      qcHrs,
+      qcDueDate,
+      status,
       progress,
       handler,
       files,

@@ -266,7 +266,11 @@ const Navbar = ({ toggleSidebar }) => {
                 <h5 className="modal-title">Confirm Break</h5>
               </div>
               <div className="modal-body">
-                <p>Remaining break time: {breakTimeRemaining} minutes</p>
+                {role === "Team Member" ? (
+                  <p>Remaining break time: {breakTimeRemaining} minutes</p>
+                ) : (
+                  <p>No break time limit for Managers. Your status will be visible to Admin.</p>
+                )}
               </div>
               <div className="modal-footer">
                 <button
@@ -282,7 +286,10 @@ const Navbar = ({ toggleSidebar }) => {
                     setIsOnBreak(true);
                     setShowBreakConfirmation(false);
                     setShowOverlay(true);
-                    startBreakTimer();
+                    if (role === "Team Member") {
+                      startBreakTimer();
+                    }
+                    // For Manager, no timer logic needed
                   }}
                 >
                   Confirm

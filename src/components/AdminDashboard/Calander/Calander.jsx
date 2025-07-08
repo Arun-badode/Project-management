@@ -9,12 +9,12 @@ const Calendar = ({ userRole }) => {
   const [currentMonth, setCurrentMonth] = useState("June 2025");
   const [selectedFilters, setSelectedFilters] = useState({
     dob: true,
-    doj: false,
+    doj: true,
     companyHoliday: true,
     clientHoliday: userRole === "admin" || userRole === "manager",
     approvedLeave: userRole === "admin" || userRole === "manager",
     weekOff: userRole === "admin" || userRole === "manager",
-    notes: userRole === "admin",
+    notes: true 
   });
   const [viewMode, setViewMode] = useState("month");
   const [selectedDate, setSelectedDate] = useState(new Date(2025, 5, 25));
@@ -26,6 +26,12 @@ const Calendar = ({ userRole }) => {
   const [holidayTitle, setHolidayTitle] = useState("");
   const [editingHolidayId, setEditingHolidayId] = useState(null);
   const [companyHolidaysList, setCompanyHolidaysList] = useState([]);
+
+  // State for adding events
+  const [showAddEventModal, setShowAddEventModal] = useState(false);
+  const [addEventDate, setAddEventDate] = useState("");
+  const [addEventType, setAddEventType] = useState("");
+  const [addEventDetails, setAddEventDetails] = useState("");
 
   // Load mock data
   useEffect(() => {
@@ -339,12 +345,33 @@ const Calendar = ({ userRole }) => {
     });
   };
 
+  // Modal open handler
+  const openAddEventModal = () => {
+    setAddEventDate("");
+    setAddEventType("");
+    setAddEventDetails("");
+    setShowAddEventModal(true);
+  };
+
+  // Modal save handler (yahan aap apni event add logic laga sakte hain)
+  const handleAddEventSave = () => {
+    // Validation and event add logic
+    setShowAddEventModal(false);
+  };
+
   return (
     <div className="container py-4">
       <div className="p-3 rounded shadow bg-card">
         <div className="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
           <h2 className="gradient-heading">Calendar</h2>
           <div className="d-flex flex-wrap gap-2 align-items-center">
+            <button
+              className="btn btn-primary"
+              onClick={openAddEventModal}
+              style={{ fontWeight: 500 }}
+            >
+              + Add Event
+            </button>
             <button
               className={`btn btn-xs me-1 mb-1 ${
                 selectedFilters.dob ? "btn-danger" : "btn-outline-danger"
@@ -671,26 +698,90 @@ const Calendar = ({ userRole }) => {
         )}
 
         {/* Joining Dates Table */}
-        {selectedFilters.doj && (
-          <div className="mb-4">
-            <h5 className="text-primary">Joining Dates</h5>
-            <Table striped bordered hover responsive>
-              <thead>
-                <tr>
-                  <th>Employee</th>
-                  <th>Joining Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {joiningDates.map((event) => (
+        <div className="mb-4">
+          <h5 style={{ color: "#3fa9f5" }}>Joining Dates</h5>
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Joining Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {events
+                .filter((event) => event.type === "doj")
+                .map((event) => (
                   <tr key={`doj-${event.id}`}>
                     <td>{event.title}</td>
                     <td>{formatDate(event.date)}</td>
                   </tr>
                 ))}
-                {joiningDates.length === 0 && (
+              {events.filter((event) => event.type === "doj").length === 0 && (
+                <tr>
+                  <td colSpan="2" className="text-muted">
+                    No joining dates found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
+
+        {/* Approved Leave Table */}
+        <div className="mb-4">
+          <h5 style={{ color: "#ff9800" }}>Approved Leave</h5>
+          <Table striped bordered hover responsive>
+            <thead>
+              <tr>
+                <th>Employee</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {events
+                .filter((event) => event.type === "approvedLeave")
+                .map((event) => (
+                  <tr key={`leave-${event.id}`}>
+                    <td>{event.title}</td>
+                    <td>{formatDate(event.date)}</td>
+                  </tr>
+                ))}
+              {events.filter((event) => event.type === "approvedLeave").length === 0 && (
+                <tr>
+                  <td colSpan="2" className="text-muted">
+                    No approved leaves found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
+
+        {/* Notes Table */}
+        {selectedFilters.note && (
+          <div className="mb-4">
+            <h5 style={{ color: "#ffe100" }}>Notes</h5>
+            <Table striped bordered hover responsive>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Joining Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {events
+                  .filter((event) => event.type === "note")
+                  .map((event) => (
+                    <tr key={`note-${event.id}`}>
+                      <td>{event.title}</td>
+                      <td>{formatDate(event.date)}</td>
+                    </tr>
+                  ))}
+                {events.filter((event) => event.type === "note").length === 0 && (
                   <tr>
-                    <td colSpan="2" className="text-muted">No joining dates found</td>
+                    <td colSpan="2" className="text-muted">
+                      No notes found
+                    </td>
                   </tr>
                 )}
               </tbody>
@@ -736,6 +827,58 @@ const Calendar = ({ userRole }) => {
           </Button>
           <Button variant="primary" onClick={saveHoliday}>
             {editingHolidayId ? "Update" : "Save"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Add Event Modal */}
+      <Modal show={showAddEventModal} onHide={() => setShowAddEventModal(false)} className="custom-modal-dark">
+        <Modal.Header closeButton>
+          <Modal.Title>Add Event</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Date</Form.Label>
+              <Form.Control
+                type="date"
+                value={addEventDate}
+                onChange={(e) => setAddEventDate(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Type of Event</Form.Label>
+              <Form.Select
+                value={addEventType}
+                onChange={(e) => setAddEventType(e.target.value)}
+              >
+                <option value="">Select Type</option>
+                <option value="dob">Birthday</option>
+                <option value="doj">Joining Date</option>
+                <option value="companyHoliday">Company Holiday</option>
+                <option value="clientHoliday">Client Holiday</option>
+                <option value="approvedLeave">Leave</option>
+                <option value="weekOff">Week Off</option>
+                <option value="note">Note</option>
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Details</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter Details"
+                value={addEventDetails}
+                onChange={(e) => setAddEventDetails(e.target.value)}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowAddEventModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleAddEventSave}>
+            Save
           </Button>
         </Modal.Footer>
       </Modal>
