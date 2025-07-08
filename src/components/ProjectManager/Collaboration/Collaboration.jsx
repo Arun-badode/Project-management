@@ -657,7 +657,7 @@ function Collaboration() {
               >
                 {message.replyTo && (
                   <div
-                    className={`small text-muted mb-1 ${
+                    className={`small text-white mb-1 ${
                       message.senderId === currentUser.id ? "text-end" : ""
                     }`}
                   >
