@@ -207,10 +207,10 @@ function ResourceWorkload() {
   }, []);
 
   return (
-    <div className="container-fluid bg-card" style={{ minHeight: "100vh" }}>
+    <div className="container-fluid bg-card" >
       {/* Header Section */}
       <header className="bg-card shadow-sm mb-4">
-        <div className="container bg-card">
+        <div className="container-fluid bg-card">
           <div className="d-flex justify-content-between align-items-center py-3">
             <h2 className="gradient-heading mb-0 ">Resource Workload</h2>
             <div className="d-flex align-items-center">
@@ -285,7 +285,7 @@ function ResourceWorkload() {
         </div>
       </header>
 
-      <div className="container mb-5">
+      <div className="container-fluid mb-5">
         {/* Resource Status Overview */}
         <section className="mb-4 ">
           <h2 className="h5 mb-3">Resource Status Overview</h2>

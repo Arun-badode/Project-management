@@ -343,7 +343,7 @@ const TaskManagement = () => {
   return (
     <div className="min-vh-100 bg-main">
       {/* Main Content */}
-      <div className="container py-4">
+      <div className="container-fluid py-4">
         <div className="d-flex justify-content-between">
           <div className="mb-4">
             <h2 className="gradient-heading">Task Management</h2>

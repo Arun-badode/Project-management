@@ -1,0 +1,34 @@
+/* Parent panel must fill viewport height */
+.chat-main-panel {
+  height: 100vh;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header sticky at top */
+.chat-header-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #1e1e1e;
+}
+
+/* Footer sticky at bottom */
+.chat-footer-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: #1e1e1e;
+}
+
+/* Messages area scrollable between header and footer */
+.chat-messages-scrollable {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+  /* If header/footer height is 64px each, adjust below */
+  max-height: calc(100vh - 128px);
+}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-function Task() {
+function ManagerTask({ userRole = "manager" }) {
   const [allTasks, setAllTasks] = useState([
     {
       id: 1,
@@ -9,6 +9,7 @@ function Task() {
       project: "Website Redesign",
       dueDate: "2025-06-25",
       assignee: "John Doe",
+      responsibleManager: "Manager B",
       priority: "High",
       files: ["homepage_mockup.psd", "assets_list.xlsx"],
       comments: [
@@ -28,6 +29,7 @@ function Task() {
       project: "Mobile App Development",
       dueDate: "2025-06-23",
       assignee: "Jane Smith",
+      responsibleManager: "Current User",
       priority: "Critical",
       files: ["auth_flow.pdf", "api_docs.md"],
       comments: [
@@ -46,7 +48,8 @@ function Task() {
       status: "QC YTS",
       project: "E-commerce Application",
       dueDate: "2025-06-21",
-      assignee: "Current User",
+      assignee: "Unassigned",
+      responsibleManager: "Current User",
       priority: "Medium",
       files: ["test_cases.xlsx", "payment_flow.pdf"],
       comments: [
@@ -65,7 +68,8 @@ function Task() {
       status: "Corr WIP",
       project: "Mobile App Development",
       dueDate: "2025-06-20",
-      assignee: "Current User",
+      assignee: "Alex Johnson",
+      responsibleManager: "Manager C",
       priority: "High",
       files: ["bug_report.pdf", "screenshots.zip"],
       comments: [
@@ -85,6 +89,7 @@ function Task() {
       project: "Design System",
       dueDate: "2025-06-22",
       assignee: "Current User",
+      responsibleManager: "Current User",
       priority: "High",
       files: ["dashboard_wireframes.fig"],
       comments: [
@@ -99,10 +104,18 @@ function Task() {
     },
   ]);
 
-  // Filter tasks to show only those assigned to "Current User"
-  const [tasks, setTasks] = useState(
-    allTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS")
-  );
+  // Filter tasks based on user role
+  const getFilteredTasks = () => {
+    if (userRole === "manager") {
+      // For managers, show tasks where they are the responsible manager
+      return allTasks.filter(task => task.responsibleManager === "Current User");
+    } else {
+      // For team members, show tasks assigned to them or available for QC
+      return allTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS");
+    }
+  };
+
+  const [tasks, setTasks] = useState(getFilteredTasks());
 
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -132,6 +145,11 @@ function Task() {
     }
     return () => clearInterval(interval);
   }, [timerRunning, timerSeconds]);
+
+  // Update filtered tasks when allTasks changes
+  useEffect(() => {
+    setTasks(getFilteredTasks());
+  }, [allTasks]);
 
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
@@ -163,7 +181,9 @@ function Task() {
         }
 
         task.status = "WIP";
-        task.assignee = "Current User"; // Assign to current user when starting
+        if (userRole !== "manager") {
+          task.assignee = "Current User"; // Assign to current user when starting (for team members)
+        }
         setActiveTaskId(taskId);
         setTimerRunning(true);
         setTimerSeconds(0);
@@ -208,7 +228,9 @@ function Task() {
         }
         // Start new task
         task.status = "WIP";
-        task.assignee = "Current User"; // Assign to current user when switching
+        if (userRole !== "manager") {
+          task.assignee = "Current User"; // Assign to current user when switching (for team members)
+        }
         setActiveTaskId(taskId);
         setTimerRunning(true);
         setTimerSeconds(0);
@@ -220,8 +242,6 @@ function Task() {
 
     updatedAllTasks[taskIndex] = task;
     setAllTasks(updatedAllTasks);
-    // Update filtered tasks
-    setTasks(updatedAllTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS"));
   };
 
   const handleCompleteTask = () => {
@@ -237,7 +257,7 @@ function Task() {
     const task = { ...updatedAllTasks[taskIndex] };
 
     if (task.status === "WIP") {
-      task.status = "QC YTS";
+      task.status = userRole === "manager" ? "Completed" : "QC YTS";
     } else if (task.status === "Corr WIP") {
       task.status = "RFD";
     }
@@ -254,8 +274,6 @@ function Task() {
     updatedAllTasks[taskIndex] = task;
 
     setAllTasks(updatedAllTasks);
-    // Update filtered tasks
-    setTasks(updatedAllTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS"));
     setShowCompleteModal(false);
     setServerPath("");
     setNotes("");
@@ -300,7 +318,7 @@ function Task() {
             Complete Task
           </button>
         )}
-        {task.status === "QC YTS" && (
+        {task.status === "QC YTS" && userRole !== "manager" && (
           <button
             onClick={() => handleTaskAction(task.id, "self-assign")}
             className="btn btn-info btn-sm"
@@ -352,6 +370,8 @@ function Task() {
         return "bg-danger text-white";
       case "RFD":
         return "bg-success text-white";
+      case "Completed":
+        return "bg-success text-white";
       default:
         return "bg-light text-dark";
     }
@@ -374,9 +394,11 @@ function Task() {
 
   return (
     <div className="p-3">
-      <h2 className="mb-4 gradient-heading">My Tasks</h2>
+      <h2 className="mb-4 gradient-heading">
+        {userRole === "manager" ? "My Manager Tasks" : "My Tasks"}
+      </h2>
 
-      {/* Timer Card - Similar to the image */}
+      {/* Timer Card */}
       {activeTaskId && (
         <div className="card mb-4 bg-card">
           <div className="card-header">
@@ -436,7 +458,10 @@ function Task() {
                 {task.priority}
               </span>
               <div className="small text-muted mt-1">
-                Time tracked: {task.timeTracked.toFixed(2)} hours
+                {userRole === "manager" && (
+                  <span>Assignee: {task.assignee}</span>
+                )}
+                <span> • Time tracked: {task.timeTracked.toFixed(2)} hours</span>
               </div>
             </div>
             <div className="flex-shrink-0">{renderActionButtons(task)}</div>
@@ -623,6 +648,11 @@ function Task() {
                     <div className="mb-2">
                       <strong>Assignee:</strong> {selectedTask.assignee}
                     </div>
+                    {userRole === "manager" && (
+                      <div className="mb-2">
+                        <strong>Responsible Manager:</strong> {selectedTask.responsibleManager}
+                      </div>
+                    )}
                     <div className="mb-2">
                       <strong>Due Date:</strong> {selectedTask.dueDate}
                     </div>
@@ -728,7 +758,6 @@ function Task() {
                               timerSeconds / 3600,
                           };
                           setAllTasks(updatedAllTasks);
-                          setTasks(updatedAllTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS"));
                         }
                         setTimerRunning(false);
                       }}
@@ -761,7 +790,6 @@ function Task() {
                               timerSeconds / 3600,
                           };
                           setAllTasks(updatedAllTasks);
-                          setTasks(updatedAllTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS"));
                         }
                       }
                       setTimerRunning(false);
@@ -790,4 +818,4 @@ function Task() {
   );
 }
 
-export default Task;
+export default ManagerTask;

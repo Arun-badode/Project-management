@@ -91,7 +91,7 @@ function CreateProject() {
 
   return (
     <div >
-      <div className="container mt-3 p-4  text-white rounded shadow custom-modal-dark">
+      <div className="container-fluid mt-3 p-4  text-white rounded shadow custom-modal-dark">
         <h2 className="mb-4 gradient-heading">Create New Project</h2>
         <Form>
           <Form.Group className="mb-3">

@@ -290,28 +290,28 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li> */}
 
-              {/* <li
+               <li
                 className={`menu-item ${
-                  isActive("/projectsupport") ? "active" : ""
+                  isActive("/shift-allocation") ? "active" : ""
                 }`}
               >
                 <div
                   className="menu-link menu-i"
                   onClick={() => {
-                    navigate("/projectsupport");
+                    navigate("/shift-allocation");
                     menuItemClick();
                   }}
                 >
                   <i className="fa-solid fa-life-ring"></i>
-                  <span className="menu-text">Support</span>
+                  <span className="menu-text">Shift Allocation</span>
                 </div>
-              </li> */
+              </li> 
 
 
 
 
 
-              }
+              
 
               <li
                 className={`menu-item ${isActive("/role-permission") ? "active" : ""
@@ -324,7 +324,7 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
-                  <i className="fa-solid fa-gear"></i>
+                <i class="fa-brands fa-critical-role"></i>
                   <span className="menu-text">Role & Permission</span>
                 </div>
               </li>
@@ -355,7 +355,7 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
-                  <i className="fa-solid fa-comments"></i>
+                  <i className="fa-solid fa-gear"></i>
                   <span className="menu-text">Setting</span>
                 </div>
               </li>
@@ -410,6 +410,21 @@ const Sidebar = ({ collapsed }) => {
                 </div>
               </li>
               <li
+                className={`menu-item ${isActive("/managertask") ? "active" : ""
+                  }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/managertask");
+                    menuItemClick();
+                  }}
+                >
+                  <i class="fa-solid fa-bell"></i>
+                  <span className="menu-text"> My Task</span>
+                </div>
+              </li>
+              <li
                 className={`menu-item ${isActive("/taskrequest") ? "active" : ""
                   }`}
               >
@@ -424,6 +439,22 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Task Requests</span>
                 </div>
               </li>
+                <li
+                className={`menu-item ${isActive("/shift-allocation") ? "active" : ""
+                  }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/shift-allocation");
+                    menuItemClick();
+                  }}
+                >
+                
+                  <i class="fa-solid fa-chart-line"></i>
+                  <span className="menu-text">Shift Allocation</span>
+                </div>
+              </li>
               <li
                 className={`menu-item ${isActive("/sourcework") ? "active" : ""
                   }`}
@@ -435,6 +466,7 @@ const Sidebar = ({ collapsed }) => {
                     menuItemClick();
                   }}
                 >
+                
                   <i class="fa-solid fa-chart-line"></i>
                   <span className="menu-text">Resource Workload</span>
                 </div>
