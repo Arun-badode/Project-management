@@ -124,6 +124,7 @@ useEffect(() => {
               src="https://ik.imagekit.io/43o9qlnbg/Eminoids%20-%20Logo_W.png"
               alt="Logo"
               className="login-logo"
+              style={{ width: "220px", height: "auto", marginBottom: "24px" }} // Increased width
             />
             <h1 className="text-white">Welcome Back!</h1>
             <p className="fw-bold text-strong">
@@ -200,7 +201,7 @@ useEffect(() => {
                  Version Build 1.0 
                 </p>
 
-             <Link to="/signup" style={{ color: "#6e8efb" }}>Sign up</Link>
+             {/* <Link to="/signup" style={{ color: "#6e8efb" }}>Sign up</Link> */}
               </div>
             </form>
           </div>

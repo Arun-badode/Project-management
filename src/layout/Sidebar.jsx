@@ -344,6 +344,21 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Chat Room</span>
                 </div>
               </li>
+                <li
+                className={`menu-item ${isActive("/settingpage") ? "active" : ""
+                  }`}
+              >
+                <div
+                  className="menu-link menu-i"
+                  onClick={() => {
+                    navigate("/settingpage");
+                    menuItemClick();
+                  }}
+                >
+                  <i className="fa-solid fa-comments"></i>
+                  <span className="menu-text">Setting</span>
+                </div>
+              </li>
             </>
           )}
 

@@ -23,7 +23,273 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import axios from "axios";
+
+export const ProjectsData = [
+  {
+    id: 1,
+    title: "Project 1",
+    client: "PN",
+    tasks: 8,
+    languages: 2,
+    application: "Word",
+    pages: 150,
+    dueDate: "2025-07-06",
+    qcDeadline: "2025-07-04",
+    qcHours: 12,
+    qcDueDate: "2025-07-05",
+    status: "Near Due",
+    handler: "Alice",
+    processStatus: "Completed",
+    qaReviewer: "Lisa",
+    qaStatus: "Passed",
+    serverPath: "/mnt/server/project/project-1",
+    taskTypes: ["OVA", "Image Localization", "Source Creation"],
+    applications: ["PPT", "Word", "AI"],
+    languagesList: ["sv", "de"],
+  },
+  {
+    id: 2,
+    title: "Project 2",
+    client: "MMP Auburn",
+    tasks: 8,
+    languages: 3,
+    application: "FM",
+    pages: 150,
+    dueDate: "2025-07-01",
+    qcDeadline: "2025-06-29",
+    qcHours: 10,
+    qcDueDate: "2025-06-30",
+    status: "Active",
+    handler: "John",
+    processStatus: "Completed",
+    qaReviewer: "Lisa",
+    qaStatus: "Passed",
+    serverPath: "/mnt/server/project/project-2",
+    taskTypes: ["Source Creation", "DTP"],
+    applications: ["Project", "Word", "CDR"],
+    languagesList: ["es-ES", "hi", "ne"],
+  },
+  {
+    id: 3,
+    title: "Project 3",
+    client: "MMP Eastlake",
+    tasks: 4,
+    languages: 4,
+    application: "Project",
+    pages: 150,
+    dueDate: "2025-07-13",
+    qcDeadline: "2025-07-11",
+    qcHours: 7,
+    qcDueDate: "2025-07-12",
+    status: "Active",
+    handler: "Bob",
+    processStatus: "Pending",
+    qaReviewer: "Lisa",
+    qaStatus: "In Review",
+    serverPath: "/mnt/server/project/project-3",
+    taskTypes: ["Source Creation"],
+    applications: ["PSD"],
+    languagesList: ["he", "mr", "es-MX", "bg"],
+  },
+  {
+    id: 4,
+    title: "Project 4",
+    client: "MMP Kirkland",
+    tasks: 3,
+    languages: 1,
+    application: "Visio",
+    pages: 120,
+    dueDate: "2025-07-13",
+    qcDeadline: "2025-07-11",
+    qcHours: 5,
+    qcDueDate: "2025-07-12",
+    status: "Near Due",
+    handler: "Eve",
+    processStatus: "Ongoing",
+    qaReviewer: "Mike",
+    qaStatus: "In Review",
+    serverPath: "/mnt/server/project/project-4",
+    taskTypes: ["Prep", "Image Localization", "DTP"],
+    applications: ["CDR", "PPT"],
+    languagesList: ["be"],
+  },
+  {
+    id: 5,
+    title: "Project 5",
+    client: "GN",
+    tasks: 3,
+    languages: 4,
+    application: "CDR",
+    pages: 180,
+    dueDate: "2025-07-07",
+    qcDeadline: "2025-07-05",
+    qcHours: 5,
+    qcDueDate: "2025-07-06",
+    status: "Active",
+    handler: "Bob",
+    processStatus: "Completed",
+    qaReviewer: "Mike",
+    qaStatus: "Pending",
+    serverPath: "/mnt/server/project/project-5",
+    taskTypes: ["Image Localization", "Prep"],
+    applications: ["PSD", "INDD", "PPT"],
+    languagesList: ["bs", "zh-TW", "sr-Cyrl", "zh"],
+  },
+  {
+    id: 6,
+    title: "Project 6",
+    client: "DM",
+    tasks: 3,
+    languages: 4,
+    application: "AE",
+    pages: 150,
+    dueDate: "2025-07-10",
+    qcDeadline: "2025-07-08",
+    qcHours: 5,
+    qcDueDate: "2025-07-09",
+    status: "Active",
+    handler: "Bob",
+    processStatus: "Ongoing",
+    qaReviewer: "Alan",
+    qaStatus: "Failed",
+    serverPath: "/mnt/server/project/project-6",
+    taskTypes: ["Source Creation", "OVA", "Callout"],
+    applications: ["CDR", "Word", "AI"],
+    languagesList: ["pa", "mn", "mt", "lt"],
+  },
+  {
+    id: 7,
+    title: "Project 7",
+    client: "RN",
+    tasks: 3,
+    languages: 1,
+    application: "PSD",
+    pages: 60,
+    dueDate: "2025-07-02",
+    qcDeadline: "2025-06-30",
+    qcHours: 14,
+    qcDueDate: "2025-07-01",
+    status: "Near Due",
+    handler: "John",
+    processStatus: "Ongoing",
+    qaReviewer: "Mike",
+    qaStatus: "Passed",
+    serverPath: "/mnt/server/project/project-7",
+    taskTypes: ["Image Creation"],
+    applications: ["PPT", "Word"],
+    languagesList: ["so"],
+  },
+  {
+    id: 8,
+    title: "Project 8",
+    client: "NI",
+    tasks: 4,
+    languages: 5,
+    application: "AI",
+    pages: 90,
+    dueDate: "2025-06-30",
+    qcDeadline: "2025-06-28",
+    qcHours: 12,
+    qcDueDate: "2025-06-29",
+    status: "Active",
+    handler: "Charlie",
+    processStatus: "Ongoing",
+    qaReviewer: "Alan",
+    qaStatus: "Failed",
+    serverPath: "/mnt/server/project/project-8",
+    taskTypes: ["Prep"],
+    applications: ["INDD", "Excel"],
+    languagesList: ["es-MX", "vi", "fil", "km", "am"],
+  },
+  {
+    id: 9,
+    title: "Project 9",
+    client: "LB",
+    tasks: 8,
+    languages: 5,
+    application: "INDD",
+    pages: 150,
+    dueDate: "2025-07-08",
+    qcDeadline: "2025-07-06",
+    qcHours: 14,
+    qcDueDate: "2025-07-07",
+    status: "Near Due",
+    handler: "David",
+    processStatus: "Pending",
+    qaReviewer: "Mike",
+    qaStatus: "In Review",
+    serverPath: "/mnt/server/project/project-9",
+    taskTypes: ["Callout", "DTP"],
+    applications: ["Project", "FM", "Word"],
+    languagesList: ["he", "km", "ku", "zh-Hant", "en"],
+  },
+  {
+    id: 10,
+    title: "Project 10",
+    client: "SSS",
+    tasks: 8,
+    languages: 2,
+    application: "Excel",
+    pages: 120,
+    dueDate: "2025-07-03",
+    qcDeadline: "2025-07-01",
+    qcHours: 7,
+    qcDueDate: "2025-07-02",
+    status: "Near Due",
+    handler: "Bob",
+    processStatus: "Completed",
+    qaReviewer: "Sarah",
+    qaStatus: "Failed",
+    serverPath: "/mnt/server/project/project-10",
+    taskTypes: ["DTP"],
+    applications: ["AI", "Excel"],
+    languagesList: ["af", "el"],
+  },
+  {
+    id: 11,
+    title: "Project 11",
+    client: "Cpea",
+    tasks: 6,
+    languages: 5,
+    application: "PPT",
+    pages: 60,
+    dueDate: "2025-06-30",
+    qcDeadline: "2025-06-28",
+    qcHours: 14,
+    qcDueDate: "2025-06-29",
+    status: "Overdue",
+    handler: "Alice",
+    processStatus: "Delayed",
+    qaReviewer: "Lisa",
+    qaStatus: "In Review",
+    serverPath: "/mnt/server/project/project-11",
+    taskTypes: ["Image Creation"],
+    applications: ["INDD", "Visio"],
+    languagesList: ["mn", "zh", "nl", "ar", "te"],
+  },
+  {
+    id: 12,
+    title: "Project 12",
+    client: "CV",
+    tasks: 7,
+    languages: 5,
+    application: "Word",
+    pages: 180,
+    dueDate: "2025-07-02",
+    qcDeadline: "2025-06-30",
+    qcHours: 10,
+    qcDueDate: "2025-07-01",
+    status: "Near Due",
+    handler: "Bob",
+    processStatus: "Completed",
+    qaReviewer: "Lisa",
+    qaStatus: "In Review",
+    serverPath: "/mnt/server/project/project-12",
+    taskTypes: ["DTP", "Source Creation", "OVA"],
+    applications: ["Project", "PSD", "INDD"],
+    languagesList: ["sr-Latn", "bs", "vi", "mt", "gl"],
+  },
+];
 
 const AdminDashboard = () => {
   const scrollContainerRef = useRef(null);
@@ -40,8 +306,6 @@ const AdminDashboard = () => {
   const [viewMode, setViewMode] = useState("summary");
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("All");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
@@ -87,6 +351,73 @@ const AdminDashboard = () => {
       ],
       dailyRecords: generateDailyRecords(1),
     },
+    {
+      id: 2,
+      employeeName: "Jane Smith",
+      employeeId: "EMP002",
+      department: "Design",
+      position: "UI/UX Designer",
+      month: "May 2025",
+      daysPresent: 20,
+      daysAbsent: 0,
+      lateArrivals: 1,
+      earlyDepartures: 0,
+      leaves: [],
+      dailyRecords: generateDailyRecords(2),
+    },
+    {
+      id: 3,
+      employeeName: "Michael Johnson",
+      employeeId: "EMP003",
+      department: "Marketing",
+      position: "Marketing Specialist",
+      month: "May 2025",
+      daysPresent: 16,
+      daysAbsent: 4,
+      lateArrivals: 2,
+      earlyDepartures: 3,
+      leaves: [
+        { date: "2025-05-12", type: "Vacation", status: "Approved" },
+        { date: "2025-05-13", type: "Vacation", status: "Approved" },
+        { date: "2025-05-14", type: "Vacation", status: "Approved" },
+        { date: "2025-05-15", type: "Vacation", status: "Approved" },
+      ],
+      dailyRecords: generateDailyRecords(3),
+    },
+    {
+      id: 4,
+      employeeName: "Emily Davis",
+      employeeId: "EMP004",
+      department: "HR",
+      position: "HR Manager",
+      month: "May 2025",
+      daysPresent: 19,
+      daysAbsent: 1,
+      lateArrivals: 0,
+      earlyDepartures: 2,
+      leaves: [
+        { date: "2025-05-20", type: "Personal Leave", status: "Approved" },
+      ],
+      dailyRecords: generateDailyRecords(4),
+    },
+    {
+      id: 5,
+      employeeName: "Robert Wilson",
+      employeeId: "EMP005",
+      department: "Finance",
+      position: "Financial Analyst",
+      month: "May 2025",
+      daysPresent: 17,
+      daysAbsent: 3,
+      lateArrivals: 4,
+      earlyDepartures: 1,
+      leaves: [
+        { date: "2025-05-07", type: "Sick Leave", status: "Approved" },
+        { date: "2025-05-26", type: "Personal Leave", status: "Approved" },
+        { date: "2025-05-27", type: "Personal Leave", status: "Approved" },
+      ],
+      dailyRecords: generateDailyRecords(5),
+    },
   ]);
 
   const tasksToday = [
@@ -97,12 +428,34 @@ const AdminDashboard = () => {
       deadline: "2025-06-28 17:00",
       assignedTo: "John Doe",
     },
+    {
+      id: 2,
+      title: "Team Meeting",
+      description: "Weekly team sync to discuss progress.",
+      deadline: "2025-06-28 10:30",
+      assignedTo: "Sarah Khan",
+    },
+    {
+      id: 3,
+      title: "Client Follow-up",
+      description: "Call client for feedback and renewal discussion.",
+      deadline: "2025-06-28 15:00",
+      assignedTo: "Amit Patel",
+    },
+    {
+      id: 4,
+      title: "Design Review",
+      description: "Review new UI mockups from design team.",
+      deadline: "2025-06-28 12:00",
+      assignedTo: "Emily Smith",
+    },
   ];
 
   function generateDailyRecords(seed) {
     const records = [];
-    const startDate = new Date(2025, 3, 28);
-    const endDate = new Date(2025, 4, 27);
+    // Generate records from 28th of previous month to 27th of current month
+    const startDate = new Date(2025, 3, 28); // April 28, 2025
+    const endDate = new Date(2025, 4, 27); // May 27, 2025
 
     for (
       let d = new Date(startDate);
@@ -112,6 +465,7 @@ const AdminDashboard = () => {
       const isWeekend = d.getDay() === 0 || d.getDay() === 6;
       const date = new Date(d);
 
+      // Use seed to create some variation in the data
       const random = (seed * date.getDate()) % 10;
       let status = "Present";
       let checkIn = null;
@@ -124,8 +478,11 @@ const AdminDashboard = () => {
       } else if (random === 2) {
         status = "Leave";
       } else {
-        const baseCheckIn = 9 * 60;
-        const baseCheckOut = 17 * 60;
+        // Normal working day
+        const baseCheckIn = 9 * 60; // 9:00 AM in minutes
+        const baseCheckOut = 17 * 60; // 5:00 PM in minutes
+
+        // Add some variation
         const checkInVariation = (random - 5) * 10;
         const checkOutVariation = (random - 3) * 10;
 
@@ -145,8 +502,10 @@ const AdminDashboard = () => {
           .padStart(2, "0")}`;
 
         if (checkInMinutes > 9 * 60 + 15) {
+          // If check-in after 9:15
           status = "Late";
         } else if (checkOutMinutes < 17 * 60 - 15) {
+          // If check-out before 4:45
           status = "Early Departure";
         }
       }
@@ -169,14 +528,18 @@ const AdminDashboard = () => {
     const [outHour, outMin] = checkOut.split(":").map(Number);
     const inMinutes = inHour * 60 + inMin;
     const outMinutes = outHour * 60 + outMin;
+
+    // Calculate difference in hours, rounded to 1 decimal place
     return Math.round((outMinutes - inMinutes) / 6) / 10;
   }
 
+  // Function to handle employee selection
   const handleEmployeeSelect = (id) => {
     setSelectedEmployee(id);
     setViewMode("detailed");
   };
 
+  // Filter employees based on search and department
   const filteredEmployees = attendanceData.filter((employee) => {
     const matchesSearch =
       employee.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -186,22 +549,11 @@ const AdminDashboard = () => {
     return matchesSearch && matchesDepartment;
   });
 
+  const staticProjects = ProjectsData;
+  // Generate projects on component mount
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get("http://localhost:5000/api/admindashboard/");
-        setProjects(response.data);
-        setFilteredProjects(response.data);
-        setLoading(false);
-      } catch (err) {
-        console.error("API Fetch Error:", err);
-        setError("Failed to load projects data");
-        setLoading(false);
-      }
-    };
-
-    fetchProjects();
+    setProjects(staticProjects);
+    setFilteredProjects(staticProjects);
   }, []);
 
   const handleShow = () => setShowModal(true);
@@ -212,6 +564,7 @@ const AdminDashboard = () => {
     setShowViewModal(true);
   };
 
+  // Unified filter handler
   const handleCardFilter = (type) => {
     let filtered = [];
     const today = new Date();
@@ -225,7 +578,7 @@ const AdminDashboard = () => {
       case "nearDue":
         filtered = projects.filter((project) => {
           if (project.status !== "Active") return false;
-          const dueDate = new Date(project.actual_due_date);
+          const dueDate = new Date(project.dueDate);
           const now = new Date();
           const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
           return dueDate > now && dueDate <= thirtyMinsFromNow;
@@ -233,7 +586,7 @@ const AdminDashboard = () => {
         break;
       case "overdue":
         filtered = projects.filter((project) => {
-          const dueDate = new Date(project.actual_due_date);
+          const dueDate = new Date(project.dueDate);
           return dueDate < today && project.status !== "Completed";
         });
         break;
@@ -243,14 +596,11 @@ const AdminDashboard = () => {
       case "eventsToday":
         const todayStr = today.toISOString().split("T")[0];
         filtered = projects.filter((project) => {
-          return (
-            project.actual_due_date === todayStr ||
-            project.qc_due_date === todayStr
-          );
+          return project.dueDate === todayStr || project.qcDueDate === todayStr;
         });
         break;
       case "pendingApproval":
-        filtered = projects.filter((p) => p.qa_status === "Pending");
+        filtered = projects.filter((p) => p.qaStatus === "Pending");
         break;
       default:
         filtered = projects;
@@ -259,75 +609,95 @@ const AdminDashboard = () => {
     setActiveFilter(type);
   };
 
+  const todayStr = new Date().toISOString().split("T")[0];
+
+  // Unified counting function
   const getCardCount = (cardType) => {
     switch (cardType) {
+      // Project-related counts
       case "active":
         return projects.filter((p) => p.status === "Active").length;
       case "nearDue":
-        return projects.filter((project) => {
-          if (project.status !== "Active") return false;
-          const dueDate = new Date(project.actual_due_date);
+        return projects.filter((p) => {
+          if (p.status !== "Active") return false;
+          const dueDate = new Date(p.dueDate);
           const now = new Date();
           const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
           return dueDate > now && dueDate <= thirtyMinsFromNow;
         }).length;
       case "overdue":
         return projects.filter(
-          (p) => new Date(p.actual_due_date) < new Date() && p.status !== "Completed"
+          (p) => new Date(p.dueDate) < new Date() && p.status !== "Completed"
         ).length;
       case "pendingApproval":
-        return projects.filter((p) => p.qa_status === "Pending").length;
+        return projects.filter((p) => p.qaStatus === "Pending").length;
+
+      // Attendance-related counts
       case "teamOnDuty":
         return attendanceData.length;
+
+      // Today's tasks count
       case "eventsToday":
         return tasksToday.length;
+
+      default:
+        return 0;
+    }
+  };
+
+  const countFiltered = (type) => {
+    const today = new Date();
+    const nearDueDate = new Date();
+    nearDueDate.setDate(today.getDate() + 3);
+
+    switch (type) {
+      case "active":
+        return projects.filter((p) => p.status === "Active").length;
+      case "nearDue":
+        return projects.filter((project) => {
+          if (project.status !== "Active") return false;
+          const dueDate = new Date(project.dueDate);
+          const now = new Date();
+          const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+          return dueDate > now && dueDate <= thirtyMinsFromNow;
+        }).length;
+      case "overdue":
+        return projects.filter((project) => {
+          const dueDate = new Date(project.dueDate);
+          return dueDate < today && project.status !== "Completed";
+        }).length;
+      case "teamOnDuty":
+        return projects.filter((p) => p.status === "Team On-Duty").length;
+      case "eventsToday":
+        return projects.filter((project) => {
+          const todayStr = today.toISOString().split("T")[0];
+          return project.dueDate === todayStr || project.qcDueDate === todayStr;
+        }).length;
+      case "pendingApproval":
+        return projects.filter((p) => p.qaStatus === "Pending").length;
       default:
         return projects.length;
     }
   };
 
+  // Show all projects
   const showAllProjects = () => {
     setFilteredProjects(projects);
     setActiveFilter("all");
   };
 
-  const barData = [
-    { name: "Mon", Design: 20, Development: 40, Testing: 10, Deployment: 10 },
-    { name: "Tue", Design: 30, Development: 35, Testing: 15, Deployment: 10 },
-    { name: "Wed", Design: 40, Development: 30, Testing: 10, Deployment: 15 },
-    { name: "Thu", Design: 30, Development: 35, Testing: 10, Deployment: 10 },
-    { name: "Fri", Design: 25, Development: 35, Testing: 15, Deployment: 10 },
-  ];
+  const [setAllProjects] = useState([]);
 
-  const pieData = [
-    { name: "Development", value: 60 },
-    { name: "Meetings", value: 30 },
-    { name: "Planning", value: 20 },
-    { name: "QA", value: 25 },
-    { name: "Documentation", value: 10 },
-  ];
+ 
 
   const COLORS = ["#4F46E5", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
 
-  if (loading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="alert alert-danger">{error}</div>;
-  }
-
   return (
     <div className="admin-dashboard text-white p-3 p-md-4 bg-main">
+      {/* Header */}
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <h2 className="gradient-heading">Admin Dashboard</h2>
-        
+        <div className="d-flex flex-column flex-sm-row gap-2"></div>
       </div>
 
       <Row className="mb-4 g-3">
@@ -391,162 +761,10 @@ const AdminDashboard = () => {
         ))}
       </Row>
 
-      {activeFilter !== "all" && (
-        <Button variant="outline-light" size="sm" onClick={showAllProjects}>
-          Show All
-        </Button>
-      )}
 
-      {activeFilter === "teamOnDuty" && (
-        <div
-          className="table-responsive text-white p-3 mb-5 table-gradient-bg"
-          style={{ maxHeight: "600px", overflowY: "auto", overflowX: "auto" }}
-          ref={scrollContainerRef}
-        >
-          <h4 className="mb-3">Team's List</h4>
-          <table className="table table-hover mb-0">
-            <thead
-              className="table bg-dark p-2 sticky-top"
-              style={{ position: "sticky", top: 0, zIndex: 2 }}
-            >
-              <tr>
-                <th>Employee</th>
-                <th>Department</th>
-                <th>Present Days</th>
-                <th>Absent Days</th>
-                <th>Late Arrivals</th>
-                <th>Early Departures</th>
-                <th>Leaves</th>
-                <th className="text-end">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredEmployees.map((employee) => (
-                <tr key={employee.id}>
-                  <td>
-                    <div className="d-flex align-items-center">
-                      <div className="avatar avatar-sm bg-light-primary rounded me-3">
-                        <span className="avatar-text">
-                          {employee.employeeName
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </span>
-                      </div>
-                      <div>
-                        <div className="fw-semibold">
-                          {employee.employeeName}
-                        </div>
-                        <div className="small ">{employee.employeeId}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div>{employee.department}</div>
-                    <div className="small ">{employee.position}</div>
-                  </td>
-                  <td>
-                    <span className="badge bg-success-subtle text-success">
-                      {employee.daysPresent}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="badge bg-danger-subtle text-danger">
-                      {employee.daysAbsent}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="badge bg-warning-subtle text-warning">
-                      {employee.lateArrivals}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="badge bg-warning-subtle text-warning">
-                      {employee.earlyDepartures}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="badge bg-info-subtle text-info">
-                      {employee.leaves.length}
-                    </span>
-                  </td>
-                  <td className="text-center mt-2">
-                    <button
-                      onClick={() => handleEmployeeSelect(employee.id)}
-                      className="btn btn-sm btn-info"
-                    >
-                      <i className="fas fa-eye me-1"></i> View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {activeFilter === "eventsToday" && (
-        <div
-          className="table-responsive text-white p-3 mb-5 table-gradient-bg"
-          style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }}
-          ref={scrollContainerRef}
-        >
-          <h4 className="mb-3">Today's Event</h4>
-          <table className="table table-hover mb-0">
-            <thead
-              className="table bg-dark p-2 sticky-top"
-              style={{ position: "sticky", top: 0, zIndex: 2 }}
-            >
-              <tr>
-                <th>Task Title</th>
-                <th>Description</th>
-                <th>Deadline</th>
-                <th>Assign to</th>
-                <th className="text-end">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tasksToday.map((task) => (
-                <tr key={task.id}>
-                  <td>{task.title}</td>
-                  <td>{task.description}</td>
-                  <td>{task.deadline}</td>
-                  <td>{task.assignedTo}</td>
-                  <td className="text-end">
-                    <button
-                      onClick={() => navigate("/calendar")}
-                      className="btn btn-sm btn-info"
-                    >
-                      <i className="fas fa-eye me-1"></i> View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {activeFilter !== "teamOnDuty" && activeFilter !== "eventsToday" && (
-        <Card className="text-white p-3 mb-5 table-gradient-bg">
-          <h4 className="mb-3">Project List</h4>
-
-          <div
-            ref={fakeScrollbarRef}
-            style={{
-              overflowX: "auto",
-              overflowY: "hidden",
-              height: 16,
-              position: "fixed",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              zIndex: 1050,
-            }}
-          >
-            <div style={{ width: "2000px", height: 1 }} />
-          </div>
-
+      {activeFilter == "active" && (
+          <Card className="text-white p-3 mb-4 table-gradient-bg">
+          <h4 className="mb-3">Active Projects</h4>
           <div
             className=""
             ref={scrollContainerRef}
@@ -582,16 +800,16 @@ const AdminDashboard = () => {
                 {filteredProjects.map((project) => (
                   <tr key={project.id}>
                     <td>{project.id}</td>
-                    <td>{project.project_title}</td>
+                    <td>{project.title}</td>
                     <td>{project.client}</td>
                     <td>{project.tasks}</td>
                     <td>{project.languages}</td>
                     <td>{project.application}</td>
-                    <td>{project.total_pages}</td>
-                    <td>{project.actual_due_date}</td>
-                    <td>{project.ready_for_qc_deadline}</td>
-                    <td>{project.qc_hours}</td>
-                    <td>{project.qc_due_date}</td>
+                    <td>{project.pages}</td>
+                    <td>{project.dueDate}</td>
+                    <td>{project.qcDeadline}</td>
+                    <td>{project.qcHours}</td>
+                    <td>{project.qcDueDate}</td>
                     <td>
                       <Badge
                         bg={
@@ -614,20 +832,20 @@ const AdminDashboard = () => {
                       </Badge>
                     </td>
                     <td>{project.handler}</td>
-                    <td>{project.qa_reviewer}</td>
+                    <td>{project.qaReviewer}</td>
                     <td>
                       <Badge
                         bg={
-                          project.qa_status === "Passed"
+                          project.qaStatus === "Passed"
                             ? "success"
-                            : project.qa_status === "Failed"
+                            : project.qaStatus === "Failed"
                             ? "danger"
-                            : project.qa_status === "In Review"
+                            : project.qaStatus === "In Review"
                             ? "info"
                             : "secondary"
                         }
                       >
-                        {project.qa_status}
+                        {project.qaStatus}
                       </Badge>
                     </td>
                     <td>
@@ -648,79 +866,333 @@ const AdminDashboard = () => {
         </Card>
       )}
 
-      <div className="row g-4 mb-4">
-        <div className="col-md-6">
-          <div className="card p-3 shadow-sm h-100 bg-card">
-            <h5>Resource Utilization</h5>
-            <p className="text-muted">Utilization %</p>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={barData} stackOffset="expand">
-                <XAxis dataKey="name" />
-                <YAxis tickFormatter={(value) => `${value * 100}%`} />
-                <Tooltip
-                  formatter={(value) => `${(value * 100).toFixed(0)}%`}
-                />
-                <Legend />
-                <Bar dataKey="Design" stackId="a" fill="#6366F1" />
-                <Bar dataKey="Development" stackId="a" fill="#10B981" />
-                <Bar dataKey="Testing" stackId="a" fill="#F59E0B" />
-                <Bar dataKey="Deployment" stackId="a" fill="#EF4444" />
-              </BarChart>
-            </ResponsiveContainer>
-            <div className="d-flex justify-content-between align-items-center mt-3">
-              <p className="mb-0">
-                Average utilization:{" "}
-                <strong className="text-primary">76%</strong>
-              </p>
-              <div className="btn-group">
-                <button className="btn btn-sm btn-outline-primary">
-                  Daily
-                </button>
-                <button className="btn btn-sm btn-primary">Weekly</button>
-                <button className="btn btn-sm btn-outline-primary">
-                  Monthly
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <div className="col-md-6">
-          <div className="card p-3 shadow-sm h-100 bg-card">
-            <h5>Time Tracking Summary</h5>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={3}
-                  dataKey="value"
-                  label={false}
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="row text-center mt-3">
-              <div className="col-6 border-end">
-                <p className="mb-1">Total Hours This Week</p>
-                <h5 className="text-primary fw-bold">187 hours</h5>
-              </div>
-              <div className="col-6">
-                <p className="mb-1">Productivity Score</p>
-                <h5 className="text-success fw-bold">92%</h5>
-              </div>
-            </div>
+ {activeFilter === "nearDue" && (
+        <Card className="text-white p-3 mb-4 table-gradient-bg">
+          <h4 className="mb-3">Near Due Projects (Next 30 Minutes)</h4>
+          <div
+            className=""
+            ref={scrollContainerRef}
+            style={{
+              maxHeight: "500px",
+              overflowX: "auto",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
+          >
+            <Table className="table-gradient-bg align-middle table table-bordered table-hover">
+              <thead className="table bg-dark p-2 ">
+                <tr>
+                  <th>ID</th>
+                  <th>Project Title</th>
+                  <th>Client</th>
+                  <th>Tasks</th>
+                  <th>Languages</th>
+                  <th>Application</th>
+                  <th>Total Pages</th>
+                  <th>Actual Due Date</th>
+                  <th>Ready for QC Deadline</th>
+                  <th>QC Hrs</th>
+                  <th>QC Due Date</th>
+                  <th>Status</th>
+                  <th>Handler</th>
+                  <th>QA Reviewer</th>
+                  <th>QA Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredProjects.map((project) => (
+                  <tr key={project.id}>
+                    <td>{project.id}</td>
+                    <td>{project.title}</td>
+                    <td>{project.client}</td>
+                    <td>{project.tasks}</td>
+                    <td>{project.languages}</td>
+                    <td>{project.application}</td>
+                    <td>{project.pages}</td>
+                    <td>{project.dueDate}</td>
+                    <td>{project.qcDeadline}</td>
+                    <td>{project.qcHours}</td>
+                    <td>{project.qcDueDate}</td>
+                    <td>
+                      <Badge
+                        bg={
+                          project.status === "Completed"
+                            ? "success"
+                            : project.status === "On Hold"
+                            ? "warning"
+                            : project.status === "Active"
+                            ? "primary"
+                            : project.status === "Near Due"
+                            ? "info"
+                            : project.status === "Overdue"
+                            ? "danger"
+                            : project.status === "Team On-Duty"
+                            ? "secondary"
+                            : "dark"
+                        }
+                      >
+                        {project.status}
+                      </Badge>
+                    </td>
+                    <td>{project.handler}</td>
+                    <td>{project.qaReviewer}</td>
+                    <td>
+                      <Badge
+                        bg={
+                          project.qaStatus === "Passed"
+                            ? "success"
+                            : project.qaStatus === "Failed"
+                            ? "danger"
+                            : project.qaStatus === "In Review"
+                            ? "info"
+                            : "secondary"
+                        }
+                      >
+                        {project.qaStatus}
+                      </Badge>
+                    </td>
+                    <td>
+                      <Button
+                        variant="link"
+                        className="text-info p-0 ms-3"
+                        title="View"
+                        onClick={() => handleView(project)}
+                      >
+                        <FaEye />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
           </div>
-        </div>
-      </div>
+        </Card>
+      )}
 
+       {activeFilter === "overdue" && (
+        <Card className="text-white p-3 mb-4 table-gradient-bg">
+          <h4 className="mb-3">Overdue Projects</h4>
+          <div
+            className=""
+            ref={scrollContainerRef}
+            style={{
+              maxHeight: "500px",
+              overflowX: "auto",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
+          >
+            <Table className="table-gradient-bg align-middle table table-bordered table-hover">
+              <thead className="table bg-dark p-2 ">
+                <tr>
+                  <th>ID</th>
+                  <th>Project Title</th>
+                  <th>Client</th>
+                  <th>Tasks</th>
+                  <th>Languages</th>
+                  <th>Application</th>
+                  <th>Total Pages</th>
+                  <th>Actual Due Date</th>
+                  <th>Ready for QC Deadline</th>
+                  <th>QC Hrs</th>
+                  <th>QC Due Date</th>
+                  <th>Status</th>
+                  <th>Handler</th>
+                  <th>QA Reviewer</th>
+                  <th>QA Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredProjects.map((project) => (
+                  <tr key={project.id}>
+                    <td>{project.id}</td>
+                    <td>{project.title}</td>
+                    <td>{project.client}</td>
+                    <td>{project.tasks}</td>
+                    <td>{project.languages}</td>
+                    <td>{project.application}</td>
+                    <td>{project.pages}</td>
+                    <td>{project.dueDate}</td>
+                    <td>{project.qcDeadline}</td>
+                    <td>{project.qcHours}</td>
+                    <td>{project.qcDueDate}</td>
+                    <td>
+                      <Badge
+                        bg={
+                          project.status === "Completed"
+                            ? "success"
+                            : project.status === "On Hold"
+                            ? "warning"
+                            : project.status === "Active"
+                            ? "primary"
+                            : project.status === "Near Due"
+                            ? "info"
+                            : project.status === "Overdue"
+                            ? "danger"
+                            : project.status === "Team On-Duty"
+                            ? "secondary"
+                            : "dark"
+                        }
+                      >
+                        {project.status}
+                      </Badge>
+                    </td>
+                    <td>{project.handler}</td>
+                    <td>{project.qaReviewer}</td>
+                    <td>
+                      <Badge
+                        bg={
+                          project.qaStatus === "Passed"
+                            ? "success"
+                            : project.qaStatus === "Failed"
+                            ? "danger"
+                            : project.qaStatus === "In Review"
+                            ? "info"
+                            : "secondary"
+                        }
+                      >
+                        {project.qaStatus}
+                      </Badge>
+                    </td>
+                    <td>
+                      <Button
+                        variant="link"
+                        className="text-info p-0 ms-3"
+                        title="View"
+                        onClick={() => handleView(project)}
+                      >
+                        <FaEye />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        </Card>
+      )}
+
+      {activeFilter == "teamOnDuty" && (
+         <Card className="text-white p-3 mb-4 table-gradient-bg">
+          <h4 className="mb-3">Today's Attendance</h4>
+          <div
+            className="table-responsive"
+            style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }}
+            ref={scrollContainerRef}
+          >
+            <table className="table table-hover mb-0">
+              <thead className="table bg-dark p-2 sticky-top" style={{ position: "sticky", top: 0, zIndex: 2 }}>
+                <tr>
+                  <th>Employee</th>
+                  <th>Department</th>
+                  <th>Present Days</th>
+                  <th>Absent Days</th>
+                  <th>Late Arrivals</th>
+                  <th>Early Departures</th>
+                  <th>Leaves</th>
+                </tr>
+              </thead>
+              <tbody>
+                {attendanceData.map((employee) => (
+                  <tr key={employee.id}>
+                    <td>
+                      <div className="d-flex align-items-center">
+                        <div className="avatar avatar-sm bg-light-primary rounded me-3">
+                          <span className="avatar-text">
+                            {employee.employeeName
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </span>
+                        </div>
+                        <div>
+                          <div className="fw-semibold">
+                            {employee.employeeName}
+                          </div>
+                          <div className="small">{employee.employeeId}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div>{employee.department}</div>
+                      <div className="small">{employee.position}</div>
+                    </td>
+                    <td>
+                      <span className="badge bg-success-subtle text-success">
+                        {employee.daysPresent}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="badge bg-danger-subtle text-danger">
+                        {employee.daysAbsent}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="badge bg-warning-subtle text-warning">
+                        {employee.lateArrivals}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="badge bg-warning-subtle text-warning">
+                        {employee.earlyDepartures}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="badge bg-info-subtle text-info">
+                        {employee.leaves.length}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+
+      {activeFilter == "eventsToday" && (
+       <Card className="text-white p-3 mb-4 table-gradient-bg">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h4 className="mb-0">Today's Events</h4>
+            <Link to="/calendar" className="text-decoration-none">
+              <Button className="gradient-button me-2">Go To Calendar</Button>
+            </Link>
+          </div>
+          <div
+            className="table-responsive"
+            style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }}
+            ref={scrollContainerRef}
+          >
+            <table className="table table-hover mb-0">
+              <thead className="table bg-dark p-2 sticky-top" style={{ position: "sticky", top: 0, zIndex: 2 }}>
+                <tr>
+                  <th>Task Title</th>
+                  <th>Description</th>
+                  <th>Deadline</th>
+                  <th>Assign to</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tasksToday.map((task) => (
+                  <tr key={task.id}>
+                    <td>{task.title}</td>
+                    <td>{task.description}</td>
+                    <td>{task.deadline}</td>
+                    <td>{task.assignedTo}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+
+   
+
+      {/* View Project Details Modal */}
       <Modal
         show={showViewModal}
         onHide={() => setShowViewModal(false)}
@@ -733,71 +1205,19 @@ const AdminDashboard = () => {
         <Modal.Body>
           {selectedProject && (
             <div>
-              <p>
-                <strong>Title:</strong> {selectedProject.project_title}
-              </p>
-              <p>
-                <strong>Client:</strong> {selectedProject.client}
-              </p>
-              <p>
-                <strong>Application:</strong> {selectedProject.application}
-              </p>
-              <p>
-                <strong>Pages:</strong> {selectedProject.total_pages}
-              </p>
-              <p>
-                <strong>Due Date:</strong> {selectedProject.actual_due_date}
-              </p>
-              <p>
-                <strong>Status:</strong> {selectedProject.status}
-              </p>
-              <p>
-                <strong>Handler:</strong> {selectedProject.handler}
-              </p>
-              <p>
-                <strong>QA Reviewer:</strong> {selectedProject.qa_reviewer}
-              </p>
-              <p>
-                <strong>QA Status:</strong> {selectedProject.qa_status}
-              </p>
+              <p><strong>Title:</strong> {selectedProject.title}</p>
+              <p><strong>Client:</strong> {selectedProject.client}</p>
+              <p><strong>Application:</strong> {selectedProject.application}</p>
+              <p><strong>Pages:</strong> {selectedProject.pages}</p>
+              <p><strong>Due Date:</strong> {selectedProject.dueDate}</p>
+              <p><strong>Status:</strong> {selectedProject.status}</p>
+              <p><strong>Handler:</strong> {selectedProject.handler}</p>
+              <p><strong>QA Reviewer:</strong> {selectedProject.qaReviewer}</p>
+              <p><strong>QA Status:</strong> {selectedProject.qaStatus}</p>
             </div>
           )}
         </Modal.Body>
       </Modal>
-
-      <Col md={12} className="text-end">
-        {activeFilter === "teamOnDuty" ? (
-          <Link to="/Attendance?tab=today" className="text-decoration-none">
-            <Button className="gradient-button me-2">Go To</Button>
-          </Link>
-        ) : activeFilter === "eventsToday" ? (
-          <Link to="/calendar" className="text-decoration-none">
-            <Button className="gradient-button me-2">Go To</Button>
-          </Link>
-        ) : activeFilter === "nearDue" ? (
-          <Link
-            to="/active-project?filter=nearDue"
-            className="text-decoration-none"
-          >
-            <Button className="gradient-button me-2">Go To</Button>
-          </Link>
-        ) : activeFilter === "active" ? (
-          <Link
-            to="/active-project?filter=active"
-            className="text-decoration-none"
-          >
-            <Button className="gradient-button me-2">Go To</Button>
-          </Link>
-        ) : activeFilter === "pendingApproval" ? (
-          <Link to="/action-center" className="text-decoration-none">
-            <Button className="gradient-button me-2">Go To</Button>
-          </Link>
-        ) : (
-          <Link to="/active-project" className="text-decoration-none">
-            <Button className="gradient-button me-2">Go To</Button>
-          </Link>
-        )}
-      </Col>
     </div>
   );
 };
