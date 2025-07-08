@@ -659,7 +659,7 @@ const ActiveProject = () => {
   const {
     scrollContainerRef: scrollContainerRef1,
     fakeScrollbarRef: fakeScrollbarRef1,
-  } = useSyncScroll(activeTab === "created");
+  } = useSyncScroll(true);
 
   return (
     <div className="container-fluid py-4">
