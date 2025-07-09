@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select from "react-select";
 
 function UserManagement() {
   // State for modal and member management
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState(""); // "view", "edit", or "add"
+  const [selectedMember, setSelectedMember] = useState(null);
   const [selectedApplications, setSelectedApplications] = useState([]);
   const [activeTab, setActiveTab] = useState("live");
   
@@ -191,8 +192,44 @@ function UserManagement() {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Add logic to add member to teamMembers (currently static)
+    
+    if (modalType === "edit") {
+      // Update existing member
+      setTeamMembers(prevMembers =>
+        prevMembers.map(member =>
+          member.empId === form.empId
+            ? {
+                ...form,
+                appSkills: selectedApplications.map(app => app.value)
+              }
+            : member
+        )
+      );
+    } else {
+      // Add new member
+      const newMember = {
+        ...form,
+        appSkills: selectedApplications.map(app => app.value),
+        status: "active"
+      };
+      setTeamMembers(prevMembers => [...prevMembers, newMember]);
+    }
+    
     setShowModal(false);
+    resetForm();
+  };
+
+  // Handle form field changes
+  const handleFieldChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prevForm => ({
+      ...prevForm,
+      [name]: value,
+    }));
+  };
+
+  // Reset form to initial state
+  const resetForm = () => {
     setForm({
       empId: "",
       fullName: "",
@@ -204,15 +241,48 @@ function UserManagement() {
       username: "",
       password: "",
     });
+    setSelectedApplications([]);
   };
 
-  // Handle form field changes
-  const handleFieldChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prevForm) => ({
-      ...prevForm,
-      [name]: value,
-    }));
+  // Open modal for viewing/editing a member
+  const openMemberModal = (type, member) => {
+    setModalType(type);
+    setSelectedMember(member);
+    
+    if (type !== "add") {
+      setForm({
+        empId: member.empId,
+        fullName: member.fullName,
+        doj: member.doj,
+        dob: member.dob,
+        team: member.team,
+        role: member.role,
+        appSkills: member.appSkills,
+        username: member.username,
+        password: "", // Password is not stored for security reasons
+      });
+      
+      // Set selected applications for the select component
+      setSelectedApplications(
+        member.appSkills.map(skill => ({
+          value: skill,
+          label: skill
+        }))
+      );
+    } else {
+      resetForm();
+    }
+    
+    setShowModal(true);
+  };
+
+  // Delete a member
+  const deleteMember = (empId) => {
+    if (window.confirm("Are you sure you want to delete this member?")) {
+      setTeamMembers(prevMembers => 
+        prevMembers.filter(member => member.empId !== empId)
+      );
+    }
   };
 
   // Render the members table
@@ -278,10 +348,18 @@ function UserManagement() {
                       <span className="badge bg-success">Active</span>
                     </td>
                     <td>
-                      <button className="btn btn-sm btn-primary me-2">
+                      <button 
+                        className="btn btn-sm btn-primary me-2"
+                        onClick={() => openMemberModal("view", member)}
+                        title="View Member"
+                      >
                         <i className="fas fa-eye"></i>
                       </button>
-                      <button className="btn btn-sm btn-info me-2">
+                      <button 
+                        className="btn btn-sm btn-info me-2"
+                        onClick={() => openMemberModal("edit", member)}
+                        title="Edit Member"
+                      >
                         <i className="fas fa-edit"></i>
                       </button>
                       <button 
@@ -291,7 +369,11 @@ function UserManagement() {
                       >
                         <i className="fas fa-snowflake"></i>
                       </button>
-                      <button className="btn btn-sm btn-danger">
+                      <button 
+                        className="btn btn-sm btn-danger"
+                        onClick={() => deleteMember(member.empId)}
+                        title="Delete Member"
+                      >
                         <i className="fas fa-trash"></i>
                       </button>
                     </td>
@@ -343,10 +425,18 @@ function UserManagement() {
                       <span className="badge bg-secondary">Freezed</span>
                     </td>
                     <td>
-                      <button className="btn btn-sm btn-primary me-2">
+                      <button 
+                        className="btn btn-sm btn-primary me-2"
+                        onClick={() => openMemberModal("view", member)}
+                        title="View Member"
+                      >
                         <i className="fas fa-eye"></i>
                       </button>
-                      <button className="btn btn-sm btn-info me-2">
+                      <button 
+                        className="btn btn-sm btn-info me-2"
+                        onClick={() => openMemberModal("edit", member)}
+                        title="Edit Member"
+                      >
                         <i className="fas fa-edit"></i>
                       </button>
                       <button 
@@ -356,7 +446,11 @@ function UserManagement() {
                       >
                         <i className="fas fa-sun"></i>
                       </button>
-                      <button className="btn btn-sm btn-danger">
+                      <button 
+                        className="btn btn-sm btn-danger"
+                        onClick={() => deleteMember(member.empId)}
+                        title="Delete Member"
+                      >
                         <i className="fas fa-trash"></i>
                       </button>
                     </td>
@@ -372,7 +466,9 @@ function UserManagement() {
 
   // Render modal content based on modal type
   const renderModalContent = () => {
-    const isEditMode = modalType === "edit" || modalType === "view";
+    const isEditMode = modalType === "edit";
+    const isViewMode = modalType === "view";
+    
     return (
       <form onSubmit={handleSubmit}>
         <div className="modal-body">
@@ -385,7 +481,7 @@ function UserManagement() {
               value={form.empId}
               onChange={handleFieldChange}
               required
-              disabled={isEditMode}
+              disabled={isViewMode || isEditMode}
             />
           </div>
           <div className="mb-3">
@@ -397,6 +493,7 @@ function UserManagement() {
               value={form.fullName}
               onChange={handleFieldChange}
               required
+              disabled={isViewMode}
             />
           </div>
           <div className="mb-3">
@@ -409,6 +506,7 @@ function UserManagement() {
               onChange={handleFieldChange}
               placeholder="DD-MM-YYYY"
               required
+              disabled={isViewMode}
             />
           </div>
           <div className="mb-3">
@@ -421,6 +519,7 @@ function UserManagement() {
               onChange={handleFieldChange}
               placeholder="DD-MM-YYYY"
               required
+              disabled={isViewMode}
             />
           </div>
           <div className="mb-3">
@@ -431,11 +530,16 @@ function UserManagement() {
               value={form.team}
               onChange={handleFieldChange}
               required
+              disabled={isViewMode}
             >
               <option value="">Select Team</option>
-              <option value="Adobe">Adobe</option>
-              <option value="MS Office">MS Office</option>
+              <option value="Dev">Dev</option>
               <option value="QA">QA</option>
+              <option value="Design">Design</option>
+              <option value="DevOps">DevOps</option>
+              <option value="HR">HR</option>
+              <option value="IT Support">IT Support</option>
+              <option value="Marketing">Marketing</option>
             </select>
           </div>
           <div className="mb-3">
@@ -447,6 +551,7 @@ function UserManagement() {
               value={form.role}
               onChange={handleFieldChange}
               required
+              disabled={isViewMode}
             />
           </div>
           <div className="mb-3">
@@ -458,6 +563,7 @@ function UserManagement() {
               onChange={setSelectedApplications}
               placeholder="Select"
               styles={gradientSelectStyles}
+              isDisabled={isViewMode}
             />
           </div>
           <div className="mb-3">
@@ -469,19 +575,23 @@ function UserManagement() {
               value={form.username}
               onChange={handleFieldChange}
               required
+              disabled={isViewMode}
             />
           </div>
-          <div className="mb-3">
-            <label className="form-label">Password</label>
-            <input
-              type="password"
-              className="form-control"
-              name="password"
-              value={form.password}
-              onChange={handleFieldChange}
-              required
-            />
-          </div>
+          {!isViewMode && (
+            <div className="mb-3">
+              <label className="form-label">Password</label>
+              <input
+                type="password"
+                className="form-control"
+                name="password"
+                value={form.password}
+                onChange={handleFieldChange}
+                required={modalType === "add"}
+                disabled={isEditMode}
+              />
+            </div>
+          )}
         </div>
         <div className="modal-footer">
           <button
@@ -491,9 +601,11 @@ function UserManagement() {
           >
             Cancel
           </button>
-          <button type="submit" className="btn gradient-button">
-            {modalType === "edit" ? "Save Changes" : "Add Member"}
-          </button>
+          {!isViewMode && (
+            <button type="submit" className="btn gradient-button">
+              {modalType === "edit" ? "Save Changes" : "Add Member"}
+            </button>
+          )}
         </div>
       </form>
     );
@@ -507,10 +619,7 @@ function UserManagement() {
         <div className="text-end mb-3">
           <button
             className="btn gradient-button"
-            onClick={() => {
-              setModalType("add");
-              setShowModal(true);
-            }}
+            onClick={() => openMemberModal("add", null)}
           >
             + Add Member
           </button>

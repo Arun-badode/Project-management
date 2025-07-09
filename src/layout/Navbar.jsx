@@ -53,11 +53,11 @@ const Navbar = ({ toggleSidebar }) => {
           <div className="d-flex align-items-center gap-3 flex-shrink-0">
             <img
               // src="https://ik.imagekit.io/wycpoxj6v/Eminoids%20-%20Logo_B.png?updatedAt=1750836038955"
-              src="../../public/Logo/Eminoids - Logo_W.png"
+              src="https://ik.imagekit.io/43o9qlnbg/Eminoids%20-%20Logo_W.png"
               alt="Logo"
               style={{
-                width: window.innerWidth >= 992 ? "250px" : "120px",
-                height: "auto",
+                width: window.innerWidth >= 992 ? "150px" : "120px",
+                height: "40px",
               }}
             />
             <button
@@ -266,7 +266,11 @@ const Navbar = ({ toggleSidebar }) => {
                 <h5 className="modal-title">Confirm Break</h5>
               </div>
               <div className="modal-body">
-                <p>Remaining break time: {breakTimeRemaining} minutes</p>
+                {role === "Team Member" ? (
+                  <p>Remaining break time: {breakTimeRemaining} minutes</p>
+                ) : (
+                  <p>No break time limit for Managers. Your status will be visible to Admin.</p>
+                )}
               </div>
               <div className="modal-footer">
                 <button
@@ -282,7 +286,10 @@ const Navbar = ({ toggleSidebar }) => {
                     setIsOnBreak(true);
                     setShowBreakConfirmation(false);
                     setShowOverlay(true);
-                    startBreakTimer();
+                    if (role === "Team Member") {
+                      startBreakTimer();
+                    }
+                    // For Manager, no timer logic needed
                   }}
                 >
                   Confirm

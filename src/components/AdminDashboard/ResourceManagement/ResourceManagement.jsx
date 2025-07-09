@@ -567,7 +567,7 @@ const ResourceManagement = () => {
   };
 
   return (
-    <div className="p-4 py-4">
+    <div className=" container-fluid p-4 py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="gradient-heading">Resource Management</h2>
         <div className="d-flex gap-2">

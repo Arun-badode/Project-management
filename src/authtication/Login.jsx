@@ -12,19 +12,31 @@ const LoginPage = () => {
   const [role, setRole] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  // Additional state for animation
-const [fadeOut, setFadeOut] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
 
-useEffect(() => {
-  const timer = setTimeout(() => {
-    setFadeOut(true); // Start fade out
-    setTimeout(() => {
-      setShowVideo(false); // Remove video after fade
-    }, 1000); // Wait for animation to finish
-  }, 7000);
-  return () => clearTimeout(timer);
-}, []);
+  useEffect(() => {
+    // Check if mobile device
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
+  }, []);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFadeOut(true); // Start fade out
+      setTimeout(() => {
+        setShowVideo(false); // Remove video after fade
+      }, 1000); // Wait for animation to finish
+    }, 7000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const roleCredentials = {
     Admin: { email: "admin123", password: "admin@123" },
@@ -32,15 +44,7 @@ useEffect(() => {
     "Team Member": { email: "team123", password: "team@123" },
   };
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowVideo(false);
-    }, 7000); 
-
-    return () => clearTimeout(timer);
-  }, []);
-
-   const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!role) {
@@ -72,62 +76,41 @@ useEffect(() => {
     setPassword(roleCredentials[selectedRole].password);
   };
 
-  // if (showVideo) {
-  //   return (
-  //     <div className="video-splash-screen">
-  //       <video 
-  //         autoPlay 
-  //         muted 
-  //         playsInline 
-  //         className="splash-video"
-  //         onEnded={() => setShowVideo(false)}
-  //       >
-  //         <source 
-  //           src={isMobile ? "../../public/Video/Eminoids - Logo Animation Blue_Mob.mp4" : "../../public/Video/Eminoids - Logo Animation Blue.mp4" } 
-  //           type="video/mp4" 
-  //         />
-  //         Your browser does not support the video tag.
-  //       </video>
-  //     </div>
-  //   );
-  // }
-
   if (showVideo) {
-  return (
-    <div className={`video-splash-screen ${fadeOut ? "fade-out" : ""}`}>
-      <video 
-        autoPlay 
-        muted 
-        playsInline 
-        className="splash-video"
-      >
-        <source 
-          src={isMobile ? "/Video/Eminoids - Logo Animation Blue_Mob.mp4" : "/Video/Eminoids - Logo Animation Blue.mp4"}
-          type="video/mp4"
-        />
-        Your browser does not support the video tag.
-      </video>
-    </div>
-  );
-}
+    return (
+      <div className={`video-splash-screen ${fadeOut ? "fade-out" : ""}`}>
+        <video 
+          autoPlay 
+          muted 
+          playsInline 
+          className="splash-video"
+          style={{ height: isMobile ? "100%" : "100%" }}
+        >
+          <source 
+            src={isMobile ? "Video/mob.mp4" : "/Video/web.mp4"} 
+            type="video/mp4" 
+          />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    );
+  }
 
   return (
-    <div
-      className="login-page "
-     
-    >
+    <div className="login-page">
       <div className="login-container row">
         {/* Left Panel */}
         <div className="col-md-6 login-left d-flex justify-content-center align-items-center">
           <div className="login-left-content">
             <img
-              src="../../public/Logo/Eminoids - Logo_W.png"
+              src="https://ik.imagekit.io/43o9qlnbg/Eminoids%20-%20Logo_W.png"
               alt="Logo"
               className="login-logo"
+              style={{ width: "220px", height: "auto", marginBottom: "24px" }}
             />
             <h1 className="text-white">Welcome Back!</h1>
             <p className="fw-bold text-strong">
-              Let’s turn tasks into triumphs! 
+              Let's turn tasks into triumphs! 
             </p>
           </div>
         </div>
@@ -199,8 +182,6 @@ useEffect(() => {
                 <p className="text-muted">
                  Version Build 1.0 
                 </p>
-
-             <Link to="/signup" style={{ color: "#6e8efb" }}>Sign up</Link>
               </div>
             </form>
           </div>

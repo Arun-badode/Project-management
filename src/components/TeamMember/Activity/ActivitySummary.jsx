@@ -71,7 +71,7 @@ function ActivitySummary() {
   ];
 
   return (
-    <div className="container ">
+    <div className="container-fluid ">
       <div className="row p-3">
         {/* Header with notifications */}
         <div className="col-12 d-flex justify-content-between align-items-center mb-4">
