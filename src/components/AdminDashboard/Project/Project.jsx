@@ -1405,7 +1405,6 @@ const Project = () => {
                 </div>
                 {/* Project Cards */}
                 <div className="card">
-                 
                   <div
                     ref={fakeScrollbarRef4}
                     style={{
@@ -2079,21 +2078,31 @@ const Project = () => {
                   <h6 className="mb-3 text-white">Manage Clients</h6>
 
                   <div className="row mb-2">
-                    <div className="col-md-6 mb-2">
-                      <input
-                        className="form-control"
-                        style={{ background: "#181f3a", color: "#fff" }}
-                        placeholder="New Client Alias Name*"
-                        name="alias"
-                      />
+                    <div className="col-md-5 mb-2">
+                      <div className="input-group">
+                        <input
+                          className="form-control"
+                          style={{ background: "#181f3a", color: "#fff" }}
+                          placeholder="New Client Alias Name*"
+                          name="alias"
+                        />
+                        <button className="btn btn-gradient" type="button">
+                          +
+                        </button>
+                      </div>
                     </div>
                     <div className="col-md-6 mb-2">
-                      <input
-                        className="form-control"
-                        style={{ background: "#181f3a", color: "#fff" }}
-                        placeholder="Actual Client Name*"
-                        name="actual"
-                      />
+                      <div className="input-group">
+                        <input
+                          className="form-control"
+                          style={{ background: "#181f3a", color: "#fff" }}
+                          placeholder="Actual Client Name*"
+                          name="actual"
+                        />
+                        <button className="btn btn-gradient" type="button">
+                          +
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -2101,57 +2110,77 @@ const Project = () => {
                   <div className="row mb-3">
                     {/* Country Input */}
                     <div className="col-md-4 mb-2">
-                      <input
-                        className="form-control"
-                        style={{ background: "#181f3a", color: "#fff" }}
-                        placeholder="Country*"
-                        name="country"
-                      />
+                      <div className="input-group">
+                        <input
+                          className="form-control"
+                          style={{ background: "#181f3a", color: "#fff" }}
+                          placeholder="Country*"
+                          name="country"
+                        />
+                        <button className="btn btn-gradient" type="button">
+                          +
+                        </button>
+                      </div>
                     </div>
 
                     {/* Currency + Hourly Rate Side-by-Side */}
-                    <div className="col-md-8 mb-2">
+                    <div className="col-md-6 mb-2">
                       <div className="row">
                         {/* Currency */}
-                        <div className="col-md-3">
-                          <select
-                            className="form-control"
-                            style={{ background: "#181f3a", color: "#fff" }}
-                            name="currency"
-                          >
-                            <option value="">Currency*</option>
-                            {currencyOptions.map((cur) => (
-                              <option key={cur} value={cur}>
-                                {cur}
-                              </option>
-                            ))}
-                          </select>
+                        <div className="col-md-6 mb-2">
+                          <div className="input-group">
+                            <select
+                              className="form-control"
+                              style={{ background: "#181f3a", color: "#fff" }}
+                              name="currency"
+                            >
+                              <option value="">Currency*</option>
+                              {currencyOptions.map((cur) => (
+                                <option key={cur} value={cur}>
+                                  {cur}
+                                </option>
+                              ))}
+                            </select>
+                            <button className="btn btn-gradient" type="button">
+                              +
+                            </button>
+                          </div>
                         </div>
 
                         {/* Hourly Rate */}
-                        <div className="col-md-5 d-flex align-items-end">
-                          <input
-                            type="number"
-                            className="form-control"
-                            placeholder="Hourly Rate*"
-                            name="hourlyRate"
-                            style={{ background: "#181f3a", color: "#fff" }}
-                          />
+                        <div className="col-md-6 mb-2">
+                          <div className="input-group">
+                            <input
+                              type="number"
+                              className="form-control"
+                              placeholder="00"
+                              name="hourlyRate"
+                              style={{ background: "#181f3a", color: "#fff" }}
+                            />
+                            <button className="btn btn-gradient" type="button">
+                              +
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Third row */}
-                  <div className="d-flex gap-2 mb-2 flex-wrap">
-                    <input
-                      className="form-control"
-                      style={{ background: "#181f3a", color: "#fff" }}
-                      placeholder="Project Managers (comma-sep)"
-                      name="managers"
-                    />
-                    <button className="btn btn-gradient">+</button>
+                  <div className="mb-2">
+                    <div className="input-group">
+                      <input
+                        className="form-control"
+                        style={{ background: "#181f3a", color: "#fff" }}
+                        placeholder="Project Managers (comma-sep)"
+                        name="managers"
+                      />
+                      <button className="btn btn-gradient" type="button">
+                        +
+                      </button>
+                    </div>
                   </div>
+
                   <div className="border rounded p-2 mb-2 border-secondary">
                     {clients.map((client, index) => (
                       <div key={index}>
@@ -2214,9 +2243,9 @@ const Project = () => {
                       >
                         <span className="text-white">{task}</span>
                         <div className="btn-group btn-group-sm gap-2">
-                           <button className="btn btn-outline-secondary  text-light">
-                              <i className="bi bi-pencil"></i>
-                            </button>
+                          <button className="btn btn-outline-secondary  text-light">
+                            <i className="bi bi-pencil"></i>
+                          </button>
                           <button
                             className="btn btn-outline-danger"
                             onClick={() =>
@@ -2229,13 +2258,6 @@ const Project = () => {
                       </div>
                     ))}
                   </div>
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddTask}
-                    disabled={!newTask}
-                  >
-                    <i className="fas fa-plus me-1"></i>
-                  </button>
                 </div>
 
                 {/* Manage Application List */}
@@ -2259,9 +2281,9 @@ const Project = () => {
                       >
                         <span className="text-white">{application}</span>
                         <div className="btn-group btn-group-sm gap-2">
-                           <button className="btn btn-outline-secondary  text-light">
-                              <i className="bi bi-pencil"></i>
-                            </button>
+                          <button className="btn btn-outline-secondary  text-light">
+                            <i className="bi bi-pencil"></i>
+                          </button>
                           <button
                             className="btn btn-outline-danger"
                             onClick={() =>
@@ -2278,14 +2300,6 @@ const Project = () => {
                       </div>
                     ))}
                   </div>
-                  
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddapplication}
-                    disabled={!newapplication}
-                  >
-                    <i className="fas fa-plus me-1"></i>
-                  </button>
                 </div>
 
                 {/* Manage Languages List */}
@@ -2309,9 +2323,9 @@ const Project = () => {
                       >
                         <span className="text-white">{language}</span>
                         <div className="btn-group btn-group-sm gap-2">
-                           <button className="btn btn-outline-secondary  text-light">
-                              <i className="bi bi-pencil"></i>
-                            </button>
+                          <button className="btn btn-outline-secondary  text-light">
+                            <i className="bi bi-pencil"></i>
+                          </button>
                           <button
                             className="btn btn-outline-danger"
                             onClick={() =>
@@ -2324,13 +2338,6 @@ const Project = () => {
                       </div>
                     ))}
                   </div>
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddLanguage}
-                    disabled={!newLanguage}
-                  >
-                    <i className="fas fa-plus me-1"></i>
-                  </button>
                 </div>
 
                 {/* Currency Conversion Rates */}
@@ -2401,13 +2408,6 @@ const Project = () => {
                       </tbody>
                     </table>
                   </div>
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddCurrency}
-                    disabled={!newCurrency.name || !newCurrency.rate}
-                  >
-                    <i className="fas fa-plus me-1"></i>
-                  </button>
                 </div>
 
                 {/* Save All Settings */}

@@ -23,7 +23,6 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import useSyncScroll from "./Hooks/useSyncScroll";
 
 export const ProjectsData = [
   {
@@ -292,23 +291,9 @@ export const ProjectsData = [
   },
 ];
 
-const AdminDashboard = () => {
+const useSyncScroll = () => {
   const scrollContainerRef = useRef(null);
   const fakeScrollbarRef = useRef(null);
-  const [showModal, setShowModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [editProject, setEditProject] = useState(null);
-  const [filteredProjects, setFilteredProjects] = useState([]);
-  const [activeFilter, setActiveFilter] = useState("all");
-  const [projects, setProjects] = useState([]);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [viewMode, setViewMode] = useState("summary");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [departmentFilter, setDepartmentFilter] = useState("All");
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -333,6 +318,187 @@ const AdminDashboard = () => {
       };
     }
   }, []);
+
+  return { scrollContainerRef, fakeScrollbarRef };
+};
+
+const AdminDashboard = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [editProject, setEditProject] = useState(null);
+  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [activeFilter, setActiveFilter] = useState(null);
+  const [projects, setProjects] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [viewMode, setViewMode] = useState("summary");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState("All");
+  const [activeTab, setActiveTab] = useState(null);
+
+  const navigate = useNavigate();
+
+  const {
+    scrollContainerRef: scrollContainerRef1,
+    fakeScrollbarRef: fakeScrollbarRef1,
+  } = useSyncScroll();
+
+  const {
+    scrollContainerRef: scrollContainerRef2,
+    fakeScrollbarRef: fakeScrollbarRef2,
+  } = useSyncScroll();
+
+  const {
+    scrollContainerRef: scrollContainerRef3,
+    fakeScrollbarRef: fakeScrollbarRef3,
+  } = useSyncScroll();
+
+  const {
+    scrollContainerRef: scrollContainerRef4,
+    fakeScrollbarRef: fakeScrollbarRef4,
+  } = useSyncScroll();
+
+  const {
+    scrollContainerRef: scrollContainerRef5,
+    fakeScrollbarRef: fakeScrollbarRef5,
+  } = useSyncScroll();
+
+  useEffect(() => {
+    setProjects(ProjectsData);
+    setFilteredProjects(ProjectsData);
+  }, []);
+
+  const handleShow = () => setShowModal(true);
+  const handleClose = () => setShowModal(false);
+
+  const handleView = (project) => {
+    setSelectedProject(project);
+    setShowViewModal(true);
+  };
+
+  const handleCardFilter = (type) => {
+    if (activeFilter === type) {
+      setActiveFilter(null);
+      setActiveTab(null);
+      setFilteredProjects([]);
+      return;
+    }
+
+    let filtered = [];
+    const today = new Date();
+    const nearDueDate = new Date();
+    nearDueDate.setDate(today.getDate() + 3);
+
+    switch (type) {
+      case "active":
+        filtered = projects.filter((p) => p.status === "Active");
+        break;
+      case "nearDue":
+        filtered = projects.filter((project) => {
+          if (project.status !== "Active") return false;
+          const dueDate = new Date(project.dueDate);
+          const now = new Date();
+          const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+          return dueDate > now && dueDate <= thirtyMinsFromNow;
+        });
+        break;
+      case "overdue":
+        filtered = projects.filter((project) => {
+          const dueDate = new Date(project.dueDate);
+          return dueDate < today && project.status !== "Completed";
+        });
+        break;
+      case "teamOnDuty":
+        filtered = projects.filter((p) => p.status === "Team On-Duty");
+        break;
+      case "eventsToday":
+        const todayStr = today.toISOString().split("T")[0];
+        filtered = projects.filter((project) => {
+          return project.dueDate === todayStr || project.qcDueDate === todayStr;
+        });
+        break;
+      case "pendingApproval":
+        filtered = projects.filter((p) => p.qaStatus === "Pending");
+        break;
+      default:
+        filtered = projects;
+    }
+    setFilteredProjects(filtered);
+    setActiveFilter(type);
+    setActiveTab(type);
+  };
+
+  const todayStr = new Date().toISOString().split("T")[0];
+
+  const getCardCount = (cardType) => {
+    switch (cardType) {
+      case "active":
+        return projects.filter((p) => p.status === "Active").length;
+      case "nearDue":
+        return projects.filter((p) => {
+          if (p.status !== "Active") return false;
+          const dueDate = new Date(p.dueDate);
+          const now = new Date();
+          const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+          return dueDate > now && dueDate <= thirtyMinsFromNow;
+        }).length;
+      case "overdue":
+        return projects.filter(
+          (p) => new Date(p.dueDate) < new Date() && p.status !== "Completed"
+        ).length;
+      case "pendingApproval":
+        return projects.filter((p) => p.qaStatus === "Pending").length;
+      case "teamOnDuty":
+        return attendanceData.length;
+      case "eventsToday":
+        return tasksToday.length;
+      default:
+        return 0;
+    }
+  };
+
+  const countFiltered = (type) => {
+    const today = new Date();
+    const nearDueDate = new Date();
+    nearDueDate.setDate(today.getDate() + 3);
+
+    switch (type) {
+      case "active":
+        return projects.filter((p) => p.status === "Active").length;
+      case "nearDue":
+        return projects.filter((project) => {
+          if (project.status !== "Active") return false;
+          const dueDate = new Date(project.dueDate);
+          const now = new Date();
+          const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+          return dueDate > now && dueDate <= thirtyMinsFromNow;
+        }).length;
+      case "overdue":
+        return projects.filter((project) => {
+          const dueDate = new Date(project.dueDate);
+          return dueDate < today && project.status !== "Completed";
+        }).length;
+      case "teamOnDuty":
+        return projects.filter((p) => p.status === "Team On-Duty").length;
+      case "eventsToday":
+        return projects.filter((project) => {
+          const todayStr = today.toISOString().split("T")[0];
+          return project.dueDate === todayStr || project.qcDueDate === todayStr;
+        }).length;
+      case "pendingApproval":
+        return projects.filter((p) => p.qaStatus === "Pending").length;
+      default:
+        return projects.length;
+    }
+  };
+
+  const showAllProjects = () => {
+    setFilteredProjects(projects);
+    setActiveFilter("all");
+  };
+
+  const COLORS = ["#4F46E5", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
 
   const [attendanceData, setAttendanceData] = useState([
     {
@@ -421,6 +587,81 @@ const AdminDashboard = () => {
     },
   ]);
 
+  function generateDailyRecords(seed) {
+    const records = [];
+    const startDate = new Date(2025, 3, 28);
+    const endDate = new Date(2025, 4, 27);
+
+    for (
+      let d = new Date(startDate);
+      d <= endDate;
+      d.setDate(d.getDate() + 1)
+    ) {
+      const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+      const date = new Date(d);
+
+      const random = (seed * date.getDate()) % 10;
+      let status = "Present";
+      let checkIn = null;
+      let checkOut = null;
+
+      if (isWeekend) {
+        status = "Weekend";
+      } else if (random === 1) {
+        status = "Absent";
+      } else if (random === 2) {
+        status = "Leave";
+      } else {
+        const baseCheckIn = 9 * 60;
+        const baseCheckOut = 17 * 60;
+
+        const checkInVariation = (random - 5) * 10;
+        const checkOutVariation = (random - 3) * 10;
+
+        const checkInMinutes = baseCheckIn + checkInVariation;
+        const checkOutMinutes = baseCheckOut + checkOutVariation;
+
+        const checkInHour = Math.floor(checkInMinutes / 60);
+        const checkInMin = checkInMinutes % 60;
+        const checkOutHour = Math.floor(checkOutMinutes / 60);
+        const checkOutMin = checkOutMinutes % 60;
+
+        checkIn = `${checkInHour.toString().padStart(2, "0")}:${checkInMin
+          .toString()
+          .padStart(2, "0")}`;
+        checkOut = `${checkOutHour.toString().padStart(2, "0")}:${checkOutMin
+          .toString()
+          .padStart(2, "0")}`;
+
+        if (checkInMinutes > 9 * 60 + 15) {
+          status = "Late";
+        } else if (checkOutMinutes < 17 * 60 - 15) {
+          status = "Early Departure";
+        }
+      }
+
+      records.push({
+        date: date.toISOString().split("T")[0],
+        day: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()],
+        status,
+        checkIn,
+        checkOut,
+        workHours:
+          checkIn && checkOut ? calculateWorkHours(checkIn, checkOut) : 0,
+      });
+    }
+    return records;
+  }
+
+  function calculateWorkHours(checkIn, checkOut) {
+    const [inHour, inMin] = checkIn.split(":").map(Number);
+    const [outHour, outMin] = checkOut.split(":").map(Number);
+    const inMinutes = inHour * 60 + inMin;
+    const outMinutes = outHour * 60 + outMin;
+
+    return Math.round((outMinutes - inMinutes) / 6) / 10;
+  }
+
   const tasksToday = [
     {
       id: 1,
@@ -452,95 +693,11 @@ const AdminDashboard = () => {
     },
   ];
 
-  function generateDailyRecords(seed) {
-    const records = [];
-    // Generate records from 28th of previous month to 27th of current month
-    const startDate = new Date(2025, 3, 28); // April 28, 2025
-    const endDate = new Date(2025, 4, 27); // May 27, 2025
-
-    for (
-      let d = new Date(startDate);
-      d <= endDate;
-      d.setDate(d.getDate() + 1)
-    ) {
-      const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-      const date = new Date(d);
-
-      // Use seed to create some variation in the data
-      const random = (seed * date.getDate()) % 10;
-      let status = "Present";
-      let checkIn = null;
-      let checkOut = null;
-
-      if (isWeekend) {
-        status = "Weekend";
-      } else if (random === 1) {
-        status = "Absent";
-      } else if (random === 2) {
-        status = "Leave";
-      } else {
-        // Normal working day
-        const baseCheckIn = 9 * 60; // 9:00 AM in minutes
-        const baseCheckOut = 17 * 60; // 5:00 PM in minutes
-
-        // Add some variation
-        const checkInVariation = (random - 5) * 10;
-        const checkOutVariation = (random - 3) * 10;
-
-        const checkInMinutes = baseCheckIn + checkInVariation;
-        const checkOutMinutes = baseCheckOut + checkOutVariation;
-
-        const checkInHour = Math.floor(checkInMinutes / 60);
-        const checkInMin = checkInMinutes % 60;
-        const checkOutHour = Math.floor(checkOutMinutes / 60);
-        const checkOutMin = checkOutMinutes % 60;
-
-        checkIn = `${checkInHour.toString().padStart(2, "0")}:${checkInMin
-          .toString()
-          .padStart(2, "0")}`;
-        checkOut = `${checkOutHour.toString().padStart(2, "0")}:${checkOutMin
-          .toString()
-          .padStart(2, "0")}`;
-
-        if (checkInMinutes > 9 * 60 + 15) {
-          // If check-in after 9:15
-          status = "Late";
-        } else if (checkOutMinutes < 17 * 60 - 15) {
-          // If check-out before 4:45
-          status = "Early Departure";
-        }
-      }
-
-      records.push({
-        date: date.toISOString().split("T")[0],
-        day: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()],
-        status,
-        checkIn,
-        checkOut,
-        workHours:
-          checkIn && checkOut ? calculateWorkHours(checkIn, checkOut) : 0,
-      });
-    }
-    return records;
-  }
-
-  function calculateWorkHours(checkIn, checkOut) {
-    const [inHour, inMin] = checkIn.split(":").map(Number);
-    const [outHour, outMin] = checkOut.split(":").map(Number);
-    const inMinutes = inHour * 60 + inMin;
-    const outMinutes = outHour * 60 + outMin;
-
-    // Calculate difference in hours, rounded to 1 decimal place
-    return Math.round((outMinutes - inMinutes) / 6) / 10;
-  }
-
-  // Function to handle employee selection
   const handleEmployeeSelect = (id) => {
     setSelectedEmployee(id);
     setViewMode("detailed");
   };
 
-  // Filter employees based on search and department
   const filteredEmployees = attendanceData.filter((employee) => {
     const matchesSearch =
       employee.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -550,173 +707,47 @@ const AdminDashboard = () => {
     return matchesSearch && matchesDepartment;
   });
 
-  const staticProjects = ProjectsData;
-  // Generate projects on component mount
-  useEffect(() => {
-    setProjects(staticProjects);
-    setFilteredProjects(staticProjects);
-  }, []);
-
-  const handleShow = () => setShowModal(true);
-  const handleClose = () => setShowModal(false);
-
-  const handleView = (project) => {
-    setSelectedProject(project);
-    setShowViewModal(true);
-  };
-
-  // Unified filter handler
-  const handleCardFilter = (type) => {
-    let filtered = [];
-    const today = new Date();
-    const nearDueDate = new Date();
-    nearDueDate.setDate(today.getDate() + 3);
-
-    switch (type) {
-      case "active":
-        filtered = projects.filter((p) => p.status === "Active");
-        break;
-      case "nearDue":
-        filtered = projects.filter((project) => {
-          if (project.status !== "Active") return false;
-          const dueDate = new Date(project.dueDate);
-          const now = new Date();
-          const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
-          return dueDate > now && dueDate <= thirtyMinsFromNow;
-        });
-        break;
-      case "overdue":
-        filtered = projects.filter((project) => {
-          const dueDate = new Date(project.dueDate);
-          return dueDate < today && project.status !== "Completed";
-        });
-        break;
-      case "teamOnDuty":
-        filtered = projects.filter((p) => p.status === "Team On-Duty");
-        break;
-      case "eventsToday":
-        const todayStr = today.toISOString().split("T")[0];
-        filtered = projects.filter((project) => {
-          return project.dueDate === todayStr || project.qcDueDate === todayStr;
-        });
-        break;
-      case "pendingApproval":
-        filtered = projects.filter((p) => p.qaStatus === "Pending");
-        break;
-      default:
-        filtered = projects;
-    }
-    setFilteredProjects(filtered);
-    setActiveFilter(type);
-  };
-
-  const todayStr = new Date().toISOString().split("T")[0];
-
-  // Unified counting function
-  const getCardCount = (cardType) => {
-    switch (cardType) {
-      // Project-related counts
-      case "active":
-        return projects.filter((p) => p.status === "Active").length;
-      case "nearDue":
-        return projects.filter((p) => {
-          if (p.status !== "Active") return false;
-          const dueDate = new Date(p.dueDate);
-          const now = new Date();
-          const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
-          return dueDate > now && dueDate <= thirtyMinsFromNow;
-        }).length;
-      case "overdue":
-        return projects.filter(
-          (p) => new Date(p.dueDate) < new Date() && p.status !== "Completed"
-        ).length;
-      case "pendingApproval":
-        return projects.filter((p) => p.qaStatus === "Pending").length;
-
-      // Attendance-related counts
-      case "teamOnDuty":
-        return attendanceData.length;
-
-      // Today's tasks count
-      case "eventsToday":
-        return tasksToday.length;
-
-      default:
-        return 0;
-    }
-  };
-
-  const countFiltered = (type) => {
-    const today = new Date();
-    const nearDueDate = new Date();
-    nearDueDate.setDate(today.getDate() + 3);
-
-    switch (type) {
-      case "active":
-        return projects.filter((p) => p.status === "Active").length;
-      case "nearDue":
-        return projects.filter((project) => {
-          if (project.status !== "Active") return false;
-          const dueDate = new Date(project.dueDate);
-          const now = new Date();
-          const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
-          return dueDate > now && dueDate <= thirtyMinsFromNow;
-        }).length;
-      case "overdue":
-        return projects.filter((project) => {
-          const dueDate = new Date(project.dueDate);
-          return dueDate < today && project.status !== "Completed";
-        }).length;
-      case "teamOnDuty":
-        return projects.filter((p) => p.status === "Team On-Duty").length;
-      case "eventsToday":
-        return projects.filter((project) => {
-          const todayStr = today.toISOString().split("T")[0];
-          return project.dueDate === todayStr || project.qcDueDate === todayStr;
-        }).length;
-      case "pendingApproval":
-        return projects.filter((p) => p.qaStatus === "Pending").length;
-      default:
-        return projects.length;
-    }
-  };
-
-  // Show all projects
-  const showAllProjects = () => {
-    setFilteredProjects(projects);
-    setActiveFilter("all");
-  };
-
-  const [setAllProjects] = useState([]);
-
-  const COLORS = ["#4F46E5", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"];
-
-  const {
-    scrollContainerRef: scrollContainerRef1,
-    fakeScrollbarRef: fakeScrollbarRef1,
-  } = useSyncScroll(activeFilter === "active");
-
-  const {
-    scrollContainerRef: scrollContainerRef2,
-    fakeScrollbarRef: fakeScrollbarRef2,
-  } = useSyncScroll(activeFilter === "nearDue");
-   const {
-    scrollContainerRef: scrollContainerRef3,
-    fakeScrollbarRef: fakeScrollbarRef3,
-  } = useSyncScroll(activeFilter === "overdue");
-   const {
-    scrollContainerRef: scrollContainerRef4,
-    fakeScrollbarRef: fakeScrollbarRef4,
-  } = useSyncScroll(activeFilter === "teamOnDuty");
-   const {
-    scrollContainerRef: scrollContainerRef5,
-    fakeScrollbarRef: fakeScrollbarRef5,
-  } = useSyncScroll(activeFilter === "eventsToday");
-  
-
   return (
     <div className="admin-dashboard text-white p-3 p-md-4 bg-main">
-      {/* Header */}
+      <style>
+        {`
+          .active-tab {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+            border: 3px solid white !important;
+          }
+          
+          .primary-active {
+            background: linear-gradient(135deg, #4F46E5, #7C73E6) !important;
+          }
+          
+          .warning-active {
+            background: linear-gradient(135deg, #F59E0B, #FBBF24) !important;
+            color: white !important;
+          }
+          
+          .danger-active {
+            background: linear-gradient(135deg, #EF4444, #F87171) !important;
+          }
+          
+          .info-active {
+            background: linear-gradient(135deg, #0EA5E9, #38BDF8) !important;
+          }
+          
+          .success-active {
+            background: linear-gradient(135deg, #10B981, #34D399) !important;
+          }
+          
+          .secondary-active {
+            background: linear-gradient(135deg, #64748B, #94A3B8) !important;
+          }
+          
+          .active-tab .text-white {
+            color: white !important;
+          }
+        `}
+      </style>
+
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <h2 className="gradient-heading">Admin Dashboard</h2>
         <div className="d-flex flex-column flex-sm-row gap-2"></div>
@@ -729,45 +760,59 @@ const AdminDashboard = () => {
             title: "Active Projects",
             icon: "bi-rocket-takeoff",
             color: "primary",
+            activeColor: "primary-active"
           },
           {
             key: "nearDue",
             title: "Near Due",
             icon: "bi-hourglass-split",
             color: "warning text-dark",
+            activeColor: "warning-active"
           },
           {
             key: "overdue",
             title: "Overdue",
             icon: "bi-exclamation-octagon",
             color: "danger",
+            activeColor: "danger-active"
           },
           {
             key: "teamOnDuty",
             title: "Team On-Duty",
             icon: "bi-people-fill",
             color: "info",
+            activeColor: "info-active"
           },
           {
             key: "eventsToday",
             title: "Events Today",
             icon: "bi-calendar-event",
             color: "success",
+            activeColor: "success-active"
           },
           {
             key: "pendingApproval",
             title: "Pending Approval",
             icon: "bi-clock-history",
             color: "secondary",
+            activeColor: "secondary-active",
+            link: "/action-center",
           },
-        ].map(({ key, title, icon, color }) => (
+        ].map(({ key, title, icon, color, activeColor, link }) => (
           <Col xs={12} sm={6} md={2} key={key}>
             <Card
-              className={`bg-${color} bg-gradient p-3 rounded-4 shadow-sm border-0 w-100 ${
-                activeFilter === key ? "border border-3 border-light" : ""
+              className={`bg-${color.split(" ")[0]} bg-gradient p-3 rounded-4 shadow-sm border-0 w-100 ${
+                activeTab === key ? `active-tab ${activeColor}` : ""
               }`}
-              onClick={() => handleCardFilter(key)}
-              style={{ cursor: "pointer", minHeight: "150px", height: "150px" }}
+              onClick={() =>
+                link ? (window.location.href = link) : handleCardFilter(key)
+              }
+              style={{
+                cursor: "pointer",
+                minHeight: "150px",
+                height: "150px",
+                transition: "all 0.2s ease-in-out",
+              }}
             >
               <Card.Body className="d-flex flex-column justify-content-between h-100 text-white">
                 <div className="d-flex align-items-center gap-2">
@@ -776,14 +821,14 @@ const AdminDashboard = () => {
                     {title}
                   </Card.Title>
                 </div>
-                <h3 className="fw-bold text-end m-0">{getCardCount(key)}</h3>
+                <h3 className="fw-bold text-center m-0">{getCardCount(key)}</h3>
               </Card.Body>
             </Card>
           </Col>
         ))}
       </Row>
 
-      {activeFilter == "active" && (
+      {activeFilter === "active" && (
         <Card className="text-white p-3 mb-4 table-gradient-bg">
           <div
             ref={fakeScrollbarRef1}
@@ -1041,7 +1086,7 @@ const AdminDashboard = () => {
           <h4 className="mb-3">Overdue Projects</h4>
           <div
             className=""
-             ref={scrollContainerRef3}
+            ref={scrollContainerRef3}
             style={{
               maxHeight: "500px",
               overflowX: "auto",
@@ -1140,7 +1185,7 @@ const AdminDashboard = () => {
         </Card>
       )}
 
-      {activeFilter == "teamOnDuty" && (
+      {activeFilter === "teamOnDuty" && (
         <Card className="text-white p-3 mb-4 table-gradient-bg">
           <div
             ref={fakeScrollbarRef4}
@@ -1241,7 +1286,7 @@ const AdminDashboard = () => {
         </Card>
       )}
 
-      {activeFilter == "eventsToday" && (
+      {activeFilter === "eventsToday" && (
         <Card className="text-white p-3 mb-4 table-gradient-bg">
           <div
             ref={fakeScrollbarRef5}
@@ -1266,7 +1311,7 @@ const AdminDashboard = () => {
           </div>
           <div
             className="table-responsive"
-             ref={scrollContainerRef5}
+            ref={scrollContainerRef5}
             style={{
               maxHeight: "500px",
               overflowX: "auto",
@@ -1301,7 +1346,6 @@ const AdminDashboard = () => {
         </Card>
       )}
 
-      {/* View Project Details Modal */}
       <Modal
         show={showViewModal}
         onHide={() => setShowViewModal(false)}
