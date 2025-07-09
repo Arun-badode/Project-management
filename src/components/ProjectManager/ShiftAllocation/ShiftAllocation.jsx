@@ -477,8 +477,8 @@ const ShiftAllocation  =() => {
       
       {/* Add Shift Modal */}
       {showAddShiftModal && (
-        <div className="modal fade show d-block" tabIndex={-1}>
-          <div className="modal-dialog modal-lg">
+        <div className="modal fade show d-block" tabIndex={-1} >
+          <div className="modal-dialog modal-lg custom-modal-dark">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Add New Shift</h5>

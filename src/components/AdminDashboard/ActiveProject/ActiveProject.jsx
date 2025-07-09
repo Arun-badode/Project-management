@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { Button } from "react-bootstrap";
 import moment from "moment";
 import Select from "react-select";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Datetime from "react-datetime";
 import "react-datetime/css/react-datetime.css";
 import useSyncScroll from "../Hooks/useSyncScroll";
@@ -12,6 +14,7 @@ const ActiveProject = () => {
   const [activeTab, setActiveTab] = useState("all");
   const userRole = localStorage.getItem("userRole");
   const [expandedRow, setExpandedRow] = useState(null);
+  const [selectedDateTime, setSelectedDateTime] = useState(null);
   const isAdmin = userRole === "Admin";
 
   const [isEdit, setIsEdit] = useState(null);
@@ -821,13 +824,21 @@ const ActiveProject = () => {
         >
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Create New Project</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowCreateModal(false)}
-                ></button>
+              <div className="modal-header d-flex justify-content-between">
+                <div>
+                  <h5 className="modal-title">Create New Project</h5>
+                </div>
+
+                <div>
+                  <button className="btn btn-light btn-sm me-4 ">
+                    <i className="fas fa-cog text-muted"></i>
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowCreateModal(false)}
+                  ></button>
+                </div>
               </div>
               <div className="modal-body">
                 <form onSubmit={handleSubmit}>
@@ -1088,7 +1099,13 @@ const ActiveProject = () => {
                         <tbody>
                           {formData.files.map((file, idx) => (
                             <tr key={idx}>
-                              <td>{idx + 1}</td>
+                              <td>
+                                <div className="d-flex align-items-center gap-2">
+                                  {idx + 1}
+                                  <input type="checkbox" />
+                                </div>
+                              </td>
+
                               <td>
                                 <input
                                   type="text"
@@ -1150,21 +1167,15 @@ const ActiveProject = () => {
                         >
                           Deadline
                         </label>
-                        <input
-                          type="datetime-local"
+                        <DatePicker
+                          selected={selectedDateTime}
+                          onChange={(date) => setSelectedDateTime(date)}
+                          showTimeSelect
+                          timeFormat="HH:mm"
+                          timeIntervals={15} // 👈 15 minutes gap
+                          dateFormat="MMMM d, yyyy h:mm aa"
+                          placeholderText="Select date and time"
                           className="form-control"
-                          style={{
-                            maxWidth: "250px",
-                            backgroundColor: "#181f3a",
-                            color: "white",
-                          }}
-                          value={formData.deadline || ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              deadline: e.target.value,
-                            }))
-                          }
                         />
                         <button
                           className="btn"
@@ -1266,8 +1277,23 @@ const ActiveProject = () => {
 
                   {/* Financial Section */}
                   <div className="row g-3 mb-3">
+                    {/* Estimated Hrs with radio */}
                     <div className="col-md-3">
-                      <label className="form-label">Estimated Hrs</label>
+                      <label className="form-label d-flex align-items-center gap-2">
+                        <input
+                          type="radio"
+                          name="billingMode"
+                          value="estimated"
+                          checked={formData.billingMode === "estimated"}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              billingMode: e.target.value,
+                            }))
+                          }
+                        />
+                        Estimated Hrs
+                      </label>
                       <input
                         type="number"
                         className="form-control"
@@ -1280,13 +1306,30 @@ const ActiveProject = () => {
                           }))
                         }
                         placeholder="00.00"
+                        disabled={formData.billingMode !== "estimated"}
                       />
                       <div className="form-text text-white">
                         (in multiple of 0.25 only)
                       </div>
                     </div>
+
+                    {/* Per Page Rate with radio */}
                     <div className="col-md-3">
-                      <label className="form-label">Per page Page Rate</label>
+                      <label className="form-label d-flex align-items-center gap-2">
+                        <input
+                          type="radio"
+                          name="billingMode"
+                          value="perPage"
+                          checked={formData.billingMode === "perPage"}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              billingMode: e.target.value,
+                            }))
+                          }
+                        />
+                        Per Page Rate
+                      </label>
                       <input
                         type="number"
                         className="form-control"
@@ -1299,11 +1342,14 @@ const ActiveProject = () => {
                           }))
                         }
                         placeholder="00.00"
+                        disabled={formData.billingMode !== "perPage"}
                       />
                       <div className="form-text text-white">
                         (with only 2 decimals)
                       </div>
                     </div>
+
+                    {/* Currency (auto-filled) */}
                     <div className="col-md-2">
                       <label className="form-label">Currency</label>
                       <input
@@ -1311,25 +1357,29 @@ const ActiveProject = () => {
                         className="form-control"
                         value={formData.currency}
                         readOnly
-                        placeholder="Auto updated from Client details"
+                        placeholder="Auto from Client"
                       />
                     </div>
+
+                    {/* Total Cost */}
                     <div className="col-md-2">
                       <label className="form-label">Total Cost</label>
                       <input
                         type="text"
                         className="form-control"
-                        value={formData.cost.toFixed(2)}
+                        value={formData.cost?.toFixed(2)}
                         readOnly
                         placeholder="Auto Calculated"
                       />
                     </div>
+
+                    {/* Cost in INR */}
                     <div className="col-md-2">
                       <label className="form-label">Cost in INR</label>
                       <input
                         type="text"
                         className="form-control"
-                        value={formData.inrCost.toFixed(2)}
+                        value={formData.inrCost?.toFixed(2)}
                         readOnly
                         placeholder="Auto Calculated"
                       />
@@ -1345,21 +1395,15 @@ const ActiveProject = () => {
                       >
                         Deadline
                       </label>
-                      <input
-                        type="datetime-local"
+                      <DatePicker
+                        selected={selectedDateTime}
+                        onChange={(date) => setSelectedDateTime(date)}
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15} // 👈 15 minutes gap
+                        dateFormat="MMMM d, yyyy h:mm aa"
+                        placeholderText="Select date and time"
                         className="form-control"
-                        style={{
-                          maxWidth: "250px",
-                          backgroundColor: "#181f3a",
-                          color: "white",
-                        }}
-                        value={formData.deadline || ""}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            deadline: e.target.value,
-                          }))
-                        }
                       />
                     </div>
                     <button type="submit" className="btn btn-warning fw-bold">
@@ -1669,17 +1713,19 @@ const ActiveProject = () => {
                                   <label className="form-label">
                                     Ready for QC Due
                                   </label>
-                                  <input
-                                    type="datetime-local"
-                                    className="form-control"
-                                    value={readyForQcDueInput}
-                                    onChange={(e) =>
-                                      setReadyForQcDueInput(e.target.value)
+                                  <br />
+                                  <DatePicker
+                                    selected={selectedDateTime}
+                                    onChange={(date) =>
+                                      setSelectedDateTime(date)
                                     }
+                                    showTimeSelect
+                                    timeFormat="HH:mm"
+                                    timeIntervals={15}
+                                    dateFormat="MMMM d, yyyy h:mm aa"
+                                    placeholderText="Select date and time"
+                                    className="form-control"
                                   />
-                                  <div className="small">
-                                    Format: hh:mm DD-MM-YY
-                                  </div>
                                 </div>
                                 <div className="col-md-2">
                                   <label className="form-label">

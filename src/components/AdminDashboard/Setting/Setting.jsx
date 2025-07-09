@@ -1,4 +1,3 @@
-// SettingsPage.jsx
 import React, { useState } from "react";
 import "./SettingsPage.css";
 
@@ -10,7 +9,7 @@ const initialClients = [
     actual: "Actual Client Alpha Inc.",
     country: "USA",
     currency: "USD",
-    hourlyRate: "50",
+    hourlyRate: "50.00",
     managers: "Jane Doe, John Smith",
   },
   {
@@ -18,7 +17,7 @@ const initialClients = [
     actual: "Actual Company Beta Ltd.",
     country: "UK",
     currency: "GBP",
-    hourlyRate: "60",
+    hourlyRate: "60.00",
     managers: "Peter Jones",
   },
   {
@@ -26,13 +25,12 @@ const initialClients = [
     actual: "Actual Service Gamma LLC",
     country: "Canada",
     currency: "CAD",
-    hourlyRate: "70",
+    hourlyRate: "70.00",
     managers: "Alice Brown, Bob White",
   },
 ];
 
 export default function SettingsPage() {
-  // Clients
   const [clients, setClients] = useState(initialClients);
   const [clientForm, setClientForm] = useState({
     alias: "",
@@ -44,7 +42,6 @@ export default function SettingsPage() {
   });
   const [editClientIdx, setEditClientIdx] = useState(null);
 
-  // Handlers for Clients
   const handleClientChange = (e) => {
     const { name, value } = e.target;
     setClientForm((prev) => ({ ...prev, [name]: value }));
@@ -59,14 +56,23 @@ export default function SettingsPage() {
       !clientForm.hourlyRate.trim()
     )
       return;
+
+    const formattedRate = parseFloat(clientForm.hourlyRate).toFixed(2);
+
+    const updatedClient = {
+      ...clientForm,
+      hourlyRate: formattedRate,
+    };
+
     if (editClientIdx !== null) {
       const updated = [...clients];
-      updated[editClientIdx] = clientForm;
+      updated[editClientIdx] = updatedClient;
       setClients(updated);
       setEditClientIdx(null);
     } else {
-      setClients([...clients, clientForm]);
+      setClients([...clients, updatedClient]);
     }
+
     setClientForm({
       alias: "",
       actual: "",
@@ -89,18 +95,18 @@ export default function SettingsPage() {
 
   return (
     <div className="p-4 settings-main-unique py-4">
-      <h2 className="gradient-heading mb-1">Settings</h2>
+      <h2 className="gradient-heading mb-1">Client Management</h2>
       <div
         className="text-white mb-4"
         style={{ opacity: 0.7, fontSize: "1.05em" }}
       >
-        Manage predefined lists for project creation and other application
-        settings.
+        Manage your client details including currency, hourly rate, and project
+        managers.
       </div>
       <div className="settings-grid">
-        {/* Manage Clients */}
         <div className="settings-card">
           <h5 className="text-white">Manage Clients</h5>
+
           {/* First row */}
           <div className="row mb-2">
             <div className="col-md-6 mb-2">
@@ -127,7 +133,6 @@ export default function SettingsPage() {
 
           {/* Second row */}
           <div className="row mb-3">
-            {/* Country Input */}
             <div className="col-md-4 mb-2">
               <input
                 className="form-control"
@@ -139,10 +144,8 @@ export default function SettingsPage() {
               />
             </div>
 
-            {/* Currency + Hourly Rate Side-by-Side */}
             <div className="col-md-8 mb-2">
               <div className="row">
-                {/* Currency */}
                 <div className="col-md-3">
                   <select
                     className="form-control"
@@ -160,10 +163,10 @@ export default function SettingsPage() {
                   </select>
                 </div>
 
-                {/* Hourly Rate */}
                 <div className="col-md-5 d-flex align-items-end">
                   <input
                     type="number"
+                    step="0.01"
                     className="form-control"
                     placeholder="Hourly Rate*"
                     name="hourlyRate"
@@ -198,6 +201,8 @@ export default function SettingsPage() {
               )}
             </button>
           </div>
+
+          {/* Client List */}
           <div
             className="client-list"
             style={{
@@ -208,7 +213,7 @@ export default function SettingsPage() {
           >
             {clients.map((c, idx) => (
               <div
-                className="client-item"
+                className="client-item d-flex justify-content-between align-items-start"
                 key={idx}
                 style={{
                   border: "none",
@@ -254,7 +259,6 @@ export default function SettingsPage() {
             ))}
           </div>
         </div>
-        {/* ...rest of your settings-grid code (tasks, languages, etc.)... */}
       </div>
     </div>
   );

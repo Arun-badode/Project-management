@@ -756,7 +756,7 @@ const Project = () => {
   } = useSyncScroll(activeTab === "completed");
 
   return (
-    <div className="min-vh-100 bg-main mt-4">
+    <div className="conatiner-fluid bg-main mt-4">
       {/* Header */}
       <div className="bg-white shadow-sm bg-main">
         <div className="container-fluid py-2">
@@ -851,7 +851,7 @@ const Project = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container pt-5 pb-4">
+      <div className="container-fluid pt-5 pb-4">
         {/* Search Results Indicator */}
         {searchQuery && (
           <div className="alert alert-info mb-4">
@@ -1262,111 +1262,87 @@ const Project = () => {
                     style={{ minWidth: 900 }}
                   >
                     <thead className=" table-gradient-bg">
-                      <tr>
-                        <th>Project Title</th>
-                        <th>Client</th>
-                        <th>Country</th>
-                        <th>Project Manager</th>
-                        <th>Tasks</th>
-                        <th>Languages</th>
-                        <th>Application</th>
-                        <th>Total Pages</th>
-                        <th>Server Path</th>
-                        <th>Received Date</th>
-                        <th>Rate</th>
-                        <th>Cost</th>
-                        <th className="text-end">Actions</th>
+                       <tr>
+                      <th>Project Title</th>
+                      <th>Client</th>
+                      <th>Country</th>
+                      <th>Project Manager</th>
+                      <th>Due Date</th>
+                      <th>Progress</th>
+                      <th>Tasks</th>
+                      <th>Languages</th>
+                      <th>Application</th>
+                      <th>Total Pages</th>
+                      <th className="text-end">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredProjects.map((project) => (
-                        <tr key={project.id}>
-                          <td>
-                            {project.title}
-                            <span className="badge bg-light text-dark ms-2">
-                              Draft
-                            </span>
-                          </td>
-                          <td>{project.client}</td>
-                          <td>{project.country}</td>
-                          <td>{project.projectManager}</td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.tasks.map((task) => (
-                                <span
-                                  key={task}
-                                  className="badge bg-primary bg-opacity-10 text-primary"
-                                >
-                                  {task}
-                                </span>
-                              ))}
+                      <tr key={project.id}>
+                        <td>
+                          {project.title}
+                          <span className="badge bg-warning bg-opacity-10 text-warning ms-2">Active</span>
+                        </td>
+                        <td>{project.client}</td>
+                        <td>{project.country}</td>
+                        <td>{project.projectManager}</td>
+                        <td>{new Date(project.dueDate).toLocaleDateString()}</td>
+                        <td>
+                          <div className="d-flex align-items-center">
+                            <div className="progress flex-grow-1 me-2" style={{ height: '6px' }}>
+                              <div
+                                className="progress-bar bg-primary"
+                                style={{ width: `${project.progress}%` }}
+                              ></div>
                             </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.languages.map((language) => (
-                                <span
-                                  key={language}
-                                  className="badge bg-success bg-opacity-10 text-success"
-                                >
-                                  {language}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <span className="badge bg-purple bg-opacity-10 text-purple">
-                              {project.application}
-                            </span>
-                          </td>
-                          <td>{project.totalPages}</td>
-                          <td>
-                            <span className="badge bg-light text-dark">
-                              {project.serverPath}
-                            </span>
-                          </td>
-                          <td>
-                            {new Date(
-                              project.receivedDate
-                            ).toLocaleDateString()}
-                          </td>
-                          <td>
-                            {project.rate} {project.currency}
-                          </td>
-                          <td>
-                            {project.cost} {project.currency}
-                          </td>
-                          <td className="text-end">
-                            <div className="d-flex justify-content-end gap-2">
-                              <button
-                                onClick={() => {
-                                  const dueDate = prompt(
-                                    "Enter due date (YYYY-MM-DD):",
-                                    new Date(
-                                      Date.now() + 7 * 24 * 60 * 60 * 1000
-                                    )
-                                      .toISOString()
-                                      .split("T")[0]
-                                  );
-                                  if (dueDate) markAsYTS(project.id, dueDate);
-                                }}
-                                className="btn btn-sm btn-primary"
-                              >
-                                Mark as YTS
-                              </button>
-                              <button
-                                onClick={() => handleEditProject(project.id)}
-                                className="btn btn-sm btn-success"
-                              >
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button className="btn btn-sm btn-danger">
-                                <i className="fas fa-trash-alt"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                            <small className="text-primary">{project.progress}%</small>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="d-flex flex-wrap gap-1">
+                            {project.tasks.map((task) => (
+                              <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
+                                {task}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="d-flex flex-wrap gap-1">
+                            {project.languages.map((language) => (
+                              <span key={language} className="badge bg-success bg-opacity-10 text-success">
+                                {language}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td>
+                          <span className="badge bg-purple bg-opacity-10 text-purple">
+                            {project.application}
+                          </span>
+                        </td>
+                        <td>{project.totalPages}</td>
+                        <td className="text-end">
+                          <div className="d-flex justify-content-end gap-2">
+                            <button
+                              onClick={() => markAsCompleted(project.id)}
+                              className="btn btn-sm btn-success"
+                            >
+                              Mark as Completed
+                            </button>
+                            <button
+                              onClick={() => handleEditProject(project.id)}
+                              className="btn btn-sm btn-success"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            <button className="btn btn-sm btn-danger">
+                              <i className="fas fa-trash-alt"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                     </tbody>
                   </table>
                 </div>
@@ -1378,12 +1354,12 @@ const Project = () => {
         {/* Completed Projects Tab */}
         {activeTab === "completed" && (
           <div className="mb-4">
-            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+            {/* <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
               <h2 className="h5 mb-0 text-light">Completed Projects</h2>
               <button className="btn btn-success btn-sm w-100 w-md-auto">
                 <i className="fas fa-file-excel me-2"></i> Export to Excel
               </button>
-            </div>
+            </div> */}
             {filteredProjects.length === 0 ? (
               <div className="text-center py-5">
                 <i className="fas fa-check-circle text-muted fa-4x mb-3"></i>
@@ -1395,17 +1371,16 @@ const Project = () => {
             ) : (
               <>
                 {/* Performance Chart */}
-                <div className="card mb-4 bg-card text-light">
+                {/* <div className="card mb-4 bg-card text-light">
                   <div className="card-body">
                     <div
                       ref={chartRef}
                       style={{ height: "400px", minWidth: "300px" }}
                     ></div>
                   </div>
-                </div>
+                </div> */}
                 {/* Project Cards */}
                 <div className="card">
-                 
                   <div
                     ref={fakeScrollbarRef4}
                     style={{
@@ -1558,19 +1533,26 @@ const Project = () => {
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">
-                  {showEditModal !== false
-                    ? "Edit Project Details"
-                    : "Create New Project"}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setShowEditModal(false);
-                  }}
-                ></button>
+                <div>
+                  <h5 className="modal-title">
+                    {showEditModal !== false
+                      ? "Edit Project Details"
+                      : "Create New Project"}
+                  </h5>
+                </div>
+                <div>
+                  <button className="btn btn-light btn-sm me-4">
+                    <i className="fas fa-cog text-muted"></i>
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => {
+                      setShowCreateModal(false);
+                      setShowEditModal(false);
+                    }}
+                  ></button>
+                </div>
               </div>
               <div className="modal-body">
                 <form onSubmit={handleSubmit}>
@@ -1829,7 +1811,13 @@ const Project = () => {
                         <tbody>
                           {formData.files.map((file, idx) => (
                             <tr key={idx}>
-                              <td>{idx + 1}</td>
+                              <td>
+                                <div className="d-flex align-items-center gap-2">
+                                  {idx + 1}
+                                  <input type="checkbox" />
+                                </div>
+                              </td>
+
                               <td>
                                 <input
                                   type="text"
@@ -1967,8 +1955,23 @@ const Project = () => {
 
                   {/* Financial Section */}
                   <div className="row g-3 mb-3">
+                    {/* Estimated Hrs with radio */}
                     <div className="col-md-3">
-                      <label className="form-label">Estimated Hrs</label>
+                      <label className="form-label d-flex align-items-center gap-2">
+                        <input
+                          type="radio"
+                          name="billingMode"
+                          value="estimated"
+                          checked={formData.billingMode === "estimated"}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              billingMode: e.target.value,
+                            }))
+                          }
+                        />
+                        Estimated Hrs
+                      </label>
                       <input
                         type="number"
                         className="form-control"
@@ -1981,13 +1984,30 @@ const Project = () => {
                           }))
                         }
                         placeholder="00.00"
+                        disabled={formData.billingMode !== "estimated"}
                       />
                       <div className="form-text text-white">
                         (in multiple of 0.25 only)
                       </div>
                     </div>
+
+                    {/* Per Page Rate with radio */}
                     <div className="col-md-3">
-                      <label className="form-label">Per page Page Rate</label>
+                      <label className="form-label d-flex align-items-center gap-2">
+                        <input
+                          type="radio"
+                          name="billingMode"
+                          value="perPage"
+                          checked={formData.billingMode === "perPage"}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              billingMode: e.target.value,
+                            }))
+                          }
+                        />
+                        Per Page Rate
+                      </label>
                       <input
                         type="number"
                         className="form-control"
@@ -2000,11 +2020,14 @@ const Project = () => {
                           }))
                         }
                         placeholder="00.00"
+                        disabled={formData.billingMode !== "perPage"}
                       />
-                      <div className="form-text text-white ">
+                      <div className="form-text text-white">
                         (with only 2 decimals)
                       </div>
                     </div>
+
+                    {/* Currency (auto-filled) */}
                     <div className="col-md-2">
                       <label className="form-label">Currency</label>
                       <input
@@ -2012,25 +2035,29 @@ const Project = () => {
                         className="form-control"
                         value={formData.currency}
                         readOnly
-                        placeholder="Auto updated from Client details"
+                        placeholder="Auto from Client"
                       />
                     </div>
+
+                    {/* Total Cost */}
                     <div className="col-md-2">
                       <label className="form-label">Total Cost</label>
                       <input
                         type="text"
                         className="form-control"
-                        value={formData.cost.toFixed(2)}
+                        value={formData.cost?.toFixed(2)}
                         readOnly
                         placeholder="Auto Calculated"
                       />
                     </div>
+
+                    {/* Cost in INR */}
                     <div className="col-md-2">
                       <label className="form-label">Cost in INR</label>
                       <input
                         type="text"
                         className="form-control"
-                        value={formData.inrCost.toFixed(2)}
+                        value={formData.inrCost?.toFixed(2)}
                         readOnly
                         placeholder="Auto Calculated"
                       />
@@ -2214,9 +2241,9 @@ const Project = () => {
                       >
                         <span className="text-white">{task}</span>
                         <div className="btn-group btn-group-sm gap-2">
-                           <button className="btn btn-outline-secondary  text-light">
-                              <i className="bi bi-pencil"></i>
-                            </button>
+                          <button className="btn btn-outline-secondary  text-light">
+                            <i className="bi bi-pencil"></i>
+                          </button>
                           <button
                             className="btn btn-outline-danger"
                             onClick={() =>
@@ -2259,9 +2286,9 @@ const Project = () => {
                       >
                         <span className="text-white">{application}</span>
                         <div className="btn-group btn-group-sm gap-2">
-                           <button className="btn btn-outline-secondary  text-light">
-                              <i className="bi bi-pencil"></i>
-                            </button>
+                          <button className="btn btn-outline-secondary  text-light">
+                            <i className="bi bi-pencil"></i>
+                          </button>
                           <button
                             className="btn btn-outline-danger"
                             onClick={() =>
@@ -2278,7 +2305,7 @@ const Project = () => {
                       </div>
                     ))}
                   </div>
-                  
+
                   <button
                     className="btn btn-sm btn-primary"
                     onClick={handleAddapplication}
@@ -2309,9 +2336,9 @@ const Project = () => {
                       >
                         <span className="text-white">{language}</span>
                         <div className="btn-group btn-group-sm gap-2">
-                           <button className="btn btn-outline-secondary  text-light">
-                              <i className="bi bi-pencil"></i>
-                            </button>
+                          <button className="btn btn-outline-secondary  text-light">
+                            <i className="bi bi-pencil"></i>
+                          </button>
                           <button
                             className="btn btn-outline-danger"
                             onClick={() =>
