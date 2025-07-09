@@ -14,11 +14,21 @@ const Calendar = ({ userRole }) => {
     clientHoliday: userRole === "admin" || userRole === "manager",
     approvedLeave: userRole === "admin" || userRole === "manager",
     weekOff: userRole === "admin" || userRole === "manager",
-    notes: true 
+    notes: true,
   });
   const [viewMode, setViewMode] = useState("month");
   const [selectedDate, setSelectedDate] = useState(new Date(2025, 5, 25));
   const [events, setEvents] = useState([]);
+  // modal
+// const [showModal, setShowModal] = useState(false);
+
+//    const modalBirthdays = [
+//   { id: 1, title: "Michael Brown", date: "2025-06-01" },
+// ];
+
+// const modalHolidays = [
+//   { id: 1, title: "Company Holiday 1", date: "2025-06-01" },
+// ];
 
   // State for company holidays management
   const [showHolidayModal, setShowHolidayModal] = useState(false);
@@ -333,7 +343,9 @@ const Calendar = ({ userRole }) => {
   // Get all joining dates (only show user's own joining date for non-admins)
   const joiningDates = events.filter((event) => {
     if (event.type !== "doj" || !selectedFilters.doj) return false;
-    return userRole === "admin" || userRole === "manager" || event.userId === 100;
+    return (
+      userRole === "admin" || userRole === "manager" || event.userId === 100
+    );
   });
 
   // Format date for display
@@ -372,6 +384,7 @@ const Calendar = ({ userRole }) => {
             >
               + Add Event
             </button>
+            
             <button
               className={`btn btn-xs me-1 mb-1 ${
                 selectedFilters.dob ? "btn-danger" : "btn-outline-danger"
@@ -468,7 +481,7 @@ const Calendar = ({ userRole }) => {
               className="form-select form-select-xs"
               value={viewMode}
               onChange={(e) => setViewMode(e.target.value)}
-              style={{ width: '80px' }}
+              style={{ width: "80px" }}
             >
               <option value="month">Month</option>
               <option value="week">Week</option>
@@ -488,7 +501,7 @@ const Calendar = ({ userRole }) => {
                   })
                 );
               }}
-              style={{ width: '90px' }}
+              style={{ width: "90px" }}
             >
               {Array.from({ length: 12 }, (_, i) =>
                 new Date(0, i).toLocaleString("default", { month: "long" })
@@ -512,7 +525,7 @@ const Calendar = ({ userRole }) => {
                   })
                 );
               }}
-              style={{ width: '80px' }}
+              style={{ width: "80px" }}
             >
               {Array.from({ length: 10 }, (_, i) => 2020 + i).map((year) => (
                 <option key={year} value={year}>
@@ -607,7 +620,7 @@ const Calendar = ({ userRole }) => {
       {/* Events Summary Table */}
       <div className="mt-4 p-3 rounded shadow table-gradient-bg">
         <h4 className="gradient-heading mb-3">Events Summary</h4>
-        
+
         {/* Birthdays Table */}
         {selectedFilters.dob && (
           <div className="mb-4">
@@ -615,20 +628,24 @@ const Calendar = ({ userRole }) => {
             <Table striped bordered hover responsive>
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Date</th>
+                  <th style={{ width: "60%", textAlign: "left" }}>Employee</th>
+                  <th style={{ width: "40%", textAlign: "left" }}>Date</th>
                 </tr>
               </thead>
               <tbody>
                 {birthdays.map((event) => (
                   <tr key={`dob-${event.id}`}>
-                    <td>{event.title}</td>
-                    <td>{formatDate(event.date)}</td>
+                    <td style={{ textAlign: "left" }}>{event.title}</td>
+                    <td style={{ textAlign: "left" }}>
+                      {formatDate(event.date)}
+                    </td>
                   </tr>
                 ))}
                 {birthdays.length === 0 && (
                   <tr>
-                    <td colSpan="2" className="text-muted">No birthdays found</td>
+                    <td colSpan="2" className="text-muted text-center">
+                      No birthdays found
+                    </td>
                   </tr>
                 )}
               </tbody>
@@ -638,53 +655,37 @@ const Calendar = ({ userRole }) => {
 
         {/* Company Holidays Table */}
         {selectedFilters.companyHoliday && (
-          <div className="mb-4">
+          <div className="mb-4 ">
             <h5 className="text-success">Company Holidays</h5>
             <Table striped bordered hover responsive>
               <thead>
                 <tr>
-                  <th>Title</th>
-                  <th>Date</th>
-                  {(userRole === "admin" || userRole === "manager") && (
-                    <th>Actions</th>
-                  )}
+                  <th style={{ width: "60%", textAlign: "left" }}>Title</th>
+                  <th style={{ width: "40%", textAlign: "left" }}>Date</th>
                 </tr>
               </thead>
               <tbody>
-                {companyHolidays.map((event) => (
-                  <tr key={`holiday-${event.id}`}>
-                    <td>{event.title}</td>
-                    <td>{formatDate(event.date)}</td>
-                    {(userRole === "admin" || userRole === "manager") && (
-                      <td>
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          onClick={() => editHoliday(event)}
-                          className="me-2"
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={() => deleteHoliday(event.id)}
-                        >
-                          Delete
-                        </Button>
+                {events
+                  .filter((event) => event.type === "companyHoliday")
+                  .map((event) => (
+                    <tr key={`holiday-${event.id}`}>
+                      <td style={{ textAlign: "left" }}>{event.title}</td>
+                      <td style={{ textAlign: "left" }}>
+                        {formatDate(event.date)}
                       </td>
-                    )}
-                  </tr>
-                ))}
-                {companyHolidays.length === 0 && (
+                    </tr>
+                  ))}
+                {events.filter((event) => event.type === "companyHoliday")
+                  .length === 0 && (
                   <tr>
-                    <td colSpan={(userRole === "admin" || userRole === "manager") ? 3 : 2} className="text-muted">
-                      No company holidays found
+                    <td colSpan="2" className="text-muted text-center">
+                      No holidays found
                     </td>
                   </tr>
                 )}
               </tbody>
             </Table>
+
             {(userRole === "admin" || userRole === "manager") && (
               <Button
                 variant="success"
@@ -698,13 +699,16 @@ const Calendar = ({ userRole }) => {
         )}
 
         {/* Joining Dates Table */}
+
         <div className="mb-4">
           <h5 style={{ color: "#3fa9f5" }}>Joining Dates</h5>
           <Table striped bordered hover responsive>
             <thead>
               <tr>
-                <th>Employee</th>
-                <th>Joining Date</th>
+                <th style={{ width: "60%", textAlign: "left" }}>Employee</th>
+                <th style={{ width: "40%", textAlign: "left" }}>
+                  Joining Date
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -712,13 +716,15 @@ const Calendar = ({ userRole }) => {
                 .filter((event) => event.type === "doj")
                 .map((event) => (
                   <tr key={`doj-${event.id}`}>
-                    <td>{event.title}</td>
-                    <td>{formatDate(event.date)}</td>
+                    <td style={{ textAlign: "left" }}>{event.title}</td>
+                    <td style={{ textAlign: "left" }}>
+                      {formatDate(event.date)}
+                    </td>
                   </tr>
                 ))}
               {events.filter((event) => event.type === "doj").length === 0 && (
                 <tr>
-                  <td colSpan="2" className="text-muted">
+                  <td colSpan="2" className="text-muted text-center">
                     No joining dates found
                   </td>
                 </tr>
@@ -733,8 +739,8 @@ const Calendar = ({ userRole }) => {
           <Table striped bordered hover responsive>
             <thead>
               <tr>
-                <th>Employee</th>
-                <th>Date</th>
+                <th style={{ width: "60%", textAlign: "left" }}>Employee</th>
+                <th style={{ width: "40%", textAlign: "left" }}>Date</th>
               </tr>
             </thead>
             <tbody>
@@ -742,13 +748,16 @@ const Calendar = ({ userRole }) => {
                 .filter((event) => event.type === "approvedLeave")
                 .map((event) => (
                   <tr key={`leave-${event.id}`}>
-                    <td>{event.title}</td>
-                    <td>{formatDate(event.date)}</td>
+                    <td style={{ textAlign: "left" }}>{event.title}</td>
+                    <td style={{ textAlign: "left" }}>
+                      {formatDate(event.date)}
+                    </td>
                   </tr>
                 ))}
-              {events.filter((event) => event.type === "approvedLeave").length === 0 && (
+              {events.filter((event) => event.type === "approvedLeave")
+                .length === 0 && (
                 <tr>
-                  <td colSpan="2" className="text-muted">
+                  <td colSpan="2" className="text-muted text-center">
                     No approved leaves found
                   </td>
                 </tr>
@@ -777,7 +786,8 @@ const Calendar = ({ userRole }) => {
                       <td>{formatDate(event.date)}</td>
                     </tr>
                   ))}
-                {events.filter((event) => event.type === "note").length === 0 && (
+                {events.filter((event) => event.type === "note").length ===
+                  0 && (
                   <tr>
                     <td colSpan="2" className="text-muted">
                       No notes found
@@ -791,48 +801,78 @@ const Calendar = ({ userRole }) => {
       </div>
 
       {/* Company Holiday Modal */}
-      <Modal show={showHolidayModal} onHide={() => setShowHolidayModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {editingHolidayId ? "Edit Company Holiday" : "Add Company Holiday"}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Date</Form.Label>
-              <Form.Control
-                type="date"
-                value={holidayDate}
-                onChange={(e) => setHolidayDate(e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Holiday Title</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter holiday title"
-                value={holidayTitle}
-                onChange={(e) => setHolidayTitle(e.target.value)}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setShowHolidayModal(false)}
-          >
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={saveHoliday}>
-            {editingHolidayId ? "Update" : "Save"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+    <Modal className="custom-modal-dark" show={showHolidayModal} onHide={() => setShowHolidayModal(false)}>
+  <Modal.Header closeButton>
+    <Modal.Title>
+      {editingHolidayId ? "Edit Company Holiday" : "Add Company Holiday"}
+    </Modal.Title>
+  </Modal.Header>
+
+  {/* ✅ UPDATED CONTENT START */}
+  <Modal.Body>
+    {/* 🎂 Birthdays Section */}
+    <div className="mb-4">
+      <h6 className="text-danger fw-bold">Birthdays</h6>
+      {birthdays.length > 0 ? (
+        birthdays.map((b, i) => (
+          <div key={i} className="d-flex gap-2 mb-2">
+            <Form.Control value={b.name}  />
+            <Form.Control
+              value={new Date(b.date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
+              disabled
+            />
+          </div>
+        ))
+      ) : (
+        <div className="text-muted">No birthdays found.</div>
+      )}
+    </div>
+
+    {/* 🏖 Company Holidays Section */}
+    <div>
+      <h6 className="text-success fw-bold ">Company Holidays</h6>
+      {companyHolidays.length > 0 ? (
+        companyHolidays.map((h, i) => (
+          <div key={i} className="d-flex gap-2 mb-2">
+            <Form.Control value={h.title}  />
+            <Form.Control
+              value={new Date(h.date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
+              disabled
+            />
+          </div>
+        ))
+      ) : (
+        <div className="text-muted">No company holidays found.</div>
+      )}
+    </div>
+  </Modal.Body>
+  {/* ✅ UPDATED CONTENT END */}
+
+  <Modal.Footer>
+    <Button variant="secondary" onClick={() => setShowHolidayModal(false)}>
+      Cancel
+    </Button>
+    <Button variant="primary" onClick={saveHoliday}>
+      {editingHolidayId ? "Update" : "Save"}
+    </Button>
+  </Modal.Footer>
+</Modal>
+
 
       {/* Add Event Modal */}
-      <Modal show={showAddEventModal} onHide={() => setShowAddEventModal(false)} className="custom-modal-dark">
+      <Modal
+        show={showAddEventModal}
+        onHide={() => setShowAddEventModal(false)}
+        className="custom-modal-dark"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Add Event</Modal.Title>
         </Modal.Header>
@@ -874,7 +914,10 @@ const Calendar = ({ userRole }) => {
           </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAddEventModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowAddEventModal(false)}
+          >
             Cancel
           </Button>
           <Button variant="primary" onClick={handleAddEventSave}>
@@ -882,6 +925,9 @@ const Calendar = ({ userRole }) => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+     
+      
 
       <style jsx>{`
         .today-cell {

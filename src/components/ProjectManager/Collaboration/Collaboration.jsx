@@ -423,9 +423,9 @@ function Collaboration() {
       {/* Main Content */}
       <div className="flex-grow-1 d-flex ">
         {/* Left Sidebar */}
-        <div className="d-none d-lg-block col-lg-3 border-end bg-card p-3 overflow-auto">
+        <div className="d-none d-lg-block col-lg-3 border-end  bg-card p-3 overflow-auto">
           {/* User Profile */}
-          <div className="d-flex align-items-center mb-4 p-2 rounded bg-light">
+          <div className="d-flex align-items-center mb-4 p-2  rounded bg-light">
             <img
               src={currentUser.avatar}
               alt={currentUser.name}
@@ -648,7 +648,7 @@ function Collaboration() {
 
           {/* Messages Area */}
           <div
-            className="chat-messages-scrollable p-3 bg-main" style={{ backgroundColor: "#1e1e1e" }}
+            className="chat-messages-scrollable  scrollbar-hidden overflow-auto p-3 bg-main" style={{ backgroundColor: "#1e1e1e" }}
           >
             <div ref={messageEndRef} />
             {filteredMessages.map((message) => (
