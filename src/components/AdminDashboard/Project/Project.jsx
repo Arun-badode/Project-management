@@ -2346,7 +2346,7 @@ const Project = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div>    
       )}
 
       {/* Backdrop for modals */}
