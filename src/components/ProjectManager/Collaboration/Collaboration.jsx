@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
-import "./Collaboration.css"; // Import your CSS styles
 
 function Collaboration() {
   // State for messages
@@ -419,11 +418,14 @@ function Collaboration() {
   const emojis = ["👍", "❤️", "😂", "🎉", "🔥", "💯", "👏", "🙌", "A"];
 
   return (
-    <div className=" container-fluid d-flex flex-column">
+    <div
+      className="d-flex flex-column"
+      style={{ height: "100vh", minHeight: 0 }}
+    >
       {/* Main Content */}
-      <div className="flex-grow-1 d-flex ">
+      <div className="flex-grow-1 d-flex" style={{ minHeight: 0 }}>
         {/* Left Sidebar */}
-        <div className="d-none d-lg-block col-lg-3 border-end bg-card p-3 overflow-auto">
+        <div className="d-none d-lg-block col-lg-3 border-end bg-card p-3 overflow-y-auto">
           {/* User Profile */}
           <div className="d-flex align-items-center mb-4 p-2 rounded bg-light">
             <img
@@ -518,14 +520,14 @@ function Collaboration() {
                           alt={member.name}
                           className="rounded-circle"
                           width="32"
-                         
+                          height="32"
                         />
                         {member.isOnline ? (
                           <span
                             className="position-absolute bottom-0 end-0 bg-success rounded-circle"
                             style={{
                               width: "10px",
-                            
+                              height: "10px",
                               border: "2px solid #f8f9fa",
                             }}
                           ></span>
@@ -585,11 +587,20 @@ function Collaboration() {
         </div>
 
         {/* Right Content Area */}
-        <div className="col-12 col-lg-9 d-flex flex-column chat-main-panel">
-          <div className="row " style={{position:"fixed"}}>
-        <div className="col-12  d-flex flex-column">
+        <div
+          className="col-12 col-lg-9 d-flex flex-column p-0"
+          style={{ height: "100vh", minHeight: 0 }}
+        >
           {/* Chat Header */}
-          <div className="p-3 border-bottom bg-main d-flex justify-content-between align-items-center chat-header-sticky">
+          <div
+            className="p-3 border-bottom bg-main d-flex justify-content-between align-items-center"
+            style={{
+              position: "sticky",
+              top: 0,
+              zIndex: 2,
+              // width: "100%", // isko hata dein
+            }}
+          >
             <div>
               <h4 className="mb-0 text-white">
                 {activePrivateChat
@@ -648,9 +659,13 @@ function Collaboration() {
 
           {/* Messages Area */}
           <div
-            className="chat-messages-scrollable p-3 bg-main" style={{ backgroundColor: "#1e1e1e" }}
+            className="flex-grow-1 p-3 bg-main"
+            style={{
+              backgroundColor: "#1e1e1e",
+              overflowY: "auto",
+              minHeight: 0,
+            }}
           >
-            <div ref={messageEndRef} />
             {filteredMessages.map((message) => (
               <div
                 key={message.id}
@@ -660,7 +675,7 @@ function Collaboration() {
               >
                 {message.replyTo && (
                   <div
-                    className={`small text-white mb-1 ${
+                    className={`small text-muted mb-1 ${
                       message.senderId === currentUser.id ? "text-end" : ""
                     }`}
                   >
@@ -856,7 +871,10 @@ function Collaboration() {
           </div>
 
           {/* Message Input */}
-          <div className="p-3 border-top bg-main chat-footer-sticky">
+          <div
+            className="p-3 border-top bg-main"
+            style={{ position: "sticky", bottom: 0, zIndex: 2 }}
+          >
             <div className="position-relative">
               {showMentionList && (
                 <div
@@ -902,13 +920,7 @@ function Collaboration() {
               <textarea
                 ref={messageInputRef}
                 value={newMessage}
-                onChange={(e) => {
-                  setNewMessage(e.target.value);
-                  // In a real app, you would emit typing status to the server
-                  // socketRef.current.emit('typing', {
-                  //     isTyping: e.target.value.length > 0
-                  // });
-                }}
+                onChange={(e) => setNewMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
                 className="form-control mb-2 bg-card text-white"
                 rows="2"
@@ -971,8 +983,6 @@ function Collaboration() {
               )}
             </div>
           </div>
-        </div>
-        </div>
         </div>
       </div>
 

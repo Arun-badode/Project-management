@@ -1663,125 +1663,6 @@ const ActiveProject = () => {
                                 )}
                               </div>
 
-                              {/* Batch Edit Controls */}
-                              <div className="row g-3 mb-3">
-                                <div className="col-md-2">
-                                  <label className="form-label">
-                                    Ready for QC Due
-                                  </label>
-                                  <input
-                                    type="datetime-local"
-                                    className="form-control"
-                                    value={readyForQcDueInput}
-                                    onChange={(e) =>
-                                      setReadyForQcDueInput(e.target.value)
-                                    }
-                                  />
-                                  <div className="small">
-                                    Format: hh:mm DD-MM-YY
-                                  </div>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">
-                                    QC Allocated Hours
-                                  </label>
-                                  <input
-                                    type="number"
-                                    className="form-control"
-                                    step="0.25"
-                                    min="0"
-                                    value={qcAllocatedHours}
-                                    onChange={(e) => {
-                                      const val = parseFloat(e.target.value);
-                                      if (val >= 0 && val % 0.25 === 0)
-                                        setQcAllocatedHours(val);
-                                    }}
-                                    placeholder="0.00"
-                                  />
-                                  <div className="small">
-                                    (in multiple of 0.25 only)
-                                  </div>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">Handler</label>
-                                  <select
-                                    className="form-select"
-                                    value={batchEditValues.handler}
-                                    onChange={(e) =>
-                                      setBatchEditValues({
-                                        ...batchEditValues,
-                                        handler: e.target.value,
-                                      })
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="John Doe">John Doe</option>
-                                    <option value="Jane Smith">
-                                      Jane Smith
-                                    </option>
-                                    <option value="Mike Johnson">
-                                      Mike Johnson
-                                    </option>
-                                  </select>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">
-                                    QA Reviewer
-                                  </label>
-                                  <select
-                                    className="form-select"
-                                    value={batchEditValues.qaReviewer}
-                                    onChange={(e) =>
-                                      setBatchEditValues({
-                                        ...batchEditValues,
-                                        qaReviewer: e.target.value,
-                                      })
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="Sarah Williams">
-                                      Sarah Williams
-                                    </option>
-                                    <option value="David Brown">
-                                      David Brown
-                                    </option>
-                                    <option value="Emily Davis">
-                                      Emily Davis
-                                    </option>
-                                  </select>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">Status</label>
-                                  <select
-                                    className="form-select"
-                                    value={batchEditValues.status || ""}
-                                    onChange={(e) =>
-                                      setBatchEditValues({
-                                        ...batchEditValues,
-                                        status: e.target.value,
-                                      })
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="In Progress">
-                                      In Progress
-                                    </option>
-                                    <option value="Approved">Approved</option>
-                                    <option value="Rejected">Rejected</option>
-                                  </select>
-                                </div>
-                                <div className="col-md-2 d-flex align-items-end">
-                                  <button
-                                    className="btn btn-info"
-                                    disabled={selectedFiles.length === 0}
-                                    onClick={applyBatchEdits}
-                                  >
-                                    Apply to Selected
-                                  </button>
-                                </div>
-                              </div>
-
                               {/* Files Table */}
                               <div className="table-responsive">
                                 <table className="table table-sm table-striped table-hover">
@@ -1920,6 +1801,125 @@ const ActiveProject = () => {
                                     ))}
                                   </tbody>
                                 </table>
+                              </div>
+
+                              {/* Batch Edit Controls */}
+                              <div className="row g-3 mb-3">
+                                <div className="col-md-2">
+                                  <label className="form-label">
+                                    Ready for QC Due
+                                  </label>
+                                  <input
+                                    type="datetime-local"
+                                    className="form-control"
+                                    value={readyForQcDueInput}
+                                    onChange={(e) =>
+                                      setReadyForQcDueInput(e.target.value)
+                                    }
+                                  />
+                                  <div className="small">
+                                    Format: hh:mm DD-MM-YY
+                                  </div>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">
+                                    QC Allocated Hours
+                                  </label>
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    step="0.25"
+                                    min="0"
+                                    value={qcAllocatedHours}
+                                    onChange={(e) => {
+                                      const val = parseFloat(e.target.value);
+                                      if (val >= 0 && val % 0.25 === 0)
+                                        setQcAllocatedHours(val);
+                                    }}
+                                    placeholder="0.00"
+                                  />
+                                  <div className="small">
+                                    (in multiple of 0.25 only)
+                                  </div>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">Handler</label>
+                                  <select
+                                    className="form-select"
+                                    value={batchEditValues.handler}
+                                    onChange={(e) =>
+                                      setBatchEditValues({
+                                        ...batchEditValues,
+                                        handler: e.target.value,
+                                      })
+                                    }
+                                  >
+                                    <option value="">Select</option>
+                                    <option value="John Doe">John Doe</option>
+                                    <option value="Jane Smith">
+                                      Jane Smith
+                                    </option>
+                                    <option value="Mike Johnson">
+                                      Mike Johnson
+                                    </option>
+                                  </select>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">
+                                    QA Reviewer
+                                  </label>
+                                  <select
+                                    className="form-select"
+                                    value={batchEditValues.qaReviewer}
+                                    onChange={(e) =>
+                                      setBatchEditValues({
+                                        ...batchEditValues,
+                                        qaReviewer: e.target.value,
+                                      })
+                                    }
+                                  >
+                                    <option value="">Select</option>
+                                    <option value="Sarah Williams">
+                                      Sarah Williams
+                                    </option>
+                                    <option value="David Brown">
+                                      David Brown
+                                    </option>
+                                    <option value="Emily Davis">
+                                      Emily Davis
+                                    </option>
+                                  </select>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">Status</label>
+                                  <select
+                                    className="form-select"
+                                    value={batchEditValues.status || ""}
+                                    onChange={(e) =>
+                                      setBatchEditValues({
+                                        ...batchEditValues,
+                                        status: e.target.value,
+                                      })
+                                    }
+                                  >
+                                    <option value="">Select</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Progress">
+                                      In Progress
+                                    </option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                  </select>
+                                </div>
+                                <div className="col-md-2 d-flex align-items-end">
+                                  <button
+                                    className="btn btn-info"
+                                    disabled={selectedFiles.length === 0}
+                                    onClick={applyBatchEdits}
+                                  >
+                                    Apply to Selected
+                                  </button>
+                                </div>
                               </div>
                             </div>
 
@@ -2147,7 +2147,6 @@ const generateDummyProjects = (count) => {
         priority: ["High", "Medium", "Low"][Math.floor(Math.random() * 3)],
       });
     }
-
     projects.push({
       id: i,
       title: `Project ${i}`,
@@ -2167,8 +2166,6 @@ const generateDummyProjects = (count) => {
       files,
     });
   }
-
   return projects;
 };
-
 export default ActiveProject;
