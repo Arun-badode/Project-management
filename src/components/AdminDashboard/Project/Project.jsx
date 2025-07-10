@@ -2237,17 +2237,7 @@ const Project = () => {
                       </div>
                     ))}
                   </div>
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddClient}
-                    disabled={
-                      !newClient.alias ||
-                      !newClient.actualName ||
-                      !newClient.country
-                    }
-                  >
-                    <i className="fas fa-plus me-1"></i>
-                  </button>
+                  
                 </div>
 
                 {/* Manage Tasks List */}
@@ -2329,13 +2319,7 @@ const Project = () => {
                     ))}
                   </div>
 
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddapplication}
-                    disabled={!newapplication}
-                  >
-                    <i className="fas fa-plus me-1"></i>
-                  </button>
+                  
                 </div>
 
                 {/* Manage Languages List */}
