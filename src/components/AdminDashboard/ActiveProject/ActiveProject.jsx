@@ -558,9 +558,10 @@ const ActiveProject = () => {
   }));
 
   const handleEditProject = (project) => {
-    setEditedProject({ ...project });
-    setIsEdit(project.id);
-  };
+  setEditedProject({ ...project });
+  setIsEdit(project.id);
+  setShowEditModal(true); // <-- Add this line
+};
 
   const handleSaveProjectEdit = () => {
     if (editedProject) {
@@ -1880,22 +1881,24 @@ const ActiveProject = () => {
                               </div>
 
                               {/* Batch Edit Controls */}
-                              <div className="row g-3 mb-3">
+                               <div className="row g-3 mb-3">
                                 <div className="col-md-2">
                                   <label className="form-label">
                                     Ready for QC Due
                                   </label>
-                                  <input
-                                    type="datetime-local"
-                                    className="form-control"
-                                    value={readyForQcDueInput}
-                                    onChange={(e) =>
-                                      setReadyForQcDueInput(e.target.value)
+                                  <br />
+                                  <DatePicker
+                                    selected={selectedDateTime}
+                                    onChange={(date) =>
+                                      setSelectedDateTime(date)
                                     }
+                                    showTimeSelect
+                                    timeFormat="HH:mm"
+                                    timeIntervals={15}
+                                    dateFormat="MMMM d, yyyy h:mm aa"
+                                    placeholderText="Select date and time"
+                                    className="form-control"
                                   />
-                                  <div className="small">
-                                    Format: hh:mm DD-MM-YY
-                                  </div>
                                 </div>
                                 <div className="col-md-2">
                                   <label className="form-label">
@@ -1989,7 +1992,7 @@ const ActiveProject = () => {
                                 </div>
                                 <div className="col-md-2 d-flex align-items-end">
                                   <button
-                                    className="btn btn-info"
+                                    className="btn btn-info mb-4 " 
                                     disabled={selectedFiles.length === 0}
                                     onClick={applyBatchEdits}
                                   >

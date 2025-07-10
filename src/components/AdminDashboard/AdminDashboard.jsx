@@ -291,6 +291,22 @@ export const ProjectsData = [
   },
 ];
 
+const getStatusColor = (status) => {
+  if (!status) return "secondary";
+
+  const statusMap = {
+    present: "success",
+    absent: "danger",
+    late: "warning",
+    "on leave": "info",
+    "half day": "primary",
+    holiday: "purple",
+    weekend: "dark",
+  };
+
+  return statusMap[status.toLowerCase()] || "secondary";
+};
+
 const useSyncScroll = () => {
   const scrollContainerRef = useRef(null);
   const fakeScrollbarRef = useRef(null);
@@ -693,6 +709,94 @@ const AdminDashboard = () => {
     },
   ];
 
+ const todayAttendanceData = [
+  {
+    id: 1,
+    employeeName: "Arun Badode",
+    department: "Development",
+    position: "UI Developer",
+    status: "Present",
+    checkInTime: "10:05 AM",
+    checkOutTime: "07:30 PM",
+    isLate: true,
+    lateMinutes: 35,
+    isEarlyDeparture: false,
+    earlyMinutes: 0,
+    remarks: "Late due to traffic"
+  },
+  {
+    id: 2,
+    employeeName: "Neha Sharma",
+    department: "Management",
+    position: "Project Manager",
+    status: "Present",
+    checkInTime: "09:50 AM",
+    checkOutTime: "06:45 PM",
+    isLate: false,
+    lateMinutes: 0,
+    isEarlyDeparture: true,
+    earlyMinutes: 15,
+    remarks: "Left early for client meeting"
+  },
+  {
+    id: 3,
+    employeeName: "Ravi Verma",
+    department: "Development",
+    position: "Backend Developer",
+    status: "Absent",
+    checkInTime: null,
+    checkOutTime: null,
+    isLate: false,
+    lateMinutes: 0,
+    isEarlyDeparture: false,
+    earlyMinutes: 0,
+    remarks: "Informed sick leave"
+  },
+  {
+    id: 4,
+    employeeName: "Pooja Mehta",
+    department: "Testing",
+    position: "QA Engineer",
+    status: "Present",
+    checkInTime: "10:15 AM",
+    checkOutTime: "07:00 PM",
+    isLate: true,
+    lateMinutes: 45,
+    isEarlyDeparture: false,
+    earlyMinutes: 0,
+    remarks: "Working from home"
+  },
+  {
+    id: 5,
+    employeeName: "Kunal Joshi",
+    department: "Operations",
+    position: "DevOps Engineer",
+    status: "On Leave",
+    checkInTime: null,
+    checkOutTime: null,
+    isLate: false,
+    lateMinutes: 0,
+    isEarlyDeparture: false,
+    earlyMinutes: 0,
+    remarks: "Annual leave"
+  }
+];
+
+// Helper function for status colors
+const getStatusColor = (status) => {
+  if (!status) return 'secondary';
+  
+  const statusMap = {
+    'present': 'success',
+    'absent': 'danger',
+    'late': 'warning',
+    'on leave': 'info',
+    'half day': 'primary'
+  };
+  
+  return statusMap[status.toLowerCase()] || 'secondary';
+};
+
   const handleEmployeeSelect = (id) => {
     setSelectedEmployee(id);
     setViewMode("detailed");
@@ -760,35 +864,35 @@ const AdminDashboard = () => {
             title: "Active Projects",
             icon: "bi-rocket-takeoff",
             color: "primary",
-            activeColor: "primary-active"
+            activeColor: "primary-active",
           },
           {
             key: "nearDue",
             title: "Near Due",
             icon: "bi-hourglass-split",
             color: "warning text-dark",
-            activeColor: "warning-active"
+            activeColor: "warning-active",
           },
           {
             key: "overdue",
             title: "Overdue",
             icon: "bi-exclamation-octagon",
             color: "danger",
-            activeColor: "danger-active"
+            activeColor: "danger-active",
           },
           {
             key: "teamOnDuty",
             title: "Team On-Duty",
             icon: "bi-people-fill",
             color: "info",
-            activeColor: "info-active"
+            activeColor: "info-active",
           },
           {
             key: "eventsToday",
             title: "Events Today",
             icon: "bi-calendar-event",
             color: "success",
-            activeColor: "success-active"
+            activeColor: "success-active",
           },
           {
             key: "pendingApproval",
@@ -801,7 +905,9 @@ const AdminDashboard = () => {
         ].map(({ key, title, icon, color, activeColor, link }) => (
           <Col xs={12} sm={6} md={2} key={key}>
             <Card
-              className={`bg-${color.split(" ")[0]} bg-gradient p-3 rounded-4 shadow-sm border-0 w-100 ${
+              className={`bg-${
+                color.split(" ")[0]
+              } bg-gradient p-3 rounded-4 shadow-sm border-0 w-100 ${
                 activeTab === key ? `active-tab ${activeColor}` : ""
               }`}
               onClick={() =>
@@ -858,7 +964,7 @@ const AdminDashboard = () => {
           >
             <Table className="table-gradient-bg align-middle table table-bordered table-hover">
               <thead className="table bg-dark p-2 ">
-                <tr>
+                <tr className="text-center">
                   <th>ID</th>
                   <th>Project Title</th>
                   <th>Client</th>
@@ -879,7 +985,7 @@ const AdminDashboard = () => {
               </thead>
               <tbody>
                 {filteredProjects.map((project) => (
-                  <tr key={project.id}>
+                  <tr className="text-center" key={project.id}>
                     <td>{project.id}</td>
                     <td>{project.title}</td>
                     <td>{project.client}</td>
@@ -977,7 +1083,7 @@ const AdminDashboard = () => {
           >
             <Table className="table-gradient-bg align-middle table table-bordered table-hover">
               <thead className="table bg-dark p-2 ">
-                <tr>
+                <tr className="text-center">
                   <th>ID</th>
                   <th>Project Title</th>
                   <th>Client</th>
@@ -998,7 +1104,7 @@ const AdminDashboard = () => {
               </thead>
               <tbody>
                 {filteredProjects.map((project) => (
-                  <tr key={project.id}>
+                  <tr className="text-center" key={project.id}>
                     <td>{project.id}</td>
                     <td>{project.title}</td>
                     <td>{project.client}</td>
@@ -1096,7 +1202,7 @@ const AdminDashboard = () => {
           >
             <Table className="table-gradient-bg align-middle table table-bordered table-hover">
               <thead className="table bg-dark p-2 ">
-                <tr>
+                <tr className="text-center">
                   <th>ID</th>
                   <th>Project Title</th>
                   <th>Client</th>
@@ -1117,7 +1223,7 @@ const AdminDashboard = () => {
               </thead>
               <tbody>
                 {filteredProjects.map((project) => (
-                  <tr key={project.id}>
+                  <tr className="text-center" key={project.id}>
                     <td>{project.id}</td>
                     <td>{project.title}</td>
                     <td>{project.client}</td>
@@ -1187,102 +1293,105 @@ const AdminDashboard = () => {
 
       {activeFilter === "teamOnDuty" && (
         <Card className="text-white p-3 mb-4 table-gradient-bg">
-          <div
-            ref={fakeScrollbarRef4}
-            style={{
-              overflowX: "auto",
-              overflowY: "hidden",
-              height: 16,
-              position: "fixed",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              zIndex: 1050,
-            }}
-          >
-            <div style={{ width: "2000px", height: 1 }} />
-          </div>
-          <h4 className="mb-3">Today's Attendance</h4>
-          <div
-            className="table-responsive"
-            ref={scrollContainerRef4}
-            style={{
-              maxHeight: "500px",
-              overflowX: "auto",
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-            }}
-          >
-            <table className="table table-hover mb-0">
-              <thead
-                className="table bg-dark p-2 sticky-top"
-                style={{ position: "sticky", top: 0, zIndex: 2 }}
-              >
-                <tr>
-                  <th>Employee</th>
-                  <th>Department</th>
-                  <th>Present Days</th>
-                  <th>Absent Days</th>
-                  <th>Late Arrivals</th>
-                  <th>Early Departures</th>
-                  <th>Leaves</th>
-                </tr>
-              </thead>
-              <tbody>
-                {attendanceData.map((employee) => (
-                  <tr key={employee.id}>
+          {/* ... other existing card code ... */}
+          <table className="table table-hover mb-0">
+            <thead
+              className="table bg-dark p-2 sticky-top"
+              style={{ position: "sticky", top: 0, zIndex: 2 }}
+            >
+              <tr className="text-center">
+                <th>Employee</th>
+                <th>Department</th>
+                <th>Check-In Time</th>
+                <th>Check-Out Time</th>
+                <th>Status</th>
+                <th>Late Arrival</th>
+                <th>Early Departure</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              {todayAttendanceData.map((employee) => {
+                const initials = employee.employeeName
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("");
+                const statusColor = getStatusColor(employee.status);
+
+                return (
+                  <tr className="text-center" key={employee.id}>
                     <td>
                       <div className="d-flex align-items-center">
                         <div className="avatar avatar-sm bg-light-primary rounded me-3">
-                          <span className="avatar-text">
-                            {employee.employeeName
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
-                          </span>
+                          <span className="avatar-text">{initials}</span>
                         </div>
                         <div>
                           <div className="fw-semibold">
                             {employee.employeeName}
                           </div>
-                          <div className="small">{employee.employeeId}</div>
+                          <div className="small">{employee.position}</div>
                         </div>
                       </div>
                     </td>
+                    <td>{employee.department}</td>
                     <td>
-                      <div>{employee.department}</div>
-                      <div className="small">{employee.position}</div>
+                      {employee.checkInTime ? (
+                        <span className="badge bg-success-subtle text-success">
+                          {employee.checkInTime}
+                        </span>
+                      ) : (
+                        <span className="badge bg-secondary-subtle text-secondary">
+                          Not Checked In
+                        </span>
+                      )}
                     </td>
                     <td>
-                      <span className="badge bg-success-subtle text-success">
-                        {employee.daysPresent}
+                      {employee.checkOutTime ? (
+                        <span className="badge bg-info-subtle text-info">
+                          {employee.checkOutTime}
+                        </span>
+                      ) : (
+                        <span className="badge bg-secondary-subtle text-secondary">
+                          Not Checked Out
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      <span
+                        className={`badge bg-${statusColor}-subtle text-${statusColor}`}
+                      >
+                        {employee.status}
                       </span>
                     </td>
                     <td>
-                      <span className="badge bg-danger-subtle text-danger">
-                        {employee.daysAbsent}
-                      </span>
+                      {employee.isLate ? (
+                        <span className="badge bg-warning-subtle text-warning">
+                          Yes ({employee.lateMinutes} mins)
+                        </span>
+                      ) : (
+                        <span className="badge bg-success-subtle text-success">
+                          No
+                        </span>
+                      )}
                     </td>
                     <td>
-                      <span className="badge bg-warning-subtle text-warning">
-                        {employee.lateArrivals}
-                      </span>
+                      {employee.isEarlyDeparture ? (
+                        <span className="badge bg-warning-subtle text-warning">
+                          Yes ({employee.earlyMinutes} mins)
+                        </span>
+                      ) : (
+                        <span className="badge bg-success-subtle text-success">
+                          No
+                        </span>
+                      )}
                     </td>
-                    <td>
-                      <span className="badge bg-warning-subtle text-warning">
-                        {employee.earlyDepartures}
-                      </span>
-                    </td>
-                    <td>
-                      <span className="badge bg-info-subtle text-info">
-                        {employee.leaves.length}
-                      </span>
-                    </td>
+                    <td>{employee.remarks}</td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                );
+              })}
+            </tbody>
+          </table>
+          {/* ... rest of card code ... */}
         </Card>
       )}
 
@@ -1324,7 +1433,7 @@ const AdminDashboard = () => {
                 className="table bg-dark p-2 sticky-top"
                 style={{ position: "sticky", top: 0, zIndex: 2 }}
               >
-                <tr>
+                <tr className="text-center">
                   <th>Task Title</th>
                   <th>Description</th>
                   <th>Deadline</th>
@@ -1333,7 +1442,7 @@ const AdminDashboard = () => {
               </thead>
               <tbody>
                 {tasksToday.map((task) => (
-                  <tr key={task.id}>
+                  <tr className="text-center" key={task.id}>
                     <td>{task.title}</td>
                     <td>{task.description}</td>
                     <td>{task.deadline}</td>
