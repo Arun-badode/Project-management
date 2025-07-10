@@ -136,6 +136,7 @@ function Collaboration() {
   const emojiPickerRef = useRef(null);
   const messageInputRef = useRef(null);
   const socketRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
   // Initialize socket connection
   useEffect(() => {
@@ -159,10 +160,17 @@ function Collaboration() {
     };
   }, []);
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom when messages change or when component mounts
   useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    scrollToBottom();
   }, [messages]);
+
+  // Scroll to bottom function
+  const scrollToBottom = () => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  };
 
   // Simulate typing indicator
   useEffect(() => {
@@ -419,13 +427,13 @@ function Collaboration() {
   const emojis = ["👍", "❤️", "😂", "🎉", "🔥", "💯", "👏", "🙌", "A"];
 
   return (
-    <div className=" container-fluid d-flex flex-column">
+    <div className="container-fluid d-flex flex-column vh-100">
       {/* Main Content */}
-      <div className="flex-grow-1 d-flex ">
+      <div className="flex-grow-1 d-flex overflow-hidden">
         {/* Left Sidebar */}
-        <div className="d-none d-lg-block col-lg-3 border-end  bg-card p-3 overflow-auto">
+        <div className="d-none d-lg-flex col-lg-3 border-end bg-card p-3 flex-column overflow-auto">
           {/* User Profile */}
-          <div className="d-flex align-items-center mb-4 p-2  rounded bg-light">
+          <div className="d-flex align-items-center mb-4 p-2 rounded bg-light">
             <img
               src={currentUser.avatar}
               alt={currentUser.name}
@@ -464,15 +472,14 @@ function Collaboration() {
           {activeChat === "group" ? (
             <>
               {/* Group Chat Section */}
-              {currentUser.role === "Admin" ||
-              currentUser.role === "Manager" ? (
+              {(currentUser.role === "Admin" || currentUser.role === "Manager") && (
                 <button
                   className="btn btn-primary btn-sm w-100 mb-3"
                   onClick={() => setShowCreateGroup(true)}
                 >
                   Create New Group
                 </button>
-              ) : null}
+              )}
 
               {/* Group List */}
               <h6 className="mb-3">GROUP CHATS</h6>
@@ -518,18 +525,18 @@ function Collaboration() {
                           alt={member.name}
                           className="rounded-circle"
                           width="32"
-                         
+                          height="32"
                         />
-                        {member.isOnline ? (
+                        {member.isOnline && (
                           <span
                             className="position-absolute bottom-0 end-0 bg-success rounded-circle"
                             style={{
                               width: "10px",
-                            
+                              height: "10px",
                               border: "2px solid #f8f9fa",
                             }}
                           ></span>
-                        ) : null}
+                        )}
                       </div>
                       <div>
                         <div>{member.name}</div>
@@ -586,10 +593,8 @@ function Collaboration() {
 
         {/* Right Content Area */}
         <div className="col-12 col-lg-9 d-flex flex-column chat-main-panel">
-          <div className="row " style={{position:"fixed"}}>
-        <div className="col-12  d-flex flex-column">
-          {/* Chat Header */}
-          <div className="p-3 border-bottom bg-main d-flex justify-content-between align-items-center chat-header-sticky">
+          {/* Fixed Header */}
+          <div className="p-3 border-bottom bg-main d-flex justify-content-between align-items-center" style={{position: 'sticky', top: 0, zIndex: 1000}}>
             <div>
               <h4 className="mb-0 text-white">
                 {activePrivateChat
@@ -646,11 +651,12 @@ function Collaboration() {
             </div>
           </div>
 
-          {/* Messages Area */}
+          {/* Scrollable Messages Area */}
           <div
-            className="chat-messages-scrollable  scrollbar-hidden overflow-auto p-3 bg-main" style={{ backgroundColor: "#1e1e1e" }}
+            ref={messagesContainerRef}
+            className="flex-grow-1 overflow-auto p-3 bg-main"
+            style={{ backgroundColor: "#1e1e1e" }}
           >
-            <div ref={messageEndRef} />
             {filteredMessages.map((message) => (
               <div
                 key={message.id}
@@ -855,8 +861,8 @@ function Collaboration() {
             <div ref={messageEndRef} />
           </div>
 
-          {/* Message Input */}
-          <div className="p-3 border-top bg-main chat-footer-sticky">
+          {/* Fixed Footer */}
+          <div className="p-3 border-top bg-main" style={{position: 'sticky', bottom: 0, zIndex: 1000}}>
             <div className="position-relative">
               {showMentionList && (
                 <div
@@ -904,10 +910,10 @@ function Collaboration() {
                 value={newMessage}
                 onChange={(e) => {
                   setNewMessage(e.target.value);
-                  // In a real app, you would emit typing status to the server
-                  // socketRef.current.emit('typing', {
-                  //     isTyping: e.target.value.length > 0
-                  // });
+                  if (e.target.value.trim() !== "") {
+                    // In a real app, you would emit this to the server
+                    // socketRef.current.emit('typing', { userId: currentUser.id, isTyping: true });
+                  }
                 }}
                 onKeyDown={handleKeyDown}
                 className="form-control mb-2 bg-card text-white"
@@ -971,8 +977,6 @@ function Collaboration() {
               )}
             </div>
           </div>
-        </div>
-        </div>
         </div>
       </div>
 

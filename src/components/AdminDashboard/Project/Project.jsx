@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as echarts from "echarts";
 import useSyncScroll from "../Hooks/useSyncScroll";
-
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Select from "react-select";
 
 const Project = () => {
@@ -10,6 +11,7 @@ const Project = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(true);
+  const [selectedDateTime, setSelectedDateTime] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const searchInputRef = useRef(null);
   const chartRef = useRef(null);
@@ -121,6 +123,16 @@ const Project = () => {
     setList(newList);
   };
 
+
+  const handleApplyToSelectedFiles = () => {
+    const selected = formData.files.filter((f) => f.selected);
+    if (selected.length === 0) {
+      alert("No files selected.");
+      return;
+    }
+    // Apply deadline logic here
+    alert(`Deadline ${formData.deadline} applied to selected files.`);
+  };
   // Sample data for projects
   const [projects, setProjects] = useState([
     {
@@ -1262,87 +1274,102 @@ const Project = () => {
                     style={{ minWidth: 900 }}
                   >
                     <thead className=" table-gradient-bg">
-                       <tr>
-                      <th>Project Title</th>
-                      <th>Client</th>
-                      <th>Country</th>
-                      <th>Project Manager</th>
-                      <th>Due Date</th>
-                      <th>Progress</th>
-                      <th>Tasks</th>
-                      <th>Languages</th>
-                      <th>Application</th>
-                      <th>Total Pages</th>
-                      <th className="text-end">Actions</th>
+                      <tr>
+                        <th>Project Title</th>
+                        <th>Client</th>
+                        <th>Country</th>
+                        <th>Project Manager</th>
+                        <th>Due Date</th>
+                        <th>Progress</th>
+                        <th>Tasks</th>
+                        <th>Languages</th>
+                        <th>Application</th>
+                        <th>Total Pages</th>
+                        <th className="text-end">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredProjects.map((project) => (
-                      <tr key={project.id}>
-                        <td>
-                          {project.title}
-                          <span className="badge bg-warning bg-opacity-10 text-warning ms-2">Active</span>
-                        </td>
-                        <td>{project.client}</td>
-                        <td>{project.country}</td>
-                        <td>{project.projectManager}</td>
-                        <td>{new Date(project.dueDate).toLocaleDateString()}</td>
-                        <td>
-                          <div className="d-flex align-items-center">
-                            <div className="progress flex-grow-1 me-2" style={{ height: '6px' }}>
+                        <tr key={project.id}>
+                          <td>
+                            {project.title}
+                            <span className="badge bg-warning bg-opacity-10 text-warning ms-2">
+                              Active
+                            </span>
+                          </td>
+                          <td>{project.client}</td>
+                          <td>{project.country}</td>
+                          <td>{project.projectManager}</td>
+                          <td>
+                            {new Date(project.dueDate).toLocaleDateString()}
+                          </td>
+                          <td>
+                            <div className="d-flex align-items-center">
                               <div
-                                className="progress-bar bg-primary"
-                                style={{ width: `${project.progress}%` }}
-                              ></div>
+                                className="progress flex-grow-1 me-2"
+                                style={{ height: "6px" }}
+                              >
+                                <div
+                                  className="progress-bar bg-primary"
+                                  style={{ width: `${project.progress}%` }}
+                                ></div>
+                              </div>
+                              <small className="text-primary">
+                                {project.progress}%
+                              </small>
                             </div>
-                            <small className="text-primary">{project.progress}%</small>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex flex-wrap gap-1">
-                            {project.tasks.map((task) => (
-                              <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
-                                {task}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex flex-wrap gap-1">
-                            {project.languages.map((language) => (
-                              <span key={language} className="badge bg-success bg-opacity-10 text-success">
-                                {language}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td>
-                          <span className="badge bg-purple bg-opacity-10 text-purple">
-                            {project.application}
-                          </span>
-                        </td>
-                        <td>{project.totalPages}</td>
-                        <td className="text-end">
-                          <div className="d-flex justify-content-end gap-2">
-                            <button
-                              onClick={() => markAsCompleted(project.id)}
-                              className="btn btn-sm btn-success"
-                            >
-                              Mark as Completed
-                            </button>
-                            <button
-                              onClick={() => handleEditProject(project.id)}
-                              className="btn btn-sm btn-success"
-                            >
-                              <i className="fas fa-edit"></i>
-                            </button>
-                            <button className="btn btn-sm btn-danger">
-                              <i className="fas fa-trash-alt"></i>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td>
+                            <div className="d-flex flex-wrap gap-1">
+                              {project.tasks.map((task) => (
+                                <span
+                                  key={task}
+                                  className="badge bg-primary bg-opacity-10 text-primary"
+                                >
+                                  {task}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="d-flex flex-wrap gap-1">
+                              {project.languages.map((language) => (
+                                <span
+                                  key={language}
+                                  className="badge bg-success bg-opacity-10 text-success"
+                                >
+                                  {language}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td>
+                            <span className="badge bg-purple bg-opacity-10 text-purple">
+                              {project.application}
+                            </span>
+                          </td>
+                          <td>{project.totalPages}</td>
+                          <td className="text-end">
+                            <div className="d-flex justify-content-end gap-2">
+                              <button
+                                onClick={() => markAsCompleted(project.id)}
+                                className="btn btn-sm btn-success"
+                              >
+                                Mark as Completed
+                              </button>
+                              <button
+                                onClick={() => handleEditProject(project.id)}
+                                className="btn btn-sm btn-success"
+                              >
+                                <i className="fas fa-edit"></i>
+                              </button>
+                              <button className="btn btn-sm btn-danger">
+                                <i className="fas fa-trash-alt"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -1792,20 +1819,17 @@ const Project = () => {
                       </button>
                     </div>
                     <div className="table-responsive ">
-                      <table className="table table-bordered  ">
+                      <table className="table table-bordered">
                         <thead
                           style={{ backgroundColor: "#201E7E", color: "white" }}
                         >
-                          <tr
-                            style={{
-                              backgroundColor: "#201E7E",
-                              color: "white",
-                            }}
-                          >
+                          <tr>
                             <th>S.No.</th>
                             <th>File Name</th>
                             <th>Pages</th>
+                            <th>Language</th>
                             <th>Application</th>
+                            <th>Status</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1814,7 +1838,18 @@ const Project = () => {
                               <td>
                                 <div className="d-flex align-items-center gap-2">
                                   {idx + 1}
-                                  <input type="checkbox" />
+                                  <input
+                                    type="checkbox"
+                                    checked={file.selected || false}
+                                    onChange={(e) => {
+                                      const files = [...formData.files];
+                                      files[idx].selected = e.target.checked;
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        files,
+                                      }));
+                                    }}
+                                  />
                                 </div>
                               </td>
 
@@ -1831,6 +1866,7 @@ const Project = () => {
                                   placeholder="File Name"
                                 />
                               </td>
+
                               <td>
                                 <input
                                   type="number"
@@ -1847,13 +1883,26 @@ const Project = () => {
                                   placeholder="Pages"
                                 />
                               </td>
+
+                              <td>th</td>
+
                               <td>
                                 <select
                                   className="form-select"
                                   value={file.application || ""}
                                   onChange={(e) => {
+                                    const newApp = e.target.value;
                                     const files = [...formData.files];
-                                    files[idx].application = e.target.value;
+
+                                    // check if current row is selected
+                                    if (files[idx].selected) {
+                                      files.forEach((f) => {
+                                        if (f.selected) f.application = newApp;
+                                      });
+                                    } else {
+                                      files[idx].application = newApp;
+                                    }
+
                                     setFormData((prev) => ({ ...prev, files }));
                                   }}
                                 >
@@ -1865,10 +1914,44 @@ const Project = () => {
                                   ))}
                                 </select>
                               </td>
+
+                              <td>TYS</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
+
+                      <div className="d-flex align-items-center gap-3 mt-3">
+                        <label
+                          className="text-white"
+                          style={{ fontWeight: "bold" }}
+                        >
+                          Deadline
+                        </label>
+                        <DatePicker
+                          selected={selectedDateTime}
+                          onChange={(date) => setSelectedDateTime(date)}
+                          showTimeSelect
+                          timeFormat="HH:mm"
+                          timeIntervals={15}
+                          dateFormat="MMMM d, yyyy h:mm aa"
+                          placeholderText="Select date and time"
+                          className="form-control"
+                        />
+                        <button
+                          className="btn"
+                          style={{
+                            background:
+                              "linear-gradient(90deg, rgba(123,97,255,1) 0%, rgba(217,75,255,1) 100%)",
+                            color: "white",
+                            borderRadius: "10px",
+                            padding: "6px 18px",
+                          }}
+                          onClick={handleApplyToSelectedFiles}
+                        >
+                          Apply to Selected Files
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -2471,7 +2554,7 @@ const Project = () => {
               </div>
             </div>
           </div>
-        </div>    
+        </div>
       )}
 
       {/* Backdrop for modals */}

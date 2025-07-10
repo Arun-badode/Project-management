@@ -27,7 +27,17 @@ const ActiveProject = () => {
     tasks: [],
     languages: [],
     application: [],
-    files: [{ name: "", pageCount: 0 }],
+    files: [
+      [
+        { name: "File_1", pageCount: 3, application: "", selected: false },
+        { name: "File_2", pageCount: 5, application: "", selected: false },
+        { name: "File_3", pageCount: 4, application: "", selected: false },
+        { name: "File_4", pageCount: 2, application: "", selected: false },
+        { name: "File_5", pageCount: 6, application: "", selected: false },
+        { name: "File_6", pageCount: 7, application: "", selected: false },
+        { name: "File_7", pageCount: 8, application: "", selected: false },
+      ],
+    ],
     totalPages: 0,
     deadline: "",
     readyDeadline: "",
@@ -1078,22 +1088,17 @@ const ActiveProject = () => {
                       </button>
                     </div>
                     <div className="table-responsive ">
-                      <table className="table table-bordered  ">
+                      <table className="table table-bordered">
                         <thead
                           style={{ backgroundColor: "#201E7E", color: "white" }}
                         >
-                          <tr
-                            style={{
-                              backgroundColor: "#201E7E",
-                              color: "white",
-                            }}
-                          >
+                          <tr>
                             <th>S.No.</th>
                             <th>File Name</th>
                             <th>Pages</th>
                             <th>Language</th>
                             <th>Application</th>
-                            <th>Statuts</th>
+                            <th>Status</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1102,7 +1107,18 @@ const ActiveProject = () => {
                               <td>
                                 <div className="d-flex align-items-center gap-2">
                                   {idx + 1}
-                                  <input type="checkbox" />
+                                  <input
+                                    type="checkbox"
+                                    checked={file.selected || false}
+                                    onChange={(e) => {
+                                      const files = [...formData.files];
+                                      files[idx].selected = e.target.checked;
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        files,
+                                      }));
+                                    }}
+                                  />
                                 </div>
                               </td>
 
@@ -1119,7 +1135,7 @@ const ActiveProject = () => {
                                   placeholder="File Name"
                                 />
                               </td>
-                              <td>th</td>
+
                               <td>
                                 <input
                                   type="number"
@@ -1136,13 +1152,26 @@ const ActiveProject = () => {
                                   placeholder="Pages"
                                 />
                               </td>
+
+                              <td>th</td>
+
                               <td>
                                 <select
                                   className="form-select"
                                   value={file.application || ""}
                                   onChange={(e) => {
+                                    const newApp = e.target.value;
                                     const files = [...formData.files];
-                                    files[idx].application = e.target.value;
+
+                                    // check if current row is selected
+                                    if (files[idx].selected) {
+                                      files.forEach((f) => {
+                                        if (f.selected) f.application = newApp;
+                                      });
+                                    } else {
+                                      files[idx].application = newApp;
+                                    }
+
                                     setFormData((prev) => ({ ...prev, files }));
                                   }}
                                 >
@@ -1154,6 +1183,7 @@ const ActiveProject = () => {
                                   ))}
                                 </select>
                               </td>
+
                               <td>TYS</td>
                             </tr>
                           ))}
@@ -1172,7 +1202,7 @@ const ActiveProject = () => {
                           onChange={(date) => setSelectedDateTime(date)}
                           showTimeSelect
                           timeFormat="HH:mm"
-                          timeIntervals={15} // 👈 15 minutes gap
+                          timeIntervals={15}
                           dateFormat="MMMM d, yyyy h:mm aa"
                           placeholderText="Select date and time"
                           className="form-control"
@@ -1708,125 +1738,6 @@ const ActiveProject = () => {
                               </div>
 
                               {/* Batch Edit Controls */}
-                              <div className="row g-3 mb-3">
-                                <div className="col-md-2">
-                                  <label className="form-label">
-                                    Ready for QC Due
-                                  </label>
-                                  <br />
-                                  <DatePicker
-                                    selected={selectedDateTime}
-                                    onChange={(date) =>
-                                      setSelectedDateTime(date)
-                                    }
-                                    showTimeSelect
-                                    timeFormat="HH:mm"
-                                    timeIntervals={15}
-                                    dateFormat="MMMM d, yyyy h:mm aa"
-                                    placeholderText="Select date and time"
-                                    className="form-control"
-                                  />
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">
-                                    QC Allocated Hours
-                                  </label>
-                                  <input
-                                    type="number"
-                                    className="form-control"
-                                    step="0.25"
-                                    min="0"
-                                    value={qcAllocatedHours}
-                                    onChange={(e) => {
-                                      const val = parseFloat(e.target.value);
-                                      if (val >= 0 && val % 0.25 === 0)
-                                        setQcAllocatedHours(val);
-                                    }}
-                                    placeholder="0.00"
-                                  />
-                                  <div className="small">
-                                    (in multiple of 0.25 only)
-                                  </div>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">Handler</label>
-                                  <select
-                                    className="form-select"
-                                    value={batchEditValues.handler}
-                                    onChange={(e) =>
-                                      setBatchEditValues({
-                                        ...batchEditValues,
-                                        handler: e.target.value,
-                                      })
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="John Doe">John Doe</option>
-                                    <option value="Jane Smith">
-                                      Jane Smith
-                                    </option>
-                                    <option value="Mike Johnson">
-                                      Mike Johnson
-                                    </option>
-                                  </select>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">
-                                    QA Reviewer
-                                  </label>
-                                  <select
-                                    className="form-select"
-                                    value={batchEditValues.qaReviewer}
-                                    onChange={(e) =>
-                                      setBatchEditValues({
-                                        ...batchEditValues,
-                                        qaReviewer: e.target.value,
-                                      })
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="Sarah Williams">
-                                      Sarah Williams
-                                    </option>
-                                    <option value="David Brown">
-                                      David Brown
-                                    </option>
-                                    <option value="Emily Davis">
-                                      Emily Davis
-                                    </option>
-                                  </select>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">Status</label>
-                                  <select
-                                    className="form-select"
-                                    value={batchEditValues.status || ""}
-                                    onChange={(e) =>
-                                      setBatchEditValues({
-                                        ...batchEditValues,
-                                        status: e.target.value,
-                                      })
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="In Progress">
-                                      In Progress
-                                    </option>
-                                    <option value="Approved">Approved</option>
-                                    <option value="Rejected">Rejected</option>
-                                  </select>
-                                </div>
-                                <div className="col-md-2 d-flex align-items-end">
-                                  <button
-                                    className="btn btn-info"
-                                    disabled={selectedFiles.length === 0}
-                                    onClick={applyBatchEdits}
-                                  >
-                                    Apply to Selected
-                                  </button>
-                                </div>
-                              </div>
 
                               {/* Files Table */}
                               <div className="table-responsive">
