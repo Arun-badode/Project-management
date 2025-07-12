@@ -399,7 +399,7 @@ function ResourceWorkload() {
                             backgroundColor: "#fff", // Match your background color
                           }}
                         >
-                      <tr>
+                      <tr  className="text-center">
                         <th>ID</th>
                         <th>Task</th>
                         <th>Resource</th>
@@ -411,7 +411,7 @@ function ResourceWorkload() {
                     </thead>
                     <tbody>
                       {taskData.map((task) => (
-                        <tr key={task.id}>
+                        <tr key={task.id}  className="text-center">
                           <td>{task.id}</td>
                           <td>
                             <div className="fw-bold">{task.name}</div>

@@ -455,7 +455,7 @@ const Attendance = () => {
                     backgroundColor: "#fff", // Match your background color
                   }}
                 >
-                  <tr>
+                  <tr  className="text-center">
                     <th>User</th>
                     <th>Date</th>
                     <th>Login Time</th>
@@ -469,7 +469,7 @@ const Attendance = () => {
                 </thead>
                 <tbody>
                   {todayAttendance.map((record) => (
-                    <tr key={record.id}>
+                    <tr key={record.id}  className="text-center">
                       <td>{record.user}</td>
                       <td>{record.date}</td>
                       <td>{record.loginTime || "-"}</td>
@@ -536,7 +536,7 @@ const Attendance = () => {
                     backgroundColor: "#fff", // Match your background color
                   }}
                 >
-                  <tr>
+                  <tr  className="text-center">
                     <th>Employee</th>
                     <th>Department</th>
                     <th>Present Days</th>
@@ -552,7 +552,7 @@ const Attendance = () => {
                 </thead>
                 <tbody>
                   {filteredEmployees.map((employee) => (
-                    <tr key={employee.id}>
+                    <tr key={employee.id}  className="text-center">
                       <td>
                         <div className="d-flex align-items-center">
                           <div className="avatar avatar-sm  rounded me-3">
@@ -798,7 +798,7 @@ const Attendance = () => {
                             backgroundColor: "#fff", // Match your background color
                           }}
                         >
-                          <tr>
+                          <tr  className="text-center">
                             <th>Date</th>
                             <th>Type</th>
                             <th>Status</th>
@@ -806,7 +806,7 @@ const Attendance = () => {
                         </thead>
                         <tbody>
                           {selectedEmployeeData.leaves.map((leave, index) => (
-                            <tr key={index}>
+                            <tr key={index}  className="text-center">
                               <td>{leave.date}</td>
                               <td>{leave.type}</td>
                               <td>
@@ -846,7 +846,7 @@ const Attendance = () => {
                           backgroundColor: "#fff", // Match your background color
                         }}
                       >
-                        <tr>
+                        <tr  className="text-center">
                           <th>Date</th>
                           <th>Day</th>
                           <th>Status</th>
@@ -860,7 +860,7 @@ const Attendance = () => {
                       <tbody>
                         {selectedEmployeeData.dailyRecords.map(
                           (record, index) => (
-                            <tr key={index}>
+                            <tr key={index}  className="text-center">
                               <td>{record.date}</td>
                               <td>{record.day}</td>
                               <td>

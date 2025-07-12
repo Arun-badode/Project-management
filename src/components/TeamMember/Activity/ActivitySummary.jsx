@@ -136,7 +136,7 @@ function ActivitySummary() {
                             backgroundColor: "#fff", // Match your background color
                           }}
                         >
-                      <tr>
+                      <tr  className="text-center">
                         <th className="text-start">ID</th> {/* New ID column */}
                         <th className="text-start">Task Name</th>
                         <th className="text-center">Total Hours</th>
@@ -145,7 +145,7 @@ function ActivitySummary() {
                     </thead>
                     <tbody>
                       {monthData.tasks.map((task, taskIndex) => (
-                        <tr key={taskIndex}>
+                        <tr key={taskIndex}  className="text-center">
                           <td className="text-start">{taskIndex + 1}</td> {/* Display ID */}
                           <td className="text-start">{task.name}</td>
                           <td className="text-center">{task.hours}</td>

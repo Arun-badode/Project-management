@@ -270,7 +270,7 @@ function ManagerDashboard() {
                       backgroundColor: "#fff", // Match your background color
                     }}
                   >
-                    <tr>
+                    <tr  className="text-center">
                       <th scope="col">ID</th>
                       <th scope="col">Project</th>
                       <th scope="col">Progress</th>
@@ -280,7 +280,7 @@ function ManagerDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
+                    <tr  className="text-center">
                       <td>1</td>
                       <td>
                         <div className="d-flex align-items-center">
@@ -341,8 +341,8 @@ function ManagerDashboard() {
                         </div>
                       </td>
                     </tr>
-
-                    <tr>
+ 
+                    <tr  className="text-center">
                       <td>2</td>
                       <td>
                         <div className="d-flex align-items-center">
@@ -396,7 +396,7 @@ function ManagerDashboard() {
                         </div>
                       </td>
                     </tr>
-                    <tr>
+                    <tr  className="text-center">
                       <td>3</td>
                       <td>
                         <div className="d-flex align-items-center">
@@ -456,7 +456,7 @@ function ManagerDashboard() {
                         </div>
                       </td>
                     </tr>
-                    <tr>
+                    <tr  className="text-center">
                       <td>4</td>
                       <td>
                         <div className="d-flex align-items-center">

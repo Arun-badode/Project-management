@@ -401,7 +401,7 @@ const ShiftAllocation = () => {
                       backgroundColor: "#fff", // Match your background color
                     }}
                   >
-                    <tr>
+                    <tr  className="text-center">
                       <th scope="col" className="w-25 sticky-start bg-white">
                         Employee
                       </th>
@@ -419,7 +419,7 @@ const ShiftAllocation = () => {
                   </thead>
                   <tbody>
                     {filteredEmployees.map((employee) => (
-                      <tr key={employee.id}>
+                      <tr key={employee.id}  className="text-center">
                         <td className="sticky-start bg-white border-end">
                           <div
                             className="d-flex align-items-center cursor-pointer"

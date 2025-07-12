@@ -385,7 +385,7 @@ export const TaskDashboard = () => {
                             backgroundColor: "#fff", // Match your background color
                           }}
                         >
-                  <tr>
+                  <tr  className="text-center">
                     <th>S. No.</th> {/* Changed from ID to Serial Number */}
                     <th
                       className="cursor-pointer"
@@ -489,7 +489,7 @@ export const TaskDashboard = () => {
                 <tbody>
                   {sortedTasks.length > 0 ? (
                     sortedTasks.map((task, index) => (
-                      <tr key={task.id}>
+                      <tr key={task.id}  className="text-center">
                         <td>{index + 1}</td> {/* Serial Number */}
                         <td>{task.project}</td>
                         <td>{task.task}</td>
