@@ -4,8 +4,6 @@ import moment from "moment";
 import Select from "react-select";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import Datetime from "react-datetime";
-import "react-datetime/css/react-datetime.css";
 import useSyncScroll from "../Hooks/useSyncScroll";
 
 const ActiveProject = () => {
@@ -558,10 +556,10 @@ const ActiveProject = () => {
   }));
 
   const handleEditProject = (project) => {
-  setEditedProject({ ...project });
-  setIsEdit(project.id);
-  setShowEditModal(true); // <-- Add this line
-};
+    setEditedProject({ ...project });
+    setIsEdit(project.id);
+    setShowEditModal(true); // <-- Add this line
+  };
 
   const handleSaveProjectEdit = () => {
     if (editedProject) {
@@ -674,6 +672,25 @@ const ActiveProject = () => {
     scrollContainerRef: scrollContainerRef1,
     fakeScrollbarRef: fakeScrollbarRef1,
   } = useSyncScroll(true);
+
+  function calculateQCDue(startDate, hours) {
+    if (!startDate || !hours) return "--";
+    const endDate = new Date(startDate);
+    endDate.setHours(endDate.getHours() + hours);
+    return endDate.toLocaleString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  }
+
+  const [dateTime, setDateTime] = useState(null);
+
+  const handleChange = (value) => {
+    setDateTime(value);
+  };
 
   return (
     <div className="container-fluid py-4">
@@ -1088,13 +1105,29 @@ const ActiveProject = () => {
                         Upload Excel
                       </button>
                     </div>
-                    <div className="table-responsive ">
+                    <div className="table-responsive">
                       <table className="table table-bordered">
                         <thead
+                          className="fixed-top"
                           style={{ backgroundColor: "#201E7E", color: "white" }}
                         >
                           <tr>
-                            <th>S.No.</th>
+                            <th>
+                              S.No.
+                              <input
+                                type="checkbox"
+                                checked={formData.files.every(
+                                  (file) => file.selected
+                                )}
+                                onChange={(e) => {
+                                  const files = formData.files.map((file) => ({
+                                    ...file,
+                                    selected: e.target.checked,
+                                  }));
+                                  setFormData((prev) => ({ ...prev, files }));
+                                }}
+                              />
+                            </th>
                             <th>File Name</th>
                             <th>Pages</th>
                             <th>Language</th>
@@ -1208,6 +1241,7 @@ const ActiveProject = () => {
                           placeholderText="Select date and time"
                           className="form-control"
                         />
+
                         <button
                           className="btn"
                           style={{
@@ -1315,11 +1349,17 @@ const ActiveProject = () => {
                           type="radio"
                           name="billingMode"
                           value="estimated"
-                          checked={formData.billingMode === "estimated"}
+                          checked={
+                            formData.billingMode === "estimated" ||
+                            !formData.billingMode
+                          }
                           onChange={(e) =>
                             setFormData((prev) => ({
                               ...prev,
                               billingMode: e.target.value,
+                              // Reset rate when switching to estimated hours
+                              rate:
+                                e.target.value === "estimated" ? "" : prev.rate,
                             }))
                           }
                         />
@@ -1328,20 +1368,55 @@ const ActiveProject = () => {
                       <input
                         type="number"
                         className="form-control"
+                        min="0"
                         step="0.25"
                         value={formData.estimatedHrs || ""}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = parseFloat(e.target.value) || 0;
                           setFormData((prev) => ({
                             ...prev,
-                            estimatedHrs: e.target.value,
-                          }))
-                        }
+                            estimatedHrs: value,
+                            // Auto-calculate cost when estimated hours change
+                            cost: value * (prev.hourlyRate || 0),
+                            inrCost:
+                              value *
+                              (prev.hourlyRate || 0) *
+                              (prev.exchangeRate || 1),
+                          }));
+                        }}
                         placeholder="00.00"
-                        disabled={formData.billingMode !== "estimated"}
+                        disabled={
+                          formData.billingMode !== "estimated" &&
+                          formData.billingMode !== undefined
+                        }
                       />
                       <div className="form-text text-white">
                         (in multiple of 0.25 only)
                       </div>
+                    </div>
+
+                    {/* Hourly Rate (auto-filled from client settings) */}
+                    <div className="col-md-2">
+                      <label className="form-label">Hourly Rate</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={formData.hourlyRate || ""}
+                        onChange={(e) => {
+                          const rate = parseFloat(e.target.value) || 0;
+                          setFormData((prev) => ({
+                            ...prev,
+                            hourlyRate: rate,
+                            // Recalculate costs when rate changes
+                            cost: prev.estimatedHrs * rate,
+                            inrCost:
+                              prev.estimatedHrs *
+                              rate *
+                              (prev.exchangeRate || 1),
+                          }));
+                        }}
+                        placeholder="Auto from Client"
+                      />
                     </div>
 
                     {/* Per Page Rate with radio */}
@@ -1356,6 +1431,11 @@ const ActiveProject = () => {
                             setFormData((prev) => ({
                               ...prev,
                               billingMode: e.target.value,
+                              // Reset estimated hours when switching to per page
+                              estimatedHrs:
+                                e.target.value === "perPage"
+                                  ? ""
+                                  : prev.estimatedHrs,
                             }))
                           }
                         />
@@ -1364,14 +1444,24 @@ const ActiveProject = () => {
                       <input
                         type="number"
                         className="form-control"
+                        min="0"
                         step="0.01"
                         value={formData.rate || ""}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const rate = parseFloat(e.target.value) || 0;
+                          const totalPages = formData.files.reduce(
+                            (sum, file) => sum + (file.pageCount || 0),
+                            0
+                          );
                           setFormData((prev) => ({
                             ...prev,
-                            rate: e.target.value,
-                          }))
-                        }
+                            rate: rate,
+                            // Auto-calculate cost when rate changes
+                            cost: rate * totalPages,
+                            inrCost:
+                              rate * totalPages * (prev.exchangeRate || 1),
+                          }));
+                        }}
                         placeholder="00.00"
                         disabled={formData.billingMode !== "perPage"}
                       />
@@ -1380,14 +1470,19 @@ const ActiveProject = () => {
                       </div>
                     </div>
 
-                    {/* Currency (auto-filled) */}
+                    {/* Currency (auto-filled from client settings) */}
                     <div className="col-md-2">
                       <label className="form-label">Currency</label>
                       <input
                         type="text"
                         className="form-control"
-                        value={formData.currency}
-                        readOnly
+                        value={formData.currency || "USD"} // Default to USD if not set
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            currency: e.target.value,
+                          }))
+                        }
                         placeholder="Auto from Client"
                       />
                     </div>
@@ -1398,7 +1493,7 @@ const ActiveProject = () => {
                       <input
                         type="text"
                         className="form-control"
-                        value={formData.cost?.toFixed(2)}
+                        value={formData.cost?.toFixed(2) || "0.00"}
                         readOnly
                         placeholder="Auto Calculated"
                       />
@@ -1410,7 +1505,7 @@ const ActiveProject = () => {
                       <input
                         type="text"
                         className="form-control"
-                        value={formData.inrCost?.toFixed(2)}
+                        value={formData.inrCost?.toFixed(2) || "0.00"}
                         readOnly
                         placeholder="Auto Calculated"
                       />
@@ -1878,15 +1973,45 @@ const ActiveProject = () => {
                                     ))}
                                   </tbody>
                                 </table>
+                                <div className="col-md-2 d-flex align-items-center justify-conetnt-center">
+                                  <button
+                                    className="btn btn-info mb-4 "
+                                    disabled={selectedFiles.length === 0}
+                                    onClick={applyBatchEdits}
+                                  >
+                                    Apply to Selected
+                                  </button>
+                                </div>
                               </div>
 
                               {/* Batch Edit Controls */}
-                               <div className="row g-3 mb-3">
+                              {/* Label Row */}
+                              <div className="row g-3 mb-1">
                                 <div className="col-md-2">
                                   <label className="form-label">
                                     Ready for QC Due
                                   </label>
-                                  <br />
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">
+                                    QC Allocated Hours
+                                  </label>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">QC Due</label>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">Priority</label>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">Actions</label>
+                                </div>
+                              </div>
+
+                              {/* Input Row */}
+                              <div className="row g-3 mb-3 align-items-start">
+                                {/* Ready for QC Due */}
+                                <div className="col-md-2">
                                   <DatePicker
                                     selected={selectedDateTime}
                                     onChange={(date) =>
@@ -1895,15 +2020,14 @@ const ActiveProject = () => {
                                     showTimeSelect
                                     timeFormat="HH:mm"
                                     timeIntervals={15}
-                                    dateFormat="MMMM d, yyyy h:mm aa"
+                                    dateFormat="h:mm aa dd-MM-yyyy"
                                     placeholderText="Select date and time"
                                     className="form-control"
                                   />
                                 </div>
+
+                                {/* QC Allocated Hours */}
                                 <div className="col-md-2">
-                                  <label className="form-label">
-                                    QC Allocated Hours
-                                  </label>
                                   <input
                                     type="number"
                                     className="form-control"
@@ -1912,136 +2036,53 @@ const ActiveProject = () => {
                                     value={qcAllocatedHours}
                                     onChange={(e) => {
                                       const val = parseFloat(e.target.value);
-                                      if (val >= 0 && val % 0.25 === 0)
+                                      if (
+                                        !isNaN(val) &&
+                                        val >= 0 &&
+                                        val % 0.25 === 0
+                                      ) {
                                         setQcAllocatedHours(val);
+                                      }
                                     }}
                                     placeholder="0.00"
                                   />
-                                  <div className="small">
+                                  <div className="small text-white">
                                     (in multiple of 0.25 only)
                                   </div>
                                 </div>
+
+                                {/* QC Due (calculated) */}
                                 <div className="col-md-2">
-                                  <label className="form-label">Handler</label>
-                                  <select
-                                    className="form-select"
-                                    value={batchEditValues.handler}
-                                    onChange={(e) =>
-                                      setBatchEditValues({
-                                        ...batchEditValues,
-                                        handler: e.target.value,
-                                      })
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="John Doe">John Doe</option>
-                                    <option value="Jane Smith">
-                                      Jane Smith
-                                    </option>
-                                    <option value="Mike Johnson">
-                                      Mike Johnson
-                                    </option>
+                                  <div className="form-control  fw-bold">
+                                    {calculateQCDue(
+                                      selectedDateTime,
+                                      qcAllocatedHours
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Priority */}
+                                <div className="col-md-2">
+                                  <select className="form-select">
+                                    <option>Low</option>
+                                    <option>Mid</option>
+                                    <option>High</option>
                                   </select>
                                 </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">
-                                    QA Reviewer
-                                  </label>
-                                  <select
-                                    className="form-select"
-                                    value={batchEditValues.qaReviewer}
-                                    onChange={(e) =>
-                                      setBatchEditValues({
-                                        ...batchEditValues,
-                                        qaReviewer: e.target.value,
-                                      })
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="Sarah Williams">
-                                      Sarah Williams
-                                    </option>
-                                    <option value="David Brown">
-                                      David Brown
-                                    </option>
-                                    <option value="Emily Davis">
-                                      Emily Davis
-                                    </option>
-                                  </select>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">Status</label>
-                                  <select
-                                    className="form-select"
-                                    value={batchEditValues.status || ""}
-                                    onChange={(e) =>
-                                      setBatchEditValues({
-                                        ...batchEditValues,
-                                        status: e.target.value,
-                                      })
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="In Progress">
-                                      In Progress
-                                    </option>
-                                    <option value="Approved">Approved</option>
-                                    <option value="Rejected">Rejected</option>
-                                  </select>
-                                </div>
-                                <div className="col-md-2 d-flex align-items-end">
-                                  <button
-                                    className="btn btn-info mb-4 " 
-                                    disabled={selectedFiles.length === 0}
-                                    onClick={applyBatchEdits}
-                                  >
-                                    Apply to Selected
+
+                                {/* Save & Close Buttons */}
+                                <div className="col-md-2 d-flex gap-2">
+                                  <button className="btn btn-success w-100">
+                                    Save
+                                  </button>
+                                  <button className="btn btn-secondary w-100">
+                                    Close
                                   </button>
                                 </div>
                               </div>
                             </div>
 
                             {/* Footer buttons */}
-                            <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 bg-card px-3 py-2 rounded-3 border">
-                              <div />
-                              <div className="d-flex gap-2">
-                                <button
-                                  type="button"
-                                  className="btn btn-secondary rounded-5 px-4"
-                                  onClick={() => {
-                                    setExpandedRow(null);
-                                    setSelectedFiles([]);
-                                    setHasUnsavedChanges(false);
-                                  }}
-                                >
-                                  Close
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn btn-primary rounded-5 px-4"
-                                  disabled={!hasUnsavedChanges}
-                                  onClick={() => {
-                                    // Save changes to main projects list
-                                    setProjects(
-                                      projects.map((p) =>
-                                        p.id === project.id
-                                          ? {
-                                              ...project,
-                                              files: selectedProject.files,
-                                            }
-                                          : p
-                                      )
-                                    );
-                                    setHasUnsavedChanges(false);
-                                    setExpandedRow(null);
-                                    setSelectedFiles([]);
-                                  }}
-                                >
-                                  Save Changes
-                                </button>
-                              </div>
-                            </div>
                           </div>
                         </td>
                       </tr>

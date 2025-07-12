@@ -3,8 +3,27 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Table from "react-bootstrap/Table";
+import moment from "moment";
 
-const Calendar = ({ userRole }) => {
+
+
+const calendarEvents = [
+  {
+    id: 1,
+    type: "Birthday",
+    name: "Michael Brown",
+    date: "2025-07-10"
+  },
+  {
+    id: 2,
+    type: "Holiday",
+    title: "Company Holiday",
+    date: "2025-07-10"
+  }
+];
+
+
+const Calendar = ({ userRole}) => {
   // State for calendar data and UI
   const [currentMonth, setCurrentMonth] = useState("June 2025");
   const [selectedFilters, setSelectedFilters] = useState({
@@ -36,6 +55,7 @@ const Calendar = ({ userRole }) => {
   const [holidayTitle, setHolidayTitle] = useState("");
   const [editingHolidayId, setEditingHolidayId] = useState(null);
   const [companyHolidaysList, setCompanyHolidaysList] = useState([]);
+  const [calendarEvents, setCalendarEvents] = useState([]);
 
   // State for adding events
   const [showAddEventModal, setShowAddEventModal] = useState(false);
@@ -44,6 +64,18 @@ const Calendar = ({ userRole }) => {
   const [addEventDetails, setAddEventDetails] = useState("");
 
   // Load mock data
+
+ const birthdayEvents = [
+    { name: "Michael Brown", date: "Jun 1, 2025" }
+  ];
+
+  const holidayEvents = [
+    { title: "Company Holiday 1", date: "Jun 1, 2025" }
+  ];
+
+
+
+
   useEffect(() => {
     const mockEvents = [
       // DOBs (visible to all)
@@ -371,9 +403,16 @@ const Calendar = ({ userRole }) => {
     setShowAddEventModal(false);
   };
 
+
+
+
+
+
+
   return (
     <div className="container-fluid py-4">
-      <div className="p-3 rounded shadow bg-card">
+      <div className="row">
+      <div className="p-3 rounded shadow bg-card col-8">
         <div className="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
           <h2 className="gradient-heading">Calendar</h2>
           <div className="d-flex flex-wrap gap-2 align-items-center">
@@ -615,6 +654,66 @@ const Calendar = ({ userRole }) => {
             </tbody>
           </table>
         </div>
+      </div>
+      <div className="col-4 ">
+         <div className="bg-card bg-white shadow-sm p-3" style={{ maxWidth: "400px" }}>
+      <h5 className="mb-3 fw-bold">Events Today</h5>
+
+      {/* Birthdays */}
+      {birthdayEvents.length > 0 && (
+        <>
+          <h6 className="text-danger fw-bold">Birthdays</h6>
+          <div className="table-responsive">
+          <table className="table table-bordered table-sm mb-4 table-gradient-bg">
+            <thead className="table ">
+              <tr>
+                <th>Name</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {birthdayEvents.map((event, idx) => (
+                <tr key={idx}>
+                  <td>{event.name}</td>
+                  <td>{moment(event.date).format("MMM D, YYYY")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          </div>
+        </>
+      )}
+
+      {/* Company Holidays */}
+      {holidayEvents.length > 0 && (
+        <>
+          <h6 className="text-success fw-bold">Company Holidays</h6>
+          <div className="table-responsive">
+          <table className="table table-bordered table-sm table-gradient-bg">
+            <thead className="table">
+              <tr>
+                <th>Title</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {holidayEvents.map((event, idx) => (
+                <tr key={idx}>
+                  <td>{event.title}</td>
+                  <td>{moment(event.date).format("MMM D, YYYY")}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          </div>
+        </>
+      )}
+
+      {birthdayEvents.length === 0 && holidayEvents.length === 0 && (
+        <p className="text-muted">No events for today.</p>
+      )}
+    </div>
+      </div>
       </div>
 
       {/* Events Summary Table */}
