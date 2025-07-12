@@ -3,7 +3,7 @@ import "./App.css";
 
 import Navbar from "./layout/Navbar";
 import Sidebar from "./layout/Sidebar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LoginPage from "./authtication/Login";
 import SignupPage from "./authtication/singup";
 
@@ -51,6 +51,15 @@ function App() {
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
   const menusidebarcollaps = () => setIsSidebarCollapsed(true);
 
+
+
+    useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+  
+    if (isMobile) {
+      setIsSidebarCollapsed(true);
+    }
+  }, []);
   return (
 
     <Routes>

@@ -829,7 +829,7 @@ function Collaboration() {
 
             {/* Typing Indicator */}
             {isTyping && typingUser && (
-              <div className="d-flex align-items-center mb-3">
+              <div className="d-flex align-items-center mb-3 ">
                 <img
                   src={typingUser.avatar}
                   alt="Typing"
@@ -844,7 +844,7 @@ function Collaboration() {
                       <div className="typing-dot"></div>
                       <div className="typing-dot"></div>
                     </div>
-                    <small className="ms-2 text-white">
+                    <small className="ms-2 text-white ">
                       {typingUser.name} is typing...
                     </small>
                   </div>

@@ -322,7 +322,7 @@ function UserManagement() {
               style={{
                 position: "sticky",
                 top: 0,
-                zIndex: 2,
+                zIndex: 0,
                 backgroundColor: "#fff", // Match your background color
               }}
             >
@@ -410,7 +410,7 @@ function UserManagement() {
               style={{
                 position: "sticky",
                 top: 0,
-                zIndex: 2,
+                zIndex: 0,
                 backgroundColor: "#fff", // Match your background color
               }}
             >

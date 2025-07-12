@@ -2122,110 +2122,98 @@ const ActiveProject = () => {
       </div>
 
       {/* Filters */}
-      <div className="row mb-4">
-        <div className="col-md-6">
-          <div className="d-flex  gap-2">
-            <button
-              className={`gradient-button ${
-                activeButton === "all" ? "active-filter" : ""
-              }`}
-              onClick={() => handleCardFilter("all")}
-            >
-              All
-            </button>
-            <button
-              className={`gradient-button ${
-                activeButton === "nearDue" ? "active-filter" : ""
-              }`}
-              onClick={() => handleCardFilter("nearDue")}
-            >
-              Near Due
-            </button>
-            <button
-              className={`gradient-button ${
-                activeButton === "overdue" ? "active-filter" : ""
-              }`}
-              onClick={() => handleCardFilter("overdue")}
-            >
-              Over Due
-            </button>
-            <button
-              className={`gradient-button ${
-                activeButton === "Adobe" ? "active-filter" : ""
-              }`}
-              onClick={() => handleCardFilter("Adobe")}
-            >
-              Adobe
-            </button>
-            <button
-              className={`gradient-button ${
-                activeButton === "MSOffice" ? "active-filter" : ""
-              }`}
-              onClick={() => handleCardFilter("MSOffice")}
-            >
-              MS Office
-            </button>
-          </div>
-        </div>
-        <div
-          className="col-md-6
-         d-flex gap-2"
+      <div className="row mb-4 gy-3">
+  {/* Buttons Section */}
+  <div className="col-12 col-lg-6">
+    <div className="d-flex flex-wrap gap-2 justify-content-start">
+      {["all", "nearDue", "overdue", "Adobe", "MSOffice"].map((btn) => (
+        <button
+          key={btn}
+          className={`gradient-button ${
+            activeButton === btn ? "active-filter" : ""
+          }`}
+          onClick={() => handleCardFilter(btn)}
         >
-          <div className=" ">
-            <select
-              className="form-select"
-              value={clientFilter}
-              onChange={(e) => setClientFilter(e.target.value)}
-            >
-              <option value="">All Clients</option>
-              {getUniqueValues("client").map((client, index) => (
-                <option key={index} value={client}>
-                  {client}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="">
-            <select
-              className="form-select"
-              value={taskFilter}
-              onChange={(e) => setTaskFilter(e.target.value)}
-            >
-              <option value="">All Tasks</option>
-              {getUniqueValues("task").map((task, index) => (
-                <option key={index} value={task}>
-                  {task}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="  ">
-            <select
-              className="form-select"
-              value={languageFilter}
-              onChange={(e) => setLanguageFilter(e.target.value)}
-            >
-              {statuses.map((status, index) => (
-                <option key={index} value={status.key}>
-                  {status.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          {btn === "all"
+            ? "All"
+            : btn === "nearDue"
+            ? "Near Due"
+            : btn === "overdue"
+            ? "Over Due"
+            : btn === "Adobe"
+            ? "Adobe"
+            : "MS Office"}
+        </button>
+      ))}
+    </div>
+  </div>
 
-          <div className="">
-            <Select
-              options={applicationsOptio}
-              isMulti={false} // Single select
-              className="basic-single-select"
-              classNamePrefix="select"
-              value={selectedApplications}
-              placeholder="Select"
-              onChange={(selected) => setSelectedApplications(selected)}
-            />
-          </div>
-        </div>
+  {/* Filter Dropdowns Section */}
+  <div className="col-12 col-lg-6">
+    <div className="row g-2">
+      {/* Client Filter */}
+      <div className="col-12 col-sm-6 col-md-3">
+        <select
+          className="form-select"
+          value={clientFilter}
+          onChange={(e) => setClientFilter(e.target.value)}
+        >
+          <option value="">All Clients</option>
+          {getUniqueValues("client").map((client, index) => (
+            <option key={index} value={client}>
+              {client}
+            </option>
+          ))}
+        </select>
       </div>
+
+      {/* Task Filter */}
+      <div className="col-12 col-sm-6 col-md-3">
+        <select
+          className="form-select"
+          value={taskFilter}
+          onChange={(e) => setTaskFilter(e.target.value)}
+        >
+          <option value="">All Tasks</option>
+          {getUniqueValues("task").map((task, index) => (
+            <option key={index} value={task}>
+              {task}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Status/Language Filter */}
+      <div className="col-12 col-sm-6 col-md-3">
+        <select
+          className="form-select"
+          value={languageFilter}
+          onChange={(e) => setLanguageFilter(e.target.value)}
+        >
+          {statuses.map((status, index) => (
+            <option key={index} value={status.key}>
+              {status.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Application (Select component) */}
+      <div className="col-12 col-sm-6 col-md-3">
+        <Select
+          options={applicationsOptio}
+          isMulti={false}
+          classNamePrefix="select"
+          value={selectedApplications}
+          placeholder="Select App"
+          onChange={(selected) => setSelectedApplications(selected)}
+        />
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
       {/* Tabs */}
       <ul className="nav nav-tabs mb-4">
@@ -2416,7 +2404,7 @@ const ActiveProject = () => {
                                     style={{
                                       position: "sticky",
                                       top: 0,
-                                      zIndex: 2,
+                                      zIndex: 0,
                                       backgroundColor: "#fff", // Match your background color
                                     }}
                                   >
