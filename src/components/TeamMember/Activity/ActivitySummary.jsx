@@ -127,7 +127,15 @@ function ActivitySummary() {
                 <div className="table-responsive"
                   style={{ maxHeight: "400px", overflowY: "auto" }}>
                   <table className="table table-striped table-gradient-bg table-bordered">
-                    <thead className="table-light bg-dark">
+                     <thead
+                          className="table-gradient-bg table "
+                          style={{
+                            position: "sticky",
+                            top: 0,
+                            zIndex: 2,
+                            backgroundColor: "#fff", // Match your background color
+                          }}
+                        >
                       <tr>
                         <th className="text-start">ID</th> {/* New ID column */}
                         <th className="text-start">Task Name</th>

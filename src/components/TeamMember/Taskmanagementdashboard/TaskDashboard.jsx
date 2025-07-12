@@ -376,7 +376,15 @@ export const TaskDashboard = () => {
             <div className="table-responsive"
               style={{ maxHeight: "400px", overflowY: "auto" }}>
               <table className="table table-hover table-gradient-bg align-middle mb-0">
-                <thead className="table-light bg-dark .">
+                 <thead
+                          className="table-gradient-bg table "
+                          style={{
+                            position: "sticky",
+                            top: 0,
+                            zIndex: 2,
+                            backgroundColor: "#fff", // Match your background color
+                          }}
+                        >
                   <tr>
                     <th>S. No.</th> {/* Changed from ID to Serial Number */}
                     <th

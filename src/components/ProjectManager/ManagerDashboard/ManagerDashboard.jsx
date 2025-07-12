@@ -74,7 +74,6 @@ function ManagerDashboard() {
       className="container-fluid bg-card py-3"
       style={{ minHeight: "100vh" }}
     >
-   
       <h2 className="gradient-heading ">Manager Dashboard</h2>
 
       <div className="container-fluid mb-5">
@@ -262,7 +261,15 @@ function ManagerDashboard() {
                 style={{ maxHeight: "400px", overflowY: "auto" }}
               >
                 <table className="table table-hover mb-0 table-gradient-bg">
-                  <thead className="table-light bg-dark">
+                  <thead
+                    className="table-gradient-bg table "
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 2,
+                      backgroundColor: "#fff", // Match your background color
+                    }}
+                  >
                     <tr>
                       <th scope="col">ID</th>
                       <th scope="col">Project</th>

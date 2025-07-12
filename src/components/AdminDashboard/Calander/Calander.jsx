@@ -5,25 +5,22 @@ import Form from "react-bootstrap/Form";
 import Table from "react-bootstrap/Table";
 import moment from "moment";
 
-
-
 const calendarEvents = [
   {
     id: 1,
     type: "Birthday",
     name: "Michael Brown",
-    date: "2025-07-10"
+    date: "2025-07-10",
   },
   {
     id: 2,
     type: "Holiday",
     title: "Company Holiday",
-    date: "2025-07-10"
-  }
+    date: "2025-07-10",
+  },
 ];
 
-
-const Calendar = ({ userRole}) => {
+const Calendar = ({ userRole }) => {
   // State for calendar data and UI
   const [currentMonth, setCurrentMonth] = useState("June 2025");
   const [selectedFilters, setSelectedFilters] = useState({
@@ -39,15 +36,15 @@ const Calendar = ({ userRole}) => {
   const [selectedDate, setSelectedDate] = useState(new Date(2025, 5, 25));
   const [events, setEvents] = useState([]);
   // modal
-// const [showModal, setShowModal] = useState(false);
+  // const [showModal, setShowModal] = useState(false);
 
-//    const modalBirthdays = [
-//   { id: 1, title: "Michael Brown", date: "2025-06-01" },
-// ];
+  //    const modalBirthdays = [
+  //   { id: 1, title: "Michael Brown", date: "2025-06-01" },
+  // ];
 
-// const modalHolidays = [
-//   { id: 1, title: "Company Holiday 1", date: "2025-06-01" },
-// ];
+  // const modalHolidays = [
+  //   { id: 1, title: "Company Holiday 1", date: "2025-06-01" },
+  // ];
 
   // State for company holidays management
   const [showHolidayModal, setShowHolidayModal] = useState(false);
@@ -65,16 +62,9 @@ const Calendar = ({ userRole}) => {
 
   // Load mock data
 
- const birthdayEvents = [
-    { name: "Michael Brown", date: "Jun 1, 2025" }
-  ];
+  const birthdayEvents = [{ name: "Michael Brown", date: "Jun 1, 2025" }];
 
-  const holidayEvents = [
-    { title: "Company Holiday 1", date: "Jun 1, 2025" }
-  ];
-
-
-
+  const holidayEvents = [{ title: "Company Holiday 1", date: "Jun 1, 2025" }];
 
   useEffect(() => {
     const mockEvents = [
@@ -403,317 +393,338 @@ const Calendar = ({ userRole}) => {
     setShowAddEventModal(false);
   };
 
-
-
-
-
-
-
   return (
     <div className="container-fluid py-4">
       <div className="row">
-      <div className="p-3 rounded shadow bg-card col-8">
-        <div className="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
-          <h2 className="gradient-heading">Calendar</h2>
-          <div className="d-flex flex-wrap gap-2 align-items-center">
-            <button
-              className="btn btn-primary"
-              onClick={openAddEventModal}
-              style={{ fontWeight: 500 }}
-            >
-              + Add Event
-            </button>
-            
-            <button
-              className={`btn btn-xs me-1 mb-1 ${
-                selectedFilters.dob ? "btn-danger" : "btn-outline-danger"
-              }`}
-              onClick={() => toggleFilter("dob")}
-            >
-              Birthdays
-            </button>
+        <div className="p-3 rounded shadow bg-card col-8">
+          <div className="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+            <h2 className="gradient-heading">Calendar</h2>
+            <div className="d-flex flex-wrap gap-2 align-items-center">
+              <button
+                className="btn btn-primary"
+                onClick={openAddEventModal}
+                style={{ fontWeight: 500 }}
+              >
+                + Add Event
+              </button>
 
-            <button
-              className={`btn btn-xs me-1 mb-1 ${
-                selectedFilters.doj ? "btn-primary" : "btn-outline-primary"
-              }`}
-              onClick={() => toggleFilter("doj")}
-            >
-              Joining Dates
-            </button>
-
-            <button
-              className={`btn btn-xs me-1 mb-1 ${
-                selectedFilters.companyHoliday
-                  ? "btn-success"
-                  : "btn-outline-success"
-              }`}
-              onClick={() => toggleFilter("companyHoliday")}
-            >
-              Company Holidays
-            </button>
-
-            {(userRole === "admin" || userRole === "manager") && (
               <button
                 className={`btn btn-xs me-1 mb-1 ${
-                  selectedFilters.clientHoliday
-                    ? "btn-info"
-                    : "btn-outline-info"
+                  selectedFilters.dob ? "btn-danger" : "btn-outline-danger"
                 }`}
-                onClick={() => toggleFilter("clientHoliday")}
+                onClick={() => toggleFilter("dob")}
               >
-                Client Holidays
+                Birthdays
               </button>
-            )}
 
-            {(userRole === "admin" || userRole === "manager") && (
               <button
                 className={`btn btn-xs me-1 mb-1 ${
-                  selectedFilters.approvedLeave
-                    ? "btn-warning"
-                    : "btn-outline-warning"
+                  selectedFilters.doj ? "btn-primary" : "btn-outline-primary"
                 }`}
-                onClick={() => toggleFilter("approvedLeave")}
+                onClick={() => toggleFilter("doj")}
               >
-                Leaves
+                Joining Dates
               </button>
-            )}
 
-            {(userRole === "admin" || userRole === "manager") && (
               <button
                 className={`btn btn-xs me-1 mb-1 ${
-                  selectedFilters.weekOff
-                    ? "btn-secondary"
-                    : "btn-outline-secondary"
+                  selectedFilters.companyHoliday
+                    ? "btn-success"
+                    : "btn-outline-success"
                 }`}
-                onClick={() => toggleFilter("weekOff")}
+                onClick={() => toggleFilter("companyHoliday")}
               >
-                Week Offs
+                Company Holidays
               </button>
-            )}
 
-            {userRole === "admin" && (
+              {(userRole === "admin" || userRole === "manager") && (
+                <button
+                  className={`btn btn-xs me-1 mb-1 ${
+                    selectedFilters.clientHoliday
+                      ? "btn-info"
+                      : "btn-outline-info"
+                  }`}
+                  onClick={() => toggleFilter("clientHoliday")}
+                >
+                  Client Holidays
+                </button>
+              )}
+
+              {(userRole === "admin" || userRole === "manager") && (
+                <button
+                  className={`btn btn-xs me-1 mb-1 ${
+                    selectedFilters.approvedLeave
+                      ? "btn-warning"
+                      : "btn-outline-warning"
+                  }`}
+                  onClick={() => toggleFilter("approvedLeave")}
+                >
+                  Leaves
+                </button>
+              )}
+
+              {(userRole === "admin" || userRole === "manager") && (
+                <button
+                  className={`btn btn-xs me-1 mb-1 ${
+                    selectedFilters.weekOff
+                      ? "btn-secondary"
+                      : "btn-outline-secondary"
+                  }`}
+                  onClick={() => toggleFilter("weekOff")}
+                >
+                  Week Offs
+                </button>
+              )}
+
+              {userRole === "admin" && (
+                <button
+                  className={`btn btn-xs mb-1 ${
+                    selectedFilters.note ? "btn-dark" : "btn-outline-dark"
+                  }`}
+                  onClick={() => toggleFilter("note")}
+                >
+                  Notes
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+            <div className="d-flex align-items-center mb-2">
               <button
-                className={`btn btn-xs mb-1 ${
-                  selectedFilters.note ? "btn-dark" : "btn-outline-dark"
-                }`}
-                onClick={() => toggleFilter("note")}
+                className="btn btn-xs btn-secondary me-2"
+                onClick={handleTodayClick}
               >
-                Notes
+                Today
               </button>
-            )}
-          </div>
-        </div>
-
-        <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-          <div className="d-flex align-items-center mb-2">
-            <button
-              className="btn btn-xs btn-secondary me-2"
-              onClick={handleTodayClick}
-            >
-              Today
-            </button>
-            <h5 className="mb-0 me-2">{currentMonth}</h5>
-          </div>
-          <div className="d-flex gap-1 align-items-center mb-2">
-            <select
-              className="form-select form-select-xs"
-              value={viewMode}
-              onChange={(e) => setViewMode(e.target.value)}
-              style={{ width: "80px" }}
-            >
-              <option value="month">Month</option>
-              <option value="week">Week</option>
-              <option value="day">Day</option>
-            </select>
-            <select
-              className="form-select form-select-xs"
-              value={selectedDate.getMonth()}
-              onChange={(e) => {
-                const newDate = new Date(selectedDate);
-                newDate.setMonth(parseInt(e.target.value));
-                setSelectedDate(newDate);
-                setCurrentMonth(
-                  newDate.toLocaleDateString("en-US", {
-                    month: "long",
-                    year: "numeric",
-                  })
-                );
-              }}
-              style={{ width: "90px" }}
-            >
-              {Array.from({ length: 12 }, (_, i) =>
-                new Date(0, i).toLocaleString("default", { month: "long" })
-              ).map((month, i) => (
-                <option key={month} value={i}>
-                  {month}
-                </option>
-              ))}
-            </select>
-            <select
-              className="form-select form-select-xs"
-              value={selectedDate.getFullYear()}
-              onChange={(e) => {
-                const newDate = new Date(selectedDate);
-                newDate.setFullYear(parseInt(e.target.value));
-                setSelectedDate(newDate);
-                setCurrentMonth(
-                  newDate.toLocaleDateString("en-US", {
-                    month: "long",
-                    year: "numeric",
-                  })
-                );
-              }}
-              style={{ width: "80px" }}
-            >
-              {Array.from({ length: 10 }, (_, i) => 2020 + i).map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="mb-3 d-flex flex-wrap gap-1 table-gradient-bg">
-          {selectedFilters.dob && (
-            <span className="badge bg-danger me-1">Birthdays</span>
-          )}
-          {selectedFilters.doj && (
-            <span className="badge bg-primary me-1">Joining Dates</span>
-          )}
-          {selectedFilters.companyHoliday && (
-            <span className="badge bg-success me-1">Company Holidays</span>
-          )}
-          {selectedFilters.clientHoliday && (
-            <span className="badge bg-info me-1">Client Holidays</span>
-          )}
-          {selectedFilters.approvedLeave && (
-            <span className="badge bg-warning me-1">Leaves</span>
-          )}
-          {selectedFilters.weekOff && (
-            <span className="badge bg-secondary me-1">Week Offs</span>
-          )}
-          {selectedFilters.note && (
-            <span className="badge bg-dark me-1">Notes</span>
-          )}
-        </div>
-
-        <div className="table-responsive table-gradient-bg">
-          <table className="table table-bordered text-center ">
-            <thead className="table">
-              <tr>
-                {weekdays.map((day) => (
-                  <th key={day}>{day}</th>
+              <h5 className="mb-0 me-2">{currentMonth}</h5>
+            </div>
+            <div className="d-flex gap-1 align-items-center mb-2">
+              <select
+                className="form-select form-select-xs"
+                value={viewMode}
+                onChange={(e) => setViewMode(e.target.value)}
+                style={{ width: "80px" }}
+              >
+                <option value="month">Month</option>
+                <option value="week">Week</option>
+                <option value="day">Day</option>
+              </select>
+              <select
+                className="form-select form-select-xs"
+                value={selectedDate.getMonth()}
+                onChange={(e) => {
+                  const newDate = new Date(selectedDate);
+                  newDate.setMonth(parseInt(e.target.value));
+                  setSelectedDate(newDate);
+                  setCurrentMonth(
+                    newDate.toLocaleDateString("en-US", {
+                      month: "long",
+                      year: "numeric",
+                    })
+                  );
+                }}
+                style={{ width: "90px" }}
+              >
+                {Array.from({ length: 12 }, (_, i) =>
+                  new Date(0, i).toLocaleString("default", { month: "long" })
+                ).map((month, i) => (
+                  <option key={month} value={i}>
+                    {month}
+                  </option>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {calendarWeeks.map((week, weekIndex) => (
-                <tr key={weekIndex}>
-                  {week.map((day, dayIndex) => (
-                    <td
-                      key={dayIndex}
-                      className={`${day ? "" : ""} ${
-                        day && isToday(day) ? "today-cell" : ""
-                      }`}
-                      onClick={() => day && openHolidayModal(day)}
-                    >
-                      {day ? (
-                        <>
-                          <div
-                            className={`fw-bold ${
-                              isToday(day) ? "text-white" : ""
-                            }`}
-                          >
-                            {day.getDate()}
-                          </div>
-                          <div className="d-flex flex-column gap-1">
-                            {getFilteredEvents(day).map((event, idx) => (
-                              <span
-                                key={idx}
-                                className={`badge ${event.color} text-white text-truncate`}
-                                title={
-                                  event.title +
-                                  (event.content ? `: ${event.content}` : "")
-                                }
-                              >
-                                {event.title}
-                              </span>
-                            ))}
-                          </div>
-                        </>
-                      ) : (
-                        ""
-                      )}
-                    </td>
+              </select>
+              <select
+                className="form-select form-select-xs"
+                value={selectedDate.getFullYear()}
+                onChange={(e) => {
+                  const newDate = new Date(selectedDate);
+                  newDate.setFullYear(parseInt(e.target.value));
+                  setSelectedDate(newDate);
+                  setCurrentMonth(
+                    newDate.toLocaleDateString("en-US", {
+                      month: "long",
+                      year: "numeric",
+                    })
+                  );
+                }}
+                style={{ width: "80px" }}
+              >
+                {Array.from({ length: 10 }, (_, i) => 2020 + i).map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div className="mb-3 d-flex flex-wrap gap-1 table-gradient-bg">
+            {selectedFilters.dob && (
+              <span className="badge bg-danger me-1">Birthdays</span>
+            )}
+            {selectedFilters.doj && (
+              <span className="badge bg-primary me-1">Joining Dates</span>
+            )}
+            {selectedFilters.companyHoliday && (
+              <span className="badge bg-success me-1">Company Holidays</span>
+            )}
+            {selectedFilters.clientHoliday && (
+              <span className="badge bg-info me-1">Client Holidays</span>
+            )}
+            {selectedFilters.approvedLeave && (
+              <span className="badge bg-warning me-1">Leaves</span>
+            )}
+            {selectedFilters.weekOff && (
+              <span className="badge bg-secondary me-1">Week Offs</span>
+            )}
+            {selectedFilters.note && (
+              <span className="badge bg-dark me-1">Notes</span>
+            )}
+          </div>
+
+          <div className="table-responsive table-gradient-bg">
+            <table className="table table-bordered text-center ">
+              <thead
+                className="table-gradient-bg table "
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backgroundColor: "#fff", // Match your background color
+                }}
+              >
+                <tr  className="text-center">
+                  {weekdays.map((day) => (
+                    <th key={day}>{day}</th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {calendarWeeks.map((week, weekIndex) => (
+                  <tr key={weekIndex}  className="text-center">
+                    {week.map((day, dayIndex) => (
+                      <td
+                        key={dayIndex}
+                        className={`${day ? "" : ""} ${
+                          day && isToday(day) ? "today-cell" : ""
+                        }`}
+                        onClick={() => day && openHolidayModal(day)}
+                      >
+                        {day ? (
+                          <>
+                            <div
+                              className={`fw-bold ${
+                                isToday(day) ? "text-white" : ""
+                              }`}
+                            >
+                              {day.getDate()}
+                            </div>
+                            <div className="d-flex flex-column gap-1">
+                              {getFilteredEvents(day).map((event, idx) => (
+                                <span
+                                  key={idx}
+                                  className={`badge ${event.color} text-white text-truncate`}
+                                  title={
+                                    event.title +
+                                    (event.content ? `: ${event.content}` : "")
+                                  }
+                                >
+                                  {event.title}
+                                </span>
+                              ))}
+                            </div>
+                          </>
+                        ) : (
+                          ""
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-      <div className="col-4 ">
-         <div className="bg-card bg-white shadow-sm p-3" style={{ maxWidth: "400px" }}>
-      <h5 className="mb-3 fw-bold">Events Today</h5>
+        <div className="col-4 ">
+          <div
+            className="bg-card bg-white shadow-sm p-3"
+            style={{ maxWidth: "400px" }}
+          >
+            <h5 className="mb-3 fw-bold">Events Today</h5>
 
-      {/* Birthdays */}
-      {birthdayEvents.length > 0 && (
-        <>
-          <h6 className="text-danger fw-bold">Birthdays</h6>
-          <div className="table-responsive">
-          <table className="table table-bordered table-sm mb-4 table-gradient-bg">
-            <thead className="table ">
-              <tr>
-                <th>Name</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {birthdayEvents.map((event, idx) => (
-                <tr key={idx}>
-                  <td>{event.name}</td>
-                  <td>{moment(event.date).format("MMM D, YYYY")}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            {/* Birthdays */}
+            {birthdayEvents.length > 0 && (
+              <>
+                <h6 className="text-danger fw-bold">Birthdays</h6>
+                <div className="table-responsive">
+                  <table className="table table-bordered table-sm mb-4 table-gradient-bg">
+                    <thead
+                      className="table-gradient-bg table "
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 2,
+                        backgroundColor: "#fff", // Match your background color
+                      }}
+                    >
+                      <tr  className="text-center">
+                        <th>Name</th>
+                        <th>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {birthdayEvents.map((event, idx) => (
+                        <tr key={idx}  className="text-center">
+                          <td>{event.name}</td>
+                          <td>{moment(event.date).format("MMM D, YYYY")}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+
+            {/* Company Holidays */}
+            {holidayEvents.length > 0 && (
+              <>
+                <h6 className="text-success fw-bold">Company Holidays</h6>
+                <div className="table-responsive">
+                  <table className="table table-bordered table-sm table-gradient-bg">
+                    <thead
+                      className="table-gradient-bg table "
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 2,
+                        backgroundColor: "#fff", // Match your background color
+                      }}
+                    >
+                      <tr  className="text-center">
+                        <th>Title</th>
+                        <th>Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {holidayEvents.map((event, idx) => (
+                        <tr key={idx}  className="text-center">
+                          <td>{event.title}</td>
+                          <td>{moment(event.date).format("MMM D, YYYY")}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+
+            {birthdayEvents.length === 0 && holidayEvents.length === 0 && (
+              <p className="text-muted">No events for today.</p>
+            )}
           </div>
-        </>
-      )}
-
-      {/* Company Holidays */}
-      {holidayEvents.length > 0 && (
-        <>
-          <h6 className="text-success fw-bold">Company Holidays</h6>
-          <div className="table-responsive">
-          <table className="table table-bordered table-sm table-gradient-bg">
-            <thead className="table">
-              <tr>
-                <th>Title</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {holidayEvents.map((event, idx) => (
-                <tr key={idx}>
-                  <td>{event.title}</td>
-                  <td>{moment(event.date).format("MMM D, YYYY")}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-        </>
-      )}
-
-      {birthdayEvents.length === 0 && holidayEvents.length === 0 && (
-        <p className="text-muted">No events for today.</p>
-      )}
-    </div>
-      </div>
+        </div>
       </div>
 
       {/* Events Summary Table */}
@@ -725,15 +736,23 @@ const Calendar = ({ userRole}) => {
           <div className="mb-4">
             <h5 className="text-danger">Birthdays</h5>
             <Table striped bordered hover responsive>
-              <thead>
-                <tr>
+              <thead
+                className="table-gradient-bg table "
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backgroundColor: "#fff", // Match your background color
+                }}
+              >
+                <tr  className="text-center">
                   <th style={{ width: "60%", textAlign: "left" }}>Employee</th>
                   <th style={{ width: "40%", textAlign: "left" }}>Date</th>
                 </tr>
               </thead>
               <tbody>
                 {birthdays.map((event) => (
-                  <tr key={`dob-${event.id}`}>
+                  <tr key={`dob-${event.id}`}  className="text-center">
                     <td style={{ textAlign: "left" }}>{event.title}</td>
                     <td style={{ textAlign: "left" }}>
                       {formatDate(event.date)}
@@ -757,8 +776,16 @@ const Calendar = ({ userRole}) => {
           <div className="mb-4 ">
             <h5 className="text-success">Company Holidays</h5>
             <Table striped bordered hover responsive>
-              <thead>
-                <tr>
+              <thead
+                className="table-gradient-bg table "
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backgroundColor: "#fff", // Match your background color
+                }}
+              >
+                <tr  className="text-center">
                   <th style={{ width: "60%", textAlign: "left" }}>Title</th>
                   <th style={{ width: "40%", textAlign: "left" }}>Date</th>
                 </tr>
@@ -767,7 +794,7 @@ const Calendar = ({ userRole}) => {
                 {events
                   .filter((event) => event.type === "companyHoliday")
                   .map((event) => (
-                    <tr key={`holiday-${event.id}`}>
+                    <tr key={`holiday-${event.id}`}  className="text-center">
                       <td style={{ textAlign: "left" }}>{event.title}</td>
                       <td style={{ textAlign: "left" }}>
                         {formatDate(event.date)}
@@ -802,8 +829,16 @@ const Calendar = ({ userRole}) => {
         <div className="mb-4">
           <h5 style={{ color: "#3fa9f5" }}>Joining Dates</h5>
           <Table striped bordered hover responsive>
-            <thead>
-              <tr>
+            <thead
+              className="table-gradient-bg table "
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 2,
+                backgroundColor: "#fff", // Match your background color
+              }}
+            >
+              <tr  className="text-center">
                 <th style={{ width: "60%", textAlign: "left" }}>Employee</th>
                 <th style={{ width: "40%", textAlign: "left" }}>
                   Joining Date
@@ -814,7 +849,7 @@ const Calendar = ({ userRole}) => {
               {events
                 .filter((event) => event.type === "doj")
                 .map((event) => (
-                  <tr key={`doj-${event.id}`}>
+                  <tr key={`doj-${event.id}`}  className="text-center">
                     <td style={{ textAlign: "left" }}>{event.title}</td>
                     <td style={{ textAlign: "left" }}>
                       {formatDate(event.date)}
@@ -836,8 +871,16 @@ const Calendar = ({ userRole}) => {
         <div className="mb-4">
           <h5 style={{ color: "#ff9800" }}>Approved Leave</h5>
           <Table striped bordered hover responsive>
-            <thead>
-              <tr>
+            <thead
+              className="table-gradient-bg table "
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 2,
+                backgroundColor: "#fff", // Match your background color
+              }}
+            >
+              <tr  className="text-center">
                 <th style={{ width: "60%", textAlign: "left" }}>Employee</th>
                 <th style={{ width: "40%", textAlign: "left" }}>Date</th>
               </tr>
@@ -846,7 +889,7 @@ const Calendar = ({ userRole}) => {
               {events
                 .filter((event) => event.type === "approvedLeave")
                 .map((event) => (
-                  <tr key={`leave-${event.id}`}>
+                  <tr key={`leave-${event.id}`}  className="text-center">
                     <td style={{ textAlign: "left" }}>{event.title}</td>
                     <td style={{ textAlign: "left" }}>
                       {formatDate(event.date)}
@@ -870,8 +913,16 @@ const Calendar = ({ userRole}) => {
           <div className="mb-4">
             <h5 style={{ color: "#ffe100" }}>Notes</h5>
             <Table striped bordered hover responsive>
-              <thead>
-                <tr>
+              <thead
+                className="table-gradient-bg table "
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backgroundColor: "#fff", // Match your background color
+                }}
+              >
+                <tr  className="text-center">
                   <th>Title</th>
                   <th>Joining Date</th>
                 </tr>
@@ -880,7 +931,7 @@ const Calendar = ({ userRole}) => {
                 {events
                   .filter((event) => event.type === "note")
                   .map((event) => (
-                    <tr key={`note-${event.id}`}>
+                    <tr key={`note-${event.id}`}  className="text-center">
                       <td>{event.title}</td>
                       <td>{formatDate(event.date)}</td>
                     </tr>
@@ -900,71 +951,77 @@ const Calendar = ({ userRole}) => {
       </div>
 
       {/* Company Holiday Modal */}
-    <Modal className="custom-modal-dark" show={showHolidayModal} onHide={() => setShowHolidayModal(false)}>
-  <Modal.Header closeButton>
-    <Modal.Title>
-      {editingHolidayId ? "Edit Company Holiday" : "Add Company Holiday"}
-    </Modal.Title>
-  </Modal.Header>
+      <Modal
+        className="custom-modal-dark"
+        show={showHolidayModal}
+        onHide={() => setShowHolidayModal(false)}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {editingHolidayId ? "Edit Company Holiday" : "Add Company Holiday"}
+          </Modal.Title>
+        </Modal.Header>
 
-  {/* ✅ UPDATED CONTENT START */}
-  <Modal.Body>
-    {/* 🎂 Birthdays Section */}
-    <div className="mb-4">
-      <h6 className="text-danger fw-bold">Birthdays</h6>
-      {birthdays.length > 0 ? (
-        birthdays.map((b, i) => (
-          <div key={i} className="d-flex gap-2 mb-2">
-            <Form.Control value={b.name}  />
-            <Form.Control
-              value={new Date(b.date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })}
-              disabled
-            />
+        {/* ✅ UPDATED CONTENT START */}
+        <Modal.Body>
+          {/* 🎂 Birthdays Section */}
+          <div className="mb-4">
+            <h6 className="text-danger fw-bold">Birthdays</h6>
+            {birthdays.length > 0 ? (
+              birthdays.map((b, i) => (
+                <div key={i} className="d-flex gap-2 mb-2">
+                  <Form.Control value={b.name} />
+                  <Form.Control
+                    value={new Date(b.date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                    disabled
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="text-muted">No birthdays found.</div>
+            )}
           </div>
-        ))
-      ) : (
-        <div className="text-muted">No birthdays found.</div>
-      )}
-    </div>
 
-    {/* 🏖 Company Holidays Section */}
-    <div>
-      <h6 className="text-success fw-bold ">Company Holidays</h6>
-      {companyHolidays.length > 0 ? (
-        companyHolidays.map((h, i) => (
-          <div key={i} className="d-flex gap-2 mb-2">
-            <Form.Control value={h.title}  />
-            <Form.Control
-              value={new Date(h.date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })}
-              disabled
-            />
+          {/* 🏖 Company Holidays Section */}
+          <div>
+            <h6 className="text-success fw-bold ">Company Holidays</h6>
+            {companyHolidays.length > 0 ? (
+              companyHolidays.map((h, i) => (
+                <div key={i} className="d-flex gap-2 mb-2">
+                  <Form.Control value={h.title} />
+                  <Form.Control
+                    value={new Date(h.date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                    disabled
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="text-muted">No company holidays found.</div>
+            )}
           </div>
-        ))
-      ) : (
-        <div className="text-muted">No company holidays found.</div>
-      )}
-    </div>
-  </Modal.Body>
-  {/* ✅ UPDATED CONTENT END */}
+        </Modal.Body>
+        {/* ✅ UPDATED CONTENT END */}
 
-  <Modal.Footer>
-    <Button variant="secondary" onClick={() => setShowHolidayModal(false)}>
-      Cancel
-    </Button>
-    <Button variant="primary" onClick={saveHoliday}>
-      {editingHolidayId ? "Update" : "Save"}
-    </Button>
-  </Modal.Footer>
-</Modal>
-
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowHolidayModal(false)}
+          >
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={saveHoliday}>
+            {editingHolidayId ? "Update" : "Save"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* Add Event Modal */}
       <Modal
@@ -1024,9 +1081,6 @@ const Calendar = ({ userRole}) => {
           </Button>
         </Modal.Footer>
       </Modal>
-
-     
-      
 
       <style jsx>{`
         .today-cell {

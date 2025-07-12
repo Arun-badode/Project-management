@@ -1090,7 +1090,7 @@ const AdminDashboard = () => {
             }}
           >
             <Table className="table-gradient-bg align-middle table table-bordered table-hover">
-             <thead
+              <thead
                 className="table-gradient-bg table"
                 style={{
                   position: "sticky",
@@ -1217,7 +1217,7 @@ const AdminDashboard = () => {
             }}
           >
             <Table className="table-gradient-bg align-middle table table-bordered table-hover">
-             <thead
+              <thead
                 className="table-gradient-bg table"
                 style={{
                   position: "sticky",
@@ -1319,15 +1319,15 @@ const AdminDashboard = () => {
         <Card className="text-white p-3 mb-4 table-gradient-bg">
           {/* ... other existing card code ... */}
           <table className="table table-hover mb-0">
-           <thead
-                className="table-gradient-bg table"
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 2,
-                  backgroundColor: "#fff", // Match your background color
-                }}
-              >
+            <thead
+              className="table-gradient-bg table"
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 2,
+                backgroundColor: "#fff", // Match your background color
+              }}
+            >
               <tr className="text-center">
                 <th>Employee</th>
                 <th>Department</th>

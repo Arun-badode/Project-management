@@ -6,7 +6,6 @@ import useSyncScroll from "../Hooks/useSyncScroll";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
@@ -687,13 +686,11 @@ const ActiveProject = () => {
     });
   }
 
-
-    const [dateTime, setDateTime] = useState(null);
+  const [dateTime, setDateTime] = useState(null);
 
   const handleChange = (value) => {
     setDateTime(value);
   };
-
 
   return (
     <div className="container-fluid py-4">
@@ -1110,16 +1107,16 @@ const ActiveProject = () => {
                     </div>
                     <div className="table-responsive">
                       <table className="table table-bordered">
-                       <thead
-                className="table-gradient-bg table"
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 2,
-                  backgroundColor: "#fff", // Match your background color
-                }}
-              >
-                          <tr>
+                        <thead
+                          className="table-gradient-bg table"
+                          style={{
+                            position: "sticky",
+                            top: 0,
+                            zIndex: 2,
+                            backgroundColor: "#fff", // Match your background color
+                          }}
+                        >
+                          <tr className="text-center">
                             <th>
                               S.No.
                               <input
@@ -1145,7 +1142,7 @@ const ActiveProject = () => {
                         </thead>
                         <tbody>
                           {formData.files.map((file, idx) => (
-                            <tr key={idx}>
+                            <tr key={idx} className="text-center">
                               <td>
                                 <div className="d-flex align-items-center gap-2">
                                   {idx + 1}
@@ -1240,15 +1237,15 @@ const ActiveProject = () => {
                           Deadline
                         </label>
                         <DatePicker
-                        selected={selectedDateTime}
-                        onChange={(date) => setSelectedDateTime(date)}
-                        showTimeSelect
-                        timeFormat="HH:mm"
-                        timeIntervals={15} // 👈 15 minutes gap
-                        dateFormat="MMMM d, yyyy h:mm aa"
-                        placeholderText="Select date and time"
-                        className="form-control"
-                      />
+                          selected={selectedDateTime}
+                          onChange={(date) => setSelectedDateTime(date)}
+                          showTimeSelect
+                          timeFormat="HH:mm"
+                          timeIntervals={15} // 👈 15 minutes gap
+                          dateFormat="MMMM d, yyyy h:mm aa"
+                          placeholderText="Select date and time"
+                          className="form-control"
+                        />
 
                         <button
                           className="btn"
@@ -1724,7 +1721,7 @@ const ActiveProject = () => {
               className="table-gradient-bg align-middle mt-0 table table-bordered table-hover"
               style={{ minWidth: 1000 }}
             >
-             <thead
+              <thead
                 className="table-gradient-bg table"
                 style={{
                   position: "sticky",
@@ -1733,7 +1730,7 @@ const ActiveProject = () => {
                   backgroundColor: "#fff", // Match your background color
                 }}
               >
-                <tr>
+                <tr  className="text-center">
                   <th>S. No.</th>
                   <th>Project Title</th>
                   <th>Client</th>
@@ -1755,7 +1752,7 @@ const ActiveProject = () => {
                   <React.Fragment key={project.id}>
                     <tr
                       className={
-                        expandedRow === project.id ? "table-active" : ""
+                        expandedRow === project.id ? "table-active text-center" : ""
                       }
                     >
                       <td>{index + 1}</td>
@@ -1854,16 +1851,16 @@ const ActiveProject = () => {
                               {/* Files Table */}
                               <div className="table-responsive">
                                 <table className="table table-sm table-striped table-hover">
-                                 <thead
-                className="table-gradient-bg table"
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 2,
-                  backgroundColor: "#fff", // Match your background color
-                }}
-              >
-                                    <tr>
+                                  <thead
+                                    className="table-gradient-bg table"
+                                    style={{
+                                      position: "sticky",
+                                      top: 0,
+                                      zIndex: 2,
+                                      backgroundColor: "#fff", // Match your background color
+                                    }}
+                                  >
+                                    <tr  className="text-center">
                                       <th>
                                         <input
                                           type="checkbox"
@@ -1901,7 +1898,7 @@ const ActiveProject = () => {
                                           selectedFiles.some(
                                             (f) => f.id === file.id
                                           )
-                                            ? "table-primary"
+                                            ? "table-primary text-center"
                                             : ""
                                         }
                                       >

@@ -390,7 +390,15 @@ function ResourceWorkload() {
                   style={{ maxHeight: "400px", overflowY: "auto" }}
                 >
                   <table className="table table-hover  mb-0">
-                    <thead className="bg-dark  ">
+                   <thead
+                          className="table-gradient-bg table "
+                          style={{
+                            position: "sticky",
+                            top: 0,
+                            zIndex: 2,
+                            backgroundColor: "#fff", // Match your background color
+                          }}
+                        >
                       <tr>
                         <th>ID</th>
                         <th>Task</th>

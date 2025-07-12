@@ -922,95 +922,7 @@ const Project = () => {
               </div>
             ) : (
               <div className="card">
-                {/* <div className="table-responsive" style={{ overflowX: 'auto' }}>
-                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                    <thead className="bg-light table-gradient-bg">
-                      <tr>
-                        <th>Project Title</th>
-                        <th>Client</th>
-                        <th>Country</th>
-                        <th>Project Manager</th>
-                        <th>Tasks</th>
-                        <th>Languages</th>
-                        <th>application</th>
-                        <th>Total Pages</th>
-                        <th>Server Path</th>
-                        <th>Received Date</th>
-                        <th>Rate</th>
-                        <th>Cost</th>
-                        <th className="text-end">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredProjects.map(project => (
-                        <tr key={project.id}>
-                          <td>
-                            {project.title}
-                            <span className="badge text-dark ms-2">Draft</span>
-                          </td>
-                          <td>{project.client}</td>
-                          <td>{project.country}</td>
-                          <td>{project.projectManager}</td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.tasks.map((task) => (
-                                <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
-                                  {task}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.languages.map((language) => (
-                                <span key={language} className="badge bg-success bg-opacity-10 text-success">
-                                  {language}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <span className="badge bg-purple bg-opacity-10 text-purple">
-                              {project.application}
-                            </span>
-                          </td>
-                          <td>{project.totalPages}</td>
-                          <td>
-                            <span className="badge bg-light text-dark">
-                              {project.serverPath}
-                            </span>
-                          </td>
-                          <td>{new Date(project.receivedDate).toLocaleDateString()}</td>
-                          <td>{project.rate} {project.currency}</td>
-                          <td>{project.cost} {project.currency}</td>
-                          <td className="text-end">
-                            <div className="d-flex justify-content-end gap-2">
-                              <button
-                                onClick={() => {
-                                  const dueDate = prompt('Enter due date (YYYY-MM-DD):', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-                                  if (dueDate) markAsYTS(project.id, dueDate);
-                                }}
-                                className="btn btn-sm btn-primary"
-                              >
-                                Mark as YTS
-                              </button>
-                              <button
-                                onClick={() => handleEditProject(project.id)}
-                                className="btn btn-sm btn-success"
-                              >
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button className="btn btn-sm btn-danger">
-                                <i className="fas fa-trash-alt"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div> */}
-                {/* Fake Scrollbar */}
+               
                 <div
                   ref={fakeScrollbarRef1}
                   style={{
@@ -1051,7 +963,7 @@ const Project = () => {
                         backgroundColor: "#fff", // Match your background color
                       }}
                     >
-                      <tr>
+                      <tr  className="text-center">
                         <th>Project Title</th>
                         <th>Client</th>
                         <th>Country</th>
@@ -1069,7 +981,7 @@ const Project = () => {
                     </thead>
                     <tbody>
                       {filteredProjects.map((project) => (
-                        <tr key={project.id}>
+                        <tr key={project.id}  className="text-center">
                           <td>
                             {project.title}
                             <span className="badge bg-light text-dark ms-2">
@@ -1178,93 +1090,7 @@ const Project = () => {
               </div>
             ) : (
               <div className="card">
-                {/* <div className="table-responsive" style={{ overflowX: 'auto' }}>
-                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                    <thead className=" ">
-                      <tr>
-                        <th>Project Title</th>
-                        <th>Client</th>
-                        <th>Country</th>
-                        <th>Project Manager</th>
-                        <th>Due Date</th>
-                        <th>Progress</th>
-                        <th>Tasks</th>
-                        <th>Languages</th>
-                        <th>application</th>
-                        <th>Total Pages</th>
-                        <th className="text-end">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredProjects.map(project => (
-                        <tr key={project.id}>
-                          <td>
-                            {project.title}
-                            <span className="badge bg-warning bg-opacity-10 text-warning ms-2">Active</span>
-                          </td>
-                          <td>{project.client}</td>
-                          <td>{project.country}</td>
-                          <td>{project.projectManager}</td>
-                          <td>{new Date(project.dueDate).toLocaleDateString()}</td>
-                          <td>
-                            <div className="d-flex align-items-center">
-                              <div className="progress flex-grow-1 me-2" style={{ height: '6px' }}>
-                                <div
-                                  className="progress-bar bg-primary"
-                                  style={{ width: `${project.progress}%` }}
-                                ></div>
-                              </div>
-                              <small className="text-primary">{project.progress}%</small>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.tasks.map((task) => (
-                                <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
-                                  {task}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.languages.map((language) => (
-                                <span key={language} className="badge bg-success bg-opacity-10 text-success">
-                                  {language}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <span className="badge bg-purple bg-opacity-10 text-purple">
-                              {project.application}
-                            </span>
-                          </td>
-                          <td>{project.totalPages}</td>
-                          <td className="text-end">
-                            <div className="d-flex justify-content-end gap-2">
-                              <button
-                                onClick={() => markAsCompleted(project.id)}
-                                className="btn btn-sm btn-success"
-                              >
-                                Mark as Completed
-                              </button>
-                              <button
-                                onClick={() => handleEditProject(project.id)}
-                                className="btn btn-sm btn-success"
-                              >
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button className="btn btn-sm btn-danger">
-                                <i className="fas fa-trash-alt"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div> */}
+                
                 <div
                   ref={fakeScrollbarRef2}
                   style={{
@@ -1304,7 +1130,7 @@ const Project = () => {
                         backgroundColor: "#fff", // Match your background color
                       }}
                     >
-                      <tr>
+                      <tr  className="text-center">
                         <th>Project Title</th>
                         <th>Client</th>
                         <th>Country</th>
@@ -1320,7 +1146,7 @@ const Project = () => {
                     </thead>
                     <tbody>
                       {filteredProjects.map((project) => (
-                        <tr key={project.id}>
+                        <tr key={project.id}  className="text-center">
                           <td>
                             {project.title}
                             <span className="badge bg-warning bg-opacity-10 text-warning ms-2">
@@ -1540,7 +1366,7 @@ const Project = () => {
                           backgroundColor: "#fff", // Match your background color
                         }}
                       >
-                        <tr>
+                        <tr  className="text-center">
                           <th>Project Title</th>
                           <th>Client</th>
                           <th>Country</th>
@@ -1559,7 +1385,7 @@ const Project = () => {
                       </thead>
                       <tbody>
                         {filteredProjects.map((project) => (
-                          <tr key={project.id}>
+                          <tr key={project.id}  className="text-center">
                             <td>
                               {project.title}
                               <span className="badge bg-success bg-opacity-10 text-success ms-2">
@@ -1930,7 +1756,7 @@ const Project = () => {
                             backgroundColor: "#fff", // Match your background color
                           }}
                         >
-                          <tr>
+                          <tr  className="text-center">
                             <th>S.No.</th>
                             <th>File Name</th>
                             <th>Pages</th>
@@ -1941,7 +1767,7 @@ const Project = () => {
                         </thead>
                         <tbody>
                           {formData.files.map((file, idx) => (
-                            <tr key={idx}>
+                            <tr key={idx}  className="text-center">
                               <td>
                                 <div className="d-flex align-items-center gap-2">
                                   {idx + 1}
@@ -2267,400 +2093,6 @@ const Project = () => {
         </div>
       )}
 
-      {/* {showSettings && (
-        <div
-          className="modal fade show d-block custom-modal-dark"
-          tabIndex="-1"
-          aria-modal="true"
-          role="dialog"
-        >
-          <div className="modal-dialog modal-lg">
-            <div className="modal-content bg-dark text-white">
-              <div className="modal-header bg-dark border-secondary">
-                <h5 className="modal-title text-white">Settings</h5>
-                <button
-                  type="button"
-                  className="btn-close btn-close-white"
-                  onClick={() => setShowSettings(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <h6 className="text-white-50">
-                  Manage predefined lists for project creation and other
-                  application settings.
-                </h6>
-
-            
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Clients</h6>
-
-                  <div className="row mb-2">
-                    <div className="col-md-5 mb-2">
-                      <div className="input-group">
-                        <input
-                          className="form-control"
-                          style={{ background: "#181f3a", color: "#fff" }}
-                          placeholder="New Client Alias Name*"
-                          name="alias"
-                        />
-                        <button className="btn btn-gradient" type="button">
-                          +
-                        </button>
-                      </div>
-                    </div>
-                    <div className="col-md-6 mb-2">
-                      <div className="input-group">
-                        <input
-                          className="form-control"
-                          style={{ background: "#181f3a", color: "#fff" }}
-                          placeholder="Actual Client Name*"
-                          name="actual"
-                        />
-                        <button className="btn btn-gradient" type="button">
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="row mb-3">
-                
-                    <div className="col-md-4 mb-2">
-                      <div className="input-group">
-                        <input
-                          className="form-control"
-                          style={{ background: "#181f3a", color: "#fff" }}
-                          placeholder="Country*"
-                          name="country"
-                        />
-                        <button className="btn btn-gradient" type="button">
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                   
-                    <div className="col-md-6 mb-2">
-                      <div className="row">
-                   
-                        <div className="col-md-6 mb-2">
-                          <div className="input-group">
-                            <select
-                              className="form-control"
-                              style={{ background: "#181f3a", color: "#fff" }}
-                              name="currency"
-                            >
-                              <option value="">Currency*</option>
-                              {currencyOptions.map((cur) => (
-                                <option key={cur} value={cur}>
-                                  {cur}
-                                </option>
-                              ))}
-                            </select>
-                            <button className="btn btn-gradient" type="button">
-                              +
-                            </button>
-                          </div>
-                        </div>
-
-               
-                        <div className="col-md-6 mb-2">
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="00"
-                              name="hourlyRate"
-                              style={{ background: "#181f3a", color: "#fff" }}
-                            />
-                            <button className="btn btn-gradient" type="button">
-                              +
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-   
-                  <div className="mb-2">
-                    <div className="input-group">
-                      <input
-                        className="form-control"
-                        style={{ background: "#181f3a", color: "#fff" }}
-                        placeholder="Project Managers (comma-sep)"
-                        name="managers"
-                      />
-                      <button className="btn btn-gradient" type="button">
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    {clients.map((client, index) => (
-                      <div key={index}>
-                        <div className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-2 rounded">
-                          <span className="text-white">
-                            <strong>{client.alias}</strong> ({client.actualName}
-                            )<br />
-                            Country: {client.country}
-                            <br />
-                            PMs: {client.managers}
-                          </span>
-                          <div className="btn-group btn-group-sm gap-2">
-                            <button className="btn btn-outline-secondary  text-light">
-                              <i className="bi bi-pencil"></i>
-                            </button>
-                            <button
-                              className="btn btn-outline-danger"
-                              onClick={() =>
-                                handleDeleteItem(clients, setClients, index)
-                              }
-                            >
-                              <i className="fas fa-trash-alt"></i>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddClient}
-                    disabled={
-                      !newClient.alias ||
-                      !newClient.actualName ||
-                      !newClient.country
-                    }
-                  >
-                    <i className="fas fa-plus me-1"></i>
-                  </button>
-                </div>
-
-              
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Tasks List</h6>
-                  <div className="input-group mb-2">
-                    <input
-                      type="text"
-                      className="form-control bg-secondary text-white border-secondary"
-                      placeholder="New task..."
-                      value={newTask}
-                      onChange={(e) => setNewTask(e.target.value)}
-                    />
-                    <button className="btn btn-primary">+</button>
-                  </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    {tasks.map((task, index) => (
-                      <div
-                        key={index}
-                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
-                      >
-                        <span className="text-white">{task}</span>
-                        <div className="btn-group btn-group-sm gap-2">
-                          <button className="btn btn-outline-secondary  text-light">
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                          <button
-                            className="btn btn-outline-danger"
-                            onClick={() =>
-                              handleDeleteItem(tasks, setTasks, index)
-                            }
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-          
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Application List</h6>
-                  <div className="input-group mb-2">
-                    <input
-                      type="text"
-                      className="form-control bg-secondary text-white border-secondary"
-                      placeholder="New application..."
-                      value={newapplication}
-                      onChange={(e) => setNewapplication(e.target.value)}
-                    />
-                    <button className="btn btn-primary">+</button>
-                  </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    {applications.map((application, index) => (
-                      <div
-                        key={index}
-                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
-                      >
-                        <span className="text-white">{application}</span>
-                        <div className="btn-group btn-group-sm gap-2">
-                          <button className="btn btn-outline-secondary  text-light">
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                          <button
-                            className="btn btn-outline-danger"
-                            onClick={() =>
-                              handleDeleteItem(
-                                applications,
-                                setapplications,
-                                index
-                              )
-                            }
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddapplication}
-                    disabled={!newapplication}
-                  >
-                    <i className="fas fa-plus me-1"></i>
-                  </button>
-                </div>
-
-            
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Languages List</h6>
-                  <div className="input-group mb-2">
-                    <input
-                      type="text"
-                      className="form-control bg-secondary text-white border-secondary"
-                      placeholder="New language..."
-                      value={newLanguage}
-                      onChange={(e) => setNewLanguage(e.target.value)}
-                    />
-                    <button className="btn btn-primary">+</button>
-                  </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    {languages.map((language, index) => (
-                      <div
-                        key={index}
-                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
-                      >
-                        <span className="text-white">{language}</span>
-                        <div className="btn-group btn-group-sm gap-2">
-                          <button className="btn btn-outline-secondary  text-light">
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                          <button
-                            className="btn btn-outline-danger"
-                            onClick={() =>
-                              handleDeleteItem(languages, setLanguages, index)
-                            }
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-             
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Currency Conversion Rates</h6>
-                  <div className="row g-2 mb-2">
-                    <div className="col-md-6">
-                      <input
-                        type="text"
-                        className="form-control bg-card text-white border-secondary"
-                        placeholder="Currency (e.g. USD)"
-                        value={newCurrency.name}
-                        onChange={(e) =>
-                          setNewCurrency({
-                            ...newCurrency,
-                            name: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <input
-                        type="text"
-                        className="form-control bg-card text-white border-secondary"
-                        placeholder="Rate to INR"
-                        value={newCurrency.rate}
-                        onChange={(e) =>
-                          setNewCurrency({
-                            ...newCurrency,
-                            rate: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="border rounded p-2 mb-2 border-secondary table-gradient-bg">
-                    <table className="table table-dark table-sm mb-0">
-                      <thead>
-                        <tr>
-                          <th>Currency</th>
-                          <th>Rate to INR</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {currencies.map((currency, index) => (
-                          <tr key={index}>
-                            <td>{currency.name}</td>
-                            <td>{currency.rate}</td>
-                            <td>
-                              <div className="btn-group btn-group-sm">
-                                <button
-                                  className="btn btn-outline-danger"
-                                  onClick={() =>
-                                    handleDeleteItem(
-                                      currencies,
-                                      setCurrencies,
-                                      index
-                                    )
-                                  }
-                                >
-                                  <i className="fas fa-trash-alt"></i>
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-         
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Save All Settings</h6>
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    <p className="small text-white-50 mb-0">
-                      Remember to save your changes. Settings are stored
-                      locally.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="modal-footer  border-secondary">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowSettings(false)}
-                >
-                  Close
-                </button>
-                <button type="button" className="btn btn-primary">
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )} */}
 
       {showSettings && (
         <div

@@ -486,7 +486,7 @@ const TaskManagement = () => {
                   backgroundColor: "#fff", // Match your background color
                 }}
               >
-              <tr>
+              <tr  className="text-center">
                 <th>S. No.</th>
                 <th>Project Title</th>
                 <th>Client</th>
@@ -507,7 +507,7 @@ const TaskManagement = () => {
                   <React.Fragment key={project.id}>
                     <tr
                       className={
-                        expandedRow === project.id ? "table-active" : ""
+                        expandedRow === project.id ? "table-active text-center" : ""
                       }
                     >
                       <td>{index + 1}</td>
@@ -748,7 +748,7 @@ const TaskManagement = () => {
                                     backgroundColor: "#fff", // Match your background color
                                   }}
                                 >
-                                  <tr>
+                                  <tr  className="text-center">
                                     <th>
                                       <input
                                         type="checkbox"
@@ -788,7 +788,7 @@ const TaskManagement = () => {
                                         selectedFiles.some(
                                           (f) => f.id === file.id
                                         )
-                                          ? "table-primary"
+                                          ? "table-primary text-center"
                                           : ""
                                       }
                                     >

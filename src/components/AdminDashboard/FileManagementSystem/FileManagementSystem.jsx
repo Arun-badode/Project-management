@@ -1,8 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
-  FaTrash, FaThList, FaSearch, FaDownload,
-  FaClock, FaEllipsisV, FaFileWord, FaFilePdf,
-  FaFileExcel, FaFileImage, FaFileAlt, FaUpload,
+  FaTrash,
+  FaThList,
+  FaSearch,
+  FaDownload,
+  FaClock,
+  FaEllipsisV,
+  FaFileWord,
+  FaFilePdf,
+  FaFileExcel,
+  FaFileImage,
+  FaFileAlt,
+  FaUpload,
 } from "react-icons/fa";
 
 const prettySize = (bytes) =>
@@ -12,23 +21,33 @@ const prettySize = (bytes) =>
 
 const smIcon = (ext) => {
   switch (ext) {
-    case "docx": return <FaFileWord className="text-primary fs-4 me-2" />;
-    case "pdf": return <FaFilePdf className="text-danger fs-4 me-2" />;
-    case "xlsx": return <FaFileExcel className="text-success fs-4 me-2" />;
+    case "docx":
+      return <FaFileWord className="text-primary fs-4 me-2" />;
+    case "pdf":
+      return <FaFilePdf className="text-danger fs-4 me-2" />;
+    case "xlsx":
+      return <FaFileExcel className="text-success fs-4 me-2" />;
     case "psd":
-    case "ai": return <FaFileImage className="text-info fs-4 me-2" />;
-    default: return <FaFileAlt className="text-secondary fs-4 me-2" />;
+    case "ai":
+      return <FaFileImage className="text-info fs-4 me-2" />;
+    default:
+      return <FaFileAlt className="text-secondary fs-4 me-2" />;
   }
 };
 
 const lgIcon = (ext) => {
   switch (ext) {
-    case "docx": return <FaFileWord className="text-secondary fs-1" />;
-    case "pdf": return <FaFilePdf className="text-secondary fs-1" />;
-    case "xlsx": return <FaFileExcel className="text-secondary fs-1" />;
+    case "docx":
+      return <FaFileWord className="text-secondary fs-1" />;
+    case "pdf":
+      return <FaFilePdf className="text-secondary fs-1" />;
+    case "xlsx":
+      return <FaFileExcel className="text-secondary fs-1" />;
     case "psd":
-    case "ai": return <FaFileImage className="text-secondary fs-1" />;
-    default: return <FaFileAlt className="text-secondary fs-1" />;
+    case "ai":
+      return <FaFileImage className="text-secondary fs-1" />;
+    default:
+      return <FaFileAlt className="text-secondary fs-1" />;
   }
 };
 
@@ -145,8 +164,12 @@ const FileManagementSystem = () => {
                 placeholder="Search files..."
               />
             </div>
-            <select className="form-select"><option>All Projects</option></select>
-            <select className="form-select"><option>All Tasks</option></select>
+            <select className="form-select">
+              <option>All Projects</option>
+            </select>
+            <select className="form-select">
+              <option>All Tasks</option>
+            </select>
           </div>
         </div>
       </div>
@@ -158,7 +181,9 @@ const FileManagementSystem = () => {
               <div className="card bg-card h-100  shadow-sm">
                 <div className="card-body  text-center">
                   {lgIcon(f.extension)}
-                  <h6 className="mt-3">{f.name}.{f.extension}</h6>
+                  <h6 className="mt-3">
+                    {f.name}.{f.extension}
+                  </h6>
                   <small className=" d-block">
                     {f.size} • {f.version}
                   </small>
@@ -179,9 +204,19 @@ const FileManagementSystem = () => {
       ) : (
         <div className="table-responsive  rounded shadow-sm">
           <table className="table align-middle   table-hover mb-0 table-gradient-bg">
-            <thead className="table-light  text-uppercase">
-              <tr>
-                <th><input type="checkbox" /></th>
+            <thead
+              className="table-gradient-bg table "
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 2,
+                backgroundColor: "#fff", // Match your background color
+              }}
+            >
+              <tr  className="text-center">
+                <th>
+                  <input type="checkbox" />
+                </th>
                 <th>Name</th>
                 <th>Project</th>
                 <th>Task</th>
@@ -193,12 +228,16 @@ const FileManagementSystem = () => {
             </thead>
             <tbody>
               {files.map((f, i) => (
-                <tr key={i}>
-                  <td><input type="checkbox" /></td>
+                <tr key={i}  className="text-center">
+                  <td>
+                    <input type="checkbox" />
+                  </td>
                   <td className="d-flex  align-items-center">
                     {smIcon(f.extension)}
                     <div>
-                      <div className="fw-semibold">{f.name}.{f.extension}</div>
+                      <div className="fw-semibold">
+                        {f.name}.{f.extension}
+                      </div>
                       <small className=" ">.{f.extension}</small>
                     </div>
                   </td>
@@ -260,9 +299,7 @@ const FileManagementSystem = () => {
                   >
                     <FaUpload className="fs-2 mb-2 text-primary" />
                     <p className="mb-1">Drag &amp; drop files here</p>
-                    <p className="small mb-0">
-                      or click to browse
-                    </p>
+                    <p className="small mb-0">or click to browse</p>
                     <input
                       type="file"
                       multiple
@@ -294,176 +331,3 @@ const FileManagementSystem = () => {
 
 export default FileManagementSystem;
 
-
-
-
-// import React, { useState, useRef } from "react";
-// import {
-//   FaUpload, FaSearch, FaDownload, FaClock, FaEllipsisV,
-//   FaFileWord, FaFilePdf, FaFileExcel, FaFileImage, FaFileAlt
-// } from "react-icons/fa";
-
-// const prettySize = (bytes) =>
-//   bytes > 1024 * 1024
-//     ? `${(bytes / 1024 ** 2).toFixed(1)} MB`
-//     : `${(bytes / 1024).toFixed(1)} KB`;
-
-// const smIcon = (ext) => {
-//   switch (ext) {
-//     case "docx": return <FaFileWord className="text-primary fs-4 me-2" />;
-//     case "pdf": return <FaFilePdf className="text-danger fs-4 me-2" />;
-//     case "xlsx": return <FaFileExcel className="text-success fs-4 me-2" />;
-//     case "psd":
-//     case "ai": return <FaFileImage className="text-info fs-4 me-2" />;
-//     default: return <FaFileAlt className="text-secondary fs-4 me-2" />;
-//   }
-// };
-
-// const FileManagementSystem = () => {
-//   const [files, setFiles] = useState([]);
-//   const [showUpload, setShowUpload] = useState(false);
-//   const inputRef = useRef();
-
-//   const addFiles = (fileList) => {
-//     const newFiles = Array.from(fileList).map((f) => {
-//       const parts = f.name.split(".");
-//       const ext = parts.pop();
-//       const base = parts.join(".");
-//       return {
-//         name: base,
-//         extension: ext,
-//         project: "—",
-//         task: "—",
-//         size: prettySize(f.size),
-//         modified: new Date().toLocaleDateString(),
-//         version: "v1",
-//       };
-//     });
-//     setFiles((prev) => [...newFiles, ...prev]);
-//     setShowUpload(false);
-//   };
-
-//   return (
-//     <div className="container-fluid bg-light p-4 min-vh-100">
-//       <h3>File Management</h3>
-//       <ul>
-//         <li>Uploaded Files List</li>
-//         <li>Search by Project / Task</li>
-//         <li>File Server Path Logs</li>
-//         <li>Download Files</li>
-//       </ul>
-
-//       <div className="d-flex align-items-center gap-2 mb-3">
-//         <button
-//           className="btn btn-primary d-flex align-items-center gap-1"
-//           onClick={() => setShowUpload(true)}
-//         >
-//           <FaUpload /> Upload
-//         </button>
-//         <div className="input-group w-50">
-//           <span className="input-group-text">
-//             <FaSearch />
-//           </span>
-//           <input
-//             type="text"
-//             className="form-control"
-//             placeholder="Search by Project / Task"
-//           />
-//         </div>
-//       </div>
-
-//       <div className="table-responsive bg-white rounded shadow-sm">
-//         <table className="table align-middle table-hover mb-0">
-//           <thead className="table-light text-uppercase">
-//             <tr>
-//               <th>Name</th>
-//               <th>Project</th>
-//               <th>Task</th>
-//               <th>Size</th>
-//               <th>Modified</th>
-//               <th>Version</th>
-//               <th>Actions</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {files.map((f, i) => (
-//               <tr key={i}>
-//                 <td className="d-flex align-items-center">
-//                   {smIcon(f.extension)}
-//                   <div>
-//                     <div className="fw-semibold">{f.name}.{f.extension}</div>
-//                     <small className="text-muted">.{f.extension}</small>
-//                   </div>
-//                 </td>
-//                 <td>{f.project}</td>
-//                 <td>{f.task}</td>
-//                 <td>{f.size}</td>
-//                 <td>{f.modified}</td>
-//                 <td>{f.version}</td>
-//                 <td>
-//                   <div className="d-flex gap-2">
-//                     <FaDownload className="text-secondary" role="button" />
-//                     <FaClock className="text-secondary" role="button" />
-//                     <FaEllipsisV className="text-secondary" role="button" />
-//                   </div>
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
-
-//       {showUpload && (
-//         <>
-//           <div
-//             className="modal fade show d-block"
-//             tabIndex="-1"
-//             role="dialog"
-//             onClick={() => setShowUpload(false)}
-//           >
-//             <div
-//               className="modal-dialog modal-dialog-centered"
-//               role="document"
-//               onClick={(e) => e.stopPropagation()}
-//             >
-//               <div className="modal-content">
-//                 <div className="modal-header border-0">
-//                   <h5 className="modal-title fw-bold">Upload Files</h5>
-//                   <button
-//                     type="button"
-//                     className="btn-close"
-//                     onClick={() => setShowUpload(false)}
-//                     aria-label="Close"
-//                   ></button>
-//                 </div>
-//                 <div className="modal-body text-center">
-//                   <FaUpload className="fs-2 mb-2 text-primary" />
-//                   <p className="mb-1">Click below to browse and upload</p>
-//                   <input
-//                     type="file"
-//                     multiple
-//                     ref={inputRef}
-//                     className="form-control"
-//                     onChange={(e) => addFiles(e.target.files)}
-//                   />
-//                 </div>
-//                 <div className="modal-footer border-0">
-//                   <button
-//                     type="button"
-//                     className="btn btn-secondary"
-//                     onClick={() => setShowUpload(false)}
-//                   >
-//                     Cancel
-//                   </button>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//           <div className="modal-backdrop fade show"></div>
-//         </>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default FileManagementSystem;
