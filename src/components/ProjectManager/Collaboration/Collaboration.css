@@ -25,5 +25,5 @@
   flex: 1 1 auto;
   overflow-y: auto;
   min-height: 0;
-  max-height: calc(100vh - 128px); /* Adjust if header/footer height changes */
+  max-height: calc(100vh - 265px); /* Adjust if header/footer height changes */
 }

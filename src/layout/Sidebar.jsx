@@ -259,7 +259,7 @@ const Sidebar = ({ collapsed }) => {
                   <span className="menu-text">Chat Room</span>
                 </div>
               </li>
-              <li
+              {/* <li
                 className={`menu-item ${
                   isActive("/settingpage") ? "active" : ""
                 }`}
@@ -274,7 +274,7 @@ const Sidebar = ({ collapsed }) => {
                   <i className="fa-solid fa-gear"></i>
                   <span className="menu-text">Setting</span>
                 </div>
-              </li>
+              </li> */}
             </>
           )}
 

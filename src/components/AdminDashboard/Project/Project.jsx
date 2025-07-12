@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as echarts from "echarts";
 import useSyncScroll from "../Hooks/useSyncScroll";
-
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Select from "react-select";
+import SettingsPage from "../Setting/Setting";
 
 const Project = () => {
   const [activeTab, setActiveTab] = useState("created");
@@ -10,7 +12,22 @@ const Project = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(true);
+  const [selectedDateTime, setSelectedDateTime] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [selectedClient, setSelectedClient] = useState("");
+  const [selectedTask, setSelectedTask] = useState("");
+  const [selectedApplications, setSelectedApplications] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}`;
+  });
+
+  const clientList = ["Client A", "Client B"];
+  const taskList = ["Design", "Translation", "Proofreading"];
+  const applicationList = ["Adobe", "MS Word", "Figma"];
   const searchInputRef = useRef(null);
   const chartRef = useRef(null);
 
@@ -121,6 +138,15 @@ const Project = () => {
     setList(newList);
   };
 
+  const handleApplyToSelectedFiles = () => {
+    const selected = formData.files.filter((f) => f.selected);
+    if (selected.length === 0) {
+      alert("No files selected.");
+      return;
+    }
+    // Apply deadline logic here
+    alert(`Deadline ${formData.deadline} applied to selected files.`);
+  };
   // Sample data for projects
   const [projects, setProjects] = useState([
     {
@@ -1016,7 +1042,15 @@ const Project = () => {
                     className="table table-hover mb-0"
                     style={{ minWidth: 900 }}
                   >
-                    <thead className=" table-gradient-bg">
+                    <thead
+                      className="table-gradient-bg table"
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 2,
+                        backgroundColor: "#fff", // Match your background color
+                      }}
+                    >
                       <tr>
                         <th>Project Title</th>
                         <th>Client</th>
@@ -1261,88 +1295,111 @@ const Project = () => {
                     className="table table-hover mb-0"
                     style={{ minWidth: 900 }}
                   >
-                    <thead className=" table-gradient-bg">
-                       <tr>
-                      <th>Project Title</th>
-                      <th>Client</th>
-                      <th>Country</th>
-                      <th>Project Manager</th>
-                      <th>Due Date</th>
-                      <th>Progress</th>
-                      <th>Tasks</th>
-                      <th>Languages</th>
-                      <th>Application</th>
-                      <th>Total Pages</th>
-                      <th className="text-end">Actions</th>
+                    <thead
+                      className="table-gradient-bg table"
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 2,
+                        backgroundColor: "#fff", // Match your background color
+                      }}
+                    >
+                      <tr>
+                        <th>Project Title</th>
+                        <th>Client</th>
+                        <th>Country</th>
+                        <th>Project Manager</th>
+                        <th>Due Date</th>
+                        <th>Progress</th>
+                        <th>Tasks</th>
+                        <th>Languages</th>
+                        <th>Application</th>
+                        <th>Total Pages</th>
+                        <th className="text-end">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredProjects.map((project) => (
-                      <tr key={project.id}>
-                        <td>
-                          {project.title}
-                          <span className="badge bg-warning bg-opacity-10 text-warning ms-2">Active</span>
-                        </td>
-                        <td>{project.client}</td>
-                        <td>{project.country}</td>
-                        <td>{project.projectManager}</td>
-                        <td>{new Date(project.dueDate).toLocaleDateString()}</td>
-                        <td>
-                          <div className="d-flex align-items-center">
-                            <div className="progress flex-grow-1 me-2" style={{ height: '6px' }}>
+                        <tr key={project.id}>
+                          <td>
+                            {project.title}
+                            <span className="badge bg-warning bg-opacity-10 text-warning ms-2">
+                              Active
+                            </span>
+                          </td>
+                          <td>{project.client}</td>
+                          <td>{project.country}</td>
+                          <td>{project.projectManager}</td>
+                          <td>
+                            {new Date(project.dueDate).toLocaleDateString()}
+                          </td>
+                          <td>
+                            <div className="d-flex align-items-center">
                               <div
-                                className="progress-bar bg-primary"
-                                style={{ width: `${project.progress}%` }}
-                              ></div>
+                                className="progress flex-grow-1 me-2"
+                                style={{ height: "6px" }}
+                              >
+                                <div
+                                  className="progress-bar bg-primary"
+                                  style={{ width: `${project.progress}%` }}
+                                ></div>
+                              </div>
+                              <small className="text-primary">
+                                {project.progress}%
+                              </small>
                             </div>
-                            <small className="text-primary">{project.progress}%</small>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex flex-wrap gap-1">
-                            {project.tasks.map((task) => (
-                              <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
-                                {task}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td>
-                          <div className="d-flex flex-wrap gap-1">
-                            {project.languages.map((language) => (
-                              <span key={language} className="badge bg-success bg-opacity-10 text-success">
-                                {language}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td>
-                          <span className="badge bg-purple bg-opacity-10 text-purple">
-                            {project.application}
-                          </span>
-                        </td>
-                        <td>{project.totalPages}</td>
-                        <td className="text-end">
-                          <div className="d-flex justify-content-end gap-2">
-                            <button
-                              onClick={() => markAsCompleted(project.id)}
-                              className="btn btn-sm btn-success"
-                            >
-                              Mark as Completed
-                            </button>
-                            <button
-                              onClick={() => handleEditProject(project.id)}
-                              className="btn btn-sm btn-success"
-                            >
-                              <i className="fas fa-edit"></i>
-                            </button>
-                            <button className="btn btn-sm btn-danger">
-                              <i className="fas fa-trash-alt"></i>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td>
+                            <div className="d-flex flex-wrap gap-1">
+                              {project.tasks.map((task) => (
+                                <span
+                                  key={task}
+                                  className="badge bg-primary bg-opacity-10 text-primary"
+                                >
+                                  {task}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="d-flex flex-wrap gap-1">
+                              {project.languages.map((language) => (
+                                <span
+                                  key={language}
+                                  className="badge bg-success bg-opacity-10 text-success"
+                                >
+                                  {language}
+                                </span>
+                              ))}
+                            </div>
+                          </td>
+                          <td>
+                            <span className="badge bg-purple bg-opacity-10 text-purple">
+                              {project.application}
+                            </span>
+                          </td>
+                          <td>{project.totalPages}</td>
+                          <td className="text-end">
+                            <div className="d-flex justify-content-end gap-2">
+                              <button
+                                onClick={() => markAsCompleted(project.id)}
+                                className="btn btn-sm btn-success"
+                              >
+                                Mark as Completed
+                              </button>
+                              <button
+                                onClick={() => handleEditProject(project.id)}
+                                className="btn btn-sm btn-success"
+                              >
+                                <i className="fas fa-edit"></i>
+                              </button>
+                              <button className="btn btn-sm btn-danger">
+                                <i className="fas fa-trash-alt"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -1354,12 +1411,84 @@ const Project = () => {
         {/* Completed Projects Tab */}
         {activeTab === "completed" && (
           <div className="mb-4">
-            {/* <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+            {/* Heading and Filters */}
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
               <h2 className="h5 mb-0 text-light">Completed Projects</h2>
-              <button className="btn btn-success btn-sm w-100 w-md-auto">
-                <i className="fas fa-file-excel me-2"></i> Export to Excel
-              </button>
-            </div> */}
+            </div>
+
+            {/* Filters */}
+            <div className="row g-3 mb-3">
+              {/* Client Filter - Single Select */}
+              <div className="col-md-3">
+                <label className="form-label text-white">Client</label>
+                <select
+                  className="form-select"
+                  value={selectedClient}
+                  onChange={(e) => setSelectedClient(e.target.value)}
+                >
+                  <option value="">All Clients</option>
+                  {clientList.map((client) => (
+                    <option key={client} value={client}>
+                      {client}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Task Filter - Single Select */}
+              <div className="col-md-3">
+                <label className="form-label text-white">Task</label>
+                <select
+                  className="form-select"
+                  value={selectedTask}
+                  onChange={(e) => setSelectedTask(e.target.value)}
+                >
+                  <option value="">All Tasks</option>
+                  {taskList.map((task) => (
+                    <option key={task} value={task}>
+                      {task}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Applications Filter - Multi Select */}
+
+              <div className="col-md-3">
+                <label className="form-label text-white">Applications</label>
+                <select
+                  className="form-select"
+                  value={selectedApplications}
+                  onChange={(e) => {
+                    const selected = Array.from(
+                      e.target.selectedOptions,
+                      (option) => option.value
+                    );
+                    setSelectedApplications(e.target.value);
+                  }}
+                >
+                  <option value="">All Tasks</option>
+                  {applicationList.map((app) => (
+                    <option key={app} value={app}>
+                      {app}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Month/Year Filter */}
+              <div className="col-md-3">
+                <label className="form-label text-white">Month/Year</label>
+                <input
+                  type="month"
+                  className="form-control"
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Project Table or Empty State */}
             {filteredProjects.length === 0 ? (
               <div className="text-center py-5">
                 <i className="fas fa-check-circle text-muted fa-4x mb-3"></i>
@@ -1370,16 +1499,7 @@ const Project = () => {
               </div>
             ) : (
               <>
-                {/* Performance Chart */}
-                {/* <div className="card mb-4 bg-card text-light">
-                  <div className="card-body">
-                    <div
-                      ref={chartRef}
-                      style={{ height: "400px", minWidth: "300px" }}
-                    ></div>
-                  </div>
-                </div> */}
-                {/* Project Cards */}
+                {/* Completed Projects Table */}
                 <div className="card">
                   <div
                     ref={fakeScrollbarRef4}
@@ -1388,7 +1508,7 @@ const Project = () => {
                       overflowY: "hidden",
                       height: 16,
                       position: "fixed",
-                      bottom: 0, // Adjust as needed
+                      bottom: 0,
                       left: 0,
                       right: 0,
                       zIndex: 1050,
@@ -1396,22 +1516,30 @@ const Project = () => {
                   >
                     <div style={{ width: "2000px", height: 1 }} />
                   </div>
-                  {/* Scrollable Table 3 */}
+
                   <div
                     className="table-responsive table-gradient-bg"
                     ref={scrollContainerRef4}
                     style={{
                       maxHeight: "500px",
                       overflowX: "auto",
-                      scrollbarWidth: "none", // Firefox
-                      msOverflowStyle: "none", // IE/Edge
+                      scrollbarWidth: "none",
+                      msOverflowStyle: "none",
                     }}
                   >
                     <table
                       className="table table-hover mb-0"
                       style={{ minWidth: 900 }}
                     >
-                      <thead className="table-gradient-bg">
+                      <thead
+                        className="table-gradient-bg table"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                          zIndex: 2,
+                          backgroundColor: "#fff", // Match your background color
+                        }}
+                      >
                         <tr>
                           <th>Project Title</th>
                           <th>Client</th>
@@ -1792,20 +1920,23 @@ const Project = () => {
                       </button>
                     </div>
                     <div className="table-responsive ">
-                      <table className="table table-bordered  ">
+                      <table className="table table-bordered">
                         <thead
-                          style={{ backgroundColor: "#201E7E", color: "white" }}
+                          className="table-gradient-bg table"
+                          style={{
+                            position: "sticky",
+                            top: 0,
+                            zIndex: 2,
+                            backgroundColor: "#fff", // Match your background color
+                          }}
                         >
-                          <tr
-                            style={{
-                              backgroundColor: "#201E7E",
-                              color: "white",
-                            }}
-                          >
+                          <tr>
                             <th>S.No.</th>
                             <th>File Name</th>
                             <th>Pages</th>
+                            <th>Language</th>
                             <th>Application</th>
+                            <th>Status</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1814,7 +1945,18 @@ const Project = () => {
                               <td>
                                 <div className="d-flex align-items-center gap-2">
                                   {idx + 1}
-                                  <input type="checkbox" />
+                                  <input
+                                    type="checkbox"
+                                    checked={file.selected || false}
+                                    onChange={(e) => {
+                                      const files = [...formData.files];
+                                      files[idx].selected = e.target.checked;
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        files,
+                                      }));
+                                    }}
+                                  />
                                 </div>
                               </td>
 
@@ -1831,6 +1973,7 @@ const Project = () => {
                                   placeholder="File Name"
                                 />
                               </td>
+
                               <td>
                                 <input
                                   type="number"
@@ -1847,13 +1990,26 @@ const Project = () => {
                                   placeholder="Pages"
                                 />
                               </td>
+
+                              <td>th</td>
+
                               <td>
                                 <select
                                   className="form-select"
                                   value={file.application || ""}
                                   onChange={(e) => {
+                                    const newApp = e.target.value;
                                     const files = [...formData.files];
-                                    files[idx].application = e.target.value;
+
+                                    // check if current row is selected
+                                    if (files[idx].selected) {
+                                      files.forEach((f) => {
+                                        if (f.selected) f.application = newApp;
+                                      });
+                                    } else {
+                                      files[idx].application = newApp;
+                                    }
+
                                     setFormData((prev) => ({ ...prev, files }));
                                   }}
                                 >
@@ -1865,10 +2021,44 @@ const Project = () => {
                                   ))}
                                 </select>
                               </td>
+
+                              <td>TYS</td>
                             </tr>
                           ))}
                         </tbody>
                       </table>
+
+                      <div className="d-flex align-items-center gap-3 mt-3">
+                        <label
+                          className="text-white"
+                          style={{ fontWeight: "bold" }}
+                        >
+                          Deadline
+                        </label>
+                        <DatePicker
+                          selected={selectedDateTime}
+                          onChange={(date) => setSelectedDateTime(date)}
+                          showTimeSelect
+                          timeFormat="HH:mm"
+                          timeIntervals={15}
+                          dateFormat="MMMM d, yyyy h:mm aa"
+                          placeholderText="Select date and time"
+                          className="form-control"
+                        />
+                        <button
+                          className="btn"
+                          style={{
+                            background:
+                              "linear-gradient(90deg, rgba(123,97,255,1) 0%, rgba(217,75,255,1) 100%)",
+                            color: "white",
+                            borderRadius: "10px",
+                            padding: "6px 18px",
+                          }}
+                          onClick={handleApplyToSelectedFiles}
+                        >
+                          Apply to Selected Files
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -2077,8 +2267,7 @@ const Project = () => {
         </div>
       )}
 
-      {/* Settings Modal */}
-      {showSettings && (
+      {/* {showSettings && (
         <div
           className="modal fade show d-block custom-modal-dark"
           tabIndex="-1"
@@ -2101,7 +2290,7 @@ const Project = () => {
                   application settings.
                 </h6>
 
-                {/* Manage Clients */}
+            
                 <div className="mb-4">
                   <h6 className="mb-3 text-white">Manage Clients</h6>
 
@@ -2134,9 +2323,8 @@ const Project = () => {
                     </div>
                   </div>
 
-                  {/* Second row */}
                   <div className="row mb-3">
-                    {/* Country Input */}
+                
                     <div className="col-md-4 mb-2">
                       <div className="input-group">
                         <input
@@ -2151,10 +2339,10 @@ const Project = () => {
                       </div>
                     </div>
 
-                    {/* Currency + Hourly Rate Side-by-Side */}
+                   
                     <div className="col-md-6 mb-2">
                       <div className="row">
-                        {/* Currency */}
+                   
                         <div className="col-md-6 mb-2">
                           <div className="input-group">
                             <select
@@ -2175,7 +2363,7 @@ const Project = () => {
                           </div>
                         </div>
 
-                        {/* Hourly Rate */}
+               
                         <div className="col-md-6 mb-2">
                           <div className="input-group">
                             <input
@@ -2194,7 +2382,7 @@ const Project = () => {
                     </div>
                   </div>
 
-                  {/* Third row */}
+   
                   <div className="mb-2">
                     <div className="input-group">
                       <input
@@ -2237,10 +2425,20 @@ const Project = () => {
                       </div>
                     ))}
                   </div>
-                  
+                  <button
+                    className="btn btn-sm btn-primary"
+                    onClick={handleAddClient}
+                    disabled={
+                      !newClient.alias ||
+                      !newClient.actualName ||
+                      !newClient.country
+                    }
+                  >
+                    <i className="fas fa-plus me-1"></i>
+                  </button>
                 </div>
 
-                {/* Manage Tasks List */}
+              
                 <div className="mb-4">
                   <h6 className="mb-3 text-white">Manage Tasks List</h6>
                   <div className="input-group mb-2">
@@ -2278,7 +2476,7 @@ const Project = () => {
                   </div>
                 </div>
 
-                {/* Manage Application List */}
+          
                 <div className="mb-4">
                   <h6 className="mb-3 text-white">Manage Application List</h6>
                   <div className="input-group mb-2">
@@ -2319,10 +2517,16 @@ const Project = () => {
                     ))}
                   </div>
 
-                  
+                  <button
+                    className="btn btn-sm btn-primary"
+                    onClick={handleAddapplication}
+                    disabled={!newapplication}
+                  >
+                    <i className="fas fa-plus me-1"></i>
+                  </button>
                 </div>
 
-                {/* Manage Languages List */}
+            
                 <div className="mb-4">
                   <h6 className="mb-3 text-white">Manage Languages List</h6>
                   <div className="input-group mb-2">
@@ -2360,7 +2564,7 @@ const Project = () => {
                   </div>
                 </div>
 
-                {/* Currency Conversion Rates */}
+             
                 <div className="mb-4">
                   <h6 className="mb-3 text-white">Currency Conversion Rates</h6>
                   <div className="row g-2 mb-2">
@@ -2430,7 +2634,7 @@ const Project = () => {
                   </div>
                 </div>
 
-                {/* Save All Settings */}
+         
                 <div className="mb-4">
                   <h6 className="mb-3 text-white">Save All Settings</h6>
                   <div className="border rounded p-2 mb-2 border-secondary">
@@ -2455,9 +2659,45 @@ const Project = () => {
               </div>
             </div>
           </div>
-        </div>    
-      )}
+        </div>
+      )} */}
 
+      {showSettings && (
+        <div
+          className="modal fade show d-block custom-modal-dark"
+          tabIndex="-1"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content bg-dark text-white">
+              <div className="modal-header bg-dark border-secondary">
+                <h5 className="modal-title text-white">Settings</h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={() => setShowSettings(false)}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <SettingsPage />
+              </div>
+              <div className="modal-footer  border-secondary">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setShowSettings(false)}
+                >
+                  Close
+                </button>
+                <button type="button" className="btn btn-primary">
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Backdrop for modals */}
       {(showCreateModal || showEditModal !== false || showSettings) && (
         <div className="modal-backdrop fade show"></div>
