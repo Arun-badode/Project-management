@@ -15,16 +15,19 @@ const Project = () => {
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [selectedClient, setSelectedClient] = useState("");
-const [selectedTask, setSelectedTask] = useState("");
-const [selectedApplications, setSelectedApplications] = useState([]);
-const [selectedMonth, setSelectedMonth] = useState(() => {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-});
+  const [selectedTask, setSelectedTask] = useState("");
+  const [selectedApplications, setSelectedApplications] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}`;
+  });
 
-const clientList = ["Client A", "Client B"];
-const taskList = ["Design", "Translation", "Proofreading"];
-const applicationList = ["Adobe", "MS Word", "Figma"];
+  const clientList = ["Client A", "Client B"];
+  const taskList = ["Design", "Translation", "Proofreading"];
+  const applicationList = ["Adobe", "MS Word", "Figma"];
   const searchInputRef = useRef(null);
   const chartRef = useRef(null);
 
@@ -134,7 +137,6 @@ const applicationList = ["Adobe", "MS Word", "Figma"];
     newList.splice(index, 1);
     setList(newList);
   };
-
 
   const handleApplyToSelectedFiles = () => {
     const selected = formData.files.filter((f) => f.selected);
@@ -1040,7 +1042,15 @@ const applicationList = ["Adobe", "MS Word", "Figma"];
                     className="table table-hover mb-0"
                     style={{ minWidth: 900 }}
                   >
-                    <thead className=" table-gradient-bg">
+                    <thead
+                      className="table-gradient-bg table"
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 2,
+                        backgroundColor: "#fff", // Match your background color
+                      }}
+                    >
                       <tr>
                         <th>Project Title</th>
                         <th>Client</th>
@@ -1285,7 +1295,15 @@ const applicationList = ["Adobe", "MS Word", "Figma"];
                     className="table table-hover mb-0"
                     style={{ minWidth: 900 }}
                   >
-                    <thead className=" table-gradient-bg">
+                    <thead
+                      className="table-gradient-bg table"
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 2,
+                        backgroundColor: "#fff", // Match your background color
+                      }}
+                    >
                       <tr>
                         <th>Project Title</th>
                         <th>Client</th>
@@ -1392,230 +1410,243 @@ const applicationList = ["Adobe", "MS Word", "Figma"];
 
         {/* Completed Projects Tab */}
         {activeTab === "completed" && (
-         <div className="mb-4">
-  {/* Heading and Filters */}
-  <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
-    <h2 className="h5 mb-0 text-light">Completed Projects</h2>
-  </div>
+          <div className="mb-4">
+            {/* Heading and Filters */}
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
+              <h2 className="h5 mb-0 text-light">Completed Projects</h2>
+            </div>
 
-  {/* Filters */}
-  <div className="row g-3 mb-3">
-    {/* Client Filter - Single Select */}
-    <div className="col-md-3">
-      <label className="form-label text-white">Client</label>
-      <select
-        className="form-select"
-        value={selectedClient}
-        onChange={(e) => setSelectedClient(e.target.value)}
-      >
-        <option value="">All Clients</option>
-        {clientList.map((client) => (
-          <option key={client} value={client}>
-            {client}
-          </option>
-        ))}
-      </select>
-    </div>
+            {/* Filters */}
+            <div className="row g-3 mb-3">
+              {/* Client Filter - Single Select */}
+              <div className="col-md-3">
+                <label className="form-label text-white">Client</label>
+                <select
+                  className="form-select"
+                  value={selectedClient}
+                  onChange={(e) => setSelectedClient(e.target.value)}
+                >
+                  <option value="">All Clients</option>
+                  {clientList.map((client) => (
+                    <option key={client} value={client}>
+                      {client}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-    {/* Task Filter - Single Select */}
-    <div className="col-md-3">
-      <label className="form-label text-white">Task</label>
-      <select
-        className="form-select"
-        value={selectedTask}
-        onChange={(e) => setSelectedTask(e.target.value)}
-      >
-        <option value="">All Tasks</option>
-        {taskList.map((task) => (
-          <option key={task} value={task}>
-            {task}
-          </option>
-        ))}
-      </select>
-    </div>
+              {/* Task Filter - Single Select */}
+              <div className="col-md-3">
+                <label className="form-label text-white">Task</label>
+                <select
+                  className="form-select"
+                  value={selectedTask}
+                  onChange={(e) => setSelectedTask(e.target.value)}
+                >
+                  <option value="">All Tasks</option>
+                  {taskList.map((task) => (
+                    <option key={task} value={task}>
+                      {task}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-    {/* Applications Filter - Multi Select */}
+              {/* Applications Filter - Multi Select */}
 
- <div className="col-md-3">
-      <label className="form-label text-white">Applications</label>
-      <select
-        className="form-select"
-        value={selectedApplications}
-        onChange={(e) => { const selected = Array.from(
-            e.target.selectedOptions,
-            (option) => option.value
-          );setSelectedApplications(e.target.value)}}
-      >
-        <option value="">All Tasks</option>
-                {applicationList.map((app) => (
-          <option key={app} value={app}>
-            {app}
-          </option>
-        ))}
-      </select>
-    </div>
+              <div className="col-md-3">
+                <label className="form-label text-white">Applications</label>
+                <select
+                  className="form-select"
+                  value={selectedApplications}
+                  onChange={(e) => {
+                    const selected = Array.from(
+                      e.target.selectedOptions,
+                      (option) => option.value
+                    );
+                    setSelectedApplications(e.target.value);
+                  }}
+                >
+                  <option value="">All Tasks</option>
+                  {applicationList.map((app) => (
+                    <option key={app} value={app}>
+                      {app}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
+              {/* Month/Year Filter */}
+              <div className="col-md-3">
+                <label className="form-label text-white">Month/Year</label>
+                <input
+                  type="month"
+                  className="form-control"
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                />
+              </div>
+            </div>
 
-  
-    {/* Month/Year Filter */}
-    <div className="col-md-3">
-      <label className="form-label text-white">Month/Year</label>
-      <input
-        type="month"
-        className="form-control"
-        value={selectedMonth}
-        onChange={(e) => setSelectedMonth(e.target.value)}
-      />
-    </div>
-  </div>
+            {/* Project Table or Empty State */}
+            {filteredProjects.length === 0 ? (
+              <div className="text-center py-5">
+                <i className="fas fa-check-circle text-muted fa-4x mb-3"></i>
+                <h3 className="h6">No completed projects</h3>
+                <p className="text-muted">
+                  Mark active projects as completed to see them here.
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Completed Projects Table */}
+                <div className="card">
+                  <div
+                    ref={fakeScrollbarRef4}
+                    style={{
+                      overflowX: "auto",
+                      overflowY: "hidden",
+                      height: 16,
+                      position: "fixed",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      zIndex: 1050,
+                    }}
+                  >
+                    <div style={{ width: "2000px", height: 1 }} />
+                  </div>
 
-  {/* Project Table or Empty State */}
-  {filteredProjects.length === 0 ? (
-    <div className="text-center py-5">
-      <i className="fas fa-check-circle text-muted fa-4x mb-3"></i>
-      <h3 className="h6">No completed projects</h3>
-      <p className="text-muted">
-        Mark active projects as completed to see them here.
-      </p>
-    </div>
-  ) : (
-    <>
-      {/* Completed Projects Table */}
-      <div className="card">
-        <div
-          ref={fakeScrollbarRef4}
-          style={{
-            overflowX: "auto",
-            overflowY: "hidden",
-            height: 16,
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: 1050,
-          }}
-        >
-          <div style={{ width: "2000px", height: 1 }} />
-        </div>
-
-        <div
-          className="table-responsive table-gradient-bg"
-          ref={scrollContainerRef4}
-          style={{
-            maxHeight: "500px",
-            overflowX: "auto",
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-          }}
-        >
-          <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-            <thead className="table-gradient-bg">
-              <tr>
-                <th>Project Title</th>
-                <th>Client</th>
-                <th>Country</th>
-                <th>Project Manager</th>
-                <th>Completed Date</th>
-                <th>Tasks</th>
-                <th>Languages</th>
-                <th>Application</th>
-                <th>Total Pages</th>
-                <th>Expected Hours</th>
-                <th>Actual Hours</th>
-                <th>Efficiency</th>
-                <th>Cost</th>
-                <th className="text-end">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProjects.map((project) => (
-                <tr key={project.id}>
-                  <td>
-                    {project.title}
-                    <span className="badge bg-success bg-opacity-10 text-success ms-2">
-                      Completed
-                    </span>
-                  </td>
-                  <td>{project.client}</td>
-                  <td>{project.country}</td>
-                  <td>{project.projectManager}</td>
-                  <td>
-                    {new Date(
-                      project.completedDate
-                    ).toLocaleDateString()}
-                  </td>
-                  <td>
-                    <div className="d-flex flex-wrap gap-1">
-                      {project.tasks.map((task) => (
-                        <span
-                          key={task}
-                          className="badge bg-primary bg-opacity-10 text-primary"
-                        >
-                          {task}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="d-flex flex-wrap gap-1">
-                      {project.languages.map((language) => (
-                        <span
-                          key={language}
-                          className="badge bg-success bg-opacity-10 text-success"
-                        >
-                          {language}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td>
-                    <span className="badge bg-purple bg-opacity-10 text-purple">
-                      {project.application}
-                    </span>
-                  </td>
-                  <td>{project.totalPages}</td>
-                  <td>{project.performance.expectedHours}</td>
-                  <td>{project.performance.actualHours}</td>
-                  <td className="fw-bold">
-                    <span
-                      className={`${
-                        project.performance.expectedHours >
-                        project.performance.actualHours
-                          ? "text-success"
-                          : "text-danger"
-                      }`}
+                  <div
+                    className="table-responsive table-gradient-bg"
+                    ref={scrollContainerRef4}
+                    style={{
+                      maxHeight: "500px",
+                      overflowX: "auto",
+                      scrollbarWidth: "none",
+                      msOverflowStyle: "none",
+                    }}
+                  >
+                    <table
+                      className="table table-hover mb-0"
+                      style={{ minWidth: 900 }}
                     >
-                      {Math.round(
-                        (project.performance.expectedHours /
-                          project.performance.actualHours) *
-                          100
-                      )}
-                      %
-                    </span>
-                  </td>
-                  <td>
-                    {project.cost} {project.currency}
-                  </td>
-                  <td className="text-end">
-                    <div className="d-flex justify-content-end gap-2">
-                      <button className="btn btn-sm btn-danger">
-                        <i className="fas fa-file-alt me-1"></i> View Report
-                      </button>
-                      <button className="btn btn-sm btn-primary">
-                        <i className="fas fa-archive me-1"></i> Archive
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </>
-  )}
-</div>
-
+                      <thead
+                        className="table-gradient-bg table"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                          zIndex: 2,
+                          backgroundColor: "#fff", // Match your background color
+                        }}
+                      >
+                        <tr>
+                          <th>Project Title</th>
+                          <th>Client</th>
+                          <th>Country</th>
+                          <th>Project Manager</th>
+                          <th>Completed Date</th>
+                          <th>Tasks</th>
+                          <th>Languages</th>
+                          <th>Application</th>
+                          <th>Total Pages</th>
+                          <th>Expected Hours</th>
+                          <th>Actual Hours</th>
+                          <th>Efficiency</th>
+                          <th>Cost</th>
+                          <th className="text-end">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredProjects.map((project) => (
+                          <tr key={project.id}>
+                            <td>
+                              {project.title}
+                              <span className="badge bg-success bg-opacity-10 text-success ms-2">
+                                Completed
+                              </span>
+                            </td>
+                            <td>{project.client}</td>
+                            <td>{project.country}</td>
+                            <td>{project.projectManager}</td>
+                            <td>
+                              {new Date(
+                                project.completedDate
+                              ).toLocaleDateString()}
+                            </td>
+                            <td>
+                              <div className="d-flex flex-wrap gap-1">
+                                {project.tasks.map((task) => (
+                                  <span
+                                    key={task}
+                                    className="badge bg-primary bg-opacity-10 text-primary"
+                                  >
+                                    {task}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td>
+                              <div className="d-flex flex-wrap gap-1">
+                                {project.languages.map((language) => (
+                                  <span
+                                    key={language}
+                                    className="badge bg-success bg-opacity-10 text-success"
+                                  >
+                                    {language}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td>
+                              <span className="badge bg-purple bg-opacity-10 text-purple">
+                                {project.application}
+                              </span>
+                            </td>
+                            <td>{project.totalPages}</td>
+                            <td>{project.performance.expectedHours}</td>
+                            <td>{project.performance.actualHours}</td>
+                            <td className="fw-bold">
+                              <span
+                                className={`${
+                                  project.performance.expectedHours >
+                                  project.performance.actualHours
+                                    ? "text-success"
+                                    : "text-danger"
+                                }`}
+                              >
+                                {Math.round(
+                                  (project.performance.expectedHours /
+                                    project.performance.actualHours) *
+                                    100
+                                )}
+                                %
+                              </span>
+                            </td>
+                            <td>
+                              {project.cost} {project.currency}
+                            </td>
+                            <td className="text-end">
+                              <div className="d-flex justify-content-end gap-2">
+                                <button className="btn btn-sm btn-danger">
+                                  <i className="fas fa-file-alt me-1"></i> View
+                                  Report
+                                </button>
+                                <button className="btn btn-sm btn-primary">
+                                  <i className="fas fa-archive me-1"></i>{" "}
+                                  Archive
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         )}
       </div>
 
@@ -1891,7 +1922,13 @@ const applicationList = ["Adobe", "MS Word", "Figma"];
                     <div className="table-responsive ">
                       <table className="table table-bordered">
                         <thead
-                          style={{ backgroundColor: "#201E7E", color: "white" }}
+                          className="table-gradient-bg table"
+                          style={{
+                            position: "sticky",
+                            top: 0,
+                            zIndex: 2,
+                            backgroundColor: "#fff", // Match your background color
+                          }}
                         >
                           <tr>
                             <th>S.No.</th>
@@ -2230,7 +2267,6 @@ const applicationList = ["Adobe", "MS Word", "Figma"];
         </div>
       )}
 
-   
       {/* {showSettings && (
         <div
           className="modal fade show d-block custom-modal-dark"
@@ -2626,8 +2662,7 @@ const applicationList = ["Adobe", "MS Word", "Figma"];
         </div>
       )} */}
 
-
-   {showSettings && (
+      {showSettings && (
         <div
           className="modal fade show d-block custom-modal-dark"
           tabIndex="-1"
@@ -2645,8 +2680,7 @@ const applicationList = ["Adobe", "MS Word", "Figma"];
                 ></button>
               </div>
               <div className="modal-body">
-               <SettingsPage/>
-               
+                <SettingsPage />
               </div>
               <div className="modal-footer  border-secondary">
                 <button

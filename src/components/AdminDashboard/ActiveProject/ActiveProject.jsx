@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Button } from "react-bootstrap";
 import moment from "moment";
 import Select from "react-select";
+import useSyncScroll from "../Hooks/useSyncScroll";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import useSyncScroll from "../Hooks/useSyncScroll";
 
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
@@ -686,7 +686,8 @@ const ActiveProject = () => {
     });
   }
 
-  const [dateTime, setDateTime] = useState(null);
+
+    const [dateTime, setDateTime] = useState(null);
 
   const handleChange = (value) => {
     setDateTime(value);
@@ -1107,10 +1108,15 @@ const ActiveProject = () => {
                     </div>
                     <div className="table-responsive">
                       <table className="table table-bordered">
-                        <thead
-                          className="fixed-top"
-                          style={{ backgroundColor: "#201E7E", color: "white" }}
-                        >
+                       <thead
+                className="table-gradient-bg table"
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backgroundColor: "#fff", // Match your background color
+                }}
+              >
                           <tr>
                             <th>
                               S.No.
@@ -1232,15 +1238,15 @@ const ActiveProject = () => {
                           Deadline
                         </label>
                         <DatePicker
-                          selected={selectedDateTime}
-                          onChange={(date) => setSelectedDateTime(date)}
-                          showTimeSelect
-                          timeFormat="HH:mm"
-                          timeIntervals={15}
-                          dateFormat="MMMM d, yyyy h:mm aa"
-                          placeholderText="Select date and time"
-                          className="form-control"
-                        />
+                        selected={selectedDateTime}
+                        onChange={(date) => setSelectedDateTime(date)}
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15} // 👈 15 minutes gap
+                        dateFormat="MMMM d, yyyy h:mm aa"
+                        placeholderText="Select date and time"
+                        className="form-control"
+                      />
 
                         <button
                           className="btn"
@@ -1716,7 +1722,15 @@ const ActiveProject = () => {
               className="table-gradient-bg align-middle mt-0 table table-bordered table-hover"
               style={{ minWidth: 1000 }}
             >
-              <thead className="table">
+             <thead
+                className="table-gradient-bg table"
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backgroundColor: "#fff", // Match your background color
+                }}
+              >
                 <tr>
                   <th>S. No.</th>
                   <th>Project Title</th>
@@ -1838,7 +1852,15 @@ const ActiveProject = () => {
                               {/* Files Table */}
                               <div className="table-responsive">
                                 <table className="table table-sm table-striped table-hover">
-                                  <thead className="table-light">
+                                 <thead
+                className="table-gradient-bg table"
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backgroundColor: "#fff", // Match your background color
+                }}
+              >
                                     <tr>
                                       <th>
                                         <input

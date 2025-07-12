@@ -709,93 +709,93 @@ const AdminDashboard = () => {
     },
   ];
 
- const todayAttendanceData = [
-  {
-    id: 1,
-    employeeName: "Arun Badode",
-    department: "Development",
-    position: "UI Developer",
-    status: "Present",
-    checkInTime: "10:05 AM",
-    checkOutTime: "07:30 PM",
-    isLate: true,
-    lateMinutes: 35,
-    isEarlyDeparture: false,
-    earlyMinutes: 0,
-    remarks: "Late due to traffic"
-  },
-  {
-    id: 2,
-    employeeName: "Neha Sharma",
-    department: "Management",
-    position: "Project Manager",
-    status: "Present",
-    checkInTime: "09:50 AM",
-    checkOutTime: "06:45 PM",
-    isLate: false,
-    lateMinutes: 0,
-    isEarlyDeparture: true,
-    earlyMinutes: 15,
-    remarks: "Left early for client meeting"
-  },
-  {
-    id: 3,
-    employeeName: "Ravi Verma",
-    department: "Development",
-    position: "Backend Developer",
-    status: "Absent",
-    checkInTime: null,
-    checkOutTime: null,
-    isLate: false,
-    lateMinutes: 0,
-    isEarlyDeparture: false,
-    earlyMinutes: 0,
-    remarks: "Informed sick leave"
-  },
-  {
-    id: 4,
-    employeeName: "Pooja Mehta",
-    department: "Testing",
-    position: "QA Engineer",
-    status: "Present",
-    checkInTime: "10:15 AM",
-    checkOutTime: "07:00 PM",
-    isLate: true,
-    lateMinutes: 45,
-    isEarlyDeparture: false,
-    earlyMinutes: 0,
-    remarks: "Working from home"
-  },
-  {
-    id: 5,
-    employeeName: "Kunal Joshi",
-    department: "Operations",
-    position: "DevOps Engineer",
-    status: "On Leave",
-    checkInTime: null,
-    checkOutTime: null,
-    isLate: false,
-    lateMinutes: 0,
-    isEarlyDeparture: false,
-    earlyMinutes: 0,
-    remarks: "Annual leave"
-  }
-];
+  const todayAttendanceData = [
+    {
+      id: 1,
+      employeeName: "Arun Badode",
+      department: "Development",
+      position: "UI Developer",
+      status: "Present",
+      checkInTime: "10:05 AM",
+      checkOutTime: "07:30 PM",
+      isLate: true,
+      lateMinutes: 35,
+      isEarlyDeparture: false,
+      earlyMinutes: 0,
+      remarks: "Late due to traffic",
+    },
+    {
+      id: 2,
+      employeeName: "Neha Sharma",
+      department: "Management",
+      position: "Project Manager",
+      status: "Present",
+      checkInTime: "09:50 AM",
+      checkOutTime: "06:45 PM",
+      isLate: false,
+      lateMinutes: 0,
+      isEarlyDeparture: true,
+      earlyMinutes: 15,
+      remarks: "Left early for client meeting",
+    },
+    {
+      id: 3,
+      employeeName: "Ravi Verma",
+      department: "Development",
+      position: "Backend Developer",
+      status: "Absent",
+      checkInTime: null,
+      checkOutTime: null,
+      isLate: false,
+      lateMinutes: 0,
+      isEarlyDeparture: false,
+      earlyMinutes: 0,
+      remarks: "Informed sick leave",
+    },
+    {
+      id: 4,
+      employeeName: "Pooja Mehta",
+      department: "Testing",
+      position: "QA Engineer",
+      status: "Present",
+      checkInTime: "10:15 AM",
+      checkOutTime: "07:00 PM",
+      isLate: true,
+      lateMinutes: 45,
+      isEarlyDeparture: false,
+      earlyMinutes: 0,
+      remarks: "Working from home",
+    },
+    {
+      id: 5,
+      employeeName: "Kunal Joshi",
+      department: "Operations",
+      position: "DevOps Engineer",
+      status: "On Leave",
+      checkInTime: null,
+      checkOutTime: null,
+      isLate: false,
+      lateMinutes: 0,
+      isEarlyDeparture: false,
+      earlyMinutes: 0,
+      remarks: "Annual leave",
+    },
+  ];
 
-// Helper function for status colors
-const getStatusColor = (status) => {
-  if (!status) return 'secondary';
-  
-  const statusMap = {
-    'present': 'success',
-    'absent': 'danger',
-    'late': 'warning',
-    'on leave': 'info',
-    'half day': 'primary'
+  // Helper function for status colors
+  const getStatusColor = (status) => {
+    if (!status) return "secondary";
+
+    const statusMap = {
+      present: "success",
+      absent: "danger",
+      late: "warning",
+      "on leave": "info",
+      "half day": "primary",
+    };
+
+    return statusMap[status.toLowerCase()] || "secondary";
   };
-  
-  return statusMap[status.toLowerCase()] || 'secondary';
-};
 
   const handleEmployeeSelect = (id) => {
     setSelectedEmployee(id);
@@ -963,7 +963,15 @@ const getStatusColor = (status) => {
             }}
           >
             <Table className="table-gradient-bg align-middle table table-bordered table-hover">
-              <thead className="table bg-dark p-2 ">
+              <thead
+                className="table-gradient-bg table"
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backgroundColor: "#fff", // Match your background color
+                }}
+              >
                 <tr className="text-center">
                   <th>ID</th>
                   <th>Project Title</th>
@@ -1082,7 +1090,15 @@ const getStatusColor = (status) => {
             }}
           >
             <Table className="table-gradient-bg align-middle table table-bordered table-hover">
-              <thead className="table bg-dark p-2 ">
+             <thead
+                className="table-gradient-bg table"
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backgroundColor: "#fff", // Match your background color
+                }}
+              >
                 <tr className="text-center">
                   <th>ID</th>
                   <th>Project Title</th>
@@ -1201,7 +1217,15 @@ const getStatusColor = (status) => {
             }}
           >
             <Table className="table-gradient-bg align-middle table table-bordered table-hover">
-              <thead className="table bg-dark p-2 ">
+             <thead
+                className="table-gradient-bg table"
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backgroundColor: "#fff", // Match your background color
+                }}
+              >
                 <tr className="text-center">
                   <th>ID</th>
                   <th>Project Title</th>
@@ -1295,10 +1319,15 @@ const getStatusColor = (status) => {
         <Card className="text-white p-3 mb-4 table-gradient-bg">
           {/* ... other existing card code ... */}
           <table className="table table-hover mb-0">
-            <thead
-              className="table bg-dark p-2 sticky-top"
-              style={{ position: "sticky", top: 0, zIndex: 2 }}
-            >
+           <thead
+                className="table-gradient-bg table"
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backgroundColor: "#fff", // Match your background color
+                }}
+              >
               <tr className="text-center">
                 <th>Employee</th>
                 <th>Department</th>
@@ -1430,8 +1459,13 @@ const getStatusColor = (status) => {
           >
             <table className="table table-hover mb-0">
               <thead
-                className="table bg-dark p-2 sticky-top"
-                style={{ position: "sticky", top: 0, zIndex: 2 }}
+                className="table-gradient-bg table"
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backgroundColor: "#fff", // Match your background color
+                }}
               >
                 <tr className="text-center">
                   <th>Task Title</th>

@@ -477,7 +477,15 @@ const TaskManagement = () => {
           }}
         >
           <table className="table-gradient-bg align-middle mt-0 table table-bordered table-hover">
-            <thead className="table-light">
+            <thead
+                className="table-gradient-bg table"
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 2,
+                  backgroundColor: "#fff", // Match your background color
+                }}
+              >
               <tr>
                 <th>S. No.</th>
                 <th>Project Title</th>
@@ -731,7 +739,15 @@ const TaskManagement = () => {
                             {/* Files Table */}
                             <div className="table-responsive">
                               <table className="table table-sm table-striped table-hover">
-                                <thead className="table-light">
+                                <thead
+                                  className="table-gradient-bg table"
+                                  style={{
+                                    position: "sticky",
+                                    top: 0,
+                                    zIndex: 2,
+                                    backgroundColor: "#fff", // Match your background color
+                                  }}
+                                >
                                   <tr>
                                     <th>
                                       <input
