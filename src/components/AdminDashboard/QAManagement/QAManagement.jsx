@@ -365,8 +365,16 @@ const QAManagement = () => {
                   style={{ maxHeight: "400px", overflowY: "auto" }}
                 >
                   <table className="table table-gradient-bg mb-0">
-                    <thead className="text-white bg-dark table-light .">
-                      <tr>
+                    <thead
+                      className="table-gradient-bg table "
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 2,
+                        backgroundColor: "#fff", // Match your background color
+                      }}
+                    >
+                      <tr  className="text-center">
                         <th>Task ID</th>
                         <th>Title</th>
                         <th>Module</th>
@@ -379,7 +387,7 @@ const QAManagement = () => {
                     </thead>
                     <tbody className="text-white">
                       {filteredTasks.map((task) => (
-                        <tr key={task.id}>
+                        <tr key={task.id}  className="text-center">
                           <td>
                             <code>{task.id}</code>
                           </td>
@@ -621,77 +629,90 @@ const QAManagement = () => {
 
               {/* Status Table */}
               <div className="d-none d-lg-block">
-              <div
-   className="table-responsive"
-    style={{ maxHeight: "400px", overflowY: "auto" }}
->
-  <table className="table text-white table-gradient-bg table-hover table-bordered mb-0">
-    <thead className="table-light bg-dark .">
-      <tr>
-        <th>Task ID</th>
-        <th>Title</th>
-        <th>Assigned To</th>
-        <th>Status</th>
-        <th>Last Updated</th>
-        <th>Result File</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {filteredTasks
-        .filter((task) => task.assignedTo)
-        .map((task) => (
-          <tr key={task.id}>
-            <td><code>{task.id}</code></td>
-            <td>{task.title}</td>
-            <td>{task.assignedTo}</td>
-            <td>
-              <span className={`badge bg-${getStatusColor(task.status)}`}>
-                {task.status}
-              </span>
-            </td>
-            <td>{task.lastUpdated}</td>
-            <td>
-              {task.resultFile ? (
-                <a href="#" className="text-success">
-                  📄 {task.resultFile}
-                </a>
-              ) : (
-                <span className="">No file</span>
-              )}
-            </td>
-            <td>
-              <button
-                className="btn btn-sm btn-outline-primary me-1"
-                onClick={() =>
-                  setShowModal({
-                    show: true,
-                    type: "updateStatus",
-                    data: task,
-                  })
-                }
-              >
-                ✏️ Update
-              </button>
-              <button
-                className="btn btn-sm btn-outline-info"
-                onClick={() =>
-                  setShowModal({
-                    show: true,
-                    type: "viewDetails",
-                    data: task,
-                  })
-                }
-              >
-                👁️ View
-              </button>
-            </td>
-          </tr>
-        ))}
-    </tbody>
-  </table>
-</div>
-
+                <div
+                  className="table-responsive"
+                  style={{ maxHeight: "400px", overflowY: "auto" }}
+                >
+                  <table className="table text-white table-gradient-bg table-hover table-bordered mb-0">
+                    <thead
+                      className="table-gradient-bg table "
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 2,
+                        backgroundColor: "#fff", // Match your background color
+                      }}
+                    >
+                      <tr  className="text-center">
+                        <th>Task ID</th>
+                        <th>Title</th>
+                        <th>Assigned To</th>
+                        <th>Status</th>
+                        <th>Last Updated</th>
+                        <th>Result File</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredTasks
+                        .filter((task) => task.assignedTo)
+                        .map((task) => (
+                          <tr key={task.id}  className="text-center">
+                            <td>
+                              <code>{task.id}</code>
+                            </td>
+                            <td>{task.title}</td>
+                            <td>{task.assignedTo}</td>
+                            <td>
+                              <span
+                                className={`badge bg-${getStatusColor(
+                                  task.status
+                                )}`}
+                              >
+                                {task.status}
+                              </span>
+                            </td>
+                            <td>{task.lastUpdated}</td>
+                            <td>
+                              {task.resultFile ? (
+                                <a href="#" className="text-success">
+                                  📄 {task.resultFile}
+                                </a>
+                              ) : (
+                                <span className="">No file</span>
+                              )}
+                            </td>
+                            <td>
+                              <button
+                                className="btn btn-sm btn-outline-primary me-1"
+                                onClick={() =>
+                                  setShowModal({
+                                    show: true,
+                                    type: "updateStatus",
+                                    data: task,
+                                  })
+                                }
+                              >
+                                ✏️ Update
+                              </button>
+                              <button
+                                className="btn btn-sm btn-outline-info"
+                                onClick={() =>
+                                  setShowModal({
+                                    show: true,
+                                    type: "viewDetails",
+                                    data: task,
+                                  })
+                                }
+                              >
+                                👁️ View
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               {/* Mobile Card View */}

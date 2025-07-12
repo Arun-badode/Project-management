@@ -8,7 +8,7 @@ function UserManagement() {
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedApplications, setSelectedApplications] = useState([]);
   const [activeTab, setActiveTab] = useState("live");
-  
+
   // State for team members data
   const [teamMembers, setTeamMembers] = useState([
     {
@@ -98,7 +98,7 @@ function UserManagement() {
       appSkills: ["SEO", "Content Writing", "Canva"],
       username: "snehar",
       status: "active",
-    }
+    },
   ]);
 
   // Form state for adding/editing members
@@ -122,41 +122,43 @@ function UserManagement() {
   const gradientSelectStyles = {
     control: (provided, state) => ({
       ...provided,
-      background: 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
-      color: 'white',
-      borderColor: state.isFocused ? '#ffffff66' : '#ffffff33',
-      boxShadow: state.isFocused ? '0 0 0 1px #ffffff66' : 'none',
-      minHeight: '38px',
+      background: "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
+      color: "white",
+      borderColor: state.isFocused ? "#ffffff66" : "#ffffff33",
+      boxShadow: state.isFocused ? "0 0 0 1px #ffffff66" : "none",
+      minHeight: "38px",
     }),
     singleValue: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     multiValue: (provided) => ({
       ...provided,
-      backgroundColor: '#1b2f6e',
+      backgroundColor: "#1b2f6e",
     }),
     multiValueLabel: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     placeholder: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     input: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     option: (provided, state) => ({
       ...provided,
-      backgroundColor: state.isFocused ? '#293d80' : 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
-      color: 'white',
+      backgroundColor: state.isFocused
+        ? "#293d80"
+        : "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
+      color: "white",
     }),
     menu: (provided) => ({
       ...provided,
-      background: 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
-      color: 'white',
+      background: "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
+      color: "white",
     }),
   };
 
@@ -177,12 +179,12 @@ function UserManagement() {
 
   // Toggle member status between active and freezed
   const toggleFreezeMember = (empId) => {
-    setTeamMembers(prevMembers =>
-      prevMembers.map(member =>
+    setTeamMembers((prevMembers) =>
+      prevMembers.map((member) =>
         member.empId === empId
           ? {
               ...member,
-              status: member.status === "active" ? "freezed" : "active"
+              status: member.status === "active" ? "freezed" : "active",
             }
           : member
       )
@@ -192,15 +194,15 @@ function UserManagement() {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (modalType === "edit") {
       // Update existing member
-      setTeamMembers(prevMembers =>
-        prevMembers.map(member =>
+      setTeamMembers((prevMembers) =>
+        prevMembers.map((member) =>
           member.empId === form.empId
             ? {
                 ...form,
-                appSkills: selectedApplications.map(app => app.value)
+                appSkills: selectedApplications.map((app) => app.value),
               }
             : member
         )
@@ -209,12 +211,12 @@ function UserManagement() {
       // Add new member
       const newMember = {
         ...form,
-        appSkills: selectedApplications.map(app => app.value),
-        status: "active"
+        appSkills: selectedApplications.map((app) => app.value),
+        status: "active",
       };
-      setTeamMembers(prevMembers => [...prevMembers, newMember]);
+      setTeamMembers((prevMembers) => [...prevMembers, newMember]);
     }
-    
+
     setShowModal(false);
     resetForm();
   };
@@ -222,7 +224,7 @@ function UserManagement() {
   // Handle form field changes
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
-    setForm(prevForm => ({
+    setForm((prevForm) => ({
       ...prevForm,
       [name]: value,
     }));
@@ -248,7 +250,7 @@ function UserManagement() {
   const openMemberModal = (type, member) => {
     setModalType(type);
     setSelectedMember(member);
-    
+
     if (type !== "add") {
       setForm({
         empId: member.empId,
@@ -261,26 +263,26 @@ function UserManagement() {
         username: member.username,
         password: "", // Password is not stored for security reasons
       });
-      
+
       // Set selected applications for the select component
       setSelectedApplications(
-        member.appSkills.map(skill => ({
+        member.appSkills.map((skill) => ({
           value: skill,
-          label: skill
+          label: skill,
         }))
       );
     } else {
       resetForm();
     }
-    
+
     setShowModal(true);
   };
 
   // Delete a member
   const deleteMember = (empId) => {
     if (window.confirm("Are you sure you want to delete this member?")) {
-      setTeamMembers(prevMembers => 
-        prevMembers.filter(member => member.empId !== empId)
+      setTeamMembers((prevMembers) =>
+        prevMembers.filter((member) => member.empId !== empId)
       );
     }
   };
@@ -310,10 +312,21 @@ function UserManagement() {
 
       {/* Live Members Table */}
       {activeTab === "live" && (
-        <div className="table-responsive table-gradient-bg" style={{ maxHeight: "400px", overflowY: "auto" }}>
+        <div
+          className="table-responsive table-gradient-bg"
+          style={{ maxHeight: "400px", overflowY: "auto" }}
+        >
           <table className="table table-bordered align-middle">
-            <thead>
-              <tr>
+            <thead
+              className="table-gradient-bg table "
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 2,
+                backgroundColor: "#fff", // Match your background color
+              }}
+            >
+              <tr  className="text-center">
                 <th>Emp ID</th>
                 <th>Full Name</th>
                 <th>DOJ</th>
@@ -335,7 +348,7 @@ function UserManagement() {
                 </tr>
               ) : (
                 liveMembers.map((member, idx) => (
-                  <tr key={idx}>
+                  <tr key={idx}  className="text-center">
                     <td>{member.empId}</td>
                     <td>{member.fullName}</td>
                     <td>{member.doj}</td>
@@ -348,28 +361,28 @@ function UserManagement() {
                       <span className="badge bg-success">Active</span>
                     </td>
                     <td>
-                      <button 
+                      <button
                         className="btn btn-sm btn-primary me-2"
                         onClick={() => openMemberModal("view", member)}
                         title="View Member"
                       >
                         <i className="fas fa-eye"></i>
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-info me-2"
                         onClick={() => openMemberModal("edit", member)}
                         title="Edit Member"
                       >
                         <i className="fas fa-edit"></i>
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-warning me-2"
                         onClick={() => toggleFreezeMember(member.empId)}
                         title="Freeze Account"
                       >
                         <i className="fas fa-snowflake"></i>
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-danger"
                         onClick={() => deleteMember(member.empId)}
                         title="Delete Member"
@@ -387,10 +400,21 @@ function UserManagement() {
 
       {/* Freezed Members Table */}
       {activeTab === "freezed" && (
-        <div className="table-responsive table-gradient-bg" style={{ maxHeight: "400px", overflowY: "auto" }}>
+        <div
+          className="table-responsive table-gradient-bg"
+          style={{ maxHeight: "400px", overflowY: "auto" }}
+        >
           <table className="table table-bordered align-middle">
-            <thead>
-              <tr>
+            <thead
+              className="table-gradient-bg table "
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 2,
+                backgroundColor: "#fff", // Match your background color
+              }}
+            >
+              <tr  className="text-center">
                 <th>Emp ID</th>
                 <th>Full Name</th>
                 <th>DOJ</th>
@@ -412,7 +436,7 @@ function UserManagement() {
                 </tr>
               ) : (
                 freezedMembers.map((member, idx) => (
-                  <tr key={idx}>
+                  <tr key={idx}  className="text-center">
                     <td>{member.empId}</td>
                     <td>{member.fullName}</td>
                     <td>{member.doj}</td>
@@ -425,28 +449,28 @@ function UserManagement() {
                       <span className="badge bg-secondary">Freezed</span>
                     </td>
                     <td>
-                      <button 
+                      <button
                         className="btn btn-sm btn-primary me-2"
                         onClick={() => openMemberModal("view", member)}
                         title="View Member"
                       >
                         <i className="fas fa-eye"></i>
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-info me-2"
                         onClick={() => openMemberModal("edit", member)}
                         title="Edit Member"
                       >
                         <i className="fas fa-edit"></i>
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-success me-2"
                         onClick={() => toggleFreezeMember(member.empId)}
                         title="Activate Account"
                       >
                         <i className="fas fa-sun"></i>
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-danger"
                         onClick={() => deleteMember(member.empId)}
                         title="Delete Member"
@@ -468,7 +492,7 @@ function UserManagement() {
   const renderModalContent = () => {
     const isEditMode = modalType === "edit";
     const isViewMode = modalType === "view";
-    
+
     return (
       <form onSubmit={handleSubmit}>
         <div className="modal-body">
@@ -625,7 +649,7 @@ function UserManagement() {
           </button>
         </div>
       </div>
-      
+
       {renderTable()}
 
       {/* Modal for adding/editing members */}

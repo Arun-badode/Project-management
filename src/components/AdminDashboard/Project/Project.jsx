@@ -5,6 +5,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Select from "react-select";
 import SettingsPage from "../Setting/Setting";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 
 const Project = () => {
   const [activeTab, setActiveTab] = useState("created");
@@ -17,13 +18,6 @@ const Project = () => {
   const [selectedClient, setSelectedClient] = useState("");
   const [selectedTask, setSelectedTask] = useState("");
   const [selectedApplications, setSelectedApplications] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(() => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}`;
-  });
 
   const clientList = ["Client A", "Client B"];
   const taskList = ["Design", "Translation", "Proofreading"];
@@ -781,6 +775,113 @@ const Project = () => {
     fakeScrollbarRef: fakeScrollbarRef4,
   } = useSyncScroll(activeTab === "completed");
 
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(12);
+  const [selectedMonth, setSelectedMonth] = useState(6); // July (0-indexed)
+  const [selectedYear, setSelectedYear] = useState(2025);
+  const [selectedHour, setSelectedHour] = useState(12);
+  const [selectedMinute, setSelectedMinute] = useState(0);
+  const [isAM, setIsAM] = useState(true);
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const weekDays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+
+  const getDaysInMonth = (month, year) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (month, year) => {
+    const firstDay = new Date(year, month, 1).getDay();
+    return firstDay === 0 ? 6 : firstDay - 1; // Convert Sunday (0) to be last (6)
+  };
+
+  const generateCalendarDays = () => {
+    const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
+    const firstDay = getFirstDayOfMonth(selectedMonth, selectedYear);
+    const days = [];
+
+    // Previous month's trailing days
+    const prevMonth = selectedMonth === 0 ? 11 : selectedMonth - 1;
+    const prevYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear;
+    const daysInPrevMonth = getDaysInMonth(prevMonth, prevYear);
+
+    for (let i = firstDay - 1; i >= 0; i--) {
+      days.push({
+        day: daysInPrevMonth - i,
+        isCurrentMonth: false,
+        isNextMonth: false,
+      });
+    }
+
+    // Current month days
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push({
+        day,
+        isCurrentMonth: true,
+        isNextMonth: false,
+      });
+    }
+
+    // Next month's leading days
+    const remainingDays = 42 - days.length;
+    for (let day = 1; day <= remainingDays; day++) {
+      days.push({
+        day,
+        isCurrentMonth: false,
+        isNextMonth: true,
+      });
+    }
+
+    return days;
+  };
+
+  const handlePrevMonth = () => {
+    if (selectedMonth === 0) {
+      setSelectedMonth(11);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (selectedMonth === 11) {
+      setSelectedMonth(0);
+      setSelectedYear(selectedYear + 1);
+    } else {
+      setSelectedMonth(selectedMonth + 1);
+    }
+  };
+
+  const formatDateTime = () => {
+    const date = `${selectedDate.toString().padStart(2, "0")}/${(
+      selectedMonth + 1
+    )
+      .toString()
+      .padStart(2, "0")}/${selectedYear}`;
+    const time = `${selectedHour.toString().padStart(2, "0")}:${selectedMinute
+      .toString()
+      .padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
+    return `${date} ${time}`;
+  };
+
+  const calendarDays = generateCalendarDays();
+
   return (
     <div className="conatiner-fluid bg-main mt-4">
       {/* Header */}
@@ -922,95 +1023,6 @@ const Project = () => {
               </div>
             ) : (
               <div className="card">
-                {/* <div className="table-responsive" style={{ overflowX: 'auto' }}>
-                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                    <thead className="bg-light table-gradient-bg">
-                      <tr>
-                        <th>Project Title</th>
-                        <th>Client</th>
-                        <th>Country</th>
-                        <th>Project Manager</th>
-                        <th>Tasks</th>
-                        <th>Languages</th>
-                        <th>application</th>
-                        <th>Total Pages</th>
-                        <th>Server Path</th>
-                        <th>Received Date</th>
-                        <th>Rate</th>
-                        <th>Cost</th>
-                        <th className="text-end">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredProjects.map(project => (
-                        <tr key={project.id}>
-                          <td>
-                            {project.title}
-                            <span className="badge text-dark ms-2">Draft</span>
-                          </td>
-                          <td>{project.client}</td>
-                          <td>{project.country}</td>
-                          <td>{project.projectManager}</td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.tasks.map((task) => (
-                                <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
-                                  {task}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.languages.map((language) => (
-                                <span key={language} className="badge bg-success bg-opacity-10 text-success">
-                                  {language}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <span className="badge bg-purple bg-opacity-10 text-purple">
-                              {project.application}
-                            </span>
-                          </td>
-                          <td>{project.totalPages}</td>
-                          <td>
-                            <span className="badge bg-light text-dark">
-                              {project.serverPath}
-                            </span>
-                          </td>
-                          <td>{new Date(project.receivedDate).toLocaleDateString()}</td>
-                          <td>{project.rate} {project.currency}</td>
-                          <td>{project.cost} {project.currency}</td>
-                          <td className="text-end">
-                            <div className="d-flex justify-content-end gap-2">
-                              <button
-                                onClick={() => {
-                                  const dueDate = prompt('Enter due date (YYYY-MM-DD):', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-                                  if (dueDate) markAsYTS(project.id, dueDate);
-                                }}
-                                className="btn btn-sm btn-primary"
-                              >
-                                Mark as YTS
-                              </button>
-                              <button
-                                onClick={() => handleEditProject(project.id)}
-                                className="btn btn-sm btn-success"
-                              >
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button className="btn btn-sm btn-danger">
-                                <i className="fas fa-trash-alt"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div> */}
-                {/* Fake Scrollbar */}
                 <div
                   ref={fakeScrollbarRef1}
                   style={{
@@ -1051,7 +1063,7 @@ const Project = () => {
                         backgroundColor: "#fff", // Match your background color
                       }}
                     >
-                      <tr>
+                      <tr className="text-center">
                         <th>Project Title</th>
                         <th>Client</th>
                         <th>Country</th>
@@ -1069,7 +1081,7 @@ const Project = () => {
                     </thead>
                     <tbody>
                       {filteredProjects.map((project) => (
-                        <tr key={project.id}>
+                        <tr key={project.id} className="text-center">
                           <td>
                             {project.title}
                             <span className="badge bg-light text-dark ms-2">
@@ -1178,93 +1190,6 @@ const Project = () => {
               </div>
             ) : (
               <div className="card">
-                {/* <div className="table-responsive" style={{ overflowX: 'auto' }}>
-                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                    <thead className=" ">
-                      <tr>
-                        <th>Project Title</th>
-                        <th>Client</th>
-                        <th>Country</th>
-                        <th>Project Manager</th>
-                        <th>Due Date</th>
-                        <th>Progress</th>
-                        <th>Tasks</th>
-                        <th>Languages</th>
-                        <th>application</th>
-                        <th>Total Pages</th>
-                        <th className="text-end">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredProjects.map(project => (
-                        <tr key={project.id}>
-                          <td>
-                            {project.title}
-                            <span className="badge bg-warning bg-opacity-10 text-warning ms-2">Active</span>
-                          </td>
-                          <td>{project.client}</td>
-                          <td>{project.country}</td>
-                          <td>{project.projectManager}</td>
-                          <td>{new Date(project.dueDate).toLocaleDateString()}</td>
-                          <td>
-                            <div className="d-flex align-items-center">
-                              <div className="progress flex-grow-1 me-2" style={{ height: '6px' }}>
-                                <div
-                                  className="progress-bar bg-primary"
-                                  style={{ width: `${project.progress}%` }}
-                                ></div>
-                              </div>
-                              <small className="text-primary">{project.progress}%</small>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.tasks.map((task) => (
-                                <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
-                                  {task}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.languages.map((language) => (
-                                <span key={language} className="badge bg-success bg-opacity-10 text-success">
-                                  {language}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <span className="badge bg-purple bg-opacity-10 text-purple">
-                              {project.application}
-                            </span>
-                          </td>
-                          <td>{project.totalPages}</td>
-                          <td className="text-end">
-                            <div className="d-flex justify-content-end gap-2">
-                              <button
-                                onClick={() => markAsCompleted(project.id)}
-                                className="btn btn-sm btn-success"
-                              >
-                                Mark as Completed
-                              </button>
-                              <button
-                                onClick={() => handleEditProject(project.id)}
-                                className="btn btn-sm btn-success"
-                              >
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button className="btn btn-sm btn-danger">
-                                <i className="fas fa-trash-alt"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div> */}
                 <div
                   ref={fakeScrollbarRef2}
                   style={{
@@ -1304,7 +1229,7 @@ const Project = () => {
                         backgroundColor: "#fff", // Match your background color
                       }}
                     >
-                      <tr>
+                      <tr className="text-center">
                         <th>Project Title</th>
                         <th>Client</th>
                         <th>Country</th>
@@ -1320,7 +1245,7 @@ const Project = () => {
                     </thead>
                     <tbody>
                       {filteredProjects.map((project) => (
-                        <tr key={project.id}>
+                        <tr key={project.id} className="text-center">
                           <td>
                             {project.title}
                             <span className="badge bg-warning bg-opacity-10 text-warning ms-2">
@@ -1540,7 +1465,7 @@ const Project = () => {
                           backgroundColor: "#fff", // Match your background color
                         }}
                       >
-                        <tr>
+                        <tr className="text-center">
                           <th>Project Title</th>
                           <th>Client</th>
                           <th>Country</th>
@@ -1559,7 +1484,7 @@ const Project = () => {
                       </thead>
                       <tbody>
                         {filteredProjects.map((project) => (
-                          <tr key={project.id}>
+                          <tr key={project.id} className="text-center">
                             <td>
                               {project.title}
                               <span className="badge bg-success bg-opacity-10 text-success ms-2">
@@ -1930,7 +1855,7 @@ const Project = () => {
                             backgroundColor: "#fff", // Match your background color
                           }}
                         >
-                          <tr>
+                          <tr className="text-center">
                             <th>S.No.</th>
                             <th>File Name</th>
                             <th>Pages</th>
@@ -1941,7 +1866,7 @@ const Project = () => {
                         </thead>
                         <tbody>
                           {formData.files.map((file, idx) => (
-                            <tr key={idx}>
+                            <tr key={idx} className="text-center">
                               <td>
                                 <div className="d-flex align-items-center gap-2">
                                   {idx + 1}
@@ -2035,16 +1960,416 @@ const Project = () => {
                         >
                           Deadline
                         </label>
-                        <DatePicker
-                          selected={selectedDateTime}
-                          onChange={(date) => setSelectedDateTime(date)}
-                          showTimeSelect
-                          timeFormat="HH:mm"
-                          timeIntervals={15}
-                          dateFormat="MMMM d, yyyy h:mm aa"
-                          placeholderText="Select date and time"
-                          className="form-control"
-                        />
+                        <div className="max-w-md mx-auto">
+                          {/* Input Field */}
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={formatDateTime()}
+                              readOnly
+                              onClick={() => setIsOpen(!isOpen)}
+                              className=" bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                              placeholder="Select date and time"
+                            />
+                          </div>
+
+                          {/* Calendar Dropdown */}
+                          {isOpen && (
+                            <div className="calendar-dropdown">
+                              <style>{`
+                            
+            .calendar-dropdown {
+              position: absolute;
+              z-index: 9999;
+              margin-top: 8px;
+              background: white;
+              border: 1px solid #e5e7eb;
+              border-radius: 8px;
+              box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+              padding: 16px;
+              max-width: 30rem;
+              width: 100%;
+            }
+            .time-display {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 16px;
+              padding: 12px;
+              background: #2563eb;
+              color: white;
+              border-radius: 6px;
+            }
+            .time-display .time {
+              font-size: 1.5rem;
+              font-weight: bold;
+            }
+            .time-display .period {
+              font-size: 0.875rem;
+            }
+            .time-display .date {
+              font-size: 0.875rem;
+            }
+            .time-calendar-container {
+              display: flex;
+              gap: 16px;
+            }
+            .time-selector {
+              display: flex;
+              gap: 8px;
+            }
+            .time-column {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+            }
+            .time-column-label {
+              font-size: 0.75rem;
+              color: #6b7280;
+              margin-bottom: 4px;
+            }
+            .time-scroll {
+              height: 256px;
+              overflow-y: auto;
+              border: 1px solid #e5e7eb;
+              border-radius: 6px;
+              scrollbar-width: none;
+              -ms-overflow-style: none;
+            }
+            .time-scroll::-webkit-scrollbar {
+              display: none;
+            }
+            .time-options {
+              display: flex;
+              flex-direction: column;
+            }
+            .time-option {
+              padding: 4px 8px;
+              font-size: 0.875rem;
+              min-width: 40px;
+              background: transparent;
+              border: none;
+              cursor: pointer;
+              color: #374151;
+            }
+            .time-option:hover {
+              background: #dbeafe;
+            }
+            .time-option.selected-hour {
+              background: #2563eb;
+              color: white;
+            }
+            .time-option.selected-minute {
+              background: #ef4444;
+              color: white;
+            }
+            .period-options {
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+            }
+            .period-option {
+              padding: 4px 8px;
+              border-radius: 4px;
+              font-size: 0.875rem;
+              background: #f3f4f6;
+              color: #374151;
+              border: none;
+              cursor: pointer;
+            }
+            .period-option:hover {
+              background: #e5e7eb;
+            }
+            .period-option.selected {
+              background: #2563eb;
+              color: white;
+            }
+            .calendar-section {
+              flex: 1;
+            }
+            .month-nav {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 12px;
+            }
+            .month-nav button {
+              padding: 4px;
+              background: transparent;
+              border: none;
+              cursor: pointer;
+              border-radius: 4px;
+            }
+            .month-nav button:hover {
+              background: #f3f4f6;
+            }
+            .month-nav h3 {
+              font-weight: 600;
+              color: #1f2937;
+            }
+            .weekdays {
+              display: grid;
+              grid-template-columns: repeat(7, 1fr);
+              gap: 4px;
+              margin-bottom: 8px;
+            }
+            .weekday {
+              text-align: center;
+              font-size: 0.75rem;
+              font-weight: 500;
+              color: #6b7280;
+              padding: 4px 0;
+            }
+            .calendar-grid {
+              display: grid;
+              grid-template-columns: repeat(7, 1fr);
+              gap: 4px;
+            }
+            .calendar-day {
+              width: 32px;
+              height: 32px;
+              font-size: 0.875rem;
+              border-radius: 6px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border: none;
+              cursor: pointer;
+              background: transparent;
+            }
+            .calendar-day.current-month {
+              color: #1f2937;
+            }
+            .calendar-day.current-month:hover {
+              background: #dbeafe;
+            }
+            .calendar-day.selected {
+              background: #2563eb;
+              color: white;
+            }
+            .calendar-day.other-month {
+              color: #9ca3af;
+            }
+            .action-buttons {
+              display: flex;
+              justify-content: space-between;
+              margin-top: 16px;
+              margin-right: 50px;
+            }
+            .action-button {
+              color: #2563eb;
+              font-size: 0.875rem;
+              background: transparent;
+              border: none;
+              cursor: pointer;
+              text-decoration: none;
+            }
+            .action-button:hover {
+              text-decoration: underline;
+            }
+            .done-section {
+              display: flex;
+              justify-content: flex-end;
+              margin-top: 16px;
+              padding-top: 12px;
+              border-top: 1px solid #e5e7eb;
+            }
+            .done-button {
+              padding: 8px 16px;
+              background: #2563eb;
+              color: white;
+              border: none;
+              border-radius: 6px;
+              cursor: pointer;
+            }
+            .done-button:hover {
+              background: #1d4ed8;
+            }
+          `}</style>
+
+                              {/* Time Display */}
+                              <div className="time-display">
+                                <div className="time">
+                                  {selectedHour.toString().padStart(2, "0")}:
+                                  {selectedMinute.toString().padStart(2, "0")}
+                                </div>
+                                <div className="period">
+                                  {isAM ? "AM" : "PM"}
+                                </div>
+                                <div className="date">
+                                  {months[selectedMonth].substring(0, 3)},{" "}
+                                  {selectedYear}
+                                </div>
+                              </div>
+
+                              <div className="time-calendar-container">
+                                {/* Time Selector */}
+                                <div className="time-selector">
+                                  {/* Hour Selection */}
+                                  <div className="time-column">
+                                    <div className="time-column-label">
+                                      Hour
+                                    </div>
+                                    <div className="time-scroll">
+                                      <div className="time-options">
+                                        {[
+                                          12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+                                        ].map((hour) => (
+                                          <button
+                                            key={hour}
+                                            onClick={() =>
+                                              setSelectedHour(hour)
+                                            }
+                                            className={`time-option ${
+                                              selectedHour === hour
+                                                ? "selected-hour"
+                                                : ""
+                                            }`}
+                                          >
+                                            {hour.toString().padStart(2, "0")}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Minute Selection */}
+                                  <div className="time-column">
+                                    <div className="time-column-label">Min</div>
+                                    <div className="time-scroll">
+                                      <div className="time-options">
+                                        {[0, 15, 30, 45].map((minute) => (
+                                          <button
+                                            key={minute}
+                                            onClick={() =>
+                                              setSelectedMinute(minute)
+                                            }
+                                            className={`time-option ${
+                                              selectedMinute === minute
+                                                ? "selected-minute"
+                                                : ""
+                                            }`}
+                                          >
+                                            {minute.toString().padStart(2, "0")}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* AM/PM Toggle */}
+                                  <div className="time-column">
+                                    <div className="time-column-label">
+                                      Period
+                                    </div>
+                                    <div className="period-options">
+                                      <button
+                                        onClick={() => setIsAM(true)}
+                                        className={`period-option ${
+                                          isAM ? "selected" : ""
+                                        }`}
+                                      >
+                                        AM
+                                      </button>
+                                      <button
+                                        onClick={() => setIsAM(false)}
+                                        className={`period-option ${
+                                          !isAM ? "selected" : ""
+                                        }`}
+                                      >
+                                        PM
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Calendar */}
+                                <div className="calendar-section">
+                                  {/* Month Navigation */}
+                                  <div className="month-nav">
+                                    <button onClick={handlePrevMonth}>
+                                      <ChevronLeft size={20} />
+                                    </button>
+                                    <h3>
+                                      {months[selectedMonth]}, {selectedYear}
+                                    </h3>
+                                    <button onClick={handleNextMonth}>
+                                      <ChevronRight size={20} />
+                                    </button>
+                                  </div>
+
+                                  {/* Week Days Header */}
+                                  <div className="weekdays">
+                                    {weekDays.map((day) => (
+                                      <div key={day} className="weekday">
+                                        {day}
+                                      </div>
+                                    ))}
+                                  </div>
+
+                                  {/* Calendar Grid */}
+                                  <div className="calendar-grid">
+                                    {calendarDays.map((dayObj, index) => (
+                                      <button
+                                        key={index}
+                                        onClick={() =>
+                                          dayObj.isCurrentMonth &&
+                                          setSelectedDate(dayObj.day)
+                                        }
+                                        className={`calendar-day ${
+                                          dayObj.isCurrentMonth
+                                            ? selectedDate === dayObj.day
+                                              ? "current-month selected"
+                                              : "current-month"
+                                            : "other-month"
+                                        }`}
+                                      >
+                                        {dayObj.day}
+                                      </button>
+                                    ))}
+                                  </div>
+
+                                  {/* Action Buttons */}
+                                  <div className="action-buttons">
+                                    <button
+                                      onClick={() => {
+                                        setSelectedDate(new Date().getDate());
+                                        setSelectedMonth(new Date().getMonth());
+                                        setSelectedYear(
+                                          new Date().getFullYear()
+                                        );
+                                      }}
+                                      className="action-button"
+                                    >
+                                      Clear
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        const today = new Date();
+                                        setSelectedDate(today.getDate());
+                                        setSelectedMonth(today.getMonth());
+                                        setSelectedYear(today.getFullYear());
+                                      }}
+                                      className="action-button"
+                                    >
+                                      Today
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Close Button */}
+                              <div className="done-section">
+                                <button
+                                  onClick={() => setIsOpen(false)}
+                                  className="done-button"
+                                >
+                                  Done
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                         <button
                           className="btn"
                           style={{
@@ -2267,401 +2592,6 @@ const Project = () => {
         </div>
       )}
 
-      {/* {showSettings && (
-        <div
-          className="modal fade show d-block custom-modal-dark"
-          tabIndex="-1"
-          aria-modal="true"
-          role="dialog"
-        >
-          <div className="modal-dialog modal-lg">
-            <div className="modal-content bg-dark text-white">
-              <div className="modal-header bg-dark border-secondary">
-                <h5 className="modal-title text-white">Settings</h5>
-                <button
-                  type="button"
-                  className="btn-close btn-close-white"
-                  onClick={() => setShowSettings(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <h6 className="text-white-50">
-                  Manage predefined lists for project creation and other
-                  application settings.
-                </h6>
-
-            
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Clients</h6>
-
-                  <div className="row mb-2">
-                    <div className="col-md-5 mb-2">
-                      <div className="input-group">
-                        <input
-                          className="form-control"
-                          style={{ background: "#181f3a", color: "#fff" }}
-                          placeholder="New Client Alias Name*"
-                          name="alias"
-                        />
-                        <button className="btn btn-gradient" type="button">
-                          +
-                        </button>
-                      </div>
-                    </div>
-                    <div className="col-md-6 mb-2">
-                      <div className="input-group">
-                        <input
-                          className="form-control"
-                          style={{ background: "#181f3a", color: "#fff" }}
-                          placeholder="Actual Client Name*"
-                          name="actual"
-                        />
-                        <button className="btn btn-gradient" type="button">
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="row mb-3">
-                
-                    <div className="col-md-4 mb-2">
-                      <div className="input-group">
-                        <input
-                          className="form-control"
-                          style={{ background: "#181f3a", color: "#fff" }}
-                          placeholder="Country*"
-                          name="country"
-                        />
-                        <button className="btn btn-gradient" type="button">
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                   
-                    <div className="col-md-6 mb-2">
-                      <div className="row">
-                   
-                        <div className="col-md-6 mb-2">
-                          <div className="input-group">
-                            <select
-                              className="form-control"
-                              style={{ background: "#181f3a", color: "#fff" }}
-                              name="currency"
-                            >
-                              <option value="">Currency*</option>
-                              {currencyOptions.map((cur) => (
-                                <option key={cur} value={cur}>
-                                  {cur}
-                                </option>
-                              ))}
-                            </select>
-                            <button className="btn btn-gradient" type="button">
-                              +
-                            </button>
-                          </div>
-                        </div>
-
-               
-                        <div className="col-md-6 mb-2">
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="00"
-                              name="hourlyRate"
-                              style={{ background: "#181f3a", color: "#fff" }}
-                            />
-                            <button className="btn btn-gradient" type="button">
-                              +
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-   
-                  <div className="mb-2">
-                    <div className="input-group">
-                      <input
-                        className="form-control"
-                        style={{ background: "#181f3a", color: "#fff" }}
-                        placeholder="Project Managers (comma-sep)"
-                        name="managers"
-                      />
-                      <button className="btn btn-gradient" type="button">
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    {clients.map((client, index) => (
-                      <div key={index}>
-                        <div className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-2 rounded">
-                          <span className="text-white">
-                            <strong>{client.alias}</strong> ({client.actualName}
-                            )<br />
-                            Country: {client.country}
-                            <br />
-                            PMs: {client.managers}
-                          </span>
-                          <div className="btn-group btn-group-sm gap-2">
-                            <button className="btn btn-outline-secondary  text-light">
-                              <i className="bi bi-pencil"></i>
-                            </button>
-                            <button
-                              className="btn btn-outline-danger"
-                              onClick={() =>
-                                handleDeleteItem(clients, setClients, index)
-                              }
-                            >
-                              <i className="fas fa-trash-alt"></i>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddClient}
-                    disabled={
-                      !newClient.alias ||
-                      !newClient.actualName ||
-                      !newClient.country
-                    }
-                  >
-                    <i className="fas fa-plus me-1"></i>
-                  </button>
-                </div>
-
-              
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Tasks List</h6>
-                  <div className="input-group mb-2">
-                    <input
-                      type="text"
-                      className="form-control bg-secondary text-white border-secondary"
-                      placeholder="New task..."
-                      value={newTask}
-                      onChange={(e) => setNewTask(e.target.value)}
-                    />
-                    <button className="btn btn-primary">+</button>
-                  </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    {tasks.map((task, index) => (
-                      <div
-                        key={index}
-                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
-                      >
-                        <span className="text-white">{task}</span>
-                        <div className="btn-group btn-group-sm gap-2">
-                          <button className="btn btn-outline-secondary  text-light">
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                          <button
-                            className="btn btn-outline-danger"
-                            onClick={() =>
-                              handleDeleteItem(tasks, setTasks, index)
-                            }
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-          
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Application List</h6>
-                  <div className="input-group mb-2">
-                    <input
-                      type="text"
-                      className="form-control bg-secondary text-white border-secondary"
-                      placeholder="New application..."
-                      value={newapplication}
-                      onChange={(e) => setNewapplication(e.target.value)}
-                    />
-                    <button className="btn btn-primary">+</button>
-                  </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    {applications.map((application, index) => (
-                      <div
-                        key={index}
-                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
-                      >
-                        <span className="text-white">{application}</span>
-                        <div className="btn-group btn-group-sm gap-2">
-                          <button className="btn btn-outline-secondary  text-light">
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                          <button
-                            className="btn btn-outline-danger"
-                            onClick={() =>
-                              handleDeleteItem(
-                                applications,
-                                setapplications,
-                                index
-                              )
-                            }
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddapplication}
-                    disabled={!newapplication}
-                  >
-                    <i className="fas fa-plus me-1"></i>
-                  </button>
-                </div>
-
-            
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Languages List</h6>
-                  <div className="input-group mb-2">
-                    <input
-                      type="text"
-                      className="form-control bg-secondary text-white border-secondary"
-                      placeholder="New language..."
-                      value={newLanguage}
-                      onChange={(e) => setNewLanguage(e.target.value)}
-                    />
-                    <button className="btn btn-primary">+</button>
-                  </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    {languages.map((language, index) => (
-                      <div
-                        key={index}
-                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
-                      >
-                        <span className="text-white">{language}</span>
-                        <div className="btn-group btn-group-sm gap-2">
-                          <button className="btn btn-outline-secondary  text-light">
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                          <button
-                            className="btn btn-outline-danger"
-                            onClick={() =>
-                              handleDeleteItem(languages, setLanguages, index)
-                            }
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-             
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Currency Conversion Rates</h6>
-                  <div className="row g-2 mb-2">
-                    <div className="col-md-6">
-                      <input
-                        type="text"
-                        className="form-control bg-card text-white border-secondary"
-                        placeholder="Currency (e.g. USD)"
-                        value={newCurrency.name}
-                        onChange={(e) =>
-                          setNewCurrency({
-                            ...newCurrency,
-                            name: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <input
-                        type="text"
-                        className="form-control bg-card text-white border-secondary"
-                        placeholder="Rate to INR"
-                        value={newCurrency.rate}
-                        onChange={(e) =>
-                          setNewCurrency({
-                            ...newCurrency,
-                            rate: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="border rounded p-2 mb-2 border-secondary table-gradient-bg">
-                    <table className="table table-dark table-sm mb-0">
-                      <thead>
-                        <tr>
-                          <th>Currency</th>
-                          <th>Rate to INR</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {currencies.map((currency, index) => (
-                          <tr key={index}>
-                            <td>{currency.name}</td>
-                            <td>{currency.rate}</td>
-                            <td>
-                              <div className="btn-group btn-group-sm">
-                                <button
-                                  className="btn btn-outline-danger"
-                                  onClick={() =>
-                                    handleDeleteItem(
-                                      currencies,
-                                      setCurrencies,
-                                      index
-                                    )
-                                  }
-                                >
-                                  <i className="fas fa-trash-alt"></i>
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-         
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Save All Settings</h6>
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    <p className="small text-white-50 mb-0">
-                      Remember to save your changes. Settings are stored
-                      locally.
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="modal-footer  border-secondary">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowSettings(false)}
-                >
-                  Close
-                </button>
-                <button type="button" className="btn btn-primary">
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )} */}
-
       {showSettings && (
         <div
           className="modal fade show d-block custom-modal-dark"
@@ -2696,6 +2626,375 @@ const Project = () => {
               </div>
             </div>
           </div>
+          {isOpen && (
+            <div className="calendar-dropdown">
+              <style>{`
+            .calendar-dropdown {
+              position: absolute;
+              z-index: 9999;
+              margin-top: 8px;
+              background: white;
+              border: 1px solid #e5e7eb;
+              border-radius: 8px;
+              box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+              padding: 16px;
+              max-width: 28rem;
+              width: 100%;
+            }
+            .time-display {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 16px;
+              padding: 12px;
+              background: #2563eb;
+              color: white;
+              border-radius: 6px;
+            }
+            .time-display .time {
+              font-size: 1.5rem;
+              font-weight: bold;
+            }
+            .time-display .period {
+              font-size: 0.875rem;
+            }
+            .time-display .date {
+              font-size: 0.875rem;
+            }
+            .time-calendar-container {
+              display: flex;
+              gap: 16px;
+            }
+            .time-selector {
+              display: flex;
+              gap: 8px;
+            }
+            .time-column {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+            }
+            .time-column-label {
+              font-size: 0.75rem;
+              color: #6b7280;
+              margin-bottom: 4px;
+            }
+            .time-scroll {
+              height: 256px;
+              overflow-y: auto;
+              border: 1px solid #e5e7eb;
+              border-radius: 6px;
+              scrollbar-width: none;
+              -ms-overflow-style: none;
+            }
+            .time-scroll::-webkit-scrollbar {
+              display: none;
+            }
+            .time-options {
+              display: flex;
+              flex-direction: column;
+            }
+            .time-option {
+              padding: 4px 8px;
+              font-size: 0.875rem;
+              min-width: 40px;
+              background: transparent;
+              border: none;
+              cursor: pointer;
+              color: #374151;
+            }
+            .time-option:hover {
+              background: #dbeafe;
+            }
+            .time-option.selected-hour {
+              background: #2563eb;
+              color: white;
+            }
+            .time-option.selected-minute {
+              background: #ef4444;
+              color: white;
+            }
+            .period-options {
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+            }
+            .period-option {
+              padding: 4px 8px;
+              border-radius: 4px;
+              font-size: 0.875rem;
+              background: #f3f4f6;
+              color: #374151;
+              border: none;
+              cursor: pointer;
+            }
+            .period-option:hover {
+              background: #e5e7eb;
+            }
+            .period-option.selected {
+              background: #2563eb;
+              color: white;
+            }
+            .calendar-section {
+              flex: 1;
+            }
+            .month-nav {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 12px;
+            }
+            .month-nav button {
+              padding: 4px;
+              background: transparent;
+              border: none;
+              cursor: pointer;
+              border-radius: 4px;
+            }
+            .month-nav button:hover {
+              background: #f3f4f6;
+            }
+            .month-nav h3 {
+              font-weight: 600;
+              color: #1f2937;
+            }
+            .weekdays {
+              display: grid;
+              grid-template-columns: repeat(7, 1fr);
+              gap: 4px;
+              margin-bottom: 8px;
+            }
+            .weekday {
+              text-align: center;
+              font-size: 0.75rem;
+              font-weight: 500;
+              color: #6b7280;
+              padding: 4px 0;
+            }
+            .calendar-grid {
+              display: grid;
+              grid-template-columns: repeat(7, 1fr);
+              gap: 4px;
+            }
+            .calendar-day {
+              width: 32px;
+              height: 32px;
+              font-size: 0.875rem;
+              border-radius: 6px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border: none;
+              cursor: pointer;
+              background: transparent;
+            }
+            .calendar-day.current-month {
+              color: #1f2937;
+            }
+            .calendar-day.current-month:hover {
+              background: #dbeafe;
+            }
+            .calendar-day.selected {
+              background: #2563eb;
+              color: white;
+            }
+            .calendar-day.other-month {
+              color: #9ca3af;
+            }
+            .action-buttons {
+              display: flex;
+              justify-content: space-between;
+              margin-top: 16px;
+            }
+            .action-button {
+              color: #2563eb;
+              font-size: 0.875rem;
+              background: transparent;
+              border: none;
+              cursor: pointer;
+              text-decoration: none;
+            }
+            .action-button:hover {
+              text-decoration: underline;
+            }
+            .done-section {
+              display: flex;
+              justify-content: flex-end;
+              margin-top: 16px;
+              padding-top: 12px;
+              border-top: 1px solid #e5e7eb;
+            }
+            .done-button {
+              padding: 8px 16px;
+              background: #2563eb;
+              color: white;
+              border: none;
+              border-radius: 6px;
+              cursor: pointer;
+            }
+            .done-button:hover {
+              background: #1d4ed8;
+            }
+          `}</style>
+
+              {/* Time Display */}
+              <div className="time-display">
+                <div className="time">
+                  {selectedHour.toString().padStart(2, "0")}:
+                  {selectedMinute.toString().padStart(2, "0")}
+                </div>
+                <div className="period">{isAM ? "AM" : "PM"}</div>
+                <div className="date">
+                  {months[selectedMonth].substring(0, 3)}, {selectedYear}
+                </div>
+              </div>
+
+              <div className="time-calendar-container">
+                {/* Time Selector */}
+                <div className="time-selector">
+                  {/* Hour Selection */}
+                  <div className="time-column">
+                    <div className="time-column-label">Hour</div>
+                    <div className="time-scroll">
+                      <div className="time-options">
+                        {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((hour) => (
+                          <button
+                            key={hour}
+                            onClick={() => setSelectedHour(hour)}
+                            className={`time-option ${
+                              selectedHour === hour ? "selected-hour" : ""
+                            }`}
+                          >
+                            {hour.toString().padStart(2, "0")}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Minute Selection */}
+                  <div className="time-column">
+                    <div className="time-column-label">Min</div>
+                    <div className="time-scroll">
+                      <div className="time-options">
+                        {[0, 15, 30, 45].map((minute) => (
+                          <button
+                            key={minute}
+                            onClick={() => setSelectedMinute(minute)}
+                            className={`time-option ${
+                              selectedMinute === minute ? "selected-minute" : ""
+                            }`}
+                          >
+                            {minute.toString().padStart(2, "0")}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* AM/PM Toggle */}
+                  <div className="time-column">
+                    <div className="time-column-label">Period</div>
+                    <div className="period-options">
+                      <button
+                        onClick={() => setIsAM(true)}
+                        className={`period-option ${isAM ? "selected" : ""}`}
+                      >
+                        AM
+                      </button>
+                      <button
+                        onClick={() => setIsAM(false)}
+                        className={`period-option ${!isAM ? "selected" : ""}`}
+                      >
+                        PM
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Calendar */}
+                <div className="calendar-section">
+                  {/* Month Navigation */}
+                  <div className="month-nav">
+                    <button onClick={handlePrevMonth}>
+                      <ChevronLeft size={20} />
+                    </button>
+                    <h3>
+                      {months[selectedMonth]}, {selectedYear}
+                    </h3>
+                    <button onClick={handleNextMonth}>
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+
+                  {/* Week Days Header */}
+                  <div className="weekdays">
+                    {weekDays.map((day) => (
+                      <div key={day} className="weekday">
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Calendar Grid */}
+                  <div className="calendar-grid">
+                    {calendarDays.map((dayObj, index) => (
+                      <button
+                        key={index}
+                        onClick={() =>
+                          dayObj.isCurrentMonth && setSelectedDate(dayObj.day)
+                        }
+                        className={`calendar-day ${
+                          dayObj.isCurrentMonth
+                            ? selectedDate === dayObj.day
+                              ? "current-month selected"
+                              : "current-month"
+                            : "other-month"
+                        }`}
+                      >
+                        {dayObj.day}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="action-buttons">
+                    <button
+                      onClick={() => {
+                        setSelectedDate(new Date().getDate());
+                        setSelectedMonth(new Date().getMonth());
+                        setSelectedYear(new Date().getFullYear());
+                      }}
+                      className="action-button"
+                    >
+                      Clear
+                    </button>
+                    <button
+                      onClick={() => {
+                        const today = new Date();
+                        setSelectedDate(today.getDate());
+                        setSelectedMonth(today.getMonth());
+                        setSelectedYear(today.getFullYear());
+                      }}
+                      className="action-button"
+                    >
+                      Today
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Close Button */}
+              <div className="done-section">
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="done-button"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
       {/* Backdrop for modals */}

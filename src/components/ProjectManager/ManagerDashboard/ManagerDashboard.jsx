@@ -74,7 +74,6 @@ function ManagerDashboard() {
       className="container-fluid bg-card py-3"
       style={{ minHeight: "100vh" }}
     >
-   
       <h2 className="gradient-heading ">Manager Dashboard</h2>
 
       <div className="container-fluid mb-5">
@@ -262,8 +261,16 @@ function ManagerDashboard() {
                 style={{ maxHeight: "400px", overflowY: "auto" }}
               >
                 <table className="table table-hover mb-0 table-gradient-bg">
-                  <thead className="table-light bg-dark">
-                    <tr>
+                  <thead
+                    className="table-gradient-bg table "
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 2,
+                      backgroundColor: "#fff", // Match your background color
+                    }}
+                  >
+                    <tr  className="text-center">
                       <th scope="col">ID</th>
                       <th scope="col">Project</th>
                       <th scope="col">Progress</th>
@@ -273,7 +280,7 @@ function ManagerDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
+                    <tr  className="text-center">
                       <td>1</td>
                       <td>
                         <div className="d-flex align-items-center">
@@ -334,8 +341,8 @@ function ManagerDashboard() {
                         </div>
                       </td>
                     </tr>
-
-                    <tr>
+ 
+                    <tr  className="text-center">
                       <td>2</td>
                       <td>
                         <div className="d-flex align-items-center">
@@ -389,7 +396,7 @@ function ManagerDashboard() {
                         </div>
                       </td>
                     </tr>
-                    <tr>
+                    <tr  className="text-center">
                       <td>3</td>
                       <td>
                         <div className="d-flex align-items-center">
@@ -449,7 +456,7 @@ function ManagerDashboard() {
                         </div>
                       </td>
                     </tr>
-                    <tr>
+                    <tr  className="text-center">
                       <td>4</td>
                       <td>
                         <div className="d-flex align-items-center">

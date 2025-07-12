@@ -346,7 +346,7 @@ const ResourceManagement = () => {
                     backgroundColor: "#fff", // Match your background color
                   }}
                 >
-                  <tr>
+                  <tr  className="text-center">
                     <th>ID</th>
                     <th>Resource</th>
                     <th>Role</th>
@@ -358,7 +358,7 @@ const ResourceManagement = () => {
                 </thead>
                 <tbody>
                   {filteredResources.map((resource) => (
-                    <tr key={resource.id}>
+                    <tr key={resource.id}  className="text-center">
                       <td>{resource.id}</td>
                       <td>
                         <div className="d-flex align-items-center">
@@ -638,7 +638,7 @@ const ResourceManagement = () => {
                     backgroundColor: "#fff", // Match your background color
                   }}
                 >
-                  <tr>
+                  <tr  className="text-center">
                     <th>Project</th>
                     <th>Resources</th>
                     <th>Allocation</th>
@@ -655,7 +655,7 @@ const ResourceManagement = () => {
                     );
 
                     return (
-                      <tr key={project.id}>
+                      <tr key={project.id}  className="text-center">
                         <td>{project.name}</td>
                         <td>
                           {projectResources.map((r) => r.name).join(", ") ||

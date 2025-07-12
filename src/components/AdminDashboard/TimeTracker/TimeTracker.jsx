@@ -1,125 +1,205 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from "react";
 import {
-    Calendar,
-    Download,
-    Filter,
-    X,
-    ChevronDown,
-    Clock,
-    Users,
-    TrendingUp,
-    AlertCircle,
-    CheckCircle,
-    FileText,
-    BarChart3
-} from 'lucide-react';
+  Calendar,
+  Download,
+  Filter,
+  X,
+  ChevronDown,
+  Clock,
+  Users,
+  TrendingUp,
+  AlertCircle,
+  CheckCircle,
+  FileText,
+  BarChart3,
+} from "lucide-react";
 
 const TimeTracker = () => {
-    // Static data
-    const timeEntries = [
-        { id: 1, user: 'John Doe', project: 'Website Redesign', task: 'Homepage Layout', date: '2025-06-17', startTime: '09:00', endTime: '17:00', totalHours: 8, status: 'Billable' },
-        { id: 2, user: 'Sarah Smith', project: 'Mobile App', task: 'UI Components', date: '2025-06-17', startTime: '10:00', endTime: '18:30', totalHours: 8.5, status: 'Billable' },
-        { id: 3, user: 'Mike Johnson', project: 'API Development', task: 'Authentication', date: '2025-06-16', startTime: '08:30', endTime: '16:30', totalHours: 8, status: 'Billable' },
-        { id: 4, user: 'Emily Davis', project: 'Website Redesign', task: 'Testing', date: '2025-06-16', startTime: '09:00', endTime: '17:30', totalHours: 8.5, status: 'Non-billable' },
-        { id: 5, user: 'John Doe', project: 'Mobile App', task: 'Bug Fixes', date: '2025-06-15', startTime: '13:00', endTime: '18:00', totalHours: 5, status: 'Billable' },
-        { id: 6, user: 'Sarah Smith', project: 'Training', task: 'Team Meeting', date: '2025-06-15', startTime: '14:00', endTime: '16:00', totalHours: 2, status: 'Non-billable' },
-        { id: 7, user: 'Mike Johnson', project: 'API Development', task: 'Database Setup', date: '2025-06-14', startTime: '09:00', endTime: '12:00', totalHours: 3, status: 'Billable' },
-        { id: 8, user: 'Emily Davis', project: 'Documentation', task: 'User Manual', date: '2025-06-14', startTime: '10:00', endTime: '15:00', totalHours: 5, status: 'Non-billable' }
-    ];
+  // Static data
+  const timeEntries = [
+    {
+      id: 1,
+      user: "John Doe",
+      project: "Website Redesign",
+      task: "Homepage Layout",
+      date: "2025-06-17",
+      startTime: "09:00",
+      endTime: "17:00",
+      totalHours: 8,
+      status: "Billable",
+    },
+    {
+      id: 2,
+      user: "Sarah Smith",
+      project: "Mobile App",
+      task: "UI Components",
+      date: "2025-06-17",
+      startTime: "10:00",
+      endTime: "18:30",
+      totalHours: 8.5,
+      status: "Billable",
+    },
+    {
+      id: 3,
+      user: "Mike Johnson",
+      project: "API Development",
+      task: "Authentication",
+      date: "2025-06-16",
+      startTime: "08:30",
+      endTime: "16:30",
+      totalHours: 8,
+      status: "Billable",
+    },
+    {
+      id: 4,
+      user: "Emily Davis",
+      project: "Website Redesign",
+      task: "Testing",
+      date: "2025-06-16",
+      startTime: "09:00",
+      endTime: "17:30",
+      totalHours: 8.5,
+      status: "Non-billable",
+    },
+    {
+      id: 5,
+      user: "John Doe",
+      project: "Mobile App",
+      task: "Bug Fixes",
+      date: "2025-06-15",
+      startTime: "13:00",
+      endTime: "18:00",
+      totalHours: 5,
+      status: "Billable",
+    },
+    {
+      id: 6,
+      user: "Sarah Smith",
+      project: "Training",
+      task: "Team Meeting",
+      date: "2025-06-15",
+      startTime: "14:00",
+      endTime: "16:00",
+      totalHours: 2,
+      status: "Non-billable",
+    },
+    {
+      id: 7,
+      user: "Mike Johnson",
+      project: "API Development",
+      task: "Database Setup",
+      date: "2025-06-14",
+      startTime: "09:00",
+      endTime: "12:00",
+      totalHours: 3,
+      status: "Billable",
+    },
+    {
+      id: 8,
+      user: "Emily Davis",
+      project: "Documentation",
+      task: "User Manual",
+      date: "2025-06-14",
+      startTime: "10:00",
+      endTime: "15:00",
+      totalHours: 5,
+      status: "Non-billable",
+    },
+  ];
 
-    // Static summary data
-    // const summaryData = {
-    //     totalHours: '54.0',
-    //     avgDailyHours: '6.8',
-    //     topContributor: 'John Doe',
-    //     leastActiveProject: 'Training',
-    //     userHours: {
-    //         'John Doe': 13,
-    //         'Sarah Smith': 10.5,
-    //         'Mike Johnson': 11,
-    //         'Emily Davis': 19.5
-    //     },
-    //     projectHours: {
-    //         'Website Redesign': 16.5,
-    //         'Mobile App': 13.5,
-    //         'API Development': 11,
-    //         'Training': 2,
-    //         'Documentation': 5
-    //     }
-    // };
+  // Static summary data
+  // const summaryData = {
+  //     totalHours: '54.0',
+  //     avgDailyHours: '6.8',
+  //     topContributor: 'John Doe',
+  //     leastActiveProject: 'Training',
+  //     userHours: {
+  //         'John Doe': 13,
+  //         'Sarah Smith': 10.5,
+  //         'Mike Johnson': 11,
+  //         'Emily Davis': 19.5
+  //     },
+  //     projectHours: {
+  //         'Website Redesign': 16.5,
+  //         'Mobile App': 13.5,
+  //         'API Development': 11,
+  //         'Training': 2,
+  //         'Documentation': 5
+  //     }
+  // };
 
-    // --- Sorting Logic Start ---
-    const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'asc' });
+  // --- Sorting Logic Start ---
+  const [sortConfig, setSortConfig] = useState({ key: "id", direction: "asc" });
 
-    const handleSort = (key) => {
-        setSortConfig((prev) => {
-            if (prev.key === key) {
-                // Toggle direction
-                return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
-            }
-            return { key, direction: 'asc' };
-        });
-    };
+  const handleSort = (key) => {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        // Toggle direction
+        return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+      }
+      return { key, direction: "asc" };
+    });
+  };
 
-    const currentData = useMemo(() => {
-        const sorted = [...timeEntries];
-        sorted.sort((a, b) => {
-            let aValue = a[sortConfig.key];
-            let bValue = b[sortConfig.key];
+  const currentData = useMemo(() => {
+    const sorted = [...timeEntries];
+    sorted.sort((a, b) => {
+      let aValue = a[sortConfig.key];
+      let bValue = b[sortConfig.key];
 
-            // For date, compare as Date objects
-            if (sortConfig.key === 'date') {
-                aValue = new Date(aValue);
-                bValue = new Date(bValue);
-            }
-            // For totalHours, compare as numbers
-            if (sortConfig.key === 'totalHours') {
-                aValue = Number(aValue);
-                bValue = Number(bValue);
-            }
-            // For string comparison
-            if (typeof aValue === 'string' && typeof bValue === 'string') {
-                aValue = aValue.toLowerCase();
-                bValue = bValue.toLowerCase();
-            }
+      // For date, compare as Date objects
+      if (sortConfig.key === "date") {
+        aValue = new Date(aValue);
+        bValue = new Date(bValue);
+      }
+      // For totalHours, compare as numbers
+      if (sortConfig.key === "totalHours") {
+        aValue = Number(aValue);
+        bValue = Number(bValue);
+      }
+      // For string comparison
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
 
-            if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-            if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-            return 0;
-        });
-        return sorted;
-    }, [sortConfig, timeEntries]);
-    // --- Sorting Logic End ---
+      if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+    return sorted;
+  }, [sortConfig, timeEntries]);
+  // --- Sorting Logic End ---
 
-    const getStatusBadgeClass = (status) => {
-        return status === 'Billable'
-            ? 'tt-badge-billable badge bg-success'
-            : 'tt-badge-nonbillable badge bg-secondary';
-    };
+  const getStatusBadgeClass = (status) => {
+    return status === "Billable"
+      ? "tt-badge-billable badge bg-success"
+      : "tt-badge-nonbillable badge bg-secondary";
+  };
 
-    const isLongHours = (hours) => hours > 8;
-    const isOverdue = (date) => {
-        const today = new Date();
-        const entryDate = new Date(date);
-        const diffTime = today - entryDate;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays > 7;
-    };
+  const isLongHours = (hours) => hours > 8;
+  const isOverdue = (date) => {
+    const today = new Date();
+    const entryDate = new Date(date);
+    const diffTime = today - entryDate;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 7;
+  };
 
-    return (
-        <div className="tt-dashboard-container bg-main container-fluid p-4 bg-light min-vh-100">
-            {/* Header */}
-            <div className="tt-header-section row mb-4">
-                <div className="col-12">
-                    <h1 className="gradient-heading">
-                        Time Tracking Dashboard
-                    </h1>
-                    <p className="tt-subtitle text-white mb-3">Monitor and analyze team productivity</p>
-                </div>
-            </div>
+  return (
+    <div className="tt-dashboard-container bg-main container-fluid p-4 bg-light min-vh-100">
+      {/* Header */}
+      <div className="tt-header-section row mb-4">
+        <div className="col-12">
+          <h1 className="gradient-heading">Time Tracking Dashboard</h1>
+          <p className="tt-subtitle text-white mb-3">
+            Monitor and analyze team productivity
+          </p>
+        </div>
+      </div>
 
-            {/* Summary Cards */}
-            {/* <div className="tt-summary-section row mb-4">
+      {/* Summary Cards */}
+      {/* <div className="tt-summary-section row mb-4">
                 <div className="col-lg-3 col-md-6 mb-3">
                     <div className="tt-summary-card bg-card card h-100 border-0 shadow-sm">
                         <div className="card-body">
@@ -169,8 +249,8 @@ const TimeTracker = () => {
                 </div>
             </div> */}
 
-            {/* Charts Section */}
-            {/* <div className="tt-charts-section row mb-4">
+      {/* Charts Section */}
+      {/* <div className="tt-charts-section row mb-4">
                 <div className="col-lg-6 mb-3">
                     <div className="tt-chart-card card border-0 shadow-sm">
                         <div className="card-header bg-card border-0">
@@ -230,8 +310,8 @@ const TimeTracker = () => {
                 </div>
             </div> */}
 
-            {/* Filters and Export Section (non-functional) */}
-            {/* <div className="tt-controls-section row mb-4">
+      {/* Filters and Export Section (non-functional) */}
+      {/* <div className="tt-controls-section row mb-4">
                 <div className="col-12">
                     <div className="tt-controls-card card border-0 shadow-sm">
                         <div className="card-body bg-card">
@@ -326,135 +406,183 @@ const TimeTracker = () => {
                 </div>
             </div> */}
 
-            {/* Time Log Table */}
-            <div className="tt-table-section bg-card row">
-                <div className="col-12">
-                    <div className="tt-table-card bg-card card border-0 shadow-sm">
-                        <div className="card-header border-0">
-                            <h6 className="tt-table-title mb-0">Time Entries ({timeEntries.length} records)</h6>
-                        </div>
-                        <div className="card-body  p-0">
-                            <div
-  className="tt-table-responsive table-responsive"
-  style={{ maxHeight: "400px", overflowY: "auto" }}
->
-  <table className="tt-data-table table table-gradient-bg table-hover mb-0">
-    <thead className="tt-table-header  bg-dark .">
-      <tr>
-        <th>ID</th>
-        <th
-          className="tt-sortable-header"
-          onClick={() => handleSort("user")}
-          style={{ cursor: "pointer" }}
-        >
-          User
-          {sortConfig.key === "user" && (
-            <ChevronDown
-              size={16}
-              className={`ms-1 ${sortConfig.direction === "desc" ? "rotate-180" : ""}`}
-            />
-          )}
-        </th>
-        <th
-          className="tt-sortable-header d-none d-md-table-cell"
-          onClick={() => handleSort("project")}
-          style={{ cursor: "pointer" }}
-        >
-          Project
-          {sortConfig.key === "project" && (
-            <ChevronDown
-              size={16}
-              className={`ms-1 ${sortConfig.direction === "desc" ? "rotate-180" : ""}`}
-            />
-          )}
-        </th>
-        <th className="tt-task-header d-none d-lg-table-cell">Task</th>
-        <th
-          className="tt-sortable-header"
-          onClick={() => handleSort("date")}
-          style={{ cursor: "pointer" }}
-        >
-          Date
-          {sortConfig.key === "date" && (
-            <ChevronDown
-              size={16}
-              className={`ms-1 ${sortConfig.direction === "desc" ? "rotate-180" : ""}`}
-            />
-          )}
-        </th>
-        <th className="tt-time-header d-none d-md-table-cell">Time</th>
-        <th
-          className="tt-sortable-header"
-          onClick={() => handleSort("totalHours")}
-          style={{ cursor: "pointer" }}
-        >
-          Hours
-          {sortConfig.key === "totalHours" && (
-            <ChevronDown
-              size={16}
-              className={`ms-1 ${sortConfig.direction === "desc" ? "rotate-180" : ""}`}
-            />
-          )}
-        </th>
-        <th className="tt-status-header">Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      {currentData.map((entry) => (
-        <tr
-          key={entry.id}
-          className={`tt-table-row ${isOverdue(entry.date) ? "tt-overdue-row table-warning" : ""} ${
-            isLongHours(entry.totalHours) ? "tt-long-hours-row" : ""
-          }`}
-        >
-          <td>{entry.id}</td>
-          <td className="tt-user-cell">
-            <div className="tt-user-info">
-              <div className="tt-user-name fw-medium">{entry.user}</div>
-              <small className="tt-mobile-info d-md-none text-white">
-                {entry.project} • {entry.task}
-              </small>
+      {/* Time Log Table */}
+      <div className="tt-table-section bg-card row">
+        <div className="col-12">
+          <div className="tt-table-card bg-card card border-0 shadow-sm">
+            <div className="card-header border-0">
+              <h6 className="tt-table-title mb-0">
+                Time Entries ({timeEntries.length} records)
+              </h6>
             </div>
-          </td>
-          <td className="tt-project-cell d-none d-md-table-cell">{entry.project}</td>
-          <td className="tt-task-cell d-none d-lg-table-cell">{entry.task}</td>
-          <td className="tt-date-cell">
-            <div className="tt-date-display">
-              {new Date(entry.date).toLocaleDateString()}
-              {isOverdue(entry.date) && (
-                <AlertCircle size={14} className="tt-overdue-icon text-warning ms-1" />
-              )}
+            <div className="card-body  p-0">
+              <div
+                className="tt-table-responsive table-responsive"
+                style={{ maxHeight: "400px", overflowY: "auto" }}
+              >
+                <table className="tt-data-table table table-gradient-bg table-hover mb-0">
+                  <thead
+                    className="table-gradient-bg table "
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 2,
+                      backgroundColor: "#fff", // Match your background color
+                    }}
+                  >
+                    <tr  className="text-center">
+                      <th>ID</th>
+                      <th
+                        className="tt-sortable-header"
+                        onClick={() => handleSort("user")}
+                        style={{ cursor: "pointer" }}
+                      >
+                        User
+                        {sortConfig.key === "user" && (
+                          <ChevronDown
+                            size={16}
+                            className={`ms-1 ${
+                              sortConfig.direction === "desc"
+                                ? "rotate-180"
+                                : ""
+                            }`}
+                          />
+                        )}
+                      </th>
+                      <th
+                        className="tt-sortable-header d-none d-md-table-cell"
+                        onClick={() => handleSort("project")}
+                        style={{ cursor: "pointer" }}
+                      >
+                        Project
+                        {sortConfig.key === "project" && (
+                          <ChevronDown
+                            size={16}
+                            className={`ms-1 ${
+                              sortConfig.direction === "desc"
+                                ? "rotate-180"
+                                : ""
+                            }`}
+                          />
+                        )}
+                      </th>
+                      <th className="tt-task-header d-none d-lg-table-cell">
+                        Task
+                      </th>
+                      <th
+                        className="tt-sortable-header"
+                        onClick={() => handleSort("date")}
+                        style={{ cursor: "pointer" }}
+                      >
+                        Date
+                        {sortConfig.key === "date" && (
+                          <ChevronDown
+                            size={16}
+                            className={`ms-1 ${
+                              sortConfig.direction === "desc"
+                                ? "rotate-180"
+                                : ""
+                            }`}
+                          />
+                        )}
+                      </th>
+                      <th className="tt-time-header d-none d-md-table-cell">
+                        Time
+                      </th>
+                      <th
+                        className="tt-sortable-header"
+                        onClick={() => handleSort("totalHours")}
+                        style={{ cursor: "pointer" }}
+                      >
+                        Hours
+                        {sortConfig.key === "totalHours" && (
+                          <ChevronDown
+                            size={16}
+                            className={`ms-1 ${
+                              sortConfig.direction === "desc"
+                                ? "rotate-180"
+                                : ""
+                            }`}
+                          />
+                        )}
+                      </th>
+                      <th className="tt-status-header">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentData.map((entry) => (
+                      <tr
+                        key={entry.id}
+                        className={`tt-table-row ${
+                          isOverdue(entry.date)
+                            ? "tt-overdue-row table-warning text-center"
+                            : ""
+                        } ${
+                          isLongHours(entry.totalHours)
+                            ? "tt-long-hours-row"
+                            : ""
+                        }`}
+                      >
+                        <td>{entry.id}</td>
+                        <td className="tt-user-cell">
+                          <div className="tt-user-info">
+                            <div className="tt-user-name fw-medium">
+                              {entry.user}
+                            </div>
+                            <small className="tt-mobile-info d-md-none text-white">
+                              {entry.project} • {entry.task}
+                            </small>
+                          </div>
+                        </td>
+                        <td className="tt-project-cell d-none d-md-table-cell">
+                          {entry.project}
+                        </td>
+                        <td className="tt-task-cell d-none d-lg-table-cell">
+                          {entry.task}
+                        </td>
+                        <td className="tt-date-cell">
+                          <div className="tt-date-display">
+                            {new Date(entry.date).toLocaleDateString()}
+                            {isOverdue(entry.date) && (
+                              <AlertCircle
+                                size={14}
+                                className="tt-overdue-icon text-warning ms-1"
+                              />
+                            )}
+                          </div>
+                        </td>
+                        <td className="tt-time-cell d-none d-md-table-cell">
+                          <small className="tt-time-range">
+                            {entry.startTime} - {entry.endTime}
+                          </small>
+                        </td>
+                        <td className="tt-hours-cell">
+                          <span
+                            className={`tt-hours-badge badge ${
+                              isLongHours(entry.totalHours)
+                                ? "bg-warning text-dark"
+                                : "bg-light text-dark"
+                            }`}
+                          >
+                            {entry.totalHours}h
+                          </span>
+                        </td>
+                        <td className="tt-status-cell">
+                          <span className={getStatusBadgeClass(entry.status)}>
+                            {entry.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </td>
-          <td className="tt-time-cell d-none d-md-table-cell">
-            <small className="tt-time-range">
-              {entry.startTime} - {entry.endTime}
-            </small>
-          </td>
-          <td className="tt-hours-cell">
-            <span
-              className={`tt-hours-badge badge ${
-                isLongHours(entry.totalHours) ? "bg-warning text-dark" : "bg-light text-dark"
-              }`}
-            >
-              {entry.totalHours}h
-            </span>
-          </td>
-          <td className="tt-status-cell">
-            <span className={getStatusBadgeClass(entry.status)}>{entry.status}</span>
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default TimeTracker;
