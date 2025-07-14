@@ -5,6 +5,7 @@
   flex-direction: column;
   position: relative;
   overflow-y: auto;
+ 
 }
 
 .chat-header-sticky {
@@ -25,5 +26,40 @@
   flex: 1 1 auto;
   overflow-y: auto;
   min-height: 0;
-  max-height: calc(100vh - 265px); /* Adjust if header/footer height changes */
+  max-height: calc(98vh - 252px); /* Adjust if header/footer height changes */
+}
+.row {
+  width: 64%;
+  /* Centers the row if needed */
+}
+
+/* Tablet devices (768px and below) */
+@media (max-width: 768px) {
+  .row {
+    width: 100%;
+  }
+}
+
+/* Mobile devices (480px and below) */
+@media (max-width: 480px) {
+  .row {
+    width: 100%;
+    /* You might also want to add padding for better spacing on small screens */
+    padding: 0 10px;
+  }
+}
+
+/* Extra small devices (320px and below) */
+@media (max-width: 320px) {
+  .row {
+    width: 100%;
+  }
+}
+
+/* Large desktop screens (1200px and above) */
+@media (min-width: 1200px) {
+  .row {
+    width: 62%; /* Slightly narrower for very wide screens */
+    max-width: 1200px; /* Optional: prevents it from getting too wide */
+  }
 }

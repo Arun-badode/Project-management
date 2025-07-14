@@ -907,7 +907,7 @@ const AdminDashboard = () => {
             <Card
               className={`bg-${
                 color.split(" ")[0]
-              } bg-gradient p-3 rounded-4 shadow-sm border-0 w-100 ${
+              } bg-gradient p-3 rounded-4 shadow-sm border-0 w-100  ${
                 activeTab === key ? `active-tab ${activeColor}` : ""
               }`}
               onClick={() =>
@@ -915,15 +915,15 @@ const AdminDashboard = () => {
               }
               style={{
                 cursor: "pointer",
-                minHeight: "150px",
-                height: "150px",
+                minHeight: "140px",
+                height: "130px",
                 transition: "all 0.2s ease-in-out",
               }}
             >
               <Card.Body className="d-flex flex-column justify-content-between h-100 text-white">
-                <div className="d-flex align-items-center gap-2">
+                <div className="d-flex  justify-content-center  align-items-center gap-2">
                   <i className={`bi ${icon} fs-4`}></i>
-                  <Card.Title className="fs-6 fw-semibold mb-0">
+                  <Card.Title className="fs-6  fw-semibold mb-0">
                     {title}
                   </Card.Title>
                 </div>
