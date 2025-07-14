@@ -585,7 +585,7 @@ function Collaboration() {
 
         {/* Right Content Area */}
         <div className="col-12 col-lg-9 d-flex flex-column chat-main-panel">
-          <div className="row " style={{ position: "fixed" }}>
+          <div className="row chat" style={{ position: "fixed" }}>
             <div className="col-12  d-flex flex-column">
               {/* Chat Header */}
               <div className="p-3 border-bottom bg-main d-flex justify-content-between align-items-center chat-header-sticky">
