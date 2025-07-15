@@ -390,124 +390,152 @@ const ActiveProject = () => {
     setActivebutton(type);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      // Calculate total pages per language
-      const totalPagesPerLang = formData.files.reduce(
-        (sum, file) => sum + (file.pageCount || 0),
-        0
-      );
-
-      // Prepare the API payload
-      const payload = {
-        projectTitle: formData.title,
-        clientId: getClientId(formData.client), // You'll need to implement this
-        country: formData.country,
-        projectManagerId: getProjectManagerId(formData.projectManager), // Implement this
-        taskId: getTaskId(formData.tasks[0]), // Taking first task - adjust if needed
-        applicationId: getApplicationId(formData.application[0]), // Taking first app
-        languageId: getLanguageId(formData.languages[0]), // Taking first language
-        totalPagesLang: formatLanguagesAndPages(formData), // Format as "EN:10,FR:10"
-        totalProjectPages: totalPagesPerLang * formData.languages.length,
-        receiveDate: formData.receivedDate,
-        serverPath: formData.serverPath,
-        notes: formData.notes,
-        estimatedHours: formData.estimatedHrs || 0,
-        hourlyRate: formData.hourlyRate || 0,
-        perPageRate: formData.rate || 0,
-        currency: formData.currency,
-        totalCost: formData.cost || 0,
-        deadline: formatDeadline(), // Format from your calendar state
-      };
-
-      // Make the API call
-      const response = await fetch(
-        "https://hrb5wx2v-8800.inc1.devtunnels.ms/api/project/addProject",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log("Project created successfully:", result);
-
-      // Close modal and reset form
-      setShowCreateModal(false);
-      setFormData(initialFormData);
-
-      // Show success message
-      alert("Project created successfully!");
-
-      // If you're maintaining local state, add the new project
-      const newProject = {
-        ...formData,
-        id: result.id || projects.length + 1, // Use API response ID if available
-        status: "created",
-        receivedDate:
-          formData.receivedDate || new Date().toISOString().split("T")[0],
-      };
-      setProjects([...projects, newProject]);
-    } catch (error) {
-      console.error("Error creating project:", error);
-      alert(`Failed to create project: ${error.message}`);
-    }
-  };
-
-  // Helper functions you need to implement:
-
-  const getClientId = (clientName) => {
-    // Find the client ID from your clientOptions data
-    // Example: return clientOptions.find(c => c.name === clientName)?.id || 0;
-    return 1; // Replace with actual implementation
-  };
-
-  const getProjectManagerId = (pmName) => {
-    // Find the PM ID from your projectManagerOptions
-    return 1; // Replace with actual implementation
-  };
-
-  const getTaskId = (taskName) => {
-    // Find the task ID from your taskOptions
-    return 1; // Replace with actual implementation
-  };
-
-  const getApplicationId = (appName) => {
-    // Find the application ID from your applicationOptions
-    return 1; // Replace with actual implementation
-  };
-
-  const getLanguageId = (languageName) => {
-    // Find the language ID from your languageOptions
-    return 1; // Replace with actual implementation
-  };
-
-  const formatLanguagesAndPages = (formData) => {
-    const pagesPerLang = formData.files.reduce(
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  try {
+    // Calculate total pages per language
+    const totalPagesPerLang = formData.files.reduce(
       (sum, file) => sum + (file.pageCount || 0),
       0
     );
-    return formData.languages
-      .map((lang) => `${lang}:${pagesPerLang}`)
-      .join(",");
-  };
+    
+    // Prepare the API payload
+    const payload = {
+      projectTitle: formData.title,
+      clientId: getClientId(formData.client), // You'll need to implement this
+      country: formData.country,
+      projectManagerId: getProjectManagerId(formData.projectManager), // Implement this
+      taskId: getTaskId(formData.tasks[0]), // Taking first task - adjust if needed
+      applicationId: getApplicationId(formData.application[0]), // Taking first app
+      languageId: getLanguageId(formData.languages[0]), // Taking first language
+      totalPagesLang: formatLanguagesAndPages(formData), // Format as "EN:10,FR:10"
+      totalProjectPages: totalPagesPerLang * formData.languages.length,
+      receiveDate: formData.receivedDate,
+      serverPath: formData.serverPath,
+      notes: formData.notes,
+      estimatedHours: formData.estimatedHrs || 0,
+      hourlyRate: formData.hourlyRate || 0,
+      perPageRate: formData.rate || 0,
+      currency: formData.currency,
+      totalCost: formData.cost || 0,
+      deadline: formatDeadline(), // Format from your calendar state
+    };
 
-  const formatDeadline = () => {
-    // Format from your calendar state variables
-    const year = selectedYear;
-    const month = (selectedMonth + 1).toString().padStart(2, "0");
-    const day = selectedDate.toString().padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
+    // Make the API call
+   const response = await fetch('https://hrb5wx2v-8800.inc1.devtunnels.ms/api/project/addProject', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem("authToken")}`
+  },
+  body: JSON.stringify(payload),
+});
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('Project created successfully:', result);
+    
+    // Close modal and reset form
+    setShowCreateModal(false);
+    setFormData(initialFormData);
+    
+    // Show success message
+    alert('Project created successfully!');
+    
+    // If you're maintaining local state, add the new project
+    const newProject = {
+      ...formData,
+      id: result.id || projects.length + 1, // Use API response ID if available
+      status: "created",
+      receivedDate: formData.receivedDate || new Date().toISOString().split('T')[0],
+    };
+    setProjects([...projects, newProject]);
+    
+  } catch (error) {
+    console.error('Error creating project:', error);
+    alert(`Failed to create project: ${error.message}`);
+  }
+};
+
+
+// Helper functions you need to implement:
+
+const getClientId = (clientName) => {
+  // Find the client ID from your clientOptions data
+  // Example: return clientOptions.find(c => c.name === clientName)?.id || 0;
+  return 1; // Replace with actual implementation
+};
+
+const getProjectManagerId = (pmName) => {
+  // Find the PM ID from your projectManagerOptions
+  return 1; // Replace with actual implementation
+};
+
+const getTaskId = (taskName) => {
+  // Find the task ID from your taskOptions
+  return 1; // Replace with actual implementation
+};
+
+const getApplicationId = (appName) => {
+  // Find the application ID from your applicationOptions
+  return 1; // Replace with actual implementation
+};
+
+const getLanguageId = (languageName) => {
+  // Find the language ID from your languageOptions
+  return 1; // Replace with actual implementation
+};
+
+const formatLanguagesAndPages = (formData) => {
+  const pagesPerLang = formData.files.reduce(
+    (sum, file) => sum + (file.pageCount || 0),
+    0
+  );
+  return formData.languages.map(lang => `${lang}:${pagesPerLang}`).join(',');
+};
+
+const formatDeadline = () => {
+  // Format from your calendar state variables
+  const year = selectedYear;
+  const month = (selectedMonth + 1).toString().padStart(2, '0');
+  const day = selectedDate.toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+
+const fetchProjects = async () => {
+  try {
+    const response = await fetch(
+      "https://hrb5wx2v-8800.inc1.devtunnels.ms/api/project/getAllProjects",
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch projects");
+    }
+
+    const data = await response.json();
+    setFilteredProjects(data.projects || []);
+  } catch (error) {
+    console.error("Error fetching projects:", error);
+    alert("Failed to load project data");
+  }
+};
+
+
+useEffect(() => {
+  fetchProjects();
+}, []);
+
+
   const handleDeleteProject = (id) => {
     const project = projects.find((p) => p.id === id);
     if (!project) return;
@@ -1423,6 +1451,8 @@ const ActiveProject = () => {
                           ))}
                         </tbody>
                       </table>
+
+                    
                     </div>
                   </div>
 
@@ -2337,12 +2367,12 @@ const ActiveProject = () => {
                       }
                     >
                       <td>{index + 1}</td>
-                      <td>{project.title}</td>
-                      <td>{project.client}</td>
-                      <td>{project.task}</td>
-                      <td>{project.language}</td>
-                      <td>{project.application}</td>
-                      <td>{project.totalPages}</td>
+                      <td>{project.projectTitle}</td>
+                      <td>{project.clientId}</td>
+                      <td>{project.taskId}</td>
+                      <td>{project.languageId}</td>
+                      <td>{project.applicationId}</td>
+                      <td>{project.totalProjectPages}</td>
                       <td>{project.deadline}</td>
                       <td>{project.readyDeadline}</td>
                       <td>{project.qcHrs}</td>
