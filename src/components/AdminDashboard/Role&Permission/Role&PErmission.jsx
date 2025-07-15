@@ -399,7 +399,6 @@ const RoleManagementSystem = () => {
             </div>
           </form>
         </Modal.Body>
-
         <Modal.Footer>
           <button
             className="btn btn-secondary rounded-5"
