@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { Button } from "react-bootstrap";
 import moment from "moment";
 import Select from "react-select";
-import Datetime from "react-datetime";
-import "react-datetime/css/react-datetime.css";
-
+import useSyncScroll from "../Hooks/useSyncScroll";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
@@ -12,6 +13,7 @@ const ActiveProject = () => {
   const [activeTab, setActiveTab] = useState("all");
   const userRole = localStorage.getItem("userRole");
   const [expandedRow, setExpandedRow] = useState(null);
+  const [selectedDateTime, setSelectedDateTime] = useState(null);
   const isAdmin = userRole === "Admin";
 
   const [isEdit, setIsEdit] = useState(null);
@@ -24,8 +26,21 @@ const ActiveProject = () => {
     tasks: [],
     languages: [],
     application: [],
-    files: [{ name: "", pageCount: 0 }],
+    files: [
+      [
+        { name: "File_1", pageCount: 3, application: "", selected: false },
+        { name: "File_2", pageCount: 5, application: "", selected: false },
+        { name: "File_3", pageCount: 4, application: "", selected: false },
+        { name: "File_4", pageCount: 2, application: "", selected: false },
+        { name: "File_5", pageCount: 6, application: "", selected: false },
+        { name: "File_6", pageCount: 7, application: "", selected: false },
+        { name: "File_7", pageCount: 8, application: "", selected: false },
+      ],
+    ],
     totalPages: 0,
+    deadline: "",
+    readyDeadline: "",
+    qcHrs: "",
     receivedDate: new Date().toISOString().split("T")[0],
     serverPath: "",
     notes: "",
@@ -37,7 +52,7 @@ const ActiveProject = () => {
 
   const [formData, setFormData] = useState(initialFormData);
 
-  const [qcAllocatedHours, setQcAllocatedHours] = useState(0.25);
+  const [qcAllocatedHours, setQcAllocatedHours] = useState(0.0);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -261,13 +276,12 @@ const ActiveProject = () => {
   const [minute, setMinute] = useState("00");
   const [period, setPeriod] = useState("AM");
   const [qcDueDelay, setQcDueDelay] = useState("");
-  
+
   const scrollContainerRef = useRef(null);
   const fakeScrollbarRef = useRef(null);
   const tabScrollContainerRef = useRef(null);
   const tabFakeScrollbarRef = useRef(null);
   const tabFakeScrollbarInnerRef = useRef(null);
-  const [selectedDate, setSelectedDate] = useState(null);
 
   const statuses = [
     { key: "allstatus", label: "All Status " },
@@ -321,22 +335,29 @@ const ActiveProject = () => {
     const nearDueDate = new Date();
     nearDueDate.setDate(today.getDate() + 3);
 
+    // Clear all filters when a button is clicked
+    setClientFilter("");
+    setTaskFilter("");
+    setLanguageFilter("");
+    setSelectedApplications([]);
+
     switch (type) {
       case "all":
-        filtered = projects;
+        filtered = projects
+          .slice()
+          .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
         break;
       case "nearDue":
         filtered = projects.filter((project) => {
-          if (project.status !== "Active") return false;
-          const dueDate = new Date(project.dueDate);
           const now = new Date();
           const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+          const dueDate = new Date(customToInputDate(project.deadline));
           return dueDate > now && dueDate <= thirtyMinsFromNow;
         });
         break;
       case "overdue":
         filtered = projects.filter((project) => {
-          const dueDate = new Date(project.dueDate);
+          const dueDate = new Date(customToInputDate(project.deadline));
           return dueDate < today && project.status !== "Completed";
         });
         break;
@@ -362,18 +383,6 @@ const ActiveProject = () => {
         );
         break;
       }
-      case "teamOnDuty":
-        filtered = projects.filter((p) => p.status === "Team On-Duty");
-        break;
-      case "eventsToday":
-        const todayStr = today.toISOString().split("T")[0];
-        filtered = projects.filter((project) => {
-          return project.dueDate === todayStr || project.qcDueDate === todayStr;
-        });
-        break;
-      case "pendingApproval":
-        filtered = projects.filter((p) => p.qaStatus === "Pending");
-        break;
       default:
         filtered = projects;
     }
@@ -381,44 +390,167 @@ const ActiveProject = () => {
     setActivebutton(type);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (showEditModal !== false) {
-      setProjects(
-        projects.map((project) =>
-          project.id === showEditModal
-            ? {
-                ...project,
-                ...formData,
-                status: project.status,
-                id: project.id,
-              }
-            : project
-        )
+
+    try {
+      // Calculate total pages per language
+      const totalPagesPerLang = formData.files.reduce(
+        (sum, file) => sum + (file.pageCount || 0),
+        0
       );
-      setShowEditModal(false);
-    } else {
+
+      // Prepare the API payload
+      const payload = {
+        projectTitle: formData.title,
+        clientId: getClientId(formData.client), // You'll need to implement this
+        country: formData.country,
+        projectManagerId: getProjectManagerId(formData.projectManager), // Implement this
+        taskId: getTaskId(formData.tasks[0]), // Taking first task - adjust if needed
+        applicationId: getApplicationId(formData.application[0]), // Taking first app
+        languageId: getLanguageId(formData.languages[0]), // Taking first language
+        totalPagesLang: formatLanguagesAndPages(formData), // Format as "EN:10,FR:10"
+        totalProjectPages: totalPagesPerLang * formData.languages.length,
+        receiveDate: formData.receivedDate,
+        serverPath: formData.serverPath,
+        notes: formData.notes,
+        estimatedHours: formData.estimatedHrs || 0,
+        hourlyRate: formData.hourlyRate || 0,
+        perPageRate: formData.rate || 0,
+        currency: formData.currency,
+        totalCost: formData.cost || 0,
+        deadline: formatDeadline(), // Format from your calendar state
+      };
+
+      // Make the API call
+      const response = await fetch(
+        "https://hrb5wx2v-8800.inc1.devtunnels.ms/api/project/addProject",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Project created successfully:", result);
+
+      // Close modal and reset form
+      setShowCreateModal(false);
+      setFormData(initialFormData);
+
+      // Show success message
+      alert("Project created successfully!");
+
+      // If you're maintaining local state, add the new project
       const newProject = {
         ...formData,
-        id: projects.length + 1,
+        id: result.id || projects.length + 1, // Use API response ID if available
         status: "created",
         receivedDate:
           formData.receivedDate || new Date().toISOString().split("T")[0],
       };
       setProjects([...projects, newProject]);
-      setShowCreateModal(false);
+    } catch (error) {
+      console.error("Error creating project:", error);
+      alert(`Failed to create project: ${error.message}`);
     }
-    setFormData(initialFormData);
   };
 
+  // Helper functions you need to implement:
+
+  const getClientId = (clientName) => {
+    // Find the client ID from your clientOptions data
+    // Example: return clientOptions.find(c => c.name === clientName)?.id || 0;
+    return 1; // Replace with actual implementation
+  };
+
+  const getProjectManagerId = (pmName) => {
+    // Find the PM ID from your projectManagerOptions
+    return 1; // Replace with actual implementation
+  };
+
+  const getTaskId = (taskName) => {
+    // Find the task ID from your taskOptions
+    return 1; // Replace with actual implementation
+  };
+
+  const getApplicationId = (appName) => {
+    // Find the application ID from your applicationOptions
+    return 1; // Replace with actual implementation
+  };
+
+  const getLanguageId = (languageName) => {
+    // Find the language ID from your languageOptions
+    return 1; // Replace with actual implementation
+  };
+
+  const formatLanguagesAndPages = (formData) => {
+    const pagesPerLang = formData.files.reduce(
+      (sum, file) => sum + (file.pageCount || 0),
+      0
+    );
+    return formData.languages
+      .map((lang) => `${lang}:${pagesPerLang}`)
+      .join(",");
+  };
+
+  const formatDeadline = () => {
+    // Format from your calendar state variables
+    const year = selectedYear;
+    const month = (selectedMonth + 1).toString().padStart(2, "0");
+    const day = selectedDate.toString().padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
   const handleDeleteProject = (id) => {
+    const project = projects.find((p) => p.id === id);
+    if (!project) return;
+
     if (window.confirm("Are you sure you want to delete this project?")) {
-      setProjects(projects.filter((project) => project.id !== id));
+      // Case 1: If any file status is "YTS"
+      const ytsStatuses = ["YTS"];
+      const amendmentStatuses = [
+        "V1 YTS",
+        "V2 YTS",
+        "Amendment",
+        "Amendment YTS",
+      ];
+      let moveTo = "created";
+      let updatedFiles = project.files.map((file) => {
+        if (ytsStatuses.includes(file.qaStatus)) {
+          return { ...file, qaStatus: "" };
+        }
+        return file;
+      });
+
+      // If any file has amendment status, move to completed
+      if (
+        project.files.some((file) => amendmentStatuses.includes(file.qaStatus))
+      ) {
+        moveTo = "completed";
+        // Retain status
+      }
+
+      // TODO: Move project to Created or Completed Projects list as per your app logic
+      // For now, just remove from active list
+      setProjects(projects.filter((p) => p.id !== id));
+
+      // You can implement logic to add to created/completed lists here
+      // e.g. setCreatedProjects([...createdProjects, { ...project, files: updatedFiles }])
+      // or setCompletedProjects([...completedProjects, project])
     }
   };
 
   const handleMarkComplete = (id) => {
-    if (window.confirm("Are you sure you want to mark this project as complete?")) {
+    if (
+      window.confirm("Are you sure you want to mark this project as complete?")
+    ) {
       setProjects(projects.filter((project) => project.id !== id));
     }
   };
@@ -490,7 +622,11 @@ const ActiveProject = () => {
 
   const handleCloseModal = () => {
     if (hasUnsavedChanges) {
-      if (window.confirm("You have unsaved changes. Are you sure you want to discard them?")) {
+      if (
+        window.confirm(
+          "You have unsaved changes. Are you sure you want to discard them?"
+        )
+      ) {
         setShowDetailModal(false);
       }
     } else {
@@ -510,6 +646,7 @@ const ActiveProject = () => {
   const handleEditProject = (project) => {
     setEditedProject({ ...project });
     setIsEdit(project.id);
+    setShowEditModal(true); // <-- Add this line
   };
 
   const handleSaveProjectEdit = () => {
@@ -601,6 +738,154 @@ const ActiveProject = () => {
     setShowCreateModal(true);
   };
 
+  const handleSelectAllFiles = (e) => {
+    const updatedFiles = formData.files.map((f) => ({
+      ...f,
+      selected: e.target.checked,
+    }));
+    setFormData((prev) => ({ ...prev, files: updatedFiles }));
+  };
+
+  const handleApplyToSelectedFiles = () => {
+    const selected = formData.files.filter((f) => f.selected);
+    if (selected.length === 0) {
+      alert("No files selected.");
+      return;
+    }
+    // Apply deadline logic here
+    alert(`Deadline ${formData.deadline} applied to selected files.`);
+  };
+
+  const {
+    scrollContainerRef: scrollContainerRef1,
+    fakeScrollbarRef: fakeScrollbarRef1,
+  } = useSyncScroll(true);
+
+  function calculateQCDue(startDate, hours) {
+    if (!startDate || !hours) return "--";
+    const endDate = new Date(startDate);
+    endDate.setHours(endDate.getHours() + hours);
+    return endDate.toLocaleString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  }
+
+  const [dateTime, setDateTime] = useState(null);
+
+  const handleChange = (value) => {
+    setDateTime(value);
+  };
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(12);
+  const [selectedMonth, setSelectedMonth] = useState(6); // July (0-indexed)
+  const [selectedYear, setSelectedYear] = useState(2025);
+  const [selectedHour, setSelectedHour] = useState(12);
+  const [selectedMinute, setSelectedMinute] = useState(0);
+  const [isAM, setIsAM] = useState(true);
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const weekDays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+
+  const getDaysInMonth = (month, year) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (month, year) => {
+    const firstDay = new Date(year, month, 1).getDay();
+    return firstDay === 0 ? 6 : firstDay - 1; // Convert Sunday (0) to be last (6)
+  };
+
+  const generateCalendarDays = () => {
+    const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
+    const firstDay = getFirstDayOfMonth(selectedMonth, selectedYear);
+    const days = [];
+
+    // Previous month's trailing days
+    const prevMonth = selectedMonth === 0 ? 11 : selectedMonth - 1;
+    const prevYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear;
+    const daysInPrevMonth = getDaysInMonth(prevMonth, prevYear);
+
+    for (let i = firstDay - 1; i >= 0; i--) {
+      days.push({
+        day: daysInPrevMonth - i,
+        isCurrentMonth: false,
+        isNextMonth: false,
+      });
+    }
+
+    // Current month days
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push({
+        day,
+        isCurrentMonth: true,
+        isNextMonth: false,
+      });
+    }
+
+    // Next month's leading days
+    const remainingDays = 42 - days.length;
+    for (let day = 1; day <= remainingDays; day++) {
+      days.push({
+        day,
+        isCurrentMonth: false,
+        isNextMonth: true,
+      });
+    }
+
+    return days;
+  };
+
+  const handlePrevMonth = () => {
+    if (selectedMonth === 0) {
+      setSelectedMonth(11);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (selectedMonth === 11) {
+      setSelectedMonth(0);
+      setSelectedYear(selectedYear + 1);
+    } else {
+      setSelectedMonth(selectedMonth + 1);
+    }
+  };
+
+  const formatDateTime = () => {
+    const date = `${selectedDate.toString().padStart(2, "0")}/${(
+      selectedMonth + 1
+    )
+      .toString()
+      .padStart(2, "0")}/${selectedYear}`;
+    const time = `${selectedHour.toString().padStart(2, "0")}:${selectedMinute
+      .toString()
+      .padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
+    return `${date} ${time}`;
+  };
+
+  const calendarDays = generateCalendarDays();
   return (
     <div className="container-fluid py-4">
       {/* Edit Project Modal */}
@@ -711,17 +996,22 @@ const ActiveProject = () => {
                   </div>
                   <div className="col-md-6">
                     <label className="form-label">Due Date & Time</label>
-                    <input
-                      type="datetime-local"
-                      className="form-control"
-                      value={customToInputDate(editedProject.dueDate)}
-                      onChange={(e) => {
-                        setEditedProject({
-                          ...editedProject,
-                          dueDate: inputToCustomDate(e.target.value),
-                        });
-                      }}
-                    />
+                    <div className="input-group">
+                      <input
+                        type="datetime-local"
+                        className="form-control"
+                        value={customToInputDate(editedProject.dueDate)}
+                        onChange={(e) => {
+                          setEditedProject({
+                            ...editedProject,
+                            dueDate: inputToCustomDate(e.target.value),
+                          });
+                        }}
+                      />
+                      <span className="input-group-text">
+                        <i className="fa fa-calendar"></i>
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -733,8 +1023,8 @@ const ActiveProject = () => {
                 >
                   Cancel
                 </button>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn btn-primary"
                   onClick={handleSaveProjectEdit}
                 >
@@ -756,13 +1046,21 @@ const ActiveProject = () => {
         >
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Create New Project</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowCreateModal(false)}
-                ></button>
+              <div className="modal-header d-flex justify-content-between">
+                <div>
+                  <h5 className="modal-title">Create New Project</h5>
+                </div>
+
+                <div>
+                  {/* <button className="btn btn-light btn-sm me-4 ">
+                    <i className="fas fa-cog text-muted"></i>
+                  </button> */}
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowCreateModal(false)}
+                  ></button>
+                </div>
               </div>
               <div className="modal-body">
                 <form onSubmit={handleSubmit}>
@@ -782,7 +1080,7 @@ const ActiveProject = () => {
                       onChange={handleInputChange}
                       placeholder="Enter project title (max 80 chars)"
                     />
-                    <div className="form-text">
+                    <div className="form-text text-white">
                       Max allowed Character length – 80, (ignore or remove any
                       special character by itself)
                     </div>
@@ -959,7 +1257,7 @@ const ActiveProject = () => {
                       placeholder="Select Languages"
                       styles={gradientSelectStyles}
                     />
-                    <div className="form-text">
+                    <div className="form-text text-white">
                       {formData.languages.length} selected
                     </div>
                   </div>
@@ -1001,27 +1299,63 @@ const ActiveProject = () => {
                         Upload Excel
                       </button>
                     </div>
-                    <div className="table-responsive ">
-                      <table className="table table-bordered  ">
+                    <div className="table-responsive">
+                      <table className="table table-bordered">
                         <thead
-                          style={{ backgroundColor: "#201E7E", color: "white" }}
+                          className="table-gradient-bg table"
+                          style={{
+                            position: "sticky",
+                            top: "-2px",
+
+                            zIndex: 0,
+                            backgroundColor: "#fff", // Match your background color
+                          }}
                         >
-                          <tr
-                            style={{
-                              backgroundColor: "#201E7E",
-                              color: "white",
-                            }}
-                          >
-                            <th>S.No.</th>
+                          <tr className="text-center">
+                            <th>
+                              S.No.
+                              <input
+                                type="checkbox"
+                                checked={formData.files.every(
+                                  (file) => file.selected
+                                )}
+                                onChange={(e) => {
+                                  const files = formData.files.map((file) => ({
+                                    ...file,
+                                    selected: e.target.checked,
+                                  }));
+                                  setFormData((prev) => ({ ...prev, files }));
+                                }}
+                              />
+                            </th>
                             <th>File Name</th>
                             <th>Pages</th>
+                            {/* <th>Language</th> */}
                             <th>Application</th>
+                            {/* <th>Status</th> */}
                           </tr>
                         </thead>
                         <tbody>
                           {formData.files.map((file, idx) => (
-                            <tr key={idx}>
-                              <td>{idx + 1}</td>
+                            <tr key={idx} className="text-center">
+                              <td>
+                                <div className="d-flex align-items-center gap-2">
+                                  {idx + 1}
+                                  <input
+                                    type="checkbox"
+                                    checked={file.selected || false}
+                                    onChange={(e) => {
+                                      const files = [...formData.files];
+                                      files[idx].selected = e.target.checked;
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        files,
+                                      }));
+                                    }}
+                                  />
+                                </div>
+                              </td>
+
                               <td>
                                 <input
                                   type="text"
@@ -1035,6 +1369,7 @@ const ActiveProject = () => {
                                   placeholder="File Name"
                                 />
                               </td>
+
                               <td>
                                 <input
                                   type="number"
@@ -1051,13 +1386,26 @@ const ActiveProject = () => {
                                   placeholder="Pages"
                                 />
                               </td>
+
+                              {/* <td>th</td> */}
+
                               <td>
                                 <select
                                   className="form-select"
                                   value={file.application || ""}
                                   onChange={(e) => {
+                                    const newApp = e.target.value;
                                     const files = [...formData.files];
-                                    files[idx].application = e.target.value;
+
+                                    // check if current row is selected
+                                    if (files[idx].selected) {
+                                      files.forEach((f) => {
+                                        if (f.selected) f.application = newApp;
+                                      });
+                                    } else {
+                                      files[idx].application = newApp;
+                                    }
+
                                     setFormData((prev) => ({ ...prev, files }));
                                   }}
                                 >
@@ -1069,6 +1417,8 @@ const ActiveProject = () => {
                                   ))}
                                 </select>
                               </td>
+
+                              {/* <td>TYS</td> */}
                             </tr>
                           ))}
                         </tbody>
@@ -1110,7 +1460,7 @@ const ActiveProject = () => {
                         />
                       </div>
                     </div>
-                    <div className="form-text">
+                    <div className="form-text text-white">
                       Total Project Pages = Total Pages × Language Count
                     </div>
                   </div>
@@ -1159,68 +1509,170 @@ const ActiveProject = () => {
 
                   {/* Financial Section */}
                   <div className="row g-3 mb-3">
+                    {/* Estimated Hrs with radio */}
                     <div className="col-md-3">
-                      <label className="form-label">Estimated Hrs</label>
+                      <label className="form-label d-flex align-items-center gap-2">
+                        <input
+                          type="radio"
+                          name="billingMode"
+                          value="estimated"
+                          checked={
+                            formData.billingMode === "estimated" ||
+                            !formData.billingMode
+                          }
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              billingMode: e.target.value,
+                              // Reset rate when switching to estimated hours
+                              rate:
+                                e.target.value === "estimated" ? "" : prev.rate,
+                            }))
+                          }
+                        />
+                        Estimated Hrs
+                      </label>
                       <input
                         type="number"
                         className="form-control"
+                        min="0"
                         step="0.25"
                         value={formData.estimatedHrs || ""}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = parseFloat(e.target.value) || 0;
                           setFormData((prev) => ({
                             ...prev,
-                            estimatedHrs: e.target.value,
-                          }))
-                        }
+                            estimatedHrs: value,
+                            // Auto-calculate cost when estimated hours change
+                            cost: value * (prev.hourlyRate || 0),
+                            inrCost:
+                              value *
+                              (prev.hourlyRate || 0) *
+                              (prev.exchangeRate || 1),
+                          }));
+                        }}
                         placeholder="00.00"
+                        disabled={
+                          formData.billingMode !== "estimated" &&
+                          formData.billingMode !== undefined
+                        }
                       />
-                      <div className="form-text">
+                      <div className="form-text text-white">
                         (in multiple of 0.25 only)
                       </div>
                     </div>
-                    <div className="col-md-3">
-                      <label className="form-label">Per page Page Rate</label>
+
+                    {/* Hourly Rate (auto-filled from client settings) */}
+                    <div className="col-md-2">
+                      <label className="form-label">Hourly Rate</label>
                       <input
                         type="number"
                         className="form-control"
-                        step="0.01"
-                        value={formData.rate || ""}
-                        onChange={(e) =>
+                        value={formData.hourlyRate || ""}
+                        onChange={(e) => {
+                          const rate = parseFloat(e.target.value) || 0;
                           setFormData((prev) => ({
                             ...prev,
-                            rate: e.target.value,
-                          }))
-                        }
-                        placeholder="00.00"
+                            hourlyRate: rate,
+                            // Recalculate costs when rate changes
+                            cost: prev.estimatedHrs * rate,
+                            inrCost:
+                              prev.estimatedHrs *
+                              rate *
+                              (prev.exchangeRate || 1),
+                          }));
+                        }}
+                        placeholder="Auto from Client"
                       />
-                      <div className="form-text">(with only 2 decimals)</div>
                     </div>
+
+                    {/* Per Page Rate with radio */}
+                    <div className="col-md-3">
+                      <label className="form-label d-flex align-items-center gap-2">
+                        <input
+                          type="radio"
+                          name="billingMode"
+                          value="perPage"
+                          checked={formData.billingMode === "perPage"}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              billingMode: e.target.value,
+                              // Reset estimated hours when switching to per page
+                              estimatedHrs:
+                                e.target.value === "perPage"
+                                  ? ""
+                                  : prev.estimatedHrs,
+                            }))
+                          }
+                        />
+                        Per Page Rate
+                      </label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        min="0"
+                        step="0.01"
+                        value={formData.rate || ""}
+                        onChange={(e) => {
+                          const rate = parseFloat(e.target.value) || 0;
+                          const totalPages = formData.files.reduce(
+                            (sum, file) => sum + (file.pageCount || 0),
+                            0
+                          );
+                          setFormData((prev) => ({
+                            ...prev,
+                            rate: rate,
+                            // Auto-calculate cost when rate changes
+                            cost: rate * totalPages,
+                            inrCost:
+                              rate * totalPages * (prev.exchangeRate || 1),
+                          }));
+                        }}
+                        placeholder="00.00"
+                        disabled={formData.billingMode !== "perPage"}
+                      />
+                      <div className="form-text text-white">
+                        (with only 2 decimals)
+                      </div>
+                    </div>
+
+                    {/* Currency (auto-filled from client settings) */}
                     <div className="col-md-2">
                       <label className="form-label">Currency</label>
                       <input
                         type="text"
                         className="form-control"
-                        value={formData.currency}
-                        readOnly
-                        placeholder="Auto updated from Client details"
+                        value={formData.currency || "USD"} // Default to USD if not set
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            currency: e.target.value,
+                          }))
+                        }
+                        placeholder="Auto from Client"
                       />
                     </div>
+
+                    {/* Total Cost */}
                     <div className="col-md-2">
                       <label className="form-label">Total Cost</label>
                       <input
                         type="text"
                         className="form-control"
-                        value={formData.cost.toFixed(2)}
+                        value={formData.cost?.toFixed(2) || "0.00"}
                         readOnly
                         placeholder="Auto Calculated"
                       />
                     </div>
+
+                    {/* Cost in INR */}
                     <div className="col-md-2">
                       <label className="form-label">Cost in INR</label>
                       <input
                         type="text"
                         className="form-control"
-                        value={formData.inrCost.toFixed(2)}
+                        value={formData.inrCost?.toFixed(2) || "0.00"}
                         readOnly
                         placeholder="Auto Calculated"
                       />
@@ -1228,7 +1680,456 @@ const ActiveProject = () => {
                   </div>
 
                   {/* Save Button */}
-                  <div className="text-end">
+                  <div className="d-flex justify-content-between">
+                    <div className="d-flex align-items-center mt-3 gap-3">
+                      <label
+                        className="text-white"
+                        style={{ fontWeight: "bold" }}
+                      >
+                        Deadline
+                      </label>
+                      <div className="max-w-md mx-auto">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={formatDateTime()}
+                            readOnly
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                            placeholder="Select date and time"
+                          />
+                        </div>
+
+                        {isOpen && (
+                          <div className="calendar-dropdown">
+                            <style>{`
+        .calendar-dropdown {
+          position: absolute;
+          z-index: 9999;
+          margin-top: 8px;
+          background: white;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+          padding: 16px;
+          width: calc(100vw - 32px);
+          max-width: 30rem;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+        
+        .time-display {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 16px;
+          padding: 12px;
+          background: #2563eb;
+          color: white;
+          border-radius: 6px;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        
+        .time-display .time {
+          font-size: 1.5rem;
+          font-weight: bold;
+          min-width: 80px;
+        }
+        
+        .time-display .period {
+          font-size: 0.875rem;
+        }
+        
+        .time-display .date {
+          font-size: 0.875rem;
+        }
+        
+        .time-calendar-container {
+          display: flex;
+          gap: 16px;
+          flex-direction: column;
+        }
+        
+        @media (min-width: 640px) {
+          .time-calendar-container {
+            flex-direction: row;
+          }
+        }
+        
+        .time-selector {
+          display: flex;
+          gap: 8px;
+          justify-content: center;
+        }
+        
+        .time-column {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        
+        .time-column-label {
+          font-size: 0.75rem;
+          color: #6b7280;
+          margin-bottom: 4px;
+        }
+        
+        .time-scroll {
+          height: 200px;
+          overflow-y: auto;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        
+        .time-scroll::-webkit-scrollbar {
+          display: none;
+        }
+        
+        .time-options {
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .time-option {
+          padding: 4px 8px;
+          font-size: 0.875rem;
+          min-width: 40px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          color: #374151;
+        }
+        
+        .time-option:hover {
+          background: #dbeafe;
+        }
+        
+        .time-option.selected-hour {
+          background: #2563eb;
+          color: white;
+        }
+        
+        .time-option.selected-minute {
+          background: #ef4444;
+          color: white;
+        }
+        
+        .period-options {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        
+        .period-option {
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 0.875rem;
+          background: #f3f4f6;
+          color: #374151;
+          border: none;
+          cursor: pointer;
+        }
+        
+        .period-option:hover {
+          background: #e5e7eb;
+        }
+        
+        .period-option.selected {
+          background: #2563eb;
+          color: white;
+        }
+        
+        .calendar-section {
+          flex: 1;
+        }
+        
+        .month-nav {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 12px;
+        }
+        
+        .month-nav button {
+          padding: 4px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          border-radius: 4px;
+        }
+        
+        .month-nav button:hover {
+          background: #f3f4f6;
+        }
+        
+        .month-nav h3 {
+          font-weight: 600;
+          color: #1f2937;
+          text-align: center;
+          flex-grow: 1;
+          margin: 0 8px;
+        }
+        
+        .weekdays {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+          gap: 4px;
+          margin-bottom: 8px;
+        }
+        
+        .weekday {
+          text-align: center;
+          font-size: 0.75rem;
+          font-weight: 500;
+          color: #6b7280;
+          padding: 4px 0;
+        }
+        
+        .calendar-grid {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+          gap: 4px;
+        }
+        
+        .calendar-day {
+          width: 100%;
+          aspect-ratio: 1;
+          font-size: 0.875rem;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: none;
+          cursor: pointer;
+          background: transparent;
+        }
+        
+        .calendar-day.current-month {
+          color: #1f2937;
+        }
+        
+        .calendar-day.current-month:hover {
+          background: #dbeafe;
+        }
+        
+        .calendar-day.selected {
+          background: #2563eb;
+          color: white;
+        }
+        
+        .calendar-day.other-month {
+          color: #9ca3af;
+        }
+        
+        .action-buttons {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 16px;
+        }
+        
+        .action-button {
+          color: #2563eb;
+          font-size: 0.875rem;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          text-decoration: none;
+        }
+        
+        .action-button:hover {
+          text-decoration: underline;
+        }
+        
+        .done-section {
+          display: flex;
+          justify-content: flex-end;
+          margin-top: 16px;
+          padding-top: 12px;
+          border-top: 1px solid #e5e7eb;
+        }
+        
+        .done-button {
+          padding: 8px 16px;
+          background: #2563eb;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+        
+        .done-button:hover {
+          background: #1d4ed8;
+        }
+      `}</style>
+
+                            <div className="time-display">
+                              <div className="time">
+                                {selectedHour.toString().padStart(2, "0")}:
+                                {selectedMinute.toString().padStart(2, "0")}
+                              </div>
+                              <div className="period">{isAM ? "AM" : "PM"}</div>
+                              <div className="date">
+                                {months[selectedMonth].substring(0, 3)},{" "}
+                                {selectedYear}
+                              </div>
+                            </div>
+
+                            <div className="time-calendar-container">
+                              <div className="time-selector">
+                                <div className="time-column">
+                                  <div className="time-column-label">Hour</div>
+                                  <div className="time-scroll">
+                                    <div className="time-options">
+                                      {[
+                                        12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+                                      ].map((hour) => (
+                                        <button
+                                          key={hour}
+                                          onClick={() => setSelectedHour(hour)}
+                                          className={`time-option ${
+                                            selectedHour === hour
+                                              ? "selected-hour"
+                                              : ""
+                                          }`}
+                                        >
+                                          {hour.toString().padStart(2, "0")}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="time-column">
+                                  <div className="time-column-label">Min</div>
+                                  <div className="time-scroll">
+                                    <div className="time-options">
+                                      {[0, 15, 30, 45].map((minute) => (
+                                        <button
+                                          key={minute}
+                                          onClick={() =>
+                                            setSelectedMinute(minute)
+                                          }
+                                          className={`time-option ${
+                                            selectedMinute === minute
+                                              ? "selected-minute"
+                                              : ""
+                                          }`}
+                                        >
+                                          {minute.toString().padStart(2, "0")}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="time-column">
+                                  <div className="time-column-label">
+                                    Period
+                                  </div>
+                                  <div className="period-options">
+                                    <button
+                                      onClick={() => setIsAM(true)}
+                                      className={`period-option ${
+                                        isAM ? "selected" : ""
+                                      }`}
+                                    >
+                                      AM
+                                    </button>
+                                    <button
+                                      onClick={() => setIsAM(false)}
+                                      className={`period-option ${
+                                        !isAM ? "selected" : ""
+                                      }`}
+                                    >
+                                      PM
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="calendar-section">
+                                <div className="month-nav">
+                                  <button onClick={handlePrevMonth}>
+                                    <ChevronLeft size={20} />
+                                  </button>
+                                  <h3>
+                                    {months[selectedMonth]}, {selectedYear}
+                                  </h3>
+                                  <button onClick={handleNextMonth}>
+                                    <ChevronRight size={20} />
+                                  </button>
+                                </div>
+
+                                <div className="weekdays">
+                                  {weekDays.map((day) => (
+                                    <div key={day} className="weekday">
+                                      {day}
+                                    </div>
+                                  ))}
+                                </div>
+
+                                <div className="calendar-grid">
+                                  {calendarDays.map((dayObj, index) => (
+                                    <button
+                                      key={index}
+                                      onClick={() =>
+                                        dayObj.isCurrentMonth &&
+                                        setSelectedDate(dayObj.day)
+                                      }
+                                      className={`calendar-day ${
+                                        dayObj.isCurrentMonth
+                                          ? selectedDate === dayObj.day
+                                            ? "current-month selected"
+                                            : "current-month"
+                                          : "other-month"
+                                      }`}
+                                    >
+                                      {dayObj.day}
+                                    </button>
+                                  ))}
+                                </div>
+
+                                <div className="action-buttons">
+                                  <button
+                                    onClick={() => {
+                                      setSelectedDate(new Date().getDate());
+                                      setSelectedMonth(new Date().getMonth());
+                                      setSelectedYear(new Date().getFullYear());
+                                    }}
+                                    className="action-button"
+                                  >
+                                    Clear
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      const today = new Date();
+                                      setSelectedDate(today.getDate());
+                                      setSelectedMonth(today.getMonth());
+                                      setSelectedYear(today.getFullYear());
+                                    }}
+                                    className="action-button"
+                                  >
+                                    Today
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="done-section">
+                              <button
+                                onClick={() => setIsOpen(false)}
+                                className="done-button"
+                              >
+                                Done
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                     <button type="submit" className="btn btn-warning fw-bold">
                       Save changes
                     </button>
@@ -1256,101 +2157,93 @@ const ActiveProject = () => {
       </div>
 
       {/* Filters */}
-      <div className="row mb-4">
-        <div className="col-md-6">
-          <div className="d-flex  gap-2">
-            <button
-              className="gradient-button"
-              onClick={() => handleCardFilter("all")}
-            >
-              All
-            </button>
-
-            <button
-              className="gradient-button"
-              onClick={() => handleCardFilter("nearDue")}
-            >
-              Near Due
-            </button>
-
-            <button
-              className="gradient-button"
-              onClick={() => handleCardFilter("overDue")}
-            >
-              Over Due
-            </button>
-
-            <button
-              className="gradient-button"
-              onClick={() => handleCardFilter("Adobe")}
-            >
-              Adobe
-            </button>
-
-            <button
-              className="gradient-button"
-              onClick={() => handleCardFilter("MSOffice")}
-            >
-              MS Office
-            </button>
+      <div className="row mb-4 gy-3">
+        {/* Buttons Section */}
+        <div className="col-12 col-lg-6">
+          <div className="d-flex flex-wrap gap-2 justify-content-start">
+            {["all", "nearDue", "overdue", "Adobe", "MSOffice"].map((btn) => (
+              <button
+                key={btn}
+                className={`gradient-button ${
+                  activeButton === btn ? "active-filter" : ""
+                }`}
+                onClick={() => handleCardFilter(btn)}
+              >
+                {btn === "all"
+                  ? "All"
+                  : btn === "nearDue"
+                  ? "Near Due"
+                  : btn === "overdue"
+                  ? "Over Due"
+                  : btn === "Adobe"
+                  ? "Adobe"
+                  : "MS Office"}
+              </button>
+            ))}
           </div>
         </div>
-        <div
-          className="col-md-6
-         d-flex gap-2"
-        >
-          <div className=" ">
-            <select
-              className="form-select"
-              value={clientFilter}
-              onChange={(e) => setClientFilter(e.target.value)}
-            >
-              <option value="">All Clients</option>
-              {getUniqueValues("client").map((client, index) => (
-                <option key={index} value={client}>
-                  {client}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="">
-            <select
-              className="form-select"
-              value={taskFilter}
-              onChange={(e) => setTaskFilter(e.target.value)}
-            >
-              <option value="">All Tasks</option>
-              {getUniqueValues("task").map((task, index) => (
-                <option key={index} value={task}>
-                  {task}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="  ">
-            <select
-              className="form-select"
-              value={languageFilter}
-              onChange={(e) => setLanguageFilter(e.target.value)}
-            >
-              {statuses.map((status, index) => (
-                <option key={index} value={status.key}>
-                  {status.label}
-                </option>
-              ))}
-            </select>
-          </div>
 
-          <div className="">
-            <Select
-              options={applicationsOptio}
-              isMulti
-              className="basic-multi-select"
-              classNamePrefix="select"
-              value={selectedApplications}
-              placeholder="Select"
-              onChange={(selected) => setSelectedApplications(selected)}
-            />
+        {/* Filter Dropdowns Section */}
+        <div className="col-12 col-lg-6">
+          <div className="row g-2">
+            {/* Client Filter */}
+            <div className="col-12 col-sm-6 col-md-3">
+              <select
+                className="form-select"
+                value={clientFilter}
+                onChange={(e) => setClientFilter(e.target.value)}
+              >
+                <option value="">All Clients</option>
+                {getUniqueValues("client").map((client, index) => (
+                  <option key={index} value={client}>
+                    {client}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Task Filter */}
+            <div className="col-12 col-sm-6 col-md-3">
+              <select
+                className="form-select"
+                value={taskFilter}
+                onChange={(e) => setTaskFilter(e.target.value)}
+              >
+                <option value="">All Tasks</option>
+                {getUniqueValues("task").map((task, index) => (
+                  <option key={index} value={task}>
+                    {task}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Status/Language Filter */}
+            <div className="col-12 col-sm-6 col-md-3">
+              <select
+                className="form-select"
+                value={languageFilter}
+                onChange={(e) => setLanguageFilter(e.target.value)}
+              >
+                {statuses.map((status, index) => (
+                  <option key={index} value={status.key}>
+                    {status.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Application (Select component) */}
+            <div className="col-12 col-sm-6 col-md-3">
+              <Select
+                options={applicationsOptio}
+                isMulti={false}
+                classNamePrefix="select"
+                value={selectedApplications}
+                placeholder="Select App"
+                onChange={(selected) => setSelectedApplications(selected)}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -1375,82 +2268,95 @@ const ActiveProject = () => {
         </li>
       </ul>
 
-      {/* Projects Table */}
-      <div
-        ref={fakeScrollbarRef}
-        style={{
-          overflowX: "auto",
-          overflowY: "hidden",
-          height: 16,
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1050,
-          display: "none",
-        }}
-      >
-        <div style={{ width: "2000px", height: 1 }} />
-      </div>
-
-      {/* Scrollable Table Container */}
-      <div
-        className="table-responsive"
-        ref={scrollContainerRef}
-        style={{ maxHeight: "500px", overflowY: "auto", overflowX: "auto" }}
-      >
-        <table className="table-gradient-bg align-middle mt-0 table table-bordered table-hover">
-          <thead className="table-light">
-            <tr>
-              <th>S. No.</th>
-              <th>Project Title</th>
-              <th>Client</th>
-              <th>Task</th>
-              <th>Language</th>
-              <th>Application</th>
-              <th>Total Pages</th>
-              <th>Due Date & Time</th>
-              <th>Progress</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProjects.map((project, index) => (
-              <React.Fragment key={project.id}>
-                <tr
-                  className={expandedRow === project.id ? "table-active" : ""}
-                >
-                  <td>{index + 1}</td>
-                  <td>{project.title}</td>
-                  <td>{project.client}</td>
-                  <td>{project.task}</td>
-                  <td>{project.language}</td>
-                  <td>{project.application}</td>
-                  <td>{project.totalPages}</td>
-                  <td>
-                    {isEdit === project.id ? (
-                      <input
-                        type="datetime-local"
-                        value={customToInputDate(project.dueDate)}
-                        onChange={(e) =>
-                          setEditedProject({
-                            ...project,
-                            dueDate: inputToCustomDate(e.target.value),
-                          })
-                        }
-                      />
-                    ) : (
-                      project.dueDate
-                    )}
-                  </td>
-                  <td>
-                    <div
-                      className="progress cursor-pointer"
-                      style={{ height: "24px" }}
-                      onClick={() => handleViewProject(project)}
+      <div className="card">
+        <div
+          ref={fakeScrollbarRef1}
+          style={{
+            overflowX: "auto",
+            overflowY: "hidden",
+            height: 16,
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1050,
+          }}
+        >
+          <div style={{ width: "2000px", height: 1 }} />
+        </div>
+        {/* Projects Table */}
+        <div className="table-gradient-bg">
+          <div
+            className="table-responsive"
+            ref={scrollContainerRef1}
+            style={{
+              maxHeight: "500px",
+              overflowX: "auto",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
+          >
+            <table
+              className="table-gradient-bg align-middle mt-0 table table-bordered table-hover"
+              style={{ minWidth: 1000 }}
+            >
+              <thead
+                className="table-gradient-bg table"
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 0,
+                  backgroundColor: "#fff", // Match your background color
+                }}
+              >
+                <tr className="text-center">
+                  <th>S. No.</th>
+                  <th>Project Title</th>
+                  <th>Client</th>
+                  <th>Task</th>
+                  <th>Language</th>
+                  <th>Application</th>
+                  <th>Total Pages</th>
+                  <th>Deadline</th>
+                  <th>Ready For Qc Deadline</th>
+                  <th>Qc Hrs</th>
+                  <th>Qc Due Date</th>
+                  <th>Status</th>
+                  <th>Progress</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredProjects.map((project, index) => (
+                  <React.Fragment key={project.id}>
+                    <tr
+                      className={
+                        expandedRow === project.id
+                          ? "table-active text-center"
+                          : ""
+                      }
                     >
-                      <div
-                        className={`progress-bar 
+                      <td>{index + 1}</td>
+                      <td>{project.title}</td>
+                      <td>{project.client}</td>
+                      <td>{project.task}</td>
+                      <td>{project.language}</td>
+                      <td>{project.application}</td>
+                      <td>{project.totalPages}</td>
+                      <td>{project.deadline}</td>
+                      <td>{project.readyDeadline}</td>
+                      <td>{project.qcHrs}</td>
+                      <td>{project.qcDueDate}</td>
+                      <td>{project.status}</td>
+
+                      <td>
+                        <div
+                          className="progress cursor-pointer"
+                          style={{ height: "24px" }}
+                          onClick={() => handleViewProject(project)}
+                        >
+                          <div
+                            className={`progress-bar 
                           ${
                             project.progress < 30
                               ? "bg-danger"
@@ -1458,487 +2364,337 @@ const ActiveProject = () => {
                               ? "bg-warning"
                               : "bg-success"
                           }`}
-                        role="progressbar"
-                        style={{ width: `${project.progress}%` }}
-                        aria-valuenow={project.progress}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                      >
-                        {project.progress}%
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="d-flex gap-2">
-                      <button
-                        className="btn btn-sm btn-primary"
-                        onClick={() => handleViewProject(project)}
-                      >
-                        <i
-                          className={`fas ${
-                            expandedRow === project.id
-                              ? "fa-chevron-up"
-                              : "fa-eye"
-                          }`}
-                        ></i>
-                      </button>
-                      <button
-                        className="btn btn-sm btn-secondary"
-                        onClick={() => handleEditProject(project)}
-                      >
-                        <i className="fas fa-edit"></i>
-                      </button>
-                      {project.progress === 100 && (
-                        <button
-                          className="btn btn-sm btn-success"
-                          onClick={() => handleMarkComplete(project.id)}
-                        >
-                          <i className="fas fa-check"></i>
-                        </button>
-                      )}
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => handleDeleteProject(project.id)}
-                      >
-                        <i className="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-
-                {expandedRow === project.id && (
-                  <tr>
-                    <td colSpan={10} className="p-0 border-top-0">
-                      <div className="p-4">
-                        {/* Header */}
-                        <div className="mb-4">
-                          <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5 className="mb-0">Project Files</h5>
-                            {selectedFiles.length > 0 && (
-                              <span className="badge bg-primary">
-                                {selectedFiles.length} files selected
-                              </span>
-                            )}
+                            role="progressbar"
+                            style={{ width: `${project.progress}%` }}
+                            aria-valuenow={project.progress}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                          >
+                            {project.progress}%
                           </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="d-flex gap-2">
+                          <button
+                            className="btn btn-sm btn-primary"
+                            onClick={() => handleViewProject(project)}
+                          >
+                            <i
+                              className={`fas ${
+                                expandedRow === project.id
+                                  ? "fa-chevron-up"
+                                  : "fa-eye"
+                              }`}
+                            ></i>
+                          </button>
+                          <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => handleEditProject(project)}
+                          >
+                            <i className="fas fa-edit"></i>
+                          </button>
+                          {project.progress === 100 && (
+                            <button
+                              className="btn btn-sm btn-success"
+                              onClick={() => handleMarkComplete(project.id)}
+                            >
+                              <i className="fas fa-check"></i>
+                            </button>
+                          )}
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleDeleteProject(project.id)}
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
 
-                          {/* Batch Edit */}
-                          {selectedFiles.length > 0 && (
-                            <div className="card mb-4">
-                              <div className="card-body bg-card">
-                                <h6 className="card-title mb-3">Batch Edit</h6>
-                                <div className="row g-3">
-                                  <div className="col-md-4 col-lg-2">
-                                    <label className="form-label">
-                                      Handler
-                                    </label>
-                                    <select
-                                      className="form-select form-select-sm"
-                                      value={batchEditValues.handler}
-                                      onChange={(e) =>
-                                        setBatchEditValues({
-                                          ...batchEditValues,
-                                          handler: e.target.value,
-                                        })
-                                      }
-                                    >
-                                      <option value="">Select</option>
-                                      <option value="John Doe">John Doe</option>
-                                      <option value="Jane Smith">
-                                        Jane Smith
-                                      </option>
-                                      <option value="Mike Johnson">
-                                        Mike Johnson
-                                      </option>
-                                    </select>
-                                  </div>
+                    {expandedRow === project.id && (
+                      <tr>
+                        <td colSpan={14} className="p-0 border-top-0">
+                          <div className="p-4">
+                            {/* Project Files Header */}
+                            <div className="mb-4">
+                              <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h5 className="mb-0">Project Files</h5>
+                                {selectedFiles.length > 0 && (
+                                  <span className="badge bg-primary">
+                                    {selectedFiles.length} files selected
+                                  </span>
+                                )}
+                              </div>
 
-                                  <div className="col-md-5 col-lg-5 mb-3">
-                                    <label className="form-label">QC Due</label>
-                                    <div className="row gx-2 gy-2 align-items-center">
-                                      {/* Date Picker */}
-                                      <div className="col-12 col-sm-6 col-md-5">
+                              {/* Batch Edit Controls */}
+
+                              {/* Files Table */}
+                              <div className="table-responsive">
+                                <table className="table table-sm table-striped table-hover">
+                                  <thead
+                                    className="table-gradient-bg table"
+                                    style={{
+                                      position: "sticky",
+                                      top: 0,
+                                      zIndex: 0,
+                                      backgroundColor: "#fff", // Match your background color
+                                    }}
+                                  >
+                                    <tr className="text-center">
+                                      <th>
                                         <input
-                                          type="date"
-                                          className="form-control"
-                                          value={date}
-                                          onChange={handleDateChange}
+                                          type="checkbox"
+                                          className="form-check-input"
+                                          checked={
+                                            selectedFiles.length ===
+                                            project?.files?.length
+                                          }
+                                          onChange={(e) => {
+                                            if (e.target.checked) {
+                                              setSelectedFiles([
+                                                ...project.files,
+                                              ]);
+                                            } else {
+                                              setSelectedFiles([]);
+                                            }
+                                            setHasUnsavedChanges(true);
+                                          }}
                                         />
-                                      </div>
+                                      </th>
+                                      <th>File Name</th>
+                                      <th>Pages</th>
+                                      <th>Language</th>
+                                      <th>Application</th>
+                                      <th>Handler</th>
+                                      <th>QA Reviewer</th>
+                                      <th>QA Status</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {project.files.map((file) => (
+                                      <tr
+                                        key={file.id}
+                                        className={
+                                          selectedFiles.some(
+                                            (f) => f.id === file.id
+                                          )
+                                            ? "table-primary text-center"
+                                            : ""
+                                        }
+                                      >
+                                        <td>
+                                          <input
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            checked={selectedFiles.some(
+                                              (f) => f.id === file.id
+                                            )}
+                                            onChange={() =>
+                                              toggleFileSelection(file)
+                                            }
+                                          />
+                                        </td>
+                                        <td>{file.name}</td>
+                                        <td>{file.pages}</td>
+                                        <td>{file.language}</td>
+                                        <td>{file.application}</td>
+                                        <td>
+                                          <select
+                                            className="form-select form-select-sm"
+                                            value={file.handler || ""}
+                                            onChange={(e) => {
+                                              const updatedFiles =
+                                                project.files.map((f) =>
+                                                  f.id === file.id
+                                                    ? {
+                                                        ...f,
+                                                        handler: e.target.value,
+                                                      }
+                                                    : f
+                                                );
+                                              setSelectedProject({
+                                                ...project,
+                                                files: updatedFiles,
+                                              });
+                                              setHasUnsavedChanges(true);
+                                            }}
+                                          >
+                                            <option value="">
+                                              Not Assigned
+                                            </option>
+                                            <option value="John Doe">
+                                              John Doe
+                                            </option>
+                                            <option value="Jane Smith">
+                                              Jane Smith
+                                            </option>
+                                            <option value="Mike Johnson">
+                                              Mike Johnson
+                                            </option>
+                                          </select>
+                                        </td>
+                                        <td>
+                                          <select
+                                            className="form-select form-select-sm"
+                                            value={file.qaReviewer || ""}
+                                            onChange={(e) => {
+                                              const updatedFiles =
+                                                project.files.map((f) =>
+                                                  f.id === file.id
+                                                    ? {
+                                                        ...f,
+                                                        qaReviewer:
+                                                          e.target.value,
+                                                      }
+                                                    : f
+                                                );
+                                              setSelectedProject({
+                                                ...project,
+                                                files: updatedFiles,
+                                              });
+                                              setHasUnsavedChanges(true);
+                                            }}
+                                          >
+                                            <option value="">
+                                              Not Assigned
+                                            </option>
+                                            <option value="Sarah Williams">
+                                              Sarah Williams
+                                            </option>
+                                            <option value="David Brown">
+                                              David Brown
+                                            </option>
+                                            <option value="Emily Davis">
+                                              Emily Davis
+                                            </option>
+                                          </select>
+                                        </td>
+                                        <td>Corr WIP</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                                {/* <div className="col-md-2 d-flex align-items-center justify-conetnt-center">
+                                  <button
+                                    className="btn btn-info mb-4 "
+                                    disabled={selectedFiles.length === 0}
+                                    onClick={applyBatchEdits}
+                                  >
+                                    Apply to Selected
+                                  </button>
+                                </div> */}
+                              </div>
 
-                                      {/* Hour Selector */}
-                                      <div className="col-4 col-sm-2 col-md-2">
-                                        <select
-                                          className="form-select"
-                                          value={hour}
-                                          onChange={handleHourChange}
-                                        >
-                                          {Array.from(
-                                            { length: 12 },
-                                            (_, i) => (
-                                              <option
-                                                key={i}
-                                                value={String(i + 1).padStart(
-                                                  2,
-                                                  "0"
-                                                )}
-                                              >
-                                                {String(i + 1).padStart(2, "0")}
-                                              </option>
-                                            )
-                                          )}
-                                        </select>
-                                      </div>
+                              {/* Batch Edit Controls */}
+                              {/* Label Row */}
+                              <div className="row g-3 mb-1">
+                                <div className="col-md-2">
+                                  <label className="form-label">
+                                    Ready for QC Due
+                                  </label>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">
+                                    QC Allocated Hours
+                                  </label>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">QC Due</label>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">Priority</label>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">Actions</label>
+                                </div>
+                              </div>
 
-                                      {/* Minute Selector */}
-                                      <div className="col-4 col-sm-2 col-md-2">
-                                        <select
-                                          className="form-select"
-                                          value={minute}
-                                          onChange={handleMinuteChange}
-                                        >
-                                          {["00", "15", "30", "45"].map(
-                                            (min) => (
-                                              <option key={min} value={min}>
-                                                {min}
-                                              </option>
-                                            )
-                                          )}
-                                        </select>
-                                      </div>
+                              {/* Input Row */}
+                              <div className="row g-3 mb-3 align-items-start">
+                                {/* Ready for QC Due */}
+                                <div className="col-md-2">
+                                  <DatePicker
+                                    selected={selectedDateTime}
+                                    onChange={(date) =>
+                                      setSelectedDateTime(date)
+                                    }
+                                    showTimeSelect
+                                    timeFormat="HH:mm"
+                                    timeIntervals={15}
+                                    dateFormat="h:mm aa dd-MM-yyyy"
+                                    placeholderText="Select date and time"
+                                    className="form-control"
+                                  />
+                                </div>
 
-                                      {/* AM/PM Selector */}
-                                      <div className="col-4 col-sm-2 col-md-2">
-                                        <select
-                                          className="form-select"
-                                          value={period}
-                                          onChange={handlePeriodChange}
-                                        >
-                                          <option value="AM">AM</option>
-                                          <option value="PM">PM</option>
-                                        </select>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div className="col-md-4 col-lg-2">
-                                    <label className="form-label">
-                                      Priority
-                                    </label>
-                                    <select
-                                      className="form-select form-select-sm"
-                                      value={batchEditValues.priority}
-                                      onChange={(e) =>
-                                        setBatchEditValues({
-                                          ...batchEditValues,
-                                          priority: e.target.value,
-                                        })
+                                {/* QC Allocated Hours */}
+                                <div className="col-md-2">
+                                  <input
+                                    type="number"
+                                    className="form-control"
+                                    step="0.25"
+                                    min="0"
+                                    placeholder="0.00"
+                                    value={qcAllocatedHours}
+                                    onChange={(e) => {
+                                      const val = parseFloat(e.target.value);
+                                      if (
+                                        !isNaN(val) &&
+                                        val >= 0 &&
+                                        val % 0.25 === 0
+                                      ) {
+                                        setQcAllocatedHours(val);
                                       }
-                                    >
-                                      <option value="">Select</option>
-                                      <option value="High">High</option>
-                                      <option value="Medium">Medium</option>
-                                      <option value="Low">Low</option>
-                                    </select>
+                                    }}
+                                  />
+                                  <div className="small text-white">
+                                    (in multiple of 0.00 only)
                                   </div>
                                 </div>
 
-                                <div className="mt-3">
-                                  <button
-                                    className="btn gradient-button"
-                                    onClick={applyBatchEdits}
-                                  >
-                                    Apply to Selected Files
+                                {/* QC Due (calculated) */}
+                                <div className="col-md-2">
+                                  <div className="form-control  fw-bold">
+                                    {calculateQCDue(
+                                      selectedDateTime,
+                                      qcAllocatedHours
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Priority */}
+                                <div className="col-md-2">
+                                  <select className="form-select">
+                                    <option>Low</option>
+                                    <option>Mid</option>
+                                    <option>High</option>
+                                  </select>
+                                </div>
+
+                                {/* Save & Close Buttons */}
+                                <div className="col-md-2 d-flex gap-2">
+                                  <button className="btn btn-success w-100">
+                                    Save
+                                  </button>
+                                  <button className="btn btn-secondary w-100">
+                                    Close
                                   </button>
                                 </div>
                               </div>
                             </div>
-                          )}
 
-                          {/* Files Table */}
-                          <div className="table-responsive">
-                            <table className="table table-sm table-striped table-hover">
-                              <thead className="table-light">
-                                <tr>
-                                  <th>
-                                    <input
-                                      type="checkbox"
-                                      className="form-check-input"
-                                      checked={
-                                        selectedFiles.length ===
-                                        project?.files?.length
-                                      }
-                                      onChange={(e) => {
-                                        if (e.target.checked) {
-                                          setSelectedFiles([...project.files]);
-                                        } else {
-                                          setSelectedFiles([]);
-                                        }
-                                        setHasUnsavedChanges(true);
-                                      }}
-                                    />
-                                  </th>
-                                  <th>File Name</th>
-                                  <th>Pages</th>
-                                  <th>Language</th>
-                                  <th>Application</th>
-                                  <th>Stage</th>
-                                  <th>Assigned</th>
-                                  <th>Handler</th>
-                                  <th>QA Reviewer</th>
-                                  <th>QA Status</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {project.files.map((file) => (
-                                  <tr
-                                    key={file.id}
-                                    className={
-                                      selectedFiles.some(
-                                        (f) => f.id === file.id
-                                      )
-                                        ? "table-primary"
-                                        : ""
-                                    }
-                                  >
-                                    <td>
-                                      <input
-                                        type="checkbox"
-                                        className="form-check-input"
-                                        checked={selectedFiles.some(
-                                          (f) => f.id === file.id
-                                        )}
-                                        onChange={() =>
-                                          toggleFileSelection(file)
-                                        }
-                                      />
-                                    </td>
-                                    <td>{file.name}</td>
-                                    <td>{file.pages}</td>
-                                    <td>{file.language}</td>
-                                    <td>{file.application}</td>
-                                    <td>{file.stage}</td>
-                                    <td>{file.assigned}</td>
-                                    <td>
-                                      <select
-                                        className="form-select form-select-sm"
-                                        value={file.handler || ""}
-                                        onChange={(e) => {
-                                          const updatedFiles =
-                                            project.files.map((f) =>
-                                              f.id === file.id
-                                                ? {
-                                                    ...f,
-                                                    handler: e.target.value,
-                                                  }
-                                                : f
-                                            );
-                                          setSelectedProject({
-                                            ...project,
-                                            files: updatedFiles,
-                                          });
-                                          setHasUnsavedChanges(true);
-                                        }}
-                                      >
-                                        <option value="">Not Assigned</option>
-                                        <option value="John Doe">
-                                          John Doe
-                                        </option>
-                                        <option value="Jane Smith">
-                                          Jane Smith
-                                        </option>
-                                        <option value="Mike Johnson">
-                                          Mike Johnson
-                                        </option>
-                                      </select>
-                                    </td>
-                                    <td>
-                                      <select
-                                        className="form-select form-select-sm"
-                                        value={file.qaReviewer || ""}
-                                        onChange={(e) => {
-                                          const updatedFiles =
-                                            project.files.map((f) =>
-                                              f.id === file.id
-                                                ? {
-                                                    ...f,
-                                                    qaReviewer: e.target.value,
-                                                  }
-                                                : f
-                                            );
-                                          setSelectedProject({
-                                            ...project,
-                                            files: updatedFiles,
-                                          });
-                                          setHasUnsavedChanges(true);
-                                        }}
-                                      >
-                                        <option value="">Not Assigned</option>
-                                        <option value="Sarah Williams">
-                                          Sarah Williams
-                                        </option>
-                                        <option value="David Brown">
-                                          David Brown
-                                        </option>
-                                        <option value="Emily Davis">
-                                          Emily Davis
-                                        </option>
-                                      </select>
-                                    </td>
-                                    <td>{file.qaStatus}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                            {/* Footer buttons */}
                           </div>
-                        </div>
-
-                        {/* Footer buttons */}
-                        <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 bg-card px-3 py-2 rounded-3 border">
-                          {/* Ready for QC Due */}
-                          <div className="text-center border border-dark rounded bg-card px-3 py-2">
-                            <div className="fw-semibold bg-info border-bottom small py-1">
-                              Ready for QC Due
-                            </div>
-                            <input
-                              type="datetime-local"
-                              className="form-control"
-                              value={readyForQcDueInput}
-                              onChange={(e) => {
-                                setReadyForQcDueInput(e.target.value);
-                                const formatted = inputToCustomDate(
-                                  e.target.value
-                                );
-                                const updatedProjects = projects.map((p) =>
-                                  p.id === project.id
-                                    ? {
-                                        ...p,
-                                        files: p.files.map((f) => ({
-                                          ...f,
-                                          readyForQcDue: formatted,
-                                        })),
-                                      }
-                                    : p
-                                );
-                                setProjects(updatedProjects);
-                              }}
-                            />
-                            <div className=" small">Format: hh:mm DD-MM-YY</div>
-                          </div>
-
-                          {/* QC Allocated Hours */}
-                          <div className="text-center bg-card px-2">
-                            <div className="fw-bold">QC Allocated hours</div>
-                            <input
-                              type="number"
-                              className="form-control"
-                              step="0.25"
-                              min="0"
-                              value={qcAllocatedHours}
-                              onChange={(e) => {
-                                const val = parseFloat(e.target.value);
-                                if (val >= 0 && val % 0.25 === 0) {
-                                  setQcAllocatedHours(val);
-                                  const updatedProjects = projects.map((p) =>
-                                    p.id === project.id
-                                      ? {
-                                          ...p,
-                                          files: p.files.map((f) => ({
-                                            ...f,
-                                            qcAllocatedHours: val,
-                                          })),
-                                        }
-                                      : p
-                                  );
-                                  setProjects(updatedProjects);
-                                }
-                              }}
-                              placeholder="0.00"
-                            />
-                            <div className=" small">
-                              (in multiple of 0.25 only)
-                            </div>
-                          </div>
-
-                          <div className="text-center border border-dark rounded bg-card px-3 py-2">
-                            <div className="fw-semibold bg-info border-bottom small py-1">
-                              QC Due
-                            </div>
-                            <div className="fw-semibold text-light">
-                              {readyForQcDueInput
-                                ? inputToCustomDate(readyForQcDueInput)
-                                : "hh:mm AM/PM DD-MM-YY"}{" "}
-                              <span className="text-warning">(Auto)</span>
-                            </div>
-                            {qcDueDelay && (
-                              <div
-                                className={`small fw-semibold ${
-                                  qcDueDelay.startsWith("Delayed")
-                                    ? "text-danger"
-                                    : "text-success"
-                                }`}
-                              >
-                                {qcDueDelay}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Priority */}
-                          <div className="text-center border border-dark rounded bg-card px-3 py-2">
-                            <div className="fw-semibold bg-info border-bottom small py-1">
-                              Priority
-                            </div>
-                            <select
-                              className="form-select"
-                              value={priorityAll}
-                              onChange={(e) => {
-                                setPriorityAll(e.target.value);
-                                const updatedProjects = projects.map((p) =>
-                                  p.id === project.id
-                                    ? {
-                                        ...p,
-                                        files: p.files.map((f) => ({
-                                          ...f,
-                                          priority: e.target.value,
-                                        })),
-                                      }
-                                    : p
-                                );
-                                setProjects(updatedProjects);
-                              }}
-                            >
-                              <option value="Low">Low</option>
-                              <option value="Mid">Mid</option>
-                              <option value="High">High</option>
-                            </select>
-                          </div>
-
-                          {/* Footer action buttons */}
-                          <div className="d-flex gap-2">
-                            <button
-                              type="button"
-                              className="btn btn-secondary rounded-5 px-4"
-                              onClick={() => setExpandedRow(null)}
-                            >
-                              Close
-                            </button>
-                            {hasUnsavedChanges && (
-                              <button
-                                type="button"
-                                className="btn btn-primary rounded-5 px-4"
-                              >
-                                Save Changes
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -2004,88 +2760,7 @@ const generateDummyProjects = (count) => {
     "ar",
     "az",
     "be",
-    "bg",
-    "bn",
-    "bs",
-    "ca",
-    "cs",
-    "cy",
-    "da",
-    "de",
-    "el",
-    "en",
-    "en-US",
-    "en-GB",
-    "es",
-    "es-ES",
-    "es-MX",
-    "et",
-    "eu",
-    "fa",
-    "fi",
-    "fil",
-    "fr",
-    "fr-FR",
-    "fr-CA",
-    "ga",
-    "gl",
-    "gu",
-    "ha",
-    "he",
-    "hi",
-    "hr",
-    "hu",
-    "hy",
-    "id",
-    "ig",
-    "is",
-    "it",
-    "ja",
-    "jv",
-    "ka",
-    "kk",
-    "km",
-    "kn",
-    "ko",
-    "ku",
-    "ky",
-    "lo",
-    "lt",
-    "lv",
-    "mk",
-    "ml",
-    "mn",
-    "mr",
-    "ms",
-    "mt",
-    "my",
-    "ne",
-    "nl",
-    "no",
-    "or",
-    "pa",
-    "pl",
-    "ps",
-    "pt",
-    "pt-BR",
-    "pt-PT",
-    "ro",
-    "ru",
-    "sd",
-    "si",
-    "sk",
-    "sl",
-    "so",
-    "sq",
-    "sr",
-    "sr-Cyrl",
-    "sr-Latn",
-    "sv",
-    "sw",
-    "ta",
-    "te",
-    "th",
-    "tl",
+
     "tr",
     "uk",
     "ur",
@@ -2110,6 +2785,20 @@ const generateDummyProjects = (count) => {
     "Visio",
     "Project",
     "FM",
+  ];
+
+  const statuses = [
+    "QC YTS",
+    "WIP",
+    "QC WIP",
+    "WIP",
+    "Corr YTS",
+    "WIP",
+    "Corr YTS",
+    "Corr WIP",
+    "WIP",
+    "QC YTS",
+    "Corr YTS",
   ];
   const stages = ["In Progress", "Review", "Completed", "On Hold"];
   const qaStatuses = ["Pending", "In Progress", "Approved", "Rejected"];
@@ -2138,9 +2827,28 @@ const generateDummyProjects = (count) => {
       .toString()
       .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
 
+    // Add random readyDeadline, qcHrs, qcDueDate, status
+    const readyDeadline = `${(hours + 1) % 24}:${minutes
+      .toString()
+      .padStart(2, "0")} ${hours + 1 >= 12 ? "PM" : "AM"} ${dueDate
+      .getDate()
+      .toString()
+      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+    const qcHrs = Math.floor(Math.random() * 15) + 1;
+    const qcDueDate = `${(hours + 2) % 24}:${minutes
+      .toString()
+      .padStart(2, "0")} ${hours + 2 >= 12 ? "PM" : "AM"} ${dueDate
+      .getDate()
+      .toString()
+      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+
     const fileCount = Math.floor(Math.random() * 5) + 1;
     const files = [];
-
     for (let j = 1; j <= fileCount; j++) {
       const filePages = Math.floor(Math.random() * 20) + 1;
       files.push({
@@ -2161,7 +2869,6 @@ const generateDummyProjects = (count) => {
         priority: ["High", "Medium", "Low"][Math.floor(Math.random() * 3)],
       });
     }
-
     projects.push({
       id: i,
       title: `Project ${i}`,
@@ -2171,14 +2878,16 @@ const generateDummyProjects = (count) => {
       application:
         applications[Math.floor(Math.random() * applications.length)],
       totalPages,
-      dueDate: formattedDueDate,
+      deadline: formattedDueDate,
+      readyDeadline,
+      qcHrs,
+      qcDueDate,
+      status,
       progress,
       handler,
       files,
     });
   }
-
   return projects;
 };
-
 export default ActiveProject;

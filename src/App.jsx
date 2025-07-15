@@ -3,7 +3,7 @@ import "./App.css";
 
 import Navbar from "./layout/Navbar";
 import Sidebar from "./layout/Sidebar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LoginPage from "./authtication/Login";
 import SignupPage from "./authtication/singup";
 
@@ -39,6 +39,9 @@ import Calander from "./components/AdminDashboard/Calander/Calander";
 import ActionCenter from "./components/AdminDashboard/ActionCenter/ActionCenter";
 import AuthLayout from "./layout/authLayout";
 import MainLayout from "./layout/MainLayout";
+import ManagerTask from "./components/ProjectManager/ManagerTask/ManagerTask";
+import ShiftAllocation from "./components/ProjectManager/ShiftAllocation/ShiftAllocation";
+
 
 
 
@@ -48,6 +51,15 @@ function App() {
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
   const menusidebarcollaps = () => setIsSidebarCollapsed(true);
 
+
+
+    useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+  
+    if (isMobile) {
+      setIsSidebarCollapsed(true);
+    }
+  }, []);
   return (
 
     <Routes>
@@ -87,7 +99,7 @@ function App() {
         <Route path="/changepassword" element={<ChangesPassword />} />
         <Route path="/role-permission" element={<RoleManagementSystem />} />
         <Route path="/project" element={<Project />} />
-        <Route path="/actioncenter" element={<ActionCenter />} />
+        <Route path="/action-center" element={<ActionCenter />} />
 
         {/* Lead routes */}
         <Route path="/active-project" element={<LeadDashboard />} />
@@ -110,6 +122,8 @@ function App() {
         <Route path="/createproject" element={<CreateProject />} />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/assigned" element={<Assigned />} />
+        <Route path="/managertask" element={<ManagerTask />} />
+    <Route path="/shift-allocation" element={<ShiftAllocation/>} />
 
         <Route path="/taskrequest" element={<TaskRequest />} />
         <Route path="/sourcework" element={<ResourceWorkload />} />

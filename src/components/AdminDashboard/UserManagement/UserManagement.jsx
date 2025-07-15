@@ -1,14 +1,14 @@
-import axios from "axios";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select from "react-select";
 
 function UserManagement() {
   // State for modal and member management
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState(""); // "view", "edit", or "add"
+  const [selectedMember, setSelectedMember] = useState(null);
   const [selectedApplications, setSelectedApplications] = useState([]);
   const [activeTab, setActiveTab] = useState("live");
-  
+
   // State for team members data
   const [teamMembers, setTeamMembers] = useState([
     {
@@ -98,7 +98,7 @@ function UserManagement() {
       appSkills: ["SEO", "Content Writing", "Canva"],
       username: "snehar",
       status: "active",
-    }
+    },
   ]);
 
   // Form state for adding/editing members
@@ -125,41 +125,43 @@ function UserManagement() {
   const gradientSelectStyles = {
     control: (provided, state) => ({
       ...provided,
-      background: 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
-      color: 'white',
-      borderColor: state.isFocused ? '#ffffff66' : '#ffffff33',
-      boxShadow: state.isFocused ? '0 0 0 1px #ffffff66' : 'none',
-      minHeight: '38px',
+      background: "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
+      color: "white",
+      borderColor: state.isFocused ? "#ffffff66" : "#ffffff33",
+      boxShadow: state.isFocused ? "0 0 0 1px #ffffff66" : "none",
+      minHeight: "38px",
     }),
     singleValue: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     multiValue: (provided) => ({
       ...provided,
-      backgroundColor: '#1b2f6e',
+      backgroundColor: "#1b2f6e",
     }),
     multiValueLabel: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     placeholder: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     input: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     option: (provided, state) => ({
       ...provided,
-      backgroundColor: state.isFocused ? '#293d80' : 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
-      color: 'white',
+      backgroundColor: state.isFocused
+        ? "#293d80"
+        : "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
+      color: "white",
     }),
     menu: (provided) => ({
       ...provided,
-      background: 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
-      color: 'white',
+      background: "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
+      color: "white",
     }),
   };
 
@@ -180,12 +182,12 @@ function UserManagement() {
 
   // Toggle member status between active and freezed
   const toggleFreezeMember = (empId) => {
-    setTeamMembers(prevMembers =>
-      prevMembers.map(member =>
+    setTeamMembers((prevMembers) =>
+      prevMembers.map((member) =>
         member.empId === empId
           ? {
               ...member,
-              status: member.status === "active" ? "freezed" : "active"
+              status: member.status === "active" ? "freezed" : "active",
             }
           : member
       )
@@ -193,30 +195,34 @@ function UserManagement() {
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  try {
-    const response = await axios.post("http://localhost:5000/api/users", {
-      emp_id: form.empId,
-      full_name: form.fullName,
-      doj: form.doj,
-      dob: form.dob,
-      team: form.team,
-      role: form.role,  // Ensure role is an integer
-      skills: form.skills.join(','), // Convert array to comma-separated string
-      username: form.username,
-      password: form.password
-    });
+    if (modalType === "edit") {
+      // Update existing member
+      setTeamMembers((prevMembers) =>
+        prevMembers.map((member) =>
+          member.empId === form.empId
+            ? {
+                ...form,
+                appSkills: selectedApplications.map((app) => app.value),
+              }
+            : member
+        )
+      );
+    } else {
+      // Add new member
+      const newMember = {
+        ...form,
+        appSkills: selectedApplications.map((app) => app.value),
+        status: "active",
+      };
+      setTeamMembers((prevMembers) => [...prevMembers, newMember]);
+    }
 
-    console.log("Form submitted successfully:", response.data);
-    setActiveTab(response.data);
     setShowModal(false);
-
-  } catch (error) {
-    console.error("Error submitting form:", error.response?.data || error.message);
-  }
-};
+    resetForm();
+  };
 
   // Handle form field changes
   const handleFieldChange = (e) => {
@@ -225,6 +231,63 @@ function UserManagement() {
       ...prevForm,
       [name]: value,
     }));
+  };
+
+  // Reset form to initial state
+  const resetForm = () => {
+    setForm({
+      empId: "",
+      fullName: "",
+      doj: "",
+      dob: "",
+      team: "",
+      role: "",
+      appSkills: [],
+      username: "",
+      password: "",
+    });
+    setSelectedApplications([]);
+  };
+
+  // Open modal for viewing/editing a member
+  const openMemberModal = (type, member) => {
+    setModalType(type);
+    setSelectedMember(member);
+
+    if (type !== "add") {
+      setForm({
+        empId: member.empId,
+        fullName: member.fullName,
+        doj: member.doj,
+        dob: member.dob,
+        team: member.team,
+        role: member.role,
+        appSkills: member.appSkills,
+        username: member.username,
+        password: "", // Password is not stored for security reasons
+      });
+
+      // Set selected applications for the select component
+      setSelectedApplications(
+        member.appSkills.map((skill) => ({
+          value: skill,
+          label: skill,
+        }))
+      );
+    } else {
+      resetForm();
+    }
+
+    setShowModal(true);
+  };
+
+  // Delete a member
+  const deleteMember = (empId) => {
+    if (window.confirm("Are you sure you want to delete this member?")) {
+      setTeamMembers((prevMembers) =>
+        prevMembers.filter((member) => member.empId !== empId)
+      );
+    }
   };
 
   // Render the members table
@@ -252,10 +315,21 @@ function UserManagement() {
 
       {/* Live Members Table */}
       {activeTab === "live" && (
-        <div className="table-responsive table-gradient-bg" style={{ maxHeight: "400px", overflowY: "auto" }}>
+        <div
+          className="table-responsive table-gradient-bg"
+          style={{ maxHeight: "400px", overflowY: "auto" }}
+        >
           <table className="table table-bordered align-middle">
-            <thead>
-              <tr>
+            <thead
+              className="table-gradient-bg table "
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 0,
+                backgroundColor: "#fff", // Match your background color
+              }}
+            >
+              <tr  className="text-center">
                 <th>Emp ID</th>
                 <th>Full Name</th>
                 <th>DOJ</th>
@@ -277,7 +351,7 @@ function UserManagement() {
                 </tr>
               ) : (
                 liveMembers.map((member, idx) => (
-                  <tr key={idx}>
+                  <tr key={idx}  className="text-center">
                     <td>{member.empId}</td>
                     <td>{member.fullName}</td>
                     <td>{member.doj}</td>
@@ -290,20 +364,32 @@ function UserManagement() {
                       <span className="badge bg-success">Active</span>
                     </td>
                     <td>
-                      <button className="btn btn-sm btn-primary me-2">
+                      <button
+                        className="btn btn-sm btn-primary me-2"
+                        onClick={() => openMemberModal("view", member)}
+                        title="View Member"
+                      >
                         <i className="fas fa-eye"></i>
                       </button>
-                      <button className="btn btn-sm btn-info me-2">
+                      <button
+                        className="btn btn-sm btn-info me-2"
+                        onClick={() => openMemberModal("edit", member)}
+                        title="Edit Member"
+                      >
                         <i className="fas fa-edit"></i>
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-warning me-2"
                         onClick={() => toggleFreezeMember(member.empId)}
                         title="Freeze Account"
                       >
                         <i className="fas fa-snowflake"></i>
                       </button>
-                      <button className="btn btn-sm btn-danger">
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => deleteMember(member.empId)}
+                        title="Delete Member"
+                      >
                         <i className="fas fa-trash"></i>
                       </button>
                     </td>
@@ -317,10 +403,21 @@ function UserManagement() {
 
       {/* Freezed Members Table */}
       {activeTab === "freezed" && (
-        <div className="table-responsive table-gradient-bg" style={{ maxHeight: "400px", overflowY: "auto" }}>
+        <div
+          className="table-responsive table-gradient-bg"
+          style={{ maxHeight: "400px", overflowY: "auto" }}
+        >
           <table className="table table-bordered align-middle">
-            <thead>
-              <tr>
+            <thead
+              className="table-gradient-bg table "
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 0,
+                backgroundColor: "#fff", // Match your background color
+              }}
+            >
+              <tr  className="text-center">
                 <th>Emp ID</th>
                 <th>Full Name</th>
                 <th>DOJ</th>
@@ -342,7 +439,7 @@ function UserManagement() {
                 </tr>
               ) : (
                 freezedMembers.map((member, idx) => (
-                  <tr key={idx}>
+                  <tr key={idx}  className="text-center">
                     <td>{member.empId}</td>
                     <td>{member.fullName}</td>
                     <td>{member.doj}</td>
@@ -355,20 +452,32 @@ function UserManagement() {
                       <span className="badge bg-secondary">Freezed</span>
                     </td>
                     <td>
-                      <button className="btn btn-sm btn-primary me-2">
+                      <button
+                        className="btn btn-sm btn-primary me-2"
+                        onClick={() => openMemberModal("view", member)}
+                        title="View Member"
+                      >
                         <i className="fas fa-eye"></i>
                       </button>
-                      <button className="btn btn-sm btn-info me-2">
+                      <button
+                        className="btn btn-sm btn-info me-2"
+                        onClick={() => openMemberModal("edit", member)}
+                        title="Edit Member"
+                      >
                         <i className="fas fa-edit"></i>
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-success me-2"
                         onClick={() => toggleFreezeMember(member.empId)}
                         title="Activate Account"
                       >
                         <i className="fas fa-sun"></i>
                       </button>
-                      <button className="btn btn-sm btn-danger">
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => deleteMember(member.empId)}
+                        title="Delete Member"
+                      >
                         <i className="fas fa-trash"></i>
                       </button>
                     </td>
@@ -384,7 +493,9 @@ function UserManagement() {
 
   // Render modal content based on modal type
   const renderModalContent = () => {
-    const isEditMode = modalType === "edit" || modalType === "view";
+    const isEditMode = modalType === "edit";
+    const isViewMode = modalType === "view";
+
     return (
       <form onSubmit={handleSubmit}>
         <div className="modal-body">
@@ -397,7 +508,7 @@ function UserManagement() {
               value={form.empId}
               onChange={handleFieldChange}
               required
-              disabled={isEditMode}
+              disabled={isViewMode || isEditMode}
             />
           </div>
           <div className="mb-3">
@@ -409,6 +520,7 @@ function UserManagement() {
               value={form.fullName}
               onChange={handleFieldChange}
               required
+              disabled={isViewMode}
             />
           </div>
           <div className="mb-3">
@@ -421,6 +533,7 @@ function UserManagement() {
               onChange={handleFieldChange}
               placeholder="DD-MM-YYYY"
               required
+              disabled={isViewMode}
             />
           </div>
           <div className="mb-3">
@@ -433,6 +546,7 @@ function UserManagement() {
               onChange={handleFieldChange}
               placeholder="DD-MM-YYYY"
               required
+              disabled={isViewMode}
             />
           </div>
           <div className="mb-3">
@@ -443,11 +557,16 @@ function UserManagement() {
               value={form.team}
               onChange={handleFieldChange}
               required
+              disabled={isViewMode}
             >
               <option value="">Select Team</option>
-              <option value="Adobe">Adobe</option>
-              <option value="MS Office">MS Office</option>
+              <option value="Dev">Dev</option>
               <option value="QA">QA</option>
+              <option value="Design">Design</option>
+              <option value="DevOps">DevOps</option>
+              <option value="HR">HR</option>
+              <option value="IT Support">IT Support</option>
+              <option value="Marketing">Marketing</option>
             </select>
           </div>
           <div className="mb-3">
@@ -459,6 +578,7 @@ function UserManagement() {
               value={form.role}
               onChange={handleFieldChange}
               required
+              disabled={isViewMode}
             />
           </div>
           <div className="mb-3">
@@ -470,6 +590,7 @@ function UserManagement() {
               onChange={setSelectedApplications}
               placeholder="Select"
               styles={gradientSelectStyles}
+              isDisabled={isViewMode}
             />
           </div>
           <div className="mb-3">
@@ -481,19 +602,23 @@ function UserManagement() {
               value={form.username}
               onChange={handleFieldChange}
               required
+              disabled={isViewMode}
             />
           </div>
-          <div className="mb-3">
-            <label className="form-label">Password</label>
-            <input
-              type="password"
-              className="form-control"
-              name="password"
-              value={form.password}
-              onChange={handleFieldChange}
-              required
-            />
-          </div>
+          {!isViewMode && (
+            <div className="mb-3">
+              <label className="form-label">Password</label>
+              <input
+                type="password"
+                className="form-control"
+                name="password"
+                value={form.password}
+                onChange={handleFieldChange}
+                required={modalType === "add"}
+                disabled={isEditMode}
+              />
+            </div>
+          )}
         </div>
         <div className="modal-footer">
           <button
@@ -503,9 +628,11 @@ function UserManagement() {
           >
             Cancel
           </button>
-          <button type="submit" className="btn gradient-button">
-            {modalType === "edit" ? "Save Changes" : "Add Member"}
-          </button>
+          {!isViewMode && (
+            <button type="submit" className="btn gradient-button">
+              {modalType === "edit" ? "Save Changes" : "Add Member"}
+            </button>
+          )}
         </div>
       </form>
     );
@@ -519,16 +646,13 @@ function UserManagement() {
         <div className="text-end mb-3">
           <button
             className="btn gradient-button"
-            onClick={() => {
-              setModalType("add");
-              setShowModal(true);
-            }}
+            onClick={() => openMemberModal("add", null)}
           >
             + Add Member
           </button>
         </div>
       </div>
-      
+
       {renderTable()}
 
       {/* Modal for adding/editing members */}

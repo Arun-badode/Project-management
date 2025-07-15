@@ -1,6 +1,7 @@
 * {
   margin: 0px;
   padding: 0px;
+  font-size: 14px;
 }
 .container {
   margin-top: 10px;
@@ -1055,4 +1056,37 @@ select.form-input {
   top: 100%;
   left: 0;
   z-index: 1050;
+}
+
+
+/* Add to your AdminDashboard.css or global CSS */
+/* .tab-card.active-tab {
+  box-shadow: 0 0 0 4px #fff, 0 2px 8px rgba(0,0,0,0.15);
+  border: 2px solid #fff !important;
+  z-index: 2;
+}
+.tab-content-bubble {
+  background: rgba(30,30,40,0.98);
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  padding: 1.5rem;
+  margin-top: -1.5rem;
+  position: relative;
+  z-index: 1;
+} */
+
+/* Make tab content bubble and its table full width */
+
+
+/* App.css */
+.react-datepicker-wrapper .form-control::placeholder {
+  color: #888 !important;
+}
+
+
+/* Ensure wrapper and input inside DatePicker are both full width */
+.react-datepicker-wrapper,
+.react-datepicker__input-container,
+.react-datepicker__input-container input {
+  width: 100% !important;
 }

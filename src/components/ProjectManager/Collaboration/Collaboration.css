@@ -1,0 +1,36 @@
+.chat-main-panel {
+  height: 100vh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-y: auto;
+ 
+}
+
+.chat-header-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #1e1e1e;
+}
+
+.chat-footer-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  background: #1e1e1e;
+}
+
+.chat-messages-scrollable {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  min-height: 0;
+  max-height: calc(98vh - 252px); /* Adjust if header/footer height changes */
+}
+.chat {
+  width: 64%;
+  /* Centers the row if needed */
+}
+
+/* Tablet devices (768px and below) */

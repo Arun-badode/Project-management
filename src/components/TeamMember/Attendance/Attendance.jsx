@@ -26,7 +26,7 @@ const Attendance = () => {
       breakTime: "45 Mins",
       taskActiveTime: "7 hrs 30 Mins",
       status: "Present",
-      anomalies: "Nil"
+      anomalies: "Nil",
     },
     {
       id: 2,
@@ -38,7 +38,7 @@ const Attendance = () => {
       breakTime: "50 Mins",
       taskActiveTime: "7 hrs 12 Mins",
       status: "Present",
-      anomalies: "Late Login"
+      anomalies: "Late Login",
     },
     {
       id: 3,
@@ -50,7 +50,7 @@ const Attendance = () => {
       breakTime: "1 hr 10 Mins",
       taskActiveTime: "7 hrs 12 Mins",
       status: "Present",
-      anomalies: "Long Break"
+      anomalies: "Long Break",
     },
     {
       id: 4,
@@ -62,8 +62,8 @@ const Attendance = () => {
       breakTime: "",
       taskActiveTime: "",
       status: "Leave",
-      anomalies: ""
-    }
+      anomalies: "",
+    },
   ]);
 
   // Mock data for attendance records
@@ -247,7 +247,9 @@ const Attendance = () => {
   });
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [viewMode, setViewMode] = useState("today");
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
 
   // Get unique departments for filter dropdown
   const departments = [
@@ -429,21 +431,31 @@ const Attendance = () => {
             <div className="d-flex justify-content-between align-items-center mb-4">
               <h3 className="h5 mb-0">Today's Attendance</h3>
               <div className="d-flex align-items-center">
-                <label htmlFor="datePicker" className="me-2 mb-0">Select Date:</label>
+                <label htmlFor="datePicker" className="me-2 mb-0">
+                  Select Date:
+                </label>
                 <input
                   type="date"
                   id="datePicker"
                   className="form-control"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  style={{ width: 'auto' }}
+                  style={{ width: "auto" }}
                 />
               </div>
             </div>
             <div className="table-responsive">
               <table className="table table-bordered table-hover">
-                <thead className="table-light">
-                  <tr>
+                <thead
+                  className="table-gradient-bg table "
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 0,
+                    backgroundColor: "#fff", // Match your background color
+                  }}
+                >
+                  <tr  className="text-center">
                     <th>User</th>
                     <th>Date</th>
                     <th>Login Time</th>
@@ -457,7 +469,7 @@ const Attendance = () => {
                 </thead>
                 <tbody>
                   {todayAttendance.map((record) => (
-                    <tr key={record.id}>
+                    <tr key={record.id}  className="text-center">
                       <td>{record.user}</td>
                       <td>{record.date}</td>
                       <td>{record.loginTime || "-"}</td>
@@ -466,11 +478,13 @@ const Attendance = () => {
                       <td>{record.breakTime || "-"}</td>
                       <td>{record.taskActiveTime || "-"}</td>
                       <td>
-                        <span className={`badge ${
-                          record.status === "Present" 
-                            ? "bg-success-subtle text-success" 
-                            : "bg-info-subtle text-info"
-                        }`}>
+                        <span
+                          className={`badge ${
+                            record.status === "Present"
+                              ? "bg-success-subtle text-success"
+                              : "bg-info-subtle text-info"
+                          }`}
+                        >
                           {record.status}
                         </span>
                       </td>
@@ -505,15 +519,24 @@ const Attendance = () => {
             </div>
             <div
               className="table-responsive"
-              style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }}
+              style={{
+                maxHeight: "400px",
+                overflowY: "auto",
+                overflowX: "auto",
+              }}
               ref={scrollContainerRef}
             >
               <table className="table table-hover mb-0">
                 <thead
-                  className="table-light"
-                  style={{ position: "sticky", top: 0, zIndex: 2 }}
+                  className="table-gradient-bg table "
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 0,
+                    backgroundColor: "#fff", // Match your background color
+                  }}
                 >
-                  <tr>
+                  <tr  className="text-center">
                     <th>Employee</th>
                     <th>Department</th>
                     <th>Present Days</th>
@@ -529,7 +552,7 @@ const Attendance = () => {
                 </thead>
                 <tbody>
                   {filteredEmployees.map((employee) => (
-                    <tr key={employee.id}>
+                    <tr key={employee.id}  className="text-center">
                       <td>
                         <div className="d-flex align-items-center">
                           <div className="avatar avatar-sm  rounded me-3">
@@ -578,15 +601,19 @@ const Attendance = () => {
                         </span>
                       </td>
                       <td>
-                        {Math.round(employee.daysPresent * 8 * 60 + 
-                          (employee.daysPresent * 30)) / 60} hrs
+                        {Math.round(
+                          employee.daysPresent * 8 * 60 +
+                            employee.daysPresent * 30
+                        ) / 60}{" "}
+                        hrs
                       </td>
+                      <td>{employee.daysPresent * 30} mins avg</td>
                       <td>
-                        {employee.daysPresent * 30} mins avg
-                      </td>
-                      <td>
-                        {Math.round(employee.daysPresent * 7 * 60 + 
-                          (employee.daysPresent * 30)) / 60} hrs
+                        {Math.round(
+                          employee.daysPresent * 7 * 60 +
+                            employee.daysPresent * 30
+                        ) / 60}{" "}
+                        hrs
                       </td>
                       <td className="text-center mt-2">
                         <button
@@ -762,8 +789,16 @@ const Attendance = () => {
                   <div className="card-body">
                     <div className="table-responsive table-gradient-bg">
                       <table className="table table-sm">
-                        <thead>
-                          <tr>
+                        <thead
+                          className="table-gradient-bg table "
+                          style={{
+                            position: "sticky",
+                            top: 0,
+                            zIndex: 0,
+                            backgroundColor: "#fff", // Match your background color
+                          }}
+                        >
+                          <tr  className="text-center">
                             <th>Date</th>
                             <th>Type</th>
                             <th>Status</th>
@@ -771,7 +806,7 @@ const Attendance = () => {
                         </thead>
                         <tbody>
                           {selectedEmployeeData.leaves.map((leave, index) => (
-                            <tr key={index}>
+                            <tr key={index}  className="text-center">
                               <td>{leave.date}</td>
                               <td>{leave.type}</td>
                               <td>
@@ -802,8 +837,16 @@ const Attendance = () => {
                 <div className="card-body p-0">
                   <div className="table-responsive table-gradient-bg">
                     <table className="table table-sm mb-0">
-                      <thead className="table-light">
-                        <tr>
+                      <thead
+                        className="table-gradient-bg table "
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                          zIndex: 0,
+                          backgroundColor: "#fff", // Match your background color
+                        }}
+                      >
+                        <tr  className="text-center">
                           <th>Date</th>
                           <th>Day</th>
                           <th>Status</th>
@@ -817,7 +860,7 @@ const Attendance = () => {
                       <tbody>
                         {selectedEmployeeData.dailyRecords.map(
                           (record, index) => (
-                            <tr key={index}>
+                            <tr key={index}  className="text-center">
                               <td>{record.date}</td>
                               <td>{record.day}</td>
                               <td>
@@ -839,9 +882,7 @@ const Attendance = () => {
                                   : "-"}
                               </td>
                               <td>
-                                {record.status === "Present" 
-                                  ? "30 mins" 
-                                  : "-"}
+                                {record.status === "Present" ? "30 mins" : "-"}
                               </td>
                               <td>
                                 {record.workHours > 0

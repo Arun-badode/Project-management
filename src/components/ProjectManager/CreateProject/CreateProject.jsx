@@ -1,64 +1,70 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { Form, Button } from "react-bootstrap";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
+
+
 function CreateProject() {
-  const [projectName, setProjectName] = useState('');
-  const [projectDescription, setProjectDescription] = useState('');
-  const [projectType, setProjectType] = useState('');
+  const [projectName, setProjectName] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
+  const [projectType, setProjectType] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
-  const [deadline, setDeadline] = useState('');
-  const [priority, setPriority] = useState('Medium');
+  const [deadline, setDeadline] = useState("");
+  const [priority, setPriority] = useState("Medium");
   const [teamMembers, setTeamMembers] = useState([]); // TypeScript type hata diya
-  const [memberInput, setMemberInput] = useState('');
+  const [memberInput, setMemberInput] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const [isPriorityDropdownOpen, setIsPriorityDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+    const [selectedDateTime, setSelectedDateTime] = useState(null);
   const [errors, setErrors] = useState({});
 
   const projectTypes = [
-    'Web Development',
-    'Mobile App',
-    'Design',
-    'Marketing',
-    'Research',
-    'Content Creation'
+    "Web Development",
+    "Mobile App",
+    "Design",
+    "Marketing",
+    "Research",
+    "Content Creation",
   ];
 
-  const priorityLevels = ['Low', 'Medium', 'High', 'Urgent'];
+  const priorityLevels = ["Low", "Medium", "High", "Urgent"];
 
   const suggestedMembers = [
-    'John Smith',
-    'Emma Johnson',
-    'Michael Brown',
-    'Sophia Davis',
-    'William Wilson',
-    'Olivia Martinez'
+    "John Smith",
+    "Emma Johnson",
+    "Michael Brown",
+    "Sophia Davis",
+    "William Wilson",
+    "Olivia Martinez",
   ];
 
   const handleAddMember = () => {
     if (memberInput && !teamMembers.includes(memberInput)) {
       setTeamMembers([...teamMembers, memberInput]);
-      setMemberInput('');
+      setMemberInput("");
     }
   };
 
   const handleRemoveMember = (member) => {
-    setTeamMembers(teamMembers.filter(m => m !== member));
+    setTeamMembers(teamMembers.filter((m) => m !== member));
   };
 
   const validateForm = () => {
     const newErrors = {};
 
     if (!projectName.trim()) {
-      newErrors.projectName = 'Project name is required';
+      newErrors.projectName = "Project name is required";
     }
 
     if (!projectType) {
-      newErrors.projectType = 'Project type is required';
+      newErrors.projectType = "Project type is required";
     }
 
     if (!deadline) {
-      newErrors.deadline = 'Deadline is required';
+      newErrors.deadline = "Deadline is required";
     }
 
     setErrors(newErrors);
@@ -74,24 +80,23 @@ function CreateProject() {
       // Simulate API call
       setTimeout(() => {
         setIsLoading(false);
-        alert('Project created successfully!');
+        alert("Project created successfully!");
         // Reset form or redirect
       }, 1500);
     }
   };
 
-
   const handleCancel = () => {
     // Handle cancel action
-    if (confirm('Are you sure you want to cancel? All changes will be lost.')) {
+    if (confirm("Are you sure you want to cancel? All changes will be lost.")) {
       // Reset form or redirect
-      alert('Form cancelled');
+      alert("Form cancelled");
     }
   };
 
   return (
-    <div >
-      <div className="container mt-3 p-4  text-white rounded shadow custom-modal-dark">
+    <div>
+      <div className="container-fluid mt-3 p-4  text-white rounded shadow custom-modal-dark">
         <h2 className="mb-4 gradient-heading">Create New Project</h2>
         <Form>
           <Form.Group className="mb-3">
@@ -124,8 +129,17 @@ function CreateProject() {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Ready for QC Deadline</Form.Label>
-            <Form.Control type="datetime-local" />
+            <Form.Label>Ready for QC Deadline</Form.Label><br/>
+            <DatePicker
+              selected={selectedDateTime}
+              onChange={(date) => setSelectedDateTime(date)}
+              showTimeSelect
+              timeFormat="HH:mm"
+              timeIntervals={15}
+              dateFormat="MMMM d, yyyy h:mm aa"
+              placeholderText="Select date and time"
+              className="form-control"
+            />
           </Form.Group>
 
           <Form.Group className="mb-3">
@@ -135,7 +149,16 @@ function CreateProject() {
 
           <Form.Group className="mb-3">
             <Form.Label>QC Due Date</Form.Label>
-            <Form.Control type="datetime-local" />
+             <DatePicker
+              selected={selectedDateTime}
+              onChange={(date) => setSelectedDateTime(date)}
+              showTimeSelect
+              timeFormat="HH:mm"
+              timeIntervals={15}
+              dateFormat="MMMM d, yyyy h:mm aa"
+              placeholderText="Select date and time"
+              className="form-control"
+            />
           </Form.Group>
 
           <Form.Group className="mb-3">

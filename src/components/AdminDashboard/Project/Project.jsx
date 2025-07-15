@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as echarts from "echarts";
 import useSyncScroll from "../Hooks/useSyncScroll";
-
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Select from "react-select";
+import SettingsPage from "../Setting/Setting";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 
 const Project = () => {
   const [activeTab, setActiveTab] = useState("created");
@@ -10,7 +13,15 @@ const Project = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(true);
+  const [selectedDateTime, setSelectedDateTime] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [selectedClient, setSelectedClient] = useState("");
+  const [selectedTask, setSelectedTask] = useState("");
+  const [selectedApplications, setSelectedApplications] = useState([]);
+
+  const clientList = ["Client A", "Client B"];
+  const taskList = ["Design", "Translation", "Proofreading"];
+  const applicationList = ["Adobe", "MS Word", "Figma"];
   const searchInputRef = useRef(null);
   const chartRef = useRef(null);
 
@@ -121,6 +132,15 @@ const Project = () => {
     setList(newList);
   };
 
+  const handleApplyToSelectedFiles = () => {
+    const selected = formData.files.filter((f) => f.selected);
+    if (selected.length === 0) {
+      alert("No files selected.");
+      return;
+    }
+    // Apply deadline logic here
+    alert(`Deadline ${formData.deadline} applied to selected files.`);
+  };
   // Sample data for projects
   const [projects, setProjects] = useState([
     {
@@ -238,6 +258,7 @@ const Project = () => {
     currency: "USD",
     cost: 0,
     inrCost: 0,
+    
   });
 
   // Options for dropdowns
@@ -755,8 +776,118 @@ const Project = () => {
     fakeScrollbarRef: fakeScrollbarRef4,
   } = useSyncScroll(activeTab === "completed");
 
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(12);
+  const [selectedMonth, setSelectedMonth] = useState(6); // July (0-indexed)
+  const [selectedYear, setSelectedYear] = useState(2025);
+  const [selectedHour, setSelectedHour] = useState(12);
+  const [selectedMinute, setSelectedMinute] = useState(0);
+  const [isAM, setIsAM] = useState(true);
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const weekDays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+
+  const getDaysInMonth = (month, year) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (month, year) => {
+    const firstDay = new Date(year, month, 1).getDay();
+    return firstDay === 0 ? 6 : firstDay - 1; // Convert Sunday (0) to be last (6)
+  };
+
+  const generateCalendarDays = () => {
+    const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
+    const firstDay = getFirstDayOfMonth(selectedMonth, selectedYear);
+    const days = [];
+
+    // Previous month's trailing days
+    const prevMonth = selectedMonth === 0 ? 11 : selectedMonth - 1;
+    const prevYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear;
+    const daysInPrevMonth = getDaysInMonth(prevMonth, prevYear);
+
+    for (let i = firstDay - 1; i >= 0; i--) {
+      days.push({
+        day: daysInPrevMonth - i,
+        isCurrentMonth: false,
+        isNextMonth: false,
+      });
+    }
+
+    // Current month days
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push({
+        day,
+        isCurrentMonth: true,
+        isNextMonth: false,
+      });
+    }
+
+    // Next month's leading days
+    const remainingDays = 42 - days.length;
+    for (let day = 1; day <= remainingDays; day++) {
+      days.push({
+        day,
+        isCurrentMonth: false,
+        isNextMonth: true,
+      });
+    }
+
+    return days;
+  };
+
+  const handlePrevMonth = () => {
+    if (selectedMonth === 0) {
+      setSelectedMonth(11);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (selectedMonth === 11) {
+      setSelectedMonth(0);
+      setSelectedYear(selectedYear + 1);
+    } else {
+      setSelectedMonth(selectedMonth + 1);
+    }
+  };
+
+  const formatDateTime = () => {
+    const date = `${selectedDate.toString().padStart(2, "0")}/${(
+      selectedMonth + 1
+    )
+      .toString()
+      .padStart(2, "0")}/${selectedYear}`;
+    const time = `${selectedHour.toString().padStart(2, "0")}:${selectedMinute
+      .toString()
+      .padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
+    return `${date} ${time}`;
+  };
+
+  const calendarDays = generateCalendarDays();
+
+
+  
+
   return (
-    <div className="min-vh-100 bg-main mt-4">
+    <div className="conatiner-fluid bg-main mt-4">
       {/* Header */}
       <div className="bg-white shadow-sm bg-main">
         <div className="container-fluid py-2">
@@ -764,20 +895,6 @@ const Project = () => {
             {/* Left: Title & Buttons */}
             <div className="col-12 col-md-auto d-flex flex-column flex-md-row align-items-start align-items-md-center">
               <h2 className="mb-2 mb-md-0 gradient-heading">Projects</h2>
-              {/* <div className="d-flex flex-wrap ms-md-3 gap-2">
-                <button className="btn btn-success text-light">
-                  <i className="fas fa-file-excel text-light me-2"></i>
-                  Blank Excel
-                </button>
-                <button className="btn btn-primary">
-                  <i className="fas fa-file-import text-light me-2"></i>
-                  Import Excel
-                </button>
-                <button className="btn btn-dark">
-                  <i className="fas fa-file-download text-indigo me-2"></i>
-                  Download Excel
-                </button>
-              </div> */}
             </div>
             {/* Right: Search & Create */}
             <div className="col-12 col-md-auto d-flex flex-column flex-md-row align-items-stretch align-items-md-center mt-2 mt-md-0 gap-2">
@@ -789,7 +906,7 @@ const Project = () => {
                   ref={searchInputRef}
                   type="text"
                   className="form-control ps-5"
-                  placeholder="Search projects (Ctrl+F)"
+                  placeholder="Search projects "
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -865,7 +982,7 @@ const Project = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container pt-5 pb-4">
+      <div className="container-fluid pt-5 pb-4">
         {/* Search Results Indicator */}
         {searchQuery && (
           <div className="alert alert-info mb-4">
@@ -910,95 +1027,6 @@ const Project = () => {
               </div>
             ) : (
               <div className="card">
-                {/* <div className="table-responsive" style={{ overflowX: 'auto' }}>
-                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                    <thead className="bg-light table-gradient-bg">
-                      <tr>
-                        <th>Project Title</th>
-                        <th>Client</th>
-                        <th>Country</th>
-                        <th>Project Manager</th>
-                        <th>Tasks</th>
-                        <th>Languages</th>
-                        <th>application</th>
-                        <th>Total Pages</th>
-                        <th>Server Path</th>
-                        <th>Received Date</th>
-                        <th>Rate</th>
-                        <th>Cost</th>
-                        <th className="text-end">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredProjects.map(project => (
-                        <tr key={project.id}>
-                          <td>
-                            {project.title}
-                            <span className="badge text-dark ms-2">Draft</span>
-                          </td>
-                          <td>{project.client}</td>
-                          <td>{project.country}</td>
-                          <td>{project.projectManager}</td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.tasks.map((task) => (
-                                <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
-                                  {task}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.languages.map((language) => (
-                                <span key={language} className="badge bg-success bg-opacity-10 text-success">
-                                  {language}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <span className="badge bg-purple bg-opacity-10 text-purple">
-                              {project.application}
-                            </span>
-                          </td>
-                          <td>{project.totalPages}</td>
-                          <td>
-                            <span className="badge bg-light text-dark">
-                              {project.serverPath}
-                            </span>
-                          </td>
-                          <td>{new Date(project.receivedDate).toLocaleDateString()}</td>
-                          <td>{project.rate} {project.currency}</td>
-                          <td>{project.cost} {project.currency}</td>
-                          <td className="text-end">
-                            <div className="d-flex justify-content-end gap-2">
-                              <button
-                                onClick={() => {
-                                  const dueDate = prompt('Enter due date (YYYY-MM-DD):', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-                                  if (dueDate) markAsYTS(project.id, dueDate);
-                                }}
-                                className="btn btn-sm btn-primary"
-                              >
-                                Mark as YTS
-                              </button>
-                              <button
-                                onClick={() => handleEditProject(project.id)}
-                                className="btn btn-sm btn-success"
-                              >
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button className="btn btn-sm btn-danger">
-                                <i className="fas fa-trash-alt"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div> */}
-                {/* Fake Scrollbar */}
                 <div
                   ref={fakeScrollbarRef1}
                   style={{
@@ -1030,8 +1058,16 @@ const Project = () => {
                     className="table table-hover mb-0"
                     style={{ minWidth: 900 }}
                   >
-                    <thead className=" table-gradient-bg">
-                      <tr>
+                    <thead
+                      className="table-gradient-bg table"
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 0,
+                        backgroundColor: "#fff", // Match your background color
+                      }}
+                    >
+                      <tr className="text-center">
                         <th>Project Title</th>
                         <th>Client</th>
                         <th>Country</th>
@@ -1049,7 +1085,7 @@ const Project = () => {
                     </thead>
                     <tbody>
                       {filteredProjects.map((project) => (
-                        <tr key={project.id}>
+                        <tr key={project.id} className="text-center">
                           <td>
                             {project.title}
                             <span className="badge bg-light text-dark ms-2">
@@ -1158,10 +1194,46 @@ const Project = () => {
               </div>
             ) : (
               <div className="card">
-                {/* <div className="table-responsive" style={{ overflowX: 'auto' }}>
-                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                    <thead className=" ">
-                      <tr>
+                <div
+                  ref={fakeScrollbarRef2}
+                  style={{
+                    overflowX: "auto",
+                    overflowY: "hidden",
+                    height: 16,
+                    position: "fixed",
+                    bottom: 0, // Adjust as needed
+                    left: 0,
+                    right: 0,
+                    zIndex: 1050,
+                  }}
+                >
+                  <div style={{ width: "2000px", height: 1 }} />
+                </div>
+                {/* Scrollable Table 2 */}
+                <div
+                  className="table-responsive table-gradient-bg"
+                  ref={scrollContainerRef2}
+                  style={{
+                    maxHeight: "500px",
+                    overflowX: "auto",
+                    scrollbarWidth: "none", // Firefox
+                    msOverflowStyle: "none", // IE/Edge
+                  }}
+                >
+                  <table
+                    className="table table-hover mb-0"
+                    style={{ minWidth: 900 }}
+                  >
+                    <thead
+                      className="table-gradient-bg table"
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 0,
+                        backgroundColor: "#fff", // Match your background color
+                      }}
+                    >
+                      <tr className="text-center">
                         <th>Project Title</th>
                         <th>Client</th>
                         <th>Country</th>
@@ -1170,37 +1242,49 @@ const Project = () => {
                         <th>Progress</th>
                         <th>Tasks</th>
                         <th>Languages</th>
-                        <th>application</th>
+                        <th>Application</th>
                         <th>Total Pages</th>
                         <th className="text-end">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredProjects.map(project => (
-                        <tr key={project.id}>
+                      {filteredProjects.map((project) => (
+                        <tr key={project.id} className="text-center">
                           <td>
                             {project.title}
-                            <span className="badge bg-warning bg-opacity-10 text-warning ms-2">Active</span>
+                            <span className="badge bg-warning bg-opacity-10 text-warning ms-2">
+                              Active
+                            </span>
                           </td>
                           <td>{project.client}</td>
                           <td>{project.country}</td>
                           <td>{project.projectManager}</td>
-                          <td>{new Date(project.dueDate).toLocaleDateString()}</td>
+                          <td>
+                            {new Date(project.dueDate).toLocaleDateString()}
+                          </td>
                           <td>
                             <div className="d-flex align-items-center">
-                              <div className="progress flex-grow-1 me-2" style={{ height: '6px' }}>
+                              <div
+                                className="progress flex-grow-1 me-2"
+                                style={{ height: "6px" }}
+                              >
                                 <div
                                   className="progress-bar bg-primary"
                                   style={{ width: `${project.progress}%` }}
                                 ></div>
                               </div>
-                              <small className="text-primary">{project.progress}%</small>
+                              <small className="text-primary">
+                                {project.progress}%
+                              </small>
                             </div>
                           </td>
                           <td>
                             <div className="d-flex flex-wrap gap-1">
                               {project.tasks.map((task) => (
-                                <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
+                                <span
+                                  key={task}
+                                  className="badge bg-primary bg-opacity-10 text-primary"
+                                >
                                   {task}
                                 </span>
                               ))}
@@ -1209,7 +1293,10 @@ const Project = () => {
                           <td>
                             <div className="d-flex flex-wrap gap-1">
                               {project.languages.map((language) => (
-                                <span key={language} className="badge bg-success bg-opacity-10 text-success">
+                                <span
+                                  key={language}
+                                  className="badge bg-success bg-opacity-10 text-success"
+                                >
                                   {language}
                                 </span>
                               ))}
@@ -1244,145 +1331,6 @@ const Project = () => {
                       ))}
                     </tbody>
                   </table>
-                </div> */}
-                <div
-                  ref={fakeScrollbarRef2}
-                  style={{
-                    overflowX: "auto",
-                    overflowY: "hidden",
-                    height: 16,
-                    position: "fixed",
-                    bottom: 0, // Adjust as needed
-                    left: 0,
-                    right: 0,
-                    zIndex: 1050,
-                  }}
-                >
-                  <div style={{ width: "2000px", height: 1 }} />
-                </div>
-                {/* Scrollable Table 2 */}
-                <div
-                  className="table-responsive table-gradient-bg"
-                  ref={scrollContainerRef2}
-                  style={{
-                    maxHeight: "500px",
-                    overflowX: "auto",
-                    scrollbarWidth: "none", // Firefox
-                    msOverflowStyle: "none", // IE/Edge
-                  }}
-                >
-                  <table
-                    className="table table-hover mb-0"
-                    style={{ minWidth: 900 }}
-                  >
-                    <thead className=" table-gradient-bg">
-                      <tr>
-                        <th>Project Title</th>
-                        <th>Client</th>
-                        <th>Country</th>
-                        <th>Project Manager</th>
-                        <th>Tasks</th>
-                        <th>Languages</th>
-                        <th>Application</th>
-                        <th>Total Pages</th>
-                        <th>Server Path</th>
-                        <th>Received Date</th>
-                        <th>Rate</th>
-                        <th>Cost</th>
-                        <th className="text-end">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredProjects.map((project) => (
-                        <tr key={project.id}>
-                          <td>
-                            {project.title}
-                            <span className="badge bg-light text-dark ms-2">
-                              Draft
-                            </span>
-                          </td>
-                          <td>{project.client}</td>
-                          <td>{project.country}</td>
-                          <td>{project.projectManager}</td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.tasks.map((task) => (
-                                <span
-                                  key={task}
-                                  className="badge bg-primary bg-opacity-10 text-primary"
-                                >
-                                  {task}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.languages.map((language) => (
-                                <span
-                                  key={language}
-                                  className="badge bg-success bg-opacity-10 text-success"
-                                >
-                                  {language}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <span className="badge bg-purple bg-opacity-10 text-purple">
-                              {project.application}
-                            </span>
-                          </td>
-                          <td>{project.totalPages}</td>
-                          <td>
-                            <span className="badge bg-light text-dark">
-                              {project.serverPath}
-                            </span>
-                          </td>
-                          <td>
-                            {new Date(
-                              project.receivedDate
-                            ).toLocaleDateString()}
-                          </td>
-                          <td>
-                            {project.rate} {project.currency}
-                          </td>
-                          <td>
-                            {project.cost} {project.currency}
-                          </td>
-                          <td className="text-end">
-                            <div className="d-flex justify-content-end gap-2">
-                              <button
-                                onClick={() => {
-                                  const dueDate = prompt(
-                                    "Enter due date (YYYY-MM-DD):",
-                                    new Date(
-                                      Date.now() + 7 * 24 * 60 * 60 * 1000
-                                    )
-                                      .toISOString()
-                                      .split("T")[0]
-                                  );
-                                  if (dueDate) markAsYTS(project.id, dueDate);
-                                }}
-                                className="btn btn-sm btn-primary"
-                              >
-                                Mark as YTS
-                              </button>
-                              <button
-                                onClick={() => handleEditProject(project.id)}
-                                className="btn btn-sm btn-success"
-                              >
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button className="btn btn-sm btn-danger">
-                                <i className="fas fa-trash-alt"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
                 </div>
               </div>
             )}
@@ -1392,12 +1340,84 @@ const Project = () => {
         {/* Completed Projects Tab */}
         {activeTab === "completed" && (
           <div className="mb-4">
+            {/* Heading and Filters */}
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
               <h2 className="h5 mb-0 text-light">Completed Projects</h2>
-              <button className="btn btn-success btn-sm w-100 w-md-auto">
-                <i className="fas fa-file-excel me-2"></i> Export to Excel
-              </button>
             </div>
+
+            {/* Filters */}
+            <div className="row g-3 mb-3">
+              {/* Client Filter - Single Select */}
+              <div className="col-md-3">
+                <label className="form-label text-white">Client</label>
+                <select
+                  className="form-select"
+                  value={selectedClient}
+                  onChange={(e) => setSelectedClient(e.target.value)}
+                >
+                  <option value="">All Clients</option>
+                  {clientList.map((client) => (
+                    <option key={client} value={client}>
+                      {client}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Task Filter - Single Select */}
+              <div className="col-md-3">
+                <label className="form-label text-white">Task</label>
+                <select
+                  className="form-select"
+                  value={selectedTask}
+                  onChange={(e) => setSelectedTask(e.target.value)}
+                >
+                  <option value="">All Tasks</option>
+                  {taskList.map((task) => (
+                    <option key={task} value={task}>
+                      {task}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Applications Filter - Multi Select */}
+
+              <div className="col-md-3">
+                <label className="form-label text-white">Applications</label>
+                <select
+                  className="form-select"
+                  value={selectedApplications}
+                  onChange={(e) => {
+                    const selected = Array.from(
+                      e.target.selectedOptions,
+                      (option) => option.value
+                    );
+                    setSelectedApplications(e.target.value);
+                  }}
+                >
+                  <option value="">All Tasks</option>
+                  {applicationList.map((app) => (
+                    <option key={app} value={app}>
+                      {app}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Month/Year Filter */}
+              <div className="col-md-3">
+                <label className="form-label text-white">Month/Year</label>
+                <input
+                  type="month"
+                  className="form-control"
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Project Table or Empty State */}
             {filteredProjects.length === 0 ? (
               <div className="text-center py-5">
                 <i className="fas fa-check-circle text-muted fa-4x mb-3"></i>
@@ -1408,95 +1428,8 @@ const Project = () => {
               </div>
             ) : (
               <>
-                {/* Performance Chart */}
-                <div className="card mb-4 bg-card text-light">
-                  <div className="card-body">
-                    <div
-                      ref={chartRef}
-                      style={{ height: "400px", minWidth: "300px" }}
-                    ></div>
-                  </div>
-                </div>
-                {/* Project Cards */}
+                {/* Completed Projects Table */}
                 <div className="card">
-                  {/* <div className="table-responsive" style={{ overflowX: 'auto' }}>
-                    <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                      <thead className="">
-                        <tr>
-                          <th>Project Title</th>
-                          <th>Client</th>
-                          <th>Country</th>
-                          <th>Project Manager</th>
-                          <th>Completed Date</th>
-                          <th>Tasks</th>
-                          <th>Languages</th>
-                          <th>application</th>
-                          <th>Total Pages</th>
-                          <th>Expected Hours</th>
-                          <th>Actual Hours</th>
-                          <th>Efficiency</th>
-                          <th>Cost</th>
-                          <th className="text-end">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredProjects.map(project => (
-                          <tr key={project.id}>
-                            <td>
-                              {project.title}
-                              <span className="badge bg-success bg-opacity-10 text-success ms-2">Completed</span>
-                            </td>
-                            <td>{project.client}</td>
-                            <td>{project.country}</td>
-                            <td>{project.projectManager}</td>
-                            <td>{new Date(project.completedDate).toLocaleDateString()}</td>
-                            <td>
-                              <div className="d-flex flex-wrap gap-1">
-                                {project.tasks.map((task) => (
-                                  <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
-                                    {task}
-                                  </span>
-                                ))}
-                              </div>
-                            </td>
-                            <td>
-                              <div className="d-flex flex-wrap gap-1">
-                                {project.languages.map((language) => (
-                                  <span key={language} className="badge bg-success bg-opacity-10 text-success">
-                                    {language}
-                                  </span>
-                                ))}
-                              </div>
-                            </td>
-                            <td>
-                              <span className="badge bg-purple bg-opacity-10 text-purple">
-                                {project.application}
-                              </span>
-                            </td>
-                            <td>{project.totalPages}</td>
-                            <td>{project.performance.expectedHours}</td>
-                            <td>{project.performance.actualHours}</td>
-                            <td className="fw-bold">
-                              <span className={`${project.performance.expectedHours > project.performance.actualHours ? 'text-success' : 'text-danger'}`}>
-                                {Math.round((project.performance.expectedHours / project.performance.actualHours) * 100)}%
-                              </span>
-                            </td>
-                            <td>{project.cost} {project.currency}</td>
-                            <td className="text-end">
-                              <div className="d-flex justify-content-end gap-2">
-                                <button className="btn btn-sm btn-danger">
-                                  <i className="fas fa-file-alt me-1"></i> View Report
-                                </button>
-                                <button className="btn btn-sm btn-primary">
-                                  <i className="fas fa-archive me-1"></i> Archive
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div> */}
                   <div
                     ref={fakeScrollbarRef4}
                     style={{
@@ -1504,7 +1437,7 @@ const Project = () => {
                       overflowY: "hidden",
                       height: 16,
                       position: "fixed",
-                      bottom: 0, // Adjust as needed
+                      bottom: 0,
                       left: 0,
                       right: 0,
                       zIndex: 1050,
@@ -1512,23 +1445,31 @@ const Project = () => {
                   >
                     <div style={{ width: "2000px", height: 1 }} />
                   </div>
-                  {/* Scrollable Table 3 */}
+
                   <div
                     className="table-responsive table-gradient-bg"
                     ref={scrollContainerRef4}
                     style={{
                       maxHeight: "500px",
                       overflowX: "auto",
-                      scrollbarWidth: "none", // Firefox
-                      msOverflowStyle: "none", // IE/Edge
+                      scrollbarWidth: "none",
+                      msOverflowStyle: "none",
                     }}
                   >
                     <table
                       className="table table-hover mb-0"
                       style={{ minWidth: 900 }}
                     >
-                      <thead className="table-gradient-bg">
-                        <tr>
+                      <thead
+                        className="table-gradient-bg table"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                          zIndex: 0,
+                          backgroundColor: "#fff", // Match your background color
+                        }}
+                      >
+                        <tr className="text-center">
                           <th>Project Title</th>
                           <th>Client</th>
                           <th>Country</th>
@@ -1547,7 +1488,7 @@ const Project = () => {
                       </thead>
                       <tbody>
                         {filteredProjects.map((project) => (
-                          <tr key={project.id}>
+                          <tr key={project.id} className="text-center">
                             <td>
                               {project.title}
                               <span className="badge bg-success bg-opacity-10 text-success ms-2">
@@ -1649,19 +1590,26 @@ const Project = () => {
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">
-                  {showEditModal !== false
-                    ? "Edit Project Details"
-                    : "Create New Project"}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setShowEditModal(false);
-                  }}
-                ></button>
+                <div>
+                  <h5 className="modal-title">
+                    {showEditModal !== false
+                      ? "Edit Project Details"
+                      : "Create New Project"}
+                  </h5>
+                </div>
+                <div>
+                  {/* <button className="btn btn-light btn-sm me-4">
+                    <i className="fas fa-cog text-muted"></i>
+                  </button> */}
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => {
+                      setShowCreateModal(false);
+                      setShowEditModal(false);
+                    }}
+                  ></button>
+                </div>
               </div>
               <div className="modal-body">
                 <form onSubmit={handleSubmit}>
@@ -1681,7 +1629,7 @@ const Project = () => {
                       onChange={handleInputChange}
                       placeholder="Enter project title (max 80 chars)"
                     />
-                    <div className="form-text">
+                    <div className="form-text text-white">
                       Max allowed Character length – 80, (ignore or remove any
                       special character by itself)
                     </div>
@@ -1858,7 +1806,7 @@ const Project = () => {
                       placeholder="Select Languages"
                       styles={gradientSelectStyles}
                     />
-                    <div className="form-text">
+                    <div className="form-text text-white">
                       {formData.languages.length} selected
                     </div>
                   </div>
@@ -1901,26 +1849,46 @@ const Project = () => {
                       </button>
                     </div>
                     <div className="table-responsive ">
-                      <table className="table table-bordered  ">
+                      <table className="table table-bordered">
                         <thead
-                          style={{ backgroundColor: "#201E7E", color: "white" }}
+                          className="table-gradient-bg table"
+                          style={{
+                            position: "sticky",
+                            top: 0,
+                            zIndex: 0,
+                            backgroundColor: "#fff", // Match your background color
+                          }}
                         >
-                          <tr
-                            style={{
-                              backgroundColor: "#201E7E",
-                              color: "white",
-                            }}
-                          >
+                          <tr className="text-center">
                             <th>S.No.</th>
                             <th>File Name</th>
                             <th>Pages</th>
+                            {/* <th>Language</th> */}
                             <th>Application</th>
+                            {/* <th>Status</th> */}
                           </tr>
                         </thead>
                         <tbody>
                           {formData.files.map((file, idx) => (
-                            <tr key={idx}>
-                              <td>{idx + 1}</td>
+                            <tr key={idx} className="text-center">
+                              <td>
+                                <div className="d-flex align-items-center gap-2">
+                                  {idx + 1}
+                                  <input
+                                    type="checkbox"
+                                    checked={file.selected || false}
+                                    onChange={(e) => {
+                                      const files = [...formData.files];
+                                      files[idx].selected = e.target.checked;
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        files,
+                                      }));
+                                    }}
+                                  />
+                                </div>
+                              </td>
+
                               <td>
                                 <input
                                   type="text"
@@ -1934,6 +1902,7 @@ const Project = () => {
                                   placeholder="File Name"
                                 />
                               </td>
+
                               <td>
                                 <input
                                   type="number"
@@ -1950,13 +1919,26 @@ const Project = () => {
                                   placeholder="Pages"
                                 />
                               </td>
+
+                              {/* <td>th</td> */}
+
                               <td>
                                 <select
                                   className="form-select"
                                   value={file.application || ""}
                                   onChange={(e) => {
+                                    const newApp = e.target.value;
                                     const files = [...formData.files];
-                                    files[idx].application = e.target.value;
+
+                                    // check if current row is selected
+                                    if (files[idx].selected) {
+                                      files.forEach((f) => {
+                                        if (f.selected) f.application = newApp;
+                                      });
+                                    } else {
+                                      files[idx].application = newApp;
+                                    }
+
                                     setFormData((prev) => ({ ...prev, files }));
                                   }}
                                 >
@@ -1968,10 +1950,444 @@ const Project = () => {
                                   ))}
                                 </select>
                               </td>
+
+                              {/* <td>TYS</td> */}
                             </tr>
                           ))}
                         </tbody>
                       </table>
+
+                      {/* <div className="d-flex align-items-center gap-3 mt-3">
+                        <label
+                          className="text-white"
+                          style={{ fontWeight: "bold" }}
+                        >
+                          Deadline
+                        </label>
+                        <div className="max-w-md mx-auto">
+                          
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={formatDateTime()}
+                              readOnly
+                              onClick={() => setIsOpen(!isOpen)}
+                              className=" bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                              placeholder="Select date and time"
+                            />
+                          </div>
+
+                         
+                          {isOpen && (
+                            <div className="calendar-dropdown">
+                              <style>{`
+                            
+            .calendar-dropdown {
+              position: absolute;
+              z-index: 9999;
+              margin-top: 8px;
+              background: white;
+              border: 1px solid #e5e7eb;
+              border-radius: 8px;
+              box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+              padding: 16px;
+              max-width: 30rem;
+              width: 100%;
+            }
+            .time-display {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 16px;
+              padding: 12px;
+              background: #2563eb;
+              color: white;
+              border-radius: 6px;
+            }
+            .time-display .time {
+              font-size: 1.5rem;
+              font-weight: bold;
+            }
+            .time-display .period {
+              font-size: 0.875rem;
+            }
+            .time-display .date {
+              font-size: 0.875rem;
+            }
+            .time-calendar-container {
+              display: flex;
+              gap: 16px;
+            }
+            .time-selector {
+              display: flex;
+              gap: 8px;
+            }
+            .time-column {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+            }
+            .time-column-label {
+              font-size: 0.75rem;
+              color: #6b7280;
+              margin-bottom: 4px;
+            }
+            .time-scroll {
+              height: 256px;
+              overflow-y: auto;
+              border: 1px solid #e5e7eb;
+              border-radius: 6px;
+              scrollbar-width: none;
+              -ms-overflow-style: none;
+            }
+            .time-scroll::-webkit-scrollbar {
+              display: none;
+            }
+            .time-options {
+              display: flex;
+              flex-direction: column;
+            }
+            .time-option {
+              padding: 4px 8px;
+              font-size: 0.875rem;
+              min-width: 40px;
+              background: transparent;
+              border: none;
+              cursor: pointer;
+              color: #374151;
+            }
+            .time-option:hover {
+              background: #dbeafe;
+            }
+            .time-option.selected-hour {
+              background: #2563eb;
+              color: white;
+            }
+            .time-option.selected-minute {
+              background: #ef4444;
+              color: white;
+            }
+            .period-options {
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+            }
+            .period-option {
+              padding: 4px 8px;
+              border-radius: 4px;
+              font-size: 0.875rem;
+              background: #f3f4f6;
+              color: #374151;
+              border: none;
+              cursor: pointer;
+            }
+            .period-option:hover {
+              background: #e5e7eb;
+            }
+            .period-option.selected {
+              background: #2563eb;
+              color: white;
+            }
+            .calendar-section {
+              flex: 1;
+            }
+            .month-nav {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 12px;
+            }
+            .month-nav button {
+              padding: 4px;
+              background: transparent;
+              border: none;
+              cursor: pointer;
+              border-radius: 4px;
+            }
+            .month-nav button:hover {
+              background: #f3f4f6;
+            }
+            .month-nav h3 {
+              font-weight: 600;
+              color: #1f2937;
+            }
+            .weekdays {
+              display: grid;
+              grid-template-columns: repeat(7, 1fr);
+              gap: 4px;
+              margin-bottom: 8px;
+            }
+            .weekday {
+              text-align: center;
+              font-size: 0.75rem;
+              font-weight: 500;
+              color: #6b7280;
+              padding: 4px 0;
+            }
+            .calendar-grid {
+              display: grid;
+              grid-template-columns: repeat(7, 1fr);
+              gap: 4px;
+            }
+            .calendar-day {
+              width: 32px;
+              height: 32px;
+              font-size: 0.875rem;
+              border-radius: 6px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border: none;
+              cursor: pointer;
+              background: transparent;
+            }
+            .calendar-day.current-month {
+              color: #1f2937;
+            }
+            .calendar-day.current-month:hover {
+              background: #dbeafe;
+            }
+            .calendar-day.selected {
+              background: #2563eb;
+              color: white;
+            }
+            .calendar-day.other-month {
+              color: #9ca3af;
+            }
+            .action-buttons {
+              display: flex;
+              justify-content: space-between;
+              margin-top: 16px;
+              margin-right: 50px;
+            }
+            .action-button {
+              color: #2563eb;
+              font-size: 0.875rem;
+              background: transparent;
+              border: none;
+              cursor: pointer;
+              text-decoration: none;
+            }
+            .action-button:hover {
+              text-decoration: underline;
+            }
+            .done-section {
+              display: flex;
+              justify-content: flex-end;
+              margin-top: 16px;
+              padding-top: 12px;
+              border-top: 1px solid #e5e7eb;
+            }
+            .done-button {
+              padding: 8px 16px;
+              background: #2563eb;
+              color: white;
+              border: none;
+              border-radius: 6px;
+              cursor: pointer;
+            }
+            .done-button:hover {
+              background: #1d4ed8;
+            }
+          `}</style>
+
+                            
+                              <div className="time-display">
+                                <div className="time">
+                                  {selectedHour.toString().padStart(2, "0")}:
+                                  {selectedMinute.toString().padStart(2, "0")}
+                                </div>
+                                <div className="period">
+                                  {isAM ? "AM" : "PM"}
+                                </div>
+                                <div className="date">
+                                  {months[selectedMonth].substring(0, 3)},{" "}
+                                  {selectedYear}
+                                </div>
+                              </div>
+
+                              <div className="time-calendar-container">
+                                
+                                <div className="time-selector">
+                                 
+                                  <div className="time-column">
+                                    <div className="time-column-label">
+                                      Hour
+                                    </div>
+                                    <div className="time-scroll">
+                                      <div className="time-options">
+                                        {[
+                                          12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+                                        ].map((hour) => (
+                                          <button
+                                            key={hour}
+                                            onClick={() =>
+                                              setSelectedHour(hour)
+                                            }
+                                            className={`time-option ${
+                                              selectedHour === hour
+                                                ? "selected-hour"
+                                                : ""
+                                            }`}
+                                          >
+                                            {hour.toString().padStart(2, "0")}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  
+                                  <div className="time-column">
+                                    <div className="time-column-label">Min</div>
+                                    <div className="time-scroll">
+                                      <div className="time-options">
+                                        {[0, 15, 30, 45].map((minute) => (
+                                          <button
+                                            key={minute}
+                                            onClick={() =>
+                                              setSelectedMinute(minute)
+                                            }
+                                            className={`time-option ${
+                                              selectedMinute === minute
+                                                ? "selected-minute"
+                                                : ""
+                                            }`}
+                                          >
+                                            {minute.toString().padStart(2, "0")}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                 
+                                  <div className="time-column">
+                                    <div className="time-column-label">
+                                      Period
+                                    </div>
+                                    <div className="period-options">
+                                      <button
+                                        onClick={() => setIsAM(true)}
+                                        className={`period-option ${
+                                          isAM ? "selected" : ""
+                                        }`}
+                                      >
+                                        AM
+                                      </button>
+                                      <button
+                                        onClick={() => setIsAM(false)}
+                                        className={`period-option ${
+                                          !isAM ? "selected" : ""
+                                        }`}
+                                      >
+                                        PM
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+
+                               
+                                <div className="calendar-section">
+                                 
+                                  <div className="month-nav">
+                                    <button onClick={handlePrevMonth}>
+                                      <ChevronLeft size={20} />
+                                    </button>
+                                    <h3>
+                                      {months[selectedMonth]}, {selectedYear}
+                                    </h3>
+                                    <button onClick={handleNextMonth}>
+                                      <ChevronRight size={20} />
+                                    </button>
+                                  </div>
+
+                                
+                                  <div className="weekdays">
+                                    {weekDays.map((day) => (
+                                      <div key={day} className="weekday">
+                                        {day}
+                                      </div>
+                                    ))}
+                                  </div>
+
+                                  
+                                  <div className="calendar-grid">
+                                    {calendarDays.map((dayObj, index) => (
+                                      <button
+                                        key={index}
+                                        onClick={() =>
+                                          dayObj.isCurrentMonth &&
+                                          setSelectedDate(dayObj.day)
+                                        }
+                                        className={`calendar-day ${
+                                          dayObj.isCurrentMonth
+                                            ? selectedDate === dayObj.day
+                                              ? "current-month selected"
+                                              : "current-month"
+                                            : "other-month"
+                                        }`}
+                                      >
+                                        {dayObj.day}
+                                      </button>
+                                    ))}
+                                  </div>
+
+                                 
+                                  <div className="action-buttons">
+                                    <button
+                                      onClick={() => {
+                                        setSelectedDate(new Date().getDate());
+                                        setSelectedMonth(new Date().getMonth());
+                                        setSelectedYear(
+                                          new Date().getFullYear()
+                                        );
+                                      }}
+                                      className="action-button"
+                                    >
+                                      Clear
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        const today = new Date();
+                                        setSelectedDate(today.getDate());
+                                        setSelectedMonth(today.getMonth());
+                                        setSelectedYear(today.getFullYear());
+                                      }}
+                                      className="action-button"
+                                    >
+                                      Today
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+
+                              
+                              <div className="done-section">
+                                <button
+                                  onClick={() => setIsOpen(false)}
+                                  className="done-button"
+                                >
+                                  Done
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          className="btn"
+                          style={{
+                            background:
+                              "linear-gradient(90deg, rgba(123,97,255,1) 0%, rgba(217,75,255,1) 100%)",
+                            color: "white",
+                            borderRadius: "10px",
+                            padding: "6px 18px",
+                          }}
+                          onClick={handleApplyToSelectedFiles}
+                        >
+                          Apply to Selected Files
+                        </button>
+                      </div> */}
                     </div>
                   </div>
 
@@ -2009,7 +2425,7 @@ const Project = () => {
                         />
                       </div>
                     </div>
-                    <div className="form-text">
+                    <div className="form-text text-white">
                       Total Project Pages = Total Pages × Language Count
                     </div>
                   </div>
@@ -2058,8 +2474,29 @@ const Project = () => {
 
                   {/* Financial Section */}
                   <div className="row g-3 mb-3">
+                    {/* Estimated Hrs with radio */}
                     <div className="col-md-3">
-                      <label className="form-label">Estimated Hrs</label>
+                     <label className="form-label d-flex align-items-center gap-2">
+                        <input
+                          type="radio"
+                          name="billingMode"
+                          value="estimated"
+                          checked={
+                            formData.billingMode === "estimated" ||
+                            !formData.billingMode
+                          }
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              billingMode: e.target.value,
+                              // Reset rate when switching to estimated hours
+                              rate:
+                                e.target.value === "estimated" ? "" : prev.rate,
+                            }))
+                          }
+                        />
+                        Estimated Hrs
+                      </label>
                       <input
                         type="number"
                         className="form-control"
@@ -2072,13 +2509,30 @@ const Project = () => {
                           }))
                         }
                         placeholder="00.00"
+                        disabled={formData.billingMode !== "estimated"}
                       />
-                      <div className="form-text">
+                      <div className="form-text text-white">
                         (in multiple of 0.25 only)
                       </div>
                     </div>
+
+                    {/* Per Page Rate with radio */}
                     <div className="col-md-3">
-                      <label className="form-label">Per page Page Rate</label>
+                      <label className="form-label d-flex align-items-center gap-2">
+                        <input
+                          type="radio"
+                          name="billingMode"
+                          value="perPage"
+                          checked={formData.billingMode === "perPage"}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              billingMode: e.target.value,
+                            }))
+                          }
+                        />
+                        Per Page Rate
+                      </label>
                       <input
                         type="number"
                         className="form-control"
@@ -2091,9 +2545,14 @@ const Project = () => {
                           }))
                         }
                         placeholder="00.00"
+                        disabled={formData.billingMode !== "perPage"}
                       />
-                      <div className="form-text">(with only 2 decimals)</div>
+                      <div className="form-text text-white">
+                        (with only 2 decimals)
+                      </div>
                     </div>
+
+                    {/* Currency (auto-filled) */}
                     <div className="col-md-2">
                       <label className="form-label">Currency</label>
                       <input
@@ -2101,25 +2560,29 @@ const Project = () => {
                         className="form-control"
                         value={formData.currency}
                         readOnly
-                        placeholder="Auto updated from Client details"
+                        placeholder="Auto from Client"
                       />
                     </div>
+
+                    {/* Total Cost */}
                     <div className="col-md-2">
                       <label className="form-label">Total Cost</label>
                       <input
                         type="text"
                         className="form-control"
-                        value={formData.cost.toFixed(2)}
+                        value={formData.cost?.toFixed(2)}
                         readOnly
                         placeholder="Auto Calculated"
                       />
                     </div>
+
+                    {/* Cost in INR */}
                     <div className="col-md-2">
                       <label className="form-label">Cost in INR</label>
                       <input
                         type="text"
                         className="form-control"
-                        value={formData.inrCost.toFixed(2)}
+                        value={formData.inrCost?.toFixed(2)}
                         readOnly
                         placeholder="Auto Calculated"
                       />
@@ -2138,9 +2601,7 @@ const Project = () => {
           </div>
         </div>
       )}
-
-      {/* Settings Modal */}
-      {showSettings && (
+{showSettings && (
         <div
           className="modal fade show d-block custom-modal-dark"
           tabIndex="-1"
@@ -2217,7 +2678,12 @@ const Project = () => {
                         setNewClient({ ...newClient, managers: e.target.value })
                       }
                     />
-                    <button className="btn btn-primary">+</button>
+                    <button className="btn btn-primary"  onClick={handleAddClient}
+                    disabled={
+                      !newClient.alias ||
+                      !newClient.actualName ||
+                      !newClient.country
+                    }>+</button>
                   </div>
                   <div className="border rounded p-2 mb-2 border-secondary">
                     {clients.map((client, index) => (
@@ -2244,7 +2710,7 @@ const Project = () => {
                       </div>
                     ))}
                   </div>
-                  <button
+                  {/* <button
                     className="btn btn-sm btn-primary"
                     onClick={handleAddClient}
                     disabled={
@@ -2254,7 +2720,7 @@ const Project = () => {
                     }
                   >
                     <i className="fas fa-plus me-1"></i> Add Client
-                  </button>
+                  </button> */}
                 </div>
 
                 {/* Manage Tasks List */}
@@ -2268,7 +2734,8 @@ const Project = () => {
                       value={newTask}
                       onChange={(e) => setNewTask(e.target.value)}
                     />
-                    <button className="btn btn-primary">+</button>
+                    <button className="btn btn-primary"  onClick={handleAddTask}
+                    disabled={!newTask}>+</button>
                   </div>
                   <div className="border rounded p-2 mb-2 border-secondary">
                     {tasks.map((task, index) => (
@@ -2290,13 +2757,13 @@ const Project = () => {
                       </div>
                     ))}
                   </div>
-                  <button
+                  {/* <button
                     className="btn btn-sm btn-primary"
                     onClick={handleAddTask}
                     disabled={!newTask}
                   >
                     <i className="fas fa-plus me-1"></i> Add Task
-                  </button>
+                  </button> */}
                 </div>
 
                 {/* Manage Application List */}
@@ -2310,7 +2777,8 @@ const Project = () => {
                       value={newapplication}
                       onChange={(e) => setNewapplication(e.target.value)}
                     />
-                    <button className="btn btn-primary">+</button>
+                    <button className="btn btn-primary" onClick={handleAddapplication}
+                    disabled={!newapplication}>+</button>
                   </div>
                   <div className="border rounded p-2 mb-2 border-secondary">
                     {applications.map((application, index) => (
@@ -2336,13 +2804,13 @@ const Project = () => {
                       </div>
                     ))}
                   </div>
-                  <button
+                  {/* <button
                     className="btn btn-sm btn-primary"
                     onClick={handleAddapplication}
                     disabled={!newapplication}
                   >
                     <i className="fas fa-plus me-1"></i> Add application
-                  </button>
+                  </button> */}
                 </div>
 
                 {/* Manage Languages List */}
@@ -2356,7 +2824,8 @@ const Project = () => {
                       value={newLanguage}
                       onChange={(e) => setNewLanguage(e.target.value)}
                     />
-                    <button className="btn btn-primary">+</button>
+                    <button className="btn btn-primary"  onClick={handleAddLanguage}
+                    disabled={!newLanguage}>+</button>
                   </div>
                   <div className="border rounded p-2 mb-2 border-secondary">
                     {languages.map((language, index) => (
@@ -2378,13 +2847,13 @@ const Project = () => {
                       </div>
                     ))}
                   </div>
-                  <button
+                  {/* <button
                     className="btn btn-sm btn-primary"
                     onClick={handleAddLanguage}
                     disabled={!newLanguage}
                   >
                     <i className="fas fa-plus me-1"></i> Add Language
-                  </button>
+                  </button> */}
                 </div>
 
                 {/* Currency Conversion Rates */}
@@ -2491,7 +2960,6 @@ const Project = () => {
           </div>
         </div>
       )}
-
       {/* Backdrop for modals */}
       {(showCreateModal || showEditModal !== false || showSettings) && (
         <div className="modal-backdrop fade show"></div>

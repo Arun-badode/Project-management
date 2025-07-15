@@ -1,5 +1,5 @@
 .sidebar-container {
-  width: 275px;
+  width: 265px;
   scrollbar-width: none;
   background: linear-gradient(to right, #0f2b85, #3f0a74, #720f7e) !important;  
   height: 90vh;
@@ -8,6 +8,7 @@
   margin-top: 85px;
   z-index: 1;
   position: fixed;
+  font-size: 1px;
 }
 
 .sidebar-container.collapsed {
@@ -34,10 +35,6 @@
   }
 }
 
-/* .sidebar-container.collapsed .submenu .submenu-item {
-  
-  visibility: hidden;
-} */
 .sidebar-container.collapsed .menu .menu-text {
   opacity: 0;
   visibility: hidden;
@@ -56,12 +53,11 @@
 .menu-item {
   margin-bottom: 10px;
   border-radius: 12px;
-  font-size: 19px;
+  font-size: 15px; /* Changed from 19px to 15px */
   font-weight: 700;
 }
 
 .menu-link {
-
   display: flex;
   align-items: center;
   padding: 10px;
@@ -70,11 +66,12 @@
   color: white;
   cursor: pointer;
   transition: background 0.3s ease;
-
+  font-size: 15px; /* Added font-size */
 }
 
 .menu-text {
   margin-left: 10px;
+  font-size: 15px; /* Added font-size */
 }
 
 .submenu {
@@ -93,7 +90,7 @@
 .submenu.expanded {
   max-height: 410px;
   visibility: visible;
-  font-size: 17px;
+  font-size: 15px; /* Changed from 17px to 15px */
   background-color: #fff9f1;
   font-weight: 700;
   padding-left: 10px;
@@ -101,11 +98,13 @@
 
 .submenu-item i {
   padding: 0 5px;
+  font-size: 15px; /* Added font-size */
 }
 
 .submenu-item {
   padding: 10px 0;
   cursor: pointer;
+  font-size: 15px; /* Added font-size */
 }
 
 .submenu-item {
@@ -115,6 +114,7 @@
 .submenu-arrow {
   margin-left: auto;
   transition: transform 0.3s ease;
+  font-size: 15px; /* Added font-size */
 }
 
 .submenu-arrow.rotated {
@@ -123,17 +123,13 @@
 
 .menu-item.active .menu-link {
   background-color: #133eb3;
-  /* Highlight active menu item */
   color: white;
-  /* Active text color */
   border-radius: 12px;
 }
 
 .menu-item:hover .menu-link {
   background-color: #133eb3;
-  /* Highlight active menu item */
   color: white;
-  /* Active text color */
   border-radius: 12px;
 }
 
@@ -148,4 +144,5 @@
   color: white;
   border-radius: 12px;
   padding-left: 20px;
+  font-size: 15px; /* Added font-size */
 }

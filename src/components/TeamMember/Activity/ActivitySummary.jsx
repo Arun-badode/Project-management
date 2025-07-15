@@ -71,7 +71,7 @@ function ActivitySummary() {
   ];
 
   return (
-    <div className="container ">
+    <div className="container-fluid ">
       <div className="row p-3">
         {/* Header with notifications */}
         <div className="col-12 d-flex justify-content-between align-items-center mb-4">
@@ -127,8 +127,16 @@ function ActivitySummary() {
                 <div className="table-responsive"
                   style={{ maxHeight: "400px", overflowY: "auto" }}>
                   <table className="table table-striped table-gradient-bg table-bordered">
-                    <thead className="table-light bg-dark">
-                      <tr>
+                     <thead
+                          className="table-gradient-bg table "
+                          style={{
+                            position: "sticky",
+                            top: 0,
+                            zIndex: 0,
+                            backgroundColor: "#fff", // Match your background color
+                          }}
+                        >
+                      <tr  className="text-center">
                         <th className="text-start">ID</th> {/* New ID column */}
                         <th className="text-start">Task Name</th>
                         <th className="text-center">Total Hours</th>
@@ -137,7 +145,7 @@ function ActivitySummary() {
                     </thead>
                     <tbody>
                       {monthData.tasks.map((task, taskIndex) => (
-                        <tr key={taskIndex}>
+                        <tr key={taskIndex}  className="text-center">
                           <td className="text-start">{taskIndex + 1}</td> {/* Display ID */}
                           <td className="text-start">{task.name}</td>
                           <td className="text-center">{task.hours}</td>

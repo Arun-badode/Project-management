@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 function Task() {
-  const [tasks, setTasks] = useState([
+  const [allTasks, setAllTasks] = useState([
     {
       id: 1,
       name: "Design Homepage Layout",
@@ -46,7 +46,7 @@ function Task() {
       status: "QC YTS",
       project: "E-commerce Application",
       dueDate: "2025-06-21",
-      assignee: "Unassigned",
+      assignee: "Current User",
       priority: "Medium",
       files: ["test_cases.xlsx", "payment_flow.pdf"],
       comments: [
@@ -65,7 +65,7 @@ function Task() {
       status: "Corr WIP",
       project: "Mobile App Development",
       dueDate: "2025-06-20",
-      assignee: "Alex Johnson",
+      assignee: "Current User",
       priority: "High",
       files: ["bug_report.pdf", "screenshots.zip"],
       comments: [
@@ -98,6 +98,11 @@ function Task() {
       serverPath: "",
     },
   ]);
+
+  // Filter tasks to show only those assigned to "Current User"
+  const [tasks, setTasks] = useState(
+    allTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS")
+  );
 
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -138,26 +143,27 @@ function Task() {
   };
 
   const handleTaskAction = (taskId, action) => {
-    const taskIndex = tasks.findIndex((task) => task.id === taskId);
+    const taskIndex = allTasks.findIndex((task) => task.id === taskId);
     if (taskIndex === -1) return;
 
-    const updatedTasks = [...tasks];
-    const task = { ...updatedTasks[taskIndex] };
+    const updatedAllTasks = [...allTasks];
+    const task = { ...updatedAllTasks[taskIndex] };
 
     switch (action) {
       case "start":
         // If another task is active, pause it first
         if (activeTaskId && activeTaskId !== taskId) {
-          const activeTaskIndex = tasks.findIndex((t) => t.id === activeTaskId);
+          const activeTaskIndex = allTasks.findIndex((t) => t.id === activeTaskId);
           if (activeTaskIndex !== -1) {
-            updatedTasks[activeTaskIndex] = {
-              ...updatedTasks[activeTaskIndex],
+            updatedAllTasks[activeTaskIndex] = {
+              ...updatedAllTasks[activeTaskIndex],
               status: "WIP (Paused)",
             };
           }
         }
 
         task.status = "WIP";
+        task.assignee = "Current User"; // Assign to current user when starting
         setActiveTaskId(taskId);
         setTimerRunning(true);
         setTimerSeconds(0);
@@ -190,18 +196,19 @@ function Task() {
       case "switch":
         // Pause current task
         if (activeTaskId) {
-          const activeTaskIndex = tasks.findIndex((t) => t.id === activeTaskId);
+          const activeTaskIndex = allTasks.findIndex((t) => t.id === activeTaskId);
           if (activeTaskIndex !== -1) {
-            updatedTasks[activeTaskIndex] = {
-              ...updatedTasks[activeTaskIndex],
+            updatedAllTasks[activeTaskIndex] = {
+              ...updatedAllTasks[activeTaskIndex],
               status: "WIP (Paused)",
               timeTracked:
-                updatedTasks[activeTaskIndex].timeTracked + timerSeconds / 3600,
+                updatedAllTasks[activeTaskIndex].timeTracked + timerSeconds / 3600,
             };
           }
         }
         // Start new task
         task.status = "WIP";
+        task.assignee = "Current User"; // Assign to current user when switching
         setActiveTaskId(taskId);
         setTimerRunning(true);
         setTimerSeconds(0);
@@ -211,8 +218,10 @@ function Task() {
         return;
     }
 
-    updatedTasks[taskIndex] = task;
-    setTasks(updatedTasks);
+    updatedAllTasks[taskIndex] = task;
+    setAllTasks(updatedAllTasks);
+    // Update filtered tasks
+    setTasks(updatedAllTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS"));
   };
 
   const handleCompleteTask = () => {
@@ -221,11 +230,11 @@ function Task() {
       return;
     }
 
-    const taskIndex = tasks.findIndex((task) => task.id === selectedTask.id);
+    const taskIndex = allTasks.findIndex((task) => task.id === selectedTask.id);
     if (taskIndex === -1) return;
 
-    const updatedTasks = [...tasks];
-    const task = { ...updatedTasks[taskIndex] };
+    const updatedAllTasks = [...allTasks];
+    const task = { ...updatedAllTasks[taskIndex] };
 
     if (task.status === "WIP") {
       task.status = "QC YTS";
@@ -242,9 +251,11 @@ function Task() {
     }
 
     task.serverPath = serverPath;
-    updatedTasks[taskIndex] = task;
+    updatedAllTasks[taskIndex] = task;
 
-    setTasks(updatedTasks);
+    setAllTasks(updatedAllTasks);
+    // Update filtered tasks
+    setTasks(updatedAllTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS"));
     setShowCompleteModal(false);
     setServerPath("");
     setNotes("");
@@ -363,49 +374,49 @@ function Task() {
 
   return (
     <div className="p-3">
-      <h2 className="mb-4 gradient-heading">Task Management</h2>
+      <h2 className="mb-4 gradient-heading">My Tasks</h2>
 
       {/* Timer Card - Similar to the image */}
-      <div className="card mb-4 bg-card   ">
-        <div className="card-header">
-          <h5>UI Design for Dashboard</h5>
-          <div className="small">Project: Design System</div>
-          <div className="small">Saturday, June 21, 2025</div>
-          <div className="small">Start time: 09:30 AM</div>
-        </div>
-        <div className="card-body d-flex flex-column justify-content-center align-items-center">
-          <div className="text-center">
-            <h2 className="mb-0">{formatTime(timerSeconds)}</h2>
-            <div className="text-muted small">
-              {timerRunning ? "Timer Running" : "Timer Paused"}
+      {activeTaskId && (
+        <div className="card mb-4 bg-card">
+          <div className="card-header">
+            <h5>{allTasks.find(t => t.id === activeTaskId)?.name || "Active Task"}</h5>
+            <div className="small">Project: {allTasks.find(t => t.id === activeTaskId)?.project}</div>
+            <div className="small">Saturday, June 21, 2025</div>
+            <div className="small">Start time: 09:30 AM</div>
+          </div>
+          <div className="card-body d-flex flex-column justify-content-center align-items-center">
+            <div className="text-center">
+              <h2 className="mb-0">{formatTime(timerSeconds)}</h2>
+              <div className="text-muted small">
+                {timerRunning ? "Timer Running" : "Timer Paused"}
+              </div>
+            </div>
+            <br />
+            <div className="d-flex gap-2">
+              <button
+                className="btn btn-warning"
+                onClick={() => handleTaskAction(activeTaskId, "pause")}
+                disabled={!timerRunning}
+              >
+                <i className="fas fa-pause me-2"></i>Pause Task
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowTimerModal(true)}
+              >
+                <i className="fas fa-exchange-alt me-2"></i>Switch Task
+              </button>
             </div>
           </div>
-          <br />
-          <div className="d-flex gap-2">
-            <button
-              className="btn btn-warning"
-              onClick={() => handleTaskAction(activeTaskId, "pause")}
-              disabled={!timerRunning}
-            >
-              <i className="fas fa-pause me-2"></i>Pause Task
-            </button>
-            <button
-              className="btn btn-secondary"
-              onClick={() => setShowTimerModal(true)}
-            >
-              <i className="fas fa-exchange-alt me-2"></i>Switch Task
-            </button>
+          <div className="card-footer text-center">
+            <div className="fw-bold">Task Description:</div>
+            <div>
+              {allTasks.find(t => t.id === activeTaskId)?.name} - Currently in progress
+            </div>
           </div>
         </div>
-        <div className="card-footer text-center">
-          <div className="fw-bold">Task Description:</div>
-          <div>
-            Dashboard UI design ke liye wireframes aur mockups create karna. Yeh
-            design system ke guidelines follow karte hue banana hai. Final
-            deliverable Figma mein hoga.
-          </div>
-        </div>
-      </div>
+      )}
 
       {/* Task List */}
       <div className="list-group overflow-auto">
@@ -693,7 +704,7 @@ function Task() {
                   <label className="form-label">Current Task:</label>
                   <div className="form-control">
                     {activeTaskId
-                      ? tasks.find((t) => t.id === activeTaskId)?.name ||
+                      ? allTasks.find((t) => t.id === activeTaskId)?.name ||
                       "No task selected"
                       : "No task selected"}
                   </div>
@@ -704,19 +715,20 @@ function Task() {
                     <button
                       className="btn btn-warning"
                       onClick={() => {
-                        const taskIndex = tasks.findIndex(
+                        const taskIndex = allTasks.findIndex(
                           (t) => t.id === activeTaskId
                         );
                         if (taskIndex !== -1) {
-                          const updatedTasks = [...tasks];
-                          updatedTasks[taskIndex] = {
-                            ...updatedTasks[taskIndex],
+                          const updatedAllTasks = [...allTasks];
+                          updatedAllTasks[taskIndex] = {
+                            ...updatedAllTasks[taskIndex],
                             status: "WIP (Paused)",
                             timeTracked:
-                              updatedTasks[taskIndex].timeTracked +
+                              updatedAllTasks[taskIndex].timeTracked +
                               timerSeconds / 3600,
                           };
-                          setTasks(updatedTasks);
+                          setAllTasks(updatedAllTasks);
+                          setTasks(updatedAllTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS"));
                         }
                         setTimerRunning(false);
                       }}
@@ -737,18 +749,19 @@ function Task() {
                     className="btn btn-secondary"
                     onClick={() => {
                       if (activeTaskId) {
-                        const taskIndex = tasks.findIndex(
+                        const taskIndex = allTasks.findIndex(
                           (t) => t.id === activeTaskId
                         );
                         if (taskIndex !== -1) {
-                          const updatedTasks = [...tasks];
-                          updatedTasks[taskIndex] = {
-                            ...updatedTasks[taskIndex],
+                          const updatedAllTasks = [...allTasks];
+                          updatedAllTasks[taskIndex] = {
+                            ...updatedAllTasks[taskIndex],
                             timeTracked:
-                              updatedTasks[taskIndex].timeTracked +
+                              updatedAllTasks[taskIndex].timeTracked +
                               timerSeconds / 3600,
                           };
-                          setTasks(updatedTasks);
+                          setAllTasks(updatedAllTasks);
+                          setTasks(updatedAllTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS"));
                         }
                       }
                       setTimerRunning(false);

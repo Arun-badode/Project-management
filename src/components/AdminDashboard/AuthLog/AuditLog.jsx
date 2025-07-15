@@ -512,8 +512,16 @@ const AuditLog = () => {
                   ref={scrollContainerRef}
                 >
                   <table className="table table-hover mb-0 table-gradient-bg">
-                    <thead className="table-light bg-dark  .">
-                      <tr>
+                    <thead
+                          className="table-gradient-bg table "
+                          style={{
+                            position: "sticky",
+                            top: 0,
+                            zIndex: 0,
+                            backgroundColor: "#fff", // Match your background color
+                          }}
+                        >
+                      <tr  className="text-center">
                         {activeTab === "all-activities" && (
                           <>
                             <th>ID</th>
@@ -555,7 +563,7 @@ const AuditLog = () => {
                     </thead>
                     <tbody>
                       {getCurrentData().map((item) => (
-                        <tr key={item.id}>
+                        <tr key={item.id}  className="text-center">
                           {activeTab === "all-activities" && (
                             <>
                               <td>{item.id}</td>
