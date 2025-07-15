@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope, faLock, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import "./Login.css";
+import BASE_URL from "../config";
+import axios from "axios";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -13,9 +15,10 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    // Check if mobile device
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
@@ -30,31 +33,53 @@ const LoginPage = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setFadeOut(true); // Start fade out
+      setFadeOut(true);
       setTimeout(() => {
-        setShowVideo(false); // Remove video after fade
-      }, 1000); // Wait for animation to finish
+        setShowVideo(false);
+      }, 1000);
     }, 7000);
     return () => clearTimeout(timer);
   }, []);
 
   const roleCredentials = {
-    Admin: { email: "admin123", password: "admin@123" },
-    Manager: { email: "manager123", password: "manager@123" },
-    "Team Member": { email: "team123", password: "team@123" },
+    Admin: { email: "admin@example.com", password: "admin@123" },
+    Manager: { email: "manager@example.com", password: "manager@123" },
+    "Team Member": { email: "team@example.com", password: "team@123" },
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    if (!role) {
-      alert("Please select a role.");
-      return;
-    }
+  if (!role) {
+    setError("Please select a role.");
+    return;
+  }
 
-    localStorage.setItem("userRole", role);
-    localStorage.setItem("userEmail", email);
+  setIsLoading(true);
 
+  try {
+    const response = await axios.post(`${BASE_URL}user/login`, {
+      email: email,
+      password: password
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+
+    const data = response.data.data;
+
+    console.log(data);
+    
+
+    // Store token and user data in localStorage
+    localStorage.setItem('authToken', data?.token);
+    localStorage.setItem('userRole', role);
+    localStorage.setItem('userEmail', email);
+    localStorage.setItem('userData', JSON.stringify(data?.user));
+
+    // Redirect based on selected role
     switch (role) {
       case "Admin":
         navigate("/admin-dashboard");
@@ -68,7 +93,14 @@ const LoginPage = () => {
       default:
         navigate("/dashboard");
     }
-  };
+
+  } catch (error) {
+    console.error('Login error:', error);
+    setError(error.response?.data?.message || 'Login failed. Please try again.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole);
@@ -125,15 +157,21 @@ const LoginPage = () => {
                 <span className="text-muted">Step in and take control.</span>
               </h4>
 
+              {error && (
+                <div className="alert alert-danger" role="alert">
+                  {error}
+                </div>
+              )}
+
               <div className="login-input-group">
                 <FontAwesomeIcon
                   icon={faEnvelope}
                   className="login-input-icon"
                 />
                 <input
-                  type="Username"
+                  type="text"
                   className="form-control login-input"
-                  placeholder="Username"
+                  placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -175,8 +213,12 @@ const LoginPage = () => {
                 ))}
               </div>
 
-              <button type="submit" className="btn login-submit-btn mt-3">
-                LOG IN
+              <button 
+                type="submit" 
+                className="btn login-submit-btn mt-3"
+                disabled={isLoading}
+              >
+                {isLoading ? 'LOGGING IN...' : 'LOG IN'}
               </button>
               <div className="text-center mt-3">
                 <p className="text-muted">
