@@ -258,7 +258,6 @@ const Project = () => {
     currency: "USD",
     cost: 0,
     inrCost: 0,
-    
   });
 
   // Options for dropdowns
@@ -882,9 +881,6 @@ const Project = () => {
   };
 
   const calendarDays = generateCalendarDays();
-
-
-  
 
   return (
     <div className="conatiner-fluid bg-main mt-4">
@@ -1956,438 +1952,6 @@ const Project = () => {
                           ))}
                         </tbody>
                       </table>
-
-                      {/* <div className="d-flex align-items-center gap-3 mt-3">
-                        <label
-                          className="text-white"
-                          style={{ fontWeight: "bold" }}
-                        >
-                          Deadline
-                        </label>
-                        <div className="max-w-md mx-auto">
-                          
-                          <div className="relative">
-                            <input
-                              type="text"
-                              value={formatDateTime()}
-                              readOnly
-                              onClick={() => setIsOpen(!isOpen)}
-                              className=" bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
-                              placeholder="Select date and time"
-                            />
-                          </div>
-
-                         
-                          {isOpen && (
-                            <div className="calendar-dropdown">
-                              <style>{`
-                            
-            .calendar-dropdown {
-              position: absolute;
-              z-index: 9999;
-              margin-top: 8px;
-              background: white;
-              border: 1px solid #e5e7eb;
-              border-radius: 8px;
-              box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-              padding: 16px;
-              max-width: 30rem;
-              width: 100%;
-            }
-            .time-display {
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: 16px;
-              padding: 12px;
-              background: #2563eb;
-              color: white;
-              border-radius: 6px;
-            }
-            .time-display .time {
-              font-size: 1.5rem;
-              font-weight: bold;
-            }
-            .time-display .period {
-              font-size: 0.875rem;
-            }
-            .time-display .date {
-              font-size: 0.875rem;
-            }
-            .time-calendar-container {
-              display: flex;
-              gap: 16px;
-            }
-            .time-selector {
-              display: flex;
-              gap: 8px;
-            }
-            .time-column {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-            }
-            .time-column-label {
-              font-size: 0.75rem;
-              color: #6b7280;
-              margin-bottom: 4px;
-            }
-            .time-scroll {
-              height: 256px;
-              overflow-y: auto;
-              border: 1px solid #e5e7eb;
-              border-radius: 6px;
-              scrollbar-width: none;
-              -ms-overflow-style: none;
-            }
-            .time-scroll::-webkit-scrollbar {
-              display: none;
-            }
-            .time-options {
-              display: flex;
-              flex-direction: column;
-            }
-            .time-option {
-              padding: 4px 8px;
-              font-size: 0.875rem;
-              min-width: 40px;
-              background: transparent;
-              border: none;
-              cursor: pointer;
-              color: #374151;
-            }
-            .time-option:hover {
-              background: #dbeafe;
-            }
-            .time-option.selected-hour {
-              background: #2563eb;
-              color: white;
-            }
-            .time-option.selected-minute {
-              background: #ef4444;
-              color: white;
-            }
-            .period-options {
-              display: flex;
-              flex-direction: column;
-              gap: 4px;
-            }
-            .period-option {
-              padding: 4px 8px;
-              border-radius: 4px;
-              font-size: 0.875rem;
-              background: #f3f4f6;
-              color: #374151;
-              border: none;
-              cursor: pointer;
-            }
-            .period-option:hover {
-              background: #e5e7eb;
-            }
-            .period-option.selected {
-              background: #2563eb;
-              color: white;
-            }
-            .calendar-section {
-              flex: 1;
-            }
-            .month-nav {
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: 12px;
-            }
-            .month-nav button {
-              padding: 4px;
-              background: transparent;
-              border: none;
-              cursor: pointer;
-              border-radius: 4px;
-            }
-            .month-nav button:hover {
-              background: #f3f4f6;
-            }
-            .month-nav h3 {
-              font-weight: 600;
-              color: #1f2937;
-            }
-            .weekdays {
-              display: grid;
-              grid-template-columns: repeat(7, 1fr);
-              gap: 4px;
-              margin-bottom: 8px;
-            }
-            .weekday {
-              text-align: center;
-              font-size: 0.75rem;
-              font-weight: 500;
-              color: #6b7280;
-              padding: 4px 0;
-            }
-            .calendar-grid {
-              display: grid;
-              grid-template-columns: repeat(7, 1fr);
-              gap: 4px;
-            }
-            .calendar-day {
-              width: 32px;
-              height: 32px;
-              font-size: 0.875rem;
-              border-radius: 6px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              border: none;
-              cursor: pointer;
-              background: transparent;
-            }
-            .calendar-day.current-month {
-              color: #1f2937;
-            }
-            .calendar-day.current-month:hover {
-              background: #dbeafe;
-            }
-            .calendar-day.selected {
-              background: #2563eb;
-              color: white;
-            }
-            .calendar-day.other-month {
-              color: #9ca3af;
-            }
-            .action-buttons {
-              display: flex;
-              justify-content: space-between;
-              margin-top: 16px;
-              margin-right: 50px;
-            }
-            .action-button {
-              color: #2563eb;
-              font-size: 0.875rem;
-              background: transparent;
-              border: none;
-              cursor: pointer;
-              text-decoration: none;
-            }
-            .action-button:hover {
-              text-decoration: underline;
-            }
-            .done-section {
-              display: flex;
-              justify-content: flex-end;
-              margin-top: 16px;
-              padding-top: 12px;
-              border-top: 1px solid #e5e7eb;
-            }
-            .done-button {
-              padding: 8px 16px;
-              background: #2563eb;
-              color: white;
-              border: none;
-              border-radius: 6px;
-              cursor: pointer;
-            }
-            .done-button:hover {
-              background: #1d4ed8;
-            }
-          `}</style>
-
-                            
-                              <div className="time-display">
-                                <div className="time">
-                                  {selectedHour.toString().padStart(2, "0")}:
-                                  {selectedMinute.toString().padStart(2, "0")}
-                                </div>
-                                <div className="period">
-                                  {isAM ? "AM" : "PM"}
-                                </div>
-                                <div className="date">
-                                  {months[selectedMonth].substring(0, 3)},{" "}
-                                  {selectedYear}
-                                </div>
-                              </div>
-
-                              <div className="time-calendar-container">
-                                
-                                <div className="time-selector">
-                                 
-                                  <div className="time-column">
-                                    <div className="time-column-label">
-                                      Hour
-                                    </div>
-                                    <div className="time-scroll">
-                                      <div className="time-options">
-                                        {[
-                                          12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-                                        ].map((hour) => (
-                                          <button
-                                            key={hour}
-                                            onClick={() =>
-                                              setSelectedHour(hour)
-                                            }
-                                            className={`time-option ${
-                                              selectedHour === hour
-                                                ? "selected-hour"
-                                                : ""
-                                            }`}
-                                          >
-                                            {hour.toString().padStart(2, "0")}
-                                          </button>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  
-                                  <div className="time-column">
-                                    <div className="time-column-label">Min</div>
-                                    <div className="time-scroll">
-                                      <div className="time-options">
-                                        {[0, 15, 30, 45].map((minute) => (
-                                          <button
-                                            key={minute}
-                                            onClick={() =>
-                                              setSelectedMinute(minute)
-                                            }
-                                            className={`time-option ${
-                                              selectedMinute === minute
-                                                ? "selected-minute"
-                                                : ""
-                                            }`}
-                                          >
-                                            {minute.toString().padStart(2, "0")}
-                                          </button>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                 
-                                  <div className="time-column">
-                                    <div className="time-column-label">
-                                      Period
-                                    </div>
-                                    <div className="period-options">
-                                      <button
-                                        onClick={() => setIsAM(true)}
-                                        className={`period-option ${
-                                          isAM ? "selected" : ""
-                                        }`}
-                                      >
-                                        AM
-                                      </button>
-                                      <button
-                                        onClick={() => setIsAM(false)}
-                                        className={`period-option ${
-                                          !isAM ? "selected" : ""
-                                        }`}
-                                      >
-                                        PM
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-
-                               
-                                <div className="calendar-section">
-                                 
-                                  <div className="month-nav">
-                                    <button onClick={handlePrevMonth}>
-                                      <ChevronLeft size={20} />
-                                    </button>
-                                    <h3>
-                                      {months[selectedMonth]}, {selectedYear}
-                                    </h3>
-                                    <button onClick={handleNextMonth}>
-                                      <ChevronRight size={20} />
-                                    </button>
-                                  </div>
-
-                                
-                                  <div className="weekdays">
-                                    {weekDays.map((day) => (
-                                      <div key={day} className="weekday">
-                                        {day}
-                                      </div>
-                                    ))}
-                                  </div>
-
-                                  
-                                  <div className="calendar-grid">
-                                    {calendarDays.map((dayObj, index) => (
-                                      <button
-                                        key={index}
-                                        onClick={() =>
-                                          dayObj.isCurrentMonth &&
-                                          setSelectedDate(dayObj.day)
-                                        }
-                                        className={`calendar-day ${
-                                          dayObj.isCurrentMonth
-                                            ? selectedDate === dayObj.day
-                                              ? "current-month selected"
-                                              : "current-month"
-                                            : "other-month"
-                                        }`}
-                                      >
-                                        {dayObj.day}
-                                      </button>
-                                    ))}
-                                  </div>
-
-                                 
-                                  <div className="action-buttons">
-                                    <button
-                                      onClick={() => {
-                                        setSelectedDate(new Date().getDate());
-                                        setSelectedMonth(new Date().getMonth());
-                                        setSelectedYear(
-                                          new Date().getFullYear()
-                                        );
-                                      }}
-                                      className="action-button"
-                                    >
-                                      Clear
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        const today = new Date();
-                                        setSelectedDate(today.getDate());
-                                        setSelectedMonth(today.getMonth());
-                                        setSelectedYear(today.getFullYear());
-                                      }}
-                                      className="action-button"
-                                    >
-                                      Today
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-
-                              
-                              <div className="done-section">
-                                <button
-                                  onClick={() => setIsOpen(false)}
-                                  className="done-button"
-                                >
-                                  Done
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        <button
-                          className="btn"
-                          style={{
-                            background:
-                              "linear-gradient(90deg, rgba(123,97,255,1) 0%, rgba(217,75,255,1) 100%)",
-                            color: "white",
-                            borderRadius: "10px",
-                            padding: "6px 18px",
-                          }}
-                          onClick={handleApplyToSelectedFiles}
-                        >
-                          Apply to Selected Files
-                        </button>
-                      </div> */}
                     </div>
                   </div>
 
@@ -2476,7 +2040,7 @@ const Project = () => {
                   <div className="row g-3 mb-3">
                     {/* Estimated Hrs with radio */}
                     <div className="col-md-3">
-                     <label className="form-label d-flex align-items-center gap-2">
+                      <label className="form-label d-flex align-items-center gap-2">
                         <input
                           type="radio"
                           name="billingMode"
@@ -2601,7 +2165,7 @@ const Project = () => {
           </div>
         </div>
       )}
-{showSettings && (
+      {showSettings && (
         <div
           className="modal fade show d-block custom-modal-dark"
           tabIndex="-1"
@@ -2678,12 +2242,17 @@ const Project = () => {
                         setNewClient({ ...newClient, managers: e.target.value })
                       }
                     />
-                    <button className="btn btn-primary"  onClick={handleAddClient}
-                    disabled={
-                      !newClient.alias ||
-                      !newClient.actualName ||
-                      !newClient.country
-                    }>+</button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleAddClient}
+                      disabled={
+                        !newClient.alias ||
+                        !newClient.actualName ||
+                        !newClient.country
+                      }
+                    >
+                      +
+                    </button>
                   </div>
                   <div className="border rounded p-2 mb-2 border-secondary">
                     {clients.map((client, index) => (
@@ -2734,8 +2303,13 @@ const Project = () => {
                       value={newTask}
                       onChange={(e) => setNewTask(e.target.value)}
                     />
-                    <button className="btn btn-primary"  onClick={handleAddTask}
-                    disabled={!newTask}>+</button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleAddTask}
+                      disabled={!newTask}
+                    >
+                      +
+                    </button>
                   </div>
                   <div className="border rounded p-2 mb-2 border-secondary">
                     {tasks.map((task, index) => (
@@ -2777,8 +2351,13 @@ const Project = () => {
                       value={newapplication}
                       onChange={(e) => setNewapplication(e.target.value)}
                     />
-                    <button className="btn btn-primary" onClick={handleAddapplication}
-                    disabled={!newapplication}>+</button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleAddapplication}
+                      disabled={!newapplication}
+                    >
+                      +
+                    </button>
                   </div>
                   <div className="border rounded p-2 mb-2 border-secondary">
                     {applications.map((application, index) => (
@@ -2824,8 +2403,13 @@ const Project = () => {
                       value={newLanguage}
                       onChange={(e) => setNewLanguage(e.target.value)}
                     />
-                    <button className="btn btn-primary"  onClick={handleAddLanguage}
-                    disabled={!newLanguage}>+</button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleAddLanguage}
+                      disabled={!newLanguage}
+                    >
+                      +
+                    </button>
                   </div>
                   <div className="border rounded p-2 mb-2 border-secondary">
                     {languages.map((language, index) => (
