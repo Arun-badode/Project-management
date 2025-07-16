@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useRef, useEffect, useState } from "react";
+import BASE_URL from "../../../config";
 
 const ProjectsTable = ({  onViewProject, onMarkComplete, onDeleteProject, expandedRow }) => {
   const scrollContainerRef = useRef(null);
@@ -61,7 +62,7 @@ const ProjectsTable = ({  onViewProject, onMarkComplete, onDeleteProject, expand
 
   useEffect(() => {
     axios
-      .get("https://hrb5wx2v-8800.inc1.devtunnels.ms/api/project/getAllProjects",
+      .get(`${BASE_URL}project/getAllProjects`,
         {
             headers: {
               "Content-Type": "application/json",
