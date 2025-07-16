@@ -1,45 +1,23 @@
-import React, { useRef, useEffect, useState } from "react";
-import axios from "axios";
-import BASE_URL from "../../../config";
+import React, { useRef, useEffect } from "react";
 
-const ProjectsTable = ({ onMarkComplete, onDeleteProject, expandedRowId }) => {
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+const ProjectsTable = ({ projects, onViewProject, onMarkComplete, onDeleteProject, expandedRow }) => {
   const scrollContainerRef = useRef(null);
   const fakeScrollbarRef = useRef(null);
 
-  useEffect(() => {
-    const token = localStorage.getItem("authToken");
-
-    const fetchProjects = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}project/getAllProjects`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setProjects(response.data.projects || []);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching projects:", err);
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-
-    fetchProjects();
-  }, []);
-
-  const getProgressColor = (progress) => {
-    if (progress < 30) return "bg-danger";
-    if (progress < 70) return "bg-warning";
-    return "bg-success";
-  };
-
-  const handleViewProject = (project) => {
-    setSelectedProject(project);
-    setShowModal(true);
+  // Status badge color mapping
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "In Progress":
+        return "bg-primary";
+      case "QA Review":
+        return "bg-info";
+      case "Ready for QA":
+        return "bg-warning";
+      case "Completed":
+        return "bg-success";
+      default:
+        return "bg-secondary";
+    }
   };
 
   useEffect(() => {
@@ -48,10 +26,13 @@ const ProjectsTable = ({ onMarkComplete, onDeleteProject, expandedRowId }) => {
 
     if (scrollContainer && fakeScrollbar) {
       const updateScrollbarVisibility = () => {
-        fakeScrollbar.style.display =
-          scrollContainer.scrollWidth > scrollContainer.clientWidth ? "block" : "none";
+        const needsHorizontalScroll =
+          scrollContainer.scrollWidth > scrollContainer.clientWidth;
+
+        fakeScrollbar.style.display = needsHorizontalScroll ? "block" : "none";
       };
 
+      // Sync scroll positions
       const syncScroll = () => {
         fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
       };
@@ -73,95 +54,8 @@ const ProjectsTable = ({ onMarkComplete, onDeleteProject, expandedRowId }) => {
     }
   }, []);
 
-  if (loading) return <div className="text-center py-5">Loading projects...</div>;
-  if (error) return <div className="text-center py-5 text-danger">Error: {error}</div>;
-
   return (
     <>
-      {/* View Project Modal */}
-      {showModal && selectedProject && (
-        <div className="modal fade show" style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog modal-lg modal-dialog-centered ">
-            <div className="modal-content bg-card">
-              <div className="modal-header">
-                <h5 className="modal-title">Project Details</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <h6>Project Title</h6>
-                    <p>{selectedProject.projectTitle}</p>
-                  </div>
-                  <div className="col-md-6">
-                    <h6>Client</h6>
-                    <p>{selectedProject.clientName}</p>
-                  </div>
-                </div>
-                <div className="row mb-3">
-                  <div className="col-md-4">
-                    <h6>Task</h6>
-                    <p>{selectedProject.task_name}</p>
-                  </div>
-                  <div className="col-md-4">
-                    <h6>Language</h6>
-                    <p>{selectedProject.language_name}</p>
-                  </div>
-                  <div className="col-md-4">
-                    <h6>Application</h6>
-                    <p>{selectedProject.application_name}</p>
-                  </div>
-                </div>
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <h6>Total Pages</h6>
-                    <p>{selectedProject.totalProjectPages}</p>
-                  </div>
-                  <div className="col-md-6">
-                    <h6>Deadline</h6>
-                    <p>{selectedProject.deadline}</p>
-                  </div>
-                </div>
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <h6>Handlers</h6>
-                    <p>Not Assigned</p>
-                  </div>
-                  <div className="col-md-6">
-                    <h6>QA Reviewers</h6>
-                    <p>QA Pending</p>
-                  </div>
-                </div>
-                <div className="progress-container">
-                  <h6>Progress</h6>
-                  <div className="progress" style={{ height: "24px" }}>
-                    <div
-                      className={`progress-bar ${getProgressColor(selectedProject.progress || 0)}`}
-                      style={{ width: `${selectedProject.progress || 0}%` }}
-                    >
-                      {selectedProject.progress || 0}%
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div
         ref={fakeScrollbarRef}
         style={{
@@ -179,9 +73,27 @@ const ProjectsTable = ({ onMarkComplete, onDeleteProject, expandedRowId }) => {
         <div style={{ width: "2000px", height: 1 }} />
       </div>
 
-      <div ref={scrollContainerRef} style={{ maxHeight: "500px", overflowX: "auto" }}>
+      {/* Scrollable Table Container */}
+      <div
+        className=""
+        ref={scrollContainerRef}
+        style={{
+          maxHeight: "500px",
+          overflowX: "auto",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+        }}
+      >
         <table className="table-gradient-bg align-middle mt-0 table table-bordered table-hover">
-          <thead >
+          <thead
+            className="table-gradient-bg table"
+            style={{
+              position: "sticky",
+              top: 0,
+              zIndex: 0,
+              backgroundColor: "#fff",
+            }}
+          >
             <tr className="text-center">
               <th>S. No.</th>
               <th>Project Title</th>
@@ -190,7 +102,7 @@ const ProjectsTable = ({ onMarkComplete, onDeleteProject, expandedRowId }) => {
               <th>Language</th>
               <th>Application</th>
               <th>Total Pages</th>
-              <th>Deadline</th>
+              <th>Due Date & Time</th>
               <th>Handlers</th>
               <th>QA Reviewers</th>
               <th>Progress</th>
@@ -198,71 +110,113 @@ const ProjectsTable = ({ onMarkComplete, onDeleteProject, expandedRowId }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredProjects.map((project) => {
-              const dummyProgress = Math.floor(Math.random() * 100) + 1;
-              return (
-                <tr key={project.id} className={expandedRowId === project.id ? "table-active text-center" : ""}>
+            {projects.map((project, index) => (
+              <React.Fragment key={project.id}>
+                <tr
+                  className={
+                    expandedRow === project.id ? "table-active text-center" : "text-center"
+                  }
+                >
                   <td>{index + 1}</td>
-                  <td>{project.projectTitle}</td>
-                  <td>{project.clientName}</td>
-                  <td>{project.task_name}</td>
-                  <td>{project.language_name}</td>
-                  <td>{project.application_name}</td>
-                  <td>{project.totalProjectPages}</td>
-                  <td>{project.deadline}</td>
-                  <td>Not Assigned</td>
-                  <td>QA Pending</td>
+                  <td>{project.title}</td>
+                  <td>{project.client}</td>
+                  <td>{project.task}</td>
+                  <td>{project.language}</td>
+                  <td>{project.platform}</td>
+                  <td>{project.totalPages}</td>
+                  <td>{project.dueDate}</td>
+                  <td>{project.handlers}</td>
+                  <td>{project.qaReviewers}</td>
                   <td>
                     <div
                       className="progress cursor-pointer"
                       style={{ height: "24px" }}
-                      onClick={() => handleViewProject(project)}
+                      onClick={() => onViewProject(project)}
                     >
                       <div
-                        className={`progress-bar ${getProgressColor(dummyProgress)}`}
-                        style={{ width: `${dummyProgress}%` }}
+                        className={`progress-bar 
+                          ${
+                            project.progress < 30
+                              ? "bg-danger"
+                              : project.progress < 70
+                              ? "bg-warning"
+                              : "bg-success"
+                          }`}
+                        role="progressbar"
+                        style={{ width: `${project.progress}%` }}
+                        aria-valuenow={project.progress}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
                       >
-                        {dummyProgress}%
+                        {project.progress}%
                       </div>
                     </div>
                   </td>
                   <td>
-                    <div className="d-flex gap-2 justify-content-center">
-                      <button 
-                        className="btn btn-sm btn-primary" 
-                        onClick={() => handleViewProject(project)}
-                        title="View Details"
+                    <div className="d-flex gap-2">
+                      <button
+                        className="btn btn-sm btn-primary"
+                        onClick={() => onViewProject(project)}
                       >
-                        <i className="fas fa-eye"></i>
+                        <i
+                          className={`fas ${
+                            expandedRow === project.id
+                              ? "fa-chevron-up"
+                              : "fa-eye"
+                          }`}
+                        ></i>
                       </button>
-                      <button 
-                        className="btn btn-sm btn-secondary" 
+                      <button
+                        className="btn btn-sm btn-secondary"
                         onClick={() => {}}
-                        title="Edit"
                       >
                         <i className="fas fa-edit"></i>
                       </button>
-                      {dummyProgress === 100 && (
-                        <button 
-                          className="btn btn-sm btn-success" 
+                      {project.progress === 100 && (
+                        <button
+                          className="btn btn-sm btn-success"
                           onClick={() => onMarkComplete(project.id)}
-                          title="Mark Complete"
                         >
                           <i className="fas fa-check"></i>
                         </button>
                       )}
-                      <button 
-                        className="btn btn-sm btn-danger" 
+                      <button
+                        className="btn btn-sm btn-danger"
                         onClick={() => onDeleteProject(project.id)}
-                        title="Delete"
                       >
                         <i className="fas fa-trash"></i>
                       </button>
                     </div>
                   </td>
                 </tr>
-              );
-            })}
+                {expandedRow === project.id && (
+                  <tr className="table-active">
+                    <td colSpan="12" className="p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.075)" }}>
+                      <div className="bg-card p-3 rounded" style={{ 
+                        border: "1px solid #dee2e6",
+                        
+                      }}>
+                        <h5 className="text-dark">Project Details</h5>
+                        <div className="row mt-3">
+                          <div className="col-md-6">
+                            <p><strong>Description:</strong> {project.description || "No description available"}</p>
+                            <p><strong>Start Date:</strong> {project.startDate || "Not specified"}</p>
+                          </div>
+                          <div className="col-md-6">
+                            <p><strong>Status:</strong> 
+                              <span className={`badge ${getStatusColor(project.status)} ms-2`}>
+                                {project.status}
+                              </span>
+                            </p>
+                            <p><strong>Priority:</strong> {project.priority || "Normal"}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            ))}
           </tbody>
         </table>
       </div>
