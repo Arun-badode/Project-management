@@ -1,8 +1,10 @@
-import React, { useRef, useEffect } from "react";
+import axios from "axios";
+import React, { useRef, useEffect, useState } from "react";
 
-const ProjectsTable = ({ projects, onViewProject, onMarkComplete, onDeleteProject, expandedRow }) => {
+const ProjectsTable = ({  onViewProject, onMarkComplete, onDeleteProject, expandedRow }) => {
   const scrollContainerRef = useRef(null);
   const fakeScrollbarRef = useRef(null);
+  const token = localStorage.getItem("authToken");
 
   // Status badge color mapping
   const getStatusColor = (status) => {
@@ -53,6 +55,33 @@ const ProjectsTable = ({ projects, onViewProject, onMarkComplete, onDeleteProjec
       };
     }
   }, []);
+
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    axios
+      .get("https://hrb5wx2v-8800.inc1.devtunnels.ms/api/project/getAllProjects",
+        {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+            },
+          }
+      )
+      .then((res) => {
+        console.log("Projects fetched successfully", res.data);
+        setProjects(res.data?.projects); // Assuming API returns { data: [...] }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching projects", err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+
 
   return (
     <>
@@ -110,7 +139,7 @@ const ProjectsTable = ({ projects, onViewProject, onMarkComplete, onDeleteProjec
             </tr>
           </thead>
           <tbody>
-            {projects.map((project, index) => (
+            {projects?.map((project, index) => (
               <React.Fragment key={project.id}>
                 <tr
                   className={
@@ -118,15 +147,15 @@ const ProjectsTable = ({ projects, onViewProject, onMarkComplete, onDeleteProjec
                   }
                 >
                   <td>{index + 1}</td>
-                  <td>{project.title}</td>
-                  <td>{project.client}</td>
-                  <td>{project.task}</td>
-                  <td>{project.language}</td>
-                  <td>{project.platform}</td>
-                  <td>{project.totalPages}</td>
-                  <td>{project.dueDate}</td>
-                  <td>{project.handlers}</td>
-                  <td>{project.qaReviewers}</td>
+                  <td>{project.projectTitle}</td>
+                  <td>{project.clientName}</td>
+                  <td>{project.task_name}</td>
+                  <td>{project.language_name}</td>
+                  <td>{project.application_name}</td>
+                  <td>{project.totalProjectPages}</td>
+                  <td>{project.qcDueDate}</td>
+                  <td>{project.qcHrs}</td>
+                  <td>{project.receiveDate}</td>
                   <td>
                     <div
                       className="progress cursor-pointer"
