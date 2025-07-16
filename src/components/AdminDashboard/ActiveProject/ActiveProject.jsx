@@ -2502,7 +2502,7 @@ useEffect(() => {
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {project?.files.map((file) => (
+                                    {project.files.map((file) => (
                                       <tr
                                         key={file.id}
                                         className={
