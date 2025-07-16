@@ -8,7 +8,7 @@ import LoginPage from "./authtication/Login";
 import SignupPage from "./authtication/singup";
 
 import LeadDashboard from "./components/AdminDashboard/ActiveProject/ActiveProject";
-import AdminDashboard from "./components/AdminDashboard/AdminDashboard";
+// import AdminDashboard from "./components/AdminDashboard/AdminDashboard";
 import TaskManagement from "./components/AdminDashboard/TaskManagement/TaskManagemnet";
 import UserManagement from "./components/AdminDashboard/UserManagement/UserManagement";
 import ResourceManagement from "./components/AdminDashboard/ResourceManagement/ResourceManagement";
@@ -41,6 +41,7 @@ import AuthLayout from "./layout/authLayout";
 import MainLayout from "./layout/MainLayout";
 import ManagerTask from "./components/ProjectManager/ManagerTask/ManagerTask";
 import ShiftAllocation from "./components/ProjectManager/ShiftAllocation/ShiftAllocation";
+import MainDashboard from "./components/AdminDashboard/AdminDashboard/MainDashboard";
 
 
 
@@ -79,11 +80,10 @@ function App() {
           />
         }
       >
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/admin-dashboard" element={<MainDashboard />} />
         <Route path="/calendar" element={<Calander />} />
         <Route path="/attendance" element={<Attendance />} />
 
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/task-management" element={<TaskManagement />} />
         <Route path="/calendar" element={<Calander />} />
         <Route path="/usermanage" element={<UserManagement />} />

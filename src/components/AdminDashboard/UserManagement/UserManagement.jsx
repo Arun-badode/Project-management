@@ -51,10 +51,13 @@ console.log("api response", teamMembers);
     dob: "",
     team: "",
     role: "",
-    appSkills: [],
+    skills: [],
     username: "",
     password: "",
   });
+
+
+
 
   // Filter members based on active tab
   const liveMembers = teamMembers.filter((m) => m.status === "active");
