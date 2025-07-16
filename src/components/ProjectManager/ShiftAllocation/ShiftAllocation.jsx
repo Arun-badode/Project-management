@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import * as echarts from "echarts";
+import axios from "axios";
+import dayjs from "dayjs"; // for formatting time to 12-hour
+import { use } from "react";
 
 const ShiftAllocation = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -8,7 +11,54 @@ const ShiftAllocation = () => {
   const [showAddShiftModal, setShowAddShiftModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showEmployeePanel, setShowEmployeePanel] = useState(false);
+  const [employee, setEmployees] = useState()
+  const token = localStorage.getItem("authToken");
 
+  const [formData, setFormData] = useState({
+    memberId: "",
+    shiftDate: "",
+    startTime: "",
+    endTime: "",
+    shiftType: "Half Day",
+    notes: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const formatTime12Hour = (time) => {
+    return dayjs(`2020-01-01T${time}`).format("hh:mm A");
+  };
+
+  const handleSubmit = async () => {
+    const payload = {
+      memberId: parseInt(formData.memberId),
+      shiftDate: formData.shiftDate,
+      startTime: formatTime12Hour(formData.startTime),
+      endTime: formatTime12Hour(formData.endTime),
+      shiftType: formData.shiftType,
+      notes: formData.notes,
+    };
+
+    try {
+
+      const response = await axios.post(
+        "https://hrb5wx2v-8800.inc1.devtunnels.ms/api/shift/createShift",
+        payload, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+      );
+      console.log("Shift created:", response.data);
+      setShowAddShiftModal(false);
+    } catch (error) {
+      console.error("Shift creation failed:", error);
+      alert("Error creating shift. Please try again.");
+    }
+  }
   // Get week dates based on current date
   const getWeekDates = () => {
     const dates = [];
@@ -124,10 +174,10 @@ const ShiftAllocation = () => {
   ];
 
   // Filter employees by department
-  const filteredEmployees =
-    selectedDepartment === "All Departments"
-      ? employees
-      : employees.filter((emp) => emp.department === selectedDepartment);
+  // const filteredEmployees =
+  //   selectedDepartment === "All Departments"
+  //     ? employees
+  //     : employees.filter((emp) => emp.department === selectedDepartment);
 
   // Navigate to previous week
   const goToPreviousWeek = () => {
@@ -306,6 +356,121 @@ const ShiftAllocation = () => {
     return date.toISOString().split("T")[0];
   };
 
+  // Api For GetShift
+
+  // Fetch all shifts from API on mount
+
+  // ...existing code...
+
+
+  // Get Api For Shift
+
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
+
+  // useEffect(() => {
+  //   axios
+  //     .get("https://hrb5wx2v-8800.inc1.devtunnels.ms/api/shift/getAllShifts",
+  //       {
+  //         headers: {
+  //           'Authorization': `Bearer ${token}`
+  //         }
+  //       }
+  //     )
+  //     .then((res) => {
+  //       if (res.data.status) {
+  //         console.log("asda", res)
+  //         const shiftData = res?.data?.data;
+
+  //         // // Transform flat shift list to grouped by employee with shifts by day index
+  //         // const employeesMap = {};
+
+  //         // shiftData.forEach((shift) => {
+  //         //   const shiftDayIndex = new Date(shift.shiftDate).getDay(); // 0 (Sun) to 6 (Sat)
+
+  //         //   if (!employeesMap[shift.memberId]) {
+  //         //     employeesMap[shift.memberId] = {
+  //         //       id: shift.memberId,
+  //         //       name: shift.fullName,
+  //         //       department: "Unknown", // You can update this if you have department data
+  //         //       shifts: [],
+  //         //     };
+  //         //   }
+
+  //         //   employeesMap[shift.memberId].shifts.push({
+  //         //     day: shiftDayIndex,
+  //         //     start: shift.startTime,
+  //         //     end: shift.endTime,
+  //         //     type: shift.shiftType,
+  //         //     notes: shift.notes,
+  //         //     date: shift.shiftDate,
+  //         //   });
+  //         // });
+
+  //         // setFilteredEmployees(Object.values(employeesMap));
+  //         setFilteredEmployees(shiftData);
+  //       }
+  //     })
+  //     .catch((err) => {
+  //       console.error("Failed to fetch shifts:", err);
+  //     });
+  // }, []);
+
+  useEffect(() => {
+    axios
+      .get("https://hrb5wx2v-8800.inc1.devtunnels.ms/api/shift/getAllShifts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        if (res.data.status) {
+          console.log("sss",res.data.data )
+          const shiftData = res.data.data;
+
+          // Group by unique (memberId + fullName) combo
+          const employeesMap = {};
+
+          shiftData.forEach((shift) => {
+            const shiftDayIndex = new Date(shift.shiftDate).getDay(); // 0 = Sunday
+
+            const key = `${shift.memberId}-${shift.fullName}`;
+
+            if (!employeesMap[key]) {
+              employeesMap[key] = {
+                memberId: shift.memberId,
+                fullName: shift.fullName,
+                shifts: [],
+              };
+            }
+
+            employeesMap[key].shifts.push({
+              day: shiftDayIndex,
+              start: shift.startTime,
+              end: shift.endTime,
+              type: shift.shiftType,
+              notes: shift.notes,
+              date: shift.shiftDate,
+            });
+          });
+
+          setFilteredEmployees(Object.values(employeesMap));
+        }
+      })
+
+      .catch((err) => {
+        console.error("Failed to fetch shifts:", err);
+      });
+  }, []);
+
+
+  useEffect(() => {
+    if (filteredEmployees) {
+      console.log(filteredEmployees);
+    }
+
+  }, [filteredEmployees])
+
+
   return (
     <div>
       <div className="container-fluid bg-main">
@@ -386,31 +551,26 @@ const ShiftAllocation = () => {
           <div className="">
             {/* Main Schedule */}
             <div
-              className={`card table-gradient-bg ${
-                showEmployeePanel ? "me-3" : ""
-              }`}
+              className={`card table-gradient-bg ${showEmployeePanel ? "me-3" : ""
+                }`}
             >
               <div className="table-responsive ">
-                <table className="table ">
+                <table className="table">
                   <thead
-                    className="table-gradient-bg table "
+                    className="table-gradient-bg table"
                     style={{
                       position: "sticky",
                       top: 0,
                       zIndex: 0,
-                      backgroundColor: "#fff", // Match your background color
+                      backgroundColor: "#fff",
                     }}
                   >
-                    <tr  className="text-center">
+                    <tr className="text-center">
                       <th scope="col" className="w-25 sticky-start bg-white">
                         Employee
                       </th>
                       {weekDates.map((date, index) => (
-                        <th
-                          key={index}
-                          scope="col"
-                          className="text-center min-w-150"
-                        >
+                        <th key={index} className="text-center min-w-150">
                           <div className="fw-bold">{formatDay(date)}</div>
                           <div>{formatDate(date)}</div>
                         </th>
@@ -418,39 +578,21 @@ const ShiftAllocation = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredEmployees.map((employee) => (
-                      <tr key={employee.id}  className="text-center">
-                        <td className="sticky-start bg-white border-end">
-                          <div
-                            className="d-flex align-items-center cursor-pointer"
-                            onClick={() => {
-                              setSelectedEmployee(employee.name);
-                              setShowEmployeePanel(true);
-                            }}
-                          >
-                            <div
-                              className="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3"
-                              style={{ width: "40px", height: "40px" }}
-                            >
-                              {employee.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </div>
-                            <div>
-                              <div className="fw-medium">{employee.name}</div>
-                              <div className="text-white small">
-                                {employee.department}
-                              </div>
-                            </div>
-                          </div>
+                    {filteredEmployees?.map((employee) => (
+                      <tr key={employee.memberId} className="text-center">
+                        {/* Employee Name Cell */}
+                        <td className="sticky-start bg-white border-end text-start">
+                          {employee.fullName}
                         </td>
+
+                        {/* Loop through days of week (0 = Sunday to 6 = Saturday) */}
                         {weekDates.map((_, dayIndex) => (
                           <td
                             key={dayIndex}
-                            className="position-relative"
+                            className="position-relative align-top"
                             style={{ minHeight: "80px" }}
                           >
+                            {/* Render all shifts for this day */}
                             {employee.shifts
                               .filter((shift) => shift.day === dayIndex)
                               .map((shift, idx) => (
@@ -464,20 +606,27 @@ const ShiftAllocation = () => {
                                     {shift.start} - {shift.end}
                                   </div>
                                   <div className="small">
-                                    {shift.type.charAt(0).toUpperCase() +
-                                      shift.type.slice(1)}{" "}
-                                    Shift
+                                    {shift.type.charAt(0).toUpperCase() + shift.type.slice(1)} Shift
                                   </div>
+                                  {shift.notes && (
+                                    <div className="text-white-500 small fst-italic">{shift.notes}</div>
+                                  )}
                                 </div>
                               ))}
-                            <button className="position-absolute bottom-0 end-0 text-white btn btn-sm">
-                              <i className="fas fa-plus-circle "></i>
+
+                            {/* Add Shift Button */}
+                            <button
+                              className="position-absolute bottom-0 end-0 text-primary btn btn-sm"
+                              onClick={() => handleAddShift(employee.memberId, dayIndex)}
+                            >
+                              <i className="fas fa-plus-circle"></i>
                             </button>
                           </td>
                         ))}
                       </tr>
                     ))}
                   </tbody>
+
                 </table>
               </div>
             </div>
@@ -633,13 +782,15 @@ const ShiftAllocation = () => {
 
                 <div className="modal-body">
                   <div className="mb-3">
-                    <label htmlFor="employee" className="form-label">
+                    <label htmlFor="memberId" className="form-label">
                       Employee
                     </label>
                     <select
-                      id="employee"
-                      name="employee"
+                      id="memberId"
+                      name="memberId"
                       className="form-select"
+                      value={formData.memberId}
+                      onChange={handleChange}
                     >
                       <option value="">Select Employee</option>
                       {employees.map((emp) => (
@@ -651,14 +802,16 @@ const ShiftAllocation = () => {
                   </div>
 
                   <div className="mb-3">
-                    <label htmlFor="date" className="form-label">
+                    <label htmlFor="shiftDate" className="form-label">
                       Date
                     </label>
                     <input
                       type="date"
-                      id="date"
-                      name="date"
+                      id="shiftDate"
+                      name="shiftDate"
                       className="form-control"
+                      value={formData.shiftDate}
+                      onChange={handleChange}
                     />
                   </div>
 
@@ -672,6 +825,8 @@ const ShiftAllocation = () => {
                         id="startTime"
                         name="startTime"
                         className="form-control"
+                        value={formData.startTime}
+                        onChange={handleChange}
                       />
                     </div>
 
@@ -684,6 +839,8 @@ const ShiftAllocation = () => {
                         id="endTime"
                         name="endTime"
                         className="form-control"
+                        value={formData.endTime}
+                        onChange={handleChange}
                       />
                     </div>
                   </div>
@@ -696,10 +853,12 @@ const ShiftAllocation = () => {
                       id="shiftType"
                       name="shiftType"
                       className="form-select"
+                      value={formData.shiftType}
+                      onChange={handleChange}
                     >
-                      <option value="morning">Morning Shift</option>
-                      <option value="evening">Evening Shift</option>
-                      <option value="night">Night Shift</option>
+                      <option value="Full Day">Full Day</option>
+                      <option value="Half Day">Half Day</option>
+                      <option value="Night">Night</option>
                     </select>
                   </div>
 
@@ -713,6 +872,8 @@ const ShiftAllocation = () => {
                       rows={3}
                       className="form-control"
                       placeholder="Add any additional information..."
+                      value={formData.notes}
+                      onChange={handleChange}
                     ></textarea>
                   </div>
                 </div>
@@ -725,7 +886,7 @@ const ShiftAllocation = () => {
                   >
                     Cancel
                   </button>
-                  <button type="button" className="btn btn-primary">
+                  <button type="button" className="btn btn-primary" onClick={handleSubmit}>
                     Add Shift
                   </button>
                 </div>

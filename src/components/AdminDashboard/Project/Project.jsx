@@ -4,7 +4,6 @@ import useSyncScroll from "../Hooks/useSyncScroll";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Select from "react-select";
-import SettingsPage from "../Setting/Setting";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 
 const Project = () => {
@@ -258,7 +257,7 @@ const Project = () => {
     currency: "USD",
     cost: 0,
     inrCost: 0,
-    
+
   });
 
   // Options for dropdowns
@@ -599,11 +598,11 @@ const Project = () => {
         projects.map((project) =>
           project.id === showEditModal
             ? {
-                ...project,
-                ...formData,
-                status: project.status,
-                id: project.id,
-              }
+              ...project,
+              ...formData,
+              status: project.status,
+              id: project.id,
+            }
             : project
         )
       );
@@ -728,34 +727,34 @@ const Project = () => {
       projects.map((project) =>
         project.id === projectId
           ? {
-              ...project,
-              status: "completed",
-              completedDate: new Date().toISOString().split("T")[0],
-              performance: {
-                expectedHours: Math.round(project.totalPages * 1.5),
-                actualHours: Math.round(project.totalPages * 1.3),
-                stages: [
-                  {
-                    name: "Design",
-                    start: project.receivedDate,
-                    end: new Date().toISOString().split("T")[0],
-                    handler: "Sarah Wilson",
-                  },
-                  {
-                    name: "Development",
-                    start: project.receivedDate,
-                    end: new Date().toISOString().split("T")[0],
-                    handler: "David Lee",
-                  },
-                  {
-                    name: "Testing",
-                    start: project.receivedDate,
-                    end: new Date().toISOString().split("T")[0],
-                    handler: "Rachel Chen",
-                  },
-                ],
-              },
-            }
+            ...project,
+            status: "completed",
+            completedDate: new Date().toISOString().split("T")[0],
+            performance: {
+              expectedHours: Math.round(project.totalPages * 1.5),
+              actualHours: Math.round(project.totalPages * 1.3),
+              stages: [
+                {
+                  name: "Design",
+                  start: project.receivedDate,
+                  end: new Date().toISOString().split("T")[0],
+                  handler: "Sarah Wilson",
+                },
+                {
+                  name: "Development",
+                  start: project.receivedDate,
+                  end: new Date().toISOString().split("T")[0],
+                  handler: "David Lee",
+                },
+                {
+                  name: "Testing",
+                  start: project.receivedDate,
+                  end: new Date().toISOString().split("T")[0],
+                  handler: "Rachel Chen",
+                },
+              ],
+            },
+          }
           : project
       )
     );
@@ -884,7 +883,7 @@ const Project = () => {
   const calendarDays = generateCalendarDays();
 
 
-  
+
 
   return (
     <div className="conatiner-fluid bg-main mt-4">
@@ -939,9 +938,8 @@ const Project = () => {
             <ul className="nav nav-tabs border-bottom-0 flex-wrap">
               <li className="nav-item">
                 <button
-                  className={`nav-link ${
-                    activeTab === "created" ? "active" : ""
-                  }`}
+                  className={`nav-link ${activeTab === "created" ? "active" : ""
+                    }`}
                   onClick={() => setActiveTab("created")}
                 >
                   Created Projects
@@ -952,9 +950,8 @@ const Project = () => {
               </li>
               <li className="nav-item">
                 <button
-                  className={`nav-link ${
-                    activeTab === "active" ? "active" : ""
-                  }`}
+                  className={`nav-link ${activeTab === "active" ? "active" : ""
+                    }`}
                   onClick={() => setActiveTab("active")}
                 >
                   Active Projects
@@ -965,9 +962,8 @@ const Project = () => {
               </li>
               <li className="nav-item">
                 <button
-                  className={`nav-link ${
-                    activeTab === "completed" ? "active" : ""
-                  }`}
+                  className={`nav-link ${activeTab === "completed" ? "active" : ""
+                    }`}
                   onClick={() => setActiveTab("completed")}
                 >
                   Completed Projects
@@ -1537,17 +1533,16 @@ const Project = () => {
                             <td>{project.performance.actualHours}</td>
                             <td className="fw-bold">
                               <span
-                                className={`${
-                                  project.performance.expectedHours >
-                                  project.performance.actualHours
+                                className={`${project.performance.expectedHours >
+                                    project.performance.actualHours
                                     ? "text-success"
                                     : "text-danger"
-                                }`}
+                                  }`}
                               >
                                 {Math.round(
                                   (project.performance.expectedHours /
                                     project.performance.actualHours) *
-                                    100
+                                  100
                                 )}
                                 %
                               </span>
@@ -1693,9 +1688,9 @@ const Project = () => {
                         value={
                           formData.projectManager
                             ? {
-                                value: formData.projectManager,
-                                label: formData.projectManager,
-                              }
+                              value: formData.projectManager,
+                              label: formData.projectManager,
+                            }
                             : null
                         }
                         onChange={(opt) =>
@@ -1727,9 +1722,9 @@ const Project = () => {
                         value={
                           formData.tasks.length
                             ? formData.tasks.map((t) => ({
-                                value: t,
-                                label: t,
-                              }))
+                              value: t,
+                              label: t,
+                            }))
                             : []
                         }
                         onChange={(opts) =>
@@ -1758,9 +1753,9 @@ const Project = () => {
                         value={
                           formData.application.length
                             ? formData.application.map((a) => ({
-                                value: a,
-                                label: a,
-                              }))
+                              value: a,
+                              label: a,
+                            }))
                             : []
                         }
                         onChange={(opts) =>
@@ -1790,9 +1785,9 @@ const Project = () => {
                       value={
                         formData.languages.length
                           ? formData.languages.map((l) => ({
-                              value: l,
-                              label: l,
-                            }))
+                            value: l,
+                            label: l,
+                          }))
                           : []
                       }
                       onChange={(opts) =>
@@ -2476,7 +2471,7 @@ const Project = () => {
                   <div className="row g-3 mb-3">
                     {/* Estimated Hrs with radio */}
                     <div className="col-md-3">
-                     <label className="form-label d-flex align-items-center gap-2">
+                      <label className="form-label d-flex align-items-center gap-2">
                         <input
                           type="radio"
                           name="billingMode"
@@ -2601,7 +2596,7 @@ const Project = () => {
           </div>
         </div>
       )}
-{showSettings && (
+      {showSettings && (
         <div
           className="modal fade show d-block custom-modal-dark"
           tabIndex="-1"
@@ -2678,12 +2673,12 @@ const Project = () => {
                         setNewClient({ ...newClient, managers: e.target.value })
                       }
                     />
-                    <button className="btn btn-primary"  onClick={handleAddClient}
-                    disabled={
-                      !newClient.alias ||
-                      !newClient.actualName ||
-                      !newClient.country
-                    }>+</button>
+                    <button className="btn btn-primary" onClick={handleAddClient}
+                      disabled={
+                        !newClient.alias ||
+                        !newClient.actualName ||
+                        !newClient.country
+                      }>+</button>
                   </div>
                   <div className="border rounded p-2 mb-2 border-secondary">
                     {clients.map((client, index) => (
@@ -2734,8 +2729,8 @@ const Project = () => {
                       value={newTask}
                       onChange={(e) => setNewTask(e.target.value)}
                     />
-                    <button className="btn btn-primary"  onClick={handleAddTask}
-                    disabled={!newTask}>+</button>
+                    <button className="btn btn-primary" onClick={handleAddTask}
+                      disabled={!newTask}>+</button>
                   </div>
                   <div className="border rounded p-2 mb-2 border-secondary">
                     {tasks.map((task, index) => (
@@ -2778,7 +2773,7 @@ const Project = () => {
                       onChange={(e) => setNewapplication(e.target.value)}
                     />
                     <button className="btn btn-primary" onClick={handleAddapplication}
-                    disabled={!newapplication}>+</button>
+                      disabled={!newapplication}>+</button>
                   </div>
                   <div className="border rounded p-2 mb-2 border-secondary">
                     {applications.map((application, index) => (
@@ -2824,8 +2819,8 @@ const Project = () => {
                       value={newLanguage}
                       onChange={(e) => setNewLanguage(e.target.value)}
                     />
-                    <button className="btn btn-primary"  onClick={handleAddLanguage}
-                    disabled={!newLanguage}>+</button>
+                    <button className="btn btn-primary" onClick={handleAddLanguage}
+                      disabled={!newLanguage}>+</button>
                   </div>
                   <div className="border rounded p-2 mb-2 border-secondary">
                     {languages.map((language, index) => (
