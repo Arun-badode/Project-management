@@ -3,6 +3,7 @@ import * as echarts from "echarts";
 import axios from "axios";
 import dayjs from "dayjs"; // for formatting time to 12-hour
 import { use } from "react";
+import BASE_URL from "../../../config";
 
 const ShiftAllocation = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -45,7 +46,7 @@ const ShiftAllocation = () => {
     try {
 
       const response = await axios.post(
-        "https://hrb5wx2v-8800.inc1.devtunnels.ms/api/shift/createShift",
+        `${BASE_URL}shift/createShift`,
         payload, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -417,7 +418,7 @@ const ShiftAllocation = () => {
 
   useEffect(() => {
     axios
-      .get("https://hrb5wx2v-8800.inc1.devtunnels.ms/api/shift/getAllShifts", {
+      .get(`${BASE_URL}shift/getAllShifts`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -6,6 +6,7 @@ import useSyncScroll from "../Hooks/useSyncScroll";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import BASE_URL from "../../../config";
 import "./ActiveProject.css"
 
 const ActiveProject = () => {
@@ -428,7 +429,7 @@ const ActiveProject = () => {
 
       // Make the API call
       const response = await fetch(
-        "https://hrb5wx2v-8800.inc1.devtunnels.ms/api/project/addProject",
+        `${BASE_URL}project/addProject`,
         {
           method: "POST",
           headers: {
