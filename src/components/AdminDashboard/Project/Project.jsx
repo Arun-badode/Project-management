@@ -257,7 +257,6 @@ const Project = () => {
     currency: "USD",
     cost: 0,
     inrCost: 0,
-
   });
 
   // Options for dropdowns
@@ -881,9 +880,6 @@ const Project = () => {
   };
 
   const calendarDays = generateCalendarDays();
-
-
-
 
   return (
     <div className="conatiner-fluid bg-main mt-4">
@@ -1584,25 +1580,19 @@ const Project = () => {
         >
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
-              <div className="modal-header">
+              <div className="modal-header d-flex justify-content-between">
                 <div>
-                  <h5 className="modal-title">
-                    {showEditModal !== false
-                      ? "Edit Project Details"
-                      : "Create New Project"}
-                  </h5>
+                  <h5 className="modal-title">Create New Project</h5>
                 </div>
+
                 <div>
-                  {/* <button className="btn btn-light btn-sm me-4">
+                  {/* <button className="btn btn-light btn-sm me-4 ">
                     <i className="fas fa-cog text-muted"></i>
                   </button> */}
                   <button
                     type="button"
                     className="btn-close"
-                    onClick={() => {
-                      setShowCreateModal(false);
-                      setShowEditModal(false);
-                    }}
+                    onClick={() => setShowCreateModal(false)}
                   ></button>
                 </div>
               </div>
@@ -1670,7 +1660,7 @@ const Project = () => {
                         name="country"
                         value={formData.country}
                         onChange={handleInputChange}
-                        placeholder="Auto update with Client"
+                        placeholder=""
                         readOnly
                       />
                     </div>
@@ -1700,7 +1690,7 @@ const Project = () => {
                           }))
                         }
                         isSearchable
-                        placeholder="Refined Searchable Dropdown"
+                        placeholder=" Searchable Dropdown"
                         styles={gradientSelectStyles}
                       />
                     </div>
@@ -1843,19 +1833,35 @@ const Project = () => {
                         Upload Excel
                       </button>
                     </div>
-                    <div className="table-responsive ">
+                    <div className="table-responsive">
                       <table className="table table-bordered">
                         <thead
                           className="table-gradient-bg table"
                           style={{
                             position: "sticky",
-                            top: 0,
+                            top: "-2px",
+
                             zIndex: 0,
                             backgroundColor: "#fff", // Match your background color
                           }}
                         >
                           <tr className="text-center">
-                            <th>S.No.</th>
+                            <th>
+                              S.No.
+                              <input
+                                type="checkbox"
+                                checked={formData.files.every(
+                                  (file) => file.selected
+                                )}
+                                onChange={(e) => {
+                                  const files = formData.files.map((file) => ({
+                                    ...file,
+                                    selected: e.target.checked,
+                                  }));
+                                  setFormData((prev) => ({ ...prev, files }));
+                                }}
+                              />
+                            </th>
                             <th>File Name</th>
                             <th>Pages</th>
                             {/* <th>Language</th> */}
@@ -1951,438 +1957,6 @@ const Project = () => {
                           ))}
                         </tbody>
                       </table>
-
-                      {/* <div className="d-flex align-items-center gap-3 mt-3">
-                        <label
-                          className="text-white"
-                          style={{ fontWeight: "bold" }}
-                        >
-                          Deadline
-                        </label>
-                        <div className="max-w-md mx-auto">
-                          
-                          <div className="relative">
-                            <input
-                              type="text"
-                              value={formatDateTime()}
-                              readOnly
-                              onClick={() => setIsOpen(!isOpen)}
-                              className=" bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
-                              placeholder="Select date and time"
-                            />
-                          </div>
-
-                         
-                          {isOpen && (
-                            <div className="calendar-dropdown">
-                              <style>{`
-                            
-            .calendar-dropdown {
-              position: absolute;
-              z-index: 9999;
-              margin-top: 8px;
-              background: white;
-              border: 1px solid #e5e7eb;
-              border-radius: 8px;
-              box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-              padding: 16px;
-              max-width: 30rem;
-              width: 100%;
-            }
-            .time-display {
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: 16px;
-              padding: 12px;
-              background: #2563eb;
-              color: white;
-              border-radius: 6px;
-            }
-            .time-display .time {
-              font-size: 1.5rem;
-              font-weight: bold;
-            }
-            .time-display .period {
-              font-size: 0.875rem;
-            }
-            .time-display .date {
-              font-size: 0.875rem;
-            }
-            .time-calendar-container {
-              display: flex;
-              gap: 16px;
-            }
-            .time-selector {
-              display: flex;
-              gap: 8px;
-            }
-            .time-column {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-            }
-            .time-column-label {
-              font-size: 0.75rem;
-              color: #6b7280;
-              margin-bottom: 4px;
-            }
-            .time-scroll {
-              height: 256px;
-              overflow-y: auto;
-              border: 1px solid #e5e7eb;
-              border-radius: 6px;
-              scrollbar-width: none;
-              -ms-overflow-style: none;
-            }
-            .time-scroll::-webkit-scrollbar {
-              display: none;
-            }
-            .time-options {
-              display: flex;
-              flex-direction: column;
-            }
-            .time-option {
-              padding: 4px 8px;
-              font-size: 0.875rem;
-              min-width: 40px;
-              background: transparent;
-              border: none;
-              cursor: pointer;
-              color: #374151;
-            }
-            .time-option:hover {
-              background: #dbeafe;
-            }
-            .time-option.selected-hour {
-              background: #2563eb;
-              color: white;
-            }
-            .time-option.selected-minute {
-              background: #ef4444;
-              color: white;
-            }
-            .period-options {
-              display: flex;
-              flex-direction: column;
-              gap: 4px;
-            }
-            .period-option {
-              padding: 4px 8px;
-              border-radius: 4px;
-              font-size: 0.875rem;
-              background: #f3f4f6;
-              color: #374151;
-              border: none;
-              cursor: pointer;
-            }
-            .period-option:hover {
-              background: #e5e7eb;
-            }
-            .period-option.selected {
-              background: #2563eb;
-              color: white;
-            }
-            .calendar-section {
-              flex: 1;
-            }
-            .month-nav {
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: 12px;
-            }
-            .month-nav button {
-              padding: 4px;
-              background: transparent;
-              border: none;
-              cursor: pointer;
-              border-radius: 4px;
-            }
-            .month-nav button:hover {
-              background: #f3f4f6;
-            }
-            .month-nav h3 {
-              font-weight: 600;
-              color: #1f2937;
-            }
-            .weekdays {
-              display: grid;
-              grid-template-columns: repeat(7, 1fr);
-              gap: 4px;
-              margin-bottom: 8px;
-            }
-            .weekday {
-              text-align: center;
-              font-size: 0.75rem;
-              font-weight: 500;
-              color: #6b7280;
-              padding: 4px 0;
-            }
-            .calendar-grid {
-              display: grid;
-              grid-template-columns: repeat(7, 1fr);
-              gap: 4px;
-            }
-            .calendar-day {
-              width: 32px;
-              height: 32px;
-              font-size: 0.875rem;
-              border-radius: 6px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              border: none;
-              cursor: pointer;
-              background: transparent;
-            }
-            .calendar-day.current-month {
-              color: #1f2937;
-            }
-            .calendar-day.current-month:hover {
-              background: #dbeafe;
-            }
-            .calendar-day.selected {
-              background: #2563eb;
-              color: white;
-            }
-            .calendar-day.other-month {
-              color: #9ca3af;
-            }
-            .action-buttons {
-              display: flex;
-              justify-content: space-between;
-              margin-top: 16px;
-              margin-right: 50px;
-            }
-            .action-button {
-              color: #2563eb;
-              font-size: 0.875rem;
-              background: transparent;
-              border: none;
-              cursor: pointer;
-              text-decoration: none;
-            }
-            .action-button:hover {
-              text-decoration: underline;
-            }
-            .done-section {
-              display: flex;
-              justify-content: flex-end;
-              margin-top: 16px;
-              padding-top: 12px;
-              border-top: 1px solid #e5e7eb;
-            }
-            .done-button {
-              padding: 8px 16px;
-              background: #2563eb;
-              color: white;
-              border: none;
-              border-radius: 6px;
-              cursor: pointer;
-            }
-            .done-button:hover {
-              background: #1d4ed8;
-            }
-          `}</style>
-
-                            
-                              <div className="time-display">
-                                <div className="time">
-                                  {selectedHour.toString().padStart(2, "0")}:
-                                  {selectedMinute.toString().padStart(2, "0")}
-                                </div>
-                                <div className="period">
-                                  {isAM ? "AM" : "PM"}
-                                </div>
-                                <div className="date">
-                                  {months[selectedMonth].substring(0, 3)},{" "}
-                                  {selectedYear}
-                                </div>
-                              </div>
-
-                              <div className="time-calendar-container">
-                                
-                                <div className="time-selector">
-                                 
-                                  <div className="time-column">
-                                    <div className="time-column-label">
-                                      Hour
-                                    </div>
-                                    <div className="time-scroll">
-                                      <div className="time-options">
-                                        {[
-                                          12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-                                        ].map((hour) => (
-                                          <button
-                                            key={hour}
-                                            onClick={() =>
-                                              setSelectedHour(hour)
-                                            }
-                                            className={`time-option ${
-                                              selectedHour === hour
-                                                ? "selected-hour"
-                                                : ""
-                                            }`}
-                                          >
-                                            {hour.toString().padStart(2, "0")}
-                                          </button>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  
-                                  <div className="time-column">
-                                    <div className="time-column-label">Min</div>
-                                    <div className="time-scroll">
-                                      <div className="time-options">
-                                        {[0, 15, 30, 45].map((minute) => (
-                                          <button
-                                            key={minute}
-                                            onClick={() =>
-                                              setSelectedMinute(minute)
-                                            }
-                                            className={`time-option ${
-                                              selectedMinute === minute
-                                                ? "selected-minute"
-                                                : ""
-                                            }`}
-                                          >
-                                            {minute.toString().padStart(2, "0")}
-                                          </button>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                 
-                                  <div className="time-column">
-                                    <div className="time-column-label">
-                                      Period
-                                    </div>
-                                    <div className="period-options">
-                                      <button
-                                        onClick={() => setIsAM(true)}
-                                        className={`period-option ${
-                                          isAM ? "selected" : ""
-                                        }`}
-                                      >
-                                        AM
-                                      </button>
-                                      <button
-                                        onClick={() => setIsAM(false)}
-                                        className={`period-option ${
-                                          !isAM ? "selected" : ""
-                                        }`}
-                                      >
-                                        PM
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-
-                               
-                                <div className="calendar-section">
-                                 
-                                  <div className="month-nav">
-                                    <button onClick={handlePrevMonth}>
-                                      <ChevronLeft size={20} />
-                                    </button>
-                                    <h3>
-                                      {months[selectedMonth]}, {selectedYear}
-                                    </h3>
-                                    <button onClick={handleNextMonth}>
-                                      <ChevronRight size={20} />
-                                    </button>
-                                  </div>
-
-                                
-                                  <div className="weekdays">
-                                    {weekDays.map((day) => (
-                                      <div key={day} className="weekday">
-                                        {day}
-                                      </div>
-                                    ))}
-                                  </div>
-
-                                  
-                                  <div className="calendar-grid">
-                                    {calendarDays.map((dayObj, index) => (
-                                      <button
-                                        key={index}
-                                        onClick={() =>
-                                          dayObj.isCurrentMonth &&
-                                          setSelectedDate(dayObj.day)
-                                        }
-                                        className={`calendar-day ${
-                                          dayObj.isCurrentMonth
-                                            ? selectedDate === dayObj.day
-                                              ? "current-month selected"
-                                              : "current-month"
-                                            : "other-month"
-                                        }`}
-                                      >
-                                        {dayObj.day}
-                                      </button>
-                                    ))}
-                                  </div>
-
-                                 
-                                  <div className="action-buttons">
-                                    <button
-                                      onClick={() => {
-                                        setSelectedDate(new Date().getDate());
-                                        setSelectedMonth(new Date().getMonth());
-                                        setSelectedYear(
-                                          new Date().getFullYear()
-                                        );
-                                      }}
-                                      className="action-button"
-                                    >
-                                      Clear
-                                    </button>
-                                    <button
-                                      onClick={() => {
-                                        const today = new Date();
-                                        setSelectedDate(today.getDate());
-                                        setSelectedMonth(today.getMonth());
-                                        setSelectedYear(today.getFullYear());
-                                      }}
-                                      className="action-button"
-                                    >
-                                      Today
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-
-                              
-                              <div className="done-section">
-                                <button
-                                  onClick={() => setIsOpen(false)}
-                                  className="done-button"
-                                >
-                                  Done
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        <button
-                          className="btn"
-                          style={{
-                            background:
-                              "linear-gradient(90deg, rgba(123,97,255,1) 0%, rgba(217,75,255,1) 100%)",
-                            color: "white",
-                            borderRadius: "10px",
-                            padding: "6px 18px",
-                          }}
-                          onClick={handleApplyToSelectedFiles}
-                        >
-                          Apply to Selected Files
-                        </button>
-                      </div> */}
                     </div>
                   </div>
 
@@ -2495,20 +2069,55 @@ const Project = () => {
                       <input
                         type="number"
                         className="form-control"
+                        min="0"
                         step="0.25"
                         value={formData.estimatedHrs || ""}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = parseFloat(e.target.value) || 0;
                           setFormData((prev) => ({
                             ...prev,
-                            estimatedHrs: e.target.value,
-                          }))
-                        }
+                            estimatedHrs: value,
+                            // Auto-calculate cost when estimated hours change
+                            cost: value * (prev.hourlyRate || 0),
+                            inrCost:
+                              value *
+                              (prev.hourlyRate || 0) *
+                              (prev.exchangeRate || 1),
+                          }));
+                        }}
                         placeholder="00.00"
-                        disabled={formData.billingMode !== "estimated"}
+                        disabled={
+                          formData.billingMode !== "estimated" &&
+                          formData.billingMode !== undefined
+                        }
                       />
                       <div className="form-text text-white">
                         (in multiple of 0.25 only)
                       </div>
+                    </div>
+
+                    {/* Hourly Rate (auto-filled from client settings) */}
+                    <div className="col-md-2">
+                      <label className="form-label">Hourly Rate</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={formData.hourlyRate || ""}
+                        onChange={(e) => {
+                          const rate = parseFloat(e.target.value) || 0;
+                          setFormData((prev) => ({
+                            ...prev,
+                            hourlyRate: rate,
+                            // Recalculate costs when rate changes
+                            cost: prev.estimatedHrs * rate,
+                            inrCost:
+                              prev.estimatedHrs *
+                              rate *
+                              (prev.exchangeRate || 1),
+                          }));
+                        }}
+                        placeholder="Auto from Client"
+                      />
                     </div>
 
                     {/* Per Page Rate with radio */}
@@ -2523,6 +2132,11 @@ const Project = () => {
                             setFormData((prev) => ({
                               ...prev,
                               billingMode: e.target.value,
+                              // Reset estimated hours when switching to per page
+                              estimatedHrs:
+                                e.target.value === "perPage"
+                                  ? ""
+                                  : prev.estimatedHrs,
                             }))
                           }
                         />
@@ -2531,14 +2145,24 @@ const Project = () => {
                       <input
                         type="number"
                         className="form-control"
+                        min="0"
                         step="0.01"
                         value={formData.rate || ""}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const rate = parseFloat(e.target.value) || 0;
+                          const totalPages = formData.files.reduce(
+                            (sum, file) => sum + (file.pageCount || 0),
+                            0
+                          );
                           setFormData((prev) => ({
                             ...prev,
-                            rate: e.target.value,
-                          }))
-                        }
+                            rate: rate,
+                            // Auto-calculate cost when rate changes
+                            cost: rate * totalPages,
+                            inrCost:
+                              rate * totalPages * (prev.exchangeRate || 1),
+                          }));
+                        }}
                         placeholder="00.00"
                         disabled={formData.billingMode !== "perPage"}
                       />
@@ -2547,14 +2171,19 @@ const Project = () => {
                       </div>
                     </div>
 
-                    {/* Currency (auto-filled) */}
+                    {/* Currency (auto-filled from client settings) */}
                     <div className="col-md-2">
                       <label className="form-label">Currency</label>
                       <input
                         type="text"
                         className="form-control"
-                        value={formData.currency}
-                        readOnly
+                        value={formData.currency || "USD"} // Default to USD if not set
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            currency: e.target.value,
+                          }))
+                        }
                         placeholder="Auto from Client"
                       />
                     </div>
@@ -2565,7 +2194,7 @@ const Project = () => {
                       <input
                         type="text"
                         className="form-control"
-                        value={formData.cost?.toFixed(2)}
+                        value={formData.cost?.toFixed(2) || "0.00"}
                         readOnly
                         placeholder="Auto Calculated"
                       />
@@ -2577,7 +2206,7 @@ const Project = () => {
                       <input
                         type="text"
                         className="form-control"
-                        value={formData.inrCost?.toFixed(2)}
+                        value={formData.inrCost?.toFixed(2) || "0.00"}
                         readOnly
                         placeholder="Auto Calculated"
                       />
@@ -2585,7 +2214,456 @@ const Project = () => {
                   </div>
 
                   {/* Save Button */}
-                  <div className="text-end">
+                  <div className="d-flex justify-content-between">
+                    <div className="d-flex align-items-center mt-3 gap-3">
+                      <label
+                        className="text-white"
+                        style={{ fontWeight: "bold" }}
+                      >
+                        Deadline
+                      </label>
+                      <div className="max-w-md mx-auto">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            value={formatDateTime()}
+                            readOnly
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                            placeholder="Select date and time"
+                          />
+                        </div>
+
+                        {isOpen && (
+                          <div className="calendar-dropdown">
+                            <style>{`
+        .calendar-dropdown {
+          position: absolute;
+          z-index: 9999;
+          margin-top: 8px;
+          background: white;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+          padding: 16px;
+          width: calc(100vw - 32px);
+          max-width: 30rem;
+          left: 50%;
+          transform: translateX(-50%);
+        }
+        
+        .time-display {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 16px;
+          padding: 12px;
+          background: #2563eb;
+          color: white;
+          border-radius: 6px;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        
+        .time-display .time {
+          font-size: 1.5rem;
+          font-weight: bold;
+          min-width: 80px;
+        }
+        
+        .time-display .period {
+          font-size: 0.875rem;
+        }
+        
+        .time-display .date {
+          font-size: 0.875rem;
+        }
+        
+        .time-calendar-container {
+          display: flex;
+          gap: 16px;
+          flex-direction: column;
+        }
+        
+        @media (min-width: 640px) {
+          .time-calendar-container {
+            flex-direction: row;
+          }
+        }
+        
+        .time-selector {
+          display: flex;
+          gap: 8px;
+          justify-content: center;
+        }
+        
+        .time-column {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        
+        .time-column-label {
+          font-size: 0.75rem;
+          color: #6b7280;
+          margin-bottom: 4px;
+        }
+        
+        .time-scroll {
+          height: 200px;
+          overflow-y: auto;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        
+        .time-scroll::-webkit-scrollbar {
+          display: none;
+        }
+        
+        .time-options {
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .time-option {
+          padding: 4px 8px;
+          font-size: 0.875rem;
+          min-width: 40px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          color: #374151;
+        }
+        
+        .time-option:hover {
+          background: #dbeafe;
+        }
+        
+        .time-option.selected-hour {
+          background: #2563eb;
+          color: white;
+        }
+        
+        .time-option.selected-minute {
+          background: #ef4444;
+          color: white;
+        }
+        
+        .period-options {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        
+        .period-option {
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 0.875rem;
+          background: #f3f4f6;
+          color: #374151;
+          border: none;
+          cursor: pointer;
+        }
+        
+        .period-option:hover {
+          background: #e5e7eb;
+        }
+        
+        .period-option.selected {
+          background: #2563eb;
+          color: white;
+        }
+        
+        .calendar-section {
+          flex: 1;
+        }
+        
+        .month-nav {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 12px;
+        }
+        
+        .month-nav button {
+          padding: 4px;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          border-radius: 4px;
+        }
+        
+        .month-nav button:hover {
+          background: #f3f4f6;
+        }
+        
+        .month-nav h3 {
+          font-weight: 600;
+          color: #1f2937;
+          text-align: center;
+          flex-grow: 1;
+          margin: 0 8px;
+        }
+        
+        .weekdays {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+          gap: 4px;
+          margin-bottom: 8px;
+        }
+        
+        .weekday {
+          text-align: center;
+          font-size: 0.75rem;
+          font-weight: 500;
+          color: #6b7280;
+          padding: 4px 0;
+        }
+        
+        .calendar-grid {
+          display: grid;
+          grid-template-columns: repeat(7, 1fr);
+          gap: 4px;
+        }
+        
+        .calendar-day {
+          width: 100%;
+          aspect-ratio: 1;
+          font-size: 0.875rem;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: none;
+          cursor: pointer;
+          background: transparent;
+        }
+        
+        .calendar-day.current-month {
+          color: #1f2937;
+        }
+        
+        .calendar-day.current-month:hover {
+          background: #dbeafe;
+        }
+        
+        .calendar-day.selected {
+          background: #2563eb;
+          color: white;
+        }
+        
+        .calendar-day.other-month {
+          color: #9ca3af;
+        }
+        
+        .action-buttons {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 16px;
+        }
+        
+        .action-button {
+          color: #2563eb;
+          font-size: 0.875rem;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          text-decoration: none;
+        }
+        
+        .action-button:hover {
+          text-decoration: underline;
+        }
+        
+        .done-section {
+          display: flex;
+          justify-content: flex-end;
+          margin-top: 16px;
+          padding-top: 12px;
+          border-top: 1px solid #e5e7eb;
+        }
+        
+        .done-button {
+          padding: 8px 16px;
+          background: #2563eb;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+        
+        .done-button:hover {
+          background: #1d4ed8;
+        }
+      `}</style>
+
+                            <div className="time-display">
+                              <div className="time">
+                                {selectedHour.toString().padStart(2, "0")}:
+                                {selectedMinute.toString().padStart(2, "0")}
+                              </div>
+                              <div className="period">{isAM ? "AM" : "PM"}</div>
+                              <div className="date">
+                                {months[selectedMonth].substring(0, 3)},{" "}
+                                {selectedYear}
+                              </div>
+                            </div>
+
+                            <div className="time-calendar-container">
+                              <div className="time-selector">
+                                <div className="time-column">
+                                  <div className="time-column-label">Hour</div>
+                                  <div className="time-scroll">
+                                    <div className="time-options">
+                                      {[
+                                        12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+                                      ].map((hour) => (
+                                        <button
+                                          key={hour}
+                                          onClick={() => setSelectedHour(hour)}
+                                          className={`time-option ${
+                                            selectedHour === hour
+                                              ? "selected-hour"
+                                              : ""
+                                          }`}
+                                        >
+                                          {hour.toString().padStart(2, "0")}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="time-column">
+                                  <div className="time-column-label">Min</div>
+                                  <div className="time-scroll">
+                                    <div className="time-options">
+                                      {[0, 15, 30, 45].map((minute) => (
+                                        <button
+                                          key={minute}
+                                          onClick={() =>
+                                            setSelectedMinute(minute)
+                                          }
+                                          className={`time-option ${
+                                            selectedMinute === minute
+                                              ? "selected-minute"
+                                              : ""
+                                          }`}
+                                        >
+                                          {minute.toString().padStart(2, "0")}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="time-column">
+                                  <div className="time-column-label">
+                                    Period
+                                  </div>
+                                  <div className="period-options">
+                                    <button
+                                      onClick={() => setIsAM(true)}
+                                      className={`period-option ${
+                                        isAM ? "selected" : ""
+                                      }`}
+                                    >
+                                      AM
+                                    </button>
+                                    <button
+                                      onClick={() => setIsAM(false)}
+                                      className={`period-option ${
+                                        !isAM ? "selected" : ""
+                                      }`}
+                                    >
+                                      PM
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="calendar-section">
+                                <div className="month-nav">
+                                  <button onClick={handlePrevMonth}>
+                                    <ChevronLeft size={20} />
+                                  </button>
+                                  <h3>
+                                    {months[selectedMonth]}, {selectedYear}
+                                  </h3>
+                                  <button onClick={handleNextMonth}>
+                                    <ChevronRight size={20} />
+                                  </button>
+                                </div>
+
+                                <div className="weekdays">
+                                  {weekDays.map((day) => (
+                                    <div key={day} className="weekday">
+                                      {day}
+                                    </div>
+                                  ))}
+                                </div>
+
+                                <div className="calendar-grid">
+                                  {calendarDays.map((dayObj, index) => (
+                                    <button
+                                      key={index}
+                                      onClick={() =>
+                                        dayObj.isCurrentMonth &&
+                                        setSelectedDate(dayObj.day)
+                                      }
+                                      className={`calendar-day ${
+                                        dayObj.isCurrentMonth
+                                          ? selectedDate === dayObj.day
+                                            ? "current-month selected"
+                                            : "current-month"
+                                          : "other-month"
+                                      }`}
+                                    >
+                                      {dayObj.day}
+                                    </button>
+                                  ))}
+                                </div>
+
+                                <div className="action-buttons">
+                                  <button
+                                    onClick={() => {
+                                      setSelectedDate(new Date().getDate());
+                                      setSelectedMonth(new Date().getMonth());
+                                      setSelectedYear(new Date().getFullYear());
+                                    }}
+                                    className="action-button"
+                                  >
+                                    Clear
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      const today = new Date();
+                                      setSelectedDate(today.getDate());
+                                      setSelectedMonth(today.getMonth());
+                                      setSelectedYear(today.getFullYear());
+                                    }}
+                                    className="action-button"
+                                  >
+                                    Today
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="done-section">
+                              <button
+                                onClick={() => setIsOpen(false)}
+                                className="done-button"
+                              >
+                                Done
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                     <button type="submit" className="btn btn-warning fw-bold">
                       Save changes
                     </button>
@@ -2604,8 +2682,8 @@ const Project = () => {
           role="dialog"
         >
           <div className="modal-dialog modal-lg">
-            <div className="modal-content bg-dark text-white">
-              <div className="modal-header bg-dark border-secondary">
+            <div className="modal-content  text-white">
+              <div className="modal-header border-secondary">
                 <h5 className="modal-title text-white">Settings</h5>
                 <button
                   type="button"
@@ -2621,11 +2699,11 @@ const Project = () => {
 
                 {/* Manage Clients */}
                 <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Clients</h6>
+                  <h6 className="mb-3 text-white ">Manage Clients</h6>
                   <div className="input-group mb-2">
                     <input
                       type="text"
-                      className="form-control bg-secondary text-white border-secondary"
+                      className="form-control text-white border-secondary"
                       placeholder="New Client Alias Name"
                       value={newClient.alias}
                       onChange={(e) =>
@@ -2673,17 +2751,22 @@ const Project = () => {
                         setNewClient({ ...newClient, managers: e.target.value })
                       }
                     />
-                    <button className="btn btn-primary" onClick={handleAddClient}
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleAddClient}
                       disabled={
                         !newClient.alias ||
                         !newClient.actualName ||
                         !newClient.country
-                      }>+</button>
+                      }
+                    >
+                      +
+                    </button>
                   </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
+                  <div className="border rounded p-2 mb-2 border-secondary bg-card">
                     {clients.map((client, index) => (
                       <div key={index}>
-                        <div className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-2 rounded">
+                        <div className="d-flex justify-content-between align-items-center py-2 px-2  mb-2 rounded">
                           <span className="text-white">
                             <strong>{client.alias}</strong> ({client.actualName}
                             )<br />
@@ -2729,14 +2812,19 @@ const Project = () => {
                       value={newTask}
                       onChange={(e) => setNewTask(e.target.value)}
                     />
-                    <button className="btn btn-primary" onClick={handleAddTask}
-                      disabled={!newTask}>+</button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleAddTask}
+                      disabled={!newTask}
+                    >
+                      +
+                    </button>
                   </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
+                  <div className="border rounded p-2 mb-2 border-secondary bg-card">
                     {tasks.map((task, index) => (
                       <div
                         key={index}
-                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
+                        className="d-flex justify-content-between align-items-center py-2 px-2  mb-1 rounded"
                       >
                         <span className="text-white">{task}</span>
                         <div className="btn-group btn-group-sm">
@@ -2772,14 +2860,19 @@ const Project = () => {
                       value={newapplication}
                       onChange={(e) => setNewapplication(e.target.value)}
                     />
-                    <button className="btn btn-primary" onClick={handleAddapplication}
-                      disabled={!newapplication}>+</button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleAddapplication}
+                      disabled={!newapplication}
+                    >
+                      +
+                    </button>
                   </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
+                  <div className="border rounded p-2 mb-2 border-secondary bg-card">
                     {applications.map((application, index) => (
                       <div
                         key={index}
-                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
+                        className="d-flex justify-content-between align-items-center py-2 px-2  mb-1 rounded"
                       >
                         <span className="text-white">{application}</span>
                         <div className="btn-group btn-group-sm">
@@ -2819,14 +2912,19 @@ const Project = () => {
                       value={newLanguage}
                       onChange={(e) => setNewLanguage(e.target.value)}
                     />
-                    <button className="btn btn-primary" onClick={handleAddLanguage}
-                      disabled={!newLanguage}>+</button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleAddLanguage}
+                      disabled={!newLanguage}
+                    >
+                      +
+                    </button>
                   </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
+                  <div className="border rounded p-2 mb-2 border-secondary bg-card">
                     {languages.map((language, index) => (
                       <div
                         key={index}
-                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
+                        className="d-flex justify-content-between align-items-center py-2 px-2  mb-1 rounded"
                       >
                         <span className="text-white">{language}</span>
                         <div className="btn-group btn-group-sm">
@@ -2884,8 +2982,8 @@ const Project = () => {
                       />
                     </div>
                   </div>
-                  <div className="border rounded p-2 mb-2 border-secondary table-gradient-bg">
-                    <table className="table table-dark table-sm mb-0">
+                  <div className="border rounded p-2 mb-2 border-secondary ">
+                    <table className="table table-gradient-bg table-sm mb-0">
                       <thead>
                         <tr>
                           <th>Currency</th>

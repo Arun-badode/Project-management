@@ -1,8 +1,10 @@
-import React, { useRef, useEffect } from "react";
+import axios from "axios";
+import React, { useRef, useEffect, useState } from "react";
 
-const ProjectsTable = ({ projects, onViewProject, onMarkComplete, onDeleteProject, expandedRow }) => {
+const ProjectsTable = ({  onViewProject, onMarkComplete, onDeleteProject, expandedRow }) => {
   const scrollContainerRef = useRef(null);
   const fakeScrollbarRef = useRef(null);
+  const token = localStorage.getItem("authToken");
 
   // Status badge color mapping
   const getStatusColor = (status) => {
@@ -53,6 +55,33 @@ const ProjectsTable = ({ projects, onViewProject, onMarkComplete, onDeleteProjec
       };
     }
   }, []);
+
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    axios
+      .get("https://hrb5wx2v-8800.inc1.devtunnels.ms/api/project/getAllProjects",
+        {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+            },
+          }
+      )
+      .then((res) => {
+        console.log("Projects fetched successfully", res.data);
+        setProjects(res.data?.projects); // Assuming API returns { data: [...] }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching projects", err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+
 
   return (
     <>
@@ -110,23 +139,23 @@ const ProjectsTable = ({ projects, onViewProject, onMarkComplete, onDeleteProjec
             </tr>
           </thead>
           <tbody>
-            {projects.map((project, index) => (
+            {projects?.map((project, index) => (
               <React.Fragment key={project.id}>
                 <tr
                   className={
-                    expandedRow === project.id ? "table-active text-center" : ""
+                    expandedRow === project.id ? "table-active text-center" : "text-center"
                   }
                 >
                   <td>{index + 1}</td>
-                  <td>{project.title}</td>
-                  <td>{project.client}</td>
-                  <td>{project.task}</td>
-                  <td>{project.language}</td>
-                  <td>{project.platform}</td>
-                  <td>{project.totalPages}</td>
-                  <td>{project.dueDate}</td>
-                  <td>{project.handlers}</td>
-                  <td>{project.qaReviewers}</td>
+                  <td>{project.projectTitle}</td>
+                  <td>{project.clientName}</td>
+                  <td>{project.task_name}</td>
+                  <td>{project.language_name}</td>
+                  <td>{project.application_name}</td>
+                  <td>{project.totalProjectPages}</td>
+                  <td>{project.qcDueDate}</td>
+                  <td>{project.qcHrs}</td>
+                  <td>{project.receiveDate}</td>
                   <td>
                     <div
                       className="progress cursor-pointer"
@@ -189,6 +218,32 @@ const ProjectsTable = ({ projects, onViewProject, onMarkComplete, onDeleteProjec
                     </div>
                   </td>
                 </tr>
+                {expandedRow === project.id && (
+                  <tr className="table-active">
+                    <td colSpan="12" className="p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.075)" }}>
+                      <div className="bg-card p-3 rounded" style={{ 
+                        border: "1px solid #dee2e6",
+                        
+                      }}>
+                        <h5 className="text-dark">Project Details</h5>
+                        <div className="row mt-3">
+                          <div className="col-md-6">
+                            <p><strong>Description:</strong> {project.description || "No description available"}</p>
+                            <p><strong>Start Date:</strong> {project.startDate || "Not specified"}</p>
+                          </div>
+                          <div className="col-md-6">
+                            <p><strong>Status:</strong> 
+                              <span className={`badge ${getStatusColor(project.status)} ms-2`}>
+                                {project.status}
+                              </span>
+                            </p>
+                            <p><strong>Priority:</strong> {project.priority || "Normal"}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </React.Fragment>
             ))}
           </tbody>

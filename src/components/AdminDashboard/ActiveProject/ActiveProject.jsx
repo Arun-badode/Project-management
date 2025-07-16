@@ -15,8 +15,11 @@ const ActiveProject = () => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const isAdmin = userRole === "Admin";
-
+  const [batchHandler, setBatchHandler] = useState("");
+  const [batchQAReviewer, setBatchQAReviewer] = useState("");
+  const [file, setFile] = useState("");
   const [isEdit, setIsEdit] = useState(null);
+
 
   const initialFormData = {
     title: "",
@@ -390,152 +393,124 @@ const ActiveProject = () => {
     setActivebutton(type);
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  try {
-    // Calculate total pages per language
-    const totalPagesPerLang = formData.files.reduce(
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      // Calculate total pages per language
+      const totalPagesPerLang = formData.files.reduce(
+        (sum, file) => sum + (file.pageCount || 0),
+        0
+      );
+
+      // Prepare the API payload
+      const payload = {
+        projectTitle: formData.title,
+        clientId: getClientId(formData.client), // You'll need to implement this
+        country: formData.country,
+        projectManagerId: getProjectManagerId(formData.projectManager), // Implement this
+        taskId: getTaskId(formData.tasks[0]), // Taking first task - adjust if needed
+        applicationId: getApplicationId(formData.application[0]), // Taking first app
+        languageId: getLanguageId(formData.languages[0]), // Taking first language
+        totalPagesLang: formatLanguagesAndPages(formData), // Format as "EN:10,FR:10"
+        totalProjectPages: totalPagesPerLang * formData.languages.length,
+        receiveDate: formData.receivedDate,
+        serverPath: formData.serverPath,
+        notes: formData.notes,
+        estimatedHours: formData.estimatedHrs || 0,
+        hourlyRate: formData.hourlyRate || 0,
+        perPageRate: formData.rate || 0,
+        currency: formData.currency,
+        totalCost: formData.cost || 0,
+        deadline: formatDeadline(), // Format from your calendar state
+      };
+
+      // Make the API call
+      const response = await fetch(
+        "https://hrb5wx2v-8800.inc1.devtunnels.ms/api/project/addProject",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Project created successfully:", result);
+
+      // Close modal and reset form
+      setShowCreateModal(false);
+      setFormData(initialFormData);
+
+      // Show success message
+      alert("Project created successfully!");
+
+      // If you're maintaining local state, add the new project
+      const newProject = {
+        ...formData,
+        id: result.id || projects.length + 1, // Use API response ID if available
+        status: "created",
+        receivedDate:
+          formData.receivedDate || new Date().toISOString().split("T")[0],
+      };
+      setProjects([...projects, newProject]);
+    } catch (error) {
+      console.error("Error creating project:", error);
+      alert(`Failed to create project: ${error.message}`);
+    }
+  };
+
+  // Helper functions you need to implement:
+
+  const getClientId = (clientName) => {
+    // Find the client ID from your clientOptions data
+    // Example: return clientOptions.find(c => c.name === clientName)?.id || 0;
+    return 1; // Replace with actual implementation
+  };
+
+  const getProjectManagerId = (pmName) => {
+    // Find the PM ID from your projectManagerOptions
+    return 1; // Replace with actual implementation
+  };
+
+  const getTaskId = (taskName) => {
+    // Find the task ID from your taskOptions
+    return 1; // Replace with actual implementation
+  };
+
+  const getApplicationId = (appName) => {
+    // Find the application ID from your applicationOptions
+    return 1; // Replace with actual implementation
+  };
+
+  const getLanguageId = (languageName) => {
+    // Find the language ID from your languageOptions
+    return 1; // Replace with actual implementation
+  };
+
+  const formatLanguagesAndPages = (formData) => {
+    const pagesPerLang = formData.files.reduce(
       (sum, file) => sum + (file.pageCount || 0),
       0
     );
-    
-    // Prepare the API payload
-    const payload = {
-      projectTitle: formData.title,
-      clientId: getClientId(formData.client), // You'll need to implement this
-      country: formData.country,
-      projectManagerId: getProjectManagerId(formData.projectManager), // Implement this
-      taskId: getTaskId(formData.tasks[0]), // Taking first task - adjust if needed
-      applicationId: getApplicationId(formData.application[0]), // Taking first app
-      languageId: getLanguageId(formData.languages[0]), // Taking first language
-      totalPagesLang: formatLanguagesAndPages(formData), // Format as "EN:10,FR:10"
-      totalProjectPages: totalPagesPerLang * formData.languages.length,
-      receiveDate: formData.receivedDate,
-      serverPath: formData.serverPath,
-      notes: formData.notes,
-      estimatedHours: formData.estimatedHrs || 0,
-      hourlyRate: formData.hourlyRate || 0,
-      perPageRate: formData.rate || 0,
-      currency: formData.currency,
-      totalCost: formData.cost || 0,
-      deadline: formatDeadline(), // Format from your calendar state
-    };
+    return formData.languages
+      .map((lang) => `${lang}:${pagesPerLang}`)
+      .join(",");
+  };
 
-    // Make the API call
-   const response = await fetch('https://hrb5wx2v-8800.inc1.devtunnels.ms/api/project/addProject', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem("authToken")}`
-  },
-  body: JSON.stringify(payload),
-});
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`);
-    }
-
-    const result = await response.json();
-    console.log('Project created successfully:', result);
-    
-    // Close modal and reset form
-    setShowCreateModal(false);
-    setFormData(initialFormData);
-    
-    // Show success message
-    alert('Project created successfully!');
-    
-    // If you're maintaining local state, add the new project
-    const newProject = {
-      ...formData,
-      id: result.id || projects.length + 1, // Use API response ID if available
-      status: "created",
-      receivedDate: formData.receivedDate || new Date().toISOString().split('T')[0],
-    };
-    setProjects([...projects, newProject]);
-    
-  } catch (error) {
-    console.error('Error creating project:', error);
-    alert(`Failed to create project: ${error.message}`);
-  }
-};
-
-
-// Helper functions you need to implement:
-
-const getClientId = (clientName) => {
-  // Find the client ID from your clientOptions data
-  // Example: return clientOptions.find(c => c.name === clientName)?.id || 0;
-  return 1; // Replace with actual implementation
-};
-
-const getProjectManagerId = (pmName) => {
-  // Find the PM ID from your projectManagerOptions
-  return 1; // Replace with actual implementation
-};
-
-const getTaskId = (taskName) => {
-  // Find the task ID from your taskOptions
-  return 1; // Replace with actual implementation
-};
-
-const getApplicationId = (appName) => {
-  // Find the application ID from your applicationOptions
-  return 1; // Replace with actual implementation
-};
-
-const getLanguageId = (languageName) => {
-  // Find the language ID from your languageOptions
-  return 1; // Replace with actual implementation
-};
-
-const formatLanguagesAndPages = (formData) => {
-  const pagesPerLang = formData.files.reduce(
-    (sum, file) => sum + (file.pageCount || 0),
-    0
-  );
-  return formData.languages.map(lang => `${lang}:${pagesPerLang}`).join(',');
-};
-
-const formatDeadline = () => {
-  // Format from your calendar state variables
-  const year = selectedYear;
-  const month = (selectedMonth + 1).toString().padStart(2, '0');
-  const day = selectedDate.toString().padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-
-const fetchProjects = async () => {
-  try {
-    const response = await fetch(
-      "https://hrb5wx2v-8800.inc1.devtunnels.ms/api/project/getAllProjects",
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch projects");
-    }
-
-    const data = await response.json();
-    setFilteredProjects(data.projects || []);
-  } catch (error) {
-    console.error("Error fetching projects:", error);
-    alert("Failed to load project data");
-  }
-};
-
-
-useEffect(() => {
-  fetchProjects();
-}, []);
-
-
+  const formatDeadline = () => {
+    // Format from your calendar state variables
+    const year = selectedYear;
+    const month = (selectedMonth + 1).toString().padStart(2, "0");
+    const day = selectedDate.toString().padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
   const handleDeleteProject = (id) => {
     const project = projects.find((p) => p.id === id);
     if (!project) return;
@@ -1172,9 +1147,9 @@ useEffect(() => {
                         value={
                           formData.projectManager
                             ? {
-                                value: formData.projectManager,
-                                label: formData.projectManager,
-                              }
+                              value: formData.projectManager,
+                              label: formData.projectManager,
+                            }
                             : null
                         }
                         onChange={(opt) =>
@@ -1206,9 +1181,9 @@ useEffect(() => {
                         value={
                           formData.tasks.length
                             ? formData.tasks.map((t) => ({
-                                value: t,
-                                label: t,
-                              }))
+                              value: t,
+                              label: t,
+                            }))
                             : []
                         }
                         onChange={(opts) =>
@@ -1237,9 +1212,9 @@ useEffect(() => {
                         value={
                           formData.application.length
                             ? formData.application.map((a) => ({
-                                value: a,
-                                label: a,
-                              }))
+                              value: a,
+                              label: a,
+                            }))
                             : []
                         }
                         onChange={(opts) =>
@@ -1269,9 +1244,9 @@ useEffect(() => {
                       value={
                         formData.languages.length
                           ? formData.languages.map((l) => ({
-                              value: l,
-                              label: l,
-                            }))
+                            value: l,
+                            label: l,
+                          }))
                           : []
                       }
                       onChange={(opts) =>
@@ -1451,8 +1426,6 @@ useEffect(() => {
                           ))}
                         </tbody>
                       </table>
-
-                    
                     </div>
                   </div>
 
@@ -2019,11 +1992,10 @@ useEffect(() => {
                                         <button
                                           key={hour}
                                           onClick={() => setSelectedHour(hour)}
-                                          className={`time-option ${
-                                            selectedHour === hour
-                                              ? "selected-hour"
-                                              : ""
-                                          }`}
+                                          className={`time-option ${selectedHour === hour
+                                            ? "selected-hour"
+                                            : ""
+                                            }`}
                                         >
                                           {hour.toString().padStart(2, "0")}
                                         </button>
@@ -2042,11 +2014,10 @@ useEffect(() => {
                                           onClick={() =>
                                             setSelectedMinute(minute)
                                           }
-                                          className={`time-option ${
-                                            selectedMinute === minute
-                                              ? "selected-minute"
-                                              : ""
-                                          }`}
+                                          className={`time-option ${selectedMinute === minute
+                                            ? "selected-minute"
+                                            : ""
+                                            }`}
                                         >
                                           {minute.toString().padStart(2, "0")}
                                         </button>
@@ -2062,17 +2033,15 @@ useEffect(() => {
                                   <div className="period-options">
                                     <button
                                       onClick={() => setIsAM(true)}
-                                      className={`period-option ${
-                                        isAM ? "selected" : ""
-                                      }`}
+                                      className={`period-option ${isAM ? "selected" : ""
+                                        }`}
                                     >
                                       AM
                                     </button>
                                     <button
                                       onClick={() => setIsAM(false)}
-                                      className={`period-option ${
-                                        !isAM ? "selected" : ""
-                                      }`}
+                                      className={`period-option ${!isAM ? "selected" : ""
+                                        }`}
                                     >
                                       PM
                                     </button>
@@ -2109,13 +2078,12 @@ useEffect(() => {
                                         dayObj.isCurrentMonth &&
                                         setSelectedDate(dayObj.day)
                                       }
-                                      className={`calendar-day ${
-                                        dayObj.isCurrentMonth
-                                          ? selectedDate === dayObj.day
-                                            ? "current-month selected"
-                                            : "current-month"
-                                          : "other-month"
-                                      }`}
+                                      className={`calendar-day ${dayObj.isCurrentMonth
+                                        ? selectedDate === dayObj.day
+                                          ? "current-month selected"
+                                          : "current-month"
+                                        : "other-month"
+                                        }`}
                                     >
                                       {dayObj.day}
                                     </button>
@@ -2194,20 +2162,19 @@ useEffect(() => {
             {["all", "nearDue", "overdue", "Adobe", "MSOffice"].map((btn) => (
               <button
                 key={btn}
-                className={`gradient-button ${
-                  activeButton === btn ? "active-filter" : ""
-                }`}
+                className={`gradient-button ${activeButton === btn ? "active-filter" : ""
+                  }`}
                 onClick={() => handleCardFilter(btn)}
               >
                 {btn === "all"
                   ? "All"
                   : btn === "nearDue"
-                  ? "Near Due"
-                  : btn === "overdue"
-                  ? "Over Due"
-                  : btn === "Adobe"
-                  ? "Adobe"
-                  : "MS Office"}
+                    ? "Near Due"
+                    : btn === "overdue"
+                      ? "Over Due"
+                      : btn === "Adobe"
+                        ? "Adobe"
+                        : "MS Office"}
               </button>
             ))}
           </div>
@@ -2367,12 +2334,12 @@ useEffect(() => {
                       }
                     >
                       <td>{index + 1}</td>
-                      <td>{project.projectTitle}</td>
-                      <td>{project.clientId}</td>
-                      <td>{project.taskId}</td>
-                      <td>{project.languageId}</td>
-                      <td>{project.applicationId}</td>
-                      <td>{project.totalProjectPages}</td>
+                      <td>{project.title}</td>
+                      <td>{project.client}</td>
+                      <td>{project.task}</td>
+                      <td>{project.language}</td>
+                      <td>{project.application}</td>
+                      <td>{project.totalPages}</td>
                       <td>{project.deadline}</td>
                       <td>{project.readyDeadline}</td>
                       <td>{project.qcHrs}</td>
@@ -2387,13 +2354,12 @@ useEffect(() => {
                         >
                           <div
                             className={`progress-bar 
-                          ${
-                            project.progress < 30
-                              ? "bg-danger"
-                              : project.progress < 70
-                              ? "bg-warning"
-                              : "bg-success"
-                          }`}
+                          ${project.progress < 30
+                                ? "bg-danger"
+                                : project.progress < 70
+                                  ? "bg-warning"
+                                  : "bg-success"
+                              }`}
                             role="progressbar"
                             style={{ width: `${project.progress}%` }}
                             aria-valuenow={project.progress}
@@ -2411,11 +2377,10 @@ useEffect(() => {
                             onClick={() => handleViewProject(project)}
                           >
                             <i
-                              className={`fas ${
-                                expandedRow === project.id
-                                  ? "fa-chevron-up"
-                                  : "fa-eye"
-                              }`}
+                              className={`fas ${expandedRow === project.id
+                                ? "fa-chevron-up"
+                                : "fa-eye"
+                                }`}
                             ></i>
                           </button>
                           <button
@@ -2458,6 +2423,82 @@ useEffect(() => {
                               </div>
 
                               {/* Batch Edit Controls */}
+                              {selectedFiles.length > 0 && (
+                                <div className="row g-3 mb-3 align-items-center">
+                                  <div className="col-md-3">
+                                    <label className="form-label">Batch Handler</label>
+                                    <select
+                                      className="form-select form-select-sm"
+                                      value={file.handler ?? ""}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+
+                                        // 1. Update the files array
+                                        const updatedFiles = project.files.map((f) => {
+                                          if (selectedFiles.some((sf) => sf.id === f.id)) {
+                                            return { ...f, handler: value };
+                                          }
+                                          return f;
+                                        });
+
+                                        // 2. Update the selected project state
+                                        setSelectedProject((prevProject) => ({
+                                          ...prevProject,
+                                          files: updatedFiles,
+                                        }));
+
+                                        // 3. Optionally update selectedFiles too if you're relying on it elsewhere
+                                        const updatedSelectedFiles = selectedFiles.map((f) =>
+                                          ({ ...f, handler: value })
+                                        );
+                                        setSelectedFiles(updatedSelectedFiles);
+
+                                        // 4. Flag for unsaved changes
+                                        setHasUnsavedChanges(true);
+                                      }}
+                                    >
+                                      <option value="">Not Assigned</option>
+                                      <option value="John Doe">John Doe</option>
+                                      <option value="Jane Smith">Jane Smith</option>
+                                      <option value="Mike Johnson">Mike Johnson</option>
+                                    </select>
+
+
+
+                                  </div>
+
+                                  <div className="col-md-3">
+                                    <label className="form-label">Batch QA Reviewer</label>
+                                    <select
+                                      className="form-select form-select-sm"
+                                      value={file.qaReviewer ?? ""}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+
+                                        const updatedFiles = project.files.map((f) =>
+                                          selectedFiles.some((sf) => sf.id === f.id)
+                                            ? { ...f, qaReviewer: value }
+                                            : f
+                                        );
+
+                                        setSelectedProject(prev => ({
+                                          ...prev,
+                                          files: updatedFiles
+                                        }));
+
+                                        setHasUnsavedChanges(true);
+                                      }}
+                                    >
+                                      <option value="">Not Assigned</option>
+                                      <option value="Sarah Williams">Sarah Williams</option>
+                                      <option value="David Brown">David Brown</option>
+                                      <option value="Emily Davis">Emily Davis</option>
+                                    </select>
+
+
+                                  </div>
+                                </div>
+                              )}
 
                               {/* Files Table */}
                               <div className="table-responsive">
@@ -2468,7 +2509,7 @@ useEffect(() => {
                                       position: "sticky",
                                       top: 0,
                                       zIndex: 0,
-                                      backgroundColor: "#fff", // Match your background color
+                                      backgroundColor: "#fff",
                                     }}
                                   >
                                     <tr className="text-center">
@@ -2477,14 +2518,11 @@ useEffect(() => {
                                           type="checkbox"
                                           className="form-check-input"
                                           checked={
-                                            selectedFiles.length ===
-                                            project?.files?.length
+                                            selectedFiles.length === project?.files?.length
                                           }
                                           onChange={(e) => {
                                             if (e.target.checked) {
-                                              setSelectedFiles([
-                                                ...project.files,
-                                              ]);
+                                              setSelectedFiles([...project.files]);
                                             } else {
                                               setSelectedFiles([]);
                                             }
@@ -2506,23 +2544,17 @@ useEffect(() => {
                                       <tr
                                         key={file.id}
                                         className={
-                                          selectedFiles.some(
-                                            (f) => f.id === file.id
-                                          )
+                                          selectedFiles.some((f) => f.id === file.id)
                                             ? "table-primary text-center"
-                                            : ""
+                                            : "text-center"
                                         }
                                       >
                                         <td>
                                           <input
                                             type="checkbox"
                                             className="form-check-input"
-                                            checked={selectedFiles.some(
-                                              (f) => f.id === file.id
-                                            )}
-                                            onChange={() =>
-                                              toggleFileSelection(file)
-                                            }
+                                            checked={selectedFiles.some((f) => f.id === file.id)}
+                                            onChange={() => toggleFileSelection(file)}
                                           />
                                         </td>
                                         <td>{file.name}</td>
@@ -2532,72 +2564,23 @@ useEffect(() => {
                                         <td>
                                           <select
                                             className="form-select form-select-sm"
-                                            value={file.handler || ""}
-                                            onChange={(e) => {
-                                              const updatedFiles =
-                                                project.files.map((f) =>
-                                                  f.id === file.id
-                                                    ? {
-                                                        ...f,
-                                                        handler: e.target.value,
-                                                      }
-                                                    : f
-                                                );
-                                              setSelectedProject({
-                                                ...project,
-                                                files: updatedFiles,
-                                              });
-                                              setHasUnsavedChanges(true);
-                                            }}
+                                            
                                           >
-                                            <option value="">
-                                              Not Assigned
-                                            </option>
-                                            <option value="John Doe">
-                                              John Doe
-                                            </option>
-                                            <option value="Jane Smith">
-                                              Jane Smith
-                                            </option>
-                                            <option value="Mike Johnson">
-                                              Mike Johnson
-                                            </option>
+                                            <option value="">Not Assigned</option>
+                                            <option value="John Doe">John Doe</option>
+                                            <option value="Jane Smith">Jane Smith</option>
+                                            <option value="Mike Johnson">Mike Johnson</option>
                                           </select>
                                         </td>
                                         <td>
                                           <select
                                             className="form-select form-select-sm"
-                                            value={file.qaReviewer || ""}
-                                            onChange={(e) => {
-                                              const updatedFiles =
-                                                project.files.map((f) =>
-                                                  f.id === file.id
-                                                    ? {
-                                                        ...f,
-                                                        qaReviewer:
-                                                          e.target.value,
-                                                      }
-                                                    : f
-                                                );
-                                              setSelectedProject({
-                                                ...project,
-                                                files: updatedFiles,
-                                              });
-                                              setHasUnsavedChanges(true);
-                                            }}
+                                           
                                           >
-                                            <option value="">
-                                              Not Assigned
-                                            </option>
-                                            <option value="Sarah Williams">
-                                              Sarah Williams
-                                            </option>
-                                            <option value="David Brown">
-                                              David Brown
-                                            </option>
-                                            <option value="Emily Davis">
-                                              Emily Davis
-                                            </option>
+                                            <option value="">Not Assigned</option>
+                                            <option value="Sarah Williams">Sarah Williams</option>
+                                            <option value="David Brown">David Brown</option>
+                                            <option value="Emily Davis">Emily Davis</option>
                                           </select>
                                         </td>
                                         <td>Corr WIP</td>
@@ -2605,29 +2588,15 @@ useEffect(() => {
                                     ))}
                                   </tbody>
                                 </table>
-                                {/* <div className="col-md-2 d-flex align-items-center justify-conetnt-center">
-                                  <button
-                                    className="btn btn-info mb-4 "
-                                    disabled={selectedFiles.length === 0}
-                                    onClick={applyBatchEdits}
-                                  >
-                                    Apply to Selected
-                                  </button>
-                                </div> */}
                               </div>
 
                               {/* Batch Edit Controls */}
-                              {/* Label Row */}
                               <div className="row g-3 mb-1">
                                 <div className="col-md-2">
-                                  <label className="form-label">
-                                    Ready for QC Due
-                                  </label>
+                                  <label className="form-label">Ready for QC Due</label>
                                 </div>
                                 <div className="col-md-2">
-                                  <label className="form-label">
-                                    QC Allocated Hours
-                                  </label>
+                                  <label className="form-label">QC Allocated Hours</label>
                                 </div>
                                 <div className="col-md-2">
                                   <label className="form-label">QC Due</label>
@@ -2642,13 +2611,10 @@ useEffect(() => {
 
                               {/* Input Row */}
                               <div className="row g-3 mb-3 align-items-start">
-                                {/* Ready for QC Due */}
                                 <div className="col-md-2">
                                   <DatePicker
                                     selected={selectedDateTime}
-                                    onChange={(date) =>
-                                      setSelectedDateTime(date)
-                                    }
+                                    onChange={(date) => setSelectedDateTime(date)}
                                     showTimeSelect
                                     timeFormat="HH:mm"
                                     timeIntervals={15}
@@ -2658,7 +2624,6 @@ useEffect(() => {
                                   />
                                 </div>
 
-                                {/* QC Allocated Hours */}
                                 <div className="col-md-2">
                                   <input
                                     type="number"
@@ -2669,31 +2634,20 @@ useEffect(() => {
                                     value={qcAllocatedHours}
                                     onChange={(e) => {
                                       const val = parseFloat(e.target.value);
-                                      if (
-                                        !isNaN(val) &&
-                                        val >= 0 &&
-                                        val % 0.25 === 0
-                                      ) {
+                                      if (!isNaN(val) && val >= 0 && val % 0.25 === 0) {
                                         setQcAllocatedHours(val);
                                       }
                                     }}
                                   />
-                                  <div className="small text-white">
-                                    (in multiple of 0.00 only)
-                                  </div>
+                                  <div className="small text-white">(in multiple of 0.00 only)</div>
                                 </div>
 
-                                {/* QC Due (calculated) */}
                                 <div className="col-md-2">
-                                  <div className="form-control  fw-bold">
-                                    {calculateQCDue(
-                                      selectedDateTime,
-                                      qcAllocatedHours
-                                    )}
+                                  <div className="form-control fw-bold">
+                                    {calculateQCDue(selectedDateTime, qcAllocatedHours)}
                                   </div>
                                 </div>
 
-                                {/* Priority */}
                                 <div className="col-md-2">
                                   <select className="form-select">
                                     <option>Low</option>
@@ -2702,22 +2656,16 @@ useEffect(() => {
                                   </select>
                                 </div>
 
-                                {/* Save & Close Buttons */}
                                 <div className="col-md-2 d-flex gap-2">
-                                  <button className="btn btn-success w-100">
-                                    Save
-                                  </button>
-                                  <button className="btn btn-secondary w-100">
-                                    Close
-                                  </button>
+                                  <button className="btn btn-success w-100">Save</button>
+                                  <button className="btn btn-secondary w-100">Close</button>
                                 </div>
                               </div>
                             </div>
-
-                            {/* Footer buttons */}
                           </div>
                         </td>
                       </tr>
+
                     )}
                   </React.Fragment>
                 ))}
@@ -2851,30 +2799,30 @@ const generateDummyProjects = (count) => {
     const formattedDueDate = `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
       .padStart(2, "0")} ${hours >= 12 ? "PM" : "AM"} ${dueDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+        .getDate()
+        .toString()
+        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
 
     // Add random readyDeadline, qcHrs, qcDueDate, status
     const readyDeadline = `${(hours + 1) % 24}:${minutes
       .toString()
       .padStart(2, "0")} ${hours + 1 >= 12 ? "PM" : "AM"} ${dueDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+        .getDate()
+        .toString()
+        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
     const qcHrs = Math.floor(Math.random() * 15) + 1;
     const qcDueDate = `${(hours + 2) % 24}:${minutes
       .toString()
       .padStart(2, "0")} ${hours + 2 >= 12 ? "PM" : "AM"} ${dueDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+        .getDate()
+        .toString()
+        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
     const status = statuses[Math.floor(Math.random() * statuses.length)];
 
     const fileCount = Math.floor(Math.random() * 5) + 1;
@@ -2891,7 +2839,7 @@ const generateDummyProjects = (count) => {
         stage: stages[Math.floor(Math.random() * stages.length)],
         assigned: new Date(
           dueDate.getTime() -
-            Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
+          Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
         ).toLocaleDateString(),
         handler: handler,
         qaReviewer: qaReviewers[Math.floor(Math.random() * qaReviewers.length)],
