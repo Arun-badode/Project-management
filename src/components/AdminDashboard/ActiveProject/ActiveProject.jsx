@@ -7,6 +7,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import BASE_URL from "../../../config";
+import CreateNewProject from "../Project/CreateNewProject";
+import EditModal from "./EditModal";
 
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
@@ -90,55 +92,6 @@ const ActiveProject = () => {
     setFilteredProjects(result);
   }, [location.search, projects]);
 
-  const clientOptions = [
-    "PN",
-    "MMP Auburn",
-    "MMP Eastlake",
-    "MMP Kirkland",
-    "GN",
-   
-  ];
-  const countryOptions = [
-    "United States",
-    "Canada",
-    "UK",
-    "Australia",
-    "Germany",
-    "India",
-  ];
-  const projectManagerOptions = [
-    "John Smith",
-    "Emily Johnson",
-  
-  ];
-  const taskOptions = [
-    "Source Creation",
-    "Callout",
-    
-  ];
-  const languageOptions = [
-    "af",
-    "am",
-    
-    
-  ];
-  const applicationOptions = [
-    "Word",
-    "PPT",
-    "Excel",
-    "INDD",
-  
-  ];
-  const currencyOptions = ["USD", "EUR", "GBP", "CAD", "AUD", "INR"];
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [clientFilter, setClientFilter] = useState("");
   const [taskFilter, setTaskFilter] = useState("");
@@ -168,12 +121,6 @@ const ActiveProject = () => {
   const [minute, setMinute] = useState("00");
   const [period, setPeriod] = useState("AM");
   const [qcDueDelay, setQcDueDelay] = useState("");
-
-  const scrollContainerRef = useRef(null);
-  const fakeScrollbarRef = useRef(null);
-  const tabScrollContainerRef = useRef(null);
-  const tabFakeScrollbarRef = useRef(null);
-  const tabFakeScrollbarInnerRef = useRef(null);
 
   const statuses = [
     { key: "allstatus", label: "All Status " },
@@ -282,103 +229,7 @@ const ActiveProject = () => {
     setActivebutton(type);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      // Calculate total pages per language
-      const totalPagesPerLang = formData.files.reduce(
-        (sum, file) => sum + (file.pageCount || 0),
-        0
-      );
-
-      // Prepare the API payload
-      const payload = {
-        projectTitle: formData.title,
-        clientId: getClientId(formData.client), // You'll need to implement this
-        country: formData.country,
-        projectManagerId: getProjectManagerId(formData.projectManager), // Implement this
-        taskId: getTaskId(formData.tasks[0]), // Taking first task - adjust if needed
-        applicationId: getApplicationId(formData.application[0]), // Taking first app
-        languageId: getLanguageId(formData.languages[0]), // Taking first language
-        totalPagesLang: formatLanguagesAndPages(formData), // Format as "EN:10,FR:10"
-        totalProjectPages: totalPagesPerLang * formData.languages.length,
-        receiveDate: formData.receivedDate,
-        serverPath: formData.serverPath,
-        notes: formData.notes,
-        estimatedHours: formData.estimatedHrs || 0,
-        hourlyRate: formData.hourlyRate || 0,
-        perPageRate: formData.rate || 0,
-        currency: formData.currency,
-        totalCost: formData.cost || 0,
-        deadline: formatDeadline(), // Format from your calendar state
-      };
-
-      // Make the API call
-      const response = await fetch(`${BASE_URL}project/addProject`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log("Project created successfully:", result);
-
-      // Close modal and reset form
-      setShowCreateModal(false);
-      setFormData(initialFormData);
-
-      // Show success message
-      alert("Project created successfully!");
-
-      // If you're maintaining local state, add the new project
-      const newProject = {
-        ...formData,
-        id: result.id || projects.length + 1, // Use API response ID if available
-        status: "created",
-        receivedDate:
-          formData.receivedDate || new Date().toISOString().split("T")[0],
-      };
-      setProjects([...projects, newProject]);
-    } catch (error) {
-      console.error("Error creating project:", error);
-      alert(`Failed to create project: ${error.message}`);
-    }
-  };
-
   // Helper functions you need to implement:
-
-  const getClientId = (clientName) => {
-    // Find the client ID from your clientOptions data
-    // Example: return clientOptions.find(c => c.name === clientName)?.id || 0;
-    return 1; // Replace with actual implementation
-  };
-
-  const getProjectManagerId = (pmName) => {
-    // Find the PM ID from your projectManagerOptions
-    return 1; // Replace with actual implementation
-  };
-
-  const getTaskId = (taskName) => {
-    // Find the task ID from your taskOptions
-    return 1; // Replace with actual implementation
-  };
-
-  const getApplicationId = (appName) => {
-    // Find the application ID from your applicationOptions
-    return 1; // Replace with actual implementation
-  };
-
-  const getLanguageId = (languageName) => {
-    // Find the language ID from your languageOptions
-    return 1; // Replace with actual implementation
-  };
 
   const formatLanguagesAndPages = (formData) => {
     const pagesPerLang = formData.files.reduce(
@@ -426,13 +277,7 @@ const ActiveProject = () => {
         // Retain status
       }
 
-      // TODO: Move project to Created or Completed Projects list as per your app logic
-      // For now, just remove from active list
       setProjects(projects.filter((p) => p.id !== id));
-
-      // You can implement logic to add to created/completed lists here
-      // e.g. setCreatedProjects([...createdProjects, { ...project, files: updatedFiles }])
-      // or setCompletedProjects([...completedProjects, project])
     }
   };
 
@@ -673,112 +518,10 @@ const ActiveProject = () => {
     setDateTime(value);
   };
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(12);
   const [selectedMonth, setSelectedMonth] = useState(6); // July (0-indexed)
   const [selectedYear, setSelectedYear] = useState(2025);
-  const [selectedHour, setSelectedHour] = useState(12);
-  const [selectedMinute, setSelectedMinute] = useState(0);
-  const [isAM, setIsAM] = useState(true);
 
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  const weekDays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-
-  const getDaysInMonth = (month, year) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (month, year) => {
-    const firstDay = new Date(year, month, 1).getDay();
-    return firstDay === 0 ? 6 : firstDay - 1; // Convert Sunday (0) to be last (6)
-  };
-
-  const generateCalendarDays = () => {
-    const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
-    const firstDay = getFirstDayOfMonth(selectedMonth, selectedYear);
-    const days = [];
-
-    // Previous month's trailing days
-    const prevMonth = selectedMonth === 0 ? 11 : selectedMonth - 1;
-    const prevYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear;
-    const daysInPrevMonth = getDaysInMonth(prevMonth, prevYear);
-
-    for (let i = firstDay - 1; i >= 0; i--) {
-      days.push({
-        day: daysInPrevMonth - i,
-        isCurrentMonth: false,
-        isNextMonth: false,
-      });
-    }
-
-    // Current month days
-    for (let day = 1; day <= daysInMonth; day++) {
-      days.push({
-        day,
-        isCurrentMonth: true,
-        isNextMonth: false,
-      });
-    }
-
-    // Next month's leading days
-    const remainingDays = 42 - days.length;
-    for (let day = 1; day <= remainingDays; day++) {
-      days.push({
-        day,
-        isCurrentMonth: false,
-        isNextMonth: true,
-      });
-    }
-
-    return days;
-  };
-
-  const handlePrevMonth = () => {
-    if (selectedMonth === 0) {
-      setSelectedMonth(11);
-      setSelectedYear(selectedYear - 1);
-    } else {
-      setSelectedMonth(selectedMonth - 1);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (selectedMonth === 11) {
-      setSelectedMonth(0);
-      setSelectedYear(selectedYear + 1);
-    } else {
-      setSelectedMonth(selectedMonth + 1);
-    }
-  };
-
-  const formatDateTime = () => {
-    const date = `${selectedDate.toString().padStart(2, "0")}/${(
-      selectedMonth + 1
-    )
-      .toString()
-      .padStart(2, "0")}/${selectedYear}`;
-    const time = `${selectedHour.toString().padStart(2, "0")}:${selectedMinute
-      .toString()
-      .padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
-    return `${date} ${time}`;
-  };
-
-  const calendarDays = generateCalendarDays();
   return (
     <div className="container-fluid py-4">
       {/* Edit Project Modal */}
@@ -798,115 +541,7 @@ const ActiveProject = () => {
                 ></button>
               </div>
               <div className="modal-body">
-                <div className="row g-3">
-                  <div className="col-md-12">
-                    <label className="form-label">Project Title</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={editedProject.title}
-                      onChange={(e) =>
-                        setEditedProject({
-                          ...editedProject,
-                          title: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Client</label>
-                    <select
-                      className="form-select"
-                      value={editedProject.client}
-                      onChange={(e) =>
-                        setEditedProject({
-                          ...editedProject,
-                          client: e.target.value,
-                        })
-                      }
-                    >
-                      {getUniqueValues("client").map((client, index) => (
-                        <option key={index} value={client}>
-                          {client}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Task</label>
-                    <select
-                      className="form-select"
-                      value={editedProject.task}
-                      onChange={(e) =>
-                        setEditedProject({
-                          ...editedProject,
-                          task: e.target.value,
-                        })
-                      }
-                    >
-                      {getUniqueValues("task").map((task, index) => (
-                        <option key={index} value={task}>
-                          {task}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Language</label>
-                    <select
-                      className="form-select"
-                      value={editedProject.language}
-                      onChange={(e) =>
-                        setEditedProject({
-                          ...editedProject,
-                          language: e.target.value,
-                        })
-                      }
-                    >
-                      {getUniqueValues("language").map((language, index) => (
-                        <option key={index} value={language}>
-                          {language}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Application</label>
-                    <select
-                      className="form-select"
-                      value={editedProject.application}
-                      onChange={(e) =>
-                        setEditedProject({
-                          ...editedProject,
-                          application: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="Web">Web</option>
-                      <option value="Mobile">Mobile</option>
-                      <option value="Desktop">Desktop</option>
-                    </select>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Due Date & Time</label>
-                    <div className="input-group">
-                      <input
-                        type="datetime-local"
-                        className="form-control"
-                        value={customToInputDate(editedProject.dueDate)}
-                        onChange={(e) => {
-                          setEditedProject({
-                            ...editedProject,
-                            dueDate: inputToCustomDate(e.target.value),
-                          });
-                        }}
-                      />
-                      <span className="input-group-text">
-                        <i className="fa fa-calendar"></i>
-                      </span>
-                    </div>
-                  </div>
-                </div>
+               <EditModal/>
               </div>
               <div className="modal-footer">
                 <button
@@ -930,7 +565,38 @@ const ActiveProject = () => {
       )}
 
       {/* Create Project Modal */}
-    
+      {showCreateModal && (
+        <div
+          className="modal fade show d-block custom-modal-dark"
+          tabIndex="-1"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header d-flex justify-content-between">
+                <div>
+                  <h5 className="modal-title">Create New Project</h5>
+                </div>
+
+                <div>
+                  {/* <button className="btn btn-light btn-sm me-4 ">
+                    <i className="fas fa-cog text-muted"></i>
+                  </button> */}
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowCreateModal(false)}
+                  ></button>
+                </div>
+              </div>
+              <div className="modal-body">
+                <CreateNewProject />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Header with action buttons */}
       <div className="row mb-4">
@@ -1317,7 +983,7 @@ const ActiveProject = () => {
                               )}
 
                               {/* Files Table */}
-                               <div className="table-responsive">
+                              <div className="table-responsive">
                                 <table className="table table-sm table-striped table-hover">
                                   <thead
                                     className="table-gradient-bg table"
@@ -1334,11 +1000,14 @@ const ActiveProject = () => {
                                           type="checkbox"
                                           className="form-check-input"
                                           checked={
-                                            selectedFiles.length === project?.files?.length
+                                            selectedFiles.length ===
+                                            project?.files?.length
                                           }
                                           onChange={(e) => {
                                             if (e.target.checked) {
-                                              setSelectedFiles([...project.files]);
+                                              setSelectedFiles([
+                                                ...project.files,
+                                              ]);
                                             } else {
                                               setSelectedFiles([]);
                                             }
@@ -1360,7 +1029,9 @@ const ActiveProject = () => {
                                       <tr
                                         key={file.id}
                                         className={
-                                          selectedFiles.some((f) => f.id === file.id)
+                                          selectedFiles.some(
+                                            (f) => f.id === file.id
+                                          )
                                             ? "table-primary text-center"
                                             : "text-center"
                                         }
@@ -1369,8 +1040,12 @@ const ActiveProject = () => {
                                           <input
                                             type="checkbox"
                                             className="form-check-input"
-                                            checked={selectedFiles.some((f) => f.id === file.id)}
-                                            onChange={() => toggleFileSelection(file)}
+                                            checked={selectedFiles.some(
+                                              (f) => f.id === file.id
+                                            )}
+                                            onChange={() =>
+                                              toggleFileSelection(file)
+                                            }
                                           />
                                         </td>
                                         <td>{file.name}</td>
@@ -1378,25 +1053,35 @@ const ActiveProject = () => {
                                         <td>{file.language}</td>
                                         <td>{file.application}</td>
                                         <td>
-                                          <select
-                                            className="form-select form-select-sm"
-                                            
-                                          >
-                                            <option value="">Not Assigned</option>
-                                            <option value="John Doe">John Doe</option>
-                                            <option value="Jane Smith">Jane Smith</option>
-                                            <option value="Mike Johnson">Mike Johnson</option>
+                                          <select className="form-select form-select-sm">
+                                            <option value="">
+                                              Not Assigned
+                                            </option>
+                                            <option value="John Doe">
+                                              John Doe
+                                            </option>
+                                            <option value="Jane Smith">
+                                              Jane Smith
+                                            </option>
+                                            <option value="Mike Johnson">
+                                              Mike Johnson
+                                            </option>
                                           </select>
                                         </td>
                                         <td>
-                                          <select
-                                            className="form-select form-select-sm"
-                                           
-                                          >
-                                            <option value="">Not Assigned</option>
-                                            <option value="Sarah Williams">Sarah Williams</option>
-                                            <option value="David Brown">David Brown</option>
-                                            <option value="Emily Davis">Emily Davis</option>
+                                          <select className="form-select form-select-sm">
+                                            <option value="">
+                                              Not Assigned
+                                            </option>
+                                            <option value="Sarah Williams">
+                                              Sarah Williams
+                                            </option>
+                                            <option value="David Brown">
+                                              David Brown
+                                            </option>
+                                            <option value="Emily Davis">
+                                              Emily Davis
+                                            </option>
                                           </select>
                                         </td>
                                         <td>Corr WIP</td>
