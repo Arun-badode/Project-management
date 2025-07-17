@@ -1077,7 +1077,7 @@ const Project = () => {
                     </thead>
                     <tbody>
                       {filteredProjects.map((project) => (
-                        <tr key={project.id} className="text-center">
+                        <tr key={project.id}>
                           <td>
                             {project.title}
                             <span className="badge bg-light text-dark ms-2">

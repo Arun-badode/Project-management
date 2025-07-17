@@ -68,7 +68,7 @@ const ProjectTables = ({
           </thead>
           <tbody>
             {filteredProjects.map((project) => (
-              <tr className="text-center" key={project.id}>
+              <tr  key={project.id}>
                 <td>{project.id}</td>
                 <td>{project.title}</td>
                 <td>{project.client}</td>

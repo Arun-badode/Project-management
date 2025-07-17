@@ -55,7 +55,7 @@ const EventsTodayTable = ({ tasksToday, scrollContainerRef, fakeScrollbarRef }) 
           </thead>
           <tbody>
             {tasksToday.map((task) => (
-              <tr className="text-center" key={task.id}>
+              <tr  key={task.id}>
                 <td>{task.title}</td>
                 <td>{task.description}</td>
                 <td>{task.deadline}</td>

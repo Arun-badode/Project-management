@@ -603,7 +603,7 @@ const Calendar = ({ userRole }) => {
               </thead>
               <tbody>
                 {calendarWeeks.map((week, weekIndex) => (
-                  <tr key={weekIndex}  className="text-center">
+                  <tr key={weekIndex} >
                     {week.map((day, dayIndex) => (
                       <td
                         key={dayIndex}
@@ -676,7 +676,7 @@ const Calendar = ({ userRole }) => {
                     </thead>
                     <tbody>
                       {birthdayEvents.map((event, idx) => (
-                        <tr key={idx}  className="text-center">
+                        <tr key={idx}  >
                           <td>{event.name}</td>
                           <td>{moment(event.date).format("MMM D, YYYY")}</td>
                         </tr>
@@ -709,7 +709,7 @@ const Calendar = ({ userRole }) => {
                     </thead>
                     <tbody>
                       {holidayEvents.map((event, idx) => (
-                        <tr key={idx}  className="text-center">
+                        <tr key={idx} >
                           <td>{event.title}</td>
                           <td>{moment(event.date).format("MMM D, YYYY")}</td>
                         </tr>
@@ -752,7 +752,7 @@ const Calendar = ({ userRole }) => {
               </thead>
               <tbody>
                 {birthdays.map((event) => (
-                  <tr key={`dob-${event.id}`}  className="text-center">
+                  <tr key={`dob-${event.id}`}>
                     <td style={{ textAlign: "left" }}>{event.title}</td>
                     <td style={{ textAlign: "left" }}>
                       {formatDate(event.date)}
@@ -794,7 +794,7 @@ const Calendar = ({ userRole }) => {
                 {events
                   .filter((event) => event.type === "companyHoliday")
                   .map((event) => (
-                    <tr key={`holiday-${event.id}`}  className="text-center">
+                    <tr key={`holiday-${event.id}`} >
                       <td style={{ textAlign: "left" }}>{event.title}</td>
                       <td style={{ textAlign: "left" }}>
                         {formatDate(event.date)}
@@ -849,7 +849,7 @@ const Calendar = ({ userRole }) => {
               {events
                 .filter((event) => event.type === "doj")
                 .map((event) => (
-                  <tr key={`doj-${event.id}`}  className="text-center">
+                  <tr key={`doj-${event.id}`} >
                     <td style={{ textAlign: "left" }}>{event.title}</td>
                     <td style={{ textAlign: "left" }}>
                       {formatDate(event.date)}
@@ -889,7 +889,7 @@ const Calendar = ({ userRole }) => {
               {events
                 .filter((event) => event.type === "approvedLeave")
                 .map((event) => (
-                  <tr key={`leave-${event.id}`}  className="text-center">
+                  <tr key={`leave-${event.id}`}  >
                     <td style={{ textAlign: "left" }}>{event.title}</td>
                     <td style={{ textAlign: "left" }}>
                       {formatDate(event.date)}
@@ -931,7 +931,7 @@ const Calendar = ({ userRole }) => {
                 {events
                   .filter((event) => event.type === "note")
                   .map((event) => (
-                    <tr key={`note-${event.id}`}  className="text-center">
+                    <tr key={`note-${event.id}`} >
                       <td>{event.title}</td>
                       <td>{formatDate(event.date)}</td>
                     </tr>
