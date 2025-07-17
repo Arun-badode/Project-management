@@ -5,9 +5,11 @@ import Select from "react-select";
 import useSyncScroll from "../Hooks/useSyncScroll";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+
 import BASE_URL from "../../../config";
-import "./ActiveProject.css"
+import CreateNewProject from "../Project/CreateNewProject";
+import EditModal from "./EditModal";
+
 
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
@@ -17,10 +19,28 @@ const ActiveProject = () => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const isAdmin = userRole === "Admin";
-  const [batchHandler, setBatchHandler] = useState("");
-  const [batchQAReviewer, setBatchQAReviewer] = useState("");
+
   const [file, setFile] = useState("");
   const [isEdit, setIsEdit] = useState(null);
+  const [fileHandlers, setFileHandlers] = useState({});
+
+  const assignees = [
+    { label: "Not Assigned", value: "" },
+    { label: "John Doe", value: "John Doe" },
+    { label: "Jane Smith", value: "Jane Smith" },
+    { label: "Mike Johnson", value: "Mike Johnson" },
+  ];
+  const handleHandlerChange = (fileId, newHandler) => {
+    // Update handler for all selected files
+    const updatedHandlers = { ...fileHandlers };
+
+    selectedFiles.forEach((f) => {
+      updatedHandlers[f.id] = newHandler;
+    });
+
+    setFileHandlers(updatedHandlers);
+    setHasUnsavedChanges(true);
+  };
 
   const initialFormData = {
     title: "",
@@ -91,167 +111,6 @@ const ActiveProject = () => {
     setFilteredProjects(result);
   }, [location.search, projects]);
 
-  const clientOptions = [
-    "PN",
-    "MMP Auburn",
-    "MMP Eastlake",
-    "MMP Kirkland",
-    "GN",
-    "DM",
-    "RN",
-    "NI",
-    "LB",
-    "SSS",
-    "Cpea",
-    "CV",
-  ];
-  const countryOptions = [
-    "United States",
-    "Canada",
-    "UK",
-    "Australia",
-    "Germany",
-    "India",
-  ];
-  const projectManagerOptions = [
-    "John Smith",
-    "Emily Johnson",
-    "Michael Brown",
-    "Sarah Wilson",
-    "David Lee",
-  ];
-  const taskOptions = [
-    "Source Creation",
-    "Callout",
-    "Prep",
-    "Image Creation",
-    "DTP",
-    "Image Localization",
-    "OVA",
-  ];
-  const languageOptions = [
-    "af",
-    "am",
-    "ar",
-    "az",
-    "be",
-    "bg",
-    "bn",
-    "bs",
-    "ca",
-    "cs",
-    "cy",
-    "da",
-    "de",
-    "el",
-    "en",
-    "en-US",
-    "en-GB",
-    "es",
-    "es-ES",
-    "es-MX",
-    "et",
-    "eu",
-    "fa",
-    "fi",
-    "fil",
-    "fr",
-    "fr-FR",
-    "fr-CA",
-    "ga",
-    "gl",
-    "gu",
-    "ha",
-    "he",
-    "hi",
-    "hr",
-    "hu",
-    "hy",
-    "id",
-    "ig",
-    "is",
-    "it",
-    "ja",
-    "jv",
-    "ka",
-    "kk",
-    "km",
-    "kn",
-    "ko",
-    "ku",
-    "ky",
-    "lo",
-    "lt",
-    "lv",
-    "mk",
-    "ml",
-    "mn",
-    "mr",
-    "ms",
-    "mt",
-    "my",
-    "ne",
-    "nl",
-    "no",
-    "or",
-    "pa",
-    "pl",
-    "ps",
-    "pt",
-    "pt-BR",
-    "pt-PT",
-    "ro",
-    "ru",
-    "sd",
-    "si",
-    "sk",
-    "sl",
-    "so",
-    "sq",
-    "sr",
-    "sr-Cyrl",
-    "sr-Latn",
-    "sv",
-    "sw",
-    "ta",
-    "te",
-    "th",
-    "tl",
-    "tr",
-    "uk",
-    "ur",
-    "uz",
-    "vi",
-    "xh",
-    "yo",
-    "zh",
-    "zh-Hans",
-    "zh-Hant",
-    "zh-TW",
-  ];
-  const applicationOptions = [
-    "Word",
-    "PPT",
-    "Excel",
-    "INDD",
-    "AI",
-    "PSD",
-    "AE",
-    "CDR",
-    "Visio",
-    "Project",
-    "FM",
-  ];
-  const currencyOptions = ["USD", "EUR", "GBP", "CAD", "AUD", "INR"];
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [clientFilter, setClientFilter] = useState("");
   const [taskFilter, setTaskFilter] = useState("");
@@ -281,12 +140,6 @@ const ActiveProject = () => {
   const [minute, setMinute] = useState("00");
   const [period, setPeriod] = useState("AM");
   const [qcDueDelay, setQcDueDelay] = useState("");
-
-  const scrollContainerRef = useRef(null);
-  const fakeScrollbarRef = useRef(null);
-  const tabScrollContainerRef = useRef(null);
-  const tabFakeScrollbarRef = useRef(null);
-  const tabFakeScrollbarInnerRef = useRef(null);
 
   const statuses = [
     { key: "allstatus", label: "All Status " },
@@ -395,121 +248,9 @@ const ActiveProject = () => {
     setActivebutton(type);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      // Calculate total pages per language
-      const totalPagesPerLang = formData.files.reduce(
-        (sum, file) => sum + (file.pageCount || 0),
-        0
-      );
-
-      // Prepare the API payload
-      const payload = {
-        projectTitle: formData.title,
-        clientId: getClientId(formData.client), // You'll need to implement this
-        country: formData.country,
-        projectManagerId: getProjectManagerId(formData.projectManager), // Implement this
-        taskId: getTaskId(formData.tasks[0]), // Taking first task - adjust if needed
-        applicationId: getApplicationId(formData.application[0]), // Taking first app
-        languageId: getLanguageId(formData.languages[0]), // Taking first language
-        totalPagesLang: formatLanguagesAndPages(formData), // Format as "EN:10,FR:10"
-        totalProjectPages: totalPagesPerLang * formData.languages.length,
-        receiveDate: formData.receivedDate,
-        serverPath: formData.serverPath,
-        notes: formData.notes,
-        estimatedHours: formData.estimatedHrs || 0,
-        hourlyRate: formData.hourlyRate || 0,
-        perPageRate: formData.rate || 0,
-        currency: formData.currency,
-        totalCost: formData.cost || 0,
-        deadline: formatDeadline(), // Format from your calendar state
-      };
-
-      // Make the API call
-      const response = await fetch(`${BASE_URL}project/addProject`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log("Project created successfully:", result);
-
-      // Close modal and reset form
-      setShowCreateModal(false);
-      setFormData(initialFormData);
-
-      // Show success message
-      alert("Project created successfully!");
-
-      // If you're maintaining local state, add the new project
-      const newProject = {
-        ...formData,
-        id: result.id || projects.length + 1, // Use API response ID if available
-        status: "created",
-        receivedDate:
-          formData.receivedDate || new Date().toISOString().split("T")[0],
-      };
-      setProjects([...projects, newProject]);
-    } catch (error) {
-      console.error("Error creating project:", error);
-      alert(`Failed to create project: ${error.message}`);
-    }
-  };
-
   // Helper functions you need to implement:
 
-  const getClientId = (clientName) => {
-    // Find the client ID from your clientOptions data
-    // Example: return clientOptions.find(c => c.name === clientName)?.id || 0;
-    return 1; // Replace with actual implementation
-  };
 
-  const getProjectManagerId = (pmName) => {
-    // Find the PM ID from your projectManagerOptions
-    return 1; // Replace with actual implementation
-  };
-
-  const getTaskId = (taskName) => {
-    // Find the task ID from your taskOptions
-    return 1; // Replace with actual implementation
-  };
-
-  const getApplicationId = (appName) => {
-    // Find the application ID from your applicationOptions
-    return 1; // Replace with actual implementation
-  };
-
-  const getLanguageId = (languageName) => {
-    // Find the language ID from your languageOptions
-    return 1; // Replace with actual implementation
-  };
-
-  const formatLanguagesAndPages = (formData) => {
-    const pagesPerLang = formData.files.reduce(
-      (sum, file) => sum + (file.pageCount || 0),
-      0
-    );
-    return formData.languages
-      .map((lang) => `${lang}:${pagesPerLang}`)
-      .join(",");
-  };
-
-  const formatDeadline = () => {
-    // Format from your calendar state variables
-    const year = selectedYear;
-    const month = (selectedMonth + 1).toString().padStart(2, "0");
-    const day = selectedDate.toString().padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
   const handleDeleteProject = (id) => {
     const project = projects.find((p) => p.id === id);
     if (!project) return;
@@ -539,13 +280,7 @@ const ActiveProject = () => {
         // Retain status
       }
 
-      // TODO: Move project to Created or Completed Projects list as per your app logic
-      // For now, just remove from active list
       setProjects(projects.filter((p) => p.id !== id));
-
-      // You can implement logic to add to created/completed lists here
-      // e.g. setCreatedProjects([...createdProjects, { ...project, files: updatedFiles }])
-      // or setCompletedProjects([...completedProjects, project])
     }
   };
 
@@ -582,10 +317,10 @@ const ActiveProject = () => {
     setHasUnsavedChanges(true);
   };
   console.log("slectedFiles", selectedFiles);
-  console.log(
-    "slselectedFiles.some((f) => f.id === file.idectedFiles",
-    selectedFiles.some((f) => f.id === file.id)
-  );
+  // console.log(
+  //   "slselectedFiles.some((f) => f.id === file.idectedFiles",
+  //   selectedFiles.some((f) => f.id === file.id)
+  // );
   const applyBatchEdits = () => {
     if (selectedProject && selectedFiles.length > 0) {
       const updatedFiles = selectedProject.files.map((file) => {
@@ -786,112 +521,10 @@ const ActiveProject = () => {
     setDateTime(value);
   };
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(12);
   const [selectedMonth, setSelectedMonth] = useState(6); // July (0-indexed)
   const [selectedYear, setSelectedYear] = useState(2025);
-  const [selectedHour, setSelectedHour] = useState(12);
-  const [selectedMinute, setSelectedMinute] = useState(0);
-  const [isAM, setIsAM] = useState(true);
 
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  const weekDays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-
-  const getDaysInMonth = (month, year) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (month, year) => {
-    const firstDay = new Date(year, month, 1).getDay();
-    return firstDay === 0 ? 6 : firstDay - 1; // Convert Sunday (0) to be last (6)
-  };
-
-  const generateCalendarDays = () => {
-    const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
-    const firstDay = getFirstDayOfMonth(selectedMonth, selectedYear);
-    const days = [];
-
-    // Previous month's trailing days
-    const prevMonth = selectedMonth === 0 ? 11 : selectedMonth - 1;
-    const prevYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear;
-    const daysInPrevMonth = getDaysInMonth(prevMonth, prevYear);
-
-    for (let i = firstDay - 1; i >= 0; i--) {
-      days.push({
-        day: daysInPrevMonth - i,
-        isCurrentMonth: false,
-        isNextMonth: false,
-      });
-    }
-
-    // Current month days
-    for (let day = 1; day <= daysInMonth; day++) {
-      days.push({
-        day,
-        isCurrentMonth: true,
-        isNextMonth: false,
-      });
-    }
-
-    // Next month's leading days
-    const remainingDays = 42 - days.length;
-    for (let day = 1; day <= remainingDays; day++) {
-      days.push({
-        day,
-        isCurrentMonth: false,
-        isNextMonth: true,
-      });
-    }
-
-    return days;
-  };
-
-  const handlePrevMonth = () => {
-    if (selectedMonth === 0) {
-      setSelectedMonth(11);
-      setSelectedYear(selectedYear - 1);
-    } else {
-      setSelectedMonth(selectedMonth - 1);
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (selectedMonth === 11) {
-      setSelectedMonth(0);
-      setSelectedYear(selectedYear + 1);
-    } else {
-      setSelectedMonth(selectedMonth + 1);
-    }
-  };
-
-  const formatDateTime = () => {
-    const date = `${selectedDate.toString().padStart(2, "0")}/${(
-      selectedMonth + 1
-    )
-      .toString()
-      .padStart(2, "0")}/${selectedYear}`;
-    const time = `${selectedHour.toString().padStart(2, "0")}:${selectedMinute
-      .toString()
-      .padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
-    return `${date} ${time}`;
-  };
-
-  const calendarDays = generateCalendarDays();
   return (
     <div className="container-fluid py-4">
       {/* Edit Project Modal */}
@@ -911,115 +544,7 @@ const ActiveProject = () => {
                 ></button>
               </div>
               <div className="modal-body">
-                <div className="row g-3">
-                  <div className="col-md-12">
-                    <label className="form-label">Project Title</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={editedProject.title}
-                      onChange={(e) =>
-                        setEditedProject({
-                          ...editedProject,
-                          title: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Client</label>
-                    <select
-                      className="form-select"
-                      value={editedProject.client}
-                      onChange={(e) =>
-                        setEditedProject({
-                          ...editedProject,
-                          client: e.target.value,
-                        })
-                      }
-                    >
-                      {getUniqueValues("client").map((client, index) => (
-                        <option key={index} value={client}>
-                          {client}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Task</label>
-                    <select
-                      className="form-select"
-                      value={editedProject.task}
-                      onChange={(e) =>
-                        setEditedProject({
-                          ...editedProject,
-                          task: e.target.value,
-                        })
-                      }
-                    >
-                      {getUniqueValues("task").map((task, index) => (
-                        <option key={index} value={task}>
-                          {task}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Language</label>
-                    <select
-                      className="form-select"
-                      value={editedProject.language}
-                      onChange={(e) =>
-                        setEditedProject({
-                          ...editedProject,
-                          language: e.target.value,
-                        })
-                      }
-                    >
-                      {getUniqueValues("language").map((language, index) => (
-                        <option key={index} value={language}>
-                          {language}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Application</label>
-                    <select
-                      className="form-select"
-                      value={editedProject.application}
-                      onChange={(e) =>
-                        setEditedProject({
-                          ...editedProject,
-                          application: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="Web">Web</option>
-                      <option value="Mobile">Mobile</option>
-                      <option value="Desktop">Desktop</option>
-                    </select>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Due Date & Time</label>
-                    <div className="input-group">
-                      <input
-                        type="datetime-local"
-                        className="form-control"
-                        value={customToInputDate(editedProject.dueDate)}
-                        onChange={(e) => {
-                          setEditedProject({
-                            ...editedProject,
-                            dueDate: inputToCustomDate(e.target.value),
-                          });
-                        }}
-                      />
-                      <span className="input-group-text">
-                        <i className="fa fa-calendar"></i>
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                <EditModal />
               </div>
               <div className="modal-footer">
                 <button
@@ -1069,815 +594,7 @@ const ActiveProject = () => {
                 </div>
               </div>
               <div className="modal-body">
-                <form onSubmit={handleSubmit}>
-                  {/* Project Title */}
-                  <div className=" row mb-3 col-md-12">
-                    <label htmlFor="title" className="form-label">
-                      Project Title <span className="text-danger">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="title"
-                      name="title"
-                      maxLength={80}
-                      required
-                      value={formData.title}
-                      onChange={handleInputChange}
-                      placeholder="Enter project title (max 80 chars)"
-                    />
-                    <div className="form-text text-white">
-                      Max allowed Character length – 80, (ignore or remove any
-                      special character by itself)
-                    </div>
-                  </div>
-
-                  {/* Client, Country, Project Manager */}
-                  <div className="row g-3 mb-3">
-                    <div className="col-md-4">
-                      <label htmlFor="client" className="form-label">
-                        Client <span className="text-danger">*</span>
-                      </label>
-                      <Select
-                        id="client"
-                        name="client"
-                        options={clientOptions.map((c) => ({
-                          value: c,
-                          label: c,
-                        }))}
-                        value={
-                          formData.client
-                            ? { value: formData.client, label: formData.client }
-                            : null
-                        }
-                        onChange={(opt) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            client: opt ? opt.value : "",
-                          }))
-                        }
-                        isSearchable
-                        placeholder="Select Client"
-                        styles={gradientSelectStyles}
-                      />
-                    </div>
-                    <div className="col-md-4">
-                      <label htmlFor="country" className="form-label">
-                        Country
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="country"
-                        name="country"
-                        value={formData.country}
-                        onChange={handleInputChange}
-                        placeholder=""
-                        readOnly
-                      />
-                    </div>
-                    <div className="col-md-4">
-                      <label htmlFor="projectManager" className="form-label">
-                        Project Manager
-                      </label>
-                      <Select
-                        id="projectManager"
-                        name="projectManager"
-                        options={projectManagerOptions.map((pm) => ({
-                          value: pm,
-                          label: pm,
-                        }))}
-                        value={
-                          formData.projectManager
-                            ? {
-                                value: formData.projectManager,
-                                label: formData.projectManager,
-                              }
-                            : null
-                        }
-                        onChange={(opt) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            projectManager: opt ? opt.value : "",
-                          }))
-                        }
-                        isSearchable
-                        placeholder=" Searchable Dropdown"
-                        styles={gradientSelectStyles}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Task & Applications */}
-                  <div className="row g-3 mb-3">
-                    <div className="col-md-6">
-                      <label htmlFor="task" className="form-label">
-                        Task <span className="text-danger">*</span>
-                      </label>
-                      <Select
-                        id="task"
-                        name="task"
-                        options={taskOptions.map((t) => ({
-                          value: t,
-                          label: t,
-                        }))}
-                        value={
-                          formData.tasks.length
-                            ? formData.tasks.map((t) => ({
-                                value: t,
-                                label: t,
-                              }))
-                            : []
-                        }
-                        onChange={(opts) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            tasks: opts ? opts.map((o) => o.value) : [],
-                          }))
-                        }
-                        isMulti
-                        isSearchable
-                        placeholder="Select Task(s)"
-                        styles={gradientSelectStyles}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label htmlFor="application" className="form-label">
-                        Applications <span className="text-danger">*</span>
-                      </label>
-                      <Select
-                        id="application"
-                        name="application"
-                        options={applicationOptions.map((a) => ({
-                          value: a,
-                          label: a,
-                        }))}
-                        value={
-                          formData.application.length
-                            ? formData.application.map((a) => ({
-                                value: a,
-                                label: a,
-                              }))
-                            : []
-                        }
-                        onChange={(opts) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            application: opts ? opts.map((o) => o.value) : [],
-                          }))
-                        }
-                        isMulti
-                        isSearchable
-                        placeholder="Select Application(s)"
-                        styles={gradientSelectStyles}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Languages */}
-                  <div className="mb-3">
-                    <label className="form-label">
-                      Languages <span className="text-danger">*</span>
-                    </label>
-                    <Select
-                      options={languageOptions.map((l) => ({
-                        value: l,
-                        label: l,
-                      }))}
-                      value={
-                        formData.languages.length
-                          ? formData.languages.map((l) => ({
-                              value: l,
-                              label: l,
-                            }))
-                          : []
-                      }
-                      onChange={(opts) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          languages: opts ? opts.map((o) => o.value) : [],
-                        }))
-                      }
-                      isMulti
-                      isSearchable
-                      placeholder="Select Languages"
-                      styles={gradientSelectStyles}
-                    />
-                    <div className="form-text text-white">
-                      {formData.languages.length} selected
-                    </div>
-                  </div>
-
-                  {/* File Details */}
-                  <div className="mb-3">
-                    <label className="form-label">File Details*:</label>
-                    <div className="d-flex align-items-center gap-2 mb-2 bg-[#201E7E]">
-                      <span>Count</span>
-                      <input
-                        type="number"
-                        min={1}
-                        className="form-control"
-                        style={{ width: 80 }}
-                        value={formData.files.length}
-                        onChange={(e) => {
-                          const count = Math.max(1, Number(e.target.value));
-                          setFormData((prev) => ({
-                            ...prev,
-                            files: Array.from(
-                              { length: count },
-                              (_, i) =>
-                                prev.files[i] || {
-                                  name: "",
-                                  pageCount: 0,
-                                  application: "",
-                                }
-                            ),
-                          }));
-                        }}
-                      />
-                      <button
-                        type="button"
-                        className="btn btn-success btn-sm"
-                        onClick={() => {
-                          /* handle excel upload */
-                        }}
-                      >
-                        Upload Excel
-                      </button>
-                    </div>
-                    <div className="table-responsive">
-                      <table className="table table-bordered">
-                        <thead
-                          className="table-gradient-bg table"
-                          style={{
-                            position: "sticky",
-                            top: "-2px",
-
-                            zIndex: 0,
-                            backgroundColor: "#fff", // Match your background color
-                          }}
-                        >
-                          <tr className="text-center">
-                            <th>
-                              S.No.
-                              <input
-                                type="checkbox"
-                                checked={formData.files.every(
-                                  (file) => file.selected
-                                )}
-                                onChange={(e) => {
-                                  const files = formData.files.map((file) => ({
-                                    ...file,
-                                    selected: e.target.checked,
-                                  }));
-                                  setFormData((prev) => ({ ...prev, files }));
-                                }}
-                              />
-                            </th>
-                            <th>File Name</th>
-                            <th>Pages</th>
-                            {/* <th>Language</th> */}
-                            <th>Application</th>
-                            {/* <th>Status</th> */}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {formData.files.map((file, idx) => (
-                            <tr key={idx} className="text-center">
-                              <td>
-                                <div className="d-flex align-items-center gap-2">
-                                  {idx + 1}
-                                  <input
-                                    type="checkbox"
-                                    checked={file.selected || false}
-                                    onChange={(e) => {
-                                      const files = [...formData.files];
-                                      files[idx].selected = e.target.checked;
-                                      setFormData((prev) => ({
-                                        ...prev,
-                                        files,
-                                      }));
-                                    }}
-                                  />
-                                </div>
-                              </td>
-
-                              <td>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  value={file.name}
-                                  onChange={(e) => {
-                                    const files = [...formData.files];
-                                    files[idx].name = e.target.value;
-                                    setFormData((prev) => ({ ...prev, files }));
-                                  }}
-                                  placeholder="File Name"
-                                />
-                              </td>
-
-                              <td>
-                                <input
-                                  type="number"
-                                  min={1}
-                                  className="form-control"
-                                  value={file.pageCount || ""}
-                                  onChange={(e) => {
-                                    const files = [...formData.files];
-                                    files[idx].pageCount = Number(
-                                      e.target.value
-                                    );
-                                    setFormData((prev) => ({ ...prev, files }));
-                                  }}
-                                  placeholder="Pages"
-                                />
-                              </td>
-
-                              {/* <td>th</td> */}
-
-                              <td>
-                                <select
-                                  className="form-select"
-                                  value={file.application || ""}
-                                  onChange={(e) => {
-                                    const newApp = e.target.value;
-                                    const files = [...formData.files];
-
-                                    // check if current row is selected
-                                    if (files[idx].selected) {
-                                      files.forEach((f) => {
-                                        if (f.selected) f.application = newApp;
-                                      });
-                                    } else {
-                                      files[idx].application = newApp;
-                                    }
-
-                                    setFormData((prev) => ({ ...prev, files }));
-                                  }}
-                                >
-                                  <option value="">Select</option>
-                                  {applicationOptions.map((app) => (
-                                    <option key={app} value={app}>
-                                      {app}
-                                    </option>
-                                  ))}
-                                </select>
-                              </td>
-
-                              {/* <td>TYS</td> */}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {/* Total Pages */}
-                  <div className="mb-3">
-                    <div className="row g-3">
-                      <div className="col-md-4">
-                        <label className="form-label">
-                          Total Pages Per Lang
-                        </label>
-                        <input
-                          type="number"
-                          className="form-control"
-                          value={formData.files.reduce(
-                            (sum, file) => sum + (file.pageCount || 0),
-                            0
-                          )}
-                          readOnly
-                        />
-                      </div>
-                      <div className="col-md-4">
-                        <label className="form-label">
-                          Total Project Pages
-                        </label>
-                        <input
-                          type="number"
-                          className="form-control"
-                          value={
-                            formData.files.reduce(
-                              (sum, file) => sum + (file.pageCount || 0),
-                              0
-                            ) * (formData.languages.length || 1)
-                          }
-                          readOnly
-                        />
-                      </div>
-                    </div>
-                    <div className="form-text text-white">
-                      Total Project Pages = Total Pages × Language Count
-                    </div>
-                  </div>
-
-                  {/* Received Date, Server Path, Notes */}
-                  <div className="row g-3 mb-3">
-                    <div className="col-md-4">
-                      <label className="form-label">
-                        Received Date <span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        name="receivedDate"
-                        value={formData.receivedDate}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="col-md-8">
-                      <label className="form-label">
-                        Server Path <span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="serverPath"
-                        value={formData.serverPath}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="/projects/client/project-name"
-                      />
-                    </div>
-                    <div className="col-12">
-                      <label className="form-label">Notes</label>
-                      <textarea
-                        className="form-control"
-                        name="notes"
-                        rows={3}
-                        value={formData.notes}
-                        onChange={handleInputChange}
-                        placeholder="Add any additional notes or instructions..."
-                      />
-                    </div>
-                  </div>
-
-                  {/* Financial Section */}
-                  <div className="row g-3 mb-3">
-                    {/* Estimated Hrs with radio */}
-                    <div className="col-md-3">
-                      <label className="form-label d-flex align-items-center gap-2">
-                        <input
-                          type="radio"
-                          name="billingMode"
-                          value="estimated"
-                          checked={
-                            formData.billingMode === "estimated" ||
-                            !formData.billingMode
-                          }
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              billingMode: e.target.value,
-                              // Reset rate when switching to estimated hours
-                              rate:
-                                e.target.value === "estimated" ? "" : prev.rate,
-                            }))
-                          }
-                        />
-                        Estimated Hrs
-                      </label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        min="0"
-                        step="0.25"
-                        value={formData.estimatedHrs || ""}
-                        onChange={(e) => {
-                          const value = parseFloat(e.target.value) || 0;
-                          setFormData((prev) => ({
-                            ...prev,
-                            estimatedHrs: value,
-                            // Auto-calculate cost when estimated hours change
-                            cost: value * (prev.hourlyRate || 0),
-                            inrCost:
-                              value *
-                              (prev.hourlyRate || 0) *
-                              (prev.exchangeRate || 1),
-                          }));
-                        }}
-                        placeholder="00.00"
-                        disabled={
-                          formData.billingMode !== "estimated" &&
-                          formData.billingMode !== undefined
-                        }
-                      />
-                      <div className="form-text text-white">
-                        (in multiple of 0.25 only)
-                      </div>
-                    </div>
-
-                    {/* Hourly Rate (auto-filled from client settings) */}
-                    <div className="col-md-2">
-                      <label className="form-label">Hourly Rate</label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        value={formData.hourlyRate || ""}
-                        onChange={(e) => {
-                          const rate = parseFloat(e.target.value) || 0;
-                          setFormData((prev) => ({
-                            ...prev,
-                            hourlyRate: rate,
-                            // Recalculate costs when rate changes
-                            cost: prev.estimatedHrs * rate,
-                            inrCost:
-                              prev.estimatedHrs *
-                              rate *
-                              (prev.exchangeRate || 1),
-                          }));
-                        }}
-                        placeholder="Auto from Client"
-                      />
-                    </div>
-
-                    {/* Per Page Rate with radio */}
-                    <div className="col-md-3">
-                      <label className="form-label d-flex align-items-center gap-2">
-                        <input
-                          type="radio"
-                          name="billingMode"
-                          value="perPage"
-                          checked={formData.billingMode === "perPage"}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              billingMode: e.target.value,
-                              // Reset estimated hours when switching to per page
-                              estimatedHrs:
-                                e.target.value === "perPage"
-                                  ? ""
-                                  : prev.estimatedHrs,
-                            }))
-                          }
-                        />
-                        Per Page Rate
-                      </label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        min="0"
-                        step="0.01"
-                        value={formData.rate || ""}
-                        onChange={(e) => {
-                          const rate = parseFloat(e.target.value) || 0;
-                          const totalPages = formData.files.reduce(
-                            (sum, file) => sum + (file.pageCount || 0),
-                            0
-                          );
-                          setFormData((prev) => ({
-                            ...prev,
-                            rate: rate,
-                            // Auto-calculate cost when rate changes
-                            cost: rate * totalPages,
-                            inrCost:
-                              rate * totalPages * (prev.exchangeRate || 1),
-                          }));
-                        }}
-                        placeholder="00.00"
-                        disabled={formData.billingMode !== "perPage"}
-                      />
-                      <div className="form-text text-white">
-                        (with only 2 decimals)
-                      </div>
-                    </div>
-
-                    {/* Currency (auto-filled from client settings) */}
-                    <div className="col-md-2">
-                      <label className="form-label">Currency</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={formData.currency || "USD"} // Default to USD if not set
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            currency: e.target.value,
-                          }))
-                        }
-                        placeholder="Auto from Client"
-                      />
-                    </div>
-
-                    {/* Total Cost */}
-                    <div className="col-md-2">
-                      <label className="form-label">Total Cost</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={formData.cost?.toFixed(2) || "0.00"}
-                        readOnly
-                        placeholder="Auto Calculated"
-                      />
-                    </div>
-
-                    {/* Cost in INR */}
-                    <div className="col-md-2">
-                      <label className="form-label">Cost in INR</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={formData.inrCost?.toFixed(2) || "0.00"}
-                        readOnly
-                        placeholder="Auto Calculated"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Save Button */}
-                  <div className="d-flex justify-content-between">
-                    <div className="d-flex align-items-center mt-3 gap-3">
-                      <label
-                        className="text-white"
-                        style={{ fontWeight: "bold" }}
-                      >
-                        Deadline
-                      </label>
-                      <div className="max-w-md mx-auto">
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={formatDateTime()}
-                            readOnly
-                            onClick={() => setIsOpen(!isOpen)}
-                            className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
-                            placeholder="Select date and time"
-                          />
-                        </div>
-
-                        {isOpen && (
-                          <div className="calendar-dropdown">
-                            <div className="time-display">
-                              <div className="time">
-                                {selectedHour.toString().padStart(2, "0")}:
-                                {selectedMinute.toString().padStart(2, "0")}
-                              </div>
-                              <div className="period">{isAM ? "AM" : "PM"}</div>
-                              <div className="date">
-                                {months[selectedMonth].substring(0, 3)},{" "}
-                                {selectedYear}
-                              </div>
-                            </div>
-
-                            <div className="time-calendar-container">
-                              <div className="time-selector">
-                                <div className="time-column">
-                                  <div className="time-column-label">Hour</div>
-                                  <div className="time-scroll">
-                                    <div className="time-options">
-                                      {[
-                                        12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-                                      ].map((hour) => (
-                                        <button
-                                          key={hour}
-                                          onClick={() => setSelectedHour(hour)}
-                                          className={`time-option ${
-                                            selectedHour === hour
-                                              ? "selected-hour"
-                                              : ""
-                                          }`}
-                                        >
-                                          {hour.toString().padStart(2, "0")}
-                                        </button>
-                                      ))}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="time-column">
-                                  <div className="time-column-label">Min</div>
-                                  <div className="time-scroll">
-                                    <div className="time-options">
-                                      {[0, 15, 30, 45].map((minute) => (
-                                        <button
-                                          key={minute}
-                                          onClick={() =>
-                                            setSelectedMinute(minute)
-                                          }
-                                          className={`time-option ${
-                                            selectedMinute === minute
-                                              ? "selected-minute"
-                                              : ""
-                                          }`}
-                                        >
-                                          {minute.toString().padStart(2, "0")}
-                                        </button>
-                                      ))}
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <div className="time-column">
-                                  <div className="time-column-label">
-                                    Period
-                                  </div>
-                                  <div className="period-options">
-                                    <button
-                                      onClick={() => setIsAM(true)}
-                                      className={`period-option ${
-                                        isAM ? "selected" : ""
-                                      }`}
-                                    >
-                                      AM
-                                    </button>
-                                    <button
-                                      onClick={() => setIsAM(false)}
-                                      className={`period-option ${
-                                        !isAM ? "selected" : ""
-                                      }`}
-                                    >
-                                      PM
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="calendar-section">
-                                <div className="month-nav">
-                                  <button onClick={handlePrevMonth}>
-                                    <ChevronLeft size={20} />
-                                  </button>
-                                  <h3>
-                                    {months[selectedMonth]}, {selectedYear}
-                                  </h3>
-                                  <button onClick={handleNextMonth}>
-                                    <ChevronRight size={20} />
-                                  </button>
-                                </div>
-
-                                <div className="weekdays">
-                                  {weekDays.map((day) => (
-                                    <div key={day} className="weekday">
-                                      {day}
-                                    </div>
-                                  ))}
-                                </div>
-
-                                <div className="calendar-grid">
-                                  {calendarDays.map((dayObj, index) => (
-                                    <button
-                                      key={index}
-                                      onClick={() =>
-                                        dayObj.isCurrentMonth &&
-                                        setSelectedDate(dayObj.day)
-                                      }
-                                      className={`calendar-day ${
-                                        dayObj.isCurrentMonth
-                                          ? selectedDate === dayObj.day
-                                            ? "current-month selected"
-                                            : "current-month"
-                                          : "other-month"
-                                      }`}
-                                    >
-                                      {dayObj.day}
-                                    </button>
-                                  ))}
-                                </div>
-
-                                <div className="action-buttons">
-                                  <button
-                                    onClick={() => {
-                                      setSelectedDate(new Date().getDate());
-                                      setSelectedMonth(new Date().getMonth());
-                                      setSelectedYear(new Date().getFullYear());
-                                    }}
-                                    className="action-button"
-                                  >
-                                    Clear
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      const today = new Date();
-                                      setSelectedDate(today.getDate());
-                                      setSelectedMonth(today.getMonth());
-                                      setSelectedYear(today.getFullYear());
-                                    }}
-                                    className="action-button"
-                                  >
-                                    Today
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="done-section">
-                              <button
-                                onClick={() => setIsOpen(false)}
-                                className="done-button"
-                              >
-                                Done
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <button type="submit" className="btn btn-warning fw-bold">
-                      Save changes
-                    </button>
-                  </div>
-                </form>
+                <CreateNewProject />
               </div>
             </div>
           </div>
@@ -1907,20 +624,19 @@ const ActiveProject = () => {
             {["all", "nearDue", "overdue", "Adobe", "MSOffice"].map((btn) => (
               <button
                 key={btn}
-                className={`gradient-button ${
-                  activeButton === btn ? "active-filter" : ""
-                }`}
+                className={`gradient-button ${activeButton === btn ? "active-filter" : ""
+                  }`}
                 onClick={() => handleCardFilter(btn)}
               >
                 {btn === "all"
                   ? "All"
                   : btn === "nearDue"
-                  ? "Near Due"
-                  : btn === "overdue"
-                  ? "Over Due"
-                  : btn === "Adobe"
-                  ? "Adobe"
-                  : "MS Office"}
+                    ? "Near Due"
+                    : btn === "overdue"
+                      ? "Over Due"
+                      : btn === "Adobe"
+                        ? "Adobe"
+                        : "MS Office"}
               </button>
             ))}
           </div>
@@ -2100,13 +816,12 @@ const ActiveProject = () => {
                         >
                           <div
                             className={`progress-bar 
-                          ${
-                            project.progress < 30
-                              ? "bg-danger"
-                              : project.progress < 70
-                              ? "bg-warning"
-                              : "bg-success"
-                          }`}
+                          ${project.progress < 30
+                                ? "bg-danger"
+                                : project.progress < 70
+                                  ? "bg-warning"
+                                  : "bg-success"
+                              }`}
                             role="progressbar"
                             style={{ width: `${project.progress}%` }}
                             aria-valuenow={project.progress}
@@ -2124,11 +839,10 @@ const ActiveProject = () => {
                             onClick={() => handleViewProject(project)}
                           >
                             <i
-                              className={`fas ${
-                                expandedRow === project.id
-                                  ? "fa-chevron-up"
-                                  : "fa-eye"
-                              }`}
+                              className={`fas ${expandedRow === project.id
+                                ? "fa-chevron-up"
+                                : "fa-eye"
+                                }`}
                             ></i>
                           </button>
                           <button
@@ -2269,7 +983,7 @@ const ActiveProject = () => {
                               )}
 
                               {/* Files Table */}
-                               <div className="table-responsive">
+                              <div className="table-responsive">
                                 <table className="table table-sm table-striped table-hover">
                                   <thead
                                     className="table-gradient-bg table"
@@ -2286,11 +1000,14 @@ const ActiveProject = () => {
                                           type="checkbox"
                                           className="form-check-input"
                                           checked={
-                                            selectedFiles.length === project?.files?.length
+                                            selectedFiles.length ===
+                                            project?.files?.length
                                           }
                                           onChange={(e) => {
                                             if (e.target.checked) {
-                                              setSelectedFiles([...project.files]);
+                                              setSelectedFiles([
+                                                ...project.files,
+                                              ]);
                                             } else {
                                               setSelectedFiles([]);
                                             }
@@ -2312,7 +1029,9 @@ const ActiveProject = () => {
                                       <tr
                                         key={file.id}
                                         className={
-                                          selectedFiles.some((f) => f.id === file.id)
+                                          selectedFiles.some(
+                                            (f) => f.id === file.id
+                                          )
                                             ? "table-primary text-center"
                                             : "text-center"
                                         }
@@ -2321,8 +1040,12 @@ const ActiveProject = () => {
                                           <input
                                             type="checkbox"
                                             className="form-check-input"
-                                            checked={selectedFiles.some((f) => f.id === file.id)}
-                                            onChange={() => toggleFileSelection(file)}
+                                            checked={selectedFiles.some(
+                                              (f) => f.id === file.id
+                                            )}
+                                            onChange={() =>
+                                              toggleFileSelection(file)
+                                            }
                                           />
                                         </td>
                                         <td>{file.name}</td>
@@ -2332,23 +1055,34 @@ const ActiveProject = () => {
                                         <td>
                                           <select
                                             className="form-select form-select-sm"
-
+                                            value={fileHandlers[file.id]}
+                                            onChange={(e) =>
+                                              handleHandlerChange(file.id, e.target.value)
+                                            }
                                           >
-                                            <option value="">Not Assigned</option>
-                                            <option value="John Doe">John Doe</option>
-                                            <option value="Jane Smith">Jane Smith</option>
-                                            <option value="Mike Johnson">Mike Johnson</option>
+                                            {assignees.map((assignee, index) => (
+                                              <option key={index} value={assignee.value}>
+                                                {assignee.label}
+                                              </option>
+                                            ))}
                                           </select>
-                                        </td>
-                                        <td>
-                                          <select
-                                            className="form-select form-select-sm"
 
-                                          >
-                                            <option value="">Not Assigned</option>
-                                            <option value="Sarah Williams">Sarah Williams</option>
-                                            <option value="David Brown">David Brown</option>
-                                            <option value="Emily Davis">Emily Davis</option>
+                                        </td>
+
+                                        <td>
+                                          <select className="form-select form-select-sm">
+                                            <option value="">
+                                              Not Assigned
+                                            </option>
+                                            <option value="Sarah Williams">
+                                              Sarah Williams
+                                            </option>
+                                            <option value="David Brown">
+                                              David Brown
+                                            </option>
+                                            <option value="Emily Davis">
+                                              Emily Davis
+                                            </option>
                                           </select>
                                         </td>
                                         <td>Corr WIP</td>
@@ -2585,30 +1319,30 @@ const generateDummyProjects = (count) => {
     const formattedDueDate = `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
       .padStart(2, "0")} ${hours >= 12 ? "PM" : "AM"} ${dueDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+        .getDate()
+        .toString()
+        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
 
     // Add random readyDeadline, qcHrs, qcDueDate, status
     const readyDeadline = `${(hours + 1) % 24}:${minutes
       .toString()
       .padStart(2, "0")} ${hours + 1 >= 12 ? "PM" : "AM"} ${dueDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+        .getDate()
+        .toString()
+        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
     const qcHrs = Math.floor(Math.random() * 15) + 1;
     const qcDueDate = `${(hours + 2) % 24}:${minutes
       .toString()
       .padStart(2, "0")} ${hours + 2 >= 12 ? "PM" : "AM"} ${dueDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+        .getDate()
+        .toString()
+        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
     const status = statuses[Math.floor(Math.random() * statuses.length)];
 
     const fileCount = Math.floor(Math.random() * 5) + 1;
@@ -2625,7 +1359,7 @@ const generateDummyProjects = (count) => {
         stage: stages[Math.floor(Math.random() * stages.length)],
         assigned: new Date(
           dueDate.getTime() -
-            Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
+          Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
         ).toLocaleDateString(),
         handler: handler,
         qaReviewer: qaReviewers[Math.floor(Math.random() * qaReviewers.length)],
