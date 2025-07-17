@@ -22,7 +22,6 @@ const ActiveProject = () => {
   const [file, setFile] = useState("");
   const [isEdit, setIsEdit] = useState(null);
 
-
   const initialFormData = {
     title: "",
     client: "",
@@ -276,6 +275,7 @@ const ActiveProject = () => {
     qcAllocatedHours: "",
     priority: "",
   });
+  console.log("batchEditValues", batchEditValues.handler);
   const [date, setDate] = useState("");
   const [hour, setHour] = useState("01");
   const [minute, setMinute] = useState("00");
@@ -428,17 +428,14 @@ const ActiveProject = () => {
       };
 
       // Make the API call
-      const response = await fetch(
-        `${BASE_URL}project/addProject`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`${BASE_URL}project/addProject`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        body: JSON.stringify(payload),
+      });
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
@@ -584,7 +581,11 @@ const ActiveProject = () => {
     }
     setHasUnsavedChanges(true);
   };
-
+  console.log("slectedFiles", selectedFiles);
+  console.log(
+    "slselectedFiles.some((f) => f.id === file.idectedFiles",
+    selectedFiles.some((f) => f.id === file.id)
+  );
   const applyBatchEdits = () => {
     if (selectedProject && selectedFiles.length > 0) {
       const updatedFiles = selectedProject.files.map((file) => {
@@ -1149,9 +1150,9 @@ const ActiveProject = () => {
                         value={
                           formData.projectManager
                             ? {
-                              value: formData.projectManager,
-                              label: formData.projectManager,
-                            }
+                                value: formData.projectManager,
+                                label: formData.projectManager,
+                              }
                             : null
                         }
                         onChange={(opt) =>
@@ -1183,9 +1184,9 @@ const ActiveProject = () => {
                         value={
                           formData.tasks.length
                             ? formData.tasks.map((t) => ({
-                              value: t,
-                              label: t,
-                            }))
+                                value: t,
+                                label: t,
+                              }))
                             : []
                         }
                         onChange={(opts) =>
@@ -1214,9 +1215,9 @@ const ActiveProject = () => {
                         value={
                           formData.application.length
                             ? formData.application.map((a) => ({
-                              value: a,
-                              label: a,
-                            }))
+                                value: a,
+                                label: a,
+                              }))
                             : []
                         }
                         onChange={(opts) =>
@@ -1246,9 +1247,9 @@ const ActiveProject = () => {
                       value={
                         formData.languages.length
                           ? formData.languages.map((l) => ({
-                            value: l,
-                            label: l,
-                          }))
+                              value: l,
+                              label: l,
+                            }))
                           : []
                       }
                       onChange={(opts) =>
@@ -1731,10 +1732,11 @@ const ActiveProject = () => {
                                         <button
                                           key={hour}
                                           onClick={() => setSelectedHour(hour)}
-                                          className={`time-option ${selectedHour === hour
-                                            ? "selected-hour"
-                                            : ""
-                                            }`}
+                                          className={`time-option ${
+                                            selectedHour === hour
+                                              ? "selected-hour"
+                                              : ""
+                                          }`}
                                         >
                                           {hour.toString().padStart(2, "0")}
                                         </button>
@@ -1753,10 +1755,11 @@ const ActiveProject = () => {
                                           onClick={() =>
                                             setSelectedMinute(minute)
                                           }
-                                          className={`time-option ${selectedMinute === minute
-                                            ? "selected-minute"
-                                            : ""
-                                            }`}
+                                          className={`time-option ${
+                                            selectedMinute === minute
+                                              ? "selected-minute"
+                                              : ""
+                                          }`}
                                         >
                                           {minute.toString().padStart(2, "0")}
                                         </button>
@@ -1772,15 +1775,17 @@ const ActiveProject = () => {
                                   <div className="period-options">
                                     <button
                                       onClick={() => setIsAM(true)}
-                                      className={`period-option ${isAM ? "selected" : ""
-                                        }`}
+                                      className={`period-option ${
+                                        isAM ? "selected" : ""
+                                      }`}
                                     >
                                       AM
                                     </button>
                                     <button
                                       onClick={() => setIsAM(false)}
-                                      className={`period-option ${!isAM ? "selected" : ""
-                                        }`}
+                                      className={`period-option ${
+                                        !isAM ? "selected" : ""
+                                      }`}
                                     >
                                       PM
                                     </button>
@@ -1817,12 +1822,13 @@ const ActiveProject = () => {
                                         dayObj.isCurrentMonth &&
                                         setSelectedDate(dayObj.day)
                                       }
-                                      className={`calendar-day ${dayObj.isCurrentMonth
-                                        ? selectedDate === dayObj.day
-                                          ? "current-month selected"
-                                          : "current-month"
-                                        : "other-month"
-                                        }`}
+                                      className={`calendar-day ${
+                                        dayObj.isCurrentMonth
+                                          ? selectedDate === dayObj.day
+                                            ? "current-month selected"
+                                            : "current-month"
+                                          : "other-month"
+                                      }`}
                                     >
                                       {dayObj.day}
                                     </button>
@@ -1901,19 +1907,20 @@ const ActiveProject = () => {
             {["all", "nearDue", "overdue", "Adobe", "MSOffice"].map((btn) => (
               <button
                 key={btn}
-                className={`gradient-button ${activeButton === btn ? "active-filter" : ""
-                  }`}
+                className={`gradient-button ${
+                  activeButton === btn ? "active-filter" : ""
+                }`}
                 onClick={() => handleCardFilter(btn)}
               >
                 {btn === "all"
                   ? "All"
                   : btn === "nearDue"
-                    ? "Near Due"
-                    : btn === "overdue"
-                      ? "Over Due"
-                      : btn === "Adobe"
-                        ? "Adobe"
-                        : "MS Office"}
+                  ? "Near Due"
+                  : btn === "overdue"
+                  ? "Over Due"
+                  : btn === "Adobe"
+                  ? "Adobe"
+                  : "MS Office"}
               </button>
             ))}
           </div>
@@ -2093,12 +2100,13 @@ const ActiveProject = () => {
                         >
                           <div
                             className={`progress-bar 
-                          ${project.progress < 30
-                                ? "bg-danger"
-                                : project.progress < 70
-                                  ? "bg-warning"
-                                  : "bg-success"
-                              }`}
+                          ${
+                            project.progress < 30
+                              ? "bg-danger"
+                              : project.progress < 70
+                              ? "bg-warning"
+                              : "bg-success"
+                          }`}
                             role="progressbar"
                             style={{ width: `${project.progress}%` }}
                             aria-valuenow={project.progress}
@@ -2116,10 +2124,11 @@ const ActiveProject = () => {
                             onClick={() => handleViewProject(project)}
                           >
                             <i
-                              className={`fas ${expandedRow === project.id
-                                ? "fa-chevron-up"
-                                : "fa-eye"
-                                }`}
+                              className={`fas ${
+                                expandedRow === project.id
+                                  ? "fa-chevron-up"
+                                  : "fa-eye"
+                              }`}
                             ></i>
                           </button>
                           <button
@@ -2165,7 +2174,9 @@ const ActiveProject = () => {
                               {selectedFiles.length > 0 && (
                                 <div className="row g-3 mb-3 align-items-center">
                                   <div className="col-md-3">
-                                    <label className="form-label">Batch Handler</label>
+                                    <label className="form-label">
+                                      Batch Handler
+                                    </label>
                                     <select
                                       className="form-select form-select-sm"
                                       value={file.handler ?? ""}
@@ -2173,12 +2184,18 @@ const ActiveProject = () => {
                                         const value = e.target.value;
 
                                         // 1. Update the files array
-                                        const updatedFiles = project.files.map((f) => {
-                                          if (selectedFiles.some((sf) => sf.id === f.id)) {
-                                            return { ...f, handler: value };
+                                        const updatedFiles = project.files.map(
+                                          (f) => {
+                                            if (
+                                              selectedFiles.some(
+                                                (sf) => sf.id === f.id
+                                              )
+                                            ) {
+                                              return { ...f, handler: value };
+                                            }
+                                            return f;
                                           }
-                                          return f;
-                                        });
+                                        );
 
                                         // 2. Update the selected project state
                                         setSelectedProject((prevProject) => ({
@@ -2187,9 +2204,11 @@ const ActiveProject = () => {
                                         }));
 
                                         // 3. Optionally update selectedFiles too if you're relying on it elsewhere
-                                        const updatedSelectedFiles = selectedFiles.map((f) =>
-                                          ({ ...f, handler: value })
-                                        );
+                                        const updatedSelectedFiles =
+                                          selectedFiles.map((f) => ({
+                                            ...f,
+                                            handler: value,
+                                          }));
                                         setSelectedFiles(updatedSelectedFiles);
 
                                         // 4. Flag for unsaved changes
@@ -2198,49 +2217,59 @@ const ActiveProject = () => {
                                     >
                                       <option value="">Not Assigned</option>
                                       <option value="John Doe">John Doe</option>
-                                      <option value="Jane Smith">Jane Smith</option>
-                                      <option value="Mike Johnson">Mike Johnson</option>
+                                      <option value="Jane Smith">
+                                        Jane Smith
+                                      </option>
+                                      <option value="Mike Johnson">
+                                        Mike Johnson
+                                      </option>
                                     </select>
-
-
-
                                   </div>
 
                                   <div className="col-md-3">
-                                    <label className="form-label">Batch QA Reviewer</label>
+                                    <label className="form-label">
+                                      Batch QA Reviewer
+                                    </label>
                                     <select
                                       className="form-select form-select-sm"
                                       value={file.qaReviewer ?? ""}
                                       onChange={(e) => {
                                         const value = e.target.value;
 
-                                        const updatedFiles = project.files.map((f) =>
-                                          selectedFiles.some((sf) => sf.id === f.id)
-                                            ? { ...f, qaReviewer: value }
-                                            : f
+                                        const updatedFiles = project.files.map(
+                                          (f) =>
+                                            selectedFiles.some(
+                                              (sf) => sf.id === f.id
+                                            )
+                                              ? { ...f, qaReviewer: value }
+                                              : f
                                         );
 
-                                        setSelectedProject(prev => ({
+                                        setSelectedProject((prev) => ({
                                           ...prev,
-                                          files: updatedFiles
+                                          files: updatedFiles,
                                         }));
 
                                         setHasUnsavedChanges(true);
                                       }}
                                     >
                                       <option value="">Not Assigned</option>
-                                      <option value="Sarah Williams">Sarah Williams</option>
-                                      <option value="David Brown">David Brown</option>
-                                      <option value="Emily Davis">Emily Davis</option>
+                                      <option value="Sarah Williams">
+                                        Sarah Williams
+                                      </option>
+                                      <option value="David Brown">
+                                        David Brown
+                                      </option>
+                                      <option value="Emily Davis">
+                                        Emily Davis
+                                      </option>
                                     </select>
-
-
                                   </div>
                                 </div>
                               )}
 
                               {/* Files Table */}
-                              <div className="table-responsive">
+                               <div className="table-responsive">
                                 <table className="table table-sm table-striped table-hover">
                                   <thead
                                     className="table-gradient-bg table"
@@ -2332,10 +2361,14 @@ const ActiveProject = () => {
                               {/* Batch Edit Controls */}
                               <div className="row g-3 mb-1">
                                 <div className="col-md-2">
-                                  <label className="form-label">Ready for QC Due</label>
+                                  <label className="form-label">
+                                    Ready for QC Due
+                                  </label>
                                 </div>
                                 <div className="col-md-2">
-                                  <label className="form-label">QC Allocated Hours</label>
+                                  <label className="form-label">
+                                    QC Allocated Hours
+                                  </label>
                                 </div>
                                 <div className="col-md-2">
                                   <label className="form-label">QC Due</label>
@@ -2353,7 +2386,9 @@ const ActiveProject = () => {
                                 <div className="col-md-2">
                                   <DatePicker
                                     selected={selectedDateTime}
-                                    onChange={(date) => setSelectedDateTime(date)}
+                                    onChange={(date) =>
+                                      setSelectedDateTime(date)
+                                    }
                                     showTimeSelect
                                     timeFormat="HH:mm"
                                     timeIntervals={15}
@@ -2373,17 +2408,26 @@ const ActiveProject = () => {
                                     value={qcAllocatedHours}
                                     onChange={(e) => {
                                       const val = parseFloat(e.target.value);
-                                      if (!isNaN(val) && val >= 0 && val % 0.25 === 0) {
+                                      if (
+                                        !isNaN(val) &&
+                                        val >= 0 &&
+                                        val % 0.25 === 0
+                                      ) {
                                         setQcAllocatedHours(val);
                                       }
                                     }}
                                   />
-                                  <div className="small text-white">(in multiple of 0.00 only)</div>
+                                  <div className="small text-white">
+                                    (in multiple of 0.00 only)
+                                  </div>
                                 </div>
 
                                 <div className="col-md-2">
                                   <div className="form-control fw-bold">
-                                    {calculateQCDue(selectedDateTime, qcAllocatedHours)}
+                                    {calculateQCDue(
+                                      selectedDateTime,
+                                      qcAllocatedHours
+                                    )}
                                   </div>
                                 </div>
 
@@ -2396,15 +2440,18 @@ const ActiveProject = () => {
                                 </div>
 
                                 <div className="col-md-2 d-flex gap-2">
-                                  <button className="btn btn-success w-100">Save</button>
-                                  <button className="btn btn-secondary w-100">Close</button>
+                                  <button className="btn btn-success w-100">
+                                    Save
+                                  </button>
+                                  <button className="btn btn-secondary w-100">
+                                    Close
+                                  </button>
                                 </div>
                               </div>
                             </div>
                           </div>
                         </td>
                       </tr>
-
                     )}
                   </React.Fragment>
                 ))}
@@ -2538,30 +2585,30 @@ const generateDummyProjects = (count) => {
     const formattedDueDate = `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
       .padStart(2, "0")} ${hours >= 12 ? "PM" : "AM"} ${dueDate
-        .getDate()
-        .toString()
-        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-          .toString()
-          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+      .getDate()
+      .toString()
+      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
 
     // Add random readyDeadline, qcHrs, qcDueDate, status
     const readyDeadline = `${(hours + 1) % 24}:${minutes
       .toString()
       .padStart(2, "0")} ${hours + 1 >= 12 ? "PM" : "AM"} ${dueDate
-        .getDate()
-        .toString()
-        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-          .toString()
-          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+      .getDate()
+      .toString()
+      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
     const qcHrs = Math.floor(Math.random() * 15) + 1;
     const qcDueDate = `${(hours + 2) % 24}:${minutes
       .toString()
       .padStart(2, "0")} ${hours + 2 >= 12 ? "PM" : "AM"} ${dueDate
-        .getDate()
-        .toString()
-        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-          .toString()
-          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+      .getDate()
+      .toString()
+      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
     const status = statuses[Math.floor(Math.random() * statuses.length)];
 
     const fileCount = Math.floor(Math.random() * 5) + 1;
@@ -2578,7 +2625,7 @@ const generateDummyProjects = (count) => {
         stage: stages[Math.floor(Math.random() * stages.length)],
         assigned: new Date(
           dueDate.getTime() -
-          Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
+            Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
         ).toLocaleDateString(),
         handler: handler,
         qaReviewer: qaReviewers[Math.floor(Math.random() * qaReviewers.length)],

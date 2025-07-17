@@ -144,7 +144,7 @@ const ProjectsTable = ({  onViewProject, onMarkComplete, onDeleteProject, expand
               <React.Fragment key={project.id}>
                 <tr
                   className={
-                    expandedRow === project.id ? "table-active text-center" : "text-center"
+                    expandedRow === project.id ? "table-active " : ""
                   }
                 >
                   <td>{index + 1}</td>

@@ -563,7 +563,7 @@ const AuditLog = () => {
                     </thead>
                     <tbody>
                       {getCurrentData().map((item) => (
-                        <tr key={item.id}  className="text-center">
+                        <tr key={item.id}  >
                           {activeTab === "all-activities" && (
                             <>
                               <td>{item.id}</td>

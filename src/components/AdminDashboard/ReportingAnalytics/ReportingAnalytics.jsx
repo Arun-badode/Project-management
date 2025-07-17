@@ -538,7 +538,7 @@ const ReportingAnalytics = () => {
           </thead>
           <tbody>
             {filteredProjectData.map((project) => (
-              <tr key={project.id} className="analytics-project-row text-center">
+              <tr key={project.id} className="analytics-project-row">
                 <td>{project.id}</td>
                 <td className="text-dark analytics-project-name">
                   {project.name}
@@ -851,7 +851,7 @@ const ReportingAnalytics = () => {
             {filteredFeedback.map((feedback) => (
               <tr
                 key={feedback.id}
-                className="text-white analytics-feedback-row text-center"
+                className="text-white analytics-feedback-row"
               >
                 <td>{feedback.id}</td>
                 <td className="text-white">{feedback.project}</td>
@@ -957,7 +957,7 @@ const ReportingAnalytics = () => {
                 {teamPerformanceData.map((member) => (
                   <tr
                     key={member.id}
-                    className="text-white analytics-performance-row text-center"
+                    className="text-white analytics-performance-row"
                   >
                     <td>{member.id}</td>
                     <td className="text-white analytics-member-name">

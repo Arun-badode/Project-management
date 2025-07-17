@@ -48,7 +48,7 @@ const TeamOnDutyTable = ({ todayAttendanceData }) => {
           return (
             <tr className="text-center" key={employee.id}>
               <td>
-                <div className="d-flex align-items-center">
+                <div className="d-flex ">
                   <div className="avatar avatar-sm bg-light-primary rounded me-3">
                     <span className="avatar-text">{initials}</span>
                   </div>

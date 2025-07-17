@@ -224,7 +224,7 @@ const RoleManagementSystem = () => {
                   </thead>
                   <tbody>
                     {roles.map((role) => (
-                      <tr key={role._id} className="text-center">
+                      <tr key={role._id}>
                         <td>{role.roleName}</td>
                         <td>
                           <span className="badge bg-light text-primary">
@@ -277,7 +277,7 @@ const RoleManagementSystem = () => {
                     </thead>
                     <tbody>
                       {features.map((item, index) => (
-                        <tr key={item._id} className="text-center">
+                        <tr key={item._id} >
                           <td>{index === 0 ? module : ""}</td>
                           <td>
                             {index === 0 && (
@@ -385,7 +385,7 @@ const RoleManagementSystem = () => {
                     </thead>
                     <tbody>
                       {features.map((item, index) => (
-                        <tr key={item._id} className="text-center">
+                        <tr key={item._id} >
                           <td>{index === 0 ? module : ""}</td>
                           <td>
                             {index === 0 && (
