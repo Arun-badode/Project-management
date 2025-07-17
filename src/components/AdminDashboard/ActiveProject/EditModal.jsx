@@ -1,20 +1,57 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 function EditModal() {
+  const [editedProject, setEditedProject] = useState(null);
+  
+const initialFormData = {
+    title: "",
+    client: "",
+    country: "",
+    projectManager: "",
+    tasks: [],
+    languages: [],
+    application: [],
+    files: [
+      [
+        { name: "File_1", pageCount: 3, application: "", selected: false },
+        { name: "File_2", pageCount: 5, application: "", selected: false },
+        { name: "File_3", pageCount: 4, application: "", selected: false },
+        { name: "File_4", pageCount: 2, application: "", selected: false },
+        { name: "File_5", pageCount: 6, application: "", selected: false },
+        { name: "File_6", pageCount: 7, application: "", selected: false },
+        { name: "File_7", pageCount: 8, application: "", selected: false },
+      ],
+    ],
+    totalPages: 0,
+    deadline: "",
+    readyDeadline: "",
+    qcHrs: "",
+    receivedDate: new Date().toISOString().split("T")[0],
+    serverPath: "",
+    notes: "",
+    rate: 0,
+    currency: "USD",
+    cost: 0,
+    inrCost: 0,
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
+
+
+   const handleSaveProjectEdit = () => {
+    if (editedProject) {
+      setProjects(
+        projects.map((p) => (p.id === editedProject.id ? editedProject : p))
+      );
+      setShowEditModal(false);
+      setEditedProject(null);
+    }
+  };
+
+  
   return (
     <div>
-       <div className="modal-dialog modal-lg">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Edit Project</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowEditModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <div className="row g-3">
+         <div className="row g-3">
                   <div className="col-md-12">
                     <label className="form-label">Project Title</label>
                     <input
@@ -123,28 +160,10 @@ function EditModal() {
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowEditModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleSaveProjectEdit}
-                >
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          </div>
-      
     </div>
+    
   )
+  
 }
 
 export default EditModal
