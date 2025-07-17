@@ -5,7 +5,7 @@ import Select from "react-select";
 import useSyncScroll from "../Hooks/useSyncScroll";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+
 import BASE_URL from "../../../config";
 import CreateNewProject from "../Project/CreateNewProject";
 import EditModal from "./EditModal";
@@ -18,8 +18,7 @@ const ActiveProject = () => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const isAdmin = userRole === "Admin";
-  const [batchHandler, setBatchHandler] = useState("");
-  const [batchQAReviewer, setBatchQAReviewer] = useState("");
+ 
   const [file, setFile] = useState("");
   const [isEdit, setIsEdit] = useState(null);
 
@@ -231,23 +230,7 @@ const ActiveProject = () => {
 
   // Helper functions you need to implement:
 
-  const formatLanguagesAndPages = (formData) => {
-    const pagesPerLang = formData.files.reduce(
-      (sum, file) => sum + (file.pageCount || 0),
-      0
-    );
-    return formData.languages
-      .map((lang) => `${lang}:${pagesPerLang}`)
-      .join(",");
-  };
-
-  const formatDeadline = () => {
-    // Format from your calendar state variables
-    const year = selectedYear;
-    const month = (selectedMonth + 1).toString().padStart(2, "0");
-    const day = selectedDate.toString().padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
+ 
   const handleDeleteProject = (id) => {
     const project = projects.find((p) => p.id === id);
     if (!project) return;
