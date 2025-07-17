@@ -22,7 +22,7 @@ const Setting = () => {
   const [applications, setapplications] = useState(["Web", "Mobile Responsive", "iOS", "Android"]);
   const [currencies, setCurrencies] = useState([{ name: "USD", rate: "83" }, { name: "EUR", rate: "90" }, { name: "GBP", rate: "90" }]);
 
-  const [newClient, setNewClient] = useState({ alias: "", actualName: "", country: "", managers: "" });
+  const [newClient, setNewClient] = useState({ alias: "", actualName: "", country: "", managers: "" , currency: "", hourlyRate: "" });
   const [newTask, setNewTask] = useState("");
   const [newLanguage, setNewLanguage] = useState("");
   const [newapplication, setNewapplication] = useState("");
@@ -88,6 +88,12 @@ const Setting = () => {
           <div className="col-md-4">
             <input type="text" className="form-control bg-secondary text-white border-secondary" placeholder="Country*" value={newClient.country} onChange={(e) => setNewClient({ ...newClient, country: e.target.value })} />
           </div>
+            <div className="col-md-4">
+            <input type="text" className="form-control bg-secondary text-white border-secondary" placeholder="Currency*" value={newClient.country} onChange={(e) => setNewClient({ ...newClient, currency: e.target.value })} />
+          </div>
+            <div className="col-md-4">
+            <input type="text" className="form-control bg-secondary text-white border-secondary" placeholder="Hourly Rate" value={newClient.country} onChange={(e) => setNewClient({ ...newClient, hourlyRate: e.target.value })} />
+          </div>
         </div>
         <div className="input-group mb-2">
           <input type="text" className="form-control bg-secondary text-white border-secondary" placeholder="Project Managers (comma-sep)" value={newClient.managers} onChange={(e) => setNewClient({ ...newClient, managers: e.target.value })} />
@@ -102,9 +108,12 @@ const Setting = () => {
                 PMs: {client.managers}
               </span>
               <div className="btn-group btn-group-sm gap-2">
-                <button className="btn btn-outline-danger" onClick={() => handleDeleteItem(clients, setClients, index)}>
-                  <i className="fas fa-trash-alt"></i>
-                </button>
+               <div>
+                 <button className="btn btn-outline-secondary btn-sm me-2" ><i class="fa-solid fa-pen"></i></button>
+              <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteItem(applications, setapplications, index)}>
+                <i className="fas fa-trash-alt"></i>
+              </button>
+              </div>
               </div>
             </div>
           ))}
@@ -122,9 +131,12 @@ const Setting = () => {
           {tasks.map((task, index) => (
             <div key={index} className="d-flex justify-content-between align-items-center py-2 px-2 mb-1 rounded">
               <span className="text-white">{task}</span>
-              <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteItem(tasks, setTasks, index)}>
+              <div>
+                 <button className="btn btn-outline-secondary btn-sm me-2" ><i class="fa-solid fa-pen"></i></button>
+              <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteItem(applications, setapplications, index)}>
                 <i className="fas fa-trash-alt"></i>
               </button>
+              </div>
             </div>
           ))}
         </div>
@@ -141,9 +153,12 @@ const Setting = () => {
           {applications.map((application, index) => (
             <div key={index} className="d-flex justify-content-between align-items-center py-2 px-2 mb-1 rounded">
               <span className="text-white">{application}</span>
+              <div>
+                 <button className="btn btn-outline-secondary btn-sm me-2" ><i class="fa-solid fa-pen"></i></button>
               <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteItem(applications, setapplications, index)}>
                 <i className="fas fa-trash-alt"></i>
               </button>
+              </div>
             </div>
           ))}
         </div>
@@ -160,9 +175,12 @@ const Setting = () => {
           {languages.map((language, index) => (
             <div key={index} className="d-flex justify-content-between align-items-center py-2 px-2 mb-1 rounded">
               <span className="text-white">{language}</span>
+              <div>
+                 <button className="btn btn-outline-secondary btn-sm me-2" ><i class="fa-solid fa-pen"></i></button>
               <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteItem(languages, setLanguages, index)}>
                 <i className="fas fa-trash-alt"></i>
               </button>
+              </div>
             </div>
           ))}
         </div>
@@ -194,6 +212,7 @@ const Setting = () => {
                   <td>{currency.name}</td>
                   <td>{currency.rate}</td>
                   <td>
+                    <button className="btn btn-outline-secondary btn-sm me-2" ><i class="fa-solid fa-pen"></i></button>
                     <button className="btn btn-outline-danger btn-sm" onClick={() => handleDeleteItem(currencies, setCurrencies, index)}>
                       <i className="fas fa-trash-alt"></i>
                     </button>
@@ -203,9 +222,9 @@ const Setting = () => {
             </tbody>
           </table>
         </div>
-        <button className="btn btn-sm btn-primary" onClick={handleAddCurrency} disabled={!newCurrency.name || !newCurrency.rate}>
+        {/* <button className="btn btn-sm btn-primary" onClick={handleAddCurrency} disabled={!newCurrency.name || !newCurrency.rate}>
           <i className="fas fa-plus me-1"></i> Add Currency
-        </button>
+        </button> */}
       </div>
     </div>
   );
