@@ -472,14 +472,14 @@ console.log("api response", teamMembers);
               </tr>
             </thead>
             <tbody>
-              {freezedMembers.length === 0 ? (
+              {freezedMembers?.length === 0 ? (
                 <tr>
                   <td colSpan="10" className="text-center text-muted">
                     No freezed members found.
                   </td>
                 </tr>
               ) : (
-                freezedMembers.map((member, idx) => (
+                freezedMembers?.map((member, idx) => (
                   <tr key={idx} className="text-center">
                     <td>{member.empId}</td>
                     <td>{member.fullName}</td>
@@ -487,7 +487,7 @@ console.log("api response", teamMembers);
                     <td>{member.dob}</td>
                     <td>{member.team}</td>
                     <td>{member.role}</td>
-                    <td>{member.appSkills.join(", ")}</td>
+                    <td>{member.appSkills}</td>
                     <td>{member.username}</td>
                     <td>
                       <span className="badge bg-secondary">Freezed</span>

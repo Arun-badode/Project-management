@@ -110,7 +110,7 @@ const LoginPage = () => {
 
   if (showVideo) {
     return (
-      <div className={`video-splash-screen ${fadeOut ? "fade-out" : ""}`}>
+      <div className={`video-splash-screen ${fadeOut ? "" : ""}`}>
         <video 
           autoPlay 
           muted 

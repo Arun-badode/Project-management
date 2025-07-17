@@ -358,7 +358,7 @@ const ResourceManagement = () => {
                 </thead>
                 <tbody>
                   {filteredResources.map((resource) => (
-                    <tr key={resource.id}  className="text-center">
+                    <tr key={resource.id} >
                       <td>{resource.id}</td>
                       <td>
                         <div className="d-flex align-items-center">

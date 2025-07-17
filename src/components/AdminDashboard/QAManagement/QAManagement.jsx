@@ -387,7 +387,7 @@ const QAManagement = () => {
                     </thead>
                     <tbody className="text-white">
                       {filteredTasks.map((task) => (
-                        <tr key={task.id}  className="text-center">
+                        <tr key={task.id}  >
                           <td>
                             <code>{task.id}</code>
                           </td>
@@ -657,7 +657,7 @@ const QAManagement = () => {
                       {filteredTasks
                         .filter((task) => task.assignedTo)
                         .map((task) => (
-                          <tr key={task.id}  className="text-center">
+                          <tr key={task.id}  >
                             <td>
                               <code>{task.id}</code>
                             </td>

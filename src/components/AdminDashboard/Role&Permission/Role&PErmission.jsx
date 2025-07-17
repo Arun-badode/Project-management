@@ -173,160 +173,6 @@ const RoleManagementSystem = () => {
     });
   };
 
-  const RoleListView = () => (
-    <div className="card shadow rounded-3 p-3 bg-card">
-      <div className="card-header bg-white border-bottom pb-0 bg-card">
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2 ">
-          <h2 className="card-title h4 m-0">Permissions</h2>
-          <button
-            className="btn gradient-button btn-sm d-flex align-items-center gap-1"
-            onClick={handleOpenAddRoleModal}
-          >
-            <Plus size={16} /> Add Role
-          </button>
-        </div>
-      </div>
-
-      <div className="card-body p-0">
-        <div
-          className="table-responsive"
-          style={{ maxHeight: "400px", overflowY: "auto" }}
-        >
-          <table className="table align-middle table-hover table-borderless mb-0 text-center table-gradient-bg">
-            <thead
-              className="table-gradient-bg table "
-              style={{
-                position: "sticky",
-                top: 0,
-                zIndex: 0,
-                backgroundColor: "#fff", // Match your background color
-              }}
-            >
-              <tr  className="text-center">
-                <th>Role</th>
-                <th>Type</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {roles.map((role) => (
-                <tr key={role._id}  className="text-center">
-                  <td>{role.roleName}</td>
-                  <td>
-                    <span className="badge bg-light text-primary">
-                      {role.description}
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-sm btn-outline-success"
-                      onClick={() => handleEditRole(role)}
-                    >
-                      <Edit size={14} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-
-  const PermissionsView = () => (
-    <div className="">
-      {Object.entries(permissionsState).map(([module, features]) => (
-        <div key={module} className="mb-5">
-          <div className="bg-light p-3 rounded mb-3 bg-card">
-            <h3 className="h5 mb-0">{module}</h3>
-          </div>
-          <div className="table-responsive">
-            <table className="table table-hover align-middle text-center table-gradient-bg">
-              <thead
-                className="table-gradient-bg table "
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 0,
-                  backgroundColor: "#fff", // Match your background color
-                }}
-              >
-                <tr  className="text-center"> 
-                  <th>Module</th>
-                  <th>Module Permission</th>
-                  <th>Feature</th>
-                  <th>View</th>
-                  <th>Add</th>
-                  <th>Edit</th>
-                  <th>Delete</th>
-                  <th>Permission</th>
-                </tr>
-              </thead>
-              <tbody>
-                {features.map((item, index) => (
-                  <tr key={item._id}  className="text-center">
-                    <td>{index === 0 ? module : ""}</td>
-                    <td>
-                      {index === 0 && (
-                        <input
-                          type="checkbox"
-                          className="form-check-input"
-                          checked={features.some((f) => f.permission)}
-                          onChange={() => {
-                            const updated = features.map((f) => ({
-                              ...f,
-                              permission: !features[0].permission,
-                            }));
-                            setPermissionsState((prev) => ({
-                              ...prev,
-                              [module]: updated,
-                            }));
-                          }}
-                        />
-                      )}
-                    </td>
-                    <td>{item.feature}</td>
-                    {[
-                      "isGet",
-                      "isCreate",
-                      "isEdit",
-                      "isDelete",
-                      "permission",
-                    ].map((type, idx) => (
-                      <td key={idx}>
-                        <input
-                          type="checkbox"
-                          className="form-check-input"
-                          checked={item[type]}
-                          onChange={() => togglePermission(module, index, type)}
-                        />
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ))}
-      <div className="border-top pt-4 mt-4 d-flex justify-content-end gap-3">
-        <button
-          className="btn btn-outline-secondary rounded-5"
-          onClick={handleClosePermissionsModal}
-        >
-          Cancel
-        </button>
-        <button
-          className="btn gradient-button"
-          onClick={() => alert("Permissions saved")}
-        >
-          Save Permissions
-        </button>
-      </div>
-    </div>
-  );
-
   useEffect(() => {
     document.body.style.overflow = showPermissionsModal ? "hidden" : "auto";
   }, [showPermissionsModal]);
@@ -341,7 +187,157 @@ const RoleManagementSystem = () => {
       </div>
 
       <div className="row justify-content-center">
-        {currentView === "roleList" ? <RoleListView /> : <PermissionsView />}
+        {currentView === "roleList" ? (
+          <div className="card shadow rounded-3 p-3 bg-card">
+            <div className="card-header bg-white border-bottom pb-0 bg-card">
+              <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-2 ">
+                <h2 className="card-title h4 m-0">Permissions</h2>
+                <button
+                  className="btn gradient-button btn-sm d-flex align-items-center gap-1"
+                  onClick={handleOpenAddRoleModal}
+                >
+                  <Plus size={16} /> Add Role
+                </button>
+              </div>
+            </div>
+
+            <div className="card-body p-0">
+              <div
+                className="table-responsive"
+                style={{ maxHeight: "400px", overflowY: "auto" }}
+              >
+                <table className="table align-middle table-hover table-borderless mb-0 text-center table-gradient-bg">
+                  <thead
+                    className="table-gradient-bg table "
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 0,
+                      backgroundColor: "#fff",
+                    }}
+                  >
+                    <tr className="text-center">
+                      <th>Role</th>
+                      <th>Type</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {roles.map((role) => (
+                      <tr key={role._id}>
+                        <td>{role.roleName}</td>
+                        <td>
+                          <span className="badge bg-light text-primary">
+                            {role.description}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            className="btn btn-sm btn-outline-success"
+                            onClick={() => handleEditRole(role)}
+                          >
+                            <Edit size={14} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="">
+            {Object.entries(permissionsState).map(([module, features]) => (
+              <div key={module} className="mb-5">
+                <div className="bg-light p-3 rounded mb-3 bg-card">
+                  <h3 className="h5 mb-0">{module}</h3>
+                </div>
+                <div className="table-responsive">
+                  <table className="table table-hover align-middle text-center table-gradient-bg">
+                    <thead
+                      className="table-gradient-bg table "
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 0,
+                        backgroundColor: "#fff",
+                      }}
+                    >
+                      <tr className="text-center">
+                        <th>Module</th>
+                        <th>Module Permission</th>
+                        <th>Feature</th>
+                        <th>View</th>
+                        <th>Add</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                        <th>Permission</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {features.map((item, index) => (
+                        <tr key={item._id} >
+                          <td>{index === 0 ? module : ""}</td>
+                          <td>
+                            {index === 0 && (
+                              <input
+                                type="checkbox"
+                                className="form-check-input"
+                                checked={features.some((f) => f.permission)}
+                                onChange={() => {
+                                  const updated = features.map((f) => ({
+                                    ...f,
+                                    permission: !features[0].permission,
+                                  }));
+                                  setPermissionsState((prev) => ({
+                                    ...prev,
+                                    [module]: updated,
+                                  }));
+                                }}
+                              />
+                            )}
+                          </td>
+                          <td>{item.feature}</td>
+                          {[
+                            "isGet",
+                            "isCreate",
+                            "isEdit",
+                            "isDelete",
+                            "permission",
+                          ].map((type, idx) => (
+                            <td key={idx}>
+                              <input
+                                type="checkbox"
+                                className="form-check-input"
+                                checked={item[type]}
+                                onChange={() => togglePermission(module, index, type)}
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
+            <div className="border-top pt-4 mt-4 d-flex justify-content-end gap-3">
+              <button
+                className="btn btn-outline-secondary rounded-5"
+                onClick={handleClosePermissionsModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn gradient-button"
+                onClick={() => alert("Permissions saved")}
+              >
+                Save Permissions
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Permission Modal */}
@@ -359,7 +355,96 @@ const RoleManagementSystem = () => {
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <PermissionsView />
+          <div className="">
+            {Object.entries(permissionsState).map(([module, features]) => (
+              <div key={module} className="mb-5">
+                <div className="bg-light p-3 rounded mb-3 bg-card">
+                  <h3 className="h5 mb-0">{module}</h3>
+                </div>
+                <div className="table-responsive">
+                  <table className="table table-hover align-middle text-center table-gradient-bg">
+                    <thead
+                      className="table-gradient-bg table "
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 0,
+                        backgroundColor: "#fff",
+                      }}
+                    >
+                      <tr className="text-center">
+                        <th>Module</th>
+                        <th>Module Permission</th>
+                        <th>Feature</th>
+                        <th>View</th>
+                        <th>Add</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                        <th>Permission</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {features.map((item, index) => (
+                        <tr key={item._id} >
+                          <td>{index === 0 ? module : ""}</td>
+                          <td>
+                            {index === 0 && (
+                              <input
+                                type="checkbox"
+                                className="form-check-input"
+                                checked={features.some((f) => f.permission)}
+                                onChange={() => {
+                                  const updated = features.map((f) => ({
+                                    ...f,
+                                    permission: !features[0].permission,
+                                  }));
+                                  setPermissionsState((prev) => ({
+                                    ...prev,
+                                    [module]: updated,
+                                  }));
+                                }}
+                              />
+                            )}
+                          </td>
+                          <td>{item.feature}</td>
+                          {[
+                            "isGet",
+                            "isCreate",
+                            "isEdit",
+                            "isDelete",
+                            "permission",
+                          ].map((type, idx) => (
+                            <td key={idx}>
+                              <input
+                                type="checkbox"
+                                className="form-check-input"
+                                checked={item[type]}
+                                onChange={() => togglePermission(module, index, type)}
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
+            <div className="border-top pt-4 mt-4 d-flex justify-content-end gap-3">
+              <button
+                className="btn btn-outline-secondary rounded-5"
+                onClick={handleClosePermissionsModal}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn gradient-button"
+                onClick={() => alert("Permissions saved")}
+              >
+                Save Permissions
+              </button>
+            </div>
+          </div>
         </Modal.Body>
       </Modal>
 
