@@ -10,6 +10,7 @@ import BASE_URL from "../../../config";
 import CreateNewProject from "../Project/CreateNewProject";
 import EditModal from "./EditModal";
 
+
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
@@ -18,9 +19,28 @@ const ActiveProject = () => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const isAdmin = userRole === "Admin";
- 
+
   const [file, setFile] = useState("");
   const [isEdit, setIsEdit] = useState(null);
+  const [fileHandlers, setFileHandlers] = useState({});
+
+  const assignees = [
+    { label: "Not Assigned", value: "" },
+    { label: "John Doe", value: "John Doe" },
+    { label: "Jane Smith", value: "Jane Smith" },
+    { label: "Mike Johnson", value: "Mike Johnson" },
+  ];
+  const handleHandlerChange = (fileId, newHandler) => {
+    // Update handler for all selected files
+    const updatedHandlers = { ...fileHandlers };
+
+    selectedFiles.forEach((f) => {
+      updatedHandlers[f.id] = newHandler;
+    });
+
+    setFileHandlers(updatedHandlers);
+    setHasUnsavedChanges(true);
+  };
 
   const initialFormData = {
     title: "",
@@ -230,7 +250,7 @@ const ActiveProject = () => {
 
   // Helper functions you need to implement:
 
- 
+
   const handleDeleteProject = (id) => {
     const project = projects.find((p) => p.id === id);
     if (!project) return;
@@ -297,10 +317,10 @@ const ActiveProject = () => {
     setHasUnsavedChanges(true);
   };
   console.log("slectedFiles", selectedFiles);
-  console.log(
-    "slselectedFiles.some((f) => f.id === file.idectedFiles",
-    selectedFiles.some((f) => f.id === file.id)
-  );
+  // console.log(
+  //   "slselectedFiles.some((f) => f.id === file.idectedFiles",
+  //   selectedFiles.some((f) => f.id === file.id)
+  // );
   const applyBatchEdits = () => {
     if (selectedProject && selectedFiles.length > 0) {
       const updatedFiles = selectedProject.files.map((file) => {
@@ -524,7 +544,7 @@ const ActiveProject = () => {
                 ></button>
               </div>
               <div className="modal-body">
-               <EditModal/>
+                <EditModal />
               </div>
               <div className="modal-footer">
                 <button
@@ -604,20 +624,19 @@ const ActiveProject = () => {
             {["all", "nearDue", "overdue", "Adobe", "MSOffice"].map((btn) => (
               <button
                 key={btn}
-                className={`gradient-button ${
-                  activeButton === btn ? "active-filter" : ""
-                }`}
+                className={`gradient-button ${activeButton === btn ? "active-filter" : ""
+                  }`}
                 onClick={() => handleCardFilter(btn)}
               >
                 {btn === "all"
                   ? "All"
                   : btn === "nearDue"
-                  ? "Near Due"
-                  : btn === "overdue"
-                  ? "Over Due"
-                  : btn === "Adobe"
-                  ? "Adobe"
-                  : "MS Office"}
+                    ? "Near Due"
+                    : btn === "overdue"
+                      ? "Over Due"
+                      : btn === "Adobe"
+                        ? "Adobe"
+                        : "MS Office"}
               </button>
             ))}
           </div>
@@ -797,13 +816,12 @@ const ActiveProject = () => {
                         >
                           <div
                             className={`progress-bar 
-                          ${
-                            project.progress < 30
-                              ? "bg-danger"
-                              : project.progress < 70
-                              ? "bg-warning"
-                              : "bg-success"
-                          }`}
+                          ${project.progress < 30
+                                ? "bg-danger"
+                                : project.progress < 70
+                                  ? "bg-warning"
+                                  : "bg-success"
+                              }`}
                             role="progressbar"
                             style={{ width: `${project.progress}%` }}
                             aria-valuenow={project.progress}
@@ -821,11 +839,10 @@ const ActiveProject = () => {
                             onClick={() => handleViewProject(project)}
                           >
                             <i
-                              className={`fas ${
-                                expandedRow === project.id
-                                  ? "fa-chevron-up"
-                                  : "fa-eye"
-                              }`}
+                              className={`fas ${expandedRow === project.id
+                                ? "fa-chevron-up"
+                                : "fa-eye"
+                                }`}
                             ></i>
                           </button>
                           <button
@@ -1036,21 +1053,22 @@ const ActiveProject = () => {
                                         <td>{file.language}</td>
                                         <td>{file.application}</td>
                                         <td>
-                                          <select className="form-select form-select-sm">
-                                            <option value="">
-                                              Not Assigned
-                                            </option>
-                                            <option value="John Doe">
-                                              John Doe
-                                            </option>
-                                            <option value="Jane Smith">
-                                              Jane Smith
-                                            </option>
-                                            <option value="Mike Johnson">
-                                              Mike Johnson
-                                            </option>
+                                          <select
+                                            className="form-select form-select-sm"
+                                            value={fileHandlers[file.id]}
+                                            onChange={(e) =>
+                                              handleHandlerChange(file.id, e.target.value)
+                                            }
+                                          >
+                                            {assignees.map((assignee, index) => (
+                                              <option key={index} value={assignee.value}>
+                                                {assignee.label}
+                                              </option>
+                                            ))}
                                           </select>
+
                                         </td>
+
                                         <td>
                                           <select className="form-select form-select-sm">
                                             <option value="">
@@ -1301,30 +1319,30 @@ const generateDummyProjects = (count) => {
     const formattedDueDate = `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
       .padStart(2, "0")} ${hours >= 12 ? "PM" : "AM"} ${dueDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+        .getDate()
+        .toString()
+        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
 
     // Add random readyDeadline, qcHrs, qcDueDate, status
     const readyDeadline = `${(hours + 1) % 24}:${minutes
       .toString()
       .padStart(2, "0")} ${hours + 1 >= 12 ? "PM" : "AM"} ${dueDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+        .getDate()
+        .toString()
+        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
     const qcHrs = Math.floor(Math.random() * 15) + 1;
     const qcDueDate = `${(hours + 2) % 24}:${minutes
       .toString()
       .padStart(2, "0")} ${hours + 2 >= 12 ? "PM" : "AM"} ${dueDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+        .getDate()
+        .toString()
+        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
     const status = statuses[Math.floor(Math.random() * statuses.length)];
 
     const fileCount = Math.floor(Math.random() * 5) + 1;
@@ -1341,7 +1359,7 @@ const generateDummyProjects = (count) => {
         stage: stages[Math.floor(Math.random() * stages.length)],
         assigned: new Date(
           dueDate.getTime() -
-            Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
+          Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
         ).toLocaleDateString(),
         handler: handler,
         qaReviewer: qaReviewers[Math.floor(Math.random() * qaReviewers.length)],
