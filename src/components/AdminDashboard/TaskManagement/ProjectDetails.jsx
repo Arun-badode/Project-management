@@ -215,7 +215,7 @@ const ProjectDetails = ({ project, onClose }) => {
                 key={file.id}
                 className={
                   selectedFiles.some((f) => f.id === file.id)
-                    ? "table-primary text-center"
+                    ? "table-primary"
                     : ""
                 }
               >

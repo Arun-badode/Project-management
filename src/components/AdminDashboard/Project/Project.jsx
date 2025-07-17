@@ -597,11 +597,11 @@ const Project = () => {
         projects.map((project) =>
           project.id === showEditModal
             ? {
-              ...project,
-              ...formData,
-              status: project.status,
-              id: project.id,
-            }
+                ...project,
+                ...formData,
+                status: project.status,
+                id: project.id,
+              }
             : project
         )
       );
@@ -726,34 +726,34 @@ const Project = () => {
       projects.map((project) =>
         project.id === projectId
           ? {
-            ...project,
-            status: "completed",
-            completedDate: new Date().toISOString().split("T")[0],
-            performance: {
-              expectedHours: Math.round(project.totalPages * 1.5),
-              actualHours: Math.round(project.totalPages * 1.3),
-              stages: [
-                {
-                  name: "Design",
-                  start: project.receivedDate,
-                  end: new Date().toISOString().split("T")[0],
-                  handler: "Sarah Wilson",
-                },
-                {
-                  name: "Development",
-                  start: project.receivedDate,
-                  end: new Date().toISOString().split("T")[0],
-                  handler: "David Lee",
-                },
-                {
-                  name: "Testing",
-                  start: project.receivedDate,
-                  end: new Date().toISOString().split("T")[0],
-                  handler: "Rachel Chen",
-                },
-              ],
-            },
-          }
+              ...project,
+              status: "completed",
+              completedDate: new Date().toISOString().split("T")[0],
+              performance: {
+                expectedHours: Math.round(project.totalPages * 1.5),
+                actualHours: Math.round(project.totalPages * 1.3),
+                stages: [
+                  {
+                    name: "Design",
+                    start: project.receivedDate,
+                    end: new Date().toISOString().split("T")[0],
+                    handler: "Sarah Wilson",
+                  },
+                  {
+                    name: "Development",
+                    start: project.receivedDate,
+                    end: new Date().toISOString().split("T")[0],
+                    handler: "David Lee",
+                  },
+                  {
+                    name: "Testing",
+                    start: project.receivedDate,
+                    end: new Date().toISOString().split("T")[0],
+                    handler: "Rachel Chen",
+                  },
+                ],
+              },
+            }
           : project
       )
     );
@@ -934,8 +934,9 @@ const Project = () => {
             <ul className="nav nav-tabs border-bottom-0 flex-wrap">
               <li className="nav-item">
                 <button
-                  className={`nav-link ${activeTab === "created" ? "active" : ""
-                    }`}
+                  className={`nav-link ${
+                    activeTab === "created" ? "active" : ""
+                  }`}
                   onClick={() => setActiveTab("created")}
                 >
                   Created Projects
@@ -946,8 +947,9 @@ const Project = () => {
               </li>
               <li className="nav-item">
                 <button
-                  className={`nav-link ${activeTab === "active" ? "active" : ""
-                    }`}
+                  className={`nav-link ${
+                    activeTab === "active" ? "active" : ""
+                  }`}
                   onClick={() => setActiveTab("active")}
                 >
                   Active Projects
@@ -958,8 +960,9 @@ const Project = () => {
               </li>
               <li className="nav-item">
                 <button
-                  className={`nav-link ${activeTab === "completed" ? "active" : ""
-                    }`}
+                  className={`nav-link ${
+                    activeTab === "completed" ? "active" : ""
+                  }`}
                   onClick={() => setActiveTab("completed")}
                 >
                   Completed Projects
@@ -1077,7 +1080,7 @@ const Project = () => {
                     </thead>
                     <tbody>
                       {filteredProjects.map((project) => (
-                        <tr key={project.id}>
+                        <tr key={project.id} >
                           <td>
                             {project.title}
                             <span className="badge bg-light text-dark ms-2">
@@ -1241,7 +1244,7 @@ const Project = () => {
                     </thead>
                     <tbody>
                       {filteredProjects.map((project) => (
-                        <tr key={project.id} className="text-center">
+                        <tr key={project.id} >
                           <td>
                             {project.title}
                             <span className="badge bg-warning bg-opacity-10 text-warning ms-2">
@@ -1480,7 +1483,7 @@ const Project = () => {
                       </thead>
                       <tbody>
                         {filteredProjects.map((project) => (
-                          <tr key={project.id} className="text-center">
+                          <tr key={project.id} >
                             <td>
                               {project.title}
                               <span className="badge bg-success bg-opacity-10 text-success ms-2">
@@ -1529,16 +1532,17 @@ const Project = () => {
                             <td>{project.performance.actualHours}</td>
                             <td className="fw-bold">
                               <span
-                                className={`${project.performance.expectedHours >
-                                    project.performance.actualHours
+                                className={`${
+                                  project.performance.expectedHours >
+                                  project.performance.actualHours
                                     ? "text-success"
                                     : "text-danger"
-                                  }`}
+                                }`}
                               >
                                 {Math.round(
                                   (project.performance.expectedHours /
                                     project.performance.actualHours) *
-                                  100
+                                    100
                                 )}
                                 %
                               </span>
@@ -1678,9 +1682,9 @@ const Project = () => {
                         value={
                           formData.projectManager
                             ? {
-                              value: formData.projectManager,
-                              label: formData.projectManager,
-                            }
+                                value: formData.projectManager,
+                                label: formData.projectManager,
+                              }
                             : null
                         }
                         onChange={(opt) =>
@@ -1712,9 +1716,9 @@ const Project = () => {
                         value={
                           formData.tasks.length
                             ? formData.tasks.map((t) => ({
-                              value: t,
-                              label: t,
-                            }))
+                                value: t,
+                                label: t,
+                              }))
                             : []
                         }
                         onChange={(opts) =>
@@ -1743,9 +1747,9 @@ const Project = () => {
                         value={
                           formData.application.length
                             ? formData.application.map((a) => ({
-                              value: a,
-                              label: a,
-                            }))
+                                value: a,
+                                label: a,
+                              }))
                             : []
                         }
                         onChange={(opts) =>
@@ -1775,9 +1779,9 @@ const Project = () => {
                       value={
                         formData.languages.length
                           ? formData.languages.map((l) => ({
-                            value: l,
-                            label: l,
-                          }))
+                              value: l,
+                              label: l,
+                            }))
                           : []
                       }
                       onChange={(opts) =>
@@ -1871,7 +1875,7 @@ const Project = () => {
                         </thead>
                         <tbody>
                           {formData.files.map((file, idx) => (
-                            <tr key={idx} className="text-center">
+                            <tr key={idx} >
                               <td>
                                 <div className="d-flex align-items-center gap-2">
                                   {idx + 1}
@@ -2700,7 +2704,8 @@ const Project = () => {
                 {/* Manage Clients */}
                 <div className="mb-4">
                   <h6 className="mb-3 text-white ">Manage Clients</h6>
-                  <div className="input-group mb-2">
+                  <div className="row g-2 mb-2">
+                   <div className="col-md-6">
                     <input
                       type="text"
                       className="form-control text-white border-secondary"
@@ -2711,8 +2716,7 @@ const Project = () => {
                       }
                     />
                   </div>
-                  <div className="row g-2 mb-2">
-                    <div className="col-md-6">
+                  <div className="col-md-6">
                       <input
                         type="text"
                         className="form-control bg-secondary text-white border-secondary"
@@ -2726,7 +2730,10 @@ const Project = () => {
                         }
                       />
                     </div>
-                    <div className="col-md-6">
+                  </div>
+                  <div className="row g-2 mb-2">
+                    
+                    <div className="col-md-4">
                       <input
                         type="text"
                         className="form-control bg-secondary text-white border-secondary"
@@ -2738,6 +2745,22 @@ const Project = () => {
                             country: e.target.value,
                           })
                         }
+                      />
+                    </div>
+                    <div className="col-md-4">
+                      <input
+                        type="text"
+                        className="form-control bg-secondary text-white border-secondary"
+                        placeholder="Currency*"
+                        
+                      />
+                    </div>
+                    <div className="col-md-4">
+                      <input
+                        type="text"
+                        className="form-control bg-secondary text-white border-secondary"
+                        placeholder="Hourly Rate*"
+                        
                       />
                     </div>
                   </div>
@@ -2774,7 +2797,11 @@ const Project = () => {
                             <br />
                             PMs: {client.managers}
                           </span>
-                          <div className="btn-group btn-group-sm">
+                          <div className="btn-group btn-group-sm gap-2">
+                            <button className="btn btn-outline-warning">
+                              <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+
                             <button
                               className="btn btn-outline-danger"
                               onClick={() =>
@@ -2827,7 +2854,10 @@ const Project = () => {
                         className="d-flex justify-content-between align-items-center py-2 px-2  mb-1 rounded"
                       >
                         <span className="text-white">{task}</span>
-                        <div className="btn-group btn-group-sm">
+                        <div className="btn-group btn-group-sm gap-2">
+                           <button className="btn btn-outline-warning">
+                              <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
                           <button
                             className="btn btn-outline-danger"
                             onClick={() =>
@@ -2875,7 +2905,10 @@ const Project = () => {
                         className="d-flex justify-content-between align-items-center py-2 px-2  mb-1 rounded"
                       >
                         <span className="text-white">{application}</span>
-                        <div className="btn-group btn-group-sm">
+                        <div className="btn-group btn-group-sm gap-2">
+                           <button className="btn btn-outline-warning">
+                              <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
                           <button
                             className="btn btn-outline-danger"
                             onClick={() =>
@@ -2927,7 +2960,10 @@ const Project = () => {
                         className="d-flex justify-content-between align-items-center py-2 px-2  mb-1 rounded"
                       >
                         <span className="text-white">{language}</span>
-                        <div className="btn-group btn-group-sm">
+                        <div className="btn-group btn-group-sm gap-2">
+                           <button className="btn btn-outline-warning">
+                              <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
                           <button
                             className="btn btn-outline-danger"
                             onClick={() =>
@@ -2997,7 +3033,10 @@ const Project = () => {
                             <td>{currency.name}</td>
                             <td>{currency.rate}</td>
                             <td>
-                              <div className="btn-group btn-group-sm">
+                              <div className="btn-group btn-group-sm gap-2">
+                                 <button className="btn btn-outline-warning">
+                              <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
                                 <button
                                   className="btn btn-outline-danger"
                                   onClick={() =>
@@ -3017,6 +3056,7 @@ const Project = () => {
                       </tbody>
                     </table>
                   </div>
+                  
                   <button
                     className="btn btn-sm btn-primary"
                     onClick={handleAddCurrency}
