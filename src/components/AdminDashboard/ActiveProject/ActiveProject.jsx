@@ -12,6 +12,7 @@ const ActiveProject = () => {
   const [activeTab, setActiveTab] = useState("all");
   const userRole = localStorage.getItem("userRole");
   const [expandedRow, setExpandedRow] = useState(null);
+  const[files, setFiles] = useState([]);
   const isAdmin = userRole === "Admin";
 
   const [isEdit, setIsEdit] = useState(null);
@@ -1671,20 +1672,22 @@ const ActiveProject = () => {
                                       <th>
                                         <input
                                           type="checkbox"
-                                          className="form-check-input"
-                                          checked={
-                                            selectedFiles.length ===
-                                            project?.files?.length
-                                          }
+                                         
                                           onChange={(e) => {
-                                            if (e.target.checked) {
-                                              setSelectedFiles([
-                                                ...project.files,
-                                              ]);
-                                            } else {
-                                              setSelectedFiles([]);
-                                            }
-                                            setHasUnsavedChanges(true);
+                                            const updatedFiles =
+                                              project.files.map((f) =>
+                                                f.id === file.id
+                                                  ? {
+                                                      ...f,
+                                                      checked: e.target.checked,
+                                                    }
+                                                  : f
+                                              );
+
+                                            setSelectedProject({
+                                              ...project,
+                                              files: updatedFiles,
+                                            });
                                           }}
                                         />
                                       </th>
@@ -1728,42 +1731,44 @@ const ActiveProject = () => {
                                         <td>
                                           <select
                                             className="form-select form-select-sm"
-                                            value={file.handler || ""}
                                             onChange={(e) => {
+                                              const newHandler = e.target.value;
+
                                               const updatedFiles =
                                                 project.files.map((f) =>
-                                                  f.id === file.id
+                                                  f.checked
                                                     ? {
                                                         ...f,
-                                                        handler: e.target.value,
+                                                        handler: newHandler,
                                                       }
                                                     : f
                                                 );
+
                                               setSelectedProject({
                                                 ...project,
                                                 files: updatedFiles,
                                               });
+
                                               setHasUnsavedChanges(true);
                                             }}
                                           >
                                             <option value="">
-                                              Not Assigned
+                                              Select Handler
                                             </option>
-                                            <option value="John Doe">
-                                              John Doe
+                                            <option value="handler1">
+                                              Handler 1
                                             </option>
-                                            <option value="Jane Smith">
-                                              Jane Smith
+                                            <option value="handler2">
+                                              Handler 2
                                             </option>
-                                            <option value="Mike Johnson">
-                                              Mike Johnson
+                                            <option value="handler3">
+                                              Handler 3
                                             </option>
                                           </select>
                                         </td>
                                         <td>
                                           <select
                                             className="form-select form-select-sm"
-                                            value={file.qaReviewer || ""}
                                             onChange={(e) => {
                                               const updatedFiles =
                                                 project.files.map((f) =>

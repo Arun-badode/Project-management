@@ -823,12 +823,12 @@ const Calendar = ({ userRole }) => {
                 month: "short",
                 day: "numeric",
               })}
-              disabled
+             
             />
           </div>
         ))
       ) : (
-        <div className="text-muted">No birthdays found.</div>
+        <div className="text-white">No birthdays found.</div>
       )}
     </div>
 
@@ -845,12 +845,12 @@ const Calendar = ({ userRole }) => {
                 month: "short",
                 day: "numeric",
               })}
-              disabled
+             
             />
           </div>
         ))
       ) : (
-        <div className="text-muted">No company holidays found.</div>
+        <div className="text-white">No company holidays found.</div>
       )}
     </div>
   </Modal.Body>
