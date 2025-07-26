@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "react-bootstrap";
-import moment from "moment";
 import Select from "react-select";
 import useSyncScroll from "../Hooks/useSyncScroll";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-import BASE_URL from "../../../config";
 import CreateNewProject from "../Project/CreateNewProject";
 import EditModal from "./EditModal";
-
 
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
@@ -20,8 +17,6 @@ const ActiveProject = () => {
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const isAdmin = userRole === "Admin";
 
-  const [file, setFile] = useState("");
-  const [isEdit, setIsEdit] = useState(null);
   const [fileHandlers, setFileHandlers] = useState({});
 
   const assignees = [
@@ -135,10 +130,7 @@ const ActiveProject = () => {
     priority: "",
   });
   console.log("batchEditValues", batchEditValues.handler);
-  const [date, setDate] = useState("");
-  const [hour, setHour] = useState("01");
-  const [minute, setMinute] = useState("00");
-  const [period, setPeriod] = useState("AM");
+
   const [qcDueDelay, setQcDueDelay] = useState("");
 
   const statuses = [
@@ -250,7 +242,6 @@ const ActiveProject = () => {
 
   // Helper functions you need to implement:
 
-
   const handleDeleteProject = (id) => {
     const project = projects.find((p) => p.id === id);
     if (!project) return;
@@ -321,68 +312,10 @@ const ActiveProject = () => {
   //   "slselectedFiles.some((f) => f.id === file.idectedFiles",
   //   selectedFiles.some((f) => f.id === file.id)
   // );
-  const applyBatchEdits = () => {
-    if (selectedProject && selectedFiles.length > 0) {
-      const updatedFiles = selectedProject.files.map((file) => {
-        if (selectedFiles.some((f) => f.id === file.id)) {
-          return {
-            ...file,
-            application: batchEditValues.application || file.application,
-            handler: batchEditValues.handler || file.handler,
-            qaReviewer: batchEditValues.qaReviewer || file.qaReviewer,
-            qcDue: batchEditValues.qcDue || file.qcDue,
-            qcAllocatedHours:
-              batchEditValues.qcAllocatedHours || file.qcAllocatedHours,
-            priority: batchEditValues.priority || file.priority,
-          };
-        }
-        return file;
-      });
-
-      const updatedProject = {
-        ...selectedProject,
-        files: updatedFiles,
-      };
-
-      setSelectedProject(updatedProject);
-      setProjects(
-        projects.map((p) => (p.id === updatedProject.id ? updatedProject : p))
-      );
-      setBatchEditValues({
-        application: "",
-        handler: "",
-        qaReviewer: "",
-        qcDue: "",
-        qcAllocatedHours: "",
-        priority: "",
-      });
-      setSelectedFiles([]);
-      setHasUnsavedChanges(false);
-    }
-  };
-
-  const handleCloseModal = () => {
-    if (hasUnsavedChanges) {
-      if (
-        window.confirm(
-          "You have unsaved changes. Are you sure you want to discard them?"
-        )
-      ) {
-        setShowDetailModal(false);
-      }
-    } else {
-      setShowDetailModal(false);
-    }
-  };
 
   const getUniqueValues = (key) => {
     return Array.from(new Set(projects.map((project) => project[key])));
   };
-
-  const applicationOptio = getUniqueValues("application").map((app) => ({
-    value: app,
-    label: app,
-  }));
 
   const handleEditProject = (project) => {
     setEditedProject({ ...project });
@@ -398,49 +331,6 @@ const ActiveProject = () => {
       setShowEditModal(false);
       setEditedProject(null);
     }
-  };
-
-  const gradientSelectStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      background: "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
-      color: "white",
-      borderColor: state.isFocused ? "#ffffff66" : "#ffffff33",
-      boxShadow: state.isFocused ? "0 0 0 1px #ffffff66" : "none",
-      minHeight: "38px",
-    }),
-    singleValue: (provided) => ({
-      ...provided,
-      color: "white",
-    }),
-    multiValue: (provided) => ({
-      ...provided,
-      backgroundColor: "#1b2f6e",
-    }),
-    multiValueLabel: (provided) => ({
-      ...provided,
-      color: "white",
-    }),
-    placeholder: (provided) => ({
-      ...provided,
-      color: "white",
-    }),
-    input: (provided) => ({
-      ...provided,
-      color: "white",
-    }),
-    option: (provided, state) => ({
-      ...provided,
-      backgroundColor: state.isFocused
-        ? "#293d80"
-        : "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
-      color: "white",
-    }),
-    menu: (provided) => ({
-      ...provided,
-      background: "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
-      color: "white",
-    }),
   };
 
   useEffect(() => {
@@ -479,14 +369,6 @@ const ActiveProject = () => {
     setShowCreateModal(true);
   };
 
-  const handleSelectAllFiles = (e) => {
-    const updatedFiles = formData.files.map((f) => ({
-      ...f,
-      selected: e.target.checked,
-    }));
-    setFormData((prev) => ({ ...prev, files: updatedFiles }));
-  };
-
   const handleApplyToSelectedFiles = () => {
     const selected = formData.files.filter((f) => f.selected);
     if (selected.length === 0) {
@@ -514,16 +396,6 @@ const ActiveProject = () => {
       year: "numeric",
     });
   }
-
-  const [dateTime, setDateTime] = useState(null);
-
-  const handleChange = (value) => {
-    setDateTime(value);
-  };
-
-  const [selectedDate, setSelectedDate] = useState(12);
-  const [selectedMonth, setSelectedMonth] = useState(6); // July (0-indexed)
-  const [selectedYear, setSelectedYear] = useState(2025);
 
   return (
     <div className="container-fluid py-4">
@@ -608,7 +480,7 @@ const ActiveProject = () => {
           <div className="d-flex flex-column flex-sm-row gap-2">
             <Button
               className="gradient-button"
-            onClick={handleCreateNewProject}
+              onClick={handleCreateNewProject}
             >
               <i className="fas fa-plus me-2"></i> Create New Project
             </Button>
@@ -624,19 +496,20 @@ const ActiveProject = () => {
             {["all", "nearDue", "overdue", "Adobe", "MSOffice"].map((btn) => (
               <button
                 key={btn}
-                className={`gradient-button ${activeButton === btn ? "active-filter" : ""
-                  }`}
+                className={`gradient-button ${
+                  activeButton === btn ? "active-filter" : ""
+                }`}
                 onClick={() => handleCardFilter(btn)}
               >
                 {btn === "all"
                   ? "All"
                   : btn === "nearDue"
-                    ? "Near Due"
-                    : btn === "overdue"
-                      ? "Over Due"
-                      : btn === "Adobe"
-                        ? "Adobe"
-                        : "MS Office"}
+                  ? "Near Due"
+                  : btn === "overdue"
+                  ? "Over Due"
+                  : btn === "Adobe"
+                  ? "Adobe"
+                  : "MS Office"}
               </button>
             ))}
           </div>
@@ -816,12 +689,13 @@ const ActiveProject = () => {
                         >
                           <div
                             className={`progress-bar 
-                          ${project.progress < 30
-                                ? "bg-danger"
-                                : project.progress < 70
-                                  ? "bg-warning"
-                                  : "bg-success"
-                              }`}
+                          ${
+                            project.progress < 30
+                              ? "bg-danger"
+                              : project.progress < 70
+                              ? "bg-warning"
+                              : "bg-success"
+                          }`}
                             role="progressbar"
                             style={{ width: `${project.progress}%` }}
                             aria-valuenow={project.progress}
@@ -839,10 +713,11 @@ const ActiveProject = () => {
                             onClick={() => handleViewProject(project)}
                           >
                             <i
-                              className={`fas ${expandedRow === project.id
-                                ? "fa-chevron-up"
-                                : "fa-eye"
-                                }`}
+                              className={`fas ${
+                                expandedRow === project.id
+                                  ? "fa-chevron-up"
+                                  : "fa-eye"
+                              }`}
                             ></i>
                           </button>
                           <button
@@ -883,104 +758,6 @@ const ActiveProject = () => {
                                   </span>
                                 )}
                               </div>
-
-                              {/* Batch Edit Controls */}
-                              {/* {selectedFiles.length > 0 && (
-                                <div className="row g-3 mb-3 align-items-center">
-                                  <div className="col-md-3">
-                                    <label className="form-label">
-                                      Batch Handler
-                                    </label>
-                                    <select
-                                      className="form-select form-select-sm"
-                                      value={file.handler ?? ""}
-                                      onChange={(e) => {
-                                        const value = e.target.value;
-
-                                        // 1. Update the files array
-                                        const updatedFiles = project.files.map(
-                                          (f) => {
-                                            if (
-                                              selectedFiles.some(
-                                                (sf) => sf.id === f.id
-                                              )
-                                            ) {
-                                              return { ...f, handler: value };
-                                            }
-                                            return f;
-                                          }
-                                        );
-
-                                        // 2. Update the selected project state
-                                        setSelectedProject((prevProject) => ({
-                                          ...prevProject,
-                                          files: updatedFiles,
-                                        }));
-
-                                        // 3. Optionally update selectedFiles too if you're relying on it elsewhere
-                                        const updatedSelectedFiles =
-                                          selectedFiles.map((f) => ({
-                                            ...f,
-                                            handler: value,
-                                          }));
-                                        setSelectedFiles(updatedSelectedFiles);
-
-                                        // 4. Flag for unsaved changes
-                                        setHasUnsavedChanges(true);
-                                      }}
-                                    >
-                                      <option value="">Not Assigned</option>
-                                      <option value="John Doe">John Doe</option>
-                                      <option value="Jane Smith">
-                                        Jane Smith
-                                      </option>
-                                      <option value="Mike Johnson">
-                                        Mike Johnson
-                                      </option>
-                                    </select>
-                                  </div>
-
-                                  <div className="col-md-3">
-                                    <label className="form-label">
-                                      Batch QA Reviewer
-                                    </label>
-                                    <select
-                                      className="form-select form-select-sm"
-                                      value={file.qaReviewer ?? ""}
-                                      onChange={(e) => {
-                                        const value = e.target.value;
-
-                                        const updatedFiles = project.files.map(
-                                          (f) =>
-                                            selectedFiles.some(
-                                              (sf) => sf.id === f.id
-                                            )
-                                              ? { ...f, qaReviewer: value }
-                                              : f
-                                        );
-
-                                        setSelectedProject((prev) => ({
-                                          ...prev,
-                                          files: updatedFiles,
-                                        }));
-
-                                        setHasUnsavedChanges(true);
-                                      }}
-                                    >
-                                      <option value="">Not Assigned</option>
-                                      <option value="Sarah Williams">
-                                        Sarah Williams
-                                      </option>
-                                      <option value="David Brown">
-                                        David Brown
-                                      </option>
-                                      <option value="Emily Davis">
-                                        Emily Davis
-                                      </option>
-                                    </select>
-                                  </div>
-                                </div>
-                              )} */}
 
                               {/* Files Table */}
                               <div className="table-responsive">
@@ -1033,7 +810,7 @@ const ActiveProject = () => {
                                             (f) => f.id === file.id
                                           )
                                             ? "table-primary text-center"
-                                            : "text-center"
+                                            : ""
                                         }
                                       >
                                         <td>
@@ -1057,16 +834,23 @@ const ActiveProject = () => {
                                             className="form-select form-select-sm"
                                             value={fileHandlers[file.id]}
                                             onChange={(e) =>
-                                              handleHandlerChange(file.id, e.target.value)
+                                              handleHandlerChange(
+                                                file.id,
+                                                e.target.value
+                                              )
                                             }
                                           >
-                                            {assignees.map((assignee, index) => (
-                                              <option key={index} value={assignee.value}>
-                                                {assignee.label}
-                                              </option>
-                                            ))}
+                                            {assignees.map(
+                                              (assignee, index) => (
+                                                <option
+                                                  key={index}
+                                                  value={assignee.value}
+                                                >
+                                                  {assignee.label}
+                                                </option>
+                                              )
+                                            )}
                                           </select>
-
                                         </td>
 
                                         <td>
@@ -1236,12 +1020,6 @@ const generateDummyProjects = (count) => {
     "MMP Kirkland",
     "GN",
     "DM",
-    "RN",
-    "NI",
-    "LB",
-    "SSS",
-    "Cpea",
-    "CV",
   ];
   const tasks = [
     "Source Creation",
@@ -1252,25 +1030,7 @@ const generateDummyProjects = (count) => {
     "Image Localization",
     "OVA",
   ];
-  const languages = [
-    "af",
-    "am",
-    "ar",
-    "az",
-    "be",
-
-    "tr",
-    "uk",
-    "ur",
-    "uz",
-    "vi",
-    "xh",
-    "yo",
-    "zh",
-    "zh-Hans",
-    "zh-Hant",
-    "zh-TW",
-  ];
+  const languages = ["af", "am", "ar", "az", "be"];
   const applications = [
     "Word",
     "PPT",
@@ -1319,30 +1079,30 @@ const generateDummyProjects = (count) => {
     const formattedDueDate = `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
       .padStart(2, "0")} ${hours >= 12 ? "PM" : "AM"} ${dueDate
-        .getDate()
-        .toString()
-        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-          .toString()
-          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+      .getDate()
+      .toString()
+      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
 
     // Add random readyDeadline, qcHrs, qcDueDate, status
     const readyDeadline = `${(hours + 1) % 24}:${minutes
       .toString()
       .padStart(2, "0")} ${hours + 1 >= 12 ? "PM" : "AM"} ${dueDate
-        .getDate()
-        .toString()
-        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-          .toString()
-          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+      .getDate()
+      .toString()
+      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
     const qcHrs = Math.floor(Math.random() * 15) + 1;
     const qcDueDate = `${(hours + 2) % 24}:${minutes
       .toString()
       .padStart(2, "0")} ${hours + 2 >= 12 ? "PM" : "AM"} ${dueDate
-        .getDate()
-        .toString()
-        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-          .toString()
-          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+      .getDate()
+      .toString()
+      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
     const status = statuses[Math.floor(Math.random() * statuses.length)];
 
     const fileCount = Math.floor(Math.random() * 5) + 1;
@@ -1359,7 +1119,7 @@ const generateDummyProjects = (count) => {
         stage: stages[Math.floor(Math.random() * stages.length)],
         assigned: new Date(
           dueDate.getTime() -
-          Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
+            Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
         ).toLocaleDateString(),
         handler: handler,
         qaReviewer: qaReviewers[Math.floor(Math.random() * qaReviewers.length)],
