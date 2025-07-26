@@ -247,21 +247,19 @@ const CreateNewProject = () => {
               styles={gradientSelectStyles}
             />
           </div>
-          <div className="col-md-4">
-            <label htmlFor="country" className="form-label">
-              Country
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="country"
-              name="country"
-              value={formData.country}
-              onChange={handleInputChange}
-              placeholder=""
-              readOnly
-            />
-          </div>
+         <div className="col-md-4">
+      <label htmlFor="country" className="form-label">
+        Country
+      </label>
+      <input
+        type="text"
+        className="form-control text-white"
+        id="country"
+        name="country"
+        value={formData.country}
+        onChange={handleInputChange}
+      />
+    </div>
           <div className="col-md-4">
             <label htmlFor="projectManager" className="form-label">
               Project Manager
