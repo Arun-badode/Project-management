@@ -187,7 +187,7 @@ const ProjectDetails = ({ project, onClose }) => {
                 <input
                   type="checkbox"
                   className="form-check-input"
-                  checked={selectedFiles.length === project.files.length}
+                  checked={selectedFiles?.length === project?.files?.length}
                   onChange={(e) => {
                     if (e.target.checked) {
                       setSelectedFiles([...project.files]);
@@ -210,7 +210,7 @@ const ProjectDetails = ({ project, onClose }) => {
             </tr>
           </thead>
           <tbody>
-            {project.files.map((file) => (
+            {project?.files?.map((file) => (
               <tr
                 key={file.id}
                 className={
