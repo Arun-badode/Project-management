@@ -54,10 +54,10 @@ const generateCalendarDays = (selectedMonth, selectedYear) => {
 };
 
 const CreateNewProject = () => {
-  const [selectedDate, setSelectedDate] = useState(12);
-  const [selectedMonth, setSelectedMonth] = useState(6);
-  const [selectedYear, setSelectedYear] = useState(2025);
-  const [selectedHour, setSelectedHour] = useState(12);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedHour, setSelectedHour] = useState(0);
   const [selectedMinute, setSelectedMinute] = useState(0);
   const [isAM, setIsAM] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -186,15 +186,6 @@ const CreateNewProject = () => {
     "David Lee",
   ];
 
-  // const taskOptions = [
-  //   "Source Creation",
-  //   "Callout",
-  //   "Prep",
-  //   "Image Creation",
-  //   "DTP",
-  //   "Image Localization",
-  //   "OVA",
-  // ];
   const [taskOptions, setTaskOptions] = useState([]);
 
   useEffect(() => {
@@ -214,7 +205,6 @@ const CreateNewProject = () => {
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
   }, []);
-  // apllication
 
   const [applicationOptions, setApplicationOptions] = useState([]);
 
@@ -223,7 +213,6 @@ const CreateNewProject = () => {
       .get(`${BASE_URL}application/getAllApplication`, {
         headers: { authorization: `Bearer ${token}` },
       })
-
       .then((res) => {
         if (res.data.status) {
           const options = res.data.application.map((app) => ({
@@ -235,8 +224,6 @@ const CreateNewProject = () => {
       })
       .catch((err) => console.error(err));
   }, []);
-
-  // languages
 
   const [languageOptions, setLanguageOptions] = useState([]);
 
@@ -259,11 +246,14 @@ const CreateNewProject = () => {
   }, []);
 
   const formatDateTime = () => {
+    if (selectedDate === null) {
+      return "00/00/00 00:00 AM";
+    }
     const date = `${selectedDate.toString().padStart(2, "0")}/${(
       selectedMonth + 1
     )
       .toString()
-      .padStart(2, "0")}/${selectedYear}`;
+      .padStart(2, "0")}/${selectedYear.toString().slice(-2)}`;
     const time = `${selectedHour.toString().padStart(2, "0")}:${selectedMinute
       .toString()
       .padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
@@ -866,14 +856,15 @@ const CreateNewProject = () => {
             </label>
             <div className="max-w-md mx-auto">
               <div className="relative">
-                <input
+                <input  
                   type="text"
                   value={formatDateTime()}
                   readOnly
                   onClick={() => setIsOpen(!isOpen)}
                   className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
-                  placeholder="Select date and time"
+                  placeholder="00/00/00 00:00 AM"
                 />
+               
               </div>
 
               {isOpen && (
@@ -885,7 +876,12 @@ const CreateNewProject = () => {
                     </div>
                     <div className="period">{isAM ? "AM" : "PM"}</div>
                     <div className="date">
-                      {months[selectedMonth].substring(0, 3)}, {selectedYear}
+                      {selectedDate !== null
+                        ? `${months[selectedMonth].substring(
+                            0,
+                            3
+                          )}, ${selectedYear}`
+                        : "00/00/00"}
                     </div>
                   </div>
 
@@ -1001,9 +997,10 @@ const CreateNewProject = () => {
                       <div className="action-buttons">
                         <button
                           onClick={() => {
-                            setSelectedDate(new Date().getDate());
-                            setSelectedMonth(new Date().getMonth());
-                            setSelectedYear(new Date().getFullYear());
+                            setSelectedDate(null);
+                            setSelectedHour(0);
+                            setSelectedMinute(0);
+                            setIsAM(true);
                           }}
                           className="action-button"
                         >
@@ -1015,6 +1012,9 @@ const CreateNewProject = () => {
                             setSelectedDate(today.getDate());
                             setSelectedMonth(today.getMonth());
                             setSelectedYear(today.getFullYear());
+                            setSelectedHour(today.getHours() % 12 || 12);
+                            setSelectedMinute(today.getMinutes());
+                            setIsAM(today.getHours() < 12);
                           }}
                           className="action-button"
                         >
