@@ -1,22 +1,179 @@
 import React, { useState, useEffect } from "react";
 import { Edit, Plus } from "lucide-react";
 import { Modal } from "react-bootstrap";
+import BASE_URL from "../../../config"
+import Swal from 'sweetalert2';
+import axios from "axios";
 
 const RoleManagementSystem = () => {
   const [currentView, setCurrentView] = useState("roleList");
   const [selectedRole, setSelectedRole] = useState(null);
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [showAddRoleModal, setShowAddRoleModal] = useState(false);
-
   const [permissionsState, setPermissionsState] = useState({});
-  const [newRole, setNewRole] = useState({ roleName: "", description: "" });
+  const [newRole, setNewRole] = useState({ roleName: "", description: "" , type:""});
+  const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const token = localStorage.getItem("authToken");
 
-  const [roles, setRoles] = useState([
-    { _id: "1", roleName: "Admin", description: "Full Access" },
-    { _id: "2", roleName: "Manager", description: "Limited Access" },
-    { _id: "3", roleName: "Team Member", description: "Custom Access" },
-  ]);
 
+  // Fetch all roles on component mount
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}roles/getAllRoles`,{
+          headers:{
+            'Authorization':`Bearer ${token}`,
+          }
+        });
+        console.log(response.data.data,"Api response");
+        
+        setRoles(response.data.data);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch roles");
+        setLoading(false);
+        console.error("Error fetching roles:", err);
+      }
+    };
+    fetchRoles();
+  }, []);
+
+  const handleEditRole = (role) => {
+    setSelectedRole(role);
+    // In a real app, you would fetch the role's permissions here
+    // For now, we're using dummy permissions
+    setPermissionsState(dummyPermissions);
+    setShowPermissionsModal(true);
+  };
+
+  const handleClosePermissionsModal = () => {
+    setShowPermissionsModal(false);
+    setSelectedRole(null);
+    setPermissionsState({});
+  };
+
+  const handleOpenAddRoleModal = () => {
+    setNewRole({ roleName: "", description: "" });
+    setShowAddRoleModal(true);
+  };
+
+  const handleCloseAddRoleModal = () => {
+    setShowAddRoleModal(false);
+  };
+
+  const handleAddRole = async () => {
+  if (newRole.roleName.trim()) {
+    try {
+      const response = await axios.post(`${BASE_URL}roles/addRole`, {
+        roleName: newRole.roleName,
+        description: newRole.description,
+        type: newRole.type,
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Role Added Successfully!',
+        showConfirmButton: false,
+        timer: 1500
+      }).then(() => {
+        setShowAddRoleModal(false);
+        fetchRoles(); // GET API call to refresh roles list
+      });
+
+    } catch (err) {
+      console.error("Error adding role:", err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed to add role',
+        text: err.response?.data?.message || 'Something went wrong!'
+      });
+    }
+  } else {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Role name is required',
+    });
+  }
+};
+
+ const handleSavePermissions = async () => {
+  if (!selectedRole || !selectedRole._id) {
+    alert("No role selected or invalid role ID");
+    return;
+  }
+
+  try {
+    // Validate permissions data
+    if (!permissionsState || Object.keys(permissionsState).length === 0) {
+      alert("No permissions data to save");
+      return;
+    }
+
+    // Make sure to include the token
+   
+
+    const response = await axios.patch(
+      `${BASE_URL}roles/updateRole/${selectedRole._id}`,
+      {
+        permissions: permissionsState,
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (response.data.status) {
+      alert("Permissions saved successfully");
+      handleClosePermissionsModal();
+    } else {
+      alert(response.data.message || "Failed to save permissions");
+    }
+  } catch (err) {
+    console.error("Error saving permissions:", err);
+    
+    // More detailed error message
+    if (err.response) {
+      // The request was made and the server responded with a status code
+      console.error("Response data:", err.response.data);
+      console.error("Response status:", err.response.status);
+      console.error("Response headers:", err.response.headers);
+      alert(`Error: ${err.response.data.message || err.message}`);
+    } else if (err.request) {
+      // The request was made but no response was received
+      console.error("Request:", err.request);
+      alert("No response received from server");
+    } else {
+      // Something happened in setting up the request
+      console.error("Error:", err.message);
+      alert(`Error: ${err.message}`);
+    }
+  }
+};
+
+  const togglePermission = (module, index, type) => {
+    setPermissionsState((prev) => {
+      const updated = { ...prev };
+      updated[module] = [...updated[module]];
+      updated[module][index] = { ...updated[module][index] };
+      updated[module][index][type] = !updated[module][index][type];
+      return updated;
+    });
+  };
+
+  useEffect(() => {
+    document.body.style.overflow = showPermissionsModal ? "hidden" : "auto";
+  }, [showPermissionsModal]);
+
+  // Dummy permissions data (replace with actual data from your API)
   const dummyPermissions = {
     Dashboard: [
       {
@@ -42,140 +199,96 @@ const RoleManagementSystem = () => {
     ],
     Project: [
       {
-        feature: "Manage Users",
+        feature: "Manage Projects",
         isGet: true,
         isCreate: true,
         isEdit: true,
         isDelete: true,
         permission: true,
-        _id: "b1",
+        _id: "c1",
       },
     ],
     Task: [
       {
-        feature: "Manage Users",
+        feature: "Manage Tasks",
         isGet: true,
         isCreate: true,
         isEdit: true,
         isDelete: true,
         permission: true,
-        _id: "b1",
+        _id: "d1",
       },
     ],
-    TimeTraking: [
+    TimeTracking: [
       {
-        feature: "Manage Users",
+        feature: "Manage Time Tracking",
         isGet: true,
         isCreate: true,
         isEdit: true,
         isDelete: true,
         permission: true,
-        _id: "b1",
+        _id: "e1",
       },
     ],
     FileManagement: [
       {
-        feature: "Manage Users",
+        feature: "Manage Files",
         isGet: true,
         isCreate: true,
         isEdit: true,
         isDelete: true,
         permission: true,
-        _id: "b1",
+        _id: "f1",
       },
     ],
     QAManagement: [
       {
-        feature: "Manage Users",
+        feature: "Manage QA",
         isGet: true,
         isCreate: true,
         isEdit: true,
         isDelete: true,
         permission: true,
-        _id: "b1",
+        _id: "g1",
       },
     ],
-    Reporting$Analytics: [
+    ReportingAnalytics: [
       {
-        feature: "Manage Users",
+        feature: "View Reports",
         isGet: true,
-        isCreate: true,
-        isEdit: true,
-        isDelete: true,
+        isCreate: false,
+        isEdit: false,
+        isDelete: false,
         permission: true,
-        _id: "b1",
+        _id: "h1",
       },
     ],
     AuditLog: [
       {
-        feature: "Manage Users",
+        feature: "View Audit Logs",
         isGet: true,
-        isCreate: true,
-        isEdit: true,
-        isDelete: true,
+        isCreate: false,
+        isEdit: false,
+        isDelete: false,
         permission: true,
-        _id: "b1",
+        _id: "i1",
       },
     ],
     ProfileAccount: [
       {
-        feature: "Manage Users",
+        feature: "Manage Profile",
         isGet: true,
-        isCreate: true,
+        isCreate: false,
         isEdit: true,
-        isDelete: true,
+        isDelete: false,
         permission: true,
-        _id: "b1",
+        _id: "j1",
       },
     ],
   };
 
-  const handleEditRole = (role) => {
-    setSelectedRole(role);
-    setPermissionsState(dummyPermissions);
-    setShowPermissionsModal(true);
-  };
-
-  const handleClosePermissionsModal = () => {
-    setShowPermissionsModal(false);
-    setSelectedRole(null);
-    setPermissionsState({});
-  };
-
-  const handleOpenAddRoleModal = () => {
-    setNewRole({ roleName: "", description: "" });
-    setShowAddRoleModal(true);
-  };
-
-  const handleCloseAddRoleModal = () => {
-    setShowAddRoleModal(false);
-  };
-
-  const handleAddRole = () => {
-    if (newRole.roleName.trim()) {
-      const newRoleObj = {
-        _id: Date.now().toString(),
-        roleName: newRole.roleName,
-        description: newRole.description,
-      };
-      setRoles([...roles, newRoleObj]);
-      setShowAddRoleModal(false);
-    }
-  };
-
-  const togglePermission = (module, index, type) => {
-    setPermissionsState((prev) => {
-      const updated = { ...prev };
-      updated[module] = [...updated[module]];
-      updated[module][index] = { ...updated[module][index] };
-      updated[module][index][type] = !updated[module][index][type];
-      return updated;
-    });
-  };
-
-  useEffect(() => {
-    document.body.style.overflow = showPermissionsModal ? "hidden" : "auto";
-  }, [showPermissionsModal]);
+  if (loading) return <div className="text-center py-5">Loading...</div>;
+  if (error) return <div className="text-center py-5 text-danger">{error}</div>;
 
   return (
     <div className="min-vh-100 bg-light p-2 p-md-3 bg-main">
@@ -277,7 +390,7 @@ const RoleManagementSystem = () => {
                     </thead>
                     <tbody>
                       {features.map((item, index) => (
-                        <tr key={item._id} >
+                        <tr key={item._id}>
                           <td>{index === 0 ? module : ""}</td>
                           <td>
                             {index === 0 && (
@@ -331,7 +444,7 @@ const RoleManagementSystem = () => {
               </button>
               <button
                 className="btn gradient-button"
-                onClick={() => alert("Permissions saved")}
+                onClick={handleSavePermissions}
               >
                 Save Permissions
               </button>
@@ -385,7 +498,7 @@ const RoleManagementSystem = () => {
                     </thead>
                     <tbody>
                       {features.map((item, index) => (
-                        <tr key={item._id} >
+                        <tr key={item._id}>
                           <td>{index === 0 ? module : ""}</td>
                           <td>
                             {index === 0 && (
@@ -439,7 +552,7 @@ const RoleManagementSystem = () => {
               </button>
               <button
                 className="btn gradient-button"
-                onClick={() => alert("Permissions saved")}
+                onClick={handleSavePermissions}
               >
                 Save Permissions
               </button>
@@ -469,6 +582,7 @@ const RoleManagementSystem = () => {
                 onChange={(e) =>
                   setNewRole({ ...newRole, roleName: e.target.value })
                 }
+                required
               />
             </div>
             <div className="mb-3">
@@ -479,6 +593,17 @@ const RoleManagementSystem = () => {
                 value={newRole.description}
                 onChange={(e) =>
                   setNewRole({ ...newRole, description: e.target.value })
+                }
+              />
+            </div>
+             <div className="mb-3">
+              <label className="form-label">Type</label>
+              <input
+                type="text"
+                className="form-control"
+                value={newRole.type}
+                onChange={(e) =>
+                  setNewRole({ ...newRole, type: e.target.value })
                 }
               />
             </div>

@@ -393,7 +393,7 @@ const CreateNewProject = () => {
               value={formData.country}
               onChange={handleInputChange}
               placeholder=""
-              readOnly
+             
             />
           </div>
           <div className="col-md-4">
