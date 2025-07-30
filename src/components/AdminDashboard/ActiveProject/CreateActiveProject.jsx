@@ -2,6 +2,42 @@ import React from 'react'
 
 const CreateActiveProject = () => {
       const [showCreateModal, setShowCreateModal] = useState(false);
+       const [formData, setFormData] = useState({ languages: [] });
+
+    const handleLanguageChange = (opts) => {
+        const selectedLanguages = opts ? opts.map((o) => o.value) : [];
+
+        setFormData((prev) => ({
+            ...prev,
+            languages: selectedLanguages,
+        }));
+
+        // Call API for each newly selected language
+        selectedLanguages.forEach((lang) => {
+            addLanguageAPI(lang);
+        });
+    };
+
+    const addLanguageAPI = async (languageName) => {
+        try {
+            const response = await fetch("https://hrb5wx2v-8800.inc1.devtunnels.ms/api/language/addlanguage", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ languageName }),
+            });
+
+            if (response.ok) {
+                console.log(`${languageName} added successfully`);
+            } else {
+                console.error(`Failed to add ${languageName}`);
+            }
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    };
+
     return (
         <>
             <div
