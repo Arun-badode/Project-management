@@ -294,7 +294,7 @@ const Project = () => {
                   }`}
                   onClick={() => setActiveTab("created")}
                 >
-                  All Projects
+                 Created Projects
                   <span className="badge bg-light text-dark ms-2">
                     {
                       projects.filter(
@@ -370,7 +370,7 @@ const Project = () => {
         {/* Created Projects Tab */}
         {activeTab === "created" && (
           <div className="mb-4">
-            <h2 className="h5 mb-3 text-light">Draft Projects</h2>
+            <h2 className="h5 mb-3 text-light">Created Projects</h2>
             {filteredProjects.length === 0 ? (
               <div className="text-center py-5">
                 <i className="fas fa-folder-open text-muted fa-4x mb-3"></i>

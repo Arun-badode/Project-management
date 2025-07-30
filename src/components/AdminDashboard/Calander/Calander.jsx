@@ -28,8 +28,8 @@ const Calendar = ({ userRole }) => {
     doj: true,
     companyHoliday: true,
     clientHoliday: userRole === "admin" || userRole === "manager",
-    approvedLeave: userRole === "admin" || userRole === "manager",
-    weekOff: userRole === "admin" || userRole === "manager",
+    // approvedLeave: userRole === "admin" || userRole === "manager",
+    // weekOff: userRole === "admin" || userRole === "manager",
     notes: true,
   });
   const [viewMode, setViewMode] = useState("month");
@@ -210,16 +210,16 @@ const Calendar = ({ userRole }) => {
           return event.userId === 100;
         case "clientHoliday":
           return userRole === "admin" || userRole === "manager";
-        case "approvedLeave":
-          return (
-            userRole === "admin" ||
-            userRole === "manager" ||
-            event.userId === 100
-          );
-        case "weekOff":
-          return userRole === "admin" || userRole === "manager";
-        case "note":
-          return userRole === "admin";
+        // case "approvedLeave":
+        //   return (
+        //     userRole === "admin" ||
+        //     userRole === "manager" ||
+        //     event.userId === 100
+        //   );
+        // case "weekOff":
+        //   return userRole === "admin" || userRole === "manager";
+        // case "note":
+        //   return userRole === "admin";
         default:
           return true;
       }
@@ -450,7 +450,7 @@ const Calendar = ({ userRole }) => {
                 </button>
               )}
 
-              {(userRole === "admin" || userRole === "manager") && (
+              {/* {(userRole === "admin" || userRole === "manager") && (
                 <button
                   className={`btn btn-xs me-1 mb-1 ${
                     selectedFilters.approvedLeave
@@ -474,7 +474,7 @@ const Calendar = ({ userRole }) => {
                 >
                   Week Offs
                 </button>
-              )}
+              )} */}
 
               {userRole === "admin" && (
                 <button
@@ -573,12 +573,12 @@ const Calendar = ({ userRole }) => {
             {selectedFilters.clientHoliday && (
               <span className="badge bg-info me-1">Client Holidays</span>
             )}
-            {selectedFilters.approvedLeave && (
+            {/* {selectedFilters.approvedLeave && (
               <span className="badge bg-warning me-1">Leaves</span>
             )}
             {selectedFilters.weekOff && (
               <span className="badge bg-secondary me-1">Week Offs</span>
-            )}
+            )} */}
             {selectedFilters.note && (
               <span className="badge bg-dark me-1">Notes</span>
             )}
@@ -1053,8 +1053,8 @@ const Calendar = ({ userRole }) => {
                 <option value="doj">Joining Date</option>
                 <option value="companyHoliday">Company Holiday</option>
                 <option value="clientHoliday">Client Holiday</option>
-                <option value="approvedLeave">Leave</option>
-                <option value="weekOff">Week Off</option>
+                {/* <option value="approvedLeave">Leave</option>
+                <option value="weekOff">Week Off</option> */}
                 <option value="note">Note</option>
               </Form.Select>
             </Form.Group>
