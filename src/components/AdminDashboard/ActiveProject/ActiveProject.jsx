@@ -775,20 +775,22 @@ const ActiveProject = () => {
                                       <th>
                                         <input
                                           type="checkbox"
-                                          className="form-check-input"
-                                          checked={
-                                            selectedFiles.length ===
-                                            project?.files?.length
-                                          }
+                                         
                                           onChange={(e) => {
-                                            if (e.target.checked) {
-                                              setSelectedFiles([
-                                                ...project.files,
-                                              ]);
-                                            } else {
-                                              setSelectedFiles([]);
-                                            }
-                                            setHasUnsavedChanges(true);
+                                            const updatedFiles =
+                                              project.files.map((f) =>
+                                                f.id === file.id
+                                                  ? {
+                                                      ...f,
+                                                      checked: e.target.checked,
+                                                    }
+                                                  : f
+                                              );
+
+                                            setSelectedProject({
+                                              ...project,
+                                              files: updatedFiles,
+                                            });
                                           }}
                                         />
                                       </th>
