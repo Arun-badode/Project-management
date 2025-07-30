@@ -43,26 +43,20 @@ import ManagerTask from "./components/ProjectManager/ManagerTask/ManagerTask";
 import ShiftAllocation from "./components/ProjectManager/ShiftAllocation/ShiftAllocation";
 import MainDashboard from "./components/AdminDashboard/AdminDashboard/MainDashboard";
 
-
-
-
 function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
   const menusidebarcollaps = () => setIsSidebarCollapsed(true);
 
-
-
-    useEffect(() => {
+  useEffect(() => {
     const isMobile = window.innerWidth < 768;
-  
+
     if (isMobile) {
       setIsSidebarCollapsed(true);
     }
   }, []);
   return (
-
     <Routes>
       {/* Auth Routes */}
       <Route element={<AuthLayout />}>
@@ -94,7 +88,10 @@ function App() {
         <Route path="/auditlog" element={<AuditLog />} />
         <Route path="/timetracker" element={<TimeTracker />} />
         <Route path="/reportinganalytics" element={<ReportingAnalytics />} />
-        <Route path="/filemanagementsystem" element={<FileManagementSystem />} />
+        <Route
+          path="/filemanagementsystem"
+          element={<FileManagementSystem />}
+        />
         <Route path="/qamanagement" element={<QAManagement />} />
         <Route path="/changepassword" element={<ChangesPassword />} />
         <Route path="/role-permission" element={<RoleManagementSystem />} />
@@ -111,7 +108,7 @@ function App() {
         {/* team Member */}
         <Route path="/task" element={<Task />} />
         <Route path="/team-dashboard" element={<TaskDashboard />} />
-        <Route path='/messages' element={<Messages />} />
+        <Route path="/messages" element={<Messages />} />
         <Route path="/activity" element={<ActivitySummary />} />
 
         {/* Add your other routes here */}
@@ -123,7 +120,7 @@ function App() {
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/assigned" element={<Assigned />} />
         <Route path="/managertask" element={<ManagerTask />} />
-    <Route path="/shift-allocation" element={<ShiftAllocation/>} />
+        <Route path="/shift-allocation" element={<ShiftAllocation />} />
 
         <Route path="/taskrequest" element={<TaskRequest />} />
         <Route path="/sourcework" element={<ResourceWorkload />} />
@@ -131,66 +128,16 @@ function App() {
 
         {/* <Route path="/task" element={<Task/>} /> */}
 
-
         {/* productivity */}
 
-        <Route path="/productivity" element={<Productivity />} />
-
-
-
-
-
+        <Route path="/productivity" element={<Productivity />} /> 
       </Route>
 
       {/* Fallback Route */}
       <Route path="*" element={<h1>404 - Not Found</h1>} />
     </Routes>
-
   );
 }
 
 
-// App.js
-
-
-// function App() {
-//   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-//   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
-//   const menusidebarcollaps = () => setIsSidebarCollapsed(true);
-//   const role = localStorage.getItem("userRole");
-
-//   const roleRoutes = routesByRole[role] || [];
-
-//   return (
-//     <Routes>
-//       {/* Auth */}
-//       <Route element={<AuthLayout />}>
-//         <Route path="/" element={<LoginPage />} />
-//         <Route path="/signup" element={<SignupPage />} />
-//       </Route>
-
-//       {/* Protected App Routes */}
-//       <Route
-//         element={
-//           <ProtectedRoute allowedRoles={["Admin", "Manager", "Employee"]}>
-//             <MainLayout
-//               isSidebarCollapsed={isSidebarCollapsed}
-//               toggleSidebar={toggleSidebar}
-//               menusidebarcollaps={menusidebarcollaps}
-//             />
-//           </ProtectedRoute>
-//         }
-//       >
-//         {roleRoutes.map(({ path, element }) => (
-//           <Route key={path} path={path} element={element} />
-//         ))}
-//       </Route>
-
-//       {/* Fallback */}
-//       <Route path="*" element={<h1>404 - Not Found</h1>} />
-//     </Routes>
-//   );
-// }
-
 export default App;
-

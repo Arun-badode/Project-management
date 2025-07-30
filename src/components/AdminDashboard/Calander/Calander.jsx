@@ -4,6 +4,8 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Table from "react-bootstrap/Table";
 import moment from "moment";
+import BASE_URL from "../../../config";
+import axios from "axios";
 
 const calendarEvents = [
   {
@@ -22,14 +24,14 @@ const calendarEvents = [
 
 const Calendar = ({ userRole }) => {
   // State for calendar data and UI
-  const [currentMonth, setCurrentMonth] = useState("June 2025");
+  // const [currentMonth, setCurrentMonth] = useState("June 2025");
   const [selectedFilters, setSelectedFilters] = useState({
     dob: true,
     doj: true,
     companyHoliday: true,
     clientHoliday: userRole === "admin" || userRole === "manager",
-    approvedLeave: userRole === "admin" || userRole === "manager",
-    weekOff: userRole === "admin" || userRole === "manager",
+    // approvedLeave: userRole === "admin" || userRole === "manager",
+    // weekOff: userRole === "admin" || userRole === "manager",
     notes: true,
   });
   const [viewMode, setViewMode] = useState("month");
@@ -59,7 +61,20 @@ const Calendar = ({ userRole }) => {
   const [addEventDate, setAddEventDate] = useState("");
   const [addEventType, setAddEventType] = useState("");
   const [addEventDetails, setAddEventDetails] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+   const [eventsData, setEventsData] = useState({
+    birthdays: [],
+    companyHolidays: [],
+    joiningDates: [],
+    approvedLeaves: [],
+    notes: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
+ const token = localStorage.getItem('authToken');
   // Load mock data
 
   const birthdayEvents = [{ name: "Michael Brown", date: "Jun 1, 2025" }];
@@ -210,16 +225,16 @@ const Calendar = ({ userRole }) => {
           return event.userId === 100;
         case "clientHoliday":
           return userRole === "admin" || userRole === "manager";
-        case "approvedLeave":
-          return (
-            userRole === "admin" ||
-            userRole === "manager" ||
-            event.userId === 100
-          );
-        case "weekOff":
-          return userRole === "admin" || userRole === "manager";
-        case "note":
-          return userRole === "admin";
+        // case "approvedLeave":
+        //   return (
+        //     userRole === "admin" ||
+        //     userRole === "manager" ||
+        //     event.userId === 100
+        //   );
+        // case "weekOff":
+        //   return userRole === "admin" || userRole === "manager";
+        // case "note":
+        //   return userRole === "admin";
         default:
           return true;
       }
@@ -371,13 +386,13 @@ const Calendar = ({ userRole }) => {
   });
 
   // Format date for display
-  const formatDate = (date) => {
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
+  // const formatDate = (date) => {
+  //   return date.toLocaleDateString("en-US", {
+  //     month: "short",
+  //     day: "numeric",
+  //     year: "numeric",
+  //   });
+  // };
 
   // Modal open handler
   const openAddEventModal = () => {
@@ -388,10 +403,96 @@ const Calendar = ({ userRole }) => {
   };
 
   // Modal save handler (yahan aap apni event add logic laga sakte hain)
-  const handleAddEventSave = () => {
-    // Validation and event add logic
-    setShowAddEventModal(false);
+
+
+   const handleAddEventSave = async () => {
+    if (!addEventDate || !addEventType || !addEventDetails) {
+      setError('Please fill all fields');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.post(
+        `${BASE_URL}event/addEvent`,
+        {
+          eventDate: addEventDate,
+          eventType: addEventType,
+          details: addEventDetails
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.success) {
+        setShowAddEventModal(false);
+        // Reset form
+        setAddEventDate('');
+        setAddEventType('');
+        setAddEventDetails('');
+        // You might want to refresh the events list here
+      } else {
+        setError(response.data.message || 'Failed to add event');
+      }
+    } catch (err) {
+      console.error('Error adding event:', err);
+      setError(err.response?.data?.message || 'Failed to add event. Please try again.');
+      
+      if (err.response?.status === 401) {
+        // Handle unauthorized error (e.g., redirect to login)
+        console.error('Authentication failed - redirect to login');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+    useEffect(() => {
+    fetchEventsSummary();
+  }, [currentMonth, currentYear]);
+
+  const fetchEventsSummary = async () => {
+    try {
+      const token = localStorage.getItem("authToken")
+      setLoading(true);
+      const response = await axios.get(
+        `${BASE_URL}event/getEventSummary?month=${currentMonth}&year=${currentYear}`
+      ,{
+        headers:{
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      
+      if (response.data.status) {
+        setEventsData({
+          birthdays: response.data.summary.birthdays,
+          companyHolidays: response.data.summary.companyHolidays,
+          joiningDates: response.data.summary.joiningDates,
+          approvedLeaves: response.data.summary.approvedLeaves,
+          notes: [] // Note: Your API response doesn't include notes, adjust if needed
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching events summary:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  if (loading) {
+    return <div>Loading events summary...</div>;
+  }
 
   return (
     <div className="container-fluid py-4">
@@ -450,7 +551,7 @@ const Calendar = ({ userRole }) => {
                 </button>
               )}
 
-              {(userRole === "admin" || userRole === "manager") && (
+              {/* {(userRole === "admin" || userRole === "manager") && (
                 <button
                   className={`btn btn-xs me-1 mb-1 ${
                     selectedFilters.approvedLeave
@@ -474,7 +575,7 @@ const Calendar = ({ userRole }) => {
                 >
                   Week Offs
                 </button>
-              )}
+              )} */}
 
               {userRole === "admin" && (
                 <button
@@ -573,12 +674,12 @@ const Calendar = ({ userRole }) => {
             {selectedFilters.clientHoliday && (
               <span className="badge bg-info me-1">Client Holidays</span>
             )}
-            {selectedFilters.approvedLeave && (
+            {/* {selectedFilters.approvedLeave && (
               <span className="badge bg-warning me-1">Leaves</span>
             )}
             {selectedFilters.weekOff && (
               <span className="badge bg-secondary me-1">Week Offs</span>
-            )}
+            )} */}
             {selectedFilters.note && (
               <span className="badge bg-dark me-1">Notes</span>
             )}
@@ -728,227 +829,207 @@ const Calendar = ({ userRole }) => {
       </div>
 
       {/* Events Summary Table */}
-      <div className="mt-4 p-3 rounded shadow table-gradient-bg">
-        <h4 className="gradient-heading mb-3">Events Summary</h4>
+       <div className="mt-4 p-3 rounded shadow table-gradient-bg">
+      <h4 className="gradient-heading mb-3">Events Summary</h4>
 
-        {/* Birthdays Table */}
-        {selectedFilters.dob && (
-          <div className="mb-4">
-            <h5 className="text-danger">Birthdays</h5>
-            <Table striped bordered hover responsive>
-              <thead
-                className="table-gradient-bg table "
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 0,
-                  backgroundColor: "#fff", // Match your background color
-                }}
-              >
-                <tr  className="text-center">
-                  <th style={{ width: "60%", textAlign: "left" }}>Employee</th>
-                  <th style={{ width: "40%", textAlign: "left" }}>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {birthdays.map((event) => (
-                  <tr key={`dob-${event.id}`}>
-                    <td style={{ textAlign: "left" }}>{event.title}</td>
-                    <td style={{ textAlign: "left" }}>
-                      {formatDate(event.date)}
-                    </td>
-                  </tr>
-                ))}
-                {birthdays.length === 0 && (
-                  <tr>
-                    <td colSpan="2" className="text-muted text-center">
-                      No birthdays found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
-          </div>
-        )}
-
-        {/* Company Holidays Table */}
-        {selectedFilters.companyHoliday && (
-          <div className="mb-4 ">
-            <h5 className="text-success">Company Holidays</h5>
-            <Table striped bordered hover responsive>
-              <thead
-                className="table-gradient-bg table "
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 0,
-                  backgroundColor: "#fff", // Match your background color
-                }}
-              >
-                <tr  className="text-center">
-                  <th style={{ width: "60%", textAlign: "left" }}>Title</th>
-                  <th style={{ width: "40%", textAlign: "left" }}>Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {events
-                  .filter((event) => event.type === "companyHoliday")
-                  .map((event) => (
-                    <tr key={`holiday-${event.id}`} >
-                      <td style={{ textAlign: "left" }}>{event.title}</td>
-                      <td style={{ textAlign: "left" }}>
-                        {formatDate(event.date)}
-                      </td>
-                    </tr>
-                  ))}
-                {events.filter((event) => event.type === "companyHoliday")
-                  .length === 0 && (
-                  <tr>
-                    <td colSpan="2" className="text-muted text-center">
-                      No holidays found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
-
-            {(userRole === "admin" || userRole === "manager") && (
-              <Button
-                variant="success"
-                onClick={() => openHolidayModal()}
-                className="mt-2"
-              >
-                Add Company Holiday
-              </Button>
-            )}
-          </div>
-        )}
-
-        {/* Joining Dates Table */}
-
+      {/* Birthdays Table */}
+      {selectedFilters.dob && (
         <div className="mb-4">
-          <h5 style={{ color: "#3fa9f5" }}>Joining Dates</h5>
+          <h5 className="text-danger">Birthdays</h5>
           <Table striped bordered hover responsive>
             <thead
-              className="table-gradient-bg table "
+              className="table-gradient-bg table"
               style={{
                 position: "sticky",
                 top: 0,
                 zIndex: 0,
-                backgroundColor: "#fff", // Match your background color
+                backgroundColor: "#fff",
               }}
             >
-              <tr  className="text-center">
-                <th style={{ width: "60%", textAlign: "left" }}>Employee</th>
-                <th style={{ width: "40%", textAlign: "left" }}>
-                  Joining Date
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {events
-                .filter((event) => event.type === "doj")
-                .map((event) => (
-                  <tr key={`doj-${event.id}`} >
-                    <td style={{ textAlign: "left" }}>{event.title}</td>
-                    <td style={{ textAlign: "left" }}>
-                      {formatDate(event.date)}
-                    </td>
-                  </tr>
-                ))}
-              {events.filter((event) => event.type === "doj").length === 0 && (
-                <tr>
-                  <td colSpan="2" className="text-muted text-center">
-                    No joining dates found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
-        </div>
-
-        {/* Approved Leave Table */}
-        <div className="mb-4">
-          <h5 style={{ color: "#ff9800" }}>Approved Leave</h5>
-          <Table striped bordered hover responsive>
-            <thead
-              className="table-gradient-bg table "
-              style={{
-                position: "sticky",
-                top: 0,
-                zIndex: 0,
-                backgroundColor: "#fff", // Match your background color
-              }}
-            >
-              <tr  className="text-center">
+              <tr className="text-center">
                 <th style={{ width: "60%", textAlign: "left" }}>Employee</th>
                 <th style={{ width: "40%", textAlign: "left" }}>Date</th>
               </tr>
             </thead>
             <tbody>
-              {events
-                .filter((event) => event.type === "approvedLeave")
-                .map((event) => (
-                  <tr key={`leave-${event.id}`}  >
-                    <td style={{ textAlign: "left" }}>{event.title}</td>
-                    <td style={{ textAlign: "left" }}>
-                      {formatDate(event.date)}
-                    </td>
-                  </tr>
-                ))}
-              {events.filter((event) => event.type === "approvedLeave")
-                .length === 0 && (
+              {eventsData.birthdays.map((event, index) => (
+                <tr key={`dob-${index}`}>
+                  <td style={{ textAlign: "left" }}>{event.name}</td>
+                  <td style={{ textAlign: "left" }}>{formatDate(event.date)}</td>
+                </tr>
+              ))}
+              {eventsData.birthdays.length === 0 && (
                 <tr>
                   <td colSpan="2" className="text-muted text-center">
-                    No approved leaves found
+                    No birthdays found
                   </td>
                 </tr>
               )}
             </tbody>
           </Table>
         </div>
+      )}
 
-        {/* Notes Table */}
-        {selectedFilters.note && (
-          <div className="mb-4">
-            <h5 style={{ color: "#ffe100" }}>Notes</h5>
-            <Table striped bordered hover responsive>
-              <thead
-                className="table-gradient-bg table "
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 0,
-                  backgroundColor: "#fff", // Match your background color
-                }}
-              >
-                <tr  className="text-center">
-                  <th>Title</th>
-                  <th>Joining Date</th>
+      {/* Company Holidays Table */}
+      {selectedFilters.companyHoliday && (
+        <div className="mb-4">
+          <h5 className="text-success">Company Holidays</h5>
+          <Table striped bordered hover responsive>
+            <thead
+              className="table-gradient-bg table"
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 0,
+                backgroundColor: "#fff",
+              }}
+            >
+              <tr className="text-center">
+                <th style={{ width: "60%", textAlign: "left" }}>Title</th>
+                <th style={{ width: "40%", textAlign: "left" }}>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {eventsData.companyHolidays.map((event, index) => (
+                <tr key={`holiday-${index}`}>
+                  <td style={{ textAlign: "left" }}>{event.name}</td>
+                  <td style={{ textAlign: "left" }}>{formatDate(event.date)}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {events
-                  .filter((event) => event.type === "note")
-                  .map((event) => (
-                    <tr key={`note-${event.id}`} >
-                      <td>{event.title}</td>
-                      <td>{formatDate(event.date)}</td>
-                    </tr>
-                  ))}
-                {events.filter((event) => event.type === "note").length ===
-                  0 && (
-                  <tr>
-                    <td colSpan="2" className="text-muted">
-                      No notes found
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
-          </div>
-        )}
+              ))}
+              {eventsData.companyHolidays.length === 0 && (
+                <tr>
+                  <td colSpan="2" className="text-muted text-center">
+                    No holidays found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+
+          {(userRole === "admin" || userRole === "manager") && (
+            <Button
+              variant="success"
+              onClick={() => openHolidayModal()}
+              className="mt-2"
+            >
+              Add Company Holiday
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Joining Dates Table */}
+      <div className="mb-4">
+        <h5 style={{ color: "#3fa9f5" }}>Joining Dates</h5>
+        <Table striped bordered hover responsive>
+          <thead
+            className="table-gradient-bg table"
+            style={{
+              position: "sticky",
+              top: 0,
+              zIndex: 0,
+              backgroundColor: "#fff",
+            }}
+          >
+            <tr className="text-center">
+              <th style={{ width: "60%", textAlign: "left" }}>Employee</th>
+              <th style={{ width: "40%", textAlign: "left" }}>
+                Joining Date
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {eventsData.joiningDates.map((event, index) => (
+              <tr key={`doj-${index}`}>
+                <td style={{ textAlign: "left" }}>{event.name}</td>
+                <td style={{ textAlign: "left" }}>{formatDate(event.date)}</td>
+              </tr>
+            ))}
+            {eventsData.joiningDates.length === 0 && (
+              <tr>
+                <td colSpan="2" className="text-muted text-center">
+                  No joining dates found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
       </div>
+
+      {/* Approved Leave Table */}
+      <div className="mb-4">
+        <h5 style={{ color: "#ff9800" }}>Approved Leave</h5>
+        <Table striped bordered hover responsive>
+          <thead
+            className="table-gradient-bg table"
+            style={{
+              position: "sticky",
+              top: 0,
+              zIndex: 0,
+              backgroundColor: "#fff",
+            }}
+          >
+            <tr className="text-center">
+              <th style={{ width: "60%", textAlign: "left" }}>Employee</th>
+              <th style={{ width: "40%", textAlign: "left" }}>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {eventsData.approvedLeaves.map((event, index) => (
+              <tr key={`leave-${index}`}>
+                <td style={{ textAlign: "left" }}>{event.name}</td>
+                <td style={{ textAlign: "left" }}>{formatDate(event.date)}</td>
+              </tr>
+            ))}
+            {eventsData.approvedLeaves.length === 0 && (
+              <tr>
+                <td colSpan="2" className="text-muted text-center">
+                  No approved leaves found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
+      </div>
+
+      {/* Notes Table */}
+      {selectedFilters.note && (
+        <div className="mb-4">
+          <h5 style={{ color: "#ffe100" }}>Notes</h5>
+          <Table striped bordered hover responsive>
+            <thead
+              className="table-gradient-bg table"
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 0,
+                backgroundColor: "#fff",
+              }}
+            >
+              <tr className="text-center">
+                <th>Title</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {eventsData.notes.map((event, index) => (
+                <tr key={`note-${index}`}>
+                  <td>{event.name}</td>
+                  <td>{formatDate(event.date)}</td>
+                </tr>
+              ))}
+              {eventsData.notes.length === 0 && (
+                <tr>
+                  <td colSpan="2" className="text-muted">
+                    No notes found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </Table>
+        </div>
+      )}
+    </div>
 
       {/* Company Holiday Modal */}
       <Modal
@@ -1053,8 +1134,8 @@ const Calendar = ({ userRole }) => {
                 <option value="doj">Joining Date</option>
                 <option value="companyHoliday">Company Holiday</option>
                 <option value="clientHoliday">Client Holiday</option>
-                <option value="approvedLeave">Leave</option>
-                <option value="weekOff">Week Off</option>
+                {/* <option value="approvedLeave">Leave</option>
+                <option value="weekOff">Week Off</option> */}
                 <option value="note">Note</option>
               </Form.Select>
             </Form.Group>
@@ -1081,6 +1162,76 @@ const Calendar = ({ userRole }) => {
           </Button>
         </Modal.Footer>
       </Modal>
+        <Modal
+      show={showAddEventModal}
+      onHide={() => setShowAddEventModal(false)}
+      className="custom-modal-dark"
+    >
+      <Modal.Header closeButton>
+        <Modal.Title>Add Event</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Form>
+          {error && (
+            <div className="alert alert-danger mb-3">
+              {error}
+            </div>
+          )}
+          <Form.Group className="mb-3">
+            <Form.Label>Date</Form.Label>
+            <Form.Control
+              type="date"
+              value={addEventDate}
+              onChange={(e) => setAddEventDate(e.target.value)}
+              required
+            />
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Type of Event</Form.Label>
+            <Form.Select
+              value={addEventType}
+              onChange={(e) => setAddEventType(e.target.value)}
+              required
+            >
+              <option value="">Select Type</option>
+              <option value="dob">Birthday</option>
+              <option value="doj">Joining Date</option>
+              <option value="companyHoliday">Company Holiday</option>
+              <option value="clientHoliday">Client Holiday</option>
+              <option value="approvedLeave">Leave</option>
+              <option value="weekOff">Week Off</option>
+              <option value="note">Note</option>
+            </Form.Select>
+          </Form.Group>
+          <Form.Group className="mb-3">
+            <Form.Label>Details</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Enter Details"
+              value={addEventDetails}
+              onChange={(e) => setAddEventDetails(e.target.value)}
+              required
+            />
+          </Form.Group>
+        </Form>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button
+          variant="secondary"
+          onClick={() => setShowAddEventModal(false)}
+          disabled={isLoading}
+        >
+          Cancel
+        </Button>
+        <Button 
+          variant="primary" 
+          onClick={handleAddEventSave}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Saving...' : 'Save'}
+        </Button>
+      </Modal.Footer>
+    </Modal>
 
       <style jsx>{`
         .today-cell {

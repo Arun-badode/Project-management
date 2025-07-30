@@ -59,7 +59,6 @@ function Collaboration() {
   const [teamMembers, setTeamMembers] = useState([
     {
       id: 101,
-      name: "Sarah Johnson",
       avatar:
         "https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20woman%20with%20brown%20hair%20and%20friendly%20smile%2C%20business%20attire%2C%20neutral%20background%2C%20high%20quality%20portrait%20photo%2C%20soft%20lighting&width=40&height=40&seq=user1sm&orientation=squarish",
       isOnline: true,
@@ -418,6 +417,8 @@ function Collaboration() {
 
   const emojis = ["👍", "❤️", "😂", "🎉", "🔥", "💯", "👏", "🙌", "A"];
 
+
+  
   return (
     <div className=" container-fluid d-flex flex-column">
       {/* Main Content */}

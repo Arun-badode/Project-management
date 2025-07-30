@@ -93,6 +93,79 @@ export default function SettingsPage() {
     if (editClientIdx === idx) setEditClientIdx(null);
   };
 
+
+   const [newTask, setNewTask] = useState("");
+    const [newLanguage, setNewLanguage] = useState("");
+    const [newapplication, setNewapplication] = useState("");
+    const [newCurrency, setNewCurrency] = useState({ name: "", rate: "" });
+  
+    const handleAddClient = () => {
+      if (newClient.alias && newClient.actualName && newClient.country) {
+        setClients([...clients, newClient]);
+        setNewClient({ alias: "", actualName: "", country: "", managers: "" });
+      }
+    };
+  
+    const handleAddTask = () => {
+      if (newTask) {
+        setTasks([...tasks, newTask]);
+        setNewTask("");
+      }
+    };
+  
+    const handleAddLanguage = () => {
+      if (newLanguage) {
+        setLanguages([...languages, newLanguage]);
+        setNewLanguage("");
+      }
+    };
+  
+    const handleAddapplication = () => {
+      if (newapplication) {
+        setapplications([...applications, newapplication]);
+        setNewapplication("");
+      }
+    };
+  
+    const handleAddCurrency = () => {
+      if (newCurrency.name && newCurrency.rate) {
+        setCurrencies([...currencies, newCurrency]);
+        setNewCurrency({ name: "", rate: "" });
+      }
+    };
+
+     const [tasks, setTasks] = useState([
+        "Backend Dev",
+        "API Integration",
+        "Frontend Dev",
+        "QA Testing",
+      ]);
+    
+      const [languages, setLanguages] = useState([
+        "English",
+        "Spanish",
+        "French",
+        "German",
+      ]);
+    
+      const [applications, setapplications] = useState([
+        "Web",
+        "Mobile Responsive",
+        "iOS",
+        "Android",
+      ]);
+    
+      const [currencies, setCurrencies] = useState([
+        { name: "USD", rate: "83" },
+        { name: "EUR", rate: "90" },
+        { name: "GBP", rate: "90" },
+      ]);
+
+        const handleDeleteItem = (list, setList, index) => {
+    const newList = [...list];
+    newList.splice(index, 1);
+    setList(newList);
+  };
   return (
     <div className="p-4 settings-main-unique py-4">
       <h2 className="gradient-heading mb-1">Client Management</h2>
@@ -209,18 +282,16 @@ export default function SettingsPage() {
               border: "2px solid #7b2ff2",
               borderRadius: 10,
               background: "rgba(20,30,70,0.7)",
+              maxHeight: "400px", // Added fixed height
+              overflowY: "auto", // Added scroll for overflow
+              padding: "10px",
             }}
           >
             {clients.map((c, idx) => (
               <div
                 className="client-item d-flex justify-content-between align-items-start"
                 key={idx}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  marginBottom: 0,
-                  marginTop: 8,
-                }}
+              
               >
                 <div>
                   <b className="text-white">{c.alias} (Alias)</b>{" "}
@@ -258,6 +329,234 @@ export default function SettingsPage() {
               </div>
             ))}
           </div>
+            {/* Manage Tasks List */}
+                <div className="mb-4">
+                  <h6 className="mb-3 text-white">Manage Tasks List</h6>
+                  <div className="input-group mb-2">
+                    <input
+                      type="text"
+                      className="form-control bg-secondary text-white border-secondary"
+                      placeholder="New task..."
+                      value={newTask}
+                      onChange={(e) => setNewTask(e.target.value)}
+                    />
+                    <button className="btn btn-primary"  onClick={handleAddTask}
+                    disabled={!newTask}>+</button>
+                  </div>
+                  <div className="border rounded p-2 mb-2 border-secondary">
+                    {tasks.map((task, index) => (
+                      <div
+                        key={index}
+                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
+                      >
+                        <span className="text-white">{task}</span>
+                        <div className="btn-group btn-group-sm">
+                           <button
+                    className="btn btn-sm btn-link text-light"
+                    onClick={() => handleEditClient(idx)}
+                  >
+                    <i className="bi bi-pencil"></i>
+                  </button>
+                          <button
+                            className="btn btn-outline-danger"
+                            onClick={() =>
+                              handleDeleteItem(tasks, setTasks, index)
+                            }
+                          >
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* <button
+                    className="btn btn-sm btn-primary"
+                    onClick={handleAddTask}
+                    disabled={!newTask}
+                  >
+                    <i className="fas fa-plus me-1"></i> Add Task
+                  </button> */}
+                </div>
+
+                {/* Manage Application List */}
+                <div className="mb-4">
+                  <h6 className="mb-3 text-white">Manage Application List</h6>
+                  <div className="input-group mb-2">
+                    <input
+                      type="text"
+                      className="form-control bg-secondary text-white border-secondary"
+                      placeholder="New application..."
+                      value={newapplication}
+                      onChange={(e) => setNewapplication(e.target.value)}
+                    />
+                    <button className="btn btn-primary" onClick={handleAddapplication}
+                    disabled={!newapplication}>+</button>
+                  </div>
+                  <div className="border rounded p-2 mb-2 border-secondary">
+                    {applications.map((application, index) => (
+                      <div
+                        key={index}
+                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
+                      >
+                        <span className="text-white">{application}</span>
+                        <div className="btn-group btn-group-sm">
+                          <button
+                            className="btn btn-outline-danger"
+                            onClick={() =>
+                              handleDeleteItem(
+                                applications,
+                                setapplications,
+                                index
+                              )
+                            }
+                          >
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* <button
+                    className="btn btn-sm btn-primary"
+                    onClick={handleAddapplication}
+                    disabled={!newapplication}
+                  >
+                    <i className="fas fa-plus me-1"></i> Add application
+                  </button> */}
+                </div>
+
+                {/* Manage Languages List */}
+                <div className="mb-4">
+                  <h6 className="mb-3 text-white">Manage Languages List</h6>
+                  <div className="input-group mb-2">
+                    <input
+                      type="text"
+                      className="form-control bg-secondary text-white border-secondary"
+                      placeholder="New language..."
+                      value={newLanguage}
+                      onChange={(e) => setNewLanguage(e.target.value)}
+                    />
+                    <button className="btn btn-primary"  onClick={handleAddLanguage}
+                    disabled={!newLanguage}>+</button>
+                  </div>
+                  <div className="border rounded p-2 mb-2 border-secondary">
+                    {languages.map((language, index) => (
+                      <div
+                        key={index}
+                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
+                      >
+                        <span className="text-white">{language}</span>
+                        <div className="btn-group btn-group-sm">
+                           <button
+                    className="btn btn-sm btn-link text-light"
+                    onClick={() => handleEditClient(idx)}
+                  >
+                    <i className="bi bi-pencil"></i>
+                  </button>
+                          <button
+                            className="btn btn-outline-danger"
+                            onClick={() =>
+                              handleDeleteItem(languages, setLanguages, index)
+                            }
+                          >
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* <button
+                    className="btn btn-sm btn-primary"
+                    onClick={handleAddLanguage}
+                    disabled={!newLanguage}
+                  >
+                    <i className="fas fa-plus me-1"></i> Add Language
+                  </button> */}
+                </div>
+
+                {/* Currency Conversion Rates */}
+                <div className="mb-4">
+                  <h6 className="mb-3 text-white">Currency Conversion Rates</h6>
+                  <div className="row g-2 mb-2">
+                    <div className="col-md-6">
+                      <input
+                        type="text"
+                        className="form-control bg-card text-white border-secondary"
+                        placeholder="Currency (e.g. USD)"
+                        value={newCurrency.name}
+                        onChange={(e) =>
+                          setNewCurrency({
+                            ...newCurrency,
+                            name: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <input
+                        type="text"
+                        className="form-control bg-card text-white border-secondary"
+                        placeholder="Rate to INR"
+                        value={newCurrency.rate}
+                        onChange={(e) =>
+                          setNewCurrency({
+                            ...newCurrency,
+                            rate: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="border rounded p-2 mb-2 border-secondary table-gradient-bg">
+                    <table className="table table-dark table-sm mb-0">
+                      <thead>
+                        <tr>
+                          <th>Currency</th>
+                          <th>Rate to INR</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {currencies.map((currency, index) => (
+                          <tr key={index}>
+                            <td>{currency.name}</td>
+                            <td>{currency.rate}</td>
+                            <td>
+                              <div className="btn-group btn-group-sm">
+                                 <button
+                    className="btn btn-sm btn-link text-light"
+                    onClick={() => handleEditClient(idx)}
+                  >
+                    <i className="bi bi-pencil"></i>
+                  </button>
+                                <button
+                                  className="btn btn-outline-danger"
+                                  onClick={() =>
+                                    handleDeleteItem(
+                                      currencies,
+                                      setCurrencies,
+                                      index
+                                    )
+                                  }
+                                >
+                                  <i className="fas fa-trash-alt"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <button
+                    className="btn btn-sm btn-primary"
+                    onClick={handleAddCurrency}
+                    disabled={!newCurrency.name || !newCurrency.rate}
+                  >
+                    <i className="fas fa-plus me-1"></i> Add Currency
+                  </button>
+                </div>
+
         </div>
       </div>
     </div>

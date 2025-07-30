@@ -54,10 +54,12 @@ const Navbar = ({ toggleSidebar }) => {
             <img
               // src="https://ik.imagekit.io/wycpoxj6v/Eminoids%20-%20Logo_B.png?updatedAt=1750836038955"
               src="https://ik.imagekit.io/43o9qlnbg/Eminoids%20-%20Logo_W.png"
+             
               alt="Logo"
               style={{
                 width: window.innerWidth >= 992 ? "150px" : "120px",
                 height: "40px",
+               
               }}
             />
             <button

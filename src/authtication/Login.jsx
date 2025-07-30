@@ -136,6 +136,7 @@ const LoginPage = () => {
           <div className="login-left-content">
             <img
               src="https://ik.imagekit.io/43o9qlnbg/Eminoids%20-%20Logo_W.png"
+              
               alt="Logo"
               className="login-logo"
               style={{ width: "220px", height: "auto", marginBottom: "24px" }}
