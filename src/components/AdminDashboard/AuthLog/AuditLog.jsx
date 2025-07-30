@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Search,
   Download,
@@ -12,6 +12,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 import useSyncScroll from "../Hooks/useSyncScroll";
+import axios from "axios";
+import BASE_URL from "../../../config";
 
 const AuditLog = () => {
   const [activeTab, setActiveTab] = useState("all-activities");
@@ -24,216 +26,220 @@ const AuditLog = () => {
   const [itemsPerPage] = useState(10);
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState(null);
+  const [allActivitiesData ,setAllActivitiesData] =useState([])
+  const [loginLogoutData , setLoginLogoutData ] =useState([])
+const [changesHistoryData ,setChangesHistoryData] = useState([])
 
   // Sample data
-  const allActivitiesData = [
-    {
-      id: 1,
-      timestamp: "2024-06-17 14:30:25",
-      user: "John Doe",
-      role: "Admin",
-      activity: "User Created",
-      module: "User Management",
-      ipAddress: "192.168.1.100",
-      device: "Chrome 125.0 / Windows 10",
-      details: "Created new user account for jane.smith@company.com",
-    },
-    {
-      id: 2,
-      timestamp: "2024-06-17 14:25:18",
-      user: "Sarah Wilson",
-      role: "Manager",
-      activity: "Project Updated",
-      module: "Project Management",
-      ipAddress: "192.168.1.105",
-      device: "Firefox 126.0 / macOS",
-      details: "Updated project timeline and assigned new team members",
-    },
-    {
-      id: 3,
-      timestamp: "2024-06-17 14:20:42",
-      user: "Mike Johnson",
-      role: "User",
-      activity: "File Download",
-      module: "Document Management",
-      ipAddress: "192.168.1.110",
-      device: "Safari 17.0 / iOS",
-      details: "Downloaded quarterly report PDF file",
-    },
-    {
-      id: 4,
-      timestamp: "2024-06-17 14:15:33",
-      user: "Emily Davis",
-      role: "Admin",
-      activity: "Settings Changed",
-      module: "System Settings",
-      ipAddress: "192.168.1.115",
-      device: "Edge 124.0 / Windows 11",
-      details: "Modified security settings and password policies",
-    },
-    {
-      id: 5,
-      timestamp: "2024-06-17 14:10:15",
-      user: "Robert Brown",
-      role: "Manager",
-      activity: "Report Generated",
-      module: "Analytics",
-      ipAddress: "192.168.1.120",
-      device: "Chrome 125.0 / Linux",
-      details: "Generated monthly performance analytics report",
-    },
-    {
-      id: 4,
-      timestamp: "2024-06-17 14:15:33",
-      user: "Emily Davis",
-      role: "Admin",
-      activity: "Settings Changed",
-      module: "System Settings",
-      ipAddress: "192.168.1.115",
-      device: "Edge 124.0 / Windows 11",
-      details: "Modified security settings and password policies",
-    },
-    {
-      id: 5,
-      timestamp: "2024-06-17 14:10:15",
-      user: "Robert Brown",
-      role: "Manager",
-      activity: "Report Generated",
-      module: "Analytics",
-      ipAddress: "192.168.1.120",
-      device: "Chrome 125.0 / Linux",
-      details: "Generated monthly performance analytics report",
-    },
-  ];
+  // const allActivitiesData = [
+  //   {
+  //     id: 1,
+  //     timestamp: "2024-06-17 14:30:25",
+  //     user: "John Doe",
+  //     role: "Admin",
+  //     activity: "User Created",
+  //     module: "User Management",
+  //     ipAddress: "192.168.1.100",
+  //     device: "Chrome 125.0 / Windows 10",
+  //     details: "Created new user account for jane.smith@company.com",
+  //   },
+  //   {
+  //     id: 2,
+  //     timestamp: "2024-06-17 14:25:18",
+  //     user: "Sarah Wilson",
+  //     role: "Manager",
+  //     activity: "Project Updated",
+  //     module: "Project Management",
+  //     ipAddress: "192.168.1.105",
+  //     device: "Firefox 126.0 / macOS",
+  //     details: "Updated project timeline and assigned new team members",
+  //   },
+  //   {
+  //     id: 3,
+  //     timestamp: "2024-06-17 14:20:42",
+  //     user: "Mike Johnson",
+  //     role: "User",
+  //     activity: "File Download",
+  //     module: "Document Management",
+  //     ipAddress: "192.168.1.110",
+  //     device: "Safari 17.0 / iOS",
+  //     details: "Downloaded quarterly report PDF file",
+  //   },
+  //   {
+  //     id: 4,
+  //     timestamp: "2024-06-17 14:15:33",
+  //     user: "Emily Davis",
+  //     role: "Admin",
+  //     activity: "Settings Changed",
+  //     module: "System Settings",
+  //     ipAddress: "192.168.1.115",
+  //     device: "Edge 124.0 / Windows 11",
+  //     details: "Modified security settings and password policies",
+  //   },
+  //   {
+  //     id: 5,
+  //     timestamp: "2024-06-17 14:10:15",
+  //     user: "Robert Brown",
+  //     role: "Manager",
+  //     activity: "Report Generated",
+  //     module: "Analytics",
+  //     ipAddress: "192.168.1.120",
+  //     device: "Chrome 125.0 / Linux",
+  //     details: "Generated monthly performance analytics report",
+  //   },
+  //   {
+  //     id: 4,
+  //     timestamp: "2024-06-17 14:15:33",
+  //     user: "Emily Davis",
+  //     role: "Admin",
+  //     activity: "Settings Changed",
+  //     module: "System Settings",
+  //     ipAddress: "192.168.1.115",
+  //     device: "Edge 124.0 / Windows 11",
+  //     details: "Modified security settings and password policies",
+  //   },
+  //   {
+  //     id: 5,
+  //     timestamp: "2024-06-17 14:10:15",
+  //     user: "Robert Brown",
+  //     role: "Manager",
+  //     activity: "Report Generated",
+  //     module: "Analytics",
+  //     ipAddress: "192.168.1.120",
+  //     device: "Chrome 125.0 / Linux",
+  //     details: "Generated monthly performance analytics report",
+  //   },
+  // ];
 
-  const loginLogoutData = [
-    {
-      id: 1,
-      datetime: "2024-06-17 14:35:20",
-      user: "John Doe",
-      role: "Admin",
-      action: "Login",
-      status: "Success",
-      ipAddress: "192.168.1.100",
-      device: "Chrome 125.0 / Windows 10",
-    },
-    {
-      id: 2,
-      datetime: "2024-06-17 14:30:15",
-      user: "Sarah Wilson",
-      role: "Manager",
-      action: "Login",
-      status: "Success",
-      ipAddress: "192.168.1.105",
-      device: "Firefox 126.0 / macOS",
-    },
-    {
-      id: 3,
-      datetime: "2024-06-17 14:25:10",
-      user: "Mike Johnson",
-      role: "User",
-      action: "Login",
-      status: "Failed",
-      ipAddress: "192.168.1.110",
-      device: "Safari 17.0 / iOS",
-    },
-    {
-      id: 4,
-      datetime: "2024-06-17 14:20:05",
-      user: "Emily Davis",
-      role: "Admin",
-      action: "Logout",
-      status: "Success",
-      ipAddress: "192.168.1.115",
-      device: "Edge 124.0 / Windows 11",
-    },
-    {
-      id: 5,
-      datetime: "2024-06-17 14:15:00",
-      user: "Robert Brown",
-      role: "Manager",
-      action: "Login",
-      status: "Success",
-      ipAddress: "192.168.1.120",
-      device: "Chrome 125.0 / Linux",
-    },
+  // const loginLogoutData = [
+  //   {
+  //     id: 1,
+  //     datetime: "2024-06-17 14:35:20",
+  //     user: "John Doe",
+  //     role: "Admin",
+  //     action: "Login",
+  //     status: "Success",
+  //     ipAddress: "192.168.1.100",
+  //     device: "Chrome 125.0 / Windows 10",
+  //   },
+  //   {
+  //     id: 2,
+  //     datetime: "2024-06-17 14:30:15",
+  //     user: "Sarah Wilson",
+  //     role: "Manager",
+  //     action: "Login",
+  //     status: "Success",
+  //     ipAddress: "192.168.1.105",
+  //     device: "Firefox 126.0 / macOS",
+  //   },
+  //   {
+  //     id: 3,
+  //     datetime: "2024-06-17 14:25:10",
+  //     user: "Mike Johnson",
+  //     role: "User",
+  //     action: "Login",
+  //     status: "Failed",
+  //     ipAddress: "192.168.1.110",
+  //     device: "Safari 17.0 / iOS",
+  //   },
+  //   {
+  //     id: 4,
+  //     datetime: "2024-06-17 14:20:05",
+  //     user: "Emily Davis",
+  //     role: "Admin",
+  //     action: "Logout",
+  //     status: "Success",
+  //     ipAddress: "192.168.1.115",
+  //     device: "Edge 124.0 / Windows 11",
+  //   },
+  //   {
+  //     id: 5,
+  //     datetime: "2024-06-17 14:15:00",
+  //     user: "Robert Brown",
+  //     role: "Manager",
+  //     action: "Login",
+  //     status: "Success",
+  //     ipAddress: "192.168.1.120",
+  //     device: "Chrome 125.0 / Linux",
+  //   },
 
-  ];
+  // ];
 
-  const changesHistoryData = [
-    {
-      id: 1,
-      timestamp: "2024-06-17 14:40:30",
-      user: "John Doe",
-      entityType: "User",
-      action: "Created",
-      entityName: "jane.smith@company.com",
-      changeSummary: "New user account created with Manager role",
-      beforeAfter: {
-        before: null,
-        after: { name: "Jane Smith", role: "Manager", status: "Active" },
-      },
-    },
-    {
-      id: 2,
-      timestamp: "2024-06-17 14:35:25",
-      user: "Sarah Wilson",
-      entityType: "Project",
-      action: "Updated",
-      entityName: "Q2 Marketing Campaign",
-      changeSummary: "Project status and deadline updated",
-      beforeAfter: {
-        before: { status: "In Progress", deadline: "2024-06-30" },
-        after: { status: "Review", deadline: "2024-07-15" },
-      },
-    },
-    {
-      id: 3,
-      timestamp: "2024-06-17 14:30:20",
-      user: "Mike Johnson",
-      entityType: "Task",
-      action: "Updated",
-      entityName: "Website Redesign",
-      changeSummary: "Task priority and assignee changed",
-      beforeAfter: {
-        before: { priority: "Medium", assignee: "Tom Wilson" },
-        after: { priority: "High", assignee: "Lisa Johnson" },
-      },
-    },
-    {
-      id: 4,
-      timestamp: "2024-06-17 14:25:15",
-      user: "Emily Davis",
-      entityType: "Project",
-      action: "Deleted",
-      entityName: "Old Training Module",
-      changeSummary: "Deprecated project removed from system",
-      beforeAfter: {
-        before: { name: "Old Training Module", status: "Completed" },
-        after: null,
-      },
-    },
-    {
-      id: 5,
-      timestamp: "2024-06-17 14:20:10",
-      user: "Robert Brown",
-      entityType: "User",
-      action: "Updated",
-      entityName: "alex.jones@company.com",
-      changeSummary: "User role elevated from User to Manager",
-      beforeAfter: {
-        before: { role: "User", permissions: ["read"] },
-        after: { role: "Manager", permissions: ["read", "write", "manage"] },
-      },
-    },
+  // const changesHistoryData = [
+  //   {
+  //     id: 1,
+  //     timestamp: "2024-06-17 14:40:30",
+  //     user: "John Doe",
+  //     entityType: "User",
+  //     action: "Created",
+  //     entityName: "jane.smith@company.com",
+  //     changeSummary: "New user account created with Manager role",
+  //     beforeAfter: {
+  //       before: null,
+  //       after: { name: "Jane Smith", role: "Manager", status: "Active" },
+  //     },
+  //   },
+  //   {
+  //     id: 2,
+  //     timestamp: "2024-06-17 14:35:25",
+  //     user: "Sarah Wilson",
+  //     entityType: "Project",
+  //     action: "Updated",
+  //     entityName: "Q2 Marketing Campaign",
+  //     changeSummary: "Project status and deadline updated",
+  //     beforeAfter: {
+  //       before: { status: "In Progress", deadline: "2024-06-30" },
+  //       after: { status: "Review", deadline: "2024-07-15" },
+  //     },
+  //   },
+  //   {
+  //     id: 3,
+  //     timestamp: "2024-06-17 14:30:20",
+  //     user: "Mike Johnson",
+  //     entityType: "Task",
+  //     action: "Updated",
+  //     entityName: "Website Redesign",
+  //     changeSummary: "Task priority and assignee changed",
+  //     beforeAfter: {
+  //       before: { priority: "Medium", assignee: "Tom Wilson" },
+  //       after: { priority: "High", assignee: "Lisa Johnson" },
+  //     },
+  //   },
+  //   {
+  //     id: 4,
+  //     timestamp: "2024-06-17 14:25:15",
+  //     user: "Emily Davis",
+  //     entityType: "Project",
+  //     action: "Deleted",
+  //     entityName: "Old Training Module",
+  //     changeSummary: "Deprecated project removed from system",
+  //     beforeAfter: {
+  //       before: { name: "Old Training Module", status: "Completed" },
+  //       after: null,
+  //     },
+  //   },
+  //   {
+  //     id: 5,
+  //     timestamp: "2024-06-17 14:20:10",
+  //     user: "Robert Brown",
+  //     entityType: "User",
+  //     action: "Updated",
+  //     entityName: "alex.jones@company.com",
+  //     changeSummary: "User role elevated from User to Manager",
+  //     beforeAfter: {
+  //       before: { role: "User", permissions: ["read"] },
+  //       after: { role: "Manager", permissions: ["read", "write", "manage"] },
+  //     },
+  //   },
 
 
-  ];
+  // ];
 
   const roles = ["Admin", "Manager", "User"];
   const statuses = ["Success", "Failed"];
   const actions = ["Login", "Logout"];
   const entityActions = ["Created", "Updated", "Deleted"];
+  const token =localStorage.getItem("authToken"); 
 
   // Filter and search logic
   const filterData = (data, type) => {
@@ -339,6 +345,40 @@ const AuditLog = () => {
 
   const { scrollContainerRef, fakeScrollbarRef } = useSyncScroll(true);
 
+
+
+  useEffect(()=>{
+fetchdata()
+  },[])
+
+  const fetchdata = async()=>{
+    try {
+      const response = await axios.get(`${BASE_URL}activityLogs/getActivityLogs`,{
+        headers:{
+          'Authorization':`Bearer ${token}`
+        }
+      })
+      console.log("Activity fetch",response.data);
+      
+      setAllActivitiesData(response.data.data || []);
+      setLoginLogoutData(response.data.data || []);
+      setChangesHistoryData(response.data.data || []);
+    } catch (error) {
+         console.error("Failed to fetch data", error);
+    }
+  }
+
+  const transformData = (apiData) => {
+  return apiData.map(item => ({
+    id: item.id,
+    timestamp: item.createdAt, // or whatever field from API
+    user: item.user?.name || 'Unknown',
+    role: item.user?.role || 'Unknown',
+    // ... map other fields accordingly
+  }));
+};
+
+// Then in fetchdata:
 
   return (
     <div className="container-fluid py-4 bg-light min-vh-100 bg-main">
@@ -561,6 +601,7 @@ const AuditLog = () => {
                         )}
                       </tr>
                     </thead>
+
                     <tbody>
                       {getCurrentData().map((item) => (
                         <tr key={item.id}  >
@@ -584,7 +625,7 @@ const AuditLog = () => {
                                 <code>{item.ipAddress}</code>
                               </td>
                               <td className="text-muted small">
-                                {item.device}
+                                {item.deviceBrowser}
                               </td>
                               <td>
                                 <button
@@ -601,7 +642,7 @@ const AuditLog = () => {
                             <>
                               <td>{item.id}</td>
                               <td className="text-muted small">
-                                {item.datetime}
+                                {item.timestamp}
                               </td>
                               <td>
                                 <strong>{item.user}</strong>
@@ -630,7 +671,7 @@ const AuditLog = () => {
                                 <code>{item.ipAddress}</code>
                               </td>
                               <td className="text-muted small">
-                                {item.device}
+                                {item.deviceBrowser}
                               </td>
                             </>
                           )}
@@ -645,7 +686,7 @@ const AuditLog = () => {
                               </td>
                               <td>
                                 <span className="badge bg-info">
-                                  {item.entityType}
+                                  {item.role}
                                 </span>
                               </td>
                               <td>
@@ -673,6 +714,7 @@ const AuditLog = () => {
                         </tr>
                       ))}
                     </tbody>
+                    
                   </table>
                 </div>
               </div>

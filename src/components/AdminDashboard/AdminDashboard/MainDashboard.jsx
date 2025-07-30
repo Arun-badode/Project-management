@@ -180,7 +180,7 @@ const MainDashboard = () => {
     },
     {
       key: "nearDue",
-      title: "Near Due",
+      title: "Near Due Projects",
       icon: "bi-hourglass-split",
       color: "warning text-dark",
       activeColor: "warning-active",
@@ -272,7 +272,7 @@ const MainDashboard = () => {
               color={card.color}
               activeColor={card.activeColor}
               activeTab={activeTab}
-              count={getCardCount(card.key)}
+              // count={getCardCount(card.key)}
               onClick={() => card.link ? (window.location.href = card.link) : handleCardFilter(card.key)}
             />
           </Col>
@@ -318,6 +318,7 @@ const MainDashboard = () => {
       {activeFilter === "eventsToday" && (
         <EventsTodayTable
           tasksToday={tasksToday}
+          title="Events Today"
           scrollContainerRef={scrollContainerRef5}
           fakeScrollbarRef={fakeScrollbarRef5}
         />
