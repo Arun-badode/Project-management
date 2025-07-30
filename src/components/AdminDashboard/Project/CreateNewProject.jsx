@@ -54,10 +54,10 @@ const generateCalendarDays = (selectedMonth, selectedYear) => {
 };
 
 const CreateNewProject = () => {
-  const [selectedDate, setSelectedDate] = useState(12);
-  const [selectedMonth, setSelectedMonth] = useState(6);
-  const [selectedYear, setSelectedYear] = useState(2025);
-  const [selectedHour, setSelectedHour] = useState(12);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedHour, setSelectedHour] = useState(0);
   const [selectedMinute, setSelectedMinute] = useState(0);
   const [isAM, setIsAM] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -186,15 +186,6 @@ const CreateNewProject = () => {
     "David Lee",
   ];
 
-  // const taskOptions = [
-  //   "Source Creation",
-  //   "Callout",
-  //   "Prep",
-  //   "Image Creation",
-  //   "DTP",
-  //   "Image Localization",
-  //   "OVA",
-  // ];
   const [taskOptions, setTaskOptions] = useState([]);
 
   useEffect(() => {
@@ -214,7 +205,6 @@ const CreateNewProject = () => {
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
   }, []);
-  // apllication
 
   const [applicationOptions, setApplicationOptions] = useState([]);
 
@@ -223,7 +213,6 @@ const CreateNewProject = () => {
       .get(`${BASE_URL}application/getAllApplication`, {
         headers: { authorization: `Bearer ${token}` },
       })
-
       .then((res) => {
         if (res.data.status) {
           const options = res.data.application.map((app) => ({
@@ -235,8 +224,6 @@ const CreateNewProject = () => {
       })
       .catch((err) => console.error(err));
   }, []);
-
-  // languages
 
   const [languageOptions, setLanguageOptions] = useState([]);
 
@@ -259,11 +246,14 @@ const CreateNewProject = () => {
   }, []);
 
   const formatDateTime = () => {
+    if (selectedDate === null) {
+      return "00/00/00 00:00 AM";
+    }
     const date = `${selectedDate.toString().padStart(2, "0")}/${(
       selectedMonth + 1
     )
       .toString()
-      .padStart(2, "0")}/${selectedYear}`;
+      .padStart(2, "0")}/${selectedYear.toString().slice(-2)}`;
     const time = `${selectedHour.toString().padStart(2, "0")}:${selectedMinute
       .toString()
       .padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
@@ -338,19 +328,21 @@ const CreateNewProject = () => {
               styles={gradientSelectStyles}
             />
           </div>
-         <div className="col-md-4">
-      <label htmlFor="country" className="form-label">
-        Country
-      </label>
-      <input
-        type="text"
-        className="form-control text-white"
-        id="country"
-        name="country"
-        value={formData.country}
-        onChange={handleInputChange}
-      />
-    </div>
+          <div className="col-md-4">
+            <label htmlFor="country" className="form-label">
+              Country
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              id="country"
+              name="country"
+              value={formData.country}
+              onChange={handleInputChange}
+              placeholder=""
+             
+            />
+          </div>
           <div className="col-md-4">
             <label htmlFor="projectManager" className="form-label">
               Project Manager
@@ -857,187 +849,197 @@ const CreateNewProject = () => {
         </div>
 
         {/* Save Button */}
-       <div className="d-flex justify-content-between">
-  <div className="d-flex align-items-center mt-3 gap-3">
-    <label className="text-white" style={{ fontWeight: "bold" }}>
-      Deadline
-    </label>
-    <div className="max-w-md mx-auto">
-      <div className="relative">
-        <input
-          type="text"
-          value={selectedDate ? formatDateTime() : ""}
-          readOnly
-          onClick={() => setIsOpen(!isOpen)}
-          className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
-          placeholder="Select date and time"
-        />
-      </div>
+        <div className="d-flex justify-content-between">
+          <div className="d-flex align-items-center mt-3 gap-3">
+            <label className="text-white" style={{ fontWeight: "bold" }}>
+              Deadline
+            </label>
+            <div className="max-w-md mx-auto">
+              <div className="relative">
+                <input  
+                  type="text"
+                  value={formatDateTime()}
+                  readOnly
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                  placeholder="00/00/00 00:00 AM"
+                />
+               
+              </div>
 
-      {isOpen && (
-        <div className="calendar-dropdown">
-          <div className="time-display">
-            <div className="time">
-              {selectedHour.toString().padStart(2, "0")}:
-              {selectedMinute.toString().padStart(2, "0")}
-            </div>
-            <div className="period">{isAM ? "AM" : "PM"}</div>
-            <div className="date">
-              {months[selectedMonth].substring(0, 3)}, {selectedYear}
-            </div>
-          </div>
+              {isOpen && (
+                <div className="calendar-dropdown">
+                  <div className="time-display">
+                    <div className="time">
+                      {selectedHour.toString().padStart(2, "0")}:
+                      {selectedMinute.toString().padStart(2, "0")}
+                    </div>
+                    <div className="period">{isAM ? "AM" : "PM"}</div>
+                    <div className="date">
+                      {selectedDate !== null
+                        ? `${months[selectedMonth].substring(
+                            0,
+                            3
+                          )}, ${selectedYear}`
+                        : "00/00/00"}
+                    </div>
+                  </div>
 
-          <div className="time-calendar-container">
-            <div className="time-selector">
-              <div className="time-column">
-                <div className="time-column-label">Hour</div>
-                <div className="time-scroll">
-                  <div className="time-options">
-                    {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(
-                      (hour) => (
-                        <button
-                          key={hour}
-                          onClick={() => setSelectedHour(hour)}
-                          className={`time-option ${
-                            selectedHour === hour ? "selected-hour" : ""
-                          }`}
-                        >
-                          {hour.toString().padStart(2, "0")}
+                  <div className="time-calendar-container">
+                    <div className="time-selector">
+                      <div className="time-column">
+                        <div className="time-column-label">Hour</div>
+                        <div className="time-scroll">
+                          <div className="time-options">
+                            {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(
+                              (hour) => (
+                                <button
+                                  key={hour}
+                                  onClick={() => setSelectedHour(hour)}
+                                  className={`time-option ${
+                                    selectedHour === hour ? "selected-hour" : ""
+                                  }`}
+                                >
+                                  {hour.toString().padStart(2, "0")}
+                                </button>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="time-column">
+                        <div className="time-column-label">Min</div>
+                        <div className="time-scroll">
+                          <div className="time-options">
+                            {[0, 15, 30, 45].map((minute) => (
+                              <button
+                                key={minute}
+                                onClick={() => setSelectedMinute(minute)}
+                                className={`time-option ${
+                                  selectedMinute === minute
+                                    ? "selected-minute"
+                                    : ""
+                                }`}
+                              >
+                                {minute.toString().padStart(2, "0")}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="time-column">
+                        <div className="time-column-label">Period</div>
+                        <div className="period-options">
+                          <button
+                            onClick={() => setIsAM(true)}
+                            className={`period-option ${
+                              isAM ? "selected" : ""
+                            }`}
+                          >
+                            AM
+                          </button>
+                          <button
+                            onClick={() => setIsAM(false)}
+                            className={`period-option ${
+                              !isAM ? "selected" : ""
+                            }`}
+                          >
+                            PM
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="calendar-section">
+                      <div className="month-nav">
+                        <button onClick={handlePrevMonth}>
+                          <ChevronLeft size={20} />
                         </button>
-                      )
-                    )}
+                        <h3>
+                          {months[selectedMonth]}, {selectedYear}
+                        </h3>
+                        <button onClick={handleNextMonth}>
+                          <ChevronRight size={20} />
+                        </button>
+                      </div>
+
+                      <div className="weekdays">
+                        {weekDays.map((day) => (
+                          <div key={day} className="weekday">
+                            {day}
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="calendar-grid">
+                        {calendarDays.map((dayObj, index) => (
+                          <button
+                            key={index}
+                            onClick={() =>
+                              dayObj.isCurrentMonth &&
+                              setSelectedDate(dayObj.day)
+                            }
+                            className={`calendar-day ${
+                              dayObj.isCurrentMonth
+                                ? selectedDate === dayObj.day
+                                  ? "current-month selected"
+                                  : "current-month"
+                                : "other-month"
+                            }`}
+                          >
+                            {dayObj.day}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="action-buttons">
+                        <button
+                          onClick={() => {
+                            setSelectedDate(null);
+                            setSelectedHour(0);
+                            setSelectedMinute(0);
+                            setIsAM(true);
+                          }}
+                          className="action-button"
+                        >
+                          Clear
+                        </button>
+                        <button
+                          onClick={() => {
+                            const today = new Date();
+                            setSelectedDate(today.getDate());
+                            setSelectedMonth(today.getMonth());
+                            setSelectedYear(today.getFullYear());
+                            setSelectedHour(today.getHours() % 12 || 12);
+                            setSelectedMinute(today.getMinutes());
+                            setIsAM(today.getHours() < 12);
+                          }}
+                          className="action-button"
+                        >
+                          Today
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="done-section">
+                    <button
+                      onClick={() => setIsOpen(false)}
+                      className="done-button"
+                    >
+                      Done
+                    </button>
                   </div>
                 </div>
-              </div>
-
-              <div className="time-column">
-                <div className="time-column-label">Min</div>
-                <div className="time-scroll">
-                  <div className="time-options">
-                    {[0, 15, 30, 45].map((minute) => (
-                      <button
-                        key={minute}
-                        onClick={() => setSelectedMinute(minute)}
-                        className={`time-option ${
-                          selectedMinute === minute
-                            ? "selected-minute"
-                            : ""
-                        }`}
-                      >
-                        {minute.toString().padStart(2, "0")}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="time-column">
-                <div className="time-column-label">Period</div>
-                <div className="period-options">
-                  <button
-                    onClick={() => setIsAM(true)}
-                    className={`period-option ${
-                      isAM ? "selected" : ""
-                    }`}
-                  >
-                    AM
-                  </button>
-                  <button
-                    onClick={() => setIsAM(false)}
-                    className={`period-option ${
-                      !isAM ? "selected" : ""
-                    }`}
-                  >
-                    PM
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="calendar-section">
-              <div className="month-nav">
-                <button onClick={handlePrevMonth}>
-                  <ChevronLeft size={20} />
-                </button>
-                <h3>
-                  {months[selectedMonth]}, {selectedYear}
-                </h3>
-                <button onClick={handleNextMonth}>
-                  <ChevronRight size={20} />
-                </button>
-              </div>
-
-              <div className="weekdays">
-                {weekDays.map((day) => (
-                  <div key={day} className="weekday">
-                    {day}
-                  </div>
-                ))}
-              </div>
-
-              <div className="calendar-grid">
-                {calendarDays.map((dayObj, index) => (
-                  <button
-                    key={index}
-                    onClick={() =>
-                      dayObj.isCurrentMonth &&
-                      setSelectedDate(dayObj.day)
-                    }
-                    className={`calendar-day ${
-                      dayObj.isCurrentMonth
-                        ? selectedDate === dayObj.day
-                          ? "current-month selected"
-                          : "current-month"
-                        : "other-month"
-                    }`}
-                  >
-                    {dayObj.day}
-                  </button>
-                ))}
-              </div>
-
-              <div className="action-buttons">
-                <button
-                  onClick={() => {
-                    setSelectedDate(null);
-                    setSelectedMonth(new Date().getMonth());
-                    setSelectedYear(new Date().getFullYear());
-                  }}
-                  className="action-button"
-                >
-                  Clear
-                </button>
-                <button
-                  onClick={() => {
-                    const today = new Date();
-                    setSelectedDate(today.getDate());
-                    setSelectedMonth(today.getMonth());
-                    setSelectedYear(today.getFullYear());
-                  }}
-                  className="action-button"
-                >
-                  Today
-                </button>
-              </div>
+              )}
             </div>
           </div>
-
-          <div className="done-section">
-            <button
-              onClick={() => setIsOpen(false)}
-              className="done-button"
-            >
-              Done
-            </button>
-          </div>
+          <button type="submit" className="btn btn-warning fw-bold">
+            Save changes
+          </button>
         </div>
-      )}
-    </div>
-  </div>
-  <button type="submit" className="btn btn-warning fw-bold">
-    Save changes
-  </button>
-</div>
       </form>
     </div>
   );
