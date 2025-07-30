@@ -12,7 +12,7 @@ const ShiftAllocation = () => {
   const [showAddShiftModal, setShowAddShiftModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showEmployeePanel, setShowEmployeePanel] = useState(false);
-  const [employee, setEmployees] = useState()
+  const [employee, setEmployees] = useState();
   const token = localStorage.getItem("authToken");
 
   const [formData, setFormData] = useState({
@@ -26,16 +26,33 @@ const ShiftAllocation = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const formatTime12Hour = (time) => {
-    return dayjs(`2020-01-01T${time}`).format("hh:mm A");
+    if (!time) return "";
+    const [hours, minutes] = time.split(":");
+    const suffix = hours >= 12 ? "PM" : "AM";
+    const hours12 = hours % 12 || 12;
+    return `${hours12}:${minutes} ${suffix}`;
   };
 
   const handleSubmit = async () => {
+    // Validate required fields
+    if (!formData.memberId) {
+      alert("Please select an employee");
+      return;
+    }
+    if (!formData.shiftDate) {
+      alert("Please select a date");
+      return;
+    }
+
     const payload = {
-      memberId: parseInt(formData.memberId),
+      memberId: parseInt(formData.memberId), // Ensure base 10 parsing
       shiftDate: formData.shiftDate,
       startTime: formatTime12Hour(formData.startTime),
       endTime: formatTime12Hour(formData.endTime),
@@ -43,23 +60,36 @@ const ShiftAllocation = () => {
       notes: formData.notes,
     };
 
-    try {
+    console.log("Submitting payload:", payload); // Debug log
 
+    try {
       const response = await axios.post(
         `${BASE_URL}shift/createShift`,
-        payload, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      }
       );
-      console.log("Shift created:", response.data);
-      setShowAddShiftModal(false);
+
+      if (response.data.status) {
+        console.log("Shift created:", response.data);
+        setShowAddShiftModal(false);
+      } else {
+        alert(response.data.message || "Error creating shift");
+      }
     } catch (error) {
-      console.error("Shift creation failed:", error);
-      alert("Error creating shift. Please try again.");
+      console.error(
+        "Shift creation failed:",
+        error.response?.data || error.message
+      );
+      alert(
+        error.response?.data?.message ||
+          "Error creating shift. Please try again."
+      );
     }
-  }
+  };
   // Get week dates based on current date
   const getWeekDates = () => {
     const dates = [];
@@ -363,58 +393,9 @@ const ShiftAllocation = () => {
 
   // ...existing code...
 
-
   // Get Api For Shift
 
   const [filteredEmployees, setFilteredEmployees] = useState([]);
-
-  // useEffect(() => {
-  //   axios
-  //     .get("https://hrb5wx2v-8800.inc1.devtunnels.ms/api/shift/getAllShifts",
-  //       {
-  //         headers: {
-  //           'Authorization': `Bearer ${token}`
-  //         }
-  //       }
-  //     )
-  //     .then((res) => {
-  //       if (res.data.status) {
-  //         console.log("asda", res)
-  //         const shiftData = res?.data?.data;
-
-  //         // // Transform flat shift list to grouped by employee with shifts by day index
-  //         // const employeesMap = {};
-
-  //         // shiftData.forEach((shift) => {
-  //         //   const shiftDayIndex = new Date(shift.shiftDate).getDay(); // 0 (Sun) to 6 (Sat)
-
-  //         //   if (!employeesMap[shift.memberId]) {
-  //         //     employeesMap[shift.memberId] = {
-  //         //       id: shift.memberId,
-  //         //       name: shift.fullName,
-  //         //       department: "Unknown", // You can update this if you have department data
-  //         //       shifts: [],
-  //         //     };
-  //         //   }
-
-  //         //   employeesMap[shift.memberId].shifts.push({
-  //         //     day: shiftDayIndex,
-  //         //     start: shift.startTime,
-  //         //     end: shift.endTime,
-  //         //     type: shift.shiftType,
-  //         //     notes: shift.notes,
-  //         //     date: shift.shiftDate,
-  //         //   });
-  //         // });
-
-  //         // setFilteredEmployees(Object.values(employeesMap));
-  //         setFilteredEmployees(shiftData);
-  //       }
-  //     })
-  //     .catch((err) => {
-  //       console.error("Failed to fetch shifts:", err);
-  //     });
-  // }, []);
 
   useEffect(() => {
     axios
@@ -425,7 +406,7 @@ const ShiftAllocation = () => {
       })
       .then((res) => {
         if (res.data.status) {
-          console.log("sss",res.data.data )
+          console.log("sss", res.data.data);
           const shiftData = res.data.data;
 
           // Group by unique (memberId + fullName) combo
@@ -463,14 +444,30 @@ const ShiftAllocation = () => {
       });
   }, []);
 
-
   useEffect(() => {
     if (filteredEmployees) {
       console.log(filteredEmployees);
     }
+  }, [filteredEmployees]);
 
-  }, [filteredEmployees])
+  useEffect(() => {
+    fetchMember();
+  }, []);
+  const [member, setmember] = useState();
 
+  const fetchMember = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(`${BASE_URL}member/getAllMembers`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(response);
+
+      setmember(response.data.data);
+    } catch (error) {}
+  };
 
   return (
     <div>
@@ -552,8 +549,9 @@ const ShiftAllocation = () => {
           <div className="">
             {/* Main Schedule */}
             <div
-              className={`card table-gradient-bg ${showEmployeePanel ? "me-3" : ""
-                }`}
+              className={`card table-gradient-bg ${
+                showEmployeePanel ? "me-3" : ""
+              }`}
             >
               <div className="table-responsive ">
                 <table className="table">
@@ -607,27 +605,48 @@ const ShiftAllocation = () => {
                                     {shift.start} - {shift.end}
                                   </div>
                                   <div className="small">
-                                    {shift.type.charAt(0).toUpperCase() + shift.type.slice(1)} Shift
+                                    {shift.type.charAt(0).toUpperCase() +
+                                      shift.type.slice(1)}{" "}
+                                    Shift
                                   </div>
                                   {shift.notes && (
-                                    <div className="text-white-500 small fst-italic">{shift.notes}</div>
+                                    <div className="text-white-500 small fst-italic">
+                                      {shift.notes}
+                                    </div>
                                   )}
                                 </div>
                               ))}
 
                             {/* Add Shift Button */}
-                            <button
-                              className="position-absolute bottom-0 end-0 text-primary btn btn-sm"
-                              onClick={() => handleAddShift(employee.memberId, dayIndex)}
+                            <div
+                              className="d-flex justify-content-between position-relative"
+                              style={{ height: "40px" }}
                             >
-                              <i className="fas fa-plus-circle"></i>
-                            </button>
+                              {/* Minus Button - Bottom Left */}
+                              <button
+                                className="position-absolute bottom-0 start-0 text-danger btn btn-sm"
+                                onClick={() =>
+                                  handleRemoveShift(employee.memberId, dayIndex)
+                                } // this should remove shift
+                              >
+                                <i className="fas fa-minus-circle"></i>
+                              </button>
+
+                              {/* Plus Button - Bottom Right */}
+                              <button
+                                className="position-absolute bottom-0 end-0 text-success btn btn-sm"
+                                onClick={() =>
+                                  handleAddShift(employee.memberId, dayIndex)
+                                } // this should add shift
+                              >
+                                <i className="fas fa-plus-circle"></i>
+                              </button>
+                            </div>
                           </td>
                         ))}
                       </tr>
                     ))}
                   </tbody>
-
                 </table>
               </div>
             </div>
@@ -792,11 +811,12 @@ const ShiftAllocation = () => {
                       className="form-select"
                       value={formData.memberId}
                       onChange={handleChange}
+                      required
                     >
                       <option value="">Select Employee</option>
-                      {employees.map((emp) => (
+                      {member.map((emp) => (
                         <option key={emp.id} value={emp.id}>
-                          {emp.name}
+                          {emp.fullName}
                         </option>
                       ))}
                     </select>
@@ -813,6 +833,7 @@ const ShiftAllocation = () => {
                       className="form-control"
                       value={formData.shiftDate}
                       onChange={handleChange}
+                      required
                     />
                   </div>
 
@@ -828,6 +849,7 @@ const ShiftAllocation = () => {
                         className="form-control"
                         value={formData.startTime}
                         onChange={handleChange}
+                        required
                       />
                     </div>
 
@@ -842,6 +864,7 @@ const ShiftAllocation = () => {
                         className="form-control"
                         value={formData.endTime}
                         onChange={handleChange}
+                        required
                       />
                     </div>
                   </div>
@@ -887,7 +910,11 @@ const ShiftAllocation = () => {
                   >
                     Cancel
                   </button>
-                  <button type="button" className="btn btn-primary" onClick={handleSubmit}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSubmit}
+                  >
                     Add Shift
                   </button>
                 </div>
