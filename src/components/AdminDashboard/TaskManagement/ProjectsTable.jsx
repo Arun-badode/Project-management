@@ -6,6 +6,8 @@ const ProjectsTable = ({  onViewProject, onMarkComplete, onDeleteProject, expand
   const scrollContainerRef = useRef(null);
   const fakeScrollbarRef = useRef(null);
   const token = localStorage.getItem("authToken");
+   const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // Status badge color mapping
   const getStatusColor = (status) => {
@@ -57,8 +59,7 @@ const ProjectsTable = ({  onViewProject, onMarkComplete, onDeleteProject, expand
     }
   }, []);
 
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
+ 
 
   useEffect(() => {
     axios
@@ -161,7 +162,7 @@ const ProjectsTable = ({  onViewProject, onMarkComplete, onDeleteProject, expand
                     <div
                       className="progress cursor-pointer"
                       style={{ height: "24px" }}
-                      onClick={() => onViewProject(project)}
+                     
                     >
                       <div
                         className={`progress-bar 
@@ -173,8 +174,8 @@ const ProjectsTable = ({  onViewProject, onMarkComplete, onDeleteProject, expand
                               : "bg-success"
                           }`}
                         role="progressbar"
-                        style={{ width: `${project.progress}%` }}
-                        aria-valuenow={project.progress}
+                        style={{ width: `${project?.progress}%` }}
+                        aria-valuenow={project?.progress}
                         aria-valuemin={0}
                         aria-valuemax={100}
                       >

@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as echarts from "echarts";
 import useSyncScroll from "../Hooks/useSyncScroll";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import Select from "react-select";
 
 import "./Project.css";
 import Setting from "./Setting";
 import CreateNewProject from "./CreateNewProject";
+import CompletedProjects from "./CompletedProjects";
+import Created from "./created";
+import ActiveProjects from "./ActiveProjects";
 
 const Project = () => {
   const [activeTab, setActiveTab] = useState("created");
@@ -15,7 +16,6 @@ const Project = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(true);
-  const [selectedDateTime, setSelectedDateTime] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [selectedClient, setSelectedClient] = useState("");
   const [selectedTask, setSelectedTask] = useState("");
@@ -25,124 +25,7 @@ const Project = () => {
   const taskList = ["Design", "Translation", "Proofreading"];
   const applicationList = ["Adobe", "MS Word", "Figma"];
   const searchInputRef = useRef(null);
-  const chartRef = useRef(null);
 
-  const currencyRates = [
-    { name: "USD", rate: 83 },
-    { name: "EUR", rate: 90 },
-    { name: "GBP", rate: 90 },
-  ];
-
-  const [clients, setClients] = useState([
-    {
-      alias: "Client Alpha (Alias)",
-      actualName: "Actual Client Alpha Inc.",
-      country: "USA",
-      managers: "Jane Doe, John Smith",
-    },
-    {
-      alias: "Company Beta (Alias)",
-      actualName: "Actual Company Beta Ltd.",
-      country: "UK",
-      managers: "Peter Jones",
-    },
-    {
-      alias: "Service Gamma (Alias)",
-      actualName: "Actual Service Gamma LLC",
-      country: "Canada",
-      managers: "Alice Brown, Bob White",
-    },
-  ]);
-
-  const [tasks, setTasks] = useState([
-    "Backend Dev",
-    "API Integration",
-    "Frontend Dev",
-    "QA Testing",
-  ]);
-
-  const [languages, setLanguages] = useState([
-    "English",
-    "Spanish",
-    "French",
-    "German",
-  ]);
-
-  const [applications, setapplications] = useState([
-    "Web",
-    "Mobile Responsive",
-    "iOS",
-    "Android",
-  ]);
-
-  const [currencies, setCurrencies] = useState([
-    { name: "USD", rate: "83" },
-    { name: "EUR", rate: "90" },
-    { name: "GBP", rate: "90" },
-  ]);
-
-  const [newClient, setNewClient] = useState({
-    alias: "",
-    actualName: "",
-    country: "",
-    managers: "",
-  });
-
-  const [newTask, setNewTask] = useState("");
-  const [newLanguage, setNewLanguage] = useState("");
-  const [newapplication, setNewapplication] = useState("");
-  const [newCurrency, setNewCurrency] = useState({ name: "", rate: "" });
-
-  const handleAddClient = () => {
-    if (newClient.alias && newClient.actualName && newClient.country) {
-      setClients([...clients, newClient]);
-      setNewClient({ alias: "", actualName: "", country: "", managers: "" });
-    }
-  };
-
-  const handleAddTask = () => {
-    if (newTask) {
-      setTasks([...tasks, newTask]);
-      setNewTask("");
-    }
-  };
-
-  const handleAddLanguage = () => {
-    if (newLanguage) {
-      setLanguages([...languages, newLanguage]);
-      setNewLanguage("");
-    }
-  };
-
-  const handleAddapplication = () => {
-    if (newapplication) {
-      setapplications([...applications, newapplication]);
-      setNewapplication("");
-    }
-  };
-
-  const handleAddCurrency = () => {
-    if (newCurrency.name && newCurrency.rate) {
-      setCurrencies([...currencies, newCurrency]);
-      setNewCurrency({ name: "", rate: "" });
-    }
-  };
-
-  const handleDeleteItem = (list, setList, index) => {
-    const newList = [...list];
-    newList.splice(index, 1);
-    setList(newList);
-  };
-
-  const handleApplyToSelectedFiles = () => {
-    const selected = formData.files.filter((f) => f.selected);
-    if (selected.length === 0) {
-      alert("No files selected.");
-      return;
-    }
-    // Apply deadline logic here
-    alert(`Deadline ${formData.deadline} applied to selected files.`);
-  };
   // Sample data for projects
   const [projects, setProjects] = useState([
     {
@@ -263,19 +146,6 @@ const Project = () => {
   });
 
   // Options for dropdowns
- 
-  const countryOptions = [
-    "United States",
-    "Canada",
-    "UK",
-    "Australia",
-    "Germany",
-    "India",
-  ];
-  
-
- 
-  const currencyOptions = ["USD", "EUR", "GBP", "CAD", "AUD", "INR"];
 
   // Filter projects based on active tab and search query
   const filteredProjects = projects.filter((project) => {
@@ -310,53 +180,6 @@ const Project = () => {
   }, []);
 
   // Initialize chart for completed projects
-  useEffect(() => {
-    if (activeTab === "completed" && chartRef.current) {
-      const chart = echarts.init(chartRef.current);
-      const option = {
-        animation: false,
-        title: {
-          text: "Project Performance",
-          left: "center",
-        },
-        tooltip: {
-          trigger: "axis",
-        },
-        legend: {
-          data: ["Expected Hours", "Actual Hours"],
-          bottom: 10,
-        },
-        xAxis: {
-          type: "category",
-          data: filteredProjects.map((p) => p.title),
-        },
-        yAxis: {
-          type: "value",
-          name: "Hours",
-        },
-        series: [
-          {
-            name: "Expected Hours",
-            type: "bar",
-            data: filteredProjects.map(
-              (p) => p.performance?.expectedHours || 0
-            ),
-            color: "#4F46E5",
-          },
-          {
-            name: "Actual Hours",
-            type: "bar",
-            data: filteredProjects.map((p) => p.performance?.actualHours || 0),
-            color: "#10B981",
-          },
-        ],
-      };
-      chart.setOption(option);
-      return () => {
-        chart.dispose();
-      };
-    }
-  }, [activeTab, filteredProjects]);
 
   // Calculate total pages
   const calculateTotalPages = () => {
@@ -396,137 +219,6 @@ const Project = () => {
     }));
   }, [formData.rate, formData.totalPages, formData.currency]);
 
-  // Handle form input changes
- 
-
-  // Handle multi-select changes
-  const handleMultiSelectChange = (name, value) => {
-    setFormData((prev) => {
-      const currentValues = [...prev[name]];
-      const newValues = currentValues.includes(value)
-        ? currentValues.filter((v) => v !== value)
-        : [...currentValues, value];
-      return {
-        ...prev,
-        [name]: newValues,
-      };
-    });
-  };
-
-  // Handle file input changes
-  const handleFileChange = (index, field, value) => {
-    setFormData((prev) => {
-      const newFiles = [...prev.files];
-      newFiles[index] = {
-        ...newFiles[index],
-        [field]: field === "pageCount" ? Number(value) : value,
-      };
-      return {
-        ...prev,
-        files: newFiles,
-      };
-    });
-  };
-
-  // Add new file row
-  const addFileRow = () => {
-    setFormData((prev) => ({
-      ...prev,
-      files: [...prev.files, { name: "", pageCount: 0 }],
-    }));
-  };
-
-  // Remove file row
-  const removeFileRow = (index) => {
-    if (formData.files.length > 1) {
-      setFormData((prev) => ({
-        ...prev,
-        files: prev.files.filter((_, i) => i !== index),
-      }));
-    }
-  };
-
-  // Submit form
- 
- 
-  // Handle edit project
-  const handleEditProject = (projectId) => {
-    const projectToEdit = projects.find((p) => p.id === projectId);
-    if (projectToEdit) {
-      setFormData({
-        title: projectToEdit.title,
-        client: projectToEdit.client,
-        country: projectToEdit.country,
-        projectManager: projectToEdit.projectManager || "",
-        tasks: projectToEdit.tasks,
-        languages: projectToEdit.languages,
-        application: Array.isArray(projectToEdit.application)
-          ? projectToEdit.application
-          : [projectToEdit.application],
-        files: projectToEdit.files,
-        totalPages: projectToEdit.totalPages,
-        receivedDate: projectToEdit.receivedDate,
-        serverPath: projectToEdit.serverPath,
-        notes: projectToEdit.notes || "",
-        rate: projectToEdit.rate || 0,
-        currency: projectToEdit.currency || "USD",
-        cost: projectToEdit.cost || 0,
-        inrCost: projectToEdit.inrCost || 0,
-      });
-      setShowEditModal(projectId);
-    }
-  };
-
-  // Mark project as YTS (Yet to Start)
-  const markAsYTS = (projectId, dueDate) => {
-    setProjects(
-      projects.map((project) =>
-        project.id === projectId
-          ? { ...project, status: "active", dueDate, progress: 0 }
-          : project
-      )
-    );
-  };
-
-  // Mark project as completed
-  const markAsCompleted = (projectId) => {
-    setProjects(
-      projects.map((project) =>
-        project.id === projectId
-          ? {
-              ...project,
-              status: "completed",
-              completedDate: new Date().toISOString().split("T")[0],
-              performance: {
-                expectedHours: Math.round(project.totalPages * 1.5),
-                actualHours: Math.round(project.totalPages * 1.3),
-                stages: [
-                  {
-                    name: "Design",
-                    start: project.receivedDate,
-                    end: new Date().toISOString().split("T")[0],
-                    handler: "Sarah Wilson",
-                  },
-                  {
-                    name: "Development",
-                    start: project.receivedDate,
-                    end: new Date().toISOString().split("T")[0],
-                    handler: "David Lee",
-                  },
-                  {
-                    name: "Testing",
-                    start: project.receivedDate,
-                    end: new Date().toISOString().split("T")[0],
-                    handler: "Rachel Chen",
-                  },
-                ],
-              },
-            }
-          : project
-      )
-    );
-  };
-
   const {
     scrollContainerRef: scrollContainerRef1,
     fakeScrollbarRef: fakeScrollbarRef1,
@@ -542,66 +234,7 @@ const Project = () => {
     fakeScrollbarRef: fakeScrollbarRef4,
   } = useSyncScroll(activeTab === "completed");
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentDate, setCurrentDate] = useState(new Date());
- 
   const [selectedMonth, setSelectedMonth] = useState(6); // July (0-indexed)
- 
- 
-
-  
-
-  const getFirstDayOfMonth = (month, year) => {
-    const firstDay = new Date(year, month, 1).getDay();
-    return firstDay === 0 ? 6 : firstDay - 1; // Convert Sunday (0) to be last (6)
-  };
-
-  // const generateCalendarDays = () => {
-  //   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
-  //   const firstDay = getFirstDayOfMonth(selectedMonth, selectedYear);
-  //   const days = [];
-
-  //   // Previous month's trailing days
-  //   const prevMonth = selectedMonth === 0 ? 11 : selectedMonth - 1;
-  //   const prevYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear;
-  //   const daysInPrevMonth = getDaysInMonth(prevMonth, prevYear);
-
-  //   for (let i = firstDay - 1; i >= 0; i--) {
-  //     days.push({
-  //       day: daysInPrevMonth - i,
-  //       isCurrentMonth: false,
-  //       isNextMonth: false,
-  //     });
-  //   }
-
-  //   // Current month days
-  //   for (let day = 1; day <= daysInMonth; day++) {
-  //     days.push({
-  //       day,
-  //       isCurrentMonth: true,
-  //       isNextMonth: false,
-  //     });
-  //   }
-
-  //   // Next month's leading days
-  //   const remainingDays = 42 - days.length;
-  //   for (let day = 1; day <= remainingDays; day++) {
-  //     days.push({
-  //       day,
-  //       isCurrentMonth: false,
-  //       isNextMonth: true,
-  //     });
-  //   }
-
-  //   return days;
-  // };
-
- 
-
- 
-
-  
-
 
   return (
     <div className="conatiner-fluid bg-main mt-4">
@@ -661,9 +294,13 @@ const Project = () => {
                   }`}
                   onClick={() => setActiveTab("created")}
                 >
-                  Created Projects
+                  All Projects
                   <span className="badge bg-light text-dark ms-2">
-                    {projects.filter((p) => p.status === "created").length}
+                    {
+                      projects.filter(
+                        (p) => p.status?.toLowerCase() === "created"
+                      ).length
+                    }
                   </span>
                 </button>
               </li>
@@ -676,7 +313,11 @@ const Project = () => {
                 >
                   Active Projects
                   <span className="badge bg-light text-dark ms-2">
-                    {projects.filter((p) => p.status === "active").length}
+                    {
+                      projects.filter(
+                        (p) => p.status?.toLowerCase() === "active"
+                      ).length
+                    }
                   </span>
                 </button>
               </li>
@@ -689,7 +330,11 @@ const Project = () => {
                 >
                   Completed Projects
                   <span className="badge bg-light text-dark ms-2">
-                    {projects.filter((p) => p.status === "completed").length}
+                    {
+                      projects.filter(
+                        (p) => p.status?.toLowerCase() === "completed"
+                      ).length
+                    }
                   </span>
                 </button>
               </li>
@@ -771,126 +416,7 @@ const Project = () => {
                     msOverflowStyle: "none", // IE/Edge
                   }}
                 >
-                  <table
-                    className="table table-hover mb-0"
-                    style={{ minWidth: 900 }}
-                  >
-                    <thead
-                      className="table-gradient-bg table"
-                      style={{
-                        position: "sticky",
-                        top: 0,
-                        zIndex: 0,
-                        backgroundColor: "#fff", // Match your background color
-                      }}
-                    >
-                      <tr className="text-center">
-                        <th>Project Title</th>
-                        <th>Client</th>
-                        <th>Country</th>
-                        <th>Project Manager</th>
-                        <th>Tasks</th>
-                        <th>Languages</th>
-                        <th>Application</th>
-                        <th>Total Pages</th>
-                        <th>Server Path</th>
-                        <th>Received Date</th>
-                        <th>Rate</th>
-                        <th>Cost</th>
-                        <th className="text-end">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredProjects.map((project) => (
-                        <tr key={project.id} >
-                          <td>
-                            {project.title}
-                            <span className="badge bg-light text-dark ms-2">
-                              Draft
-                            </span>
-                          </td>
-                          <td>{project.client}</td>
-                          <td>{project.country}</td>
-                          <td>{project.projectManager}</td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.tasks.map((task) => (
-                                <span
-                                  key={task}
-                                  className="badge bg-primary bg-opacity-10 text-primary"
-                                >
-                                  {task}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.languages.map((language) => (
-                                <span
-                                  key={language}
-                                  className="badge bg-success bg-opacity-10 text-success"
-                                >
-                                  {language}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <span className="badge bg-purple bg-opacity-10 text-purple">
-                              {project.application}
-                            </span>
-                          </td>
-                          <td>{project.totalPages}</td>
-                          <td>
-                            <span className="badge bg-light text-dark">
-                              {project.serverPath}
-                            </span>
-                          </td>
-                          <td>
-                            {new Date(
-                              project.receivedDate
-                            ).toLocaleDateString()}
-                          </td>
-                          <td>
-                            {project.rate} {project.currency}
-                          </td>
-                          <td>
-                            {project.cost} {project.currency}
-                          </td>
-                          <td className="text-end">
-                            <div className="d-flex justify-content-end gap-2">
-                              <button
-                                onClick={() => {
-                                  const dueDate = prompt(
-                                    "Enter due date (YYYY-MM-DD):",
-                                    new Date(
-                                      Date.now() + 7 * 24 * 60 * 60 * 1000
-                                    )
-                                      .toISOString()
-                                      .split("T")[0]
-                                  );
-                                  if (dueDate) markAsYTS(project.id, dueDate);
-                                }}
-                                className="btn btn-sm btn-primary"
-                              >
-                                Mark as YTS
-                              </button>
-                              <button
-                                onClick={() => handleEditProject(project.id)}
-                                className="btn btn-sm btn-success"
-                              >
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button className="btn btn-sm btn-danger">
-                                <i className="fas fa-trash-alt"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <Created />
                 </div>
               </div>
             )}
@@ -937,117 +463,7 @@ const Project = () => {
                     msOverflowStyle: "none", // IE/Edge
                   }}
                 >
-                  <table
-                    className="table table-hover mb-0"
-                    style={{ minWidth: 900 }}
-                  >
-                    <thead
-                      className="table-gradient-bg table"
-                      style={{
-                        position: "sticky",
-                        top: 0,
-                        zIndex: 0,
-                        backgroundColor: "#fff", // Match your background color
-                      }}
-                    >
-                      <tr className="text-center">
-                        <th>Project Title</th>
-                        <th>Client</th>
-                        <th>Country</th>
-                        <th>Project Manager</th>
-                        <th>Due Date</th>
-                        <th>Progress</th>
-                        <th>Tasks</th>
-                        <th>Languages</th>
-                        <th>Application</th>
-                        <th>Total Pages</th>
-                        <th className="text-end">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredProjects.map((project) => (
-                        <tr key={project.id} >
-                          <td>
-                            {project.title}
-                            <span className="badge bg-warning bg-opacity-10 text-warning ms-2">
-                              Active
-                            </span>
-                          </td>
-                          <td>{project.client}</td>
-                          <td>{project.country}</td>
-                          <td>{project.projectManager}</td>
-                          <td>
-                            {new Date(project.dueDate).toLocaleDateString()}
-                          </td>
-                          <td>
-                            <div className="d-flex align-items-center">
-                              <div
-                                className="progress flex-grow-1 me-2"
-                                style={{ height: "6px" }}
-                              >
-                                <div
-                                  className="progress-bar bg-primary"
-                                  style={{ width: `${project.progress}%` }}
-                                ></div>
-                              </div>
-                              <small className="text-primary">
-                                {project.progress}%
-                              </small>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.tasks.map((task) => (
-                                <span
-                                  key={task}
-                                  className="badge bg-primary bg-opacity-10 text-primary"
-                                >
-                                  {task}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.languages.map((language) => (
-                                <span
-                                  key={language}
-                                  className="badge bg-success bg-opacity-10 text-success"
-                                >
-                                  {language}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <span className="badge bg-purple bg-opacity-10 text-purple">
-                              {project.application}
-                            </span>
-                          </td>
-                          <td>{project.totalPages}</td>
-                          <td className="text-end">
-                            <div className="d-flex justify-content-end gap-2">
-                              <button
-                                onClick={() => markAsCompleted(project.id)}
-                                className="btn btn-sm btn-success"
-                              >
-                                Mark as Completed
-                              </button>
-                              <button
-                                onClick={() => handleEditProject(project.id)}
-                                className="btn btn-sm btn-success"
-                              >
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button className="btn btn-sm btn-danger">
-                                <i className="fas fa-trash-alt"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <ActiveProjects />
                 </div>
               </div>
             )}
@@ -1173,121 +589,7 @@ const Project = () => {
                       msOverflowStyle: "none",
                     }}
                   >
-                    <table
-                      className="table table-hover mb-0"
-                      style={{ minWidth: 900 }}
-                    >
-                      <thead
-                        className="table-gradient-bg table"
-                        style={{
-                          position: "sticky",
-                          top: 0,
-                          zIndex: 0,
-                          backgroundColor: "#fff", // Match your background color
-                        }}
-                      >
-                        <tr className="text-center">
-                          <th>Project Title</th>
-                          <th>Client</th>
-                          <th>Country</th>
-                          <th>Project Manager</th>
-                          <th>Completed Date</th>
-                          <th>Tasks</th>
-                          <th>Languages</th>
-                          <th>Application</th>
-                          <th>Total Pages</th>
-                          <th>Expected Hours</th>
-                          <th>Actual Hours</th>
-                          <th>Efficiency</th>
-                          <th>Cost</th>
-                          <th className="text-end">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredProjects.map((project) => (
-                          <tr key={project.id} >
-                            <td>
-                              {project.title}
-                              <span className="badge bg-success bg-opacity-10 text-success ms-2">
-                                Completed
-                              </span>
-                            </td>
-                            <td>{project.client}</td>
-                            <td>{project.country}</td>
-                            <td>{project.projectManager}</td>
-                            <td>
-                              {new Date(
-                                project.completedDate
-                              ).toLocaleDateString()}
-                            </td>
-                            <td>
-                              <div className="d-flex flex-wrap gap-1">
-                                {project.tasks.map((task) => (
-                                  <span
-                                    key={task}
-                                    className="badge bg-primary bg-opacity-10 text-primary"
-                                  >
-                                    {task}
-                                  </span>
-                                ))}
-                              </div>
-                            </td>
-                            <td>
-                              <div className="d-flex flex-wrap gap-1">
-                                {project.languages.map((language) => (
-                                  <span
-                                    key={language}
-                                    className="badge bg-success bg-opacity-10 text-success"
-                                  >
-                                    {language}
-                                  </span>
-                                ))}
-                              </div>
-                            </td>
-                            <td>
-                              <span className="badge bg-purple bg-opacity-10 text-purple">
-                                {project.application}
-                              </span>
-                            </td>
-                            <td>{project.totalPages}</td>
-                            <td>{project.performance.expectedHours}</td>
-                            <td>{project.performance.actualHours}</td>
-                            <td className="fw-bold">
-                              <span
-                                className={`${
-                                  project.performance.expectedHours >
-                                  project.performance.actualHours
-                                    ? "text-success"
-                                    : "text-danger"
-                                }`}
-                              >
-                                {Math.round(
-                                  (project.performance.expectedHours /
-                                    project.performance.actualHours) *
-                                    100
-                                )}
-                                %
-                              </span>
-                            </td>
-                            <td>
-                              {project.cost} {project.currency}
-                            </td>
-                            <td className="text-end">
-                              <div className="d-flex justify-content-end gap-2">
-                                <button className="btn btn-sm btn-danger">
-                                  <i className="fas fa-file-alt me-1"></i> View
-                                  Report
-                                </button>
-                                <button className="btn btn-sm btn-primary">
-                                  <i className="fas fa-archive me-1"></i>{" "}
-                                  Archive
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                    <CompletedProjects />
                   </div>
                 </div>
               </>
@@ -1318,12 +620,15 @@ const Project = () => {
                   <button
                     type="button"
                     className="btn-close"
-                    onClick={() => setShowCreateModal(false)}
+                    onClick={() => {
+                      setShowCreateModal(false);
+                      setShowEditModal(false);
+                    }}
                   ></button>
                 </div>
               </div>
               <div className="modal-body">
-              <CreateNewProject/>
+                <CreateNewProject />
               </div>
             </div>
           </div>
@@ -1347,7 +652,7 @@ const Project = () => {
                 ></button>
               </div>
               <div className="modal-body">
-               <Setting/>
+                <Setting />
               </div>
               <div className="modal-footer  border-secondary">
                 <button

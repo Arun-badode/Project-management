@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import Select from "react-select";
-import axios from 'axios'; // Import axios for API calls
+import axios from "axios";
+import BASE_URL from "../../../config";
+
 // Helper functions moved outside the component
 const getDaysInMonth = (month, year) => {
   return new Date(year, month + 1, 0).getDate();
@@ -52,16 +54,18 @@ const generateCalendarDays = (selectedMonth, selectedYear) => {
 };
 
 const CreateNewProject = () => {
-  const [selectedDate, setSelectedDate] = useState(12);
-  const [selectedMonth, setSelectedMonth] = useState(6); 
-  const [selectedYear, setSelectedYear] = useState(2025);
-  const [selectedHour, setSelectedHour] = useState(12);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedHour, setSelectedHour] = useState(0);
   const [selectedMinute, setSelectedMinute] = useState(0);
   const [isAM, setIsAM] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const token = localStorage.getItem("authToken");
+  const [loading, setLoading] = useState(true);
+
   const calendarDays = generateCalendarDays(selectedMonth, selectedYear);
-  
+
   const [formData, setFormData] = useState({
     title: "",
     client: "",
@@ -160,14 +164,34 @@ const CreateNewProject = () => {
 
   const weekDays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
   const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
 
   // Options for dropdowns
   const clientOptions = [
-    "PN", "MMP Auburn", "MMP Eastlake", "MMP Kirkland", "GN", "DM",
-    "RN", "NI", "LB", "SSS", "Cpea", "CV"
+    "PN",
+    "MMP Auburn",
+    "MMP Eastlake",
+    "MMP Kirkland",
+    "GN",
+    "DM",
+    "RN",
+    "NI",
+    "LB",
+    "SSS",
+    "Cpea",
+    "CV",
   ];
 
   const gradientSelectStyles = {
@@ -201,7 +225,9 @@ const CreateNewProject = () => {
     }),
     option: (provided, state) => ({
       ...provided,
-      backgroundColor: state.isFocused ? "#293d80" : "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
+      backgroundColor: state.isFocused
+        ? "#293d80"
+        : "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
       color: "white",
     }),
     menu: (provided) => ({
@@ -212,27 +238,81 @@ const CreateNewProject = () => {
   };
 
   const projectManagerOptions = [
-    "John Smith", "Emily Johnson", "Michael Brown", "Sarah Wilson", "David Lee"
+    "John Smith",
+    "Emily Johnson",
+    "Michael Brown",
+    "Sarah Wilson",
+    "David Lee",
   ];
 
-  const taskOptions = [
-    "Source Creation", "Callout", "Prep", "Image Creation", "DTP",
-    "Image Localization", "OVA"
-  ];
+  const [taskOptions, setTaskOptions] = useState([]);
 
-  const applicationOptions = [
-    "Word", "PPT", "Excel", "INDD", "AI", "PSD", "AE", "CDR", "Visio", "Project", "FM"
-  ];
+  useEffect(() => {
+    axios
+      .get(`${BASE_URL}tasks/getAllTasks`, {
+        headers: { authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        if (res.data.status) {
+          const options = res.data.tasks.map((task) => ({
+            value: task.id,
+            label: task.taskName,
+          }));
+          setTaskOptions(options);
+        }
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
+  }, []);
 
-  const languageOptions = [
-    "af", "am", "ar", "az", "be", "bg", "bn", "bs", "ca", "cs", "cy", "da", "de",
-    "el", "en", "en-US", "en-GB", "es", "es-ES", "es-MX", "et", "eu", "fa", "fi", "fil", "fr"
-  ];
+  const [applicationOptions, setApplicationOptions] = useState([]);
+
+  useEffect(() => {
+    axios
+      .get(`${BASE_URL}application/getAllApplication`, {
+        headers: { authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        if (res.data.status) {
+          const options = res.data.application.map((app) => ({
+            value: app.id,
+            label: app.applicationName,
+          }));
+          setApplicationOptions(options);
+        }
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
+  const [languageOptions, setLanguageOptions] = useState([]);
+
+  useEffect(() => {
+    axios
+      .get(`${BASE_URL}language/getAlllanguage`, {
+        headers: { authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        if (res.data.status) {
+          const options = res.data.languages.map((lang) => ({
+            value: lang.id,
+            label: lang.languageName,
+          }));
+          setLanguageOptions(options);
+        }
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
+  }, []);
 
   const formatDateTime = () => {
-    const date = `${selectedDate.toString().padStart(2, "0")}/${(selectedMonth + 1)
+    if (selectedDate === null) {
+      return "00/00/00 00:00 AM";
+    }
+    const date = `${selectedDate.toString().padStart(2, "0")}/${(
+      selectedMonth + 1
+    )
       .toString()
-      .padStart(2, "0")}/${selectedYear}`;
+      .padStart(2, "0")}/${selectedYear.toString().slice(-2)}`;
     const time = `${selectedHour.toString().padStart(2, "0")}:${selectedMinute
       .toString()
       .padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
@@ -267,7 +347,8 @@ const CreateNewProject = () => {
             placeholder="Enter project title (max 80 chars)"
           />
           <div className="form-text text-white">
-            Max allowed Character length – 80, (ignore or remove any special character by itself)
+            Max allowed Character length – 80, (ignore or remove any special
+            character by itself)
           </div>
         </div>
 
@@ -356,29 +437,30 @@ const CreateNewProject = () => {
             <Select
               id="task"
               name="task"
-              options={taskOptions.map((t) => ({
-                value: t,
-                label: t,
-              }))}
+              options={taskOptions}
               value={
-                formData.tasks.length
-                  ? formData.tasks.map((t) => ({
-                      value: t,
-                      label: t,
-                    }))
+                taskOptions?.length && formData?.tasks?.length
+                  ? taskOptions.filter((opt) =>
+                      formData.tasks.includes(opt.value)
+                    )
                   : []
               }
-              onChange={(opts) =>
+              onChange={(selectedOptions) =>
                 setFormData((prev) => ({
                   ...prev,
-                  tasks: opts ? opts.map((o) => o.value) : [],
+                  tasks: selectedOptions
+                    ? selectedOptions.map((opt) => opt.value)
+                    : [],
                 }))
               }
               isMulti
               isSearchable
-              placeholder="Select Task(s)"
+              placeholder={loading ? "Loading..." : "Select Task(s)"}
               styles={gradientSelectStyles}
             />
+            <div className="form-text text-white">
+              {formData?.tasks?.length || 0} selected
+            </div>
           </div>
           <div className="col-md-6">
             <label htmlFor="application" className="form-label">
@@ -387,27 +469,21 @@ const CreateNewProject = () => {
             <Select
               id="application"
               name="application"
-              options={applicationOptions.map((a) => ({
-                value: a,
-                label: a,
-              }))}
-              value={
-                formData.application.length
-                  ? formData.application.map((a) => ({
-                      value: a,
-                      label: a,
-                    }))
-                  : []
-              }
-              onChange={(opts) =>
+              options={applicationOptions}
+              value={applicationOptions?.filter((opt) =>
+                formData?.application?.includes(opt.value)
+              )}
+              onChange={(selectedOptions) =>
                 setFormData((prev) => ({
                   ...prev,
-                  application: opts ? opts.map((o) => o.value) : [],
+                  application: selectedOptions
+                    ? selectedOptions.map((opt) => opt.value)
+                    : [],
                 }))
               }
               isMulti
               isSearchable
-              placeholder="Select Application(s)"
+              placeholder={loading ? "Loading..." : "Select Application(s)"}
               styles={gradientSelectStyles}
             />
           </div>
@@ -419,31 +495,25 @@ const CreateNewProject = () => {
             Languages <span className="text-danger">*</span>
           </label>
           <Select
-            options={languageOptions.map((l) => ({
-              value: l,
-              label: l,
-            }))}
-            value={
-              formData.languages.length
-                ? formData.languages.map((l) => ({
-                    value: l,
-                    label: l,
-                  }))
-                : []
-            }
-            onChange={(opts) =>
+            options={languageOptions}
+            value={languageOptions?.filter((opt) =>
+              formData?.languages?.includes(opt.value)
+            )}
+            onChange={(selectedOptions) =>
               setFormData((prev) => ({
                 ...prev,
-                languages: opts ? opts.map((o) => o.value) : [],
+                languages: selectedOptions
+                  ? selectedOptions.map((opt) => opt.value)
+                  : [],
               }))
             }
             isMulti
             isSearchable
-            placeholder="Select Languages"
+            placeholder={loading ? "Loading..." : "Select Languages"}
             styles={gradientSelectStyles}
           />
           <div className="form-text text-white">
-            {formData.languages.length} selected
+            {formData?.languages?.length} selected
           </div>
         </div>
 
@@ -500,9 +570,7 @@ const CreateNewProject = () => {
                     S.No.
                     <input
                       type="checkbox"
-                      checked={formData.files.every(
-                        (file) => file.selected
-                      )}
+                      checked={formData.files.every((file) => file.selected)}
                       onChange={(e) => {
                         const files = formData.files.map((file) => ({
                           ...file,
@@ -560,9 +628,7 @@ const CreateNewProject = () => {
                         value={file.pageCount || ""}
                         onChange={(e) => {
                           const files = [...formData.files];
-                          files[idx].pageCount = Number(
-                            e.target.value
-                          );
+                          files[idx].pageCount = Number(e.target.value);
                           setFormData((prev) => ({ ...prev, files }));
                         }}
                         placeholder="Pages"
@@ -590,8 +656,8 @@ const CreateNewProject = () => {
                       >
                         <option value="">Select</option>
                         {applicationOptions.map((app) => (
-                          <option key={app} value={app}>
-                            {app}
+                          <option key={app.value} value={app.value}>
+                            {app.label}
                           </option>
                         ))}
                       </select>
@@ -607,9 +673,7 @@ const CreateNewProject = () => {
         <div className="mb-3">
           <div className="row g-3">
             <div className="col-md-4">
-              <label className="form-label">
-                Total Pages Per Lang
-              </label>
+              <label className="form-label">Total Pages Per Lang</label>
               <input
                 type="number"
                 className="form-control"
@@ -621,9 +685,7 @@ const CreateNewProject = () => {
               />
             </div>
             <div className="col-md-4">
-              <label className="form-label">
-                Total Project Pages
-              </label>
+              <label className="form-label">Total Project Pages</label>
               <input
                 type="number"
                 className="form-control"
@@ -694,8 +756,7 @@ const CreateNewProject = () => {
                 name="billingMode"
                 value="estimated"
                 checked={
-                  formData.billingMode === "estimated" ||
-                  !formData.billingMode
+                  formData.billingMode === "estimated" || !formData.billingMode
                 }
                 onChange={(e) =>
                   setFormData((prev) => ({
@@ -720,9 +781,7 @@ const CreateNewProject = () => {
                   estimatedHrs: value,
                   cost: value * (prev.hourlyRate || 0),
                   inrCost:
-                    value *
-                    (prev.hourlyRate || 0) *
-                    (prev.exchangeRate || 1),
+                    value * (prev.hourlyRate || 0) * (prev.exchangeRate || 1),
                 }));
               }}
               placeholder="00.00"
@@ -749,10 +808,7 @@ const CreateNewProject = () => {
                   ...prev,
                   hourlyRate: rate,
                   cost: prev.estimatedHrs * rate,
-                  inrCost:
-                    prev.estimatedHrs *
-                    rate *
-                    (prev.exchangeRate || 1),
+                  inrCost: prev.estimatedHrs * rate * (prev.exchangeRate || 1),
                 }));
               }}
               placeholder="Auto from Client"
@@ -772,9 +828,7 @@ const CreateNewProject = () => {
                     ...prev,
                     billingMode: e.target.value,
                     estimatedHrs:
-                      e.target.value === "perPage"
-                        ? ""
-                        : prev.estimatedHrs,
+                      e.target.value === "perPage" ? "" : prev.estimatedHrs,
                   }))
                 }
               />
@@ -796,16 +850,13 @@ const CreateNewProject = () => {
                   ...prev,
                   rate: rate,
                   cost: rate * totalPages,
-                  inrCost:
-                    rate * totalPages * (prev.exchangeRate || 1),
+                  inrCost: rate * totalPages * (prev.exchangeRate || 1),
                 }));
               }}
               placeholder="00.00"
               disabled={formData.billingMode !== "perPage"}
             />
-            <div className="form-text text-white">
-              (with only 2 decimals)
-            </div>
+            <div className="form-text text-white">(with only 2 decimals)</div>
           </div>
 
           {/* Currency */}
@@ -858,14 +909,15 @@ const CreateNewProject = () => {
             </label>
             <div className="max-w-md mx-auto">
               <div className="relative">
-                <input
+                <input  
                   type="text"
                   value={formatDateTime()}
                   readOnly
                   onClick={() => setIsOpen(!isOpen)}
                   className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
-                  placeholder="Select date and time"
+                  placeholder="00/00/00 00:00 AM"
                 />
+               
               </div>
 
               {isOpen && (
@@ -877,8 +929,12 @@ const CreateNewProject = () => {
                     </div>
                     <div className="period">{isAM ? "AM" : "PM"}</div>
                     <div className="date">
-                      {months[selectedMonth].substring(0, 3)},{" "}
-                      {selectedYear}
+                      {selectedDate !== null
+                        ? `${months[selectedMonth].substring(
+                            0,
+                            3
+                          )}, ${selectedYear}`
+                        : "00/00/00"}
                     </div>
                   </div>
 
@@ -888,21 +944,19 @@ const CreateNewProject = () => {
                         <div className="time-column-label">Hour</div>
                         <div className="time-scroll">
                           <div className="time-options">
-                            {[
-                              12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-                            ].map((hour) => (
-                              <button
-                                key={hour}
-                                onClick={() => setSelectedHour(hour)}
-                                className={`time-option ${
-                                  selectedHour === hour
-                                    ? "selected-hour"
-                                    : ""
-                                }`}
-                              >
-                                {hour.toString().padStart(2, "0")}
-                              </button>
-                            ))}
+                            {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(
+                              (hour) => (
+                                <button
+                                  key={hour}
+                                  onClick={() => setSelectedHour(hour)}
+                                  className={`time-option ${
+                                    selectedHour === hour ? "selected-hour" : ""
+                                  }`}
+                                >
+                                  {hour.toString().padStart(2, "0")}
+                                </button>
+                              )
+                            )}
                           </div>
                         </div>
                       </div>
@@ -914,9 +968,7 @@ const CreateNewProject = () => {
                             {[0, 15, 30, 45].map((minute) => (
                               <button
                                 key={minute}
-                                onClick={() =>
-                                  setSelectedMinute(minute)
-                                }
+                                onClick={() => setSelectedMinute(minute)}
                                 className={`time-option ${
                                   selectedMinute === minute
                                     ? "selected-minute"
@@ -931,9 +983,7 @@ const CreateNewProject = () => {
                       </div>
 
                       <div className="time-column">
-                        <div className="time-column-label">
-                          Period
-                        </div>
+                        <div className="time-column-label">Period</div>
                         <div className="period-options">
                           <button
                             onClick={() => setIsAM(true)}
@@ -1000,9 +1050,10 @@ const CreateNewProject = () => {
                       <div className="action-buttons">
                         <button
                           onClick={() => {
-                            setSelectedDate(new Date().getDate());
-                            setSelectedMonth(new Date().getMonth());
-                            setSelectedYear(new Date().getFullYear());
+                            setSelectedDate(null);
+                            setSelectedHour(0);
+                            setSelectedMinute(0);
+                            setIsAM(true);
                           }}
                           className="action-button"
                         >
@@ -1014,6 +1065,9 @@ const CreateNewProject = () => {
                             setSelectedDate(today.getDate());
                             setSelectedMonth(today.getMonth());
                             setSelectedYear(today.getFullYear());
+                            setSelectedHour(today.getHours() % 12 || 12);
+                            setSelectedMinute(today.getMinutes());
+                            setIsAM(today.getHours() < 12);
                           }}
                           className="action-button"
                         >
