@@ -518,14 +518,13 @@ function Collaboration() {
                           alt={member.name}
                           className="rounded-circle"
                           width="32"
-                         
                         />
                         {member.isOnline ? (
                           <span
                             className="position-absolute bottom-0 end-0 bg-success rounded-circle"
                             style={{
                               width: "10px",
-                            
+
                               border: "2px solid #f8f9fa",
                             }}
                           ></span>
@@ -586,393 +585,404 @@ function Collaboration() {
 
         {/* Right Content Area */}
         <div className="col-12 col-lg-9 d-flex flex-column chat-main-panel">
-          <div className="row " style={{position:"fixed"}}>
-        <div className="col-12  d-flex flex-column">
-          {/* Chat Header */}
-          <div className="p-3 border-bottom bg-main d-flex justify-content-between align-items-center chat-header-sticky">
-            <div>
-              <h4 className="mb-0 text-white">
-                {activePrivateChat
-                  ? teamMembers.find((m) => m.id === activePrivateChat)?.name
-                  : "Project Team"}
-              </h4>
-              <small className="text-white">
-                {activePrivateChat
-                  ? teamMembers.find((m) => m.id === activePrivateChat)
-                      ?.isOnline
-                    ? "Online"
-                    : `Last seen ${
-                        teamMembers.find((m) => m.id === activePrivateChat)
-                          ?.lastSeen
-                      }`
-                  : `${
-                      teamMembers.length + 1
-                    } members • Last activity 11:32 AM`}
-              </small>
-            </div>
-            <div className="d-flex">
-              <button className="btn btn-sm btn-outline-light me-2">
-                <i className="fas fa-search"></i>
-              </button>
-              <div className="dropdown">
-                <button
-                  className="btn btn-sm btn-outline-light dropdown-toggle"
-                  data-bs-toggle="dropdown"
-                >
-                  <i className="fas fa-ellipsis-v"></i>
-                </button>
-                <ul className="dropdown-menu dropdown-menu-end">
-                  <li>
-                    <button className="dropdown-item">View Members</button>
-                  </li>
-                  {activeChat === "group" && (
-                    <li>
-                      <button className="dropdown-item">Group Settings</button>
-                    </li>
-                  )}
-                  <li>
-                    <button className="dropdown-item">Clear History</button>
-                  </li>
-                  <li>
-                    <hr className="dropdown-divider" />
-                  </li>
-                  <li>
-                    <button className="dropdown-item text-danger">
-                      Leave Chat
+          <div className="row chat" style={{ position: "fixed" }}>
+            <div className="col-12  d-flex flex-column">
+              {/* Chat Header */}
+              <div className="p-3 border-bottom bg-main d-flex justify-content-between align-items-center chat-header-sticky">
+                <div>
+                  <h4 className="mb-0 text-white">
+                    {activePrivateChat
+                      ? teamMembers.find((m) => m.id === activePrivateChat)
+                          ?.name
+                      : "Project Team"}
+                  </h4>
+                  <small className="text-white">
+                    {activePrivateChat
+                      ? teamMembers.find((m) => m.id === activePrivateChat)
+                          ?.isOnline
+                        ? "Online"
+                        : `Last seen ${
+                            teamMembers.find((m) => m.id === activePrivateChat)
+                              ?.lastSeen
+                          }`
+                      : `${
+                          teamMembers.length + 1
+                        } members • Last activity 11:32 AM`}
+                  </small>
+                </div>
+                <div className="d-flex">
+                  <button className="btn btn-sm btn-outline-light me-2">
+                    <i className="fas fa-search"></i>
+                  </button>
+                  <div className="dropdown">
+                    <button
+                      className="btn btn-sm btn-outline-light dropdown-toggle"
+                      data-bs-toggle="dropdown"
+                    >
+                      <i className="fas fa-ellipsis-v"></i>
                     </button>
-                  </li>
-                </ul>
+                    <ul className="dropdown-menu dropdown-menu-end">
+                      <li>
+                        <button className="dropdown-item">View Members</button>
+                      </li>
+                      {activeChat === "group" && (
+                        <li>
+                          <button className="dropdown-item">
+                            Group Settings
+                          </button>
+                        </li>
+                      )}
+                      <li>
+                        <button className="dropdown-item">Clear History</button>
+                      </li>
+                      <li>
+                        <hr className="dropdown-divider" />
+                      </li>
+                      <li>
+                        <button className="dropdown-item text-danger">
+                          Leave Chat
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* Messages Area */}
-          <div
-            className="chat-messages-scrollable  scrollbar-hidden overflow-auto p-3 bg-main" style={{ backgroundColor: "#1e1e1e" }}
-          >
-            <div ref={messageEndRef} />
-            {filteredMessages.map((message) => (
+              {/* Messages Area */}
               <div
-                key={message.id}
-                className={`mb-3 ${
-                  message.senderId === currentUser.id ? "text-end" : ""
-                }`}
+                className="chat-messages-scrollable  scrollbar-hidden overflow-auto p-3 bg-main"
+                style={{ backgroundColor: "#1e1e1e" }}
               >
-                {message.replyTo && (
+                <div ref={messageEndRef} />
+                {filteredMessages.map((message) => (
                   <div
-                    className={`small text-white mb-1 ${
+                    key={message.id}
+                    className={`mb-3 ${
                       message.senderId === currentUser.id ? "text-end" : ""
                     }`}
                   >
-                    Replying to:{" "}
-                    {messages
-                      .find((m) => m.id === message.replyTo)
-                      ?.content.substring(0, 50)}
-                    ...
+                    {message.replyTo && (
+                      <div
+                        className={`small text-white mb-1 ${
+                          message.senderId === currentUser.id ? "text-end" : ""
+                        }`}
+                      >
+                        Replying to:{" "}
+                        {messages
+                          .find((m) => m.id === message.replyTo)
+                          ?.content.substring(0, 50)}
+                        ...
+                      </div>
+                    )}
+                    <div
+                      className={`d-flex ${
+                        message.senderId === currentUser.id
+                          ? "justify-content-end"
+                          : ""
+                      }`}
+                    >
+                      {message.senderId !== currentUser.id && (
+                        <img
+                          src={message.avatar}
+                          alt={message.sender}
+                          className="rounded-circle me-2"
+                          width="40"
+                          height="40"
+                        />
+                      )}
+                      <div
+                        className={`rounded p-3 position-relative ${
+                          message.senderId === currentUser.id
+                            ? "bg-primary"
+                            : "bg-card"
+                        }`}
+                        style={{ maxWidth: "75%" }}
+                      >
+                        <div className="d-flex justify-content-between align-items-center mb-1">
+                          <strong
+                            className={
+                              message.senderId === currentUser.id
+                                ? "text-white"
+                                : "text-white"
+                            }
+                          >
+                            {message.sender}
+                          </strong>
+                          <small
+                            className={
+                              message.senderId === currentUser.id
+                                ? "text-white-50"
+                                : "text-white-50"
+                            }
+                          >
+                            {message.timestamp}
+                            {message.isEdited && (
+                              <span className="ms-1">(edited)</span>
+                            )}
+                          </small>
+                        </div>
+                        <p className="mb-2 text-white">
+                          {message.content}
+                          {message.mentionedUsers?.includes(currentUser.id) && (
+                            <span className="badge bg-warning ms-2">
+                              Mentioned
+                            </span>
+                          )}
+                        </p>
+
+                        {/* Message actions */}
+                        <div
+                          className={`position-absolute ${
+                            message.senderId === currentUser.id
+                              ? "left-0 start-100"
+                              : "right-0 end-100"
+                          } px-2 d-flex`}
+                        >
+                          <button
+                            className="btn btn-sm p-0 text-white-50"
+                            onClick={() => handleReply(message.id)}
+                            title="Reply"
+                          >
+                            <i className="fas fa-reply"></i>
+                          </button>
+                          {message.senderId === currentUser.id && (
+                            <>
+                              <button
+                                className="btn btn-sm p-0 mx-1 text-white-50"
+                                onClick={() => handleEditMessage(message.id)}
+                                title="Edit"
+                              >
+                                <i className="fas fa-edit"></i>
+                              </button>
+                              <button
+                                className="btn btn-sm p-0 text-white-50"
+                                onClick={() => handleDeleteMessage(message.id)}
+                                title="Delete"
+                              >
+                                <i className="fas fa-trash"></i>
+                              </button>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Reactions */}
+                        {message.reactions.length > 0 && (
+                          <div className="d-flex flex-wrap gap-1 mt-2">
+                            {message.reactions.map((reaction, idx) => (
+                              <button
+                                key={idx}
+                                className={`btn btn-sm p-0 px-1 rounded-pill ${
+                                  reaction.reacted
+                                    ? "bg-white"
+                                    : message.senderId === currentUser.id
+                                    ? "bg-white-10"
+                                    : "bg-light"
+                                }`}
+                                onClick={() =>
+                                  handleReaction(message.id, reaction.emoji)
+                                }
+                              >
+                                <span>{reaction.emoji}</span>
+                                <small className="ms-1">{reaction.count}</small>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Seen status */}
+                        {activePrivateChat &&
+                          message.senderId === currentUser.id && (
+                            <div className="text-end mt-1">
+                              <small className="text-white-50">
+                                {message.seenBy.includes(activePrivateChat)
+                                  ? "Seen"
+                                  : "Delivered"}
+                              </small>
+                            </div>
+                          )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Editing Message */}
+                {editingMessageId && (
+                  <div className="mb-3 p-3 bg-dark rounded">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <strong>Editing message</strong>
+                      <button
+                        className="btn btn-sm btn-outline-light"
+                        onClick={() => setEditingMessageId(null)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    <textarea
+                      value={editedMessageContent}
+                      onChange={(e) => setEditedMessageContent(e.target.value)}
+                      className="form-control mb-2"
+                      rows="3"
+                    />
+                    <button
+                      onClick={handleSaveEdit}
+                      className="btn btn-primary btn-sm"
+                    >
+                      Save Changes
+                    </button>
                   </div>
                 )}
-                <div
-                  className={`d-flex ${
-                    message.senderId === currentUser.id
-                      ? "justify-content-end"
-                      : ""
-                  }`}
-                >
-                  {message.senderId !== currentUser.id && (
+
+                {/* Typing Indicator */}
+                {isTyping && typingUser && (
+                  <div className="d-flex align-items-center mb-3 ">
                     <img
-                      src={message.avatar}
-                      alt={message.sender}
+                      src={typingUser.avatar}
+                      alt="Typing"
                       className="rounded-circle me-2"
                       width="40"
                       height="40"
                     />
-                  )}
-                  <div
-                    className={`rounded p-3 position-relative ${
-                      message.senderId === currentUser.id
-                        ? "bg-primary"
-                        : "bg-card"
-                    }`}
-                    style={{ maxWidth: "75%" }}
-                  >
-                    <div className="d-flex justify-content-between align-items-center mb-1">
-                      <strong
-                        className={
-                          message.senderId === currentUser.id
-                            ? "text-white"
-                            : "text-white"
-                        }
-                      >
-                        {message.sender}
-                      </strong>
-                      <small
-                        className={
-                          message.senderId === currentUser.id
-                            ? "text-white-50"
-                            : "text-white-50"
-                        }
-                      >
-                        {message.timestamp}
-                        {message.isEdited && (
-                          <span className="ms-1">(edited)</span>
-                        )}
-                      </small>
+                    <div className="rounded p-2 bg-card">
+                      <div className="d-flex align-items-center">
+                        <div className="typing-dots">
+                          <div className="typing-dot"></div>
+                          <div className="typing-dot"></div>
+                          <div className="typing-dot"></div>
+                        </div>
+                        <small className="ms-2 text-white ">
+                          {typingUser.name} is typing...
+                        </small>
+                      </div>
                     </div>
-                    <p className="mb-2 text-white">
-                      {message.content}
-                      {message.mentionedUsers?.includes(currentUser.id) && (
-                        <span className="badge bg-warning ms-2">Mentioned</span>
-                      )}
-                    </p>
+                  </div>
+                )}
 
-                    {/* Message actions */}
+                <div ref={messageEndRef} />
+              </div>
+
+              {/* Message Input */}
+              <div className="p-3 border-top bg-main chat-footer-sticky">
+                <div className="position-relative">
+                  {showMentionList && (
                     <div
-                      className={`position-absolute ${
-                        message.senderId === currentUser.id
-                          ? "left-0 start-100"
-                          : "right-0 end-100"
-                      } px-2 d-flex`}
+                      className="position-absolute bottom-100 mb-2 bg-white border rounded p-2 w-100"
+                      style={{
+                        zIndex: 1000,
+                        maxHeight: "200px",
+                        overflowY: "auto",
+                      }}
                     >
-                      <button
-                        className="btn btn-sm p-0 text-white-50"
-                        onClick={() => handleReply(message.id)}
-                        title="Reply"
-                      >
-                        <i className="fas fa-reply"></i>
-                      </button>
-                      {message.senderId === currentUser.id && (
-                        <>
-                          <button
-                            className="btn btn-sm p-0 mx-1 text-white-50"
-                            onClick={() => handleEditMessage(message.id)}
-                            title="Edit"
+                      {teamMembers
+                        .filter(
+                          (member) =>
+                            member.name
+                              .toLowerCase()
+                              .includes(mentionQuery.toLowerCase()) &&
+                            member.id !== currentUser.id
+                        )
+                        .map((member) => (
+                          <div
+                            key={member.id}
+                            className="p-2 hover-bg cursor-pointer"
+                            onClick={() => handleMentionSelect(member)}
                           >
-                            <i className="fas fa-edit"></i>
-                          </button>
-                          <button
-                            className="btn btn-sm p-0 text-white-50"
-                            onClick={() => handleDeleteMessage(message.id)}
-                            title="Delete"
-                          >
-                            <i className="fas fa-trash"></i>
-                          </button>
-                        </>
-                      )}
+                            <div className="d-flex align-items-center">
+                              <img
+                                src={member.avatar}
+                                alt={member.name}
+                                className="rounded-circle me-2"
+                                width="32"
+                                height="32"
+                              />
+                              <div>
+                                <div>{member.name}</div>
+                                <small className="text-muted">
+                                  {member.role}
+                                </small>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                     </div>
+                  )}
 
-                    {/* Reactions */}
-                    {message.reactions.length > 0 && (
-                      <div className="d-flex flex-wrap gap-1 mt-2">
-                        {message.reactions.map((reaction, idx) => (
+                  <textarea
+                    ref={messageInputRef}
+                    value={newMessage}
+                    onChange={(e) => {
+                      setNewMessage(e.target.value);
+                      // In a real app, you would emit typing status to the server
+                      // socketRef.current.emit('typing', {
+                      //     isTyping: e.target.value.length > 0
+                      // });
+                    }}
+                    onKeyDown={handleKeyDown}
+                    className="form-control mb-2 bg-card text-white"
+                    rows="2"
+                    placeholder="Type your message here..."
+                    style={{ resize: "none" }}
+                  />
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <button
+                        className="btn btn-sm btn-outline-light me-2"
+                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                      >
+                        <i className="far fa-smile"></i>
+                      </button>
+                    </div>
+                    <button
+                      onClick={
+                        editingMessageId ? handleSaveEdit : handleSendMessage
+                      }
+                      disabled={
+                        editingMessageId
+                          ? editedMessageContent.trim() === ""
+                          : newMessage.trim() === ""
+                      }
+                      className={`btn ${
+                        editingMessageId
+                          ? "btn-warning"
+                          : newMessage.trim() === ""
+                          ? "btn-outline-primary"
+                          : "btn-primary"
+                      }`}
+                    >
+                      {editingMessageId ? "Save Edit" : "Send"}{" "}
+                      <i className="fas fa-paper-plane ms-1"></i>
+                    </button>
+                  </div>
+
+                  {/* Emoji Picker */}
+                  {showEmojiPicker && (
+                    <div
+                      ref={emojiPickerRef}
+                      className="position-absolute bottom-100 bg-white border rounded p-2 mb-2 shadow-sm"
+                      style={{ zIndex: 1000 }}
+                    >
+                      <div
+                        className="d-flex flex-wrap"
+                        style={{ width: "200px" }}
+                      >
+                        {emojis.map((emoji, idx) => (
                           <button
                             key={idx}
-                            className={`btn btn-sm p-0 px-1 rounded-pill ${
-                              reaction.reacted
-                                ? "bg-white"
-                                : message.senderId === currentUser.id
-                                ? "bg-white-10"
-                                : "bg-light"
-                            }`}
-                            onClick={() =>
-                              handleReaction(message.id, reaction.emoji)
-                            }
+                            className="btn btn-sm p-1"
+                            onClick={() => {
+                              setNewMessage((prev) => prev + emoji);
+                              setShowEmojiPicker(false);
+                            }}
                           >
-                            <span>{reaction.emoji}</span>
-                            <small className="ms-1">{reaction.count}</small>
+                            {emoji}
                           </button>
                         ))}
                       </div>
-                    )}
-
-                    {/* Seen status */}
-                    {activePrivateChat &&
-                      message.senderId === currentUser.id && (
-                        <div className="text-end mt-1">
-                          <small className="text-white-50">
-                            {message.seenBy.includes(activePrivateChat)
-                              ? "Seen"
-                              : "Delivered"}
-                          </small>
-                        </div>
-                      )}
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {/* Editing Message */}
-            {editingMessageId && (
-              <div className="mb-3 p-3 bg-dark rounded">
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <strong>Editing message</strong>
-                  <button
-                    className="btn btn-sm btn-outline-light"
-                    onClick={() => setEditingMessageId(null)}
-                  >
-                    Cancel
-                  </button>
-                </div>
-                <textarea
-                  value={editedMessageContent}
-                  onChange={(e) => setEditedMessageContent(e.target.value)}
-                  className="form-control mb-2"
-                  rows="3"
-                />
-                <button
-                  onClick={handleSaveEdit}
-                  className="btn btn-primary btn-sm"
-                >
-                  Save Changes
-                </button>
-              </div>
-            )}
-
-            {/* Typing Indicator */}
-            {isTyping && typingUser && (
-              <div className="d-flex align-items-center mb-3">
-                <img
-                  src={typingUser.avatar}
-                  alt="Typing"
-                  className="rounded-circle me-2"
-                  width="40"
-                  height="40"
-                />
-                <div className="rounded p-2 bg-card">
-                  <div className="d-flex align-items-center">
-                    <div className="typing-dots">
-                      <div className="typing-dot"></div>
-                      <div className="typing-dot"></div>
-                      <div className="typing-dot"></div>
                     </div>
-                    <small className="ms-2 text-white">
-                      {typingUser.name} is typing...
-                    </small>
-                  </div>
+                  )}
                 </div>
               </div>
-            )}
-
-            <div ref={messageEndRef} />
-          </div>
-
-          {/* Message Input */}
-          <div className="p-3 border-top bg-main chat-footer-sticky">
-            <div className="position-relative">
-              {showMentionList && (
-                <div
-                  className="position-absolute bottom-100 mb-2 bg-white border rounded p-2 w-100"
-                  style={{
-                    zIndex: 1000,
-                    maxHeight: "200px",
-                    overflowY: "auto",
-                  }}
-                >
-                  {teamMembers
-                    .filter(
-                      (member) =>
-                        member.name
-                          .toLowerCase()
-                          .includes(mentionQuery.toLowerCase()) &&
-                        member.id !== currentUser.id
-                    )
-                    .map((member) => (
-                      <div
-                        key={member.id}
-                        className="p-2 hover-bg cursor-pointer"
-                        onClick={() => handleMentionSelect(member)}
-                      >
-                        <div className="d-flex align-items-center">
-                          <img
-                            src={member.avatar}
-                            alt={member.name}
-                            className="rounded-circle me-2"
-                            width="32"
-                            height="32"
-                          />
-                          <div>
-                            <div>{member.name}</div>
-                            <small className="text-muted">{member.role}</small>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              )}
-
-              <textarea
-                ref={messageInputRef}
-                value={newMessage}
-                onChange={(e) => {
-                  setNewMessage(e.target.value);
-                  // In a real app, you would emit typing status to the server
-                  // socketRef.current.emit('typing', {
-                  //     isTyping: e.target.value.length > 0
-                  // });
-                }}
-                onKeyDown={handleKeyDown}
-                className="form-control mb-2 bg-card text-white"
-                rows="2"
-                placeholder="Type your message here..."
-                style={{ resize: "none" }}
-              />
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  <button
-                    className="btn btn-sm btn-outline-light me-2"
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                  >
-                    <i className="far fa-smile"></i>
-                  </button>
-                </div>
-                <button
-                  onClick={
-                    editingMessageId ? handleSaveEdit : handleSendMessage
-                  }
-                  disabled={
-                    editingMessageId
-                      ? editedMessageContent.trim() === ""
-                      : newMessage.trim() === ""
-                  }
-                  className={`btn ${
-                    editingMessageId
-                      ? "btn-warning"
-                      : newMessage.trim() === ""
-                      ? "btn-outline-primary"
-                      : "btn-primary"
-                  }`}
-                >
-                  {editingMessageId ? "Save Edit" : "Send"}{" "}
-                  <i className="fas fa-paper-plane ms-1"></i>
-                </button>
-              </div>
-
-              {/* Emoji Picker */}
-              {showEmojiPicker && (
-                <div
-                  ref={emojiPickerRef}
-                  className="position-absolute bottom-100 bg-white border rounded p-2 mb-2 shadow-sm"
-                  style={{ zIndex: 1000 }}
-                >
-                  <div className="d-flex flex-wrap" style={{ width: "200px" }}>
-                    {emojis.map((emoji, idx) => (
-                      <button
-                        key={idx}
-                        className="btn btn-sm p-1"
-                        onClick={() => {
-                          setNewMessage((prev) => prev + emoji);
-                          setShowEmojiPicker(false);
-                        }}
-                      >
-                        {emoji}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
-        </div>
-        </div>
         </div>
       </div>
 

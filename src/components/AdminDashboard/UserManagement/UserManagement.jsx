@@ -1,105 +1,47 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
+import axios from "axios";
+import Swal from "sweetalert2";
+import BASE_URL from "../../../config";
 
-function UserManagement() {
+function UserManagement({ isViewMode, isEditMode }) {
   // State for modal and member management
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState(""); // "view", "edit", or "add"
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedApplications, setSelectedApplications] = useState([]);
   const [activeTab, setActiveTab] = useState("live");
-  
+  const [isLoading, setIsLoading] = useState(false);
+
   // State for team members data
-  const [teamMembers, setTeamMembers] = useState([
-    {
-      empId: "E001",
-      fullName: "John Doe",
-      doj: "2022-01-01",
-      dob: "1990-05-10",
-      team: "Dev",
-      role: "Frontend",
-      appSkills: ["React", "JS"],
-      username: "johnd",
-      status: "active",
-    },
-    {
-      empId: "E002",
-      fullName: "Jane Smith",
-      doj: "2021-07-15",
-      dob: "1992-04-22",
-      team: "QA",
-      role: "Tester",
-      appSkills: ["Selenium"],
-      username: "janes",
-      status: "freezed",
-    },
-    {
-      empId: "E003",
-      fullName: "Amit Sharma",
-      doj: "2020-11-12",
-      dob: "1988-02-10",
-      team: "Design",
-      role: "UI/UX",
-      appSkills: ["Figma", "Adobe XD"],
-      username: "amitsh",
-      status: "active",
-    },
-    {
-      empId: "E004",
-      fullName: "Priya Mehra",
-      doj: "2019-06-21",
-      dob: "1993-09-18",
-      team: "DevOps",
-      role: "Engineer",
-      appSkills: ["Docker", "Kubernetes", "AWS"],
-      username: "priyam",
-      status: "freezed",
-    },
-    {
-      empId: "E005",
-      fullName: "Rahul Verma",
-      doj: "2023-03-10",
-      dob: "1995-11-23",
-      team: "Dev",
-      role: "Backend",
-      appSkills: ["Node.js", "MongoDB", "Express"],
-      username: "rahulv",
-      status: "active",
-    },
-    {
-      empId: "E006",
-      fullName: "Neha Kaur",
-      doj: "2022-09-05",
-      dob: "1991-12-05",
-      team: "HR",
-      role: "Recruiter",
-      appSkills: ["Excel", "LinkedIn", "HRMS"],
-      username: "nehak",
-      status: "active",
-    },
-    {
-      empId: "E007",
-      fullName: "Arjun Nair",
-      doj: "2018-04-17",
-      dob: "1987-03-30",
-      team: "IT Support",
-      role: "Tech Support",
-      appSkills: ["Windows", "Networking", "VPN"],
-      username: "arjunn",
-      status: "freezed",
-    },
-    {
-      empId: "E008",
-      fullName: "Sneha Roy",
-      doj: "2021-02-25",
-      dob: "1994-06-12",
-      team: "Marketing",
-      role: "Content Writer",
-      appSkills: ["SEO", "Content Writing", "Canva"],
-      username: "snehar",
-      status: "active",
-    }
-  ]);
+  const [teamMembers, setTeamMembers] = useState([]);
+console.log("api response", teamMembers);
+
+  // Fetch team members on component mount
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        if (!token) return;
+
+        const response = await axios.get(`${BASE_URL}member/getAllMembers`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+        console.log(response.data.data);
+        
+        if (response.data && Array.isArray(response.data.data)) {
+          setTeamMembers(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching team members:", error);
+        Swal.fire("Error", "Failed to fetch team members", "error");
+      }
+    };
+
+    fetchTeamMembers();
+  }, []);
 
   // Form state for adding/editing members
   const [form, setForm] = useState({
@@ -109,10 +51,13 @@ function UserManagement() {
     dob: "",
     team: "",
     role: "",
-    appSkills: [],
+    skills: [],
     username: "",
     password: "",
   });
+
+
+
 
   // Filter members based on active tab
   const liveMembers = teamMembers.filter((m) => m.status === "active");
@@ -122,41 +67,43 @@ function UserManagement() {
   const gradientSelectStyles = {
     control: (provided, state) => ({
       ...provided,
-      background: 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
-      color: 'white',
-      borderColor: state.isFocused ? '#ffffff66' : '#ffffff33',
-      boxShadow: state.isFocused ? '0 0 0 1px #ffffff66' : 'none',
-      minHeight: '38px',
+      background: "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
+      color: "white",
+      borderColor: state.isFocused ? "#ffffff66" : "#ffffff33",
+      boxShadow: state.isFocused ? "0 0 0 1px #ffffff66" : "none",
+      minHeight: "38px",
     }),
     singleValue: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     multiValue: (provided) => ({
       ...provided,
-      backgroundColor: '#1b2f6e',
+      backgroundColor: "#1b2f6e",
     }),
     multiValueLabel: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     placeholder: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     input: (provided) => ({
       ...provided,
-      color: 'white',
+      color: "white",
     }),
     option: (provided, state) => ({
       ...provided,
-      backgroundColor: state.isFocused ? '#293d80' : 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
-      color: 'white',
+      backgroundColor: state.isFocused
+        ? "#293d80"
+        : "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
+      color: "white",
     }),
     menu: (provided) => ({
       ...provided,
-      background: 'linear-gradient(to bottom right, #141c3a, #1b2f6e)',
-      color: 'white',
+      background: "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
+      color: "white",
     }),
   };
 
@@ -176,53 +123,123 @@ function UserManagement() {
   ];
 
   // Toggle member status between active and freezed
-  const toggleFreezeMember = (empId) => {
-    setTeamMembers(prevMembers =>
-      prevMembers.map(member =>
-        member.empId === empId
-          ? {
-              ...member,
-              status: member.status === "active" ? "freezed" : "active"
-            }
-          : member
-      )
-    );
-  };
+  const toggleFreezeMember = async (empId) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        Swal.fire("Error", "No token found. Please login again.", "error");
+        return;
+      }
 
-  // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (modalType === "edit") {
-      // Update existing member
-      setTeamMembers(prevMembers =>
-        prevMembers.map(member =>
-          member.empId === form.empId
-            ? {
-                ...form,
-                appSkills: selectedApplications.map(app => app.value)
-              }
+      const member = teamMembers.find(m => m.empId === empId);
+      const newStatus = member.status === "active" ? "freezed" : "active";
+
+      const response = await axios.put(
+        `${BASE_URL}member/updateStatus/${empId}`,
+        { status: newStatus },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        }
+      );
+
+      setTeamMembers((prevMembers) =>
+        prevMembers.map((member) =>
+          member.empId === empId
+            ? { ...member, status: newStatus }
             : member
         )
       );
-    } else {
-      // Add new member
-      const newMember = {
-        ...form,
-        appSkills: selectedApplications.map(app => app.value),
-        status: "active"
-      };
-      setTeamMembers(prevMembers => [...prevMembers, newMember]);
+
+      Swal.fire("Success!", `Member status updated to ${newStatus}`, "success");
+    } catch (error) {
+      console.error("Error updating member status:", error);
+      Swal.fire("Error", "Failed to update member status", "error");
     }
-    
-    setShowModal(false);
-    resetForm();
   };
 
-  // Handle form field changes
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        Swal.fire("Error", "No token found. Please login again.", "error");
+        setIsLoading(false);
+        return;
+      }
+
+      const payload = {
+        ...form,
+        appSkills: selectedApplications.map((app) => app.value),
+        status: "active" // Default status for new members
+      };
+
+      if (modalType === "edit") {
+        // Update member
+        const response = await axios.put(
+          `${BASE_URL}member/updateMember/${form.empId}`,
+          payload,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+            },
+          }
+        );
+
+        setTeamMembers((prevMembers) =>
+          prevMembers.map((member) =>
+            member.empId === form.empId ? response.data : member
+          )
+        );
+        Swal.fire("Updated!", "Member updated successfully.", "success");
+      } else {
+        // Add new member
+        const response = await axios.post(
+          `${BASE_URL}member/addMember`,
+          payload,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+            },
+          }
+        );
+
+        setTeamMembers((prev) => [...prev, response.data]);
+        Swal.fire("Success!", "Member added successfully.", "success");
+      }
+
+      setShowModal(false);
+      resetForm();
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      let errorMessage = "Failed to submit form. Please try again.";
+      
+      if (error.response) {
+        if (error.response.status === 400) {
+          errorMessage = error.response.data.message || "Invalid data provided.";
+        } else if (error.response.status === 401) {
+          errorMessage = "Unauthorized. Please login again.";
+        } else if (error.response.status === 500) {
+          errorMessage = "Server error. Please try again later.";
+        }
+      }
+      
+      Swal.fire("Error", errorMessage, "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
-    setForm(prevForm => ({
+    setForm((prevForm) => ({
       ...prevForm,
       [name]: value,
     }));
@@ -248,7 +265,7 @@ function UserManagement() {
   const openMemberModal = (type, member) => {
     setModalType(type);
     setSelectedMember(member);
-    
+
     if (type !== "add") {
       setForm({
         empId: member.empId,
@@ -261,27 +278,56 @@ function UserManagement() {
         username: member.username,
         password: "", // Password is not stored for security reasons
       });
-      
+
       // Set selected applications for the select component
       setSelectedApplications(
-        member.appSkills.map(skill => ({
+        member.appSkills.map((skill) => ({
           value: skill,
-          label: skill
+          label: skill,
         }))
       );
     } else {
       resetForm();
     }
-    
+
     setShowModal(true);
   };
 
   // Delete a member
-  const deleteMember = (empId) => {
-    if (window.confirm("Are you sure you want to delete this member?")) {
-      setTeamMembers(prevMembers => 
-        prevMembers.filter(member => member.empId !== empId)
-      );
+  const deleteMember = async (empId) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          Swal.fire("Error", "No token found. Please login again.", "error");
+          return;
+        }
+
+        await axios.delete(`${BASE_URL}member/deleteMember/${empId}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        setTeamMembers((prevMembers) =>
+          prevMembers.filter((member) => member.empId !== empId)
+        );
+
+        Swal.fire("Deleted!", "Member has been deleted.", "success");
+      } catch (error) {
+        console.error("Error deleting member:", error);
+        Swal.fire("Error", "Failed to delete member", "error");
+      }
     }
   };
 
@@ -310,10 +356,21 @@ function UserManagement() {
 
       {/* Live Members Table */}
       {activeTab === "live" && (
-        <div className="table-responsive table-gradient-bg" style={{ maxHeight: "400px", overflowY: "auto" }}>
+        <div
+          className="table-responsive table-gradient-bg"
+          style={{ maxHeight: "400px", overflowY: "auto" }}
+        >
           <table className="table table-bordered align-middle">
-            <thead>
-              <tr>
+            <thead
+              className="table-gradient-bg table "
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 0,
+                backgroundColor: "#fff",
+              }}
+            >
+              <tr className="text-center">
                 <th>Emp ID</th>
                 <th>Full Name</th>
                 <th>DOJ</th>
@@ -334,42 +391,42 @@ function UserManagement() {
                   </td>
                 </tr>
               ) : (
-                liveMembers.map((member, idx) => (
-                  <tr key={idx}>
+                liveMembers?.map((member, idx) => (
+                  <tr key={idx} className="text-center">
                     <td>{member.empId}</td>
                     <td>{member.fullName}</td>
                     <td>{member.doj}</td>
                     <td>{member.dob}</td>
                     <td>{member.team}</td>
                     <td>{member.role}</td>
-                    <td>{member.appSkills.join(", ")}</td>
+                    <td>{member.appSkills}</td>
                     <td>{member.username}</td>
                     <td>
                       <span className="badge bg-success">Active</span>
                     </td>
                     <td>
-                      <button 
+                      <button
                         className="btn btn-sm btn-primary me-2"
                         onClick={() => openMemberModal("view", member)}
                         title="View Member"
                       >
                         <i className="fas fa-eye"></i>
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-info me-2"
                         onClick={() => openMemberModal("edit", member)}
                         title="Edit Member"
                       >
                         <i className="fas fa-edit"></i>
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-warning me-2"
                         onClick={() => toggleFreezeMember(member.empId)}
                         title="Freeze Account"
                       >
                         <i className="fas fa-snowflake"></i>
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-danger"
                         onClick={() => deleteMember(member.empId)}
                         title="Delete Member"
@@ -387,10 +444,21 @@ function UserManagement() {
 
       {/* Freezed Members Table */}
       {activeTab === "freezed" && (
-        <div className="table-responsive table-gradient-bg" style={{ maxHeight: "400px", overflowY: "auto" }}>
+        <div
+          className="table-responsive table-gradient-bg"
+          style={{ maxHeight: "400px", overflowY: "auto" }}
+        >
           <table className="table table-bordered align-middle">
-            <thead>
-              <tr>
+            <thead
+              className="table-gradient-bg table "
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 0,
+                backgroundColor: "#fff",
+              }}
+            >
+              <tr className="text-center">
                 <th>Emp ID</th>
                 <th>Full Name</th>
                 <th>DOJ</th>
@@ -404,49 +472,49 @@ function UserManagement() {
               </tr>
             </thead>
             <tbody>
-              {freezedMembers.length === 0 ? (
+              {freezedMembers?.length === 0 ? (
                 <tr>
                   <td colSpan="10" className="text-center text-muted">
                     No freezed members found.
                   </td>
                 </tr>
               ) : (
-                freezedMembers.map((member, idx) => (
-                  <tr key={idx}>
+                freezedMembers?.map((member, idx) => (
+                  <tr key={idx} className="text-center">
                     <td>{member.empId}</td>
                     <td>{member.fullName}</td>
                     <td>{member.doj}</td>
                     <td>{member.dob}</td>
                     <td>{member.team}</td>
                     <td>{member.role}</td>
-                    <td>{member.appSkills.join(", ")}</td>
+                    <td>{member.appSkills}</td>
                     <td>{member.username}</td>
                     <td>
                       <span className="badge bg-secondary">Freezed</span>
                     </td>
                     <td>
-                      <button 
+                      <button
                         className="btn btn-sm btn-primary me-2"
                         onClick={() => openMemberModal("view", member)}
                         title="View Member"
                       >
                         <i className="fas fa-eye"></i>
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-info me-2"
                         onClick={() => openMemberModal("edit", member)}
                         title="Edit Member"
                       >
                         <i className="fas fa-edit"></i>
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-success me-2"
                         onClick={() => toggleFreezeMember(member.empId)}
                         title="Activate Account"
                       >
                         <i className="fas fa-sun"></i>
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-danger"
                         onClick={() => deleteMember(member.empId)}
                         title="Delete Member"
@@ -468,7 +536,7 @@ function UserManagement() {
   const renderModalContent = () => {
     const isEditMode = modalType === "edit";
     const isViewMode = modalType === "view";
-    
+
     return (
       <form onSubmit={handleSubmit}>
         <div className="modal-body">
@@ -499,12 +567,11 @@ function UserManagement() {
           <div className="mb-3">
             <label className="form-label">DOJ (Date of Joining)</label>
             <input
-              type="text"
+              type="date"
               className="form-control"
               name="doj"
               value={form.doj}
               onChange={handleFieldChange}
-              placeholder="DD-MM-YYYY"
               required
               disabled={isViewMode}
             />
@@ -512,12 +579,11 @@ function UserManagement() {
           <div className="mb-3">
             <label className="form-label">DOB (Date of Birth)</label>
             <input
-              type="text"
+              type="date"
               className="form-control"
               name="dob"
               value={form.dob}
               onChange={handleFieldChange}
-              placeholder="DD-MM-YYYY"
               required
               disabled={isViewMode}
             />
@@ -598,12 +664,24 @@ function UserManagement() {
             type="button"
             className="btn btn-secondary rounded-5"
             onClick={() => setShowModal(false)}
+            disabled={isLoading}
           >
             Cancel
           </button>
           {!isViewMode && (
-            <button type="submit" className="btn gradient-button">
-              {modalType === "edit" ? "Save Changes" : "Add Member"}
+            <button 
+              type="submit" 
+              className="btn gradient-button"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  {modalType === "edit" ? "Saving..." : "Adding..."}
+                </>
+              ) : (
+                modalType === "edit" ? "Save Changes" : "Add Member"
+              )}
             </button>
           )}
         </div>
@@ -625,7 +703,7 @@ function UserManagement() {
           </button>
         </div>
       </div>
-      
+
       {renderTable()}
 
       {/* Modal for adding/editing members */}
@@ -646,8 +724,9 @@ function UserManagement() {
                 </h5>
                 <button
                   type="button"
-                  className="btn-close"
+                  className="btn-close"mem
                   onClick={() => setShowModal(false)}
+                  disabled={isLoading}
                 ></button>
               </div>
               {renderModalContent()}

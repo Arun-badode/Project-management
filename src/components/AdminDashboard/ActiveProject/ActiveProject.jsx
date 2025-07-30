@@ -2,9 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { Button } from "react-bootstrap";
 import moment from "moment";
 import Select from "react-select";
-import Datetime from "react-datetime";
-import "react-datetime/css/react-datetime.css";
 import useSyncScroll from "../Hooks/useSyncScroll";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
+import BASE_URL from "../../../config";
+import CreateNewProject from "../Project/CreateNewProject";
+import EditModal from "./EditModal";
+
 
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
@@ -12,10 +17,30 @@ const ActiveProject = () => {
   const [activeTab, setActiveTab] = useState("all");
   const userRole = localStorage.getItem("userRole");
   const [expandedRow, setExpandedRow] = useState(null);
-  const[files, setFiles] = useState([]);
+  const [selectedDateTime, setSelectedDateTime] = useState(null);
   const isAdmin = userRole === "Admin";
 
+  const [file, setFile] = useState("");
   const [isEdit, setIsEdit] = useState(null);
+  const [fileHandlers, setFileHandlers] = useState({});
+
+  const assignees = [
+    { label: "Not Assigned", value: "" },
+    { label: "John Doe", value: "John Doe" },
+    { label: "Jane Smith", value: "Jane Smith" },
+    { label: "Mike Johnson", value: "Mike Johnson" },
+  ];
+  const handleHandlerChange = (fileId, newHandler) => {
+    // Update handler for all selected files
+    const updatedHandlers = { ...fileHandlers };
+
+    selectedFiles.forEach((f) => {
+      updatedHandlers[f.id] = newHandler;
+    });
+
+    setFileHandlers(updatedHandlers);
+    setHasUnsavedChanges(true);
+  };
 
   const initialFormData = {
     title: "",
@@ -25,7 +50,17 @@ const ActiveProject = () => {
     tasks: [],
     languages: [],
     application: [],
-    files: [{ name: "", pageCount: 0 }],
+    files: [
+      [
+        { name: "File_1", pageCount: 3, application: "", selected: false },
+        { name: "File_2", pageCount: 5, application: "", selected: false },
+        { name: "File_3", pageCount: 4, application: "", selected: false },
+        { name: "File_4", pageCount: 2, application: "", selected: false },
+        { name: "File_5", pageCount: 6, application: "", selected: false },
+        { name: "File_6", pageCount: 7, application: "", selected: false },
+        { name: "File_7", pageCount: 8, application: "", selected: false },
+      ],
+    ],
     totalPages: 0,
     deadline: "",
     readyDeadline: "",
@@ -41,7 +76,7 @@ const ActiveProject = () => {
 
   const [formData, setFormData] = useState(initialFormData);
 
-  const [qcAllocatedHours, setQcAllocatedHours] = useState(0.25);
+  const [qcAllocatedHours, setQcAllocatedHours] = useState(0.0);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -76,167 +111,6 @@ const ActiveProject = () => {
     setFilteredProjects(result);
   }, [location.search, projects]);
 
-  const clientOptions = [
-    "PN",
-    "MMP Auburn",
-    "MMP Eastlake",
-    "MMP Kirkland",
-    "GN",
-    "DM",
-    "RN",
-    "NI",
-    "LB",
-    "SSS",
-    "Cpea",
-    "CV",
-  ];
-  const countryOptions = [
-    "United States",
-    "Canada",
-    "UK",
-    "Australia",
-    "Germany",
-    "India",
-  ];
-  const projectManagerOptions = [
-    "John Smith",
-    "Emily Johnson",
-    "Michael Brown",
-    "Sarah Wilson",
-    "David Lee",
-  ];
-  const taskOptions = [
-    "Source Creation",
-    "Callout",
-    "Prep",
-    "Image Creation",
-    "DTP",
-    "Image Localization",
-    "OVA",
-  ];
-  const languageOptions = [
-    "af",
-    "am",
-    "ar",
-    "az",
-    "be",
-    "bg",
-    "bn",
-    "bs",
-    "ca",
-    "cs",
-    "cy",
-    "da",
-    "de",
-    "el",
-    "en",
-    "en-US",
-    "en-GB",
-    "es",
-    "es-ES",
-    "es-MX",
-    "et",
-    "eu",
-    "fa",
-    "fi",
-    "fil",
-    "fr",
-    "fr-FR",
-    "fr-CA",
-    "ga",
-    "gl",
-    "gu",
-    "ha",
-    "he",
-    "hi",
-    "hr",
-    "hu",
-    "hy",
-    "id",
-    "ig",
-    "is",
-    "it",
-    "ja",
-    "jv",
-    "ka",
-    "kk",
-    "km",
-    "kn",
-    "ko",
-    "ku",
-    "ky",
-    "lo",
-    "lt",
-    "lv",
-    "mk",
-    "ml",
-    "mn",
-    "mr",
-    "ms",
-    "mt",
-    "my",
-    "ne",
-    "nl",
-    "no",
-    "or",
-    "pa",
-    "pl",
-    "ps",
-    "pt",
-    "pt-BR",
-    "pt-PT",
-    "ro",
-    "ru",
-    "sd",
-    "si",
-    "sk",
-    "sl",
-    "so",
-    "sq",
-    "sr",
-    "sr-Cyrl",
-    "sr-Latn",
-    "sv",
-    "sw",
-    "ta",
-    "te",
-    "th",
-    "tl",
-    "tr",
-    "uk",
-    "ur",
-    "uz",
-    "vi",
-    "xh",
-    "yo",
-    "zh",
-    "zh-Hans",
-    "zh-Hant",
-    "zh-TW",
-  ];
-  const applicationOptions = [
-    "Word",
-    "PPT",
-    "Excel",
-    "INDD",
-    "AI",
-    "PSD",
-    "AE",
-    "CDR",
-    "Visio",
-    "Project",
-    "FM",
-  ];
-  const currencyOptions = ["USD", "EUR", "GBP", "CAD", "AUD", "INR"];
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [clientFilter, setClientFilter] = useState("");
   const [taskFilter, setTaskFilter] = useState("");
@@ -260,18 +134,12 @@ const ActiveProject = () => {
     qcAllocatedHours: "",
     priority: "",
   });
+  console.log("batchEditValues", batchEditValues.handler);
   const [date, setDate] = useState("");
   const [hour, setHour] = useState("01");
   const [minute, setMinute] = useState("00");
   const [period, setPeriod] = useState("AM");
   const [qcDueDelay, setQcDueDelay] = useState("");
-
-  const scrollContainerRef = useRef(null);
-  const fakeScrollbarRef = useRef(null);
-  const tabScrollContainerRef = useRef(null);
-  const tabFakeScrollbarRef = useRef(null);
-  const tabFakeScrollbarInnerRef = useRef(null);
-  const [selectedDate, setSelectedDate] = useState(null);
 
   const statuses = [
     { key: "allstatus", label: "All Status " },
@@ -380,35 +248,8 @@ const ActiveProject = () => {
     setActivebutton(type);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (showEditModal !== false) {
-      setProjects(
-        projects.map((project) =>
-          project.id === showEditModal
-            ? {
-                ...project,
-                ...formData,
-                status: project.status,
-                id: project.id,
-              }
-            : project
-        )
-      );
-      setShowEditModal(false);
-    } else {
-      const newProject = {
-        ...formData,
-        id: projects.length + 1,
-        status: "created",
-        receivedDate:
-          formData.receivedDate || new Date().toISOString().split("T")[0],
-      };
-      setProjects([...projects, newProject]);
-      setShowCreateModal(false);
-    }
-    setFormData(initialFormData);
-  };
+  // Helper functions you need to implement:
+
 
   const handleDeleteProject = (id) => {
     const project = projects.find((p) => p.id === id);
@@ -439,13 +280,7 @@ const ActiveProject = () => {
         // Retain status
       }
 
-      // TODO: Move project to Created or Completed Projects list as per your app logic
-      // For now, just remove from active list
       setProjects(projects.filter((p) => p.id !== id));
-
-      // You can implement logic to add to created/completed lists here
-      // e.g. setCreatedProjects([...createdProjects, { ...project, files: updatedFiles }])
-      // or setCompletedProjects([...completedProjects, project])
     }
   };
 
@@ -481,7 +316,11 @@ const ActiveProject = () => {
     }
     setHasUnsavedChanges(true);
   };
-
+  console.log("slectedFiles", selectedFiles);
+  // console.log(
+  //   "slselectedFiles.some((f) => f.id === file.idectedFiles",
+  //   selectedFiles.some((f) => f.id === file.id)
+  // );
   const applyBatchEdits = () => {
     if (selectedProject && selectedFiles.length > 0) {
       const updatedFiles = selectedProject.files.map((file) => {
@@ -548,6 +387,7 @@ const ActiveProject = () => {
   const handleEditProject = (project) => {
     setEditedProject({ ...project });
     setIsEdit(project.id);
+    setShowEditModal(true); // <-- Add this line
   };
 
   const handleSaveProjectEdit = () => {
@@ -662,6 +502,29 @@ const ActiveProject = () => {
     fakeScrollbarRef: fakeScrollbarRef1,
   } = useSyncScroll(true);
 
+  function calculateQCDue(startDate, hours) {
+    if (!startDate || !hours) return "--";
+    const endDate = new Date(startDate);
+    endDate.setHours(endDate.getHours() + hours);
+    return endDate.toLocaleString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  }
+
+  const [dateTime, setDateTime] = useState(null);
+
+  const handleChange = (value) => {
+    setDateTime(value);
+  };
+
+  const [selectedDate, setSelectedDate] = useState(12);
+  const [selectedMonth, setSelectedMonth] = useState(6); // July (0-indexed)
+  const [selectedYear, setSelectedYear] = useState(2025);
+
   return (
     <div className="container-fluid py-4">
       {/* Edit Project Modal */}
@@ -681,115 +544,7 @@ const ActiveProject = () => {
                 ></button>
               </div>
               <div className="modal-body">
-                <div className="row g-3">
-                  <div className="col-md-12">
-                    <label className="form-label">Project Title</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      value={editedProject.title}
-                      onChange={(e) =>
-                        setEditedProject({
-                          ...editedProject,
-                          title: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Client</label>
-                    <select
-                      className="form-select"
-                      value={editedProject.client}
-                      onChange={(e) =>
-                        setEditedProject({
-                          ...editedProject,
-                          client: e.target.value,
-                        })
-                      }
-                    >
-                      {getUniqueValues("client").map((client, index) => (
-                        <option key={index} value={client}>
-                          {client}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Task</label>
-                    <select
-                      className="form-select"
-                      value={editedProject.task}
-                      onChange={(e) =>
-                        setEditedProject({
-                          ...editedProject,
-                          task: e.target.value,
-                        })
-                      }
-                    >
-                      {getUniqueValues("task").map((task, index) => (
-                        <option key={index} value={task}>
-                          {task}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Language</label>
-                    <select
-                      className="form-select"
-                      value={editedProject.language}
-                      onChange={(e) =>
-                        setEditedProject({
-                          ...editedProject,
-                          language: e.target.value,
-                        })
-                      }
-                    >
-                      {getUniqueValues("language").map((language, index) => (
-                        <option key={index} value={language}>
-                          {language}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Application</label>
-                    <select
-                      className="form-select"
-                      value={editedProject.application}
-                      onChange={(e) =>
-                        setEditedProject({
-                          ...editedProject,
-                          application: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="Web">Web</option>
-                      <option value="Mobile">Mobile</option>
-                      <option value="Desktop">Desktop</option>
-                    </select>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Due Date & Time</label>
-                    <div className="input-group">
-                      <input
-                        type="datetime-local"
-                        className="form-control"
-                        value={customToInputDate(editedProject.dueDate)}
-                        onChange={(e) => {
-                          setEditedProject({
-                            ...editedProject,
-                            dueDate: inputToCustomDate(e.target.value),
-                          });
-                        }}
-                      />
-                      <span className="input-group-text">
-                        <i className="fa fa-calendar"></i>
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                <EditModal />
               </div>
               <div className="modal-footer">
                 <button
@@ -822,552 +577,24 @@ const ActiveProject = () => {
         >
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Create New Project</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowCreateModal(false)}
-                ></button>
+              <div className="modal-header d-flex justify-content-between">
+                <div>
+                  <h5 className="modal-title">Create New Project</h5>
+                </div>
+
+                <div>
+                  {/* <button className="btn btn-light btn-sm me-4 ">
+                    <i className="fas fa-cog text-muted"></i>
+                  </button> */}
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => setShowCreateModal(false)}
+                  ></button>
+                </div>
               </div>
               <div className="modal-body">
-                <form onSubmit={handleSubmit}>
-                  {/* Project Title */}
-                  <div className=" row mb-3 col-md-12">
-                    <label htmlFor="title" className="form-label">
-                      Project Title <span className="text-danger">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="title"
-                      name="title"
-                      maxLength={80}
-                      required
-                      value={formData.title}
-                      onChange={handleInputChange}
-                      placeholder="Enter project title (max 80 chars)"
-                    />
-                    <div className="form-text text-white">
-                      Max allowed Character length – 80, (ignore or remove any
-                      special character by itself)
-                    </div>
-                  </div>
-
-                  {/* Client, Country, Project Manager */}
-                  <div className="row g-3 mb-3">
-                    <div className="col-md-4">
-                      <label htmlFor="client" className="form-label">
-                        Client <span className="text-danger">*</span>
-                      </label>
-                      <Select
-                        id="client"
-                        name="client"
-                        options={clientOptions.map((c) => ({
-                          value: c,
-                          label: c,
-                        }))}
-                        value={
-                          formData.client
-                            ? { value: formData.client, label: formData.client }
-                            : null
-                        }
-                        onChange={(opt) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            client: opt ? opt.value : "",
-                          }))
-                        }
-                        isSearchable
-                        placeholder="Select Client"
-                        styles={gradientSelectStyles}
-                      />
-                    </div>
-                    <div className="col-md-4">
-                      <label htmlFor="country" className="form-label">
-                        Country
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="country"
-                        name="country"
-                        value={formData.country}
-                        onChange={handleInputChange}
-                        placeholder=""
-                        readOnly
-                      />
-                    </div>
-                    <div className="col-md-4">
-                      <label htmlFor="projectManager" className="form-label">
-                        Project Manager
-                      </label>
-                      <Select
-                        id="projectManager"
-                        name="projectManager"
-                        options={projectManagerOptions.map((pm) => ({
-                          value: pm,
-                          label: pm,
-                        }))}
-                        value={
-                          formData.projectManager
-                            ? {
-                                value: formData.projectManager,
-                                label: formData.projectManager,
-                              }
-                            : null
-                        }
-                        onChange={(opt) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            projectManager: opt ? opt.value : "",
-                          }))
-                        }
-                        isSearchable
-                        placeholder=" Searchable Dropdown"
-                        styles={gradientSelectStyles}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Task & Applications */}
-                  <div className="row g-3 mb-3">
-                    <div className="col-md-6">
-                      <label htmlFor="task" className="form-label">
-                        Task <span className="text-danger">*</span>
-                      </label>
-                      <Select
-                        id="task"
-                        name="task"
-                        options={taskOptions.map((t) => ({
-                          value: t,
-                          label: t,
-                        }))}
-                        value={
-                          formData.tasks.length
-                            ? formData.tasks.map((t) => ({
-                                value: t,
-                                label: t,
-                              }))
-                            : []
-                        }
-                        onChange={(opts) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            tasks: opts ? opts.map((o) => o.value) : [],
-                          }))
-                        }
-                        isMulti
-                        isSearchable
-                        placeholder="Select Task(s)"
-                        styles={gradientSelectStyles}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label htmlFor="application" className="form-label">
-                        Applications <span className="text-danger">*</span>
-                      </label>
-                      <Select
-                        id="application"
-                        name="application"
-                        options={applicationOptions.map((a) => ({
-                          value: a,
-                          label: a,
-                        }))}
-                        value={
-                          formData.application.length
-                            ? formData.application.map((a) => ({
-                                value: a,
-                                label: a,
-                              }))
-                            : []
-                        }
-                        onChange={(opts) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            application: opts ? opts.map((o) => o.value) : [],
-                          }))
-                        }
-                        isMulti
-                        isSearchable
-                        placeholder="Select Application(s)"
-                        styles={gradientSelectStyles}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Languages */}
-                  <div className="mb-3">
-                    <label className="form-label">
-                      Languages <span className="text-danger">*</span>
-                    </label>
-                    <Select
-                      options={languageOptions.map((l) => ({
-                        value: l,
-                        label: l,
-                      }))}
-                      value={
-                        formData.languages.length
-                          ? formData.languages.map((l) => ({
-                              value: l,
-                              label: l,
-                            }))
-                          : []
-                      }
-                      onChange={(opts) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          languages: opts ? opts.map((o) => o.value) : [],
-                        }))
-                      }
-                      isMulti
-                      isSearchable
-                      placeholder="Select Languages"
-                      styles={gradientSelectStyles}
-                    />
-                    <div className="form-text text-white">
-                      {formData.languages.length} selected
-                    </div>
-                  </div>
-
-                  {/* File Details */}
-                  <div className="mb-3">
-                    <label className="form-label">File Details*:</label>
-                    <div className="d-flex align-items-center gap-2 mb-2 bg-[#201E7E]">
-                      <span>Count</span>
-                      <input
-                        type="number"
-                        min={1}
-                        className="form-control"
-                        style={{ width: 80 }}
-                        value={formData.files.length}
-                        onChange={(e) => {
-                          const count = Math.max(1, Number(e.target.value));
-                          setFormData((prev) => ({
-                            ...prev,
-                            files: Array.from(
-                              { length: count },
-                              (_, i) =>
-                                prev.files[i] || {
-                                  name: "",
-                                  pageCount: 0,
-                                  application: "",
-                                }
-                            ),
-                          }));
-                        }}
-                      />
-                      <button
-                        type="button"
-                        className="btn btn-success btn-sm"
-                        onClick={() => {
-                          /* handle excel upload */
-                        }}
-                      >
-                        Upload Excel
-                      </button>
-                    </div>
-                    <div className="table-responsive ">
-                      <table className="table table-bordered  ">
-                        <thead
-                          style={{ backgroundColor: "#201E7E", color: "white" }}
-                        >
-                          <tr
-                            style={{
-                              backgroundColor: "#201E7E",
-                              color: "white",
-                            }}
-                          >
-                            <th>S.No.</th>
-                            <th>File Name</th>
-                            <th>Pages</th>
-                            <th>Language</th>
-                            <th>Application</th>
-                            <th>Statuts</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {formData.files.map((file, idx) => (
-                            <tr key={idx}>
-                              <td>{idx + 1}</td>
-                              <td>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  value={file.name}
-                                  onChange={(e) => {
-                                    const files = [...formData.files];
-                                    files[idx].name = e.target.value;
-                                    setFormData((prev) => ({ ...prev, files }));
-                                  }}
-                                  placeholder="File Name"
-                                />
-                              </td>
-                              <td>th</td>
-                              <td>
-                                <input
-                                  type="number"
-                                  min={1}
-                                  className="form-control"
-                                  value={file.pageCount || ""}
-                                  onChange={(e) => {
-                                    const files = [...formData.files];
-                                    files[idx].pageCount = Number(
-                                      e.target.value
-                                    );
-                                    setFormData((prev) => ({ ...prev, files }));
-                                  }}
-                                  placeholder="Pages"
-                                />
-                              </td>
-                              <td>
-                                <select
-                                  className="form-select"
-                                  value={file.application || ""}
-                                  onChange={(e) => {
-                                    const files = [...formData.files];
-                                    files[idx].application = e.target.value;
-                                    setFormData((prev) => ({ ...prev, files }));
-                                  }}
-                                >
-                                  <option value="">Select</option>
-                                  {applicationOptions.map((app) => (
-                                    <option key={app} value={app}>
-                                      {app}
-                                    </option>
-                                  ))}
-                                </select>
-                              </td>
-                              <td>TYS</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-
-                      <div className="d-flex align-items-center gap-3 mt-3">
-                        <label
-                          className="text-white"
-                          style={{ fontWeight: "bold" }}
-                        >
-                          Deadline
-                        </label>
-                        <input
-                          type="datetime-local"
-                          className="form-control"
-                          style={{
-                            maxWidth: "250px",
-                            backgroundColor: "#181f3a",
-                            color: "white",
-                          }}
-                          value={formData.deadline || ""}
-                          onChange={(e) =>
-                            setFormData((prev) => ({
-                              ...prev,
-                              deadline: e.target.value,
-                            }))
-                          }
-                        />
-                        <button
-                          className="btn"
-                          style={{
-                            background:
-                              "linear-gradient(90deg, rgba(123,97,255,1) 0%, rgba(217,75,255,1) 100%)",
-                            color: "white",
-                            borderRadius: "10px",
-                            padding: "6px 18px",
-                          }}
-                          onClick={handleApplyToSelectedFiles}
-                        >
-                          Apply to Selected Files
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Total Pages */}
-                  <div className="mb-3">
-                    <div className="row g-3">
-                      <div className="col-md-4">
-                        <label className="form-label">
-                          Total Pages Per Lang
-                        </label>
-                        <input
-                          type="number"
-                          className="form-control"
-                          value={formData.files.reduce(
-                            (sum, file) => sum + (file.pageCount || 0),
-                            0
-                          )}
-                          readOnly
-                        />
-                      </div>
-                      <div className="col-md-4">
-                        <label className="form-label">
-                          Total Project Pages
-                        </label>
-                        <input
-                          type="number"
-                          className="form-control"
-                          value={
-                            formData.files.reduce(
-                              (sum, file) => sum + (file.pageCount || 0),
-                              0
-                            ) * (formData.languages.length || 1)
-                          }
-                          readOnly
-                        />
-                      </div>
-                    </div>
-                    <div className="form-text text-white">
-                      Total Project Pages = Total Pages × Language Count
-                    </div>
-                  </div>
-
-                  {/* Received Date, Server Path, Notes */}
-                  <div className="row g-3 mb-3">
-                    <div className="col-md-4">
-                      <label className="form-label">
-                        Received Date <span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        name="receivedDate"
-                        value={formData.receivedDate}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="col-md-8">
-                      <label className="form-label">
-                        Server Path <span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="serverPath"
-                        value={formData.serverPath}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="/projects/client/project-name"
-                      />
-                    </div>
-                    <div className="col-12">
-                      <label className="form-label">Notes</label>
-                      <textarea
-                        className="form-control"
-                        name="notes"
-                        rows={3}
-                        value={formData.notes}
-                        onChange={handleInputChange}
-                        placeholder="Add any additional notes or instructions..."
-                      />
-                    </div>
-                  </div>
-
-                  {/* Financial Section */}
-                  <div className="row g-3 mb-3">
-                    <div className="col-md-3">
-                      <label className="form-label">Estimated Hrs</label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        step="0.25"
-                        value={formData.estimatedHrs || ""}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            estimatedHrs: e.target.value,
-                          }))
-                        }
-                        placeholder="00.00"
-                      />
-                      <div className="form-text text-white">
-                        (in multiple of 0.25 only)
-                      </div>
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label">Per page Page Rate</label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        step="0.01"
-                        value={formData.rate || ""}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            rate: e.target.value,
-                          }))
-                        }
-                        placeholder="00.00"
-                      />
-                      <div className="form-text text-white">
-                        (with only 2 decimals)
-                      </div>
-                    </div>
-                    <div className="col-md-2">
-                      <label className="form-label">Currency</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={formData.currency}
-                        readOnly
-                        placeholder="Auto updated from Client details"
-                      />
-                    </div>
-                    <div className="col-md-2">
-                      <label className="form-label">Total Cost</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={formData.cost.toFixed(2)}
-                        readOnly
-                        placeholder="Auto Calculated"
-                      />
-                    </div>
-                    <div className="col-md-2">
-                      <label className="form-label">Cost in INR</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={formData.inrCost.toFixed(2)}
-                        readOnly
-                        placeholder="Auto Calculated"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Save Button */}
-                  <div className="d-flex justify-content-between">
-                    <div className="d-flex gap-3">
-                      <label
-                        className="text-white"
-                        style={{ fontWeight: "bold" }}
-                      >
-                        Deadline
-                      </label>
-                      <input
-                        type="datetime-local"
-                        className="form-control"
-                        style={{
-                          maxWidth: "250px",
-                          backgroundColor: "#181f3a",
-                          color: "white",
-                        }}
-                        value={formData.deadline || ""}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            deadline: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <button type="submit" className="btn btn-warning fw-bold">
-                      Save changes
-                    </button>
-                  </div>
-                </form>
+                <CreateNewProject />
               </div>
             </div>
           </div>
@@ -1381,7 +608,7 @@ const ActiveProject = () => {
           <div className="d-flex flex-column flex-sm-row gap-2">
             <Button
               className="gradient-button"
-              onClick={handleCreateNewProject}
+            onClick={handleCreateNewProject}
             >
               <i className="fas fa-plus me-2"></i> Create New Project
             </Button>
@@ -1390,107 +617,92 @@ const ActiveProject = () => {
       </div>
 
       {/* Filters */}
-      <div className="row mb-4">
-        <div className="col-md-6">
-          <div className="d-flex  gap-2">
-            <button
-              className={`gradient-button ${
-                activeButton === "all" ? "active-filter" : ""
-              }`}
-              onClick={() => handleCardFilter("all")}
-            >
-              All
-            </button>
-            <button
-              className={`gradient-button ${
-                activeButton === "nearDue" ? "active-filter" : ""
-              }`}
-              onClick={() => handleCardFilter("nearDue")}
-            >
-              Near Due
-            </button>
-            <button
-              className={`gradient-button ${
-                activeButton === "overdue" ? "active-filter" : ""
-              }`}
-              onClick={() => handleCardFilter("overdue")}
-            >
-              Over Due
-            </button>
-            <button
-              className={`gradient-button ${
-                activeButton === "Adobe" ? "active-filter" : ""
-              }`}
-              onClick={() => handleCardFilter("Adobe")}
-            >
-              Adobe
-            </button>
-            <button
-              className={`gradient-button ${
-                activeButton === "MSOffice" ? "active-filter" : ""
-              }`}
-              onClick={() => handleCardFilter("MSOffice")}
-            >
-              MS Office
-            </button>
+      <div className="row mb-4 gy-3">
+        {/* Buttons Section */}
+        <div className="col-12 col-lg-6">
+          <div className="d-flex flex-wrap gap-2 justify-content-start">
+            {["all", "nearDue", "overdue", "Adobe", "MSOffice"].map((btn) => (
+              <button
+                key={btn}
+                className={`gradient-button ${activeButton === btn ? "active-filter" : ""
+                  }`}
+                onClick={() => handleCardFilter(btn)}
+              >
+                {btn === "all"
+                  ? "All"
+                  : btn === "nearDue"
+                    ? "Near Due"
+                    : btn === "overdue"
+                      ? "Over Due"
+                      : btn === "Adobe"
+                        ? "Adobe"
+                        : "MS Office"}
+              </button>
+            ))}
           </div>
         </div>
-        <div
-          className="col-md-6
-         d-flex gap-2"
-        >
-          <div className=" ">
-            <select
-              className="form-select"
-              value={clientFilter}
-              onChange={(e) => setClientFilter(e.target.value)}
-            >
-              <option value="">All Clients</option>
-              {getUniqueValues("client").map((client, index) => (
-                <option key={index} value={client}>
-                  {client}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="">
-            <select
-              className="form-select"
-              value={taskFilter}
-              onChange={(e) => setTaskFilter(e.target.value)}
-            >
-              <option value="">All Tasks</option>
-              {getUniqueValues("task").map((task, index) => (
-                <option key={index} value={task}>
-                  {task}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="  ">
-            <select
-              className="form-select"
-              value={languageFilter}
-              onChange={(e) => setLanguageFilter(e.target.value)}
-            >
-              {statuses.map((status, index) => (
-                <option key={index} value={status.key}>
-                  {status.label}
-                </option>
-              ))}
-            </select>
-          </div>
 
-          <div className="">
-            <Select
-              options={applicationsOptio}
-              isMulti={false} // Single select
-              className="basic-single-select"
-              classNamePrefix="select"
-              value={selectedApplications}
-              placeholder="Select"
-              onChange={(selected) => setSelectedApplications(selected)}
-            />
+        {/* Filter Dropdowns Section */}
+        <div className="col-12 col-lg-6">
+          <div className="row g-2">
+            {/* Client Filter */}
+            <div className="col-12 col-sm-6 col-md-3">
+              <select
+                className="form-select"
+                value={clientFilter}
+                onChange={(e) => setClientFilter(e.target.value)}
+              >
+                <option value="">All Clients</option>
+                {getUniqueValues("client").map((client, index) => (
+                  <option key={index} value={client}>
+                    {client}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Task Filter */}
+            <div className="col-12 col-sm-6 col-md-3">
+              <select
+                className="form-select"
+                value={taskFilter}
+                onChange={(e) => setTaskFilter(e.target.value)}
+              >
+                <option value="">All Tasks</option>
+                {getUniqueValues("task").map((task, index) => (
+                  <option key={index} value={task}>
+                    {task}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Status/Language Filter */}
+            <div className="col-12 col-sm-6 col-md-3">
+              <select
+                className="form-select"
+                value={languageFilter}
+                onChange={(e) => setLanguageFilter(e.target.value)}
+              >
+                {statuses.map((status, index) => (
+                  <option key={index} value={status.key}>
+                    {status.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Application (Select component) */}
+            <div className="col-12 col-sm-6 col-md-3">
+              <Select
+                options={applicationsOptio}
+                isMulti={false}
+                classNamePrefix="select"
+                value={selectedApplications}
+                placeholder="Select App"
+                onChange={(selected) => setSelectedApplications(selected)}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -1547,8 +759,16 @@ const ActiveProject = () => {
               className="table-gradient-bg align-middle mt-0 table table-bordered table-hover"
               style={{ minWidth: 1000 }}
             >
-              <thead className="table">
-                <tr>
+              <thead
+                className="table-gradient-bg table"
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 0,
+                  backgroundColor: "#fff", // Match your background color
+                }}
+              >
+                <tr className="text-center">
                   <th>S. No.</th>
                   <th>Project Title</th>
                   <th>Client</th>
@@ -1570,7 +790,9 @@ const ActiveProject = () => {
                   <React.Fragment key={project.id}>
                     <tr
                       className={
-                        expandedRow === project.id ? "table-active" : ""
+                        expandedRow === project.id
+                          ? "table-active text-center"
+                          : ""
                       }
                     >
                       <td>{index + 1}</td>
@@ -1594,13 +816,12 @@ const ActiveProject = () => {
                         >
                           <div
                             className={`progress-bar 
-                          ${
-                            project.progress < 30
-                              ? "bg-danger"
-                              : project.progress < 70
-                              ? "bg-warning"
-                              : "bg-success"
-                          }`}
+                          ${project.progress < 30
+                                ? "bg-danger"
+                                : project.progress < 70
+                                  ? "bg-warning"
+                                  : "bg-success"
+                              }`}
                             role="progressbar"
                             style={{ width: `${project.progress}%` }}
                             aria-valuenow={project.progress}
@@ -1618,11 +839,10 @@ const ActiveProject = () => {
                             onClick={() => handleViewProject(project)}
                           >
                             <i
-                              className={`fas ${
-                                expandedRow === project.id
-                                  ? "fa-chevron-up"
-                                  : "fa-eye"
-                              }`}
+                              className={`fas ${expandedRow === project.id
+                                ? "fa-chevron-up"
+                                : "fa-eye"
+                                }`}
                             ></i>
                           </button>
                           <button
@@ -1664,11 +884,117 @@ const ActiveProject = () => {
                                 )}
                               </div>
 
+                              {/* Batch Edit Controls */}
+                              {/* {selectedFiles.length > 0 && (
+                                <div className="row g-3 mb-3 align-items-center">
+                                  <div className="col-md-3">
+                                    <label className="form-label">
+                                      Batch Handler
+                                    </label>
+                                    <select
+                                      className="form-select form-select-sm"
+                                      value={file.handler ?? ""}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+
+                                        // 1. Update the files array
+                                        const updatedFiles = project.files.map(
+                                          (f) => {
+                                            if (
+                                              selectedFiles.some(
+                                                (sf) => sf.id === f.id
+                                              )
+                                            ) {
+                                              return { ...f, handler: value };
+                                            }
+                                            return f;
+                                          }
+                                        );
+
+                                        // 2. Update the selected project state
+                                        setSelectedProject((prevProject) => ({
+                                          ...prevProject,
+                                          files: updatedFiles,
+                                        }));
+
+                                        // 3. Optionally update selectedFiles too if you're relying on it elsewhere
+                                        const updatedSelectedFiles =
+                                          selectedFiles.map((f) => ({
+                                            ...f,
+                                            handler: value,
+                                          }));
+                                        setSelectedFiles(updatedSelectedFiles);
+
+                                        // 4. Flag for unsaved changes
+                                        setHasUnsavedChanges(true);
+                                      }}
+                                    >
+                                      <option value="">Not Assigned</option>
+                                      <option value="John Doe">John Doe</option>
+                                      <option value="Jane Smith">
+                                        Jane Smith
+                                      </option>
+                                      <option value="Mike Johnson">
+                                        Mike Johnson
+                                      </option>
+                                    </select>
+                                  </div>
+
+                                  <div className="col-md-3">
+                                    <label className="form-label">
+                                      Batch QA Reviewer
+                                    </label>
+                                    <select
+                                      className="form-select form-select-sm"
+                                      value={file.qaReviewer ?? ""}
+                                      onChange={(e) => {
+                                        const value = e.target.value;
+
+                                        const updatedFiles = project.files.map(
+                                          (f) =>
+                                            selectedFiles.some(
+                                              (sf) => sf.id === f.id
+                                            )
+                                              ? { ...f, qaReviewer: value }
+                                              : f
+                                        );
+
+                                        setSelectedProject((prev) => ({
+                                          ...prev,
+                                          files: updatedFiles,
+                                        }));
+
+                                        setHasUnsavedChanges(true);
+                                      }}
+                                    >
+                                      <option value="">Not Assigned</option>
+                                      <option value="Sarah Williams">
+                                        Sarah Williams
+                                      </option>
+                                      <option value="David Brown">
+                                        David Brown
+                                      </option>
+                                      <option value="Emily Davis">
+                                        Emily Davis
+                                      </option>
+                                    </select>
+                                  </div>
+                                </div>
+                              )} */}
+
                               {/* Files Table */}
                               <div className="table-responsive">
                                 <table className="table table-sm table-striped table-hover">
-                                  <thead className="table-light">
-                                    <tr>
+                                  <thead
+                                    className="table-gradient-bg table"
+                                    style={{
+                                      position: "sticky",
+                                      top: 0,
+                                      zIndex: 0,
+                                      backgroundColor: "#fff",
+                                    }}
+                                  >
+                                    <tr className="text-center">
                                       <th>
                                         <input
                                           type="checkbox"
@@ -1708,8 +1034,8 @@ const ActiveProject = () => {
                                           selectedFiles.some(
                                             (f) => f.id === file.id
                                           )
-                                            ? "table-primary"
-                                            : ""
+                                            ? "table-primary text-center"
+                                            : "text-center"
                                         }
                                       >
                                         <td>
@@ -1731,62 +1057,22 @@ const ActiveProject = () => {
                                         <td>
                                           <select
                                             className="form-select form-select-sm"
-                                            onChange={(e) => {
-                                              const newHandler = e.target.value;
-
-                                              const updatedFiles =
-                                                project.files.map((f) =>
-                                                  f.checked
-                                                    ? {
-                                                        ...f,
-                                                        handler: newHandler,
-                                                      }
-                                                    : f
-                                                );
-
-                                              setSelectedProject({
-                                                ...project,
-                                                files: updatedFiles,
-                                              });
-
-                                              setHasUnsavedChanges(true);
-                                            }}
+                                            value={fileHandlers[file.id]}
+                                            onChange={(e) =>
+                                              handleHandlerChange(file.id, e.target.value)
+                                            }
                                           >
-                                            <option value="">
-                                              Select Handler
-                                            </option>
-                                            <option value="handler1">
-                                              Handler 1
-                                            </option>
-                                            <option value="handler2">
-                                              Handler 2
-                                            </option>
-                                            <option value="handler3">
-                                              Handler 3
-                                            </option>
+                                            {assignees.map((assignee, index) => (
+                                              <option key={index} value={assignee.value}>
+                                                {assignee.label}
+                                              </option>
+                                            ))}
                                           </select>
+
                                         </td>
+
                                         <td>
-                                          <select
-                                            className="form-select form-select-sm"
-                                            onChange={(e) => {
-                                              const updatedFiles =
-                                                project.files.map((f) =>
-                                                  f.id === file.id
-                                                    ? {
-                                                        ...f,
-                                                        qaReviewer:
-                                                          e.target.value,
-                                                      }
-                                                    : f
-                                                );
-                                              setSelectedProject({
-                                                ...project,
-                                                files: updatedFiles,
-                                              });
-                                              setHasUnsavedChanges(true);
-                                            }}
-                                          >
+                                          <select className="form-select form-select-sm">
                                             <option value="">
                                               Not Assigned
                                             </option>
@@ -1809,163 +1095,94 @@ const ActiveProject = () => {
                               </div>
 
                               {/* Batch Edit Controls */}
-                              <div className="row g-3 mb-3">
+                              <div className="row g-3 mb-1">
                                 <div className="col-md-2">
                                   <label className="form-label">
                                     Ready for QC Due
                                   </label>
-                                  <input
-                                    type="datetime-local"
-                                    className="form-control"
-                                    value={readyForQcDueInput}
-                                    onChange={(e) =>
-                                      setReadyForQcDueInput(e.target.value)
-                                    }
-                                  />
-                                  <div className="small">
-                                    Format: hh:mm DD-MM-YY
-                                  </div>
                                 </div>
                                 <div className="col-md-2">
                                   <label className="form-label">
                                     QC Allocated Hours
                                   </label>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">QC Due</label>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">Priority</label>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">Actions</label>
+                                </div>
+                              </div>
+
+                              {/* Input Row */}
+                              <div className="row g-3 mb-3 align-items-start">
+                                <div className="col-md-2">
+                                  <DatePicker
+                                    selected={selectedDateTime}
+                                    onChange={(date) =>
+                                      setSelectedDateTime(date)
+                                    }
+                                    showTimeSelect
+                                    timeFormat="HH:mm"
+                                    timeIntervals={15}
+                                    dateFormat="h:mm aa dd-MM-yyyy"
+                                    placeholderText="Select date and time"
+                                    className="form-control"
+                                  />
+                                </div>
+
+                                <div className="col-md-2">
                                   <input
                                     type="number"
                                     className="form-control"
                                     step="0.25"
                                     min="0"
+                                    placeholder="0.00"
                                     value={qcAllocatedHours}
                                     onChange={(e) => {
                                       const val = parseFloat(e.target.value);
-                                      if (val >= 0 && val % 0.25 === 0)
+                                      if (
+                                        !isNaN(val) &&
+                                        val >= 0 &&
+                                        val % 0.25 === 0
+                                      ) {
                                         setQcAllocatedHours(val);
+                                      }
                                     }}
-                                    placeholder="0.00"
                                   />
-                                  <div className="small">
-                                    (in multiple of 0.25 only)
+                                  <div className="small text-white">
+                                    (in multiple of 0.00 only)
                                   </div>
                                 </div>
+
                                 <div className="col-md-2">
-                                  <label className="form-label">Handler</label>
-                                  <select
-                                    className="form-select"
-                                    value={batchEditValues.handler}
-                                    onChange={(e) =>
-                                      setBatchEditValues({
-                                        ...batchEditValues,
-                                        handler: e.target.value,
-                                      })
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="John Doe">John Doe</option>
-                                    <option value="Jane Smith">
-                                      Jane Smith
-                                    </option>
-                                    <option value="Mike Johnson">
-                                      Mike Johnson
-                                    </option>
+                                  <div className="form-control fw-bold">
+                                    {calculateQCDue(
+                                      selectedDateTime,
+                                      qcAllocatedHours
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="col-md-2">
+                                  <select className="form-select">
+                                    <option>Low</option>
+                                    <option>Mid</option>
+                                    <option>High</option>
                                   </select>
                                 </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">
-                                    QA Reviewer
-                                  </label>
-                                  <select
-                                    className="form-select"
-                                    value={batchEditValues.qaReviewer}
-                                    onChange={(e) =>
-                                      setBatchEditValues({
-                                        ...batchEditValues,
-                                        qaReviewer: e.target.value,
-                                      })
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="Sarah Williams">
-                                      Sarah Williams
-                                    </option>
-                                    <option value="David Brown">
-                                      David Brown
-                                    </option>
-                                    <option value="Emily Davis">
-                                      Emily Davis
-                                    </option>
-                                  </select>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">Status</label>
-                                  <select
-                                    className="form-select"
-                                    value={batchEditValues.status || ""}
-                                    onChange={(e) =>
-                                      setBatchEditValues({
-                                        ...batchEditValues,
-                                        status: e.target.value,
-                                      })
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="In Progress">
-                                      In Progress
-                                    </option>
-                                    <option value="Approved">Approved</option>
-                                    <option value="Rejected">Rejected</option>
-                                  </select>
-                                </div>
-                                <div className="col-md-2 d-flex align-items-end">
-                                  <button
-                                    className="btn btn-info"
-                                    disabled={selectedFiles.length === 0}
-                                    onClick={applyBatchEdits}
-                                  >
-                                    Apply to Selected
+
+                                <div className="col-md-2 d-flex gap-2">
+                                  <button className="btn btn-success w-100">
+                                    Save
+                                  </button>
+                                  <button className="btn btn-secondary w-100">
+                                    Close
                                   </button>
                                 </div>
-                              </div>
-                            </div>
-
-                            {/* Footer buttons */}
-                            <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 bg-card px-3 py-2 rounded-3 border">
-                              <div />
-                              <div className="d-flex gap-2">
-                                <button
-                                  type="button"
-                                  className="btn btn-secondary rounded-5 px-4"
-                                  onClick={() => {
-                                    setExpandedRow(null);
-                                    setSelectedFiles([]);
-                                    setHasUnsavedChanges(false);
-                                  }}
-                                >
-                                  Close
-                                </button>
-                                <button
-                                  type="button"
-                                  className="btn btn-primary rounded-5 px-4"
-                                  disabled={!hasUnsavedChanges}
-                                  onClick={() => {
-                                    // Save changes to main projects list
-                                    setProjects(
-                                      projects.map((p) =>
-                                        p.id === project.id
-                                          ? {
-                                              ...project,
-                                              files: selectedProject.files,
-                                            }
-                                          : p
-                                      )
-                                    );
-                                    setHasUnsavedChanges(false);
-                                    setExpandedRow(null);
-                                    setSelectedFiles([]);
-                                  }}
-                                >
-                                  Save Changes
-                                </button>
                               </div>
                             </div>
                           </div>
@@ -2104,30 +1321,30 @@ const generateDummyProjects = (count) => {
     const formattedDueDate = `${hours.toString().padStart(2, "0")}:${minutes
       .toString()
       .padStart(2, "0")} ${hours >= 12 ? "PM" : "AM"} ${dueDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+        .getDate()
+        .toString()
+        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
 
     // Add random readyDeadline, qcHrs, qcDueDate, status
     const readyDeadline = `${(hours + 1) % 24}:${minutes
       .toString()
       .padStart(2, "0")} ${hours + 1 >= 12 ? "PM" : "AM"} ${dueDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+        .getDate()
+        .toString()
+        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
     const qcHrs = Math.floor(Math.random() * 15) + 1;
     const qcDueDate = `${(hours + 2) % 24}:${minutes
       .toString()
       .padStart(2, "0")} ${hours + 2 >= 12 ? "PM" : "AM"} ${dueDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+        .getDate()
+        .toString()
+        .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
     const status = statuses[Math.floor(Math.random() * statuses.length)];
 
     const fileCount = Math.floor(Math.random() * 5) + 1;
@@ -2144,7 +1361,7 @@ const generateDummyProjects = (count) => {
         stage: stages[Math.floor(Math.random() * stages.length)],
         assigned: new Date(
           dueDate.getTime() -
-            Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
+          Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
         ).toLocaleDateString(),
         handler: handler,
         qaReviewer: qaReviewers[Math.floor(Math.random() * qaReviewers.length)],

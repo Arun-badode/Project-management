@@ -18,6 +18,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   
    <link
         href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css"
@@ -165,6 +166,16 @@
   </script>
   <script src="https://unpkg.com/primereact/core/core.min.js"></script>
   <script src="https://unpkg.com/primereact/confirmdialog/confirmdialog.min.js"></script>
+
+    <script>
+    flatpickr("#datetimePicker", {
+      enableTime: true,
+      dateFormat: "h:i K d-m-Y", // Format: 12:00 AM 19-07-2025
+      minuteIncrement: 15,       // Show 00, 15, 30, 45
+      time_24hr: false,          // 12-hour format with AM/PM
+      defaultDate: new Date(),   // Show current date-time by default
+    });
+  </script>
 </body>
 
 </html>

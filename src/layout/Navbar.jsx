@@ -157,7 +157,7 @@ const Navbar = ({ toggleSidebar }) => {
               style={{ fontSize: "22px", textDecoration: "none" }}
               aria-label="Notifications"
             >
-              <i className="fa-regular fa-bell"></i>
+              <i className="fa-regular fa-bell" style={{fontSize:"x-large"}}></i>
             </a>
 
             {/* Profile Dropdown */}
@@ -173,7 +173,7 @@ const Navbar = ({ toggleSidebar }) => {
                 aria-label="Profile Menu"
               >
                 <div className="position-relative">
-                  <i className="fa-solid fa-circle-user"></i>
+                  <i className="fa-solid fa-circle-user" style={{fontSize:"x-large"}}></i>
                   <span
                     className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success"
                     style={{ fontSize: "8px", width: "12px", height: "12px" }}

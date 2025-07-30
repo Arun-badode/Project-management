@@ -1,8 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import * as echarts from "echarts";
 import useSyncScroll from "../Hooks/useSyncScroll";
-
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Select from "react-select";
+
+import "./Project.css";
+import Setting from "./Setting";
+import CreateNewProject from "./CreateNewProject";
 
 const Project = () => {
   const [activeTab, setActiveTab] = useState("created");
@@ -10,7 +15,15 @@ const Project = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(true);
+  const [selectedDateTime, setSelectedDateTime] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [selectedClient, setSelectedClient] = useState("");
+  const [selectedTask, setSelectedTask] = useState("");
+  const [selectedApplications, setSelectedApplications] = useState([]);
+
+  const clientList = ["Client A", "Client B"];
+  const taskList = ["Design", "Translation", "Proofreading"];
+  const applicationList = ["Adobe", "MS Word", "Figma"];
   const searchInputRef = useRef(null);
   const chartRef = useRef(null);
 
@@ -121,6 +134,15 @@ const Project = () => {
     setList(newList);
   };
 
+  const handleApplyToSelectedFiles = () => {
+    const selected = formData.files.filter((f) => f.selected);
+    if (selected.length === 0) {
+      alert("No files selected.");
+      return;
+    }
+    // Apply deadline logic here
+    alert(`Deadline ${formData.deadline} applied to selected files.`);
+  };
   // Sample data for projects
   const [projects, setProjects] = useState([
     {
@@ -241,20 +263,7 @@ const Project = () => {
   });
 
   // Options for dropdowns
-  const clientOptions = [
-    "PN",
-    "MMP Auburn",
-    "MMP Eastlake",
-    "MMP Kirkland",
-    "GN",
-    "DM",
-    "RN",
-    "NI",
-    "LB",
-    "SSS",
-    "Cpea",
-    "CV",
-  ];
+
   const countryOptions = [
     "United States",
     "Canada",
@@ -263,135 +272,7 @@ const Project = () => {
     "Germany",
     "India",
   ];
-  const projectManagerOptions = [
-    "John Smith",
-    "Emily Johnson",
-    "Michael Brown",
-    "Sarah Wilson",
-    "David Lee",
-  ];
-  const taskOptions = [
-    "Source Creation",
-    "Callout",
-    "Prep",
-    "Image Creation",
-    "DTP",
-    "Image Localization",
-    "OVA",
-  ];
-  const languageOptions = [
-    "af",
-    "am",
-    "ar",
-    "az",
-    "be",
-    "bg",
-    "bn",
-    "bs",
-    "ca",
-    "cs",
-    "cy",
-    "da",
-    "de",
-    "el",
-    "en",
-    "en-US",
-    "en-GB",
-    "es",
-    "es-ES",
-    "es-MX",
-    "et",
-    "eu",
-    "fa",
-    "fi",
-    "fil",
-    "fr",
-    "fr-FR",
-    "fr-CA",
-    "ga",
-    "gl",
-    "gu",
-    "ha",
-    "he",
-    "hi",
-    "hr",
-    "hu",
-    "hy",
-    "id",
-    "ig",
-    "is",
-    "it",
-    "ja",
-    "jv",
-    "ka",
-    "kk",
-    "km",
-    "kn",
-    "ko",
-    "ku",
-    "ky",
-    "lo",
-    "lt",
-    "lv",
-    "mk",
-    "ml",
-    "mn",
-    "mr",
-    "ms",
-    "mt",
-    "my",
-    "ne",
-    "nl",
-    "no",
-    "or",
-    "pa",
-    "pl",
-    "ps",
-    "pt",
-    "pt-BR",
-    "pt-PT",
-    "ro",
-    "ru",
-    "sd",
-    "si",
-    "sk",
-    "sl",
-    "so",
-    "sq",
-    "sr",
-    "sr-Cyrl",
-    "sr-Latn",
-    "sv",
-    "sw",
-    "ta",
-    "te",
-    "th",
-    "tl",
-    "tr",
-    "uk",
-    "ur",
-    "uz",
-    "vi",
-    "xh",
-    "yo",
-    "zh",
-    "zh-Hans",
-    "zh-Hant",
-    "zh-TW",
-  ];
-  const applicationOptions = [
-    "Word",
-    "PPT",
-    "Excel",
-    "INDD",
-    "AI",
-    "PSD",
-    "AE",
-    "CDR",
-    "Visio",
-    "Project",
-    "FM",
-  ];
+
   const currencyOptions = ["USD", "EUR", "GBP", "CAD", "AUD", "INR"];
 
   // Filter projects based on active tab and search query
@@ -514,13 +395,6 @@ const Project = () => {
   }, [formData.rate, formData.totalPages, formData.currency]);
 
   // Handle form input changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
 
   // Handle multi-select changes
   const handleMultiSelectChange = (name, value) => {
@@ -570,98 +444,7 @@ const Project = () => {
   };
 
   // Submit form
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (showEditModal !== false) {
-      // Update existing project
-      setProjects(
-        projects.map((project) =>
-          project.id === showEditModal
-            ? {
-                ...project,
-                ...formData,
-                status: project.status,
-                id: project.id,
-              }
-            : project
-        )
-      );
-      setShowEditModal(false);
-    } else {
-      // Create new project
-      const newProject = {
-        ...formData,
-        id: projects.length + 1,
-        status: "created",
-        receivedDate:
-          formData.receivedDate || new Date().toISOString().split("T")[0],
-      };
-      setProjects([...projects, newProject]);
-      setShowCreateModal(false);
-    }
-    // Reset form
-    setFormData({
-      title: "",
-      client: "",
-      country: "",
-      projectManager: "",
-      tasks: [],
-      languages: [],
-      application: [],
-      files: [{ name: "", pageCount: 0 }],
-      totalPages: 0,
-      receivedDate: new Date().toISOString().split("T")[0],
-      serverPath: "",
-      notes: "",
-      rate: 0,
-      currency: "USD",
-      cost: 0,
-      inrCost: 0,
-    });
-  };
 
-  const gradientSelectStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      background: "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
-      color: "white",
-      borderColor: state.isFocused ? "#ffffff66" : "#ffffff33",
-      boxShadow: state.isFocused ? "0 0 0 1px #ffffff66" : "none",
-      minHeight: "38px",
-    }),
-    singleValue: (provided) => ({
-      ...provided,
-      color: "white",
-    }),
-    multiValue: (provided) => ({
-      ...provided,
-      backgroundColor: "#1b2f6e",
-    }),
-    multiValueLabel: (provided) => ({
-      ...provided,
-      color: "white",
-    }),
-    placeholder: (provided) => ({
-      ...provided,
-      color: "white",
-    }),
-    input: (provided) => ({
-      ...provided,
-      color: "white",
-    }),
-    option: (provided, state) => ({
-      ...provided,
-      backgroundColor: state.isFocused
-        ? "#293d80"
-        : "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
-      color: "white",
-    }),
-    menu: (provided) => ({
-      ...provided,
-      background: "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
-      color: "white",
-    }),
-  };
   // Handle edit project
   const handleEditProject = (projectId) => {
     const projectToEdit = projects.find((p) => p.id === projectId);
@@ -755,8 +538,58 @@ const Project = () => {
     fakeScrollbarRef: fakeScrollbarRef4,
   } = useSyncScroll(activeTab === "completed");
 
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+
+  const [selectedMonth, setSelectedMonth] = useState(6); // July (0-indexed)
+
+  const getFirstDayOfMonth = (month, year) => {
+    const firstDay = new Date(year, month, 1).getDay();
+    return firstDay === 0 ? 6 : firstDay - 1; // Convert Sunday (0) to be last (6)
+  };
+
+  // const generateCalendarDays = () => {
+  //   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
+  //   const firstDay = getFirstDayOfMonth(selectedMonth, selectedYear);
+  //   const days = [];
+
+  //   // Previous month's trailing days
+  //   const prevMonth = selectedMonth === 0 ? 11 : selectedMonth - 1;
+  //   const prevYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear;
+  //   const daysInPrevMonth = getDaysInMonth(prevMonth, prevYear);
+
+  //   for (let i = firstDay - 1; i >= 0; i--) {
+  //     days.push({
+  //       day: daysInPrevMonth - i,
+  //       isCurrentMonth: false,
+  //       isNextMonth: false,
+  //     });
+  //   }
+
+  //   // Current month days
+  //   for (let day = 1; day <= daysInMonth; day++) {
+  //     days.push({
+  //       day,
+  //       isCurrentMonth: true,
+  //       isNextMonth: false,
+  //     });
+  //   }
+
+  //   // Next month's leading days
+  //   const remainingDays = 42 - days.length;
+  //   for (let day = 1; day <= remainingDays; day++) {
+  //     days.push({
+  //       day,
+  //       isCurrentMonth: false,
+  //       isNextMonth: true,
+  //     });
+  //   }
+
+  //   return days;
+  // };
+
   return (
-    <div className="min-vh-100 bg-main mt-4">
+    <div className="conatiner-fluid bg-main mt-4">
       {/* Header */}
       <div className="bg-white shadow-sm bg-main">
         <div className="container-fluid py-2">
@@ -851,7 +684,7 @@ const Project = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container pt-5 pb-4">
+      <div className="container-fluid pt-5 pb-4">
         {/* Search Results Indicator */}
         {searchQuery && (
           <div className="alert alert-info mb-4">
@@ -896,95 +729,6 @@ const Project = () => {
               </div>
             ) : (
               <div className="card">
-                {/* <div className="table-responsive" style={{ overflowX: 'auto' }}>
-                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                    <thead className="bg-light table-gradient-bg">
-                      <tr>
-                        <th>Project Title</th>
-                        <th>Client</th>
-                        <th>Country</th>
-                        <th>Project Manager</th>
-                        <th>Tasks</th>
-                        <th>Languages</th>
-                        <th>application</th>
-                        <th>Total Pages</th>
-                        <th>Server Path</th>
-                        <th>Received Date</th>
-                        <th>Rate</th>
-                        <th>Cost</th>
-                        <th className="text-end">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredProjects.map(project => (
-                        <tr key={project.id}>
-                          <td>
-                            {project.title}
-                            <span className="badge text-dark ms-2">Draft</span>
-                          </td>
-                          <td>{project.client}</td>
-                          <td>{project.country}</td>
-                          <td>{project.projectManager}</td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.tasks.map((task) => (
-                                <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
-                                  {task}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.languages.map((language) => (
-                                <span key={language} className="badge bg-success bg-opacity-10 text-success">
-                                  {language}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <span className="badge bg-purple bg-opacity-10 text-purple">
-                              {project.application}
-                            </span>
-                          </td>
-                          <td>{project.totalPages}</td>
-                          <td>
-                            <span className="badge bg-light text-dark">
-                              {project.serverPath}
-                            </span>
-                          </td>
-                          <td>{new Date(project.receivedDate).toLocaleDateString()}</td>
-                          <td>{project.rate} {project.currency}</td>
-                          <td>{project.cost} {project.currency}</td>
-                          <td className="text-end">
-                            <div className="d-flex justify-content-end gap-2">
-                              <button
-                                onClick={() => {
-                                  const dueDate = prompt('Enter due date (YYYY-MM-DD):', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-                                  if (dueDate) markAsYTS(project.id, dueDate);
-                                }}
-                                className="btn btn-sm btn-primary"
-                              >
-                                Mark as YTS
-                              </button>
-                              <button
-                                onClick={() => handleEditProject(project.id)}
-                                className="btn btn-sm btn-success"
-                              >
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button className="btn btn-sm btn-danger">
-                                <i className="fas fa-trash-alt"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div> */}
-                {/* Fake Scrollbar */}
                 <div
                   ref={fakeScrollbarRef1}
                   style={{
@@ -1016,8 +760,16 @@ const Project = () => {
                     className="table table-hover mb-0"
                     style={{ minWidth: 900 }}
                   >
-                    <thead className=" table-gradient-bg">
-                      <tr>
+                    <thead
+                      className="table-gradient-bg table"
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 0,
+                        backgroundColor: "#fff", // Match your background color
+                      }}
+                    >
+                      <tr className="text-center">
                         <th>Project Title</th>
                         <th>Client</th>
                         <th>Country</th>
@@ -1144,10 +896,46 @@ const Project = () => {
               </div>
             ) : (
               <div className="card">
-                {/* <div className="table-responsive" style={{ overflowX: 'auto' }}>
-                  <table className="table table-hover mb-0" style={{ minWidth: 900 }}>
-                    <thead className=" ">
-                      <tr>
+                <div
+                  ref={fakeScrollbarRef2}
+                  style={{
+                    overflowX: "auto",
+                    overflowY: "hidden",
+                    height: 16,
+                    position: "fixed",
+                    bottom: 0, // Adjust as needed
+                    left: 0,
+                    right: 0,
+                    zIndex: 1050,
+                  }}
+                >
+                  <div style={{ width: "2000px", height: 1 }} />
+                </div>
+                {/* Scrollable Table 2 */}
+                <div
+                  className="table-responsive table-gradient-bg"
+                  ref={scrollContainerRef2}
+                  style={{
+                    maxHeight: "500px",
+                    overflowX: "auto",
+                    scrollbarWidth: "none", // Firefox
+                    msOverflowStyle: "none", // IE/Edge
+                  }}
+                >
+                  <table
+                    className="table table-hover mb-0"
+                    style={{ minWidth: 900 }}
+                  >
+                    <thead
+                      className="table-gradient-bg table"
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 0,
+                        backgroundColor: "#fff", // Match your background color
+                      }}
+                    >
+                      <tr className="text-center">
                         <th>Project Title</th>
                         <th>Client</th>
                         <th>Country</th>
@@ -1156,37 +944,49 @@ const Project = () => {
                         <th>Progress</th>
                         <th>Tasks</th>
                         <th>Languages</th>
-                        <th>application</th>
+                        <th>Application</th>
                         <th>Total Pages</th>
                         <th className="text-end">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredProjects.map(project => (
+                      {filteredProjects.map((project) => (
                         <tr key={project.id}>
                           <td>
                             {project.title}
-                            <span className="badge bg-warning bg-opacity-10 text-warning ms-2">Active</span>
+                            <span className="badge bg-warning bg-opacity-10 text-warning ms-2">
+                              Active
+                            </span>
                           </td>
                           <td>{project.client}</td>
                           <td>{project.country}</td>
                           <td>{project.projectManager}</td>
-                          <td>{new Date(project.dueDate).toLocaleDateString()}</td>
+                          <td>
+                            {new Date(project.dueDate).toLocaleDateString()}
+                          </td>
                           <td>
                             <div className="d-flex align-items-center">
-                              <div className="progress flex-grow-1 me-2" style={{ height: '6px' }}>
+                              <div
+                                className="progress flex-grow-1 me-2"
+                                style={{ height: "6px" }}
+                              >
                                 <div
                                   className="progress-bar bg-primary"
                                   style={{ width: `${project.progress}%` }}
                                 ></div>
                               </div>
-                              <small className="text-primary">{project.progress}%</small>
+                              <small className="text-primary">
+                                {project.progress}%
+                              </small>
                             </div>
                           </td>
                           <td>
                             <div className="d-flex flex-wrap gap-1">
                               {project.tasks.map((task) => (
-                                <span key={task} className="badge bg-primary bg-opacity-10 text-primary">
+                                <span
+                                  key={task}
+                                  className="badge bg-primary bg-opacity-10 text-primary"
+                                >
                                   {task}
                                 </span>
                               ))}
@@ -1195,7 +995,10 @@ const Project = () => {
                           <td>
                             <div className="d-flex flex-wrap gap-1">
                               {project.languages.map((language) => (
-                                <span key={language} className="badge bg-success bg-opacity-10 text-success">
+                                <span
+                                  key={language}
+                                  className="badge bg-success bg-opacity-10 text-success"
+                                >
                                   {language}
                                 </span>
                               ))}
@@ -1230,145 +1033,6 @@ const Project = () => {
                       ))}
                     </tbody>
                   </table>
-                </div> */}
-                <div
-                  ref={fakeScrollbarRef2}
-                  style={{
-                    overflowX: "auto",
-                    overflowY: "hidden",
-                    height: 16,
-                    position: "fixed",
-                    bottom: 0, // Adjust as needed
-                    left: 0,
-                    right: 0,
-                    zIndex: 1050,
-                  }}
-                >
-                  <div style={{ width: "2000px", height: 1 }} />
-                </div>
-                {/* Scrollable Table 2 */}
-                <div
-                  className="table-responsive table-gradient-bg"
-                  ref={scrollContainerRef2}
-                  style={{
-                    maxHeight: "500px",
-                    overflowX: "auto",
-                    scrollbarWidth: "none", // Firefox
-                    msOverflowStyle: "none", // IE/Edge
-                  }}
-                >
-                  <table
-                    className="table table-hover mb-0"
-                    style={{ minWidth: 900 }}
-                  >
-                    <thead className=" table-gradient-bg">
-                      <tr>
-                        <th>Project Title</th>
-                        <th>Client</th>
-                        <th>Country</th>
-                        <th>Project Manager</th>
-                        <th>Tasks</th>
-                        <th>Languages</th>
-                        <th>Application</th>
-                        <th>Total Pages</th>
-                        <th>Server Path</th>
-                        <th>Received Date</th>
-                        <th>Rate</th>
-                        <th>Cost</th>
-                        <th className="text-end">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredProjects.map((project) => (
-                        <tr key={project.id}>
-                          <td>
-                            {project.title}
-                            <span className="badge bg-light text-dark ms-2">
-                              Draft
-                            </span>
-                          </td>
-                          <td>{project.client}</td>
-                          <td>{project.country}</td>
-                          <td>{project.projectManager}</td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.tasks.map((task) => (
-                                <span
-                                  key={task}
-                                  className="badge bg-primary bg-opacity-10 text-primary"
-                                >
-                                  {task}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-wrap gap-1">
-                              {project.languages.map((language) => (
-                                <span
-                                  key={language}
-                                  className="badge bg-success bg-opacity-10 text-success"
-                                >
-                                  {language}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td>
-                            <span className="badge bg-purple bg-opacity-10 text-purple">
-                              {project.application}
-                            </span>
-                          </td>
-                          <td>{project.totalPages}</td>
-                          <td>
-                            <span className="badge bg-light text-dark">
-                              {project.serverPath}
-                            </span>
-                          </td>
-                          <td>
-                            {new Date(
-                              project.receivedDate
-                            ).toLocaleDateString()}
-                          </td>
-                          <td>
-                            {project.rate} {project.currency}
-                          </td>
-                          <td>
-                            {project.cost} {project.currency}
-                          </td>
-                          <td className="text-end">
-                            <div className="d-flex justify-content-end gap-2">
-                              <button
-                                onClick={() => {
-                                  const dueDate = prompt(
-                                    "Enter due date (YYYY-MM-DD):",
-                                    new Date(
-                                      Date.now() + 7 * 24 * 60 * 60 * 1000
-                                    )
-                                      .toISOString()
-                                      .split("T")[0]
-                                  );
-                                  if (dueDate) markAsYTS(project.id, dueDate);
-                                }}
-                                className="btn btn-sm btn-primary"
-                              >
-                                Mark as YTS
-                              </button>
-                              <button
-                                onClick={() => handleEditProject(project.id)}
-                                className="btn btn-sm btn-success"
-                              >
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button className="btn btn-sm btn-danger">
-                                <i className="fas fa-trash-alt"></i>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
                 </div>
               </div>
             )}
@@ -1378,12 +1042,84 @@ const Project = () => {
         {/* Completed Projects Tab */}
         {activeTab === "completed" && (
           <div className="mb-4">
+            {/* Heading and Filters */}
             <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
               <h2 className="h5 mb-0 text-light">Completed Projects</h2>
-              <button className="btn btn-success btn-sm w-100 w-md-auto">
-                <i className="fas fa-file-excel me-2"></i> Export to Excel
-              </button>
             </div>
+
+            {/* Filters */}
+            <div className="row g-3 mb-3">
+              {/* Client Filter - Single Select */}
+              <div className="col-md-3">
+                <label className="form-label text-white">Client</label>
+                <select
+                  className="form-select"
+                  value={selectedClient}
+                  onChange={(e) => setSelectedClient(e.target.value)}
+                >
+                  <option value="">All Clients</option>
+                  {clientList.map((client) => (
+                    <option key={client} value={client}>
+                      {client}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Task Filter - Single Select */}
+              <div className="col-md-3">
+                <label className="form-label text-white">Task</label>
+                <select
+                  className="form-select"
+                  value={selectedTask}
+                  onChange={(e) => setSelectedTask(e.target.value)}
+                >
+                  <option value="">All Tasks</option>
+                  {taskList.map((task) => (
+                    <option key={task} value={task}>
+                      {task}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Applications Filter - Multi Select */}
+
+              <div className="col-md-3">
+                <label className="form-label text-white">Applications</label>
+                <select
+                  className="form-select"
+                  value={selectedApplications}
+                  onChange={(e) => {
+                    const selected = Array.from(
+                      e.target.selectedOptions,
+                      (option) => option.value
+                    );
+                    setSelectedApplications(e.target.value);
+                  }}
+                >
+                  <option value="">All Tasks</option>
+                  {applicationList.map((app) => (
+                    <option key={app} value={app}>
+                      {app}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Month/Year Filter */}
+              <div className="col-md-3">
+                <label className="form-label text-white">Month/Year</label>
+                <input
+                  type="month"
+                  className="form-control"
+                  value={selectedMonth}
+                  onChange={(e) => setSelectedMonth(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* Project Table or Empty State */}
             {filteredProjects.length === 0 ? (
               <div className="text-center py-5">
                 <i className="fas fa-check-circle text-muted fa-4x mb-3"></i>
@@ -1394,16 +1130,7 @@ const Project = () => {
               </div>
             ) : (
               <>
-                {/* Performance Chart */}
-                <div className="card mb-4 bg-card text-light">
-                  <div className="card-body">
-                    <div
-                      ref={chartRef}
-                      style={{ height: "400px", minWidth: "300px" }}
-                    ></div>
-                  </div>
-                </div>
-                {/* Project Cards */}
+                {/* Completed Projects Table */}
                 <div className="card">
                   <div
                     ref={fakeScrollbarRef4}
@@ -1412,7 +1139,7 @@ const Project = () => {
                       overflowY: "hidden",
                       height: 16,
                       position: "fixed",
-                      bottom: 0, // Adjust as needed
+                      bottom: 0,
                       left: 0,
                       right: 0,
                       zIndex: 1050,
@@ -1420,23 +1147,31 @@ const Project = () => {
                   >
                     <div style={{ width: "2000px", height: 1 }} />
                   </div>
-                  {/* Scrollable Table 3 */}
+
                   <div
                     className="table-responsive table-gradient-bg"
                     ref={scrollContainerRef4}
                     style={{
                       maxHeight: "500px",
                       overflowX: "auto",
-                      scrollbarWidth: "none", // Firefox
-                      msOverflowStyle: "none", // IE/Edge
+                      scrollbarWidth: "none",
+                      msOverflowStyle: "none",
                     }}
                   >
                     <table
                       className="table table-hover mb-0"
                       style={{ minWidth: 900 }}
                     >
-                      <thead className="table-gradient-bg">
-                        <tr>
+                      <thead
+                        className="table-gradient-bg table"
+                        style={{
+                          position: "sticky",
+                          top: 0,
+                          zIndex: 0,
+                          backgroundColor: "#fff", // Match your background color
+                        }}
+                      >
+                        <tr className="text-center">
                           <th>Project Title</th>
                           <th>Client</th>
                           <th>Country</th>
@@ -1556,500 +1291,32 @@ const Project = () => {
         >
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  {showEditModal !== false
-                    ? "Edit Project Details"
-                    : "Create New Project"}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => {
-                    setShowCreateModal(false);
-                    setShowEditModal(false);
-                  }}
-                ></button>
+              <div className="modal-header d-flex justify-content-between">
+                <div>
+                  <h5 className="modal-title">Create New Project</h5>
+                </div>
+
+                <div>
+                  {/* <button className="btn btn-light btn-sm me-4 ">
+                    <i className="fas fa-cog text-muted"></i>
+                  </button> */}
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={() => {
+                      setShowCreateModal(false);
+                      setShowEditModal(false);
+                    }}
+                  ></button>
+                </div>
               </div>
               <div className="modal-body">
-                <form onSubmit={handleSubmit}>
-                  {/* Project Title */}
-                  <div className=" row mb-3 col-md-12">
-                    <label htmlFor="title" className="form-label">
-                      Project Title <span className="text-danger">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="title"
-                      name="title"
-                      maxLength={80}
-                      required
-                      value={formData.title}
-                      onChange={handleInputChange}
-                      placeholder="Enter project title (max 80 chars)"
-                    />
-                    <div className="form-text text-white">
-                      Max allowed Character length – 80, (ignore or remove any
-                      special character by itself)
-                    </div>
-                  </div>
-
-                  {/* Client, Country, Project Manager */}
-                  <div className="row g-3 mb-3">
-                    <div className="col-md-4">
-                      <label htmlFor="client" className="form-label">
-                        Client <span className="text-danger">*</span>
-                      </label>
-                      <Select
-                        id="client"
-                        name="client"
-                        options={clientOptions.map((c) => ({
-                          value: c,
-                          label: c,
-                        }))}
-                        value={
-                          formData.client
-                            ? { value: formData.client, label: formData.client }
-                            : null
-                        }
-                        onChange={(opt) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            client: opt ? opt.value : "",
-                          }))
-                        }
-                        isSearchable
-                        placeholder="Select Client"
-                        styles={gradientSelectStyles}
-                      />
-                    </div>
-                    <div className="col-md-4">
-                      <label htmlFor="country" className="form-label">
-                        Country
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="country"
-                        name="country"
-                        value={formData.country}
-                        onChange={handleInputChange}
-                        placeholder="Auto update with Client"
-                        readOnly
-                      />
-                    </div>
-                    <div className="col-md-4">
-                      <label htmlFor="projectManager" className="form-label">
-                        Project Manager
-                      </label>
-                      <Select
-                        id="projectManager"
-                        name="projectManager"
-                        options={projectManagerOptions.map((pm) => ({
-                          value: pm,
-                          label: pm,
-                        }))}
-                        value={
-                          formData.projectManager
-                            ? {
-                                value: formData.projectManager,
-                                label: formData.projectManager,
-                              }
-                            : null
-                        }
-                        onChange={(opt) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            projectManager: opt ? opt.value : "",
-                          }))
-                        }
-                        isSearchable
-                        placeholder="Refined Searchable Dropdown"
-                        styles={gradientSelectStyles}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Task & Applications */}
-                  <div className="row g-3 mb-3">
-                    <div className="col-md-6">
-                      <label htmlFor="task" className="form-label">
-                        Task <span className="text-danger">*</span>
-                      </label>
-                      <Select
-                        id="task"
-                        name="task"
-                        options={taskOptions.map((t) => ({
-                          value: t,
-                          label: t,
-                        }))}
-                        value={
-                          formData.tasks.length
-                            ? formData.tasks.map((t) => ({
-                                value: t,
-                                label: t,
-                              }))
-                            : []
-                        }
-                        onChange={(opts) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            tasks: opts ? opts.map((o) => o.value) : [],
-                          }))
-                        }
-                        isMulti
-                        isSearchable
-                        placeholder="Select Task(s)"
-                        styles={gradientSelectStyles}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label htmlFor="application" className="form-label">
-                        Applications <span className="text-danger">*</span>
-                      </label>
-                      <Select
-                        id="application"
-                        name="application"
-                        options={applicationOptions.map((a) => ({
-                          value: a,
-                          label: a,
-                        }))}
-                        value={
-                          formData.application.length
-                            ? formData.application.map((a) => ({
-                                value: a,
-                                label: a,
-                              }))
-                            : []
-                        }
-                        onChange={(opts) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            application: opts ? opts.map((o) => o.value) : [],
-                          }))
-                        }
-                        isMulti
-                        isSearchable
-                        placeholder="Select Application(s)"
-                        styles={gradientSelectStyles}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Languages */}
-                  <div className="mb-3">
-                    <label className="form-label">
-                      Languages <span className="text-danger">*</span>
-                    </label>
-                    <Select
-                      options={languageOptions.map((l) => ({
-                        value: l,
-                        label: l,
-                      }))}
-                      value={
-                        formData.languages.length
-                          ? formData.languages.map((l) => ({
-                              value: l,
-                              label: l,
-                            }))
-                          : []
-                      }
-                      onChange={(opts) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          languages: opts ? opts.map((o) => o.value) : [],
-                        }))
-                      }
-                      isMulti
-                      isSearchable
-                      placeholder="Select Languages"
-                      styles={gradientSelectStyles}
-                    />
-                    <div className="form-text text-white">
-                      {formData.languages.length} selected
-                    </div>
-                  </div>
-
-                  {/* File Details */}
-                  <div className="mb-3">
-                    <label className="form-label">File Details*:</label>
-                    <div className="d-flex align-items-center gap-2 mb-2 bg-[#201E7E]">
-                      <span>Count</span>
-                      <input
-                        type="number"
-                        min={1}
-                        className="form-control"
-                        style={{ width: 80 }}
-                        value={formData.files.length}
-                        onChange={(e) => {
-                          const count = Math.max(1, Number(e.target.value));
-                          setFormData((prev) => ({
-                            ...prev,
-                            files: Array.from(
-                              { length: count },
-                              (_, i) =>
-                                prev.files[i] || {
-                                  name: "",
-                                  pageCount: 0,
-                                  application: "",
-                                }
-                            ),
-                          }));
-                        }}
-                      />
-                      <button
-                        type="button"
-                        className="btn btn-success btn-sm"
-                        onClick={() => {
-                          /* handle excel upload */
-                        }}
-                      >
-                        Upload Excel
-                      </button>
-                    </div>
-                    <div className="table-responsive ">
-                      <table className="table table-bordered  ">
-                        <thead
-                          style={{ backgroundColor: "#201E7E", color: "white" }}
-                        >
-                          <tr
-                            style={{
-                              backgroundColor: "#201E7E",
-                              color: "white",
-                            }}
-                          >
-                            <th>S.No.</th>
-                            <th>File Name</th>
-                            <th>Pages</th>
-                            <th>Application</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {formData.files.map((file, idx) => (
-                            <tr key={idx}>
-                              <td>{idx + 1}</td>
-                              <td>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  value={file.name}
-                                  onChange={(e) => {
-                                    const files = [...formData.files];
-                                    files[idx].name = e.target.value;
-                                    setFormData((prev) => ({ ...prev, files }));
-                                  }}
-                                  placeholder="File Name"
-                                />
-                              </td>
-                              <td>
-                                <input
-                                  type="number"
-                                  min={1}
-                                  className="form-control"
-                                  value={file.pageCount || ""}
-                                  onChange={(e) => {
-                                    const files = [...formData.files];
-                                    files[idx].pageCount = Number(
-                                      e.target.value
-                                    );
-                                    setFormData((prev) => ({ ...prev, files }));
-                                  }}
-                                  placeholder="Pages"
-                                />
-                              </td>
-                              <td>
-                                <select
-                                  className="form-select"
-                                  value={file.application || ""}
-                                  onChange={(e) => {
-                                    const files = [...formData.files];
-                                    files[idx].application = e.target.value;
-                                    setFormData((prev) => ({ ...prev, files }));
-                                  }}
-                                >
-                                  <option value="">Select</option>
-                                  {applicationOptions.map((app) => (
-                                    <option key={app} value={app}>
-                                      {app}
-                                    </option>
-                                  ))}
-                                </select>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {/* Total Pages */}
-                  <div className="mb-3">
-                    <div className="row g-3">
-                      <div className="col-md-4">
-                        <label className="form-label">
-                          Total Pages Per Lang
-                        </label>
-                        <input
-                          type="number"
-                          className="form-control"
-                          value={formData.files.reduce(
-                            (sum, file) => sum + (file.pageCount || 0),
-                            0
-                          )}
-                          readOnly
-                        />
-                      </div>
-                      <div className="col-md-4">
-                        <label className="form-label">
-                          Total Project Pages
-                        </label>
-                        <input
-                          type="number"
-                          className="form-control"
-                          value={
-                            formData.files.reduce(
-                              (sum, file) => sum + (file.pageCount || 0),
-                              0
-                            ) * (formData.languages.length || 1)
-                          }
-                          readOnly
-                        />
-                      </div>
-                    </div>
-                    <div className="form-text text-white">
-                      Total Project Pages = Total Pages × Language Count
-                    </div>
-                  </div>
-
-                  {/* Received Date, Server Path, Notes */}
-                  <div className="row g-3 mb-3">
-                    <div className="col-md-4">
-                      <label className="form-label">
-                        Received Date <span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="date"
-                        className="form-control"
-                        name="receivedDate"
-                        value={formData.receivedDate}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="col-md-8">
-                      <label className="form-label">
-                        Server Path <span className="text-danger">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        name="serverPath"
-                        value={formData.serverPath}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="/projects/client/project-name"
-                      />
-                    </div>
-                    <div className="col-12">
-                      <label className="form-label">Notes</label>
-                      <textarea
-                        className="form-control"
-                        name="notes"
-                        rows={3}
-                        value={formData.notes}
-                        onChange={handleInputChange}
-                        placeholder="Add any additional notes or instructions..."
-                      />
-                    </div>
-                  </div>
-
-                  {/* Financial Section */}
-                  <div className="row g-3 mb-3">
-                    <div className="col-md-3">
-                      <label className="form-label">Estimated Hrs</label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        step="0.25"
-                        value={formData.estimatedHrs || ""}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            estimatedHrs: e.target.value,
-                          }))
-                        }
-                        placeholder="00.00"
-                      />
-                      <div className="form-text text-white">
-                        (in multiple of 0.25 only)
-                      </div>
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label">Per page Page Rate</label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        step="0.01"
-                        value={formData.rate || ""}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            rate: e.target.value,
-                          }))
-                        }
-                        placeholder="00.00"
-                      />
-                      <div className="form-text text-white ">
-                        (with only 2 decimals)
-                      </div>
-                    </div>
-                    <div className="col-md-2">
-                      <label className="form-label">Currency</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={formData.currency}
-                        readOnly
-                        placeholder="Auto updated from Client details"
-                      />
-                    </div>
-                    <div className="col-md-2">
-                      <label className="form-label">Total Cost</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={formData.cost.toFixed(2)}
-                        readOnly
-                        placeholder="Auto Calculated"
-                      />
-                    </div>
-                    <div className="col-md-2">
-                      <label className="form-label">Cost in INR</label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={formData.inrCost.toFixed(2)}
-                        readOnly
-                        placeholder="Auto Calculated"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Save Button */}
-                  <div className="text-end">
-                    <button type="submit" className="btn btn-warning fw-bold">
-                      Save changes
-                    </button>
-                  </div>
-                </form>
+                <CreateNewProject />
               </div>
             </div>
           </div>
         </div>
       )}
-
-      {/* Settings Modal */}
       {showSettings && (
         <div
           className="modal fade show d-block custom-modal-dark"
@@ -2058,8 +1325,8 @@ const Project = () => {
           role="dialog"
         >
           <div className="modal-dialog modal-lg">
-            <div className="modal-content bg-dark text-white">
-              <div className="modal-header bg-dark border-secondary">
+            <div className="modal-content  text-white">
+              <div className="modal-header border-secondary">
                 <h5 className="modal-title text-white">Settings</h5>
                 <button
                   type="button"
@@ -2068,358 +1335,7 @@ const Project = () => {
                 ></button>
               </div>
               <div className="modal-body">
-                <h6 className="text-white-50">
-                  Manage predefined lists for project creation and other
-                  application settings.
-                </h6>
-
-                {/* Manage Clients */}
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Clients</h6>
-
-                  <div className="row mb-2">
-                    <div className="col-md-5 mb-2">
-                      <div className="input-group">
-                        <input
-                          className="form-control"
-                          style={{ background: "#181f3a", color: "#fff" }}
-                          placeholder="New Client Alias Name*"
-                          name="alias"
-                        />
-                        <button className="btn btn-gradient" type="button">
-                          +
-                        </button>
-                      </div>
-                    </div>
-                    <div className="col-md-6 mb-2">
-                      <div className="input-group">
-                        <input
-                          className="form-control"
-                          style={{ background: "#181f3a", color: "#fff" }}
-                          placeholder="Actual Client Name*"
-                          name="actual"
-                        />
-                        <button className="btn btn-gradient" type="button">
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Second row */}
-                  <div className="row mb-3">
-                    {/* Country Input */}
-                    <div className="col-md-4 mb-2">
-                      <div className="input-group">
-                        <input
-                          className="form-control"
-                          style={{ background: "#181f3a", color: "#fff" }}
-                          placeholder="Country*"
-                          name="country"
-                        />
-                        <button className="btn btn-gradient" type="button">
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Currency + Hourly Rate Side-by-Side */}
-                    <div className="col-md-6 mb-2">
-                      <div className="row">
-                        {/* Currency */}
-                        <div className="col-md-6 mb-2">
-                          <div className="input-group">
-                            <select
-                              className="form-control"
-                              style={{ background: "#181f3a", color: "#fff" }}
-                              name="currency"
-                            >
-                              <option value="">Currency*</option>
-                              {currencyOptions.map((cur) => (
-                                <option key={cur} value={cur}>
-                                  {cur}
-                                </option>
-                              ))}
-                            </select>
-                            <button className="btn btn-gradient" type="button">
-                              +
-                            </button>
-                          </div>
-                        </div>
-
-                        {/* Hourly Rate */}
-                        <div className="col-md-6 mb-2">
-                          <div className="input-group">
-                            <input
-                              type="number"
-                              className="form-control"
-                              placeholder="00"
-                              name="hourlyRate"
-                              style={{ background: "#181f3a", color: "#fff" }}
-                            />
-                            <button className="btn btn-gradient" type="button">
-                              +
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Third row */}
-                  <div className="mb-2">
-                    <div className="input-group">
-                      <input
-                        className="form-control"
-                        style={{ background: "#181f3a", color: "#fff" }}
-                        placeholder="Project Managers (comma-sep)"
-                        name="managers"
-                      />
-                      <button className="btn btn-gradient" type="button">
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    {clients.map((client, index) => (
-                      <div key={index}>
-                        <div className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-2 rounded">
-                          <span className="text-white">
-                            <strong>{client.alias}</strong> ({client.actualName}
-                            )<br />
-                            Country: {client.country}
-                            <br />
-                            PMs: {client.managers}
-                          </span>
-                          <div className="btn-group btn-group-sm gap-2">
-                            <button className="btn btn-outline-secondary  text-light">
-                              <i className="bi bi-pencil"></i>
-                            </button>
-                            <button
-                              className="btn btn-outline-danger"
-                              onClick={() =>
-                                handleDeleteItem(clients, setClients, index)
-                              }
-                            >
-                              <i className="fas fa-trash-alt"></i>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddClient}
-                    disabled={
-                      !newClient.alias ||
-                      !newClient.actualName ||
-                      !newClient.country
-                    }
-                  >
-                    <i className="fas fa-plus me-1"></i>
-                  </button>
-                </div>
-
-                {/* Manage Tasks List */}
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Tasks List</h6>
-                  <div className="input-group mb-2">
-                    <input
-                      type="text"
-                      className="form-control bg-secondary text-white border-secondary"
-                      placeholder="New task..."
-                      value={newTask}
-                      onChange={(e) => setNewTask(e.target.value)}
-                    />
-                    <button className="btn btn-primary">+</button>
-                  </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    {tasks.map((task, index) => (
-                      <div
-                        key={index}
-                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
-                      >
-                        <span className="text-white">{task}</span>
-                        <div className="btn-group btn-group-sm gap-2">
-                          <button className="btn btn-outline-secondary  text-light">
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                          <button
-                            className="btn btn-outline-danger"
-                            onClick={() =>
-                              handleDeleteItem(tasks, setTasks, index)
-                            }
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Manage Application List */}
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Application List</h6>
-                  <div className="input-group mb-2">
-                    <input
-                      type="text"
-                      className="form-control bg-secondary text-white border-secondary"
-                      placeholder="New application..."
-                      value={newapplication}
-                      onChange={(e) => setNewapplication(e.target.value)}
-                    />
-                    <button className="btn btn-primary">+</button>
-                  </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    {applications.map((application, index) => (
-                      <div
-                        key={index}
-                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
-                      >
-                        <span className="text-white">{application}</span>
-                        <div className="btn-group btn-group-sm gap-2">
-                          <button className="btn btn-outline-secondary  text-light">
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                          <button
-                            className="btn btn-outline-danger"
-                            onClick={() =>
-                              handleDeleteItem(
-                                applications,
-                                setapplications,
-                                index
-                              )
-                            }
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Manage Languages List */}
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Languages List</h6>
-                  <div className="input-group mb-2">
-                    <input
-                      type="text"
-                      className="form-control bg-secondary text-white border-secondary"
-                      placeholder="New language..."
-                      value={newLanguage}
-                      onChange={(e) => setNewLanguage(e.target.value)}
-                    />
-                    <button className="btn btn-primary">+</button>
-                  </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    {languages.map((language, index) => (
-                      <div
-                        key={index}
-                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
-                      >
-                        <span className="text-white">{language}</span>
-                        <div className="btn-group btn-group-sm gap-2">
-                          <button className="btn btn-outline-secondary  text-light">
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                          <button
-                            className="btn btn-outline-danger"
-                            onClick={() =>
-                              handleDeleteItem(languages, setLanguages, index)
-                            }
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Currency Conversion Rates */}
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Currency Conversion Rates</h6>
-                  <div className="row g-2 mb-2">
-                    <div className="col-md-6">
-                      <input
-                        type="text"
-                        className="form-control bg-card text-white border-secondary"
-                        placeholder="Currency (e.g. USD)"
-                        value={newCurrency.name}
-                        onChange={(e) =>
-                          setNewCurrency({
-                            ...newCurrency,
-                            name: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <input
-                        type="text"
-                        className="form-control bg-card text-white border-secondary"
-                        placeholder="Rate to INR"
-                        value={newCurrency.rate}
-                        onChange={(e) =>
-                          setNewCurrency({
-                            ...newCurrency,
-                            rate: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="border rounded p-2 mb-2 border-secondary table-gradient-bg">
-                    <table className="table table-dark table-sm mb-0">
-                      <thead>
-                        <tr>
-                          <th>Currency</th>
-                          <th>Rate to INR</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {currencies.map((currency, index) => (
-                          <tr key={index}>
-                            <td>{currency.name}</td>
-                            <td>{currency.rate}</td>
-                            <td>
-                              <div className="btn-group btn-group-sm">
-                                <button
-                                  className="btn btn-outline-danger"
-                                  onClick={() =>
-                                    handleDeleteItem(
-                                      currencies,
-                                      setCurrencies,
-                                      index
-                                    )
-                                  }
-                                >
-                                  <i className="fas fa-trash-alt"></i>
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* Save All Settings */}
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Save All Settings</h6>
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    <p className="small text-white-50 mb-0">
-                      Remember to save your changes. Settings are stored
-                      locally.
-                    </p>
-                  </div>
-                </div>
+                <Setting />
               </div>
               <div className="modal-footer  border-secondary">
                 <button
@@ -2435,9 +1351,8 @@ const Project = () => {
               </div>
             </div>
           </div>
-        </div>    
+        </div>
       )}
-
       {/* Backdrop for modals */}
       {(showCreateModal || showEditModal !== false || showSettings) && (
         <div className="modal-backdrop fade show"></div>
@@ -2447,3 +1362,6 @@ const Project = () => {
 };
 
 export default Project;
+
+
+

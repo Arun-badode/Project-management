@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./SettingsPage.css";
+import "./Setting.css";
 
 const currencyOptions = ["USD", "EUR", "INR", "GBP", "CAD", "AUD"];
 

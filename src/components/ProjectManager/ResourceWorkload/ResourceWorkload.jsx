@@ -390,8 +390,16 @@ function ResourceWorkload() {
                   style={{ maxHeight: "400px", overflowY: "auto" }}
                 >
                   <table className="table table-hover  mb-0">
-                    <thead className="bg-dark  ">
-                      <tr>
+                   <thead
+                          className="table-gradient-bg table "
+                          style={{
+                            position: "sticky",
+                            top: 0,
+                            zIndex: 0,
+                            backgroundColor: "#fff", // Match your background color
+                          }}
+                        >
+                      <tr  className="text-center">
                         <th>ID</th>
                         <th>Task</th>
                         <th>Resource</th>
@@ -403,7 +411,7 @@ function ResourceWorkload() {
                     </thead>
                     <tbody>
                       {taskData.map((task) => (
-                        <tr key={task.id}>
+                        <tr key={task.id}  className="text-center">
                           <td>{task.id}</td>
                           <td>
                             <div className="fw-bold">{task.name}</div>

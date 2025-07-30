@@ -1078,3 +1078,15 @@ select.form-input {
 /* Make tab content bubble and its table full width */
 
 
+/* App.css */
+.react-datepicker-wrapper .form-control::placeholder {
+  color: #888 !important;
+}
+
+
+/* Ensure wrapper and input inside DatePicker are both full width */
+.react-datepicker-wrapper,
+.react-datepicker__input-container,
+.react-datepicker__input-container input {
+  width: 100% !important;
+}
