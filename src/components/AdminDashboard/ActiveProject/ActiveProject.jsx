@@ -4,7 +4,7 @@ import Select from "react-select";
 import useSyncScroll from "../Hooks/useSyncScroll";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-
+import axios from "axios";
 import CreateNewProject from "../Project/CreateNewProject";
 import EditModal from "./EditModal";
 
@@ -16,6 +16,7 @@ const ActiveProject = () => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const isAdmin = userRole === "Admin";
+const token =localStorage.getItem("authToken"); 
 
   const [fileHandlers, setFileHandlers] = useState({});
 
@@ -396,6 +397,68 @@ const ActiveProject = () => {
       year: "numeric",
     });
   }
+
+// useEffect(() => {
+//   const fetchProjects = async () => {
+//     try {
+//       const response = await axios.get(
+//         "https://eminoids-backend-production.up.railway.app/api/project/getAllProjects"
+//       );
+//       // API returns { status, message, projects: [...] }
+//       const apiProjects = response.data.projects || [];
+//       // Map API fields to your UI fields
+//       const mapped = apiProjects.map((p) => ({
+//         id: p.id,
+//         title: p.projectTitle,
+//         client: p.clientName,
+//         task: p.task_name,
+//         language: p.language_name,
+//         application: p.application_name,
+//         totalPages: p.totalProjectPages,
+//         deadline: p.deadline,
+//         readyDeadline: p.readyQCDeadline,
+//         qcHrs: p.qcHrs,
+//         qcDueDate: p.qcDueDate,
+//         status: p.status,
+//         progress: Math.floor(Math.random() * 100), // Or use a real field if available
+//         handler: p.full_name,
+//         files: [], // You can fill this if your API provides file details
+//       }));
+//       setProjects(mapped);
+//       setFilteredProjects(mapped);
+//     } catch (err) {
+//       setProjects([]);
+//       setFilteredProjects([]);
+//     }
+//   };
+//   fetchProjects();
+// }, []);
+  
+
+
+useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('https://eminoids-backend-production.up.railway.app/api/project/getAllProjects',
+           {
+        headers: { authorization: `Bearer ${token}` },
+      }
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch projects');
+        }
+        const data = await response.json();
+        setProjects(data.projects);
+        setFilteredProjects(data.projects);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   return (
     <div className="container-fluid py-4">
