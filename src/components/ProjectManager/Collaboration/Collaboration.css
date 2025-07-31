@@ -30,7 +30,7 @@
 
 /* Default width for larger screens */
 .chat {
-  width: 64%;
+  width: 62%;
   margin: 0 auto; /* Centers the chat if needed */
 }
 
