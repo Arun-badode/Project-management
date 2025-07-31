@@ -95,10 +95,10 @@ const CompletedProjects = () => {
                     {project.status}
                   </span>
                 </td>
-                <td>{project.clientAliasName || "-"}</td>
+                <td>{project.full_name || "-"}</td>
                 <td>{project.clientName}</td>
                 <td>{project.country}</td>
-                <td>{project.full_name}</td>
+                <td>{project.projectManagerId}</td>
                 <td>
                   <span className="badge bg-primary bg-opacity-10 text-primary">
                     {project.task_name}
@@ -116,21 +116,21 @@ const CompletedProjects = () => {
                 </td>
                 <td>{project.totalProjectPages}</td>
                 <td>
-                  {project.receivedDate
-                    ? new Date(project.receivedDate).toLocaleDateString()
+                  {project.receiveDate
+                    ? new Date(project.receiveDate).toLocaleDateString()
                     : "-"}
                 </td>
-                <td>{project.expectedHours || "-"}</td>
-                <td>{project.actualHours || "-"}</td>
+                <td>{project.estimatedHours || "-"}</td>
+                <td>{project.hourlyRate || "-"}</td>
                 <td>
-                  {calculateEfficiency(project.expectedHours, project.actualHours)}
+                  {calculateEfficiency(project.expectedHours, project.hourlyRate)}
                 </td>
                 <td>
-                  {project.currency && project.cost
-                    ? `${project.currency} ${project.cost}`
+                  {project.currency 
+                    ? `${project.currency} `
                     : "-"}
                 </td>
-                <td>{project.inrCost ? `₹${project.inrCost}` : "-"}</td>
+                <td>{project.totalCost ? `₹${project.totalCost}` : "-"}</td>
                 <td className="text-end">
                   <div className="d-flex justify-content-end gap-2">
                     <button

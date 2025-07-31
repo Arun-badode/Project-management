@@ -16,6 +16,8 @@ const ActiveProject = () => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const isAdmin = userRole === "Admin";
+  const token = localStorage.getItem("authToken");
+  const[setError, setLoading] = useState(false);
 
   const [fileHandlers, setFileHandlers] = useState({});
 
@@ -285,7 +287,7 @@ const ActiveProject = () => {
 
   const handleViewProject = (project) => {
     setSelectedProject(project);
-    setSelectedFiles([]);
+    setSelectedFiles(project.files ? project.files.map(f => ({ id: f.id })) : []);
     setShowDetailModal(false);
     setHasUnsavedChanges(false);
     setBatchEditValues({
@@ -397,6 +399,33 @@ const ActiveProject = () => {
     });
   }
 
+
+//  useEffect(() => {
+//     const fetchProjects = async () => {
+//       try {
+//         const response = await fetch('https://eminoids-backend-production.up.railway.app/api/project/getAllProjects',
+//            {
+//         headers: { authorization: `Bearer ${token}` },
+//       }
+//         );
+//         if (!response.ok) {
+//           throw new Error('Failed to fetch projects');
+//         }
+//         const data = await response.json();
+//         setProjects(data.projects);
+//         setFilteredProjects(data.projects);
+//         setLoading(false);
+//       } catch (err) {
+//         setError(err.message);
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchProjects();
+//   }, []);
+
+
+  
   return (
     <div className="container-fluid py-4">
       {/* Edit Project Modal */}
@@ -775,20 +804,22 @@ const ActiveProject = () => {
                                       <th>
                                         <input
                                           type="checkbox"
-                                          className="form-check-input"
-                                          checked={
-                                            selectedFiles.length ===
-                                            project?.files?.length
-                                          }
+                                         
                                           onChange={(e) => {
-                                            if (e.target.checked) {
-                                              setSelectedFiles([
-                                                ...project.files,
-                                              ]);
-                                            } else {
-                                              setSelectedFiles([]);
-                                            }
-                                            setHasUnsavedChanges(true);
+                                            const updatedFiles =
+                                              project.files.map((f) =>
+                                                f.id === file.id
+                                                  ? {
+                                                      ...f,
+                                                      checked: e.target.checked,
+                                                    }
+                                                  : f
+                                              );
+
+                                            setSelectedProject({
+                                              ...project,
+                                              files: updatedFiles,
+                                            });
                                           }}
                                         />
                                       </th>
