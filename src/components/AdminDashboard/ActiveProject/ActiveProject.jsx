@@ -286,7 +286,7 @@ const token =localStorage.getItem("authToken");
 
   const handleViewProject = (project) => {
     setSelectedProject(project);
-    setSelectedFiles([]);
+    setSelectedFiles(project.files ? project.files.map(f => ({ id: f.id })) : []);
     setShowDetailModal(false);
     setHasUnsavedChanges(false);
     setBatchEditValues({
@@ -732,14 +732,14 @@ useEffect(() => {
                       }
                     >
                       <td>{index + 1}</td>
-                      <td>{project.title}</td>
-                      <td>{project.client}</td>
-                      <td>{project.task}</td>
-                      <td>{project.language}</td>
-                      <td>{project.application}</td>
-                      <td>{project.totalPages}</td>
+                      <td>{project.projectTitle}</td>
+                      <td>{project.clientId}</td>
+                      <td>{project.task_name}</td>
+                      <td>{project.language_name}</td>
+                      <td>{project.application_name}</td>
+                      <td>{project.totalPagesLang}</td>
                       <td>{project.deadline}</td>
-                      <td>{project.readyDeadline}</td>
+                      <td>{project.readyQCDeadline}</td>
                       <td>{project.qcHrs}</td>
                       <td>{project.qcDueDate}</td>
                       <td>{project.status}</td>
@@ -867,7 +867,7 @@ useEffect(() => {
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {project.files.map((file) => (
+                                    {project?.files?.map((file) => (
                                       <tr
                                         key={file.id}
                                         className={

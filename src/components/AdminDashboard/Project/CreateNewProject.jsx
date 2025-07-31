@@ -179,20 +179,6 @@ const CreateNewProject = () => {
   ];
 
   // Options for dropdowns
-  const clientOptions = [
-    "PN",
-    "MMP Auburn",
-    "MMP Eastlake",
-    "MMP Kirkland",
-    "GN",
-    "DM",
-    "RN",
-    "NI",
-    "LB",
-    "SSS",
-    "Cpea",
-    "CV",
-  ];
 
   const gradientSelectStyles = {
     control: (provided, state) => ({
@@ -327,6 +313,28 @@ const CreateNewProject = () => {
     }));
   };
 
+  const [clientOptions, setClientOptions] = useState([]);
+
+  // Fetch clients on component mount
+ useEffect(() => {
+  axios
+    .get("https://eminoids-backend-production.up.railway.app/api/client/getAllClients", {
+      headers: { authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      console.log("Fetching client options...", res.data.clients);
+      const options = res.data.clients.map((client) => ({
+        value: client.clientName,
+        label: client.clientName,
+      }));
+      setClientOptions(options);
+    })
+    .catch((err) => {
+      console.error("Error fetching client options", err);
+    });
+}, []);
+
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -361,10 +369,7 @@ const CreateNewProject = () => {
             <Select
               id="client"
               name="client"
-              options={clientOptions.map((c) => ({
-                value: c,
-                label: c,
-              }))}
+              options={clientOptions}
               value={
                 formData.client
                   ? { value: formData.client, label: formData.client }
@@ -381,6 +386,7 @@ const CreateNewProject = () => {
               styles={gradientSelectStyles}
             />
           </div>
+
           <div className="col-md-4">
             <label htmlFor="country" className="form-label">
               Country
@@ -393,7 +399,6 @@ const CreateNewProject = () => {
               value={formData.country}
               onChange={handleInputChange}
               placeholder=""
-             
             />
           </div>
           <div className="col-md-4">
@@ -909,7 +914,7 @@ const CreateNewProject = () => {
             </label>
             <div className="max-w-md mx-auto">
               <div className="relative">
-                <input  
+                <input
                   type="text"
                   value={formatDateTime()}
                   readOnly
@@ -917,7 +922,6 @@ const CreateNewProject = () => {
                   className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
                   placeholder="00/00/00 00:00 AM"
                 />
-               
               </div>
 
               {isOpen && (
