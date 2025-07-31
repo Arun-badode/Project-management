@@ -85,6 +85,65 @@ const CreateNewProject = () => {
     inrCost: 0,
   });
 
+
+  // post Api
+  
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Prepare the data in the format expected by the API
+    const formDataForApi = {
+      projectTitle: formData.title,
+      clientId: formData.client, // You might need to map client names to IDs
+      country: formData.country,
+      projectManagerId: formData.projectManager, // You might need to map manager names to IDs
+      taskId: formData.tasks[0], // Assuming single task - adjust if multiple are allowed
+      applicationId: formData.application[0], // Assuming single application - adjust if needed
+      languageId: formData.languages[0], // Assuming single language - adjust if needed
+      totalPagesLang: formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0),
+      totalProjectPages: formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0) * (formData.languages.length || 1),
+      receiveDate: formData.receivedDate,
+      serverPath: formData.serverPath,
+      notes: formData.notes,
+      estimatedHours: formData.estimatedHrs || 0,
+      hourlyRate: formData.hourlyRate || 0,
+      perPageRate: formData.rate || 0,
+      currency: formData.currency,
+      totalCost: formData.cost || 0,
+      deadline: `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}-${selectedDate.toString().padStart(2, '0')}`,
+      readyQCDeadline: "", // You might want to calculate this
+      qcHrs: 0, // You might want to add this field to your form
+      qcDueDate: "", // You might want to add this field to your form
+      priority: "Medium", // You might want to add this field to your form
+      status: "Active"
+    };
+
+    try {
+      const response = await axios.post(
+        'https://eminoids-backend-production.up.railway.app/api/project/addProject',
+        formDataForApi,
+        {
+         headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+         }
+      );
+   
+      console.log('Project created successfully:', response?.data);
+      // You might want to show a success message or redirect here
+      alert('Project created successfully!');
+      
+      // Reset the form if needed
+      // setFormData({...initialState});
+      
+    } catch (error) {
+      console.error('Error creating project:', error);
+      // Show error message to user
+      alert('Error creating project. Please try again.');
+    }
+  };
+
+
   const handleNextMonth = () => {
     if (selectedMonth === 11) {
       setSelectedMonth(0);
@@ -244,12 +303,6 @@ const CreateNewProject = () => {
       .toString()
       .padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
     return `${date} ${time}`;
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Add your submit logic here
-    console.log("Form submitted:", formData);
   };
 
   const handleInputChange = (e) => {
