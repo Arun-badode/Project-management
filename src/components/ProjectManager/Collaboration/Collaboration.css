@@ -5,7 +5,6 @@
   flex-direction: column;
   position: relative;
   overflow-y: auto;
- 
 }
 
 .chat-header-sticky {
@@ -28,9 +27,57 @@
   min-height: 0;
   max-height: calc(98vh - 252px); /* Adjust if header/footer height changes */
 }
+
+/* Default width for larger screens */
 .chat {
   width: 64%;
-  /* Centers the row if needed */
+  margin: 0 auto; /* Centers the chat if needed */
 }
 
-/* Tablet devices (768px and below) */
+/* For tablets (768px to 1024px) */
+@media (max-width: 1024px) {
+  .chat {
+    width: 80%;
+  }
+  
+  .chat-messages-scrollable {
+    max-height: calc(98vh - 220px); /* Slightly smaller header/footer */
+  }
+}
+
+/* For large mobile devices (481px to 767px) */
+@media (max-width: 767px) {
+  .chat {
+    width: 90%;
+  }
+  
+  .chat-messages-scrollable {
+    max-height: calc(98vh - 200px); /* Even smaller header/footer */
+  }
+}
+
+/* For small mobile devices (480px and below) */
+@media (max-width: 480px) {
+  .chat {
+    width: 100%;
+    padding: 0 8px; /* Add some padding on the sides */
+  }
+  
+  .chat-messages-scrollable {
+    max-height: calc(98vh - 180px); /* Minimal header/footer space */
+  }
+  
+  .chat-header-sticky,
+  .chat-footer-sticky {
+    padding: 8px 0; /* Reduce padding on small screens */
+  }
+}
+
+/* For very small screens (landscape phones) */
+@media (max-height: 480px) {
+  .chat-messages-scrollable {
+    max-height: calc(98vh - 150px); /* Very compact header/footer */
+  }
+}
+
+

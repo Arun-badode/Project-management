@@ -422,11 +422,11 @@ function Collaboration() {
   return (
     <div className=" container-fluid d-flex flex-column">
       {/* Main Content */}
-      <div className="flex-grow-1 d-flex ">
+      <div className="flex-grow-1  d-flex ">
         {/* Left Sidebar */}
-        <div className="d-none d-lg-block col-lg-3 border-end  bg-card p-3 overflow-auto">
+        <div className="d-none d-lg-block col-lg-3 border-end bg-card p-3 overflow-auto">
           {/* User Profile */}
-          <div className="d-flex align-items-center mb-4 p-2  rounded bg-light">
+          <div className="d-flex align-items-center mb-4 p-2   rounded bg-light">
             <img
               src={currentUser.avatar}
               alt={currentUser.name}
@@ -585,11 +585,11 @@ function Collaboration() {
         </div>
 
         {/* Right Content Area */}
-        <div className="col-12 col-lg-9 d-flex flex-column chat-main-panel">
+        <div className="col-12  col-lg-9 d-flex flex-column chat-main-panel" >
           <div className="row chat" style={{ position: "fixed" }}>
-            <div className="col-12  d-flex flex-column">
+            <div className="col-12  flex-column">
               {/* Chat Header */}
-              <div className="p-3 border-bottom bg-main d-flex justify-content-between align-items-center chat-header-sticky">
+              <div className="p-3  border-bottom bg-main d-flex justify-content-between align-items-center chat-header-sticky">
                 <div>
                   <h4 className="mb-0 text-white">
                     {activePrivateChat
@@ -649,9 +649,8 @@ function Collaboration() {
                 </div>
               </div>
 
-              {/* Messages Area */}
               <div
-                className="chat-messages-scrollable  scrollbar-hidden overflow-auto p-3 bg-main"
+                className="chat-messages-scrollable h-100 scrollbar-hidden overflow-auto p-3 bg-main"
                 style={{ backgroundColor: "#1e1e1e" }}
               >
                 <div ref={messageEndRef} />
@@ -843,7 +842,7 @@ function Collaboration() {
                       width="40"
                       height="40"
                     />
-                    <div className="rounded p-2 bg-card">
+                    <div className="rounded  p-2 bg-card">
                       <div className="d-flex align-items-center">
                         <div className="typing-dots">
                           <div className="typing-dot"></div>
@@ -859,7 +858,8 @@ function Collaboration() {
                 )}
 
                 <div ref={messageEndRef} />
-              </div>
+              </div> {/* Messages Area */}
+             
 
               {/* Message Input */}
               <div className="p-3 border-top bg-main chat-footer-sticky">
