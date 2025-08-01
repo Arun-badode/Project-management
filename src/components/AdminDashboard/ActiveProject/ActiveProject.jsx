@@ -32,7 +32,7 @@ const ActiveProject = () => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const isAdmin = userRole === "Admin";
-const token =localStorage.getItem("authToken"); 
+  const token = localStorage.getItem("authToken");
 
   const [fileHandlers, setFileHandlers] = useState({});
 
@@ -302,7 +302,9 @@ const token =localStorage.getItem("authToken");
 
   const handleViewProject = (project) => {
     setSelectedProject(project);
-    setSelectedFiles(project.files ? project.files.map(f => ({ id: f.id })) : []);
+    setSelectedFiles(
+      project.files ? project.files.map((f) => ({ id: f.id })) : []
+    );
     setShowDetailModal(false);
     setHasUnsavedChanges(false);
     setBatchEditValues({
@@ -414,54 +416,53 @@ const token =localStorage.getItem("authToken");
     });
   }
 
-// useEffect(() => {
-//   const fetchProjects = async () => {
-//     try {
-//       const response = await axios.get(
-//         "https://eminoids-backend-production.up.railway.app/api/project/getAllProjects"
-//       );
-//       // API returns { status, message, projects: [...] }
-//       const apiProjects = response.data.projects || [];
-//       // Map API fields to your UI fields
-//       const mapped = apiProjects.map((p) => ({
-//         id: p.id,
-//         title: p.projectTitle,
-//         client: p.clientName,
-//         task: p.task_name,
-//         language: p.language_name,
-//         application: p.application_name,
-//         totalPages: p.totalProjectPages,
-//         deadline: p.deadline,
-//         readyDeadline: p.readyQCDeadline,
-//         qcHrs: p.qcHrs,
-//         qcDueDate: p.qcDueDate,
-//         status: p.status,
-//         progress: Math.floor(Math.random() * 100), // Or use a real field if available
-//         handler: p.full_name,
-//         files: [], // You can fill this if your API provides file details
-//       }));
-//       setProjects(mapped);
-//       setFilteredProjects(mapped);
-//     } catch (err) {
-//       setProjects([]);
-//       setFilteredProjects([]);
-//     }
-//   };
-//   fetchProjects();
-// }, []);
-  
+  // useEffect(() => {
+  //   const fetchProjects = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         "https://eminoids-backend-production.up.railway.app/api/project/getAllProjects"
+  //       );
+  //       // API returns { status, message, projects: [...] }
+  //       const apiProjects = response.data.projects || [];
+  //       // Map API fields to your UI fields
+  //       const mapped = apiProjects.map((p) => ({
+  //         id: p.id,
+  //         title: p.projectTitle,
+  //         client: p.clientName,
+  //         task: p.task_name,
+  //         language: p.language_name,
+  //         application: p.application_name,
+  //         totalPages: p.totalProjectPages,
+  //         deadline: p.deadline,
+  //         readyDeadline: p.readyQCDeadline,
+  //         qcHrs: p.qcHrs,
+  //         qcDueDate: p.qcDueDate,
+  //         status: p.status,
+  //         progress: Math.floor(Math.random() * 100), // Or use a real field if available
+  //         handler: p.full_name,
+  //         files: [], // You can fill this if your API provides file details
+  //       }));
+  //       setProjects(mapped);
+  //       setFilteredProjects(mapped);
+  //     } catch (err) {
+  //       setProjects([]);
+  //       setFilteredProjects([]);
+  //     }
+  //   };
+  //   fetchProjects();
+  // }, []);
 
-
-useEffect(() => {
+  useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch('https://eminoids-backend-production.up.railway.app/api/project/getAllProjects',
-           {
-        headers: { authorization: `Bearer ${token}` },
-      }
+        const response = await fetch(
+          "https://eminoids-backend-production.up.railway.app/api/project/getAllProjects",
+          {
+            headers: { authorization: `Bearer ${token}` },
+          }
         );
         if (!response.ok) {
-          throw new Error('Failed to fetch projects');
+          throw new Error("Failed to fetch projects");
         }
         const data = await response.json();
         setProjects(data.projects);
@@ -823,242 +824,180 @@ useEffect(() => {
                       </td>
                     </tr>
 
-                    {expandedRow === project.id && (
-                      <tr>
-                        <td colSpan={14} className="p-0 border-top-0">
-                          <div className="p-4">
-                            {/* Project Files Header */}
-                            <div className="mb-4">
-                              <div className="d-flex justify-content-between align-items-center mb-3">
-                                <h5 className="mb-0">Project Files</h5>
-                                {selectedFiles.length > 0 && (
-                                  <span className="badge bg-primary">
-                                    {selectedFiles.length} files selected
-                                  </span>
-                                )}
-                              </div>
+                   {expandedRow === project.id && (
+  <tr>
+    <td colSpan={14} className="p-0 border-top-0">
+      <div className="p-4">
+        {/* Project Files Header */}
+        <div className="mb-4">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <h5 className="mb-0">Project Files</h5>
+            {selectedFiles.length > 0 && (
+              <span className="badge bg-primary">
+                {selectedFiles.length} files selected
+              </span>
+            )}
+          </div>
 
-                              {/* Files Table */}
-                              <div className="table-responsive">
-                                <table className="table table-sm table-striped table-hover">
-                                  <thead
-                                    className="table-gradient-bg table"
-                                    style={{
-                                      position: "sticky",
-                                      top: 0,
-                                      zIndex: 0,
-                                      backgroundColor: "#fff",
-                                    }}
-                                  >
-                                    <tr className="text-center">
-                                      <th>
-                                        <input
-                                          type="checkbox"
-                                         
-                                          onChange={(e) => {
-                                            const updatedFiles =
-                                              project.files.map((f) =>
-                                                f.id === file.id
-                                                  ? {
-                                                      ...f,
-                                                      checked: e.target.checked,
-                                                    }
-                                                  : f
-                                              );
-
-                                            setSelectedProject({
-                                              ...project,
-                                              files: updatedFiles,
-                                            });
-                                          }}
-                                        />
-                                      </th>
-                                      <th>File Name</th>
-                                      <th>Pages</th>
-                                      <th>Language</th>
-                                      <th>Application</th>
-                                      <th>Handler</th>
-                                      <th>QA Reviewer</th>
-                                      <th>QA Status</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {project?.files?.map((file) => (
-                                      <tr
-                                        key={file.id}
-                                        className={
-                                          selectedFiles.some(
-                                            (f) => f.id === file.id
-                                          )
-                                            ? "table-primary text-center"
-                                            : ""
-                                        }
-                                      >
-                                        <td>
-                                          <input
-                                            type="checkbox"
-                                            className="form-check-input"
-                                            checked={selectedFiles.some(
-                                              (f) => f.id === file.id
-                                            )}
-                                            onChange={() =>
-                                              toggleFileSelection(file)
-                                            }
-                                          />
-                                        </td>
-                                        <td>{file.name}</td>
-                                        <td>{file.pages}</td>
-                                        <td>{file.language}</td>
-                                        <td>{file.application}</td>
-                                        <td>
-                                          <select
-                                            className="form-select form-select-sm"
-                                            value={fileHandlers[file.id]}
-                                            onChange={(e) =>
-                                              handleHandlerChange(
-                                                file.id,
-                                                e.target.value
-                                              )
-                                            }
-                                          >
-                                            {assignees.map(
-                                              (assignee, index) => (
-                                                <option
-                                                  key={index}
-                                                  value={assignee.value}
-                                                >
-                                                  {assignee.label}
-                                                </option>
-                                              )
-                                            )}
-                                          </select>
-                                        </td>
-
-                                        <td>
-                                          <select className="form-select form-select-sm">
-                                            <option value="">
-                                              Not Assigned
-                                            </option>
-                                            <option value="Sarah Williams">
-                                              Sarah Williams
-                                            </option>
-                                            <option value="David Brown">
-                                              David Brown
-                                            </option>
-                                            <option value="Emily Davis">
-                                              Emily Davis
-                                            </option>
-                                          </select>
-                                        </td>
-                                        <td>Corr WIP</td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-
-                              {/* Batch Edit Controls */}
-                              <div className="row g-3 mb-1">
-                                <div className="col-md-2">
-                                  <label className="form-label">
-                                    Ready for QC Due
-                                  </label>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">
-                                    QC Allocated Hours
-                                  </label>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">QC Due</label>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">Priority</label>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">Actions</label>
-                                </div>
-                              </div>
-
-                              {/* Input Row */}
-                              <div className="row g-3 mb-3 align-items-start">
-                                <div className="col-md-2">
-                                  <DatePicker
-                                    selected={selectedDateTime}
-                                    onChange={(date) =>
-                                      setSelectedDateTime(date)
-                                    }
-                                    showTimeSelect
-                                    timeFormat="HH:mm"
-                                    timeIntervals={15}
-                                    dateFormat="h:mm aa dd-MM-yyyy"
-                                    placeholderText="Select date and time"
-                                    className="form-control"
-                                  />
-                                </div>
-
-                                <div className="col-md-2">
-                                  <input
-                                    type="number"
-                                    className="form-control"
-                                    step="0.25"
-                                    min="0"
-                                    placeholder="0.00"
-                                    value={qcAllocatedHours}
-                                    onChange={(e) => {
-                                      const val = parseFloat(e.target.value);
-                                      if (
-                                        !isNaN(val) &&
-                                        val >= 0 &&
-                                        val % 0.25 === 0
-                                      ) {
-                                        setQcAllocatedHours(val);
-                                      }
-                                    }}
-                                  />
-                                  <div className="small text-white">
-                                    (in multiple of 0.00 only)
-                                  </div>
-                                </div>
-
-                                <div className="col-md-2">
-                                  <div className="form-control fw-bold">
-                                    {calculateQCDue(
-                                      selectedDateTime,
-                                      qcAllocatedHours
-                                    )}
-                                  </div>
-                                </div>
-
-                                <div className="col-md-2">
-                                  <select className="form-select">
-                                    <option>Low</option>
-                                    <option>Mid</option>
-                                    <option>High</option>
-                                  </select>
-                                </div>
-
-                                <div className="col-md-2 d-flex gap-2">
-                                  <button className="btn btn-success w-100">
-                                    Save
-                                  </button>
-                                  <button className="btn btn-secondary w-100">
-                                    Close
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
+          {/* Files Table */}
+          <div className="table-responsive">
+            <table className="table table-sm table-striped table-hover">
+              <thead>
+                <tr className="text-center">
+                  <th>
+                    <input type="checkbox" />
+                  </th>
+                  <th>File Name</th>
+                  <th>Pages</th>
+                  <th>Language</th>
+                  <th>Application</th>
+                  <th>Handler</th>
+                  <th>QA Reviewer</th>
+                  <th>Status</th>
+                  <th>Preview</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {
+                    id: 1,
+                    name: "File_1_1.docx",
+                    pages: 15,
+                    language: "az",
+                    application: "Visio",
+                  },
+                  {
+                    id: 2,
+                    name: "File_1_2.docx",
+                    pages: 6,
+                    language: "az",
+                    application: "FM",
+                  },
+                  {
+                    id: 3,
+                    name: "File_1_3.docx",
+                    pages: 5,
+                    language: "yo",
+                    application: "Visio",
+                  },
+                  {
+                    id: 4,
+                    name: "File_1_4.docx",
+                    pages: 2,
+                    language: "am",
+                    application: "Word",
+                  },
+                ].map((file) => (
+                  <tr key={file.id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        checked={selectedFiles.some((f) => f.id === file.id)}
+                        onChange={() => toggleFileSelection(file)}
+                      />
+                    </td>
+                    <td>{file.name}</td>
+                    <td>{file.pages}</td>
+                    <td>{file.language}</td>
+                    <td>{file.application}</td>
+                    <td>
+                      <select
+                        className="form-select form-select-sm"
+                        value={fileHandlers[file.id] || ""}
+                        onChange={(e) =>
+                          handleHandlerChange(file.id, e.target.value)
+                        }
+                      >
+                        <option value="">Not Assigned</option>
+                        {assignees.map((assignee, index) => (
+                          <option key={index} value={assignee.value}>
+                            {assignee.label}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <select className="form-select form-select-sm">
+                        <option value="">Not Assigned</option>
+                        <option value="Sarah Williams">Sarah Williams</option>
+                        <option value="David Brown">David Brown</option>
+                        <option value="Emily Davis">Emily Davis</option>
+                      </select>
+                    </td>
+                    <td>YTS</td>
+                    <td>
+                      {file.imageUrl ? (
+                        <img
+                          src={file.imageUrl}
+                          alt={file.name}
+                          style={{
+                            width: "60px",
+                            height: "40px",
+                            objectFit: "cover",
+                          }}
+                        />
+                      ) : (
+                        <span className="text-muted">No Preview</span>
+                      )}
+                    </td>
+                  </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
 
+        {/* Footer Row Controls */}
+        <div className="row g-3 align-items-center mb-3">
+          <div className="col-md-3">
+            <label className="form-label">Ready for QC Due</label>
+            <input type="datetime-local" className="form-control" />
+          </div>
+          <div className="col-md-2 mt-5">
+            <label className="form-label">QC Allocated Hours</label>
+            <input
+              type="number"
+              min="0"
+              step="0.25"
+              className="form-control"
+              placeholder="0"
+            />
+            <div className="form-text">(in multiple of 0.00 only)</div>
+          </div>
+          <div className="col-md-2">
+            <label className="form-label">QC Due</label>
+            <input
+              type="text"
+              className="form-control"
+              placeholder="--"
+              disabled
+            />
+          </div>
+          <div className="col-md-2">
+            <label className="form-label">Priority</label>
+            <select className="form-select">
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+          </div>
+          <div className="col-md-3 d-flex align-items-end justify-content-end gap-2">
+            <button className="btn btn-success">Save</button>
+            <button className="btn btn-secondary">Close</button>
+          </div>
+        </div>
+      </div>
+    </td>
+  </tr>
+)}
+
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );
