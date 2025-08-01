@@ -8,6 +8,20 @@ import axios from "axios";
 import CreateNewProject from "../Project/CreateNewProject";
 import EditModal from "./EditModal";
 
+const assignees = [
+  { label: "Not Assigned", value: "" },
+  { label: "Sarah Williams", value: "Sarah Williams" },
+  { label: "David Brown", value: "David Brown" },
+  { label: "Emily Davis", value: "Emily Davis" },
+];
+
+const handleChange = (id, field, value) => {
+  const updated = files.map((file) =>
+    file.id === id ? { ...file, [field]: value } : file
+  );
+  setFiles(updated);
+};
+
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
@@ -20,13 +34,14 @@ const ActiveProject = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [deadline, setDeadline] = useState("");
+  const [allocatedHours, setAllocatedHours] = useState("");
+  const [priority, setPriority] = useState("Medium");
   const [fileHandlers, setFileHandlers] = useState({});
-
   const assignees = [
-    { label: "Not Assigned", value: "" },
-    { label: "John Doe", value: "John Doe" },
-    { label: "Jane Smith", value: "Jane Smith" },
-    { label: "Mike Johnson", value: "Mike Johnson" },
+    { label: "John Doe", value: "john" },
+    { label: "Jane Smith", value: "jane" },
+    { label: "Mike Johnson", value: "mike" },
   ];
 
   const handleHandlerChange = (fileId, newHandler) => {
@@ -736,7 +751,7 @@ const ActiveProject = () => {
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {(project.files || []).map((file) => (
+                                    {files.map((file) => (
                                       <tr key={file.id}>
                                         <td>
                                           <input
@@ -819,7 +834,7 @@ const ActiveProject = () => {
                               </div>
                             </div>
 
-                            {/* Footer Row Controls */}
+                            {/* Footer Controls */}
                             <div className="row g-3 align-items-center mb-3">
                               <div className="col-md-3">
                                 <label className="form-label">
@@ -828,8 +843,7 @@ const ActiveProject = () => {
                                 <input
                                   type="datetime-local"
                                   className="form-control"
-                                  value={readyForQcDueInput}
-                                  onChange={(e) => setReadyForQcDueInput(e.target.value)}
+                                  onChange={(e) => setDeadline(e.target.value)}
                                 />
                                 {qcDueDelay && (
                                   <small className={`form-text ${qcDueDelay.includes("Delayed") ? "text-danger" : "text-success"}`}>
@@ -847,10 +861,11 @@ const ActiveProject = () => {
                                   step="0.25"
                                   className="form-control"
                                   placeholder="0"
-                                  value={qcAllocatedHours}
-                                  onChange={(e) => setQcAllocatedHours(e.target.value)}
+                                  onChange={(e) =>
+                                    setAllocatedHours(e.target.value)
+                                  }
                                 />
-                                <div className="form-text">
+                                <div className=" text-whhite">
                                   (in multiple of 0.00 only)
                                 </div>
                               </div>
@@ -860,16 +875,14 @@ const ActiveProject = () => {
                                   type="text"
                                   className="form-control"
                                   placeholder="--"
-                                  value={calculateQCDue(readyForQcDueInput, qcAllocatedHours)}
-                                  disabled
                                 />
                               </div>
                               <div className="col-md-2">
                                 <label className="form-label">Priority</label>
-                                <select 
+                                <select
                                   className="form-select"
-                                  value={priorityAll}
-                                  onChange={(e) => setPriorityAll(e.target.value)}
+                                  value={priority}
+                                  onChange={(e) => setPriority(e.target.value)}
                                 >
                                   <option value="Low">Low</option>
                                   <option value="Medium">Medium</option>
@@ -877,9 +890,9 @@ const ActiveProject = () => {
                                 </select>
                               </div>
                               <div className="col-md-3 d-flex align-items-end justify-content-end gap-2">
-                                <button 
+                                <button
                                   className="btn btn-success"
-                                  onClick={handleApplyToSelectedFiles}
+                                  onClick={handleSave}
                                 >
                                   Save
                                 </button>
@@ -906,4 +919,171 @@ const ActiveProject = () => {
   );
 };
 
-export default ActiveProject;
+// Helper functions
+function customToInputDate(str) {
+  if (!str) return "";
+  const match = str.match(/(\d{2}):(\d{2}) (AM|PM) (\d{2})-(\d{2})-(\d{2})/);
+  if (!match) return "";
+  let [_, hour, min, ampm, day, month, year] = match;
+  hour = parseInt(hour, 10);
+  if (ampm === "PM" && hour !== 12) hour += 12;
+  if (ampm === "AM" && hour === 12) hour = 0;
+  hour = hour.toString().padStart(2, "0");
+  return `20${year}-${month}-${day}T${hour}:${min}`;
+}
+
+function inputToCustomDate(str) {
+  if (!str) return "";
+  const d = new Date(str);
+  if (isNaN(d)) return "";
+  let hour = d.getHours();
+  const min = d.getMinutes().toString().padStart(2, "0");
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12;
+  if (hour === 0) hour = 12;
+  const day = d.getDate().toString().padStart(2, "0");
+  const month = (d.getMonth() + 1).toString().padStart(2, "0");
+  const year = d.getFullYear().toString().slice(2);
+  return `${hour
+    .toString()
+    .padStart(2, "0")}:${min} ${ampm} ${day}-${month}-${year}`;
+}
+
+const generateDummyProjects = (count) => {
+  const clients = [
+    "PN",
+    "MMP Auburn",
+    "MMP Eastlake",
+    "MMP Kirkland",
+    "GN",
+    "DM",
+  ];
+  const tasks = [
+    "Source Creation",
+    "Callout",
+    "Prep",
+    "Image Creation",
+    "DTP",
+    "Image Localization",
+    "OVA",
+  ];
+  const languages = ["af", "am", "ar", "az", "be"];
+  const applications = [
+    "Word",
+    "PPT",
+    "Excel",
+    "INDD",
+    "AI",
+    "PSD",
+    "AE",
+    "CDR",
+    "Visio",
+    "Project",
+    "FM",
+  ];
+
+  const statuses = [
+    "QC YTS",
+    "WIP",
+    "QC WIP",
+    "WIP",
+    "Corr YTS",
+    "WIP",
+    "Corr YTS",
+    "Corr WIP",
+    "WIP",
+    "QC YTS",
+    "Corr YTS",
+  ];
+  const stages = ["In Progress", "Review", "Completed", "On Hold"];
+  const qaStatuses = ["Pending", "In Progress", "Approved", "Rejected"];
+  const handlers = ["John Doe", "Jane Smith", "Mike Johnson", ""];
+  const qaReviewers = ["Sarah Williams", "David Brown", "Emily Davis", ""];
+
+  const projects = [];
+
+  for (let i = 1; i <= count; i++) {
+    const totalPages = Math.floor(Math.random() * 100) + 10;
+    const progress = Math.floor(Math.random() * 101);
+    const handler = handlers[Math.floor(Math.random() * handlers.length)];
+
+    const dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + Math.floor(Math.random() * 30));
+    const hours = Math.floor(Math.random() * 24);
+    const minutes = Math.floor(Math.random() * 60);
+    dueDate.setHours(hours, minutes);
+
+    const formattedDueDate = `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")} ${hours >= 12 ? "PM" : "AM"} ${dueDate
+      .getDate()
+      .toString()
+      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+
+    // Add random readyDeadline, qcHrs, qcDueDate, status
+    const readyDeadline = `${(hours + 1) % 24}:${minutes
+      .toString()
+      .padStart(2, "0")} ${hours + 1 >= 12 ? "PM" : "AM"} ${dueDate
+      .getDate()
+      .toString()
+      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+    const qcHrs = Math.floor(Math.random() * 15) + 1;
+    const qcDueDate = `${(hours + 2) % 24}:${minutes
+      .toString()
+      .padStart(2, "0")} ${hours + 2 >= 12 ? "PM" : "AM"} ${dueDate
+      .getDate()
+      .toString()
+      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+
+    const fileCount = Math.floor(Math.random() * 5) + 1;
+    const files = [];
+    for (let j = 1; j <= fileCount; j++) {
+      const filePages = Math.floor(Math.random() * 20) + 1;
+      files.push({
+        id: j,
+        name: `File_${i}_${j}.docx`,
+        pages: filePages,
+        language: languages[Math.floor(Math.random() * languages.length)],
+        application:
+          applications[Math.floor(Math.random() * applications.length)],
+        stage: stages[Math.floor(Math.random() * stages.length)],
+        assigned: new Date(
+          dueDate.getTime() -
+            Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
+        ).toLocaleDateString(),
+        handler: handler,
+        qaReviewer: qaReviewers[Math.floor(Math.random() * qaReviewers.length)],
+        qaStatus: qaStatuses[Math.floor(Math.random() * qaStatuses.length)],
+        priority: ["High", "Medium", "Low"][Math.floor(Math.random() * 3)],
+      });
+    }
+    projects.push({
+      id: i,
+      title: `Project ${i}`,
+      client: clients[Math.floor(Math.random() * clients.length)],
+      task: tasks[Math.floor(Math.random() * tasks.length)],
+      language: languages[Math.floor(Math.random() * languages.length)],
+      application:
+        applications[Math.floor(Math.random() * applications.length)],
+      totalPages,
+      deadline: formattedDueDate,
+      readyDeadline,
+      qcHrs,
+      qcDueDate,
+      status,
+      progress,
+      handler,
+      files,
+    });
+  }
+  return projects;
+};
+export default ActiveProject;  
+           

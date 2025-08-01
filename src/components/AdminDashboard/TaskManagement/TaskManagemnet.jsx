@@ -252,14 +252,24 @@ const TaskManagement = () => {
           )}
         </ul>
 
-        {/* Projects Table */}
-        <ProjectsTable
-          projects={activeProjectTab === "all" ? filteredProjects : myTasks}
-          onViewProject={handleViewProject}
-          onMarkComplete={handleMarkComplete}
-          onDeleteProject={handleDeleteProject}
-          expandedRow={expandedRow}
-        />
+        {/* Show content based on active tab */}
+        {activeProjectTab === "all" && (
+          <>
+            <ProjectsTable
+              projects={filteredProjects}
+              onViewProject={handleViewProject}
+              onMarkComplete={handleMarkComplete}
+              onDeleteProject={handleDeleteProject}
+              expandedRow={expandedRow}
+            />
+            {selectedProject && expandedRow === selectedProject.id && (
+              <ProjectDetails 
+                project={selectedProject}
+                onClose={() => setExpandedRow(null)}
+              />
+            )}
+          </>
+        )}
 
         {/* Project Details */}
         {selectedProject && expandedRow === selectedProject.id && (
