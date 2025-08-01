@@ -16,7 +16,9 @@ const ActiveProject = () => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const isAdmin = userRole === "Admin";
-const token =localStorage.getItem("authToken"); 
+  const token = localStorage.getItem("authToken"); 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [fileHandlers, setFileHandlers] = useState({});
 
@@ -26,14 +28,12 @@ const token =localStorage.getItem("authToken");
     { label: "Jane Smith", value: "Jane Smith" },
     { label: "Mike Johnson", value: "Mike Johnson" },
   ];
-  const handleHandlerChange = (fileId, newHandler) => {
-    // Update handler for all selected files
-    const updatedHandlers = { ...fileHandlers };
 
+  const handleHandlerChange = (fileId, newHandler) => {
+    const updatedHandlers = { ...fileHandlers };
     selectedFiles.forEach((f) => {
       updatedHandlers[f.id] = newHandler;
     });
-
     setFileHandlers(updatedHandlers);
     setHasUnsavedChanges(true);
   };
@@ -71,42 +71,7 @@ const token =localStorage.getItem("authToken");
   };
 
   const [formData, setFormData] = useState(initialFormData);
-
   const [qcAllocatedHours, setQcAllocatedHours] = useState(0.0);
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const filter = params.get("filter");
-    const due = params.get("due");
-
-    let result = [...projects];
-
-    if (filter === "active") {
-      result = result.filter((project) => project.progress < 100);
-    }
-
-    if (due === "30min") {
-      const now = new Date();
-      const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
-      result = result.filter((project) => {
-        const match = project.dueDate.match(
-          /(\d{2}):(\d{2}) (AM|PM) (\d{2})-(\d{2})-(\d{2})/
-        );
-        if (!match) return false;
-        let [_, hour, min, ampm, day, month, year] = match;
-        hour = parseInt(hour, 10);
-        if (ampm === "PM" && hour !== 12) hour += 12;
-        if (ampm === "AM" && hour === 12) hour = 0;
-        const dueDateObj = new Date(
-          `20${year}-${month}-${day}T${hour.toString().padStart(2, "0")}:${min}`
-        );
-        return dueDateObj > now && dueDateObj <= thirtyMinsFromNow;
-      });
-    }
-
-    setFilteredProjects(result);
-  }, [location.search, projects]);
-
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [clientFilter, setClientFilter] = useState("");
   const [taskFilter, setTaskFilter] = useState("");
@@ -119,7 +84,7 @@ const token =localStorage.getItem("authToken");
   const [editedProject, setEditedProject] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedApplications, setSelectedApplications] = useState([]);
-  const [activeButton, setActivebutton] = useState("");
+  const [activeButton, setActiveButton] = useState("");
   const [readyForQcDueInput, setReadyForQcDueInput] = useState("");
   const [priorityAll, setPriorityAll] = useState("Mid");
   const [batchEditValues, setBatchEditValues] = useState({
@@ -130,118 +95,121 @@ const token =localStorage.getItem("authToken");
     qcAllocatedHours: "",
     priority: "",
   });
-  console.log("batchEditValues", batchEditValues.handler);
 
   const [qcDueDelay, setQcDueDelay] = useState("");
 
   const statuses = [
-    { key: "allstatus", label: "All Status " },
+    { key: "allstatus", label: "All Status" },
     { key: "yts", label: "YTS" },
     { key: "wip", label: "WIP" },
     { key: "readyforqc", label: "Ready for QC" },
     { key: "qareview", label: "QA Review" },
     { key: "corryts", label: "Corr YTS" },
-    { key: "corrwip,", label: "Corr WIP" },
-    { key: "rfd,", label: "RFD" },
+    { key: "corrwip", label: "Corr WIP" },
+    { key: "rfd", label: "RFD" },
   ];
 
-  const applicationsOptio = [
+  const applicationsOptions = [
     { value: "Adobe", label: "Adobe" },
     { value: "MSOffice", label: "MS Office" },
   ];
 
   useEffect(() => {
-    setProjects(generateDummyProjects(15));
-    setFilteredProjects(generateDummyProjects(15));
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch(
+          'https://eminoids-backend-production.up.railway.app/api/project/getAllProjects',
+          {
+            headers: { authorization: `Bearer ${token}` },
+          }
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch projects');
+        }
+        const data = await response.json();
+        setProjects(data.projects);
+        setFilteredProjects(data.projects);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
   }, []);
 
   useEffect(() => {
     let result = [...projects];
 
+    // Apply tab filter
     if (activeTab === "unhandled") {
       result = result.filter(
         (project) => !project.handler || project.handler === ""
       );
     }
 
+    // Apply button filters
+    if (activeButton === "nearDue") {
+      const now = new Date();
+      const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+      result = result.filter((project) => {
+        const dueDate = new Date(project.deadline);
+        return dueDate > now && dueDate <= thirtyMinsFromNow;
+      });
+    } else if (activeButton === "overdue") {
+      const now = new Date();
+      result = result.filter((project) => {
+        const dueDate = new Date(project.deadline);
+        return dueDate < now && project.status !== "Completed";
+      });
+    } else if (activeButton === "Adobe") {
+      const adobeApps = ["INDD", "AI", "PSD", "AE", "CDR", "FM", "Adobe"];
+      result = result.filter((project) =>
+        adobeApps.includes(project.application_name)
+      );
+    } else if (activeButton === "MSOffice") {
+      const msOfficeApps = [
+        "Word",
+        "PPT",
+        "Excel",
+        "Visio",
+        "Project",
+        "Canva",
+        "MS Office",
+      ];
+      result = result.filter((project) =>
+        msOfficeApps.includes(project.application_name)
+      );
+    }
+
+    // Apply dropdown filters
     if (clientFilter) {
-      result = result.filter((project) => project.client === clientFilter);
+      result = result.filter((project) => 
+        project.clientId && project.clientId.toString() === clientFilter
+      );
     }
     if (taskFilter) {
-      result = result.filter((project) => project.task === taskFilter);
+      result = result.filter((project) => 
+        project.task_name && project.task_name.toLowerCase().includes(taskFilter.toLowerCase())
+      );
     }
-    if (languageFilter) {
-      result = result.filter((project) => project.language === languageFilter);
+    if (languageFilter && languageFilter !== "allstatus") {
+      result = result.filter((project) => 
+        project.status && project.status.toLowerCase() === languageFilter.toLowerCase()
+      );
+    }
+    if (selectedApplications.length > 0) {
+      const selectedAppValues = selectedApplications.map(app => app.value);
+      result = result.filter((project) =>
+        selectedAppValues.includes(project.application_name)
+      );
     }
 
-    result.sort(
-      (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
-    );
+    // Sort by deadline
+    result.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
     setFilteredProjects(result);
-  }, [projects, activeTab, clientFilter, taskFilter, languageFilter]);
-
-  const handleCardFilter = (type) => {
-    let filtered = [];
-    const today = new Date();
-    const nearDueDate = new Date();
-    nearDueDate.setDate(today.getDate() + 3);
-
-    // Clear all filters when a button is clicked
-    setClientFilter("");
-    setTaskFilter("");
-    setLanguageFilter("");
-    setSelectedApplications([]);
-
-    switch (type) {
-      case "all":
-        filtered = projects
-          .slice()
-          .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
-        break;
-      case "nearDue":
-        filtered = projects.filter((project) => {
-          const now = new Date();
-          const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
-          const dueDate = new Date(customToInputDate(project.deadline));
-          return dueDate > now && dueDate <= thirtyMinsFromNow;
-        });
-        break;
-      case "overdue":
-        filtered = projects.filter((project) => {
-          const dueDate = new Date(customToInputDate(project.deadline));
-          return dueDate < today && project.status !== "Completed";
-        });
-        break;
-      case "MSOffice": {
-        const msOfficeApps = [
-          "Word",
-          "PPT",
-          "Excel",
-          "Visio",
-          "Project",
-          "Canva",
-          "MS Office",
-        ];
-        filtered = projects.filter((project) =>
-          msOfficeApps.includes(project.application)
-        );
-        break;
-      }
-      case "Adobe": {
-        const adobeApps = ["INDD", "AI", "PSD", "AE", "CDR", "FM", "Adobe"];
-        filtered = projects.filter((project) =>
-          adobeApps.includes(project.application)
-        );
-        break;
-      }
-      default:
-        filtered = projects;
-    }
-    setFilteredProjects(filtered);
-    setActivebutton(type);
-  };
-
-  // Helper functions you need to implement:
+  }, [projects, activeTab, activeButton, clientFilter, taskFilter, languageFilter, selectedApplications]);
 
   const handleDeleteProject = (id) => {
     const project = projects.find((p) => p.id === id);
@@ -308,20 +276,20 @@ const token =localStorage.getItem("authToken");
     }
     setHasUnsavedChanges(true);
   };
-  console.log("slectedFiles", selectedFiles);
-  // console.log(
-  //   "slselectedFiles.some((f) => f.id === file.idectedFiles",
-  //   selectedFiles.some((f) => f.id === file.id)
-  // );
 
   const getUniqueValues = (key) => {
-    return Array.from(new Set(projects.map((project) => project[key])));
+    const uniqueValues = new Set();
+    projects.forEach((project) => {
+      if (project[key]) {
+        uniqueValues.add(project[key]);
+      }
+    });
+    return Array.from(uniqueValues);
   };
 
   const handleEditProject = (project) => {
     setEditedProject({ ...project });
-    setIsEdit(project.id);
-    setShowEditModal(true); // <-- Add this line
+    setShowEditModal(true);
   };
 
   const handleSaveProjectEdit = () => {
@@ -376,7 +344,6 @@ const token =localStorage.getItem("authToken");
       alert("No files selected.");
       return;
     }
-    // Apply deadline logic here
     alert(`Deadline ${formData.deadline} applied to selected files.`);
   };
 
@@ -398,67 +365,39 @@ const token =localStorage.getItem("authToken");
     });
   }
 
-// useEffect(() => {
-//   const fetchProjects = async () => {
-//     try {
-//       const response = await axios.get(
-//         "https://eminoids-backend-production.up.railway.app/api/project/getAllProjects"
-//       );
-//       // API returns { status, message, projects: [...] }
-//       const apiProjects = response.data.projects || [];
-//       // Map API fields to your UI fields
-//       const mapped = apiProjects.map((p) => ({
-//         id: p.id,
-//         title: p.projectTitle,
-//         client: p.clientName,
-//         task: p.task_name,
-//         language: p.language_name,
-//         application: p.application_name,
-//         totalPages: p.totalProjectPages,
-//         deadline: p.deadline,
-//         readyDeadline: p.readyQCDeadline,
-//         qcHrs: p.qcHrs,
-//         qcDueDate: p.qcDueDate,
-//         status: p.status,
-//         progress: Math.floor(Math.random() * 100), // Or use a real field if available
-//         handler: p.full_name,
-//         files: [], // You can fill this if your API provides file details
-//       }));
-//       setProjects(mapped);
-//       setFilteredProjects(mapped);
-//     } catch (err) {
-//       setProjects([]);
-//       setFilteredProjects([]);
-//     }
-//   };
-//   fetchProjects();
-// }, []);
-  
+  const handleCardFilter = (type) => {
+    setActiveButton(type);
+    // The actual filtering is handled in the useEffect above
+  };
 
-
-useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await fetch('https://eminoids-backend-production.up.railway.app/api/project/getAllProjects',
-           {
-        headers: { authorization: `Bearer ${token}` },
+  const getClientOptions = () => {
+    const uniqueClients = new Set();
+    projects.forEach(project => {
+      if (project.clientId) {
+        uniqueClients.add(project.clientId.toString());
       }
-        );
-        if (!response.ok) {
-          throw new Error('Failed to fetch projects');
-        }
-        const data = await response.json();
-        setProjects(data.projects);
-        setFilteredProjects(data.projects);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
-    };
+    });
+    return Array.from(uniqueClients).map(client => ({
+      value: client,
+      label: client
+    }));
+  };
 
-    fetchProjects();
-  }, []);
+  const getTaskOptions = () => {
+    const uniqueTasks = new Set();
+    projects.forEach(project => {
+      if (project.task_name) {
+        uniqueTasks.add(project.task_name);
+      }
+    });
+    return Array.from(uniqueTasks).map(task => ({
+      value: task,
+      label: task
+    }));
+  };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="container-fluid py-4">
@@ -479,7 +418,7 @@ useEffect(() => {
                 ></button>
               </div>
               <div className="modal-body">
-                <EditModal />
+                <EditModal project={editedProject} setProject={setEditedProject} />
               </div>
               <div className="modal-footer">
                 <button
@@ -516,11 +455,7 @@ useEffect(() => {
                 <div>
                   <h5 className="modal-title">Create New Project</h5>
                 </div>
-
                 <div>
-                  {/* <button className="btn btn-light btn-sm me-4 ">
-                    <i className="fas fa-cog text-muted"></i>
-                  </button> */}
                   <button
                     type="button"
                     className="btn-close"
@@ -529,7 +464,13 @@ useEffect(() => {
                 </div>
               </div>
               <div className="modal-body">
-                <CreateNewProject />
+                <CreateNewProject 
+                  onClose={() => setShowCreateModal(false)}
+                  onProjectCreated={(newProject) => {
+                    setProjects([...projects, newProject]);
+                    setShowCreateModal(false);
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -589,9 +530,9 @@ useEffect(() => {
                 onChange={(e) => setClientFilter(e.target.value)}
               >
                 <option value="">All Clients</option>
-                {getUniqueValues("client").map((client, index) => (
-                  <option key={index} value={client}>
-                    {client}
+                {getClientOptions().map((client, index) => (
+                  <option key={index} value={client.value}>
+                    {client.label}
                   </option>
                 ))}
               </select>
@@ -605,9 +546,9 @@ useEffect(() => {
                 onChange={(e) => setTaskFilter(e.target.value)}
               >
                 <option value="">All Tasks</option>
-                {getUniqueValues("task").map((task, index) => (
-                  <option key={index} value={task}>
-                    {task}
+                {getTaskOptions().map((task, index) => (
+                  <option key={index} value={task.value}>
+                    {task.label}
                   </option>
                 ))}
               </select>
@@ -631,7 +572,7 @@ useEffect(() => {
             {/* Application (Select component) */}
             <div className="col-12 col-sm-6 col-md-3">
               <Select
-                options={applicationsOptio}
+                options={applicationsOptions}
                 isMulti={false}
                 classNamePrefix="select"
                 value={selectedApplications}
@@ -645,7 +586,7 @@ useEffect(() => {
 
       {/* Tabs */}
       <ul className="nav nav-tabs mb-4">
-        <li className="nav-item ">
+        <li className="nav-item">
           <button
             className={`nav-link ${activeTab === "all" ? "active" : ""}`}
             onClick={() => setActiveTab("all")}
@@ -679,6 +620,7 @@ useEffect(() => {
         >
           <div style={{ width: "2000px", height: 1 }} />
         </div>
+        
         {/* Projects Table */}
         <div className="table-gradient-bg">
           <div
@@ -701,7 +643,7 @@ useEffect(() => {
                   position: "sticky",
                   top: 0,
                   zIndex: 0,
-                  backgroundColor: "#fff", // Match your background color
+                  backgroundColor: "#fff",
                 }}
               >
                 <tr className="text-center">
@@ -722,469 +664,338 @@ useEffect(() => {
                 </tr>
               </thead>
               <tbody>
-                {filteredProjects.map((project, index) => (
-                  <React.Fragment key={project.id}>
-                    <tr
-                      className={
-                        expandedRow === project.id
-                          ? "table-active text-center"
-                          : ""
-                      }
-                    >
-                      <td>{index + 1}</td>
-                      <td>{project.projectTitle}</td>
-                      <td>{project.clientId}</td>
-                      <td>{project.task_name}</td>
-                      <td>{project.language_name}</td>
-                      <td>{project.application_name}</td>
-                      <td>{project.totalPagesLang}</td>
-                      <td>{project.deadline}</td>
-                      <td>{project.readyQCDeadline}</td>
-                      <td>{project.qcHrs}</td>
-                      <td>{project.qcDueDate}</td>
-                      <td>{project.status}</td>
-
-                      <td>
-                        <div
-                          className="progress cursor-pointer"
-                          style={{ height: "24px" }}
-                          onClick={() => handleViewProject(project)}
-                        >
+                {filteredProjects.length > 0 ? (
+                  filteredProjects.map((project, index) => (
+                    <React.Fragment key={project.id}>
+                      <tr
+                        className={
+                          expandedRow === project.id
+                            ? "table-active text-center"
+                            : ""
+                        }
+                      >
+                        <td>{index + 1}</td>
+                        <td>{project.projectTitle}</td>
+                        <td>{project.clientId}</td>
+                        <td>{project.task_name}</td>
+                        <td>{project.language_name}</td>
+                        <td>{project.application_name}</td>
+                        <td>{project.totalPagesLang}</td>
+                        <td>{project.deadline}</td>
+                        <td>{project.readyQCDeadline}</td>
+                        <td>{project.qcHrs}</td>
+                        <td>{project.qcDueDate}</td>
+                        <td>{project.status}</td>
+                        <td>
                           <div
-                            className={`progress-bar 
-                          ${
-                            project.progress < 30
-                              ? "bg-danger"
-                              : project.progress < 70
-                              ? "bg-warning"
-                              : "bg-success"
-                          }`}
-                            role="progressbar"
-                            style={{ width: `${project.progress}%` }}
-                            aria-valuenow={project.progress}
-                            aria-valuemin={0}
-                            aria-valuemax={100}
-                          >
-                            {project.progress}%
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="d-flex gap-2">
-                          <button
-                            className="btn btn-sm btn-primary"
+                            className="progress cursor-pointer"
+                            style={{ height: "24px" }}
                             onClick={() => handleViewProject(project)}
                           >
-                            <i
-                              className={`fas ${
-                                expandedRow === project.id
-                                  ? "fa-chevron-up"
-                                  : "fa-eye"
-                              }`}
-                            ></i>
-                          </button>
-                          <button
-                            className="btn btn-sm btn-secondary"
-                            onClick={() => handleEditProject(project)}
-                          >
-                            <i className="fas fa-edit"></i>
-                          </button>
-                          {project.progress === 100 && (
-                            <button
-                              className="btn btn-sm btn-success"
-                              onClick={() => handleMarkComplete(project.id)}
+                            <div
+                              className={`progress-bar 
+                            ${
+                              project.progress < 30
+                                ? "bg-danger"
+                                : project.progress < 70
+                                ? "bg-warning"
+                                : "bg-success"
+                            }`}
+                              role="progressbar"
+                              style={{ width: `${project.progress}%` }}
+                              aria-valuenow={project.progress}
+                              aria-valuemin={0}
+                              aria-valuemax={100}
                             >
-                              <i className="fas fa-check"></i>
-                            </button>
-                          )}
-                          <button
-                            className="btn btn-sm btn-danger"
-                            onClick={() => handleDeleteProject(project.id)}
-                          >
-                            <i className="fas fa-trash"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-
-                  {expandedRow === project.id && (
-                      <tr>
-                        <td colSpan={14} className="p-0 border-top-0">
-                          <div className="p-4">
-                            {/* Project Files Header */}
-                            <div className="mb-4">
-                              <div className="d-flex justify-content-between align-items-center mb-3">
-                                <h5 className="mb-0">Project Files</h5>
-                                {selectedFiles.length > 0 && (
-                                  <span className="badge bg-primary">
-                                    {selectedFiles.length} files selected
-                                  </span>
-                                )}
-                              </div>
-
-                              {/* Files Table */}
-                              <div className="table-responsive">
-                                <table className="table table-sm table-striped table-hover">
-                                  <thead>
-                                    <tr className="text-center">
-                                      <th>
-                                        <input type="checkbox" />
-                                      </th>
-                                      <th>File Name</th>
-                                      <th>Pages</th>
-                                      <th>Language</th>
-                                      <th>Application</th>
-                                      <th>Handler</th>
-                                      <th>QA Reviewer</th>
-                                      <th>Status</th>
-                                      <th>Preview</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {[
-                                      {
-                                        id: 1,
-                                        name: "File_1_1.docx",
-                                        pages: 15,
-                                        language: "az",
-                                        application: "Visio",
-                                      },
-                                      {
-                                        id: 2,
-                                        name: "File_1_2.docx",
-                                        pages: 6,
-                                        language: "az",
-                                        application: "FM",
-                                      },
-                                      {
-                                        id: 3,
-                                        name: "File_1_3.docx",
-                                        pages: 5,
-                                        language: "yo",
-                                        application: "Visio",
-                                      },
-                                      {
-                                        id: 4,
-                                        name: "File_1_4.docx",
-                                        pages: 2,
-                                        language: "am",
-                                        application: "Word",
-                                      },
-                                    ].map((file) => (
-                                      <tr key={file.id}>
-                                        <td>
-                                          <input
-                                            type="checkbox"
-                                            className="form-check-input"
-                                            checked={selectedFiles.some(
-                                              (f) => f.id === file.id
-                                            )}
-                                            onChange={() =>
-                                              toggleFileSelection(file)
-                                            }
-                                          />
-                                        </td>
-                                        <td>{file.name}</td>
-                                        <td>{file.pages}</td>
-                                        <td>{file.language}</td>
-                                        <td>{file.application}</td>
-                                        <td>
-                                          <select
-                                            className="form-select form-select-sm"
-                                            value={fileHandlers[file.id] || ""}
-                                            onChange={(e) =>
-                                              handleHandlerChange(
-                                                file.id,
-                                                e.target.value
-                                              )
-                                            }
-                                          >
-                                            <option value="">
-                                              Not Assigned
-                                            </option>
-                                            {assignees.map(
-                                              (assignee, index) => (
-                                                <option
-                                                  key={index}
-                                                  value={assignee.value}
-                                                >
-                                                  {assignee.label}
-                                                </option>
-                                              )
-                                            )}
-                                          </select>
-                                        </td>
-                                        <td>
-                                          <select className="form-select form-select-sm">
-                                            <option value="">
-                                              Not Assigned
-                                            </option>
-                                            <option value="Sarah Williams">
-                                              Sarah Williams
-                                            </option>
-                                            <option value="David Brown">
-                                              David Brown
-                                            </option>
-                                            <option value="Emily Davis">
-                                              Emily Davis
-                                            </option>
-                                          </select>
-                                        </td>
-                                        <td>YTS</td>
-                                        <td>
-                                          {file.imageUrl ? (
-                                            <img
-                                              src={file.imageUrl}
-                                              alt={file.name}
-                                              style={{
-                                                width: "60px",
-                                                height: "40px",
-                                                objectFit: "cover",
-                                              }}
-                                            />
-                                          ) : (
-                                            <span>No Preview</span>
-                                          )}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-
-                            {/* Footer Row Controls */}
-                            <div className="row g-3 align-items-center mb-3">
-                              <div className="col-md-3">
-                                <label className="form-label">
-                                  Ready for QC Due
-                                </label>
-                                <input
-                                  type="datetime-local"
-                                  className="form-control"
-                                />
-                              </div>
-                              <div className="col-md-2 mt-5">
-                                <label className="form-label">
-                                  QC Allocated Hours
-                                </label>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  step="0.25"
-                                  className="form-control"
-                                  placeholder="0"
-                                />
-                                <div className="form-text">
-                                  (in multiple of 0.00 only)
-                                </div>
-                              </div>
-                              <div className="col-md-2">
-                                <label className="form-label">QC Due</label>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  placeholder="--"
-                                  disabled
-                                />
-                              </div>
-                              <div className="col-md-2">
-                                <label className="form-label">Priority</label>
-                                <select className="form-select">
-                                  <option value="Low">Low</option>
-                                  <option value="Medium">Medium</option>
-                                  <option value="High">High</option>
-                                </select>
-                              </div>
-                              <div className="col-md-3 d-flex align-items-end justify-content-end gap-2">
-                                <button className="btn btn-success">
-                                  Save
-                                </button>
-                                <button className="btn btn-secondary">
-                                  Close
-                                </button>
-                              </div>
+                              {project.progress}%
                             </div>
                           </div>
                         </td>
+                        <td>
+                          <div className="d-flex gap-2">
+                            <button
+                              className="btn btn-sm btn-primary"
+                              onClick={() => handleViewProject(project)}
+                            >
+                              <i
+                                className={`fas ${
+                                  expandedRow === project.id
+                                    ? "fa-chevron-up"
+                                    : "fa-eye"
+                                }`}
+                              ></i>
+                            </button>
+                            <button
+                              className="btn btn-sm btn-secondary"
+                              onClick={() => handleEditProject(project)}
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            {project.progress === 100 && (
+                              <button
+                                className="btn btn-sm btn-success"
+                                onClick={() => handleMarkComplete(project.id)}
+                              >
+                                <i className="fas fa-check"></i>
+                              </button>
+                            )}
+                            <button
+                              className="btn btn-sm btn-danger"
+                              onClick={() => handleDeleteProject(project.id)}
+                            >
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          </div>
+                        </td>
                       </tr>
-                    )}
-                  </React.Fragment>
-                ))}
+
+                      {expandedRow === project.id && (
+                        <tr>
+                          <td colSpan={14} className="p-0 border-top-0">
+                            <div className="p-4">
+                              {/* Project Files Header */}
+                              <div className="mb-4">
+                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                  <h5 className="mb-0">Project Files</h5>
+                                  {selectedFiles.length > 0 && (
+                                    <span className="badge bg-primary">
+                                      {selectedFiles.length} files selected
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Files Table */}
+                                <div className="table-responsive">
+                                  <table className="table table-sm table-striped table-hover">
+                                    <thead>
+                                      <tr className="text-center">
+                                        <th>
+                                          <input type="checkbox" />
+                                        </th>
+                                        <th>File Name</th>
+                                        <th>Pages</th>
+                                        <th>Language</th>
+                                        <th>Application</th>
+                                        <th>Handler</th>
+                                        <th>QA Reviewer</th>
+                                        <th>Status</th>
+                                        <th>Preview</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {[
+                                        {
+                                          id: 1,
+                                          name: "File_1_1.docx",
+                                          pages: 15,
+                                          language: "az",
+                                          application: "Visio",
+                                        },
+                                        {
+                                          id: 2,
+                                          name: "File_1_2.docx",
+                                          pages: 6,
+                                          language: "az",
+                                          application: "FM",
+                                        },
+                                        {
+                                          id: 3,
+                                          name: "File_1_3.docx",
+                                          pages: 5,
+                                          language: "yo",
+                                          application: "Visio",
+                                        },
+                                        {
+                                          id: 4,
+                                          name: "File_1_4.docx",
+                                          pages: 2,
+                                          language: "am",
+                                          application: "Word",
+                                        },
+                                      ].map((file) => (
+                                        <tr key={file.id}>
+                                          <td>
+                                            <input
+                                              type="checkbox"
+                                              className="form-check-input"
+                                              checked={selectedFiles.some(
+                                                (f) => f.id === file.id
+                                              )}
+                                              onChange={() =>
+                                                toggleFileSelection(file)
+                                              }
+                                            />
+                                          </td>
+                                          <td>{file.name}</td>
+                                          <td>{file.pages}</td>
+                                          <td>{file.language}</td>
+                                          <td>{file.application}</td>
+                                          <td>
+                                            <select
+                                              className="form-select form-select-sm"
+                                              value={fileHandlers[file.id] || ""}
+                                              onChange={(e) =>
+                                                handleHandlerChange(
+                                                  file.id,
+                                                  e.target.value
+                                                )
+                                              }
+                                            >
+                                              <option value="">
+                                                Not Assigned
+                                              </option>
+                                              {assignees.map(
+                                                (assignee, index) => (
+                                                  <option
+                                                    key={index}
+                                                    value={assignee.value}
+                                                  >
+                                                    {assignee.label}
+                                                  </option>
+                                                )
+                                              )}
+                                            </select>
+                                          </td>
+                                          <td>
+                                            <select className="form-select form-select-sm">
+                                              <option value="">
+                                                Not Assigned
+                                              </option>
+                                              <option value="Sarah Williams">
+                                                Sarah Williams
+                                              </option>
+                                              <option value="David Brown">
+                                                David Brown
+                                              </option>
+                                              <option value="Emily Davis">
+                                                Emily Davis
+                                              </option>
+                                            </select>
+                                          </td>
+                                          <td>YTS</td>
+                                          <td>
+                                            {file.imageUrl ? (
+                                              <img
+                                                src={file.imageUrl}
+                                                alt={file.name}
+                                                style={{
+                                                  width: "60px",
+                                                  height: "40px",
+                                                  objectFit: "cover",
+                                                }}
+                                              />
+                                            ) : (
+                                              <span>No Preview</span>
+                                            )}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+
+                              {/* Footer Row Controls */}
+                              <div className="row g-3 align-items-center mb-3">
+                                <div className="col-md-3">
+                                  <label className="form-label">
+                                    Ready for QC Due
+                                  </label>
+                                  <input
+                                    type="datetime-local"
+                                    className="form-control"
+                                    value={readyForQcDueInput}
+                                    onChange={(e) =>
+                                      setReadyForQcDueInput(e.target.value)
+                                    }
+                                  />
+                                  {qcDueDelay && (
+                                    <small
+                                      className={`text-${
+                                        qcDueDelay.includes("Delayed")
+                                          ? "danger"
+                                          : "success"
+                                      }`}
+                                    >
+                                      {qcDueDelay}
+                                    </small>
+                                  )}
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">
+                                    QC Allocated Hours
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="0.25"
+                                    className="form-control"
+                                    placeholder="0"
+                                    value={qcAllocatedHours}
+                                    onChange={(e) =>
+                                      setQcAllocatedHours(e.target.value)
+                                    }
+                                  />
+                                  <div className="form-text">
+                                    (in multiple of 0.00 only)
+                                  </div>
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">QC Due</label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="--"
+                                    value={calculateQCDue(
+                                      readyForQcDueInput,
+                                      qcAllocatedHours
+                                    )}
+                                    disabled
+                                  />
+                                </div>
+                                <div className="col-md-2">
+                                  <label className="form-label">Priority</label>
+                                  <select
+                                    className="form-select"
+                                    value={priorityAll}
+                                    onChange={(e) =>
+                                      setPriorityAll(e.target.value)
+                                    }
+                                  >
+                                    <option value="Low">Low</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="High">High</option>
+                                  </select>
+                                </div>
+                                <div className="col-md-3 d-flex align-items-end justify-content-end gap-2">
+                                  <button className="btn btn-success">
+                                    Save
+                                  </button>
+                                  <button className="btn btn-secondary">
+                                    Close
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={14} className="text-center py-4">
+                      No projects found matching your criteria
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
         </div>
-
       </div>
     </div>
   );
 };
 
-// Helper functions
-function customToInputDate(str) {
-  if (!str) return "";
-  const match = str.match(/(\d{2}):(\d{2}) (AM|PM) (\d{2})-(\d{2})-(\d{2})/);
-  if (!match) return "";
-  let [_, hour, min, ampm, day, month, year] = match;
-  hour = parseInt(hour, 10);
-  if (ampm === "PM" && hour !== 12) hour += 12;
-  if (ampm === "AM" && hour === 12) hour = 0;
-  hour = hour.toString().padStart(2, "0");
-  return `20${year}-${month}-${day}T${hour}:${min}`;
-}
-
-function inputToCustomDate(str) {
-  if (!str) return "";
-  const d = new Date(str);
-  if (isNaN(d)) return "";
-  let hour = d.getHours();
-  const min = d.getMinutes().toString().padStart(2, "0");
-  const ampm = hour >= 12 ? "PM" : "AM";
-  hour = hour % 12;
-  if (hour === 0) hour = 12;
-  const day = d.getDate().toString().padStart(2, "0");
-  const month = (d.getMonth() + 1).toString().padStart(2, "0");
-  const year = d.getFullYear().toString().slice(2);
-  return `${hour
-    .toString()
-    .padStart(2, "0")}:${min} ${ampm} ${day}-${month}-${year}`;
-}
-
-const generateDummyProjects = (count) => {
-  const clients = [
-    "PN",
-    "MMP Auburn",
-    "MMP Eastlake",
-    "MMP Kirkland",
-    "GN",
-    "DM",
-  ];
-  const tasks = [
-    "Source Creation",
-    "Callout",
-    "Prep",
-    "Image Creation",
-    "DTP",
-    "Image Localization",
-    "OVA",
-  ];
-  const languages = ["af", "am", "ar", "az", "be"];
-  const applications = [
-    "Word",
-    "PPT",
-    "Excel",
-    "INDD",
-    "AI",
-    "PSD",
-    "AE",
-    "CDR",
-    "Visio",
-    "Project",
-    "FM",
-  ];
-
-  const statuses = [
-    "QC YTS",
-    "WIP",
-    "QC WIP",
-    "WIP",
-    "Corr YTS",
-    "WIP",
-    "Corr YTS",
-    "Corr WIP",
-    "WIP",
-    "QC YTS",
-    "Corr YTS",
-  ];
-  const stages = ["In Progress", "Review", "Completed", "On Hold"];
-  const qaStatuses = ["Pending", "In Progress", "Approved", "Rejected"];
-  const handlers = ["John Doe", "Jane Smith", "Mike Johnson", ""];
-  const qaReviewers = ["Sarah Williams", "David Brown", "Emily Davis", ""];
-
-  const projects = [];
-
-  for (let i = 1; i <= count; i++) {
-    const totalPages = Math.floor(Math.random() * 100) + 10;
-    const progress = Math.floor(Math.random() * 101);
-    const handler = handlers[Math.floor(Math.random() * handlers.length)];
-
-    const dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + Math.floor(Math.random() * 30));
-    const hours = Math.floor(Math.random() * 24);
-    const minutes = Math.floor(Math.random() * 60);
-    dueDate.setHours(hours, minutes);
-
-    const formattedDueDate = `${hours.toString().padStart(2, "0")}:${minutes
-      .toString()
-      .padStart(2, "0")} ${hours >= 12 ? "PM" : "AM"} ${dueDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
-
-    // Add random readyDeadline, qcHrs, qcDueDate, status
-    const readyDeadline = `${(hours + 1) % 24}:${minutes
-      .toString()
-      .padStart(2, "0")} ${hours + 1 >= 12 ? "PM" : "AM"} ${dueDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
-    const qcHrs = Math.floor(Math.random() * 15) + 1;
-    const qcDueDate = `${(hours + 2) % 24}:${minutes
-      .toString()
-      .padStart(2, "0")} ${hours + 2 >= 12 ? "PM" : "AM"} ${dueDate
-      .getDate()
-      .toString()
-      .padStart(2, "0")}-${(dueDate.getMonth() + 1)
-      .toString()
-      .padStart(2, "0")}-${dueDate.getFullYear().toString().slice(2)}`;
-    const status = statuses[Math.floor(Math.random() * statuses.length)];
-
-    const fileCount = Math.floor(Math.random() * 5) + 1;
-    const files = [];
-    for (let j = 1; j <= fileCount; j++) {
-      const filePages = Math.floor(Math.random() * 20) + 1;
-      files.push({
-        id: j,
-        name: `File_${i}_${j}.docx`,
-        pages: filePages,
-        language: languages[Math.floor(Math.random() * languages.length)],
-        application:
-          applications[Math.floor(Math.random() * applications.length)],
-        stage: stages[Math.floor(Math.random() * stages.length)],
-        assigned: new Date(
-          dueDate.getTime() -
-            Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)
-        ).toLocaleDateString(),
-        handler: handler,
-        qaReviewer: qaReviewers[Math.floor(Math.random() * qaReviewers.length)],
-        qaStatus: qaStatuses[Math.floor(Math.random() * qaStatuses.length)],
-        priority: ["High", "Medium", "Low"][Math.floor(Math.random() * 3)],
-      });
-    }
-    projects.push({
-      id: i,
-      title: `Project ${i}`,
-      client: clients[Math.floor(Math.random() * clients.length)],
-      task: tasks[Math.floor(Math.random() * tasks.length)],
-      language: languages[Math.floor(Math.random() * languages.length)],
-      application:
-        applications[Math.floor(Math.random() * applications.length)],
-      totalPages,
-      deadline: formattedDueDate,
-      readyDeadline,
-      qcHrs,
-      qcDueDate,
-      status,
-      progress,
-      handler,
-      files,
-    });
-  }
-  return projects;
-};
 export default ActiveProject;
