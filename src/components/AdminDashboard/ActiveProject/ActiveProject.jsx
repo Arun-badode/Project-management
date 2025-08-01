@@ -8,6 +8,22 @@ import axios from "axios";
 import CreateNewProject from "../Project/CreateNewProject";
 import EditModal from "./EditModal";
 
+
+
+ const assignees = [
+    { label: "Not Assigned", value: "" },
+    { label: "Sarah Williams", value: "Sarah Williams" },
+    { label: "David Brown", value: "David Brown" },
+    { label: "Emily Davis", value: "Emily Davis" },
+  ];
+
+  const handleChange = (id, field, value) => {
+    const updated = files.map((file) =>
+      file.id === id ? { ...file, [field]: value } : file
+    );
+    setFiles(updated);
+  };
+
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
