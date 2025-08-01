@@ -1,4 +1,4 @@
-import React, { useState, useMemo , useEffect} from "react";
+import React, { useState, useMemo, useEffect } from "react";
 
 import {
   BarChart,
@@ -48,10 +48,16 @@ const ReportingAnalytics = () => {
   const [uniqueOwners, setUniqueOwners] = useState([]);
   const [selectedOwner, setSelectedOwner] = useState("All"); // this is for select the owner from the api for project report data to use filter 
   const [priorities, setPriorities] = useState([]);
-  const [status,setStatus] = useState([]);
+  const [status, setStatus] = useState([]);
   const [selectedPriority, setSelectedPriority] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [selectedMonth, setSelectedMonth] = useState("Current Month");
+    const [teamPerformanceData, setTeamPerformanceData] = useState([]); // this is for set the team performace data
+  
+
+  const [feedbackList, setFeedbackList] = useState([]); // for getting feedback logs form the api 
+  //const [filteredFeedback, setFilteredFeedback] = useState([]);
+
 
   const [feedbackFormData, setFeedbackFormData] = useState({
     project: "",
@@ -62,7 +68,7 @@ const ReportingAnalytics = () => {
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
   });
-const [projectStatusData, setProjectStatusData] = useState([]);
+  const [projectStatusData, setProjectStatusData] = useState([]);
 
 
 
@@ -82,33 +88,87 @@ const [projectStatusData, setProjectStatusData] = useState([]);
   } = useSyncScroll(activeReportTab === "team-performance");
 
   const [allProjects, setAllProjects] = useState([]);
+  useEffect(() => {
+    const fetchFeedbackData = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get(
+          `${BASE_URL}feedback/getFeedbackLog`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        )
+        //const response = await fetch("https://eminoids-backend-production.up.railway.app/api/feedback/getFeedbackLog");
+        //console.log(response.data);
+
+        if (response.status && Array.isArray(response.data.data)) {
+          setFeedbackList(response.data.data);
+          //setFilteredFeedback(response.data.data); // or filter by default
+          //console.log(feedbackList + "Feed back data");
+        } else {
+          console.error("Error fetching feedback:", response.message);
+        }
+      } catch (error) {
+        console.error("API error:", error);
+      }
+    };
+
+    fetchFeedbackData();
+  }, []);
+
+
+
 
   useEffect(() => {
-  const fetchProjects = async () => {
+    const fetchProjects = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get(
+          `${BASE_URL}project/getAllProjects`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        //console.log("api response" , response);
+        setAllProjects(response?.data.projects);
+
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  useEffect(() => {
+  const fetchPerformanceData = async () => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await axios.get(
-        `${BASE_URL}project/getAllProjects`,
+        `${BASE_URL}feedback/getTeamPerformance`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-       console.log("api response" , response);
-      setAllProjects(response?.data.projects) ;
-     
+      console.log(response.data);
+
+      if (response.data.status) {
+        setTeamPerformanceData(response.data.data);
+      } else {
+        console.error("Failed to fetch team performance data");
+      }
     } catch (error) {
-      console.error("Error fetching projects:", error);
+      console.error("Error fetching team performance:", error);
     }
   };
 
-  fetchProjects();
+  fetchPerformanceData();
 }, []);
 
-
   // api integration for the project reports data
-    const [projectReportData, setProjectReportData] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+  const [projectReportData, setProjectReportData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (activeReportTab !== "project-report") return;
@@ -134,10 +194,10 @@ const [projectStatusData, setProjectStatusData] = useState([]);
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        console.log("res",response);
+        console.log("res", response);
         setProjectReportData(response.data.data ?? []);
 
-        console.log("all project data "+ projectReportData);
+        console.log("all project data " + projectReportData);
 
         // get all the unique priorites from the api 
         const uniquePriorities = Array.from(
@@ -147,7 +207,7 @@ const [projectStatusData, setProjectStatusData] = useState([]);
 
         // get all the unique status from the api 
         const uniqueStatus = Array.from(
-          new Set(response.data.data.map(p => p.status ))
+          new Set(response.data.data.map(p => p.status))
         ).filter(Boolean).sort();
         setStatus(uniqueStatus);
 
@@ -164,13 +224,13 @@ const [projectStatusData, setProjectStatusData] = useState([]);
 
   // this effect is for 
   useEffect(() => {
-  if (projectReportData.length > 0) {
-    const owners = Array.from(
-      new Set(projectReportData.map(p => p?.owner).filter(Boolean))
-    ).sort();
-    setUniqueOwners(owners);
-  }
-}, [projectReportData]);
+    if (projectReportData.length > 0) {
+      const owners = Array.from(
+        new Set(projectReportData.map(p => p?.owner).filter(Boolean))
+      ).sort();
+      setUniqueOwners(owners);
+    }
+  }, [projectReportData]);
 
 
 
@@ -351,77 +411,77 @@ const [projectStatusData, setProjectStatusData] = useState([]);
     });
   }, [feedbackData, dateRange]);
 
- // Filter projects based on search term
-const filteredProjects = useMemo(() => {
-  if (!searchProject) return projectReportData;
-  return projectReportData.filter((project) =>
-    project.owner?.toLowerCase().includes(searchProject.toLowerCase())
-  );
-}, [searchProject, projectReportData]);
+  // Filter projects based on search term
+  const filteredProjects = useMemo(() => {
+    if (!searchProject) return projectReportData;
+    return projectReportData.filter((project) =>
+      project.owner?.toLowerCase().includes(searchProject.toLowerCase())
+    );
+  }, [searchProject, projectReportData]);
 
   // Team performance data with additional fields
-  const teamPerformanceData = [  
-    {
-      id: 1,
-      name: "John Doe",
-      completedTasks: 48,
-      onTimePercentage: 92,
-      hoursLogged: 160,
-      activeHours: 145,
-      qaFailed: 0,
-      role: "DTP Specialist",
-      team: "MS Office",
-      performance: "Top Performer",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      completedTasks: 42,
-      onTimePercentage: 88,
-      hoursLogged: 155,
-      activeHours: 135,
-      qaFailed: 0,
-      role: "DTP Specialist",
-      team: "Adobe",
-      performance: "High Performer",
-    },
-    {
-      id: 3,
-      name: "Mike Johnson",
-      completedTasks: 35,
-      onTimePercentage: 85,
-      hoursLogged: 140,
-      activeHours: 120,
-      qaFailed: 2,
-      role: "DTP Specialist",
-      team: "MS Office",
-      performance: "Good Performer",
-    },
-    {
-      id: 4,
-      name: "Sarah Wilson",
-      completedTasks: 38,
-      onTimePercentage: 90,
-      hoursLogged: 150,
-      activeHours: 125,
-      qaFailed: null,
-      role: "Quality Analyst",
-      team: "QA",
-      performance: "High Performer",
-    },
-    {
-      id: 5,
-      name: "David Brown",
-      completedTasks: 30,
-      onTimePercentage: 78,
-      hoursLogged: 135,
-      activeHours: 112,
-      qaFailed: null,
-      role: "Quality Analyst",
-      team: "QA",
-      performance: "Average Performer",
-    },
-  ];
+  // const teamPerformanceData = [
+  //   {
+  //     id: 1,
+  //     name: "John Doe",
+  //     completedTasks: 48,
+  //     onTimePercentage: 92,
+  //     hoursLogged: 160,
+  //     activeHours: 145,
+  //     qaFailed: 0,
+  //     role: "DTP Specialist",
+  //     team: "MS Office",
+  //     performance: "Top Performer",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Jane Smith",
+  //     completedTasks: 42,
+  //     onTimePercentage: 88,
+  //     hoursLogged: 155,
+  //     activeHours: 135,
+  //     qaFailed: 0,
+  //     role: "DTP Specialist",
+  //     team: "Adobe",
+  //     performance: "High Performer",
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Mike Johnson",
+  //     completedTasks: 35,
+  //     onTimePercentage: 85,
+  //     hoursLogged: 140,
+  //     activeHours: 120,
+  //     qaFailed: 2,
+  //     role: "DTP Specialist",
+  //     team: "MS Office",
+  //     performance: "Good Performer",
+  //   },
+  //   {
+  //     id: 4,
+  //     name: "Sarah Wilson",
+  //     completedTasks: 38,
+  //     onTimePercentage: 90,
+  //     hoursLogged: 150,
+  //     activeHours: 125,
+  //     qaFailed: null,
+  //     role: "Quality Analyst",
+  //     team: "QA",
+  //     performance: "High Performer",
+  //   },
+  //   {
+  //     id: 5,
+  //     name: "David Brown",
+  //     completedTasks: 30,
+  //     onTimePercentage: 78,
+  //     hoursLogged: 135,
+  //     activeHours: 112,
+  //     qaFailed: null,
+  //     role: "Quality Analyst",
+  //     team: "QA",
+  //     performance: "Average Performer",
+  //   },
+  // ];
 
   // Revenue data
   const revenueData = {
@@ -538,73 +598,73 @@ const filteredProjects = useMemo(() => {
     setSearchProject("");
   };
 
- // Get projectId using project title
-const getProjectId = (title) => {
-  const project = allProjects.find((p) => p.projectTitle === title);
-  return project ? project.id : null;
-};
-
-// Get memberId using name
-const getMemberIdByName = (name) => {
-  const member = teamMembers.find((m) => m.name === name);
-  return member ? member.id : null;
-};
-
-// Get managerId using name
-const getManagerIdByName = (name) => {
-  const manager = managers.find((m) => m.name === name);
-  return manager ? manager.id : null;
-};
-
-// Submit feedback to backend
-const submitFeedback = async () => {
-  const newFeedback = {
-    projectId: selectedProject?.id || getProjectId(feedbackFormData.project),  // ← this line handles both dropdown and manual input
-    month: feedbackFormData.month || null,
-    year: feedbackFormData.year || null,
-    feedbackDetails: feedbackFormData.details || null,
-    memberId: getMemberIdByName(feedbackFormData.accountable),
-    userId: getManagerIdByName(feedbackFormData.manager),
-    resolution: feedbackFormData.resolution || null,
+  // Get projectId using project title
+  const getProjectId = (title) => {
+    const project = allProjects.find((p) => p.projectTitle === title);
+    return project ? project.id : null;
   };
 
-  try {
-    const token = localStorage.getItem("authToken");
-    const response = await fetch("https://eminoids-backend-production.up.railway.app/api/feedback/addFeedback", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(newFeedback),
-    });
+  // Get memberId using name
+  const getMemberIdByName = (name) => {
+    const member = teamMembers.find((m) => m.name === name);
+    return member ? member.id : null;
+  };
 
-    const result = await response.json();
-    console.log(result);
+  // Get managerId using name
+  const getManagerIdByName = (name) => {
+    const manager = managers.find((m) => m.name === name);
+    return manager ? manager.id : null;
+  };
 
-    if (response.ok) {
-      setFeedbackData((prev) => [...prev, result]);
-      setShowFeedbackForm(false);
-      setFeedbackFormData({
-        project: "",
-        details: "",
-        accountable: "",
-        manager: "",
-        resolution: "",
-        month: new Date().getMonth() + 1,
-        year: new Date().getFullYear(),
+  // Submit feedback to backend
+  const submitFeedback = async () => {
+    const newFeedback = {
+      projectId: selectedProject?.id || getProjectId(feedbackFormData.project),  // ← this line handles both dropdown and manual input
+      month: feedbackFormData.month || null,
+      year: feedbackFormData.year || null,
+      feedbackDetails: feedbackFormData.details || null,
+      memberId: getMemberIdByName(feedbackFormData.accountable),
+      userId: getManagerIdByName(feedbackFormData.manager),
+      resolution: feedbackFormData.resolution || null,
+    };
+
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch("https://eminoids-backend-production.up.railway.app/api/feedback/addFeedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(newFeedback),
       });
-      setSearchProject("");
-      setSelectedProject(null);
-    } else {
-      console.error("Failed to submit feedback:", result);
-      alert("Failed to submit feedback. Please try again.");
+
+      const result = await response.json();
+      console.log(result);
+
+      if (response.ok) {
+        setFeedbackData((prev) => [...prev, result]);
+        setShowFeedbackForm(false);
+        setFeedbackFormData({
+          project: "",
+          details: "",
+          accountable: "",
+          manager: "",
+          resolution: "",
+          month: new Date().getMonth() + 1,
+          year: new Date().getFullYear(),
+        });
+        setSearchProject("");
+        setSelectedProject(null);
+      } else {
+        console.error("Failed to submit feedback:", result);
+        alert("Failed to submit feedback. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      alert("An error occurred. Please try again.");
     }
-  } catch (error) {
-    console.error("Error submitting feedback:", error);
-    alert("An error occurred. Please try again.");
-  }
-};
+  };
 
   const exportToPDF = () => {
     alert("Exporting to PDF...");
@@ -730,78 +790,77 @@ const submitFeedback = async () => {
         className="table-responsive"
         style={{ overflowX: "auto", maxHeight: "400px" }}
       >
-      {loading && <div>Loading...</div>}
-      {error && <div style={{ color: "red" }}>Error loading projects: {error.message}</div>}
-      <p className="text-white">Showing {filteredProjectData.length} filtered projects</p>
-    <table className="table text-white analytics-project-table table-gradient-bg table-hover table-bordered mb-0">
-  <thead
-    className="table-gradient-bg table"
-    style={{
-      position: "sticky",
-      top: 0,
-      zIndex: 0,
-      backgroundColor: "#fff",
-    }}
-  >
-    <tr className="text-center">
-      <th>ID</th>
-      <th>Project Name</th>
-      <th>Owner</th>
-      <th>Progress</th>
-      <th>Status</th>
-      <th>QA Status</th>
-      <th>Priority</th>
-      <th>Deadline</th>
-    </tr>
-  </thead>
-  <tbody>
-    {projectReportData.map((projectReportData) => (
-      <tr key={projectReportData.id} className="analytics-project-row">
-        <td>{projectReportData.id}</td>
-        <td className="text-dark analytics-project-name">{projectReportData.projectName}</td>
-        <td>{projectReportData.owner}</td>
-        <td>
-          {projectReportData.qcHrs !== undefined ? (
-            <div className="progress analytics-progress-bar" style={{ height: "20px" }}>
-              <div
-                className="progress-bar analytics-progress-fill bg-primary"
-                style={{ width: `${projectReportData.qcHrs}%` }}
-              >
-                {projectReportData.qcHrs}%
-              </div>
-            </div>
-          ) : (
-            "—"
-          )}
-        </td>
-        <td>
-          <span className={getStatusBadgeClass(projectReportData.status)}>
-            {projectReportData.status || "—"}
-          </span>
-        </td>
-        <td>
-          <span
-            className={`badge ${
-              projectReportData.qaStatus === "Failed"
-                ? "bg-danger"
-                : projectReportData.qaStatus === "Passed"
-                ? "bg-success"
-                : "bg-warning"
-            }`}
+        {loading && <div>Loading...</div>}
+        {error && <div style={{ color: "red" }}>Error loading projects: {error.message}</div>}
+        <p className="text-white">Showing {filteredProjectData.length} filtered projects</p>
+        <table className="table text-white analytics-project-table table-gradient-bg table-hover table-bordered mb-0">
+          <thead
+            className="table-gradient-bg table"
+            style={{
+              position: "sticky",
+              top: 0,
+              zIndex: 0,
+              backgroundColor: "#fff",
+            }}
           >
-            {projectReportData.qaStatus || "—"}
-          </span>
-        </td>
-        <td>
-          <span className={getPriorityBadgeClass(projectReportData.projectPriority)}>
-            {projectReportData.projectPriority || "—"}
-          </span>
-        </td>
-        <td>{projectReportData.deadline || projectReportData.dueDate || "—"}</td>
-      </tr>
-    ))}
-  </tbody>
-</table>
+            <tr className="text-center">
+              <th>ID</th>
+              <th>Project Name</th>
+              <th>Owner</th>
+              <th>Progress</th>
+              <th>Status</th>
+              <th>QA Status</th>
+              <th>Priority</th>
+              <th>Deadline</th>
+            </tr>
+          </thead>
+          <tbody>
+            {projectReportData.map((projectReportData) => (
+              <tr key={projectReportData.id} className="analytics-project-row">
+                <td>{projectReportData.id}</td>
+                <td className="text-dark analytics-project-name">{projectReportData.projectName}</td>
+                <td>{projectReportData.owner}</td>
+                <td>
+                  {projectReportData.qcHrs !== undefined ? (
+                    <div className="progress analytics-progress-bar" style={{ height: "20px" }}>
+                      <div
+                        className="progress-bar analytics-progress-fill bg-primary"
+                        style={{ width: `${projectReportData.qcHrs}%` }}
+                      >
+                        {projectReportData.qcHrs}%
+                      </div>
+                    </div>
+                  ) : (
+                    "—"
+                  )}
+                </td>
+                <td>
+                  <span className={getStatusBadgeClass(projectReportData.status)}>
+                    {projectReportData.status || "—"}
+                  </span>
+                </td>
+                <td>
+                  <span
+                    className={`badge ${projectReportData.qaStatus === "Failed"
+                        ? "bg-danger"
+                        : projectReportData.qaStatus === "Passed"
+                          ? "bg-success"
+                          : "bg-warning"
+                      }`}
+                  >
+                    {projectReportData.qaStatus || "—"}
+                  </span>
+                </td>
+                <td>
+                  <span className={getPriorityBadgeClass(projectReportData.projectPriority)}>
+                    {projectReportData.projectPriority || "—"}
+                  </span>
+                </td>
+                <td>{projectReportData.deadline || projectReportData.dueDate || "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
       </div>
     </div>
@@ -887,7 +946,7 @@ const submitFeedback = async () => {
                             </option>
                           ))}
                       </select>
-                      
+
                     </div>
                     {feedbackFormData.project && (
                       <div className="mt-2">
@@ -1015,7 +1074,7 @@ const submitFeedback = async () => {
                   type="button"
                   className="btn gradient-button"
                   onClick={submitFeedback}
-                 
+
                 >
                   Submit Feedback
                 </button>
@@ -1048,15 +1107,15 @@ const submitFeedback = async () => {
       >
         <table className="table text-white analytics-feedback-table table-gradient-bg">
           <thead
-            className="table-gradient-bg table "
+            className="table-gradient-bg table"
             style={{
               position: "sticky",
               top: 0,
               zIndex: 0,
-              backgroundColor: "#fff", // Match your background color
+              backgroundColor: "#fff",
             }}
           >
-            <tr  className="text-center">
+            <tr className="text-center">
               <th>ID</th>
               <th>Project</th>
               <th>Date</th>
@@ -1067,24 +1126,20 @@ const submitFeedback = async () => {
             </tr>
           </thead>
           <tbody>
-            {filteredFeedback.map((feedback) => (
-              <tr
-                key={feedback.id}
-                className="text-white analytics-feedback-row"
-              >
+            {feedbackList.map((feedback) => (
+              <tr key={feedback.id} className="text-white analytics-feedback-row">
                 <td>{feedback.id}</td>
-                <td className="text-white">{feedback.project}</td>
+                <td>{feedback.project || "-"}</td>
                 <td>{feedback.date}</td>
-                <td className="analytics-feedback-text">{feedback.feedback}</td>
-                <td>{feedback.accountable}</td>
-                <td>{feedback.manager}</td>
-                <td className="analytics-resolution-text">
-                  {feedback.resolution}
-                </td>
+                <td className="analytics-feedback-text">{feedback.feedback || "-"}</td>
+                <td>{feedback.accountable || "-"}</td>
+                <td>{feedback.manager || "-"}</td>
+                <td className="analytics-resolution-text">{feedback.resolution || "-"}</td>
               </tr>
             ))}
           </tbody>
         </table>
+
       </div>
     </div>
   );
@@ -1159,28 +1214,28 @@ const submitFeedback = async () => {
                   backgroundColor: "#fff", // Match your background color
                 }}
               >
-                <tr  className="text-center">
+                <tr className="text-center">
                   <th>EMP ID</th>
                   <th>Team Member</th>
                   <th>Role</th>
                   <th>Team</th>
                   <th>Completed Tasks</th>
-                  <th>On-Time %</th>
+                  {/* <th>On-Time %</th>
                   <th>Net Logged Hours</th>
                   <th>Task Active Hours</th>
-                  <th>QA Failed</th>
+                  <th>QA Failed</th> */}
                   <th>Performance</th>
                 </tr>
               </thead>
               <tbody>
                 {teamPerformanceData.map((member) => (
                   <tr
-                    key={member.id}
+                    key={member.empId}
                     className="text-white analytics-performance-row"
                   >
-                    <td>{member.id}</td>
+                    <td>{member.empId}</td>
                     <td className="text-white analytics-member-name">
-                      {member.name}
+                      {member.fullName}
                     </td>
                     <td>{member.role}</td>
                     <td>{member.team}</td>
@@ -1189,7 +1244,7 @@ const submitFeedback = async () => {
                         {member.completedTasks}
                       </span>
                     </td>
-                    <td>
+                    {/* <td>
                       <div
                         className="progress analytics-ontime-progress"
                         style={{ height: "15px" }}
@@ -1201,8 +1256,8 @@ const submitFeedback = async () => {
                           {member.onTimePercentage}%
                         </div>
                       </div>
-                    </td>
-                    <td>{member.hoursLogged}h</td>
+                    </td> */}
+                    {/* <td>{member.hoursLogged}h</td>
                     <td>{member.activeHours}h</td>
                     <td>
                       {member.qaFailed !== null ? (
@@ -1212,7 +1267,7 @@ const submitFeedback = async () => {
                       ) : (
                         "-"
                       )}
-                    </td>
+                    </td> */}
                     <td>{getPerformanceBadge(member.performance)}</td>
                   </tr>
                 ))}
