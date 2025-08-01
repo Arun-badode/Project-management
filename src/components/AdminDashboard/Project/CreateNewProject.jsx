@@ -340,17 +340,8 @@ const CreateNewProject = () => {
               value={formData.country}
               onChange={handleInputChange}
               placeholder=""
-<<<<<<< HEAD
-           
-=======
-             
->>>>>>> d21e53313e40652be3c183d960d7b6020e8ae0cf
-            />
-          </div>
-          <div className="col-md-4">
-            <label htmlFor="projectManager" className="form-label">
-              Project Manager
-            </label>
+         
+          />
             <Select
               id="projectManager"
               name="projectManager"

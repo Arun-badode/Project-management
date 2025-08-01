@@ -109,51 +109,46 @@ const RoleManagementSystem = () => {
   }
 
   try {
-    // Validate permissions data
+    // Validate permissions
     if (!permissionsState || Object.keys(permissionsState).length === 0) {
       alert("No permissions data to save");
       return;
     }
 
-    // Make sure to include the token
-   
+    // Create the payload to send to backend
+    const updatedRoleData = {
+      roleName: selectedRole.roleName, // optional, can be editable if needed
+      permissions: permissionsState,
+    };
 
     const response = await axios.patch(
       `${BASE_URL}roles/updateRole/${selectedRole._id}`,
-      {
-        permissions: permissionsState,
-      },
+      updatedRoleData,
       {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
       }
     );
 
     if (response.data.status) {
-      alert("Permissions saved successfully");
+      alert("Permissions updated successfully!");
+
+      // Optional: Refresh role list on frontend
+     //fetchRoles?.(); // call fetchRoles() if defined
+
       handleClosePermissionsModal();
     } else {
-      alert(response.data.message || "Failed to save permissions");
+      alert(response.data.message || "Failed to update permissions");
     }
   } catch (err) {
-    console.error("Error saving permissions:", err);
-    
-    // More detailed error message
+    console.error("Error updating permissions:", err);
     if (err.response) {
-      // The request was made and the server responded with a status code
-      console.error("Response data:", err.response.data);
-      console.error("Response status:", err.response.status);
-      console.error("Response headers:", err.response.headers);
       alert(`Error: ${err.response.data.message || err.message}`);
     } else if (err.request) {
-      // The request was made but no response was received
-      console.error("Request:", err.request);
       alert("No response received from server");
     } else {
-      // Something happened in setting up the request
-      console.error("Error:", err.message);
       alert(`Error: ${err.message}`);
     }
   }
