@@ -12,6 +12,7 @@ function UserManagement({ isViewMode, isEditMode }) {
   const [selectedApplications, setSelectedApplications] = useState([]);
   const [activeTab, setActiveTab] = useState("live");
   const [isLoading, setIsLoading] = useState(false);
+  const[id , setId] = useState("");
 
   // State for team members data
   const [teamMembers, setTeamMembers] = useState([]);
@@ -182,7 +183,7 @@ console.log("api response", teamMembers);
       if (modalType === "edit") {
         // Update member
         const response = await axios.put(
-          `${BASE_URL}member/updateMember/${form.empId}`,
+          `${BASE_URL}member/updateMember/${empId}`,
           payload,
           {
             headers: {
@@ -313,14 +314,14 @@ console.log("api response", teamMembers);
           return;
         }
 
-        await axios.delete(`${BASE_URL}member/deleteMember/${empId}`, {
+        await axios.delete(`${BASE_URL}member/deleteMember/${id}`, {
           headers: {
             "Authorization": `Bearer ${token}`,
           },
         });
 
         setTeamMembers((prevMembers) =>
-          prevMembers.filter((member) => member.empId !== empId)
+          prevMembers.filter((member) => member.id !== id)
         );
 
         Swal.fire("Deleted!", "Member has been deleted.", "success");
