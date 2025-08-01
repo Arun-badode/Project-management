@@ -8,20 +8,6 @@ import axios from "axios";
 import CreateNewProject from "../Project/CreateNewProject";
 import EditModal from "./EditModal";
 
-const assignees = [
-  { label: "Not Assigned", value: "" },
-  { label: "Sarah Williams", value: "Sarah Williams" },
-  { label: "David Brown", value: "David Brown" },
-  { label: "Emily Davis", value: "Emily Davis" },
-];
-
-const handleChange = (id, field, value) => {
-  const updated = files.map((file) =>
-    file.id === id ? { ...file, [field]: value } : file
-  );
-  setFiles(updated);
-};
-
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
@@ -30,25 +16,24 @@ const ActiveProject = () => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const isAdmin = userRole === "Admin";
-  const token = localStorage.getItem("authToken"); 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const token =localStorage.getItem("authToken"); 
 
-  const [deadline, setDeadline] = useState("");
-  const [allocatedHours, setAllocatedHours] = useState("");
-  const [priority, setPriority] = useState("Medium");
   const [fileHandlers, setFileHandlers] = useState({});
-  const assignees = [
-    { label: "John Doe", value: "john" },
-    { label: "Jane Smith", value: "jane" },
-    { label: "Mike Johnson", value: "mike" },
-  ];
 
+  const assignees = [
+    { label: "Not Assigned", value: "" },
+    { label: "John Doe", value: "John Doe" },
+    { label: "Jane Smith", value: "Jane Smith" },
+    { label: "Mike Johnson", value: "Mike Johnson" },
+  ];
   const handleHandlerChange = (fileId, newHandler) => {
+    // Update handler for all selected files
     const updatedHandlers = { ...fileHandlers };
+
     selectedFiles.forEach((f) => {
       updatedHandlers[f.id] = newHandler;
     });
+
     setFileHandlers(updatedHandlers);
     setHasUnsavedChanges(true);
   };
@@ -86,7 +71,42 @@ const ActiveProject = () => {
   };
 
   const [formData, setFormData] = useState(initialFormData);
+
   const [qcAllocatedHours, setQcAllocatedHours] = useState(0.0);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const filter = params.get("filter");
+    const due = params.get("due");
+
+    let result = [...projects];
+
+    if (filter === "active") {
+      result = result.filter((project) => project.progress < 100);
+    }
+
+    if (due === "30min") {
+      const now = new Date();
+      const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+      result = result.filter((project) => {
+        const match = project.dueDate.match(
+          /(\d{2}):(\d{2}) (AM|PM) (\d{2})-(\d{2})-(\d{2})/
+        );
+        if (!match) return false;
+        let [_, hour, min, ampm, day, month, year] = match;
+        hour = parseInt(hour, 10);
+        if (ampm === "PM" && hour !== 12) hour += 12;
+        if (ampm === "AM" && hour === 12) hour = 0;
+        const dueDateObj = new Date(
+          `20${year}-${month}-${day}T${hour.toString().padStart(2, "0")}:${min}`
+        );
+        return dueDateObj > now && dueDateObj <= thirtyMinsFromNow;
+      });
+    }
+
+    setFilteredProjects(result);
+  }, [location.search, projects]);
+
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [clientFilter, setClientFilter] = useState("");
   const [taskFilter, setTaskFilter] = useState("");
@@ -99,7 +119,7 @@ const ActiveProject = () => {
   const [editedProject, setEditedProject] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedApplications, setSelectedApplications] = useState([]);
-  const [activeButton, setActiveButton] = useState("");
+  const [activeButton, setActivebutton] = useState("");
   const [readyForQcDueInput, setReadyForQcDueInput] = useState("");
   const [priorityAll, setPriorityAll] = useState("Mid");
   const [batchEditValues, setBatchEditValues] = useState({
@@ -110,150 +130,157 @@ const ActiveProject = () => {
     qcAllocatedHours: "",
     priority: "",
   });
+  console.log("batchEditValues", batchEditValues.handler);
 
   const [qcDueDelay, setQcDueDelay] = useState("");
 
   const statuses = [
-    { key: "allstatus", label: "All Status" },
+    { key: "allstatus", label: "All Status " },
     { key: "yts", label: "YTS" },
     { key: "wip", label: "WIP" },
     { key: "readyforqc", label: "Ready for QC" },
     { key: "qareview", label: "QA Review" },
     { key: "corryts", label: "Corr YTS" },
-    { key: "corrwip", label: "Corr WIP" },
-    { key: "rfd", label: "RFD" },
+    { key: "corrwip,", label: "Corr WIP" },
+    { key: "rfd,", label: "RFD" },
   ];
 
-  const applicationsOptions = [
+  const applicationsOptio = [
     { value: "Adobe", label: "Adobe" },
     { value: "MSOffice", label: "MS Office" },
   ];
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await fetch(
-          'https://eminoids-backend-production.up.railway.app/api/project/getAllProjects',
-          {
-            headers: { authorization: `Bearer ${token}` },
-          }
-        );
-        if (!response.ok) {
-          throw new Error('Failed to fetch projects');
-        }
-        const data = await response.json();
-        
-        // Map API data to consistent format
-        const mappedProjects = data.projects.map(project => ({
-          id: project.id,
-          projectTitle: project.projectTitle,
-          clientId: project.clientId,
-          clientName: project.clientName,
-          task_name: project.task_name,
-          language_name: project.language_name,
-          application_name: project.application_name,
-          totalPagesLang: project.totalPagesLang,
-          deadline: project.deadline,
-          readyQCDeadline: project.readyQCDeadline,
-          qcHrs: project.qcHrs,
-          qcDueDate: project.qcDueDate,
-          status: project.status,
-          progress: project.progress || Math.floor(Math.random() * 100),
-          handler: project.full_name || "",
-          files: project.files || [],
-        }));
-        
-        setProjects(mappedProjects);
-        setFilteredProjects(mappedProjects);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-
-    fetchProjects();
+    setProjects(generateDummyProjects(15));
+    setFilteredProjects(generateDummyProjects(15));
   }, []);
 
   useEffect(() => {
     let result = [...projects];
 
-    // Apply tab filter
     if (activeTab === "unhandled") {
-      result = result.filter(project => !project.handler || project.handler === "");
-    }
-
-    // Apply button filter
-    if (activeButton === "nearDue") {
-      const now = new Date();
-      const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
-      result = result.filter(project => {
-        const dueDate = new Date(project.deadline);
-        return dueDate > now && dueDate <= thirtyMinsFromNow;
-      });
-    } else if (activeButton === "overdue") {
-      const now = new Date();
-      result = result.filter(project => {
-        const dueDate = new Date(project.deadline);
-        return dueDate < now && project.status !== "Completed";
-      });
-    } else if (activeButton === "Adobe") {
-      const adobeApps = ["INDD", "AI", "PSD", "AE", "CDR", "FM", "Adobe"];
-      result = result.filter(project => 
-        adobeApps.includes(project.application_name)
-      );
-    } else if (activeButton === "MSOffice") {
-      const msOfficeApps = ["Word", "PPT", "Excel", "Visio", "Project", "Canva", "MS Office"];
-      result = result.filter(project => 
-        msOfficeApps.includes(project.application_name)
+      result = result.filter(
+        (project) => !project.handler || project.handler === ""
       );
     }
 
-    // Apply dropdown filters
     if (clientFilter) {
-      result = result.filter(project => 
-        project.clientName && project.clientName.toLowerCase().includes(clientFilter.toLowerCase())
-      );
+      result = result.filter((project) => project.client === clientFilter);
     }
     if (taskFilter) {
-      result = result.filter(project => 
-        project.task_name && project.task_name.toLowerCase().includes(taskFilter.toLowerCase())
-      );
+      result = result.filter((project) => project.task === taskFilter);
     }
-    if (languageFilter && languageFilter !== "allstatus") {
-      result = result.filter(project => 
-        project.language_name && project.language_name.toLowerCase().includes(languageFilter.toLowerCase())
-      );
-    }
-    if (selectedApplications.length > 0) {
-      const selectedAppValues = selectedApplications.map(app => app.value);
-      result = result.filter(project => 
-        selectedAppValues.includes(project.application_name)
-      );
+    if (languageFilter) {
+      result = result.filter((project) => project.language === languageFilter);
     }
 
-    // Sort by deadline
-    result.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
-
+    result.sort(
+      (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+    );
     setFilteredProjects(result);
-  }, [projects, activeTab, activeButton, clientFilter, taskFilter, languageFilter, selectedApplications]);
+  }, [projects, activeTab, clientFilter, taskFilter, languageFilter]);
 
   const handleCardFilter = (type) => {
-    setActiveButton(type);
+    let filtered = [];
+    const today = new Date();
+    const nearDueDate = new Date();
+    nearDueDate.setDate(today.getDate() + 3);
+
+    // Clear all filters when a button is clicked
+    setClientFilter("");
+    setTaskFilter("");
+    setLanguageFilter("");
+    setSelectedApplications([]);
+
+    switch (type) {
+      case "all":
+        filtered = projects
+          .slice()
+          .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+        break;
+      case "nearDue":
+        filtered = projects.filter((project) => {
+          const now = new Date();
+          const thirtyMinsFromNow = new Date(now.getTime() + 30 * 60 * 1000);
+          const dueDate = new Date(customToInputDate(project.deadline));
+          return dueDate > now && dueDate <= thirtyMinsFromNow;
+        });
+        break;
+      case "overdue":
+        filtered = projects.filter((project) => {
+          const dueDate = new Date(customToInputDate(project.deadline));
+          return dueDate < today && project.status !== "Completed";
+        });
+        break;
+      case "MSOffice": {
+        const msOfficeApps = [
+          "Word",
+          "PPT",
+          "Excel",
+          "Visio",
+          "Project",
+          "Canva",
+          "MS Office",
+        ];
+        filtered = projects.filter((project) =>
+          msOfficeApps.includes(project.application)
+        );
+        break;
+      }
+      case "Adobe": {
+        const adobeApps = ["INDD", "AI", "PSD", "AE", "CDR", "FM", "Adobe"];
+        filtered = projects.filter((project) =>
+          adobeApps.includes(project.application)
+        );
+        break;
+      }
+      default:
+        filtered = projects;
+    }
+    setFilteredProjects(filtered);
+    setActivebutton(type);
   };
 
+  // Helper functions you need to implement:
+
   const handleDeleteProject = (id) => {
-    const project = projects.find(p => p.id === id);
+    const project = projects.find((p) => p.id === id);
     if (!project) return;
 
     if (window.confirm("Are you sure you want to delete this project?")) {
-      setProjects(projects.filter(p => p.id !== id));
+      // Case 1: If any file status is "YTS"
+      const ytsStatuses = ["YTS"];
+      const amendmentStatuses = [
+        "V1 YTS",
+        "V2 YTS",
+        "Amendment",
+        "Amendment YTS",
+      ];
+      let moveTo = "created";
+      let updatedFiles = project.files.map((file) => {
+        if (ytsStatuses.includes(file.qaStatus)) {
+          return { ...file, qaStatus: "" };
+        }
+        return file;
+      });
+
+      // If any file has amendment status, move to completed
+      if (
+        project.files.some((file) => amendmentStatuses.includes(file.qaStatus))
+      ) {
+        moveTo = "completed";
+        // Retain status
+      }
+
+      setProjects(projects.filter((p) => p.id !== id));
     }
   };
 
   const handleMarkComplete = (id) => {
-    if (window.confirm("Are you sure you want to mark this project as complete?")) {
-      setProjects(projects.filter(project => project.id !== id));
+    if (
+      window.confirm("Are you sure you want to mark this project as complete?")
+    ) {
+      setProjects(projects.filter((project) => project.id !== id));
     }
   };
 
@@ -274,33 +301,33 @@ const ActiveProject = () => {
   };
 
   const toggleFileSelection = (file) => {
-    if (selectedFiles.some(f => f.id === file.id)) {
-      setSelectedFiles(selectedFiles.filter(f => f.id !== file.id));
+    if (selectedFiles.some((f) => f.id === file.id)) {
+      setSelectedFiles(selectedFiles.filter((f) => f.id !== file.id));
     } else {
       setSelectedFiles([...selectedFiles, file]);
     }
     setHasUnsavedChanges(true);
   };
+  console.log("slectedFiles", selectedFiles);
+  // console.log(
+  //   "slselectedFiles.some((f) => f.id === file.idectedFiles",
+  //   selectedFiles.some((f) => f.id === file.id)
+  // );
 
   const getUniqueValues = (key) => {
-    const values = new Set();
-    projects.forEach(project => {
-      if (project[key]) {
-        values.add(project[key]);
-      }
-    });
-    return Array.from(values);
+    return Array.from(new Set(projects.map((project) => project[key])));
   };
 
   const handleEditProject = (project) => {
     setEditedProject({ ...project });
-    setShowEditModal(true);
+    setIsEdit(project.id);
+    setShowEditModal(true); // <-- Add this line
   };
 
   const handleSaveProjectEdit = () => {
     if (editedProject) {
       setProjects(
-        projects.map(p => (p.id === editedProject.id ? editedProject : p))
+        projects.map((p) => (p.id === editedProject.id ? editedProject : p))
       );
       setShowEditModal(false);
       setEditedProject(null);
@@ -344,11 +371,12 @@ const ActiveProject = () => {
   };
 
   const handleApplyToSelectedFiles = () => {
-    const selected = formData.files.filter(f => f.selected);
+    const selected = formData.files.filter((f) => f.selected);
     if (selected.length === 0) {
       alert("No files selected.");
       return;
     }
+    // Apply deadline logic here
     alert(`Deadline ${formData.deadline} applied to selected files.`);
   };
 
@@ -370,8 +398,67 @@ const ActiveProject = () => {
     });
   }
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+// useEffect(() => {
+//   const fetchProjects = async () => {
+//     try {
+//       const response = await axios.get(
+//         "https://eminoids-backend-production.up.railway.app/api/project/getAllProjects"
+//       );
+//       // API returns { status, message, projects: [...] }
+//       const apiProjects = response.data.projects || [];
+//       // Map API fields to your UI fields
+//       const mapped = apiProjects.map((p) => ({
+//         id: p.id,
+//         title: p.projectTitle,
+//         client: p.clientName,
+//         task: p.task_name,
+//         language: p.language_name,
+//         application: p.application_name,
+//         totalPages: p.totalProjectPages,
+//         deadline: p.deadline,
+//         readyDeadline: p.readyQCDeadline,
+//         qcHrs: p.qcHrs,
+//         qcDueDate: p.qcDueDate,
+//         status: p.status,
+//         progress: Math.floor(Math.random() * 100), // Or use a real field if available
+//         handler: p.full_name,
+//         files: [], // You can fill this if your API provides file details
+//       }));
+//       setProjects(mapped);
+//       setFilteredProjects(mapped);
+//     } catch (err) {
+//       setProjects([]);
+//       setFilteredProjects([]);
+//     }
+//   };
+//   fetchProjects();
+// }, []);
+  
+
+
+useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('https://eminoids-backend-production.up.railway.app/api/project/getAllProjects',
+           {
+        headers: { authorization: `Bearer ${token}` },
+      }
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch projects');
+        }
+        const data = await response.json();
+        setProjects(data.projects);
+        setFilteredProjects(data.projects);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   return (
     <div className="container-fluid py-4">
@@ -429,7 +516,11 @@ const ActiveProject = () => {
                 <div>
                   <h5 className="modal-title">Create New Project</h5>
                 </div>
+
                 <div>
+                  {/* <button className="btn btn-light btn-sm me-4 ">
+                    <i className="fas fa-cog text-muted"></i>
+                  </button> */}
                   <button
                     type="button"
                     className="btn-close"
@@ -498,7 +589,7 @@ const ActiveProject = () => {
                 onChange={(e) => setClientFilter(e.target.value)}
               >
                 <option value="">All Clients</option>
-                {getUniqueValues("clientName").map((client, index) => (
+                {getUniqueValues("client").map((client, index) => (
                   <option key={index} value={client}>
                     {client}
                   </option>
@@ -514,7 +605,7 @@ const ActiveProject = () => {
                 onChange={(e) => setTaskFilter(e.target.value)}
               >
                 <option value="">All Tasks</option>
-                {getUniqueValues("task_name").map((task, index) => (
+                {getUniqueValues("task").map((task, index) => (
                   <option key={index} value={task}>
                     {task}
                   </option>
@@ -540,7 +631,7 @@ const ActiveProject = () => {
             {/* Application (Select component) */}
             <div className="col-12 col-sm-6 col-md-3">
               <Select
-                options={applicationsOptions}
+                options={applicationsOptio}
                 isMulti={false}
                 classNamePrefix="select"
                 value={selectedApplications}
@@ -554,7 +645,7 @@ const ActiveProject = () => {
 
       {/* Tabs */}
       <ul className="nav nav-tabs mb-4">
-        <li className="nav-item">
+        <li className="nav-item ">
           <button
             className={`nav-link ${activeTab === "all" ? "active" : ""}`}
             onClick={() => setActiveTab("all")}
@@ -610,7 +701,7 @@ const ActiveProject = () => {
                   position: "sticky",
                   top: 0,
                   zIndex: 0,
-                  backgroundColor: "#fff",
+                  backgroundColor: "#fff", // Match your background color
                 }}
               >
                 <tr className="text-center">
@@ -642,7 +733,7 @@ const ActiveProject = () => {
                     >
                       <td>{index + 1}</td>
                       <td>{project.projectTitle}</td>
-                      <td>{project.clientName}</td>
+                      <td>{project.clientId}</td>
                       <td>{project.task_name}</td>
                       <td>{project.language_name}</td>
                       <td>{project.application_name}</td>
@@ -709,7 +800,6 @@ const ActiveProject = () => {
                           <button
                             className="btn btn-sm btn-danger"
                             onClick={() => handleDeleteProject(project.id)}
-                            disabled={!isAdmin}
                           >
                             <i className="fas fa-trash"></i>
                           </button>
@@ -717,7 +807,7 @@ const ActiveProject = () => {
                       </td>
                     </tr>
 
-                    {expandedRow === project.id && (
+                  {expandedRow === project.id && (
                       <tr>
                         <td colSpan={14} className="p-0 border-top-0">
                           <div className="p-4">
@@ -751,7 +841,36 @@ const ActiveProject = () => {
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {files.map((file) => (
+                                    {[
+                                      {
+                                        id: 1,
+                                        name: "File_1_1.docx",
+                                        pages: 15,
+                                        language: "az",
+                                        application: "Visio",
+                                      },
+                                      {
+                                        id: 2,
+                                        name: "File_1_2.docx",
+                                        pages: 6,
+                                        language: "az",
+                                        application: "FM",
+                                      },
+                                      {
+                                        id: 3,
+                                        name: "File_1_3.docx",
+                                        pages: 5,
+                                        language: "yo",
+                                        application: "Visio",
+                                      },
+                                      {
+                                        id: 4,
+                                        name: "File_1_4.docx",
+                                        pages: 2,
+                                        language: "am",
+                                        application: "Word",
+                                      },
+                                    ].map((file) => (
                                       <tr key={file.id}>
                                         <td>
                                           <input
@@ -811,7 +930,7 @@ const ActiveProject = () => {
                                             </option>
                                           </select>
                                         </td>
-                                        <td>{file.status || "YTS"}</td>
+                                        <td>YTS</td>
                                         <td>
                                           {file.imageUrl ? (
                                             <img
@@ -834,7 +953,7 @@ const ActiveProject = () => {
                               </div>
                             </div>
 
-                            {/* Footer Controls */}
+                            {/* Footer Row Controls */}
                             <div className="row g-3 align-items-center mb-3">
                               <div className="col-md-3">
                                 <label className="form-label">
@@ -843,15 +962,9 @@ const ActiveProject = () => {
                                 <input
                                   type="datetime-local"
                                   className="form-control"
-                                  onChange={(e) => setDeadline(e.target.value)}
                                 />
-                                {qcDueDelay && (
-                                  <small className={`form-text ${qcDueDelay.includes("Delayed") ? "text-danger" : "text-success"}`}>
-                                    {qcDueDelay}
-                                  </small>
-                                )}
                               </div>
-                              <div className="col-md-2">
+                              <div className="col-md-2 mt-5">
                                 <label className="form-label">
                                   QC Allocated Hours
                                 </label>
@@ -861,11 +974,8 @@ const ActiveProject = () => {
                                   step="0.25"
                                   className="form-control"
                                   placeholder="0"
-                                  onChange={(e) =>
-                                    setAllocatedHours(e.target.value)
-                                  }
                                 />
-                                <div className=" text-whhite">
+                                <div className="form-text">
                                   (in multiple of 0.00 only)
                                 </div>
                               </div>
@@ -875,31 +985,22 @@ const ActiveProject = () => {
                                   type="text"
                                   className="form-control"
                                   placeholder="--"
+                                  disabled
                                 />
                               </div>
                               <div className="col-md-2">
                                 <label className="form-label">Priority</label>
-                                <select
-                                  className="form-select"
-                                  value={priority}
-                                  onChange={(e) => setPriority(e.target.value)}
-                                >
+                                <select className="form-select">
                                   <option value="Low">Low</option>
                                   <option value="Medium">Medium</option>
                                   <option value="High">High</option>
                                 </select>
                               </div>
                               <div className="col-md-3 d-flex align-items-end justify-content-end gap-2">
-                                <button
-                                  className="btn btn-success"
-                                  onClick={handleSave}
-                                >
+                                <button className="btn btn-success">
                                   Save
                                 </button>
-                                <button 
-                                  className="btn btn-secondary"
-                                  onClick={() => setExpandedRow(null)}
-                                >
+                                <button className="btn btn-secondary">
                                   Close
                                 </button>
                               </div>
@@ -914,6 +1015,7 @@ const ActiveProject = () => {
             </table>
           </div>
         </div>
+
       </div>
     </div>
   );
@@ -1085,5 +1187,4 @@ const generateDummyProjects = (count) => {
   }
   return projects;
 };
-export default ActiveProject;  
-           
+export default ActiveProject;
