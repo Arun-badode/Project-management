@@ -47,60 +47,70 @@ const LoginPage = () => {
     "Team Member": { email: "team@example.com", password: "team@123" },
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  if (!role) {
-    setError("Please select a role.");
-    return;
-  }
-
-  setIsLoading(true);
-
-  try {
-    const response = await axios.post(`${BASE_URL}user/login`, {
-      email: email,
-      password: password
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
-
-    const data = response.data.data;
-
-    console.log(data);
-    
-
-    // Store token and user data in localStorage
-    localStorage.setItem('authToken', data?.token);
-    localStorage.setItem('userRole', role);
-    localStorage.setItem('userEmail', email);
-    localStorage.setItem('userData', JSON.stringify(data?.user));
-
-    // Redirect based on selected role
-    switch (role) {
-      case "Admin":
-        navigate("/admin-dashboard");
-        break;
-      case "Manager":
-        navigate("/manager-dashboard");
-        break;
-      case "Team Member":
-        navigate("/team-dashboard");
-        break;
-      default:
-        navigate("/dashboard");
+    if (!role) {
+      setError("Please select a role.");
+      return;
     }
 
-  } catch (error) {
-    console.error('Login error:', error);
-    setError(error.response?.data?.message || 'Login failed. Please try again.');
-  } finally {
-    setIsLoading(false);
-  }
-};
+    setIsLoading(true);
+
+    try {
+      const response = await axios.post(`${BASE_URL}user/login`, {
+        email: email,
+        password: password
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const { data } = response.data;
+      console.log('Login response:', response.data); // Debug log
+
+      if (!data) {
+        throw new Error('Invalid response from server');
+      }
+
+      // Store authentication data
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('userRole', role);
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('userData', JSON.stringify(data.user));
+
+      // Store managerId based on different possible response structures
+      const managerId = data.user?.id || data?.id;
+      if (managerId) {
+        localStorage.setItem("managerId", managerId);
+      } else {
+        console.warn('No managerId found in response');
+      }
+
+      // Redirect based on role
+      switch (role) {
+        case "Admin":
+          navigate("/admin-dashboard");
+          break;
+        case "Manager":
+          navigate("/manager-dashboard");
+          break;
+        case "Team Member":
+          navigate("/team-dashboard");
+          break;
+        default:
+          navigate("/dashboard");
+      }
+
+    } catch (error) {
+      console.error('Login error:', error);
+      setError(error.response?.data?.message || 'Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole);
@@ -136,7 +146,6 @@ const LoginPage = () => {
           <div className="login-left-content">
             <img
               src="https://ik.imagekit.io/43o9qlnbg/Eminoids%20-%20Logo_W.png"
-              
               alt="Logo"
               className="login-logo"
               style={{ width: "220px", height: "auto", marginBottom: "24px" }}
