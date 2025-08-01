@@ -1,59 +1,60 @@
 import React, { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import "./Collaboration.css"; // Import your CSS styles
+import axios from "axios";
 
 function Collaboration() {
   // State for messages
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: "Sarah Johnson",
-      senderId: 101,
-      avatar:
-        "https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20woman%20with%20brown%20hair%20and%20friendly%20smile%2C%20business%20attire%2C%20neutral%20background%2C%20high%20quality%20portrait%20photo%2C%20soft%20lighting&width=80&height=80&seq=user1&orientation=squarish",
-      content:
-        "Hey team, I just uploaded the latest design files for the project. Could everyone please review and share your thoughts?",
-      timestamp: "10:32 AM",
-      reactions: [
-        { emoji: "👍", count: 3, reacted: true },
-        { emoji: "🔥", count: 1, reacted: false },
-      ],
-      isUnread: false,
-      isEdited: false,
-      replyTo: null,
-      seenBy: [101, 102, 103],
-    },
-    {
-      id: 2,
-      sender: "Michael Chen",
-      senderId: 102,
-      avatar:
-        "https://readdy.ai/api/search-image?query=professional%20headshot%20of%20an%20asian%20man%20with%20glasses%20wearing%20business%20casual%20attire%2C%20neutral%20background%2C%20high%20quality%20portrait%20photo%2C%20soft%20lighting&width=80&height=80&seq=user2&orientation=squarish",
-      content:
-        "I've looked through it and I think the color palette works really well with our brand guidelines. Nice work!",
-      timestamp: "10:45 AM",
-      reactions: [{ emoji: "👍", count: 2, reacted: false }],
-      isUnread: false,
-      isEdited: false,
-      replyTo: 1,
-      seenBy: [101, 102],
-    },
-    {
-      id: 3,
-      sender: "Alex Rodriguez",
-      senderId: 103,
-      avatar:
-        "https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20latino%20man%20with%20short%20dark%20hair%20wearing%20a%20blue%20shirt%2C%20neutral%20background%2C%20high%20quality%20portrait%20photo%2C%20soft%20lighting&width=80&height=80&seq=user3&orientation=squarish",
-      content:
-        "I have some concerns about the mobile responsiveness of the new layout. Can we schedule a quick call to discuss?",
-      timestamp: "11:15 AM",
-      reactions: [],
-      isUnread: true,
-      isEdited: false,
-      replyTo: null,
-      seenBy: [103],
-    },
-  ]);
+  // const [messages, setMessages] = useState([
+  //   {
+  //     id: 1,
+  //     sender: "Sarah Johnson",
+  //     senderId: 101,
+  //     avatar:
+  //       "https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20woman%20with%20brown%20hair%20and%20friendly%20smile%2C%20business%20attire%2C%20neutral%20background%2C%20high%20quality%20portrait%20photo%2C%20soft%20lighting&width=80&height=80&seq=user1&orientation=squarish",
+  //     content:
+  //       "Hey team, I just uploaded the latest design files for the project. Could everyone please review and share your thoughts?",
+  //     timestamp: "10:32 AM",
+  //     reactions: [
+  //       { emoji: "👍", count: 3, reacted: true },
+  //       { emoji: "🔥", count: 1, reacted: false },
+  //     ],
+  //     isUnread: false,
+  //     isEdited: false,
+  //     replyTo: null,
+  //     seenBy: [101, 102, 103],
+  //   },
+  //   {
+  //     id: 2,
+  //     sender: "Michael Chen",
+  //     senderId: 102,
+  //     avatar:
+  //       "https://readdy.ai/api/search-image?query=professional%20headshot%20of%20an%20asian%20man%20with%20glasses%20wearing%20business%20casual%20attire%2C%20neutral%20background%2C%20high%20quality%20portrait%20photo%2C%20soft%20lighting&width=80&height=80&seq=user2&orientation=squarish",
+  //     content:
+  //       "I've looked through it and I think the color palette works really well with our brand guidelines. Nice work!",
+  //     timestamp: "10:45 AM",
+  //     reactions: [{ emoji: "👍", count: 2, reacted: false }],
+  //     isUnread: false,
+  //     isEdited: false,
+  //     replyTo: 1,
+  //     seenBy: [101, 102],
+  //   },
+  //   {
+  //     id: 3,
+  //     sender: "Alex Rodriguez",
+  //     senderId: 103,
+  //     avatar:
+  //       "https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20latino%20man%20with%20short%20dark%20hair%20wearing%20a%20blue%20shirt%2C%20neutral%20background%2C%20high%20quality%20portrait%20photo%2C%20soft%20lighting&width=80&height=80&seq=user3&orientation=squarish",
+  //     content:
+  //       "I have some concerns about the mobile responsiveness of the new layout. Can we schedule a quick call to discuss?",
+  //     timestamp: "11:15 AM",
+  //     reactions: [],
+  //     isUnread: true,
+  //     isEdited: false,
+  //     replyTo: null,
+  //     seenBy: [103],
+  //   },
+  // ]);
 
   // State for team members
   const [teamMembers, setTeamMembers] = useState([
@@ -112,6 +113,12 @@ function Collaboration() {
     isOnline: true,
     role: "Admin",
   };
+  // const ChatComponent = () => {
+  //   const [loading, setLoading] = useState(true);
+  //   const [error, setError] = useState(null);
+  //   const messageEndRef = useRef(null);
+  // };
+  const [messages, setMessages] = useState([]);
 
   // State for UI
   const [activeFilter, setActiveFilter] = useState("All");
@@ -129,6 +136,7 @@ function Collaboration() {
   const [mentionQuery, setMentionQuery] = useState("");
   const [showMentionList, setShowMentionList] = useState(false);
   const [mentionPosition, setMentionPosition] = useState(0);
+  const token = localStorage.getItem("authToken");
 
   // Refs
   const messageEndRef = useRef(null);
@@ -407,26 +415,94 @@ function Collaboration() {
     );
   };
 
-  const filteredMessages = messages.filter((msg) => {
-    if (activeFilter === "All") return true;
-    if (activeFilter === "Unread") return msg.isUnread;
-    if (activeFilter === "Mentions")
-      return msg.mentionedUsers && msg.mentionedUsers.includes(currentUser.id);
-    return true;
-  });
+  // const filteredMessages = messages.filter((msg) => {
+  //   if (activeFilter === "All") return true;
+  //   if (activeFilter === "Unread") return msg.isUnread;
+  //   if (activeFilter === "Mentions")
+  //     return msg.mentionedUsers && msg.mentionedUsers.includes(currentUser.id);
+  //   return true;
+  // });
 
   const emojis = ["👍", "❤️", "😂", "🎉", "🔥", "💯", "👏", "🙌", "A"];
 
+  useEffect(() => {
+    fetch(
+      "https://eminoids-backend-production.up.railway.app/api/group/getAllGroups",
+      {
+        headers: { authorization: `Bearer ${token}` },
+      }
+    ) // Replace with your actual endpoint
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status) {
+          console.log(data);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch messages:", err);
+      });
 
-  
+    fetch(
+      "https://eminoids-backend-production.up.railway.app/api/groupChat/getAllGroupMessages",
+      {
+        headers: { authorization: `Bearer ${token}` },
+      }
+    ) // Replace with your actual endpoint
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status) {
+          const formattedMessages = data.data.map((msg) => ({
+            id: msg.id,
+            groupId: msg.groupId,
+            senderId: msg.memberId,
+            sender: msg.memberName,
+            avatar: "/default-avatar.png", // Replace with actual if available
+            content: msg.message,
+            replyTo: msg.replyTo ? parseInt(msg.replyTo) : null,
+            reactions: groupReactions(msg.reaction),
+            timestamp: msg.createdAt
+              ? new Date(msg.createdAt).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "Just now",
+            isEdited: false,
+            seenBy: [],
+            mentionedUsers: [],
+          }));
+          setMessages(formattedMessages);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch messages:", err);
+      });
+  }, []);
+
+  const groupReactions = (reactionsArray) => {
+    const reactionMap = {};
+    reactionsArray.forEach(({ emoji, by }) => {
+      if (!reactionMap[emoji]) {
+        reactionMap[emoji] = { emoji, count: 0, users: [] };
+      }
+      reactionMap[emoji].count++;
+      reactionMap[emoji].users.push(by);
+    });
+
+    return Object.values(reactionMap).map((r) => ({
+      emoji: r.emoji,
+      count: r.count,
+      reacted: false, // You can check if current user reacted here
+    }));
+  };
+
   return (
     <div className=" container-fluid d-flex flex-column">
       {/* Main Content */}
-      <div className="flex-grow-1 d-flex ">
+      <div className="flex-grow-1  d-flex ">
         {/* Left Sidebar */}
-        <div className="d-none d-lg-block col-lg-3 border-end  bg-card p-3 overflow-auto">
+        <div className="d-none d-lg-block col-lg-3 border-end bg-card p-3 overflow-auto">
           {/* User Profile */}
-          <div className="d-flex align-items-center mb-4 p-2  rounded bg-light">
+          <div className="d-flex align-items-center mb-4 p-2   rounded bg-light">
             <img
               src={currentUser.avatar}
               alt={currentUser.name}
@@ -585,11 +661,11 @@ function Collaboration() {
         </div>
 
         {/* Right Content Area */}
-        <div className="col-12 col-lg-9 d-flex flex-column chat-main-panel">
+        <div className="col-12  col-lg-9 d-flex flex-column chat-main-panel">
           <div className="row chat" style={{ position: "fixed" }}>
-            <div className="col-12  d-flex flex-column">
+            <div className="col-12  flex-column" >
               {/* Chat Header */}
-              <div className="p-3 border-bottom bg-main d-flex justify-content-between align-items-center chat-header-sticky">
+              <div className="p-3  border-bottom bg-main d-flex justify-content-between align-items-center chat-header-sticky">
                 <div>
                   <h4 className="mb-0 text-white">
                     {activePrivateChat
@@ -648,14 +724,12 @@ function Collaboration() {
                   </div>
                 </div>
               </div>
-
-              {/* Messages Area */}
               <div
-                className="chat-messages-scrollable  scrollbar-hidden overflow-auto p-3 bg-main"
+                className="chat-messages-scrollable h-100 scrollbar-hidden overflow-auto p-3 bg-main"
                 style={{ backgroundColor: "#1e1e1e" }}
               >
                 <div ref={messageEndRef} />
-                {filteredMessages.map((message) => (
+                {messages.map((message) => (
                   <div
                     key={message.id}
                     className={`mb-3 ${
@@ -731,7 +805,6 @@ function Collaboration() {
                           )}
                         </p>
 
-                        {/* Message actions */}
                         <div
                           className={`position-absolute ${
                             message.senderId === currentUser.id
@@ -766,7 +839,6 @@ function Collaboration() {
                           )}
                         </div>
 
-                        {/* Reactions */}
                         {message.reactions.length > 0 && (
                           <div className="d-flex flex-wrap gap-1 mt-2">
                             {message.reactions.map((reaction, idx) => (
@@ -790,7 +862,6 @@ function Collaboration() {
                           </div>
                         )}
 
-                        {/* Seen status */}
                         {activePrivateChat &&
                           message.senderId === currentUser.id && (
                             <div className="text-end mt-1">
@@ -806,7 +877,6 @@ function Collaboration() {
                   </div>
                 ))}
 
-                {/* Editing Message */}
                 {editingMessageId && (
                   <div className="mb-3 p-3 bg-dark rounded">
                     <div className="d-flex justify-content-between align-items-center mb-2">
@@ -833,7 +903,6 @@ function Collaboration() {
                   </div>
                 )}
 
-                {/* Typing Indicator */}
                 {isTyping && typingUser && (
                   <div className="d-flex align-items-center mb-3 ">
                     <img
@@ -843,7 +912,7 @@ function Collaboration() {
                       width="40"
                       height="40"
                     />
-                    <div className="rounded p-2 bg-card">
+                    <div className="rounded  p-2 bg-card">
                       <div className="d-flex align-items-center">
                         <div className="typing-dots">
                           <div className="typing-dot"></div>
@@ -859,14 +928,14 @@ function Collaboration() {
                 )}
 
                 <div ref={messageEndRef} />
-              </div>
-
+              </div>{" "}
+              {/* Messages Area */}
               {/* Message Input */}
               <div className="p-3 border-top bg-main chat-footer-sticky">
                 <div className="position-relative">
                   {showMentionList && (
                     <div
-                      className="position-absolute bottom-100 mb-2 bg-white border rounded p-2 w-100"
+                      className="position-absolute bottom-100 mb-2 bg-white border rounded p-2  mb-5"
                       style={{
                         zIndex: 1000,
                         maxHeight: "200px",

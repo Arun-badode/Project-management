@@ -1,8 +1,65 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
-const EventsTodayTable = ({ tasksToday, scrollContainerRef, fakeScrollbarRef }) => {
+const EventsTodayTable = ({ scrollContainerRef, fakeScrollbarRef }) => {
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const token = localStorage.getItem("authToken");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          "https://eminoids-backend-production.up.railway.app/api/adminDashboard/getAdminDashboardData",
+          {
+            headers: {
+              "Authorization": `Bearer ${token}`
+            }
+          }
+        );
+
+        // Transform the API data to match the table format
+        const formattedEvents = response.data.data.eventsToday.list.map(event => ({
+          id: event.id,
+          title: event.eventType,
+          description: event.details,
+          deadline: new Date(event.eventDate).toLocaleDateString(),
+          assignedTo: "Team", // Default value - API doesn't provide this
+          createdAt: new Date(event.createdAt).toLocaleString()
+        }));
+
+        setEvents(formattedEvents);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [token]);
+
+  if (loading) {
+    return (
+      <div className="text-center p-5">
+        <div className="spinner-border text-light" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-5 text-danger">
+        Error loading events: {error}
+      </div>
+    );
+  }
+
   return (
     <div className="text-white p-3 mb-4 table-gradient-bg">
       <div
@@ -47,21 +104,29 @@ const EventsTodayTable = ({ tasksToday, scrollContainerRef, fakeScrollbarRef }) 
             }}
           >
             <tr className="text-center">
-              <th>Task Title</th>
-              <th>Description</th>
-              <th>Deadline</th>
-              <th>Assign to</th>
+              <th>Event Type</th>
+              <th>Details</th>
+              <th>Event Date</th>
+              <th>Created At</th>
             </tr>
           </thead>
           <tbody>
-            {tasksToday.map((task) => (
-              <tr  key={task.id}>
-                <td>{task.title}</td>
-                <td>{task.description}</td>
-                <td>{task.deadline}</td>
-                <td>{task.assignedTo}</td>
+            {events.length > 0 ? (
+              events.map((event) => (
+                <tr key={event.id}>
+                  <td>{event.title}</td>
+                  <td>{event.description}</td>
+                  <td>{event.deadline}</td>
+                  <td>{event.createdAt}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" className="text-center">
+                  No events scheduled for today
+                </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

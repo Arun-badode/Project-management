@@ -99,10 +99,10 @@ const Created = () => {
                     {project.status}
                   </span>
                 </td>
-                <td>{project.clientAliasName || "-"}</td>
+                <td>{project.full_name || "-"}</td>
                 <td>{project.clientName}</td>
                 <td>{project.country}</td>
-                <td>{project.full_name}</td>
+                <td>{project.projectManagerId}</td>
                 <td>
                   <span className="badge bg-primary bg-opacity-10 text-primary">
                     {project.task_name}
@@ -120,17 +120,17 @@ const Created = () => {
                 </td>
                 <td>{project.totalProjectPages}</td>
                 <td>
-                  {project.receivedDate
-                    ? new Date(project.receivedDate).toLocaleDateString()
+                  {project.receiveDate
+                    ? new Date(project.receiveDate).toLocaleDateString()
                     : "-"}
                 </td>
                 <td>{project.estimatedHours || "-"}</td>
                 <td>
-                  {project.cost
-                    ? `${project.currency || "USD"} ${project.cost}`
+                  {project.currency
+                    ? `${project.currency || "USD"} ${project.currency}`
                     : "-"}
                 </td>
-                <td>{project.inrCost ? `₹${project.inrCost}` : "-"}</td>
+                <td>{project.totalCost ? `₹${project.totalCost}` : "-"}</td>
                 <td>
                   <div className="d-flex justify-content-center gap-2">
                     <button

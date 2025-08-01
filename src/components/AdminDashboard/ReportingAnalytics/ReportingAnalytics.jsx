@@ -62,6 +62,9 @@ const ReportingAnalytics = () => {
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
   });
+const [projectStatusData, setProjectStatusData] = useState([]);
+
+
 
   const {
     scrollContainerRef: scrollProjectRef,

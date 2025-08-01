@@ -85,6 +85,65 @@ const CreateNewProject = () => {
     inrCost: 0,
   });
 
+
+  // post Api
+  
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Prepare the data in the format expected by the API
+    const formDataForApi = {
+      projectTitle: formData.title,
+      clientId: formData.client, // You might need to map client names to IDs
+      country: formData.country,
+      projectManagerId: formData.projectManager, // You might need to map manager names to IDs
+      taskId: formData.tasks[0], // Assuming single task - adjust if multiple are allowed
+      applicationId: formData.application[0], // Assuming single application - adjust if needed
+      languageId: formData.languages[0], // Assuming single language - adjust if needed
+      totalPagesLang: formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0),
+      totalProjectPages: formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0) * (formData.languages.length || 1),
+      receiveDate: formData.receivedDate,
+      serverPath: formData.serverPath,
+      notes: formData.notes,
+      estimatedHours: formData.estimatedHrs || 0,
+      hourlyRate: formData.hourlyRate || 0,
+      perPageRate: formData.rate || 0,
+      currency: formData.currency,
+      totalCost: formData.cost || 0,
+      deadline: `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}-${selectedDate.toString().padStart(2, '0')}`,
+      readyQCDeadline: "", // You might want to calculate this
+      qcHrs: 0, // You might want to add this field to your form
+      qcDueDate: "", // You might want to add this field to your form
+      priority: "Medium", // You might want to add this field to your form
+      status: "Active"
+    };
+
+    try {
+      const response = await axios.post(
+        'https://eminoids-backend-production.up.railway.app/api/project/addProject',
+        formDataForApi,
+        {
+         headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+         }
+      );
+   
+      console.log('Project created successfully:', response?.data);
+      // You might want to show a success message or redirect here
+      alert('Project created successfully!');
+      
+      // Reset the form if needed
+      // setFormData({...initialState});
+      
+    } catch (error) {
+      console.error('Error creating project:', error);
+      // Show error message to user
+      alert('Error creating project. Please try again.');
+    }
+  };
+
+
   const handleNextMonth = () => {
     if (selectedMonth === 11) {
       setSelectedMonth(0);
@@ -120,20 +179,6 @@ const CreateNewProject = () => {
   ];
 
   // Options for dropdowns
-  const clientOptions = [
-    "PN",
-    "MMP Auburn",
-    "MMP Eastlake",
-    "MMP Kirkland",
-    "GN",
-    "DM",
-    "RN",
-    "NI",
-    "LB",
-    "SSS",
-    "Cpea",
-    "CV",
-  ];
 
   const gradientSelectStyles = {
     control: (provided, state) => ({
@@ -260,12 +305,6 @@ const CreateNewProject = () => {
     return `${date} ${time}`;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Add your submit logic here
-    console.log("Form submitted:", formData);
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -273,6 +312,28 @@ const CreateNewProject = () => {
       [name]: value,
     }));
   };
+
+  const [clientOptions, setClientOptions] = useState([]);
+
+  // Fetch clients on component mount
+ useEffect(() => {
+  axios
+    .get("https://eminoids-backend-production.up.railway.app/api/client/getAllClients", {
+      headers: { authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      console.log("Fetching client options...", res.data.clients);
+      const options = res.data.clients.map((client) => ({
+        value: client.clientName,
+        label: client.clientName,
+      }));
+      setClientOptions(options);
+    })
+    .catch((err) => {
+      console.error("Error fetching client options", err);
+    });
+}, []);
+
 
   return (
     <div>
@@ -308,10 +369,7 @@ const CreateNewProject = () => {
             <Select
               id="client"
               name="client"
-              options={clientOptions.map((c) => ({
-                value: c,
-                label: c,
-              }))}
+              options={clientOptions}
               value={
                 formData.client
                   ? { value: formData.client, label: formData.client }
@@ -328,6 +386,7 @@ const CreateNewProject = () => {
               styles={gradientSelectStyles}
             />
           </div>
+
           <div className="col-md-4">
             <label htmlFor="country" className="form-label">
               Country
@@ -340,8 +399,17 @@ const CreateNewProject = () => {
               value={formData.country}
               onChange={handleInputChange}
               placeholder=""
+<<<<<<< HEAD
          
           />
+=======
+            />
+          </div>
+          <div className="col-md-4">
+            <label htmlFor="projectManager" className="form-label">
+              Project Manager
+            </label>
+>>>>>>> 6a51472785d0ae5469579c6996c4d991a4e0193c
             <Select
               id="projectManager"
               name="projectManager"
@@ -851,7 +919,7 @@ const CreateNewProject = () => {
             </label>
             <div className="max-w-md mx-auto">
               <div className="relative">
-                <input  
+                <input
                   type="text"
                   value={formatDateTime()}
                   readOnly
@@ -859,7 +927,6 @@ const CreateNewProject = () => {
                   className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
                   placeholder="00/00/00 00:00 AM"
                 />
-               
               </div>
 
               {isOpen && (

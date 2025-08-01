@@ -1105,6 +1105,66 @@ const Calendar = ({ userRole }) => {
       </Modal>
 
       {/* Add Event Modal */}
+<<<<<<< HEAD
+=======
+      <Modal
+        show={showAddEventModal}
+        onHide={() => setShowAddEventModal(false)}
+        className="custom-modal-dark"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Add Event</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Date</Form.Label>
+              <Form.Control
+                type="date"
+                value={addEventDate}
+                onChange={(e) => setAddEventDate(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Type of Event</Form.Label>
+              <Form.Select
+                value={addEventType}
+                onChange={(e) => setAddEventType(e.target.value)}
+              >
+                <option value="">Select Type</option>
+                <option value="dob">Birthday</option>
+                <option value="doj">Joining Date</option>
+                <option value="companyHoliday">Company Holiday</option>
+                <option value="clientHoliday">Client Holiday</option>
+                {/* <option value="approvedLeave">Leave</option>
+                <option value="weekOff">Week Off</option> */}
+                <option value="note">Note</option>
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Details</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter Details"
+                value={addEventDetails}
+                onChange={(e) => setAddEventDetails(e.target.value)}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowAddEventModal(false)}
+          >
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleAddEventSave}>
+            Save
+          </Button>
+        </Modal.Footer>
+      </Modal>
+>>>>>>> 6a51472785d0ae5469579c6996c4d991a4e0193c
         <Modal
       show={showAddEventModal}
       onHide={() => setShowAddEventModal(false)}
@@ -1219,3 +1279,4 @@ const Calendar = ({ userRole }) => {
 };
 
 export default Calendar;
+

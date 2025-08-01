@@ -312,37 +312,37 @@ const ActiveProjects = () => {
                 >
                   <td>{index + 1}</td>
                   <td>{project.projectTitle || "-"}</td>
-                  <td>{project.clientAliasName || "-"}</td>
+                  <td>{project.full_name || "-"}</td>
                   <td>{project.clientName || "-"}</td>
                   <td>{project.country || "-"}</td>
-                  <td>{project.projectManager || "-"}</td>
+                  <td>{project.projectManagerId || "-"}</td>
                   <td>
                     <span className="badge bg-primary bg-opacity-10 text-primary">
-                      {project.task || "-"}
+                      {project.task_name || "-"}
                     </span>
                   </td>
                   <td>
                     <span className="badge bg-success bg-opacity-10 text-success">
-                      {project.language || "-"}
+                      {project.language_name || "-"}
                     </span>
                   </td>
                   <td>
                     <span className="badge bg-purple bg-opacity-10 text-purple">
-                      {project.application || "-"}
+                      {project.application_name || "-"}
                     </span>
                   </td>
-                  <td>{project.totalPages || "-"}</td>
+                  <td>{project.totalPagesLang || "-"}</td>
                   <td>
                     {project.deadline
                       ? new Date(project.deadline).toLocaleDateString()
                       : "-"}
                   </td>
                   <td>
-                    {project.readyForQCDeadline
-                      ? new Date(project.readyForQCDeadline).toLocaleDateString()
+                    {project.readyQCDeadline
+                      ? new Date(project.readyQCDeadline).toLocaleDateString()
                       : "-"}
                   </td>
-                  <td>{project.qcHours || "-"}</td>
+                  <td>{project.qcHrs || "-"}</td>
                   <td>
                     {project.qcDueDate
                       ? new Date(project.qcDueDate).toLocaleDateString()

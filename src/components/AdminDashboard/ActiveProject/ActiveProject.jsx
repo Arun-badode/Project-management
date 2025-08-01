@@ -4,7 +4,7 @@ import Select from "react-select";
 import useSyncScroll from "../Hooks/useSyncScroll";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-
+import axios from "axios";
 import CreateNewProject from "../Project/CreateNewProject";
 import EditModal from "./EditModal";
 
@@ -16,6 +16,7 @@ const ActiveProject = () => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const isAdmin = userRole === "Admin";
+  const token = localStorage.getItem("authToken");
 
   const [fileHandlers, setFileHandlers] = useState({});
 
@@ -285,7 +286,9 @@ const ActiveProject = () => {
 
   const handleViewProject = (project) => {
     setSelectedProject(project);
-    setSelectedFiles([]);
+    setSelectedFiles(
+      project.files ? project.files.map((f) => ({ id: f.id })) : []
+    );
     setShowDetailModal(false);
     setHasUnsavedChanges(false);
     setBatchEditValues({
@@ -396,6 +399,67 @@ const ActiveProject = () => {
       year: "numeric",
     });
   }
+
+  // useEffect(() => {
+  //   const fetchProjects = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         "https://eminoids-backend-production.up.railway.app/api/project/getAllProjects"
+  //       );
+  //       // API returns { status, message, projects: [...] }
+  //       const apiProjects = response.data.projects || [];
+  //       // Map API fields to your UI fields
+  //       const mapped = apiProjects.map((p) => ({
+  //         id: p.id,
+  //         title: p.projectTitle,
+  //         client: p.clientName,
+  //         task: p.task_name,
+  //         language: p.language_name,
+  //         application: p.application_name,
+  //         totalPages: p.totalProjectPages,
+  //         deadline: p.deadline,
+  //         readyDeadline: p.readyQCDeadline,
+  //         qcHrs: p.qcHrs,
+  //         qcDueDate: p.qcDueDate,
+  //         status: p.status,
+  //         progress: Math.floor(Math.random() * 100), // Or use a real field if available
+  //         handler: p.full_name,
+  //         files: [], // You can fill this if your API provides file details
+  //       }));
+  //       setProjects(mapped);
+  //       setFilteredProjects(mapped);
+  //     } catch (err) {
+  //       setProjects([]);
+  //       setFilteredProjects([]);
+  //     }
+  //   };
+  //   fetchProjects();
+  // }, []);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch(
+          "https://eminoids-backend-production.up.railway.app/api/project/getAllProjects",
+          {
+            headers: { authorization: `Bearer ${token}` },
+          }
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch projects");
+        }
+        const data = await response.json();
+        setProjects(data.projects);
+        setFilteredProjects(data.projects);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   return (
     <div className="container-fluid py-4">
@@ -669,14 +733,14 @@ const ActiveProject = () => {
                       }
                     >
                       <td>{index + 1}</td>
-                      <td>{project.title}</td>
-                      <td>{project.client}</td>
-                      <td>{project.task}</td>
-                      <td>{project.language}</td>
-                      <td>{project.application}</td>
-                      <td>{project.totalPages}</td>
+                      <td>{project.projectTitle}</td>
+                      <td>{project.clientId}</td>
+                      <td>{project.task_name}</td>
+                      <td>{project.language_name}</td>
+                      <td>{project.application_name}</td>
+                      <td>{project.totalPagesLang}</td>
                       <td>{project.deadline}</td>
-                      <td>{project.readyDeadline}</td>
+                      <td>{project.readyQCDeadline}</td>
                       <td>{project.qcHrs}</td>
                       <td>{project.qcDueDate}</td>
                       <td>{project.status}</td>
@@ -762,35 +826,10 @@ const ActiveProject = () => {
                               {/* Files Table */}
                               <div className="table-responsive">
                                 <table className="table table-sm table-striped table-hover">
-                                  <thead
-                                    className="table-gradient-bg table"
-                                    style={{
-                                      position: "sticky",
-                                      top: 0,
-                                      zIndex: 0,
-                                      backgroundColor: "#fff",
-                                    }}
-                                  >
+                                  <thead>
                                     <tr className="text-center">
                                       <th>
-                                        <input
-                                          type="checkbox"
-                                          className="form-check-input"
-                                          checked={
-                                            selectedFiles.length ===
-                                            project?.files?.length
-                                          }
-                                          onChange={(e) => {
-                                            if (e.target.checked) {
-                                              setSelectedFiles([
-                                                ...project.files,
-                                              ]);
-                                            } else {
-                                              setSelectedFiles([]);
-                                            }
-                                            setHasUnsavedChanges(true);
-                                          }}
-                                        />
+                                        <input type="checkbox" />
                                       </th>
                                       <th>File Name</th>
                                       <th>Pages</th>
@@ -798,21 +837,42 @@ const ActiveProject = () => {
                                       <th>Application</th>
                                       <th>Handler</th>
                                       <th>QA Reviewer</th>
-                                      <th>QA Status</th>
+                                      <th>Status</th>
+                                      <th>Preview</th>
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {project.files.map((file) => (
-                                      <tr
-                                        key={file.id}
-                                        className={
-                                          selectedFiles.some(
-                                            (f) => f.id === file.id
-                                          )
-                                            ? "table-primary text-center"
-                                            : ""
-                                        }
-                                      >
+                                    {[
+                                      {
+                                        id: 1,
+                                        name: "File_1_1.docx",
+                                        pages: 15,
+                                        language: "az",
+                                        application: "Visio",
+                                      },
+                                      {
+                                        id: 2,
+                                        name: "File_1_2.docx",
+                                        pages: 6,
+                                        language: "az",
+                                        application: "FM",
+                                      },
+                                      {
+                                        id: 3,
+                                        name: "File_1_3.docx",
+                                        pages: 5,
+                                        language: "yo",
+                                        application: "Visio",
+                                      },
+                                      {
+                                        id: 4,
+                                        name: "File_1_4.docx",
+                                        pages: 2,
+                                        language: "am",
+                                        application: "Word",
+                                      },
+                                    ].map((file) => (
+                                      <tr key={file.id}>
                                         <td>
                                           <input
                                             type="checkbox"
@@ -832,7 +892,7 @@ const ActiveProject = () => {
                                         <td>
                                           <select
                                             className="form-select form-select-sm"
-                                            value={fileHandlers[file.id]}
+                                            value={fileHandlers[file.id] || ""}
                                             onChange={(e) =>
                                               handleHandlerChange(
                                                 file.id,
@@ -840,6 +900,9 @@ const ActiveProject = () => {
                                               )
                                             }
                                           >
+                                            <option value="">
+                                              Not Assigned
+                                            </option>
                                             {assignees.map(
                                               (assignee, index) => (
                                                 <option
@@ -852,7 +915,6 @@ const ActiveProject = () => {
                                             )}
                                           </select>
                                         </td>
-
                                         <td>
                                           <select className="form-select form-select-sm">
                                             <option value="">
@@ -869,102 +931,79 @@ const ActiveProject = () => {
                                             </option>
                                           </select>
                                         </td>
-                                        <td>Corr WIP</td>
+                                        <td>YTS</td>
+                                        <td>
+                                          {file.imageUrl ? (
+                                            <img
+                                              src={file.imageUrl}
+                                              alt={file.name}
+                                              style={{
+                                                width: "60px",
+                                                height: "40px",
+                                                objectFit: "cover",
+                                              }}
+                                            />
+                                          ) : (
+                                            <span>No Preview</span>
+                                          )}
+                                        </td>
                                       </tr>
                                     ))}
                                   </tbody>
                                 </table>
                               </div>
+                            </div>
 
-                              {/* Batch Edit Controls */}
-                              <div className="row g-3 mb-1">
-                                <div className="col-md-2">
-                                  <label className="form-label">
-                                    Ready for QC Due
-                                  </label>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">
-                                    QC Allocated Hours
-                                  </label>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">QC Due</label>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">Priority</label>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">Actions</label>
+                            {/* Footer Row Controls */}
+                            <div className="row g-3 align-items-center mb-3">
+                              <div className="col-md-3">
+                                <label className="form-label">
+                                  Ready for QC Due
+                                </label>
+                                <input
+                                  type="datetime-local"
+                                  className="form-control"
+                                />
+                              </div>
+                              <div className="col-md-2 mt-5">
+                                <label className="form-label">
+                                  QC Allocated Hours
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="0.25"
+                                  className="form-control"
+                                  placeholder="0"
+                                />
+                                <div className="form-text">
+                                  (in multiple of 0.00 only)
                                 </div>
                               </div>
-
-                              {/* Input Row */}
-                              <div className="row g-3 mb-3 align-items-start">
-                                <div className="col-md-2">
-                                  <DatePicker
-                                    selected={selectedDateTime}
-                                    onChange={(date) =>
-                                      setSelectedDateTime(date)
-                                    }
-                                    showTimeSelect
-                                    timeFormat="HH:mm"
-                                    timeIntervals={15}
-                                    dateFormat="h:mm aa dd-MM-yyyy"
-                                    placeholderText="Select date and time"
-                                    className="form-control"
-                                  />
-                                </div>
-
-                                <div className="col-md-2">
-                                  <input
-                                    type="number"
-                                    className="form-control"
-                                    step="0.25"
-                                    min="0"
-                                    placeholder="0.00"
-                                    value={qcAllocatedHours}
-                                    onChange={(e) => {
-                                      const val = parseFloat(e.target.value);
-                                      if (
-                                        !isNaN(val) &&
-                                        val >= 0 &&
-                                        val % 0.25 === 0
-                                      ) {
-                                        setQcAllocatedHours(val);
-                                      }
-                                    }}
-                                  />
-                                  <div className="small text-white">
-                                    (in multiple of 0.00 only)
-                                  </div>
-                                </div>
-
-                                <div className="col-md-2">
-                                  <div className="form-control fw-bold">
-                                    {calculateQCDue(
-                                      selectedDateTime,
-                                      qcAllocatedHours
-                                    )}
-                                  </div>
-                                </div>
-
-                                <div className="col-md-2">
-                                  <select className="form-select">
-                                    <option>Low</option>
-                                    <option>Mid</option>
-                                    <option>High</option>
-                                  </select>
-                                </div>
-
-                                <div className="col-md-2 d-flex gap-2">
-                                  <button className="btn btn-success w-100">
-                                    Save
-                                  </button>
-                                  <button className="btn btn-secondary w-100">
-                                    Close
-                                  </button>
-                                </div>
+                              <div className="col-md-2">
+                                <label className="form-label">QC Due</label>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  placeholder="--"
+                                  disabled
+                                />
+                              </div>
+                              <div className="col-md-2">
+                                <label className="form-label">Priority</label>
+                                <select className="form-select">
+                                  <option value="Low">Low</option>
+                                  <option value="Medium">Medium</option>
+                                  <option value="High">High</option>
+                                </select>
+                              </div>
+                              <div className="col-md-3 d-flex align-items-end justify-content-end gap-2">
+                                <button className="btn btn-success">
+                                  Save
+                                </button>
+                                <button className="btn btn-secondary">
+                                  Close
+                                </button>
                               </div>
                             </div>
                           </div>
