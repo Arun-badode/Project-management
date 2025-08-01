@@ -144,27 +144,27 @@ function Collaboration() {
   const messageInputRef = useRef(null);
   const socketRef = useRef(null);
 
-  // Initialize socket connection
-  useEffect(() => {
-    // In a real app, you would connect to your actual server
-    socketRef.current = io("http://localhost:3001", {
-      auth: {
-        userId: currentUser.id,
-        userName: currentUser.name,
-      },
-    });
+  // // Initialize socket connection
+  // useEffect(() => {
+  //   // In a real app, you would connect to your actual server
+  //   socketRef.current = io("http://localhost:3001", {
+  //     auth: {
+  //       userId: currentUser.id,
+  //       userName: currentUser.name,
+  //     },
+  //   });
 
-    // Socket event listeners
-    socketRef.current.on("message", handleNewMessage);
-    socketRef.current.on("typing", handleTyping);
-    socketRef.current.on("messageSeen", handleMessageSeen);
-    socketRef.current.on("messageEdited", handleMessageEdited);
-    socketRef.current.on("messageDeleted", handleMessageDeleted);
+  //   // Socket event listeners
+  //   socketRef.current.on("message", handleNewMessage);
+  //   socketRef.current.on("typing", handleTyping);
+  //   socketRef.current.on("messageSeen", handleMessageSeen);
+  //   socketRef.current.on("messageEdited", handleMessageEdited);
+  //   socketRef.current.on("messageDeleted", handleMessageDeleted);
 
-    return () => {
-      socketRef.current.disconnect();
-    };
-  }, []);
+  //   return () => {
+  //     socketRef.current.disconnect();
+  //   };
+  // }, []);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -424,6 +424,10 @@ function Collaboration() {
   // });
 
   const emojis = ["👍", "❤️", "😂", "🎉", "🔥", "💯", "👏", "🙌", "A"];
+  const [groups, setGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeGroup, setActiveGroup] = useState(null);
 
   useEffect(() => {
     fetch(
@@ -431,15 +435,20 @@ function Collaboration() {
       {
         headers: { authorization: `Bearer ${token}` },
       }
-    ) // Replace with your actual endpoint
+    )
       .then((res) => res.json())
       .then((data) => {
         if (data.status) {
-          console.log(data);
+          setGroups(data.data);
+        } else {
+          setError(data.message || "Failed to fetch groups");
         }
+        setLoading(false);
       })
       .catch((err) => {
         console.error("Failed to fetch messages:", err);
+        setError(err.message);
+        setLoading(false);
       });
 
     fetch(
@@ -494,6 +503,7 @@ function Collaboration() {
       reacted: false, // You can check if current user reacted here
     }));
   };
+  
 
   return (
     <div className=" container-fluid d-flex flex-column">
@@ -554,22 +564,36 @@ function Collaboration() {
               {/* Group List */}
               <h6 className="mb-3">GROUP CHATS</h6>
               <div className="list-group mb-4">
-                <button
-                  className="list-group-item list-group-item-action active"
-                  onClick={() => setActivePrivateChat(null)}
-                >
-                  <div className="d-flex justify-content-between">
-                    <strong>Project Team</strong>
-                    <span className="badge bg-white text-dark">3 new</span>
-                  </div>
-                  <small>Last message: 11:32 AM</small>
-                </button>
-                <button className="list-group-item list-group-item-action">
-                  <div className="d-flex justify-content-between">
-                    <strong>Marketing Team</strong>
-                  </div>
-                  <small>Last message: Yesterday</small>
-                </button>
+                {loading ? (
+                  <div>Loading groups...</div>
+                ) : error ? (
+                  <div className="text-danger">Error: {error}</div>
+                ) : groups.length > 0 ? (
+                  groups.map((group) => (
+                    <button
+                      key={group.id}
+                      className={`list-group-item list-group-item-action ${
+                        activeGroup?.id === group.id ? "active" : ""
+                      }`}
+                      onClick={() => {
+                        setActiveGroup(group);
+                        setActivePrivateChat(null); // Clear private chat if any
+                        // Fetch messages for this group
+                        fetchGroupMessages(group.id);
+                      }}
+                    >
+                      <div className="d-flex justify-content-between">
+                        <strong>{group.name}</strong>
+                      </div>
+                      <small>
+                        Created:{" "}
+                        {new Date(group.createdAt).toLocaleDateString()}
+                      </small>
+                    </button>
+                  ))
+                ) : (
+                  <div>No groups found</div>
+                )}
               </div>
             </>
           ) : (
@@ -663,7 +687,7 @@ function Collaboration() {
         {/* Right Content Area */}
         <div className="col-12  col-lg-9 d-flex flex-column chat-main-panel">
           <div className="row chat" style={{ position: "fixed" }}>
-            <div className="col-12  flex-column" >
+            <div className="col-12  flex-column">
               {/* Chat Header */}
               <div className="p-3  border-bottom bg-main d-flex justify-content-between align-items-center chat-header-sticky">
                 <div>
@@ -671,7 +695,7 @@ function Collaboration() {
                     {activePrivateChat
                       ? teamMembers.find((m) => m.id === activePrivateChat)
                           ?.name
-                      : "Project Team"}
+                      : activeGroup?.name || "Select a group"}
                   </h4>
                   <small className="text-white">
                     {activePrivateChat
@@ -682,9 +706,9 @@ function Collaboration() {
                             teamMembers.find((m) => m.id === activePrivateChat)
                               ?.lastSeen
                           }`
-                      : `${
-                          teamMembers.length + 1
-                        } members • Last activity 11:32 AM`}
+                      : activeGroup
+                      ? ``
+                      : ""}
                   </small>
                 </div>
                 <div className="d-flex">
@@ -729,153 +753,168 @@ function Collaboration() {
                 style={{ backgroundColor: "#1e1e1e" }}
               >
                 <div ref={messageEndRef} />
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`mb-3 ${
-                      message.senderId === currentUser.id ? "text-end" : ""
-                    }`}
-                  >
-                    {message.replyTo && (
-                      <div
-                        className={`small text-white mb-1 ${
-                          message.senderId === currentUser.id ? "text-end" : ""
-                        }`}
-                      >
-                        Replying to:{" "}
-                        {messages
-                          .find((m) => m.id === message.replyTo)
-                          ?.content.substring(0, 50)}
-                        ...
-                      </div>
-                    )}
-                    <div
-                      className={`d-flex ${
+                {messages
+                  .filter((message) =>
+                    activePrivateChat
+                      ? message.senderId === activePrivateChat ||
                         message.senderId === currentUser.id
-                          ? "justify-content-end"
-                          : ""
+                      : activeGroup && message.groupId === activeGroup.id
+                  )
+                  .map((message) => (
+                    <div
+                      key={message.id}
+                      className={`mb-3 ${
+                        message.senderId === currentUser.id ? "text-end" : ""
                       }`}
                     >
-                      {message.senderId !== currentUser.id && (
-                        <img
-                          src={message.avatar}
-                          alt={message.sender}
-                          className="rounded-circle me-2"
-                          width="40"
-                          height="40"
-                        />
+                      {message.replyTo && (
+                        <div
+                          className={`small text-white mb-1 ${
+                            message.senderId === currentUser.id
+                              ? "text-end"
+                              : ""
+                          }`}
+                        >
+                          Replying to:{" "}
+                          {messages
+                            .find((m) => m.id === message.replyTo)
+                            ?.content.substring(0, 50)}
+                          ...
+                        </div>
                       )}
                       <div
-                        className={`rounded p-3 position-relative ${
+                        className={`d-flex ${
                           message.senderId === currentUser.id
-                            ? "bg-primary"
-                            : "bg-card"
+                            ? "justify-content-end"
+                            : ""
                         }`}
-                        style={{ maxWidth: "75%" }}
                       >
-                        <div className="d-flex justify-content-between align-items-center mb-1">
-                          <strong
-                            className={
-                              message.senderId === currentUser.id
-                                ? "text-white"
-                                : "text-white"
-                            }
-                          >
-                            {message.sender}
-                          </strong>
-                          <small
-                            className={
-                              message.senderId === currentUser.id
-                                ? "text-white-50"
-                                : "text-white-50"
-                            }
-                          >
-                            {message.timestamp}
-                            {message.isEdited && (
-                              <span className="ms-1">(edited)</span>
-                            )}
-                          </small>
-                        </div>
-                        <p className="mb-2 text-white">
-                          {message.content}
-                          {message.mentionedUsers?.includes(currentUser.id) && (
-                            <span className="badge bg-warning ms-2">
-                              Mentioned
-                            </span>
-                          )}
-                        </p>
-
-                        <div
-                          className={`position-absolute ${
-                            message.senderId === currentUser.id
-                              ? "left-0 start-100"
-                              : "right-0 end-100"
-                          } px-2 d-flex`}
-                        >
-                          <button
-                            className="btn btn-sm p-0 text-white-50"
-                            onClick={() => handleReply(message.id)}
-                            title="Reply"
-                          >
-                            <i className="fas fa-reply"></i>
-                          </button>
-                          {message.senderId === currentUser.id && (
-                            <>
-                              <button
-                                className="btn btn-sm p-0 mx-1 text-white-50"
-                                onClick={() => handleEditMessage(message.id)}
-                                title="Edit"
-                              >
-                                <i className="fas fa-edit"></i>
-                              </button>
-                              <button
-                                className="btn btn-sm p-0 text-white-50"
-                                onClick={() => handleDeleteMessage(message.id)}
-                                title="Delete"
-                              >
-                                <i className="fas fa-trash"></i>
-                              </button>
-                            </>
-                          )}
-                        </div>
-
-                        {message.reactions.length > 0 && (
-                          <div className="d-flex flex-wrap gap-1 mt-2">
-                            {message.reactions.map((reaction, idx) => (
-                              <button
-                                key={idx}
-                                className={`btn btn-sm p-0 px-1 rounded-pill ${
-                                  reaction.reacted
-                                    ? "bg-white"
-                                    : message.senderId === currentUser.id
-                                    ? "bg-white-10"
-                                    : "bg-light"
-                                }`}
-                                onClick={() =>
-                                  handleReaction(message.id, reaction.emoji)
-                                }
-                              >
-                                <span>{reaction.emoji}</span>
-                                <small className="ms-1">{reaction.count}</small>
-                              </button>
-                            ))}
-                          </div>
+                        {message.senderId !== currentUser.id && (
+                          <img
+                            src={message.avatar}
+                            alt={message.sender}
+                            className="rounded-circle me-2"
+                            width="40"
+                            height="40"
+                          />
                         )}
+                        <div
+                          className={`rounded p-3 position-relative ${
+                            message.senderId === currentUser.id
+                              ? "bg-primary"
+                              : "bg-card"
+                          }`}
+                          style={{ maxWidth: "75%" }}
+                        >
+                          <div className="d-flex justify-content-between align-items-center mb-1">
+                            <strong
+                              className={
+                                message.senderId === currentUser.id
+                                  ? "text-white"
+                                  : "text-white"
+                              }
+                            >
+                              {message.sender}
+                            </strong>
+                            <small
+                              className={
+                                message.senderId === currentUser.id
+                                  ? "text-white-50"
+                                  : "text-white-50"
+                              }
+                            >
+                              {message.timestamp}
+                              {message.isEdited && (
+                                <span className="ms-1">(edited)</span>
+                              )}
+                            </small>
+                          </div>
+                          <p className="mb-2 text-white">
+                            {message.content}
+                            {message.mentionedUsers?.includes(
+                              currentUser.id
+                            ) && (
+                              <span className="badge bg-warning ms-2">
+                                Mentioned
+                              </span>
+                            )}
+                          </p>
 
-                        {activePrivateChat &&
-                          message.senderId === currentUser.id && (
-                            <div className="text-end mt-1">
-                              <small className="text-white-50">
-                                {message.seenBy.includes(activePrivateChat)
-                                  ? "Seen"
-                                  : "Delivered"}
-                              </small>
+                          <div
+                            className={`position-absolute ${
+                              message.senderId === currentUser.id
+                                ? "left-0 start-100"
+                                : "right-0 end-100"
+                            } px-2 d-flex`}
+                          >
+                            <button
+                              className="btn btn-sm p-0 text-white-50"
+                              onClick={() => handleReply(message.id)}
+                              title="Reply"
+                            >
+                              <i className="fas fa-reply"></i>
+                            </button>
+                            {message.senderId === currentUser.id && (
+                              <>
+                                <button
+                                  className="btn btn-sm p-0 mx-1 text-white-50"
+                                  onClick={() => handleEditMessage(message.id)}
+                                  title="Edit"
+                                >
+                                  <i className="fas fa-edit"></i>
+                                </button>
+                                <button
+                                  className="btn btn-sm p-0 text-white-50"
+                                  onClick={() =>
+                                    handleDeleteMessage(message.id)
+                                  }
+                                  title="Delete"
+                                >
+                                  <i className="fas fa-trash"></i>
+                                </button>
+                              </>
+                            )}
+                          </div>
+
+                          {message.reactions.length > 0 && (
+                            <div className="d-flex flex-wrap gap-1 mt-2">
+                              {message.reactions.map((reaction, idx) => (
+                                <button
+                                  key={idx}
+                                  className={`btn btn-sm p-0 px-1 rounded-pill ${
+                                    reaction.reacted
+                                      ? "bg-white"
+                                      : message.senderId === currentUser.id
+                                      ? "bg-white-10"
+                                      : "bg-light"
+                                  }`}
+                                  onClick={() =>
+                                    handleReaction(message.id, reaction.emoji)
+                                  }
+                                >
+                                  <span>{reaction.emoji}</span>
+                                  <small className="ms-1">
+                                    {reaction.count}
+                                  </small>
+                                </button>
+                              ))}
                             </div>
                           )}
+
+                          {activePrivateChat &&
+                            message.senderId === currentUser.id && (
+                              <div className="text-end mt-1">
+                                <small className="text-white-50">
+                                  {message.seenBy.includes(activePrivateChat)
+                                    ? "Seen"
+                                    : "Delivered"}
+                                </small>
+                              </div>
+                            )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
                 {editingMessageId && (
                   <div className="mb-3 p-3 bg-dark rounded">
