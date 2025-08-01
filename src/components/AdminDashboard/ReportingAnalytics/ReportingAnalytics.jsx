@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo , useEffect} from "react";
+
 import {
   BarChart,
   Bar,
@@ -33,6 +34,8 @@ import {
 } from "lucide-react";
 import useSyncScroll from "../Hooks/useSyncScroll";
 import { Tab, Tabs } from "react-bootstrap";
+import BASE_URL from "../../../config";
+import axios from "axios";
 
 const ReportingAnalytics = () => {
   const [activeReportTab, setActiveReportTab] = useState("project-report");
@@ -40,7 +43,16 @@ const ReportingAnalytics = () => {
   const [selectedTeam, setSelectedTeam] = useState("all");
   const [productivityView, setProductivityView] = useState("daily");
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
   const [searchProject, setSearchProject] = useState("");
+  const [uniqueOwners, setUniqueOwners] = useState([]);
+  const [selectedOwner, setSelectedOwner] = useState("All"); // this is for select the owner from the api for project report data to use filter 
+  const [priorities, setPriorities] = useState([]);
+  const [status,setStatus] = useState([]);
+  const [selectedPriority, setSelectedPriority] = useState("All");
+  const [selectedStatus, setSelectedStatus] = useState("All");
+  const [selectedMonth, setSelectedMonth] = useState("Current Month");
+
   const [feedbackFormData, setFeedbackFormData] = useState({
     project: "",
     details: "",
@@ -69,67 +81,195 @@ const [projectStatusData, setProjectStatusData] = useState([]);
     fakeScrollbarRef: fakePerformanceRef,
   } = useSyncScroll(activeReportTab === "team-performance");
 
-  // Mock data for projects with QA status
-  const projectData = [
-    {
-      id: 1,
-      name: "Website Redesign",
-      owner: "John Doe",
-      progress: 85,
-      status: "Delayed in Process",
-      priority: "High",
-      dueDate: "2025-07-15",
-      qaStatus: "Pending",
-    },
-    {
-      id: 2,
-      name: "Mobile App Development",
-      owner: "Jane Smith",
-      progress: 45,
-      status: "Delayed in QA",
-      priority: "Critical",
-      dueDate: "2025-06-30",
-      qaStatus: "Failed",
-    },
-    {
-      id: 3,
-      name: "Database Migration",
-      owner: "Mike Johnson",
-      progress: 100,
-      status: "Completed",
-      priority: "Medium",
-      dueDate: "2025-06-10",
-      qaStatus: "Passed",
-    },
-    {
-      id: 4,
-      name: "API Integration",
-      owner: "Sarah Wilson",
-      progress: 70,
-      status: "Failed in QA",
-      priority: "High",
-      dueDate: "2025-07-20",
-      qaStatus: "Failed",
-    },
-    {
-      id: 5,
-      name: "Security Audit",
-      owner: "David Brown",
-      progress: 25,
-      status: "Delayed in Process",
-      priority: "Critical",
-      dueDate: "2025-06-25",
-      qaStatus: "Pending",
-    },
-  ];
+  const [allProjects, setAllProjects] = useState([]);
 
-  // Filter projects for report based on status
-  const filteredProjectData = projectData.filter(
-    (project) =>
-      project.status === "Delayed in Process" ||
-      project.status === "Delayed in QA" ||
-      project.status === "Failed in QA"
-  );
+  useEffect(() => {
+  const fetchProjects = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(
+        `${BASE_URL}project/getAllProjects`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+       console.log("api response" , response);
+      setAllProjects(response?.data.projects) ;
+     
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  };
+
+  fetchProjects();
+}, []);
+
+
+  // api integration for the project reports data
+    const [projectReportData, setProjectReportData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (activeReportTab !== "project-report") return;
+
+    const fetchProjects = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Derive these from your dateRange picker if you implement one:
+        const today = new Date();
+        const month = today.getMonth() + 1; // (or from your dateRange)
+        const year = today.getFullYear();
+        const status = "Active"; // or user selection
+        const owner = selectedTeam === "all" ? "All" : selectedTeam;
+        const token = localStorage.getItem("authToken");
+        //const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc1Mzg2MzM1MiwiZXhwIjoxNzUzODc3NzUyfQ.OcSAYv6lhiLJUtiIUO-1rMpgpnybckcPCvvMZm_6BQ8";
+
+        const response = await axios.get(
+          "https://eminoids-backend-production.up.railway.app/api/projectsStatusReport/getProjectStatusReport",
+          {
+            params: { owner, status, month, year },
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        console.log("res",response);
+        setProjectReportData(response.data.data ?? []);
+
+        console.log("all project data "+ projectReportData);
+
+        // get all the unique priorites from the api 
+        const uniquePriorities = Array.from(
+          new Set(response.data.data.map(p => p.projectPriority))
+        ).filter(Boolean).sort();
+        setPriorities(uniquePriorities);
+
+        // get all the unique status from the api 
+        const uniqueStatus = Array.from(
+          new Set(response.data.data.map(p => p.status ))
+        ).filter(Boolean).sort();
+        setStatus(uniqueStatus);
+
+      } catch (err) {
+        setError(err);
+        setProjectReportData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, [activeReportTab, dateRange, selectedTeam]);
+
+  // this effect is for 
+  useEffect(() => {
+  if (projectReportData.length > 0) {
+    const owners = Array.from(
+      new Set(projectReportData.map(p => p?.owner).filter(Boolean))
+    ).sort();
+    setUniqueOwners(owners);
+  }
+}, [projectReportData]);
+
+
+
+  // Filtering based on UI search
+  // const filteredProjectData = (projectReportData ?? []).filter(
+  //   (project) =>
+  //     // Filter by projectName (case-insensitive)
+  //     (!searchProject || project.projectName.toLowerCase().includes(searchProject.toLowerCase())) &&
+  //     // Optionally add status filtering you want (example for "Active" only)
+  //     (project.status === "Active" || project.status === "Delayed in Process" || project.status === "Failed in QA")
+  // );
+
+  // Mock data for projects with QA status
+  // const projectData = [
+  //   {
+  //     id: 1,
+  //     name: "Website Redesign",
+  //     owner: "John Doe",
+  //     progress: 85,
+  //     status: "Delayed in Process",
+  //     priority: "High",
+  //     dueDate: "2025-07-15",
+  //     qaStatus: "Pending",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Mobile App Development",
+  //     owner: "Jane Smith",
+  //     progress: 45,
+  //     status: "Delayed in QA",
+  //     priority: "Critical",
+  //     dueDate: "2025-06-30",
+  //     qaStatus: "Failed",
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Database Migration",
+  //     owner: "Mike Johnson",
+  //     progress: 100,
+  //     status: "Completed",
+  //     priority: "Medium",
+  //     dueDate: "2025-06-10",
+  //     qaStatus: "Passed",
+  //   },
+  //   {
+  //     id: 4,
+  //     name: "API Integration",
+  //     owner: "Sarah Wilson",
+  //     progress: 70,
+  //     status: "Failed in QA",
+  //     priority: "High",
+  //     dueDate: "2025-07-20",
+  //     qaStatus: "Failed",
+  //   },
+  //   {
+  //     id: 5,
+  //     name: "Security Audit",
+  //     owner: "David Brown",
+  //     progress: 25,
+  //     status: "Delayed in Process",
+  //     priority: "Critical",
+  //     dueDate: "2025-06-25",
+  //     qaStatus: "Pending",
+  //   },
+  // ];
+
+  //   // Filter projects for report based on status , priority , owner and date 
+  const filteredProjectData = projectReportData.filter((project) => {
+    const matchOwner =
+      selectedOwner === "All" || project.owner === selectedOwner;
+
+    const matchPriority =
+      selectedPriority === "All" ||
+      project.projectPriority === selectedPriority;
+
+    const matchStatus =
+      selectedStatus === "All" || project.status === selectedStatus;
+
+    const projectDate = new Date(project.deadline || project.dueDate);
+    const now = new Date();
+    let matchMonth = true;
+
+    if (selectedMonth === "Current Month") {
+      matchMonth =
+        projectDate.getMonth() === now.getMonth() &&
+        projectDate.getFullYear() === now.getFullYear();
+    } else if (selectedMonth === "Last Month") {
+      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1);
+      matchMonth =
+        projectDate.getMonth() === lastMonth.getMonth() &&
+        projectDate.getFullYear() === lastMonth.getFullYear();
+    } else if (selectedMonth === "Last 3 Months") {
+      const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+      matchMonth = projectDate >= threeMonthsAgo && projectDate <= now;
+    }
+    // Skip "Custom Range" for now unless you implement a date picker
+
+    return matchOwner && matchPriority && matchStatus && matchMonth;
+  });
 
   // Feedback log data
   const [feedbackData, setFeedbackData] = useState([
@@ -211,15 +351,16 @@ const [projectStatusData, setProjectStatusData] = useState([]);
     });
   }, [feedbackData, dateRange]);
 
-  // Filter projects based on search term
-  const filteredProjects = useMemo(() => {
-    if (!searchProject) return projectData;
-    return projectData.filter((project) =>
-      project.name.toLowerCase().includes(searchProject.toLowerCase())
-    );
-  }, [searchProject, projectData]);
+ // Filter projects based on search term
+const filteredProjects = useMemo(() => {
+  if (!searchProject) return projectReportData;
+  return projectReportData.filter((project) =>
+    project.owner?.toLowerCase().includes(searchProject.toLowerCase())
+  );
+}, [searchProject, projectReportData]);
+
   // Team performance data with additional fields
-  const teamPerformanceData = [
+  const teamPerformanceData = [  
     {
       id: 1,
       name: "John Doe",
@@ -397,31 +538,73 @@ const [projectStatusData, setProjectStatusData] = useState([]);
     setSearchProject("");
   };
 
-  const submitFeedback = () => {
-    const newFeedback = {
-      id: feedbackData.length + 1,
-      project: feedbackFormData.project,
-      date: new Date().toISOString().split("T")[0],
-      feedback: feedbackFormData.details,
-      accountable: feedbackFormData.accountable,
-      manager: feedbackFormData.manager,
-      resolution: feedbackFormData.resolution,
-      month: feedbackFormData.month,
-      year: feedbackFormData.year,
-    };
+ // Get projectId using project title
+const getProjectId = (title) => {
+  const project = allProjects.find((p) => p.projectTitle === title);
+  return project ? project.id : null;
+};
 
-    setFeedbackData([...feedbackData, newFeedback]);
-    setShowFeedbackForm(false);
-    setFeedbackFormData({
-      project: "",
-      details: "",
-      accountable: "",
-      manager: "",
-      resolution: "",
-      month: new Date().getMonth() + 1,
-      year: new Date().getFullYear(),
-    });
+// Get memberId using name
+const getMemberIdByName = (name) => {
+  const member = teamMembers.find((m) => m.name === name);
+  return member ? member.id : null;
+};
+
+// Get managerId using name
+const getManagerIdByName = (name) => {
+  const manager = managers.find((m) => m.name === name);
+  return manager ? manager.id : null;
+};
+
+// Submit feedback to backend
+const submitFeedback = async () => {
+  const newFeedback = {
+    projectId: selectedProject?.id || getProjectId(feedbackFormData.project),  // ← this line handles both dropdown and manual input
+    month: feedbackFormData.month || null,
+    year: feedbackFormData.year || null,
+    feedbackDetails: feedbackFormData.details || null,
+    memberId: getMemberIdByName(feedbackFormData.accountable),
+    userId: getManagerIdByName(feedbackFormData.manager),
+    resolution: feedbackFormData.resolution || null,
   };
+
+  try {
+    const token = localStorage.getItem("authToken");
+    const response = await fetch("https://eminoids-backend-production.up.railway.app/api/feedback/addFeedback", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(newFeedback),
+    });
+
+    const result = await response.json();
+    console.log(result);
+
+    if (response.ok) {
+      setFeedbackData((prev) => [...prev, result]);
+      setShowFeedbackForm(false);
+      setFeedbackFormData({
+        project: "",
+        details: "",
+        accountable: "",
+        manager: "",
+        resolution: "",
+        month: new Date().getMonth() + 1,
+        year: new Date().getFullYear(),
+      });
+      setSearchProject("");
+      setSelectedProject(null);
+    } else {
+      console.error("Failed to submit feedback:", result);
+      alert("Failed to submit feedback. Please try again.");
+    }
+  } catch (error) {
+    console.error("Error submitting feedback:", error);
+    alert("An error occurred. Please try again.");
+  }
+};
 
   const exportToPDF = () => {
     alert("Exporting to PDF...");
@@ -463,37 +646,66 @@ const [projectStatusData, setProjectStatusData] = useState([]);
 
       <div className="row mb-3">
         <div className="col-md-3">
-          <select className="form-select analytics-filter-select mb-1">
-            <option>All Owners</option>
-            <option>John Doe</option>
-            <option>Jane Smith</option>
-            <option>Mike Johnson</option>
+          {/* // owner  */}
+          <select
+            className="form-select analytics-filter-select mb-1"
+            value={selectedOwner}
+            onChange={(e) => setSelectedOwner(e.target.value)}
+          >
+            <option value="All">All Owners</option>
+            {uniqueOwners.map((owner, index) => (
+              <option key={index} value={owner}>
+                {owner}
+              </option>
+            ))}
           </select>
         </div>
+
+        {/* // priority */}
         <div className="col-md-3">
-          <select className="form-select analytics-filter-select mb-1">
-            <option>All Priorities</option>
-            <option>Critical</option>
-            <option>High</option>
-            <option>Medium</option>
-            <option>Low</option>
+          <select
+            className="form-select analytics-filter-select mb-1"
+            value={selectedPriority}
+            onChange={(e) => setSelectedPriority(e.target.value)}
+          >
+            <option value="All">All Priorities</option>
+            {priorities.map((priority, index) => (
+              <option key={index} value={priority}>
+                {priority}
+              </option>
+            ))}
           </select>
         </div>
+
+        {/* // status  */}
         <div className="col-md-3">
-          <select className="form-select analytics-filter-select mb-1">
-            <option>All Status</option>
-            <option>Delayed in Process</option>
-            <option>Delayed in QA</option>
-            <option>Failed in QA</option>
+          <select
+            className="form-select analytics-filter-select mb-1"
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+          >
+            <option value="All">All Statuses</option>
+            {status.map((statusItem, index) => (
+              <option key={index} value={statusItem}>
+                {statusItem}
+              </option>
+            ))}
           </select>
         </div>
+
+        {/* // date */}
         <div className="col-md-3">
-          <select className="form-select analytics-filter-select">
-            <option>Current Month</option>
-            <option>Last Month</option>
-            <option>Last 3 Months</option>
-            <option>Custom Range</option>
+          <select
+            className="form-select analytics-filter-select"
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+          >
+            <option value="Current Month">Current Month</option>
+            <option value="Last Month">Last Month</option>
+            <option value="Last 3 Months">Last 3 Months</option>
+            <option value="Custom Range">Custom Range</option>
           </select>
+
         </div>
       </div>
 
@@ -518,76 +730,79 @@ const [projectStatusData, setProjectStatusData] = useState([]);
         className="table-responsive"
         style={{ overflowX: "auto", maxHeight: "400px" }}
       >
-        <table className="table text-white analytics-project-table table-gradient-bg table-hover table-bordered mb-0">
-          <thead
-            className="table-gradient-bg table "
-            style={{
-              position: "sticky",
-              top: 0,
-              zIndex: 0,
-              backgroundColor: "#fff", // Match your background color
-            }}
+      {loading && <div>Loading...</div>}
+      {error && <div style={{ color: "red" }}>Error loading projects: {error.message}</div>}
+      <p className="text-white">Showing {filteredProjectData.length} filtered projects</p>
+    <table className="table text-white analytics-project-table table-gradient-bg table-hover table-bordered mb-0">
+  <thead
+    className="table-gradient-bg table"
+    style={{
+      position: "sticky",
+      top: 0,
+      zIndex: 0,
+      backgroundColor: "#fff",
+    }}
+  >
+    <tr className="text-center">
+      <th>ID</th>
+      <th>Project Name</th>
+      <th>Owner</th>
+      <th>Progress</th>
+      <th>Status</th>
+      <th>QA Status</th>
+      <th>Priority</th>
+      <th>Deadline</th>
+    </tr>
+  </thead>
+  <tbody>
+    {projectReportData.map((projectReportData) => (
+      <tr key={projectReportData.id} className="analytics-project-row">
+        <td>{projectReportData.id}</td>
+        <td className="text-dark analytics-project-name">{projectReportData.projectName}</td>
+        <td>{projectReportData.owner}</td>
+        <td>
+          {projectReportData.qcHrs !== undefined ? (
+            <div className="progress analytics-progress-bar" style={{ height: "20px" }}>
+              <div
+                className="progress-bar analytics-progress-fill bg-primary"
+                style={{ width: `${projectReportData.qcHrs}%` }}
+              >
+                {projectReportData.qcHrs}%
+              </div>
+            </div>
+          ) : (
+            "—"
+          )}
+        </td>
+        <td>
+          <span className={getStatusBadgeClass(projectReportData.status)}>
+            {projectReportData.status || "—"}
+          </span>
+        </td>
+        <td>
+          <span
+            className={`badge ${
+              projectReportData.qaStatus === "Failed"
+                ? "bg-danger"
+                : projectReportData.qaStatus === "Passed"
+                ? "bg-success"
+                : "bg-warning"
+            }`}
           >
-            <tr  className="text-center"> 
-              <th>ID</th>
-              <th>Project Name</th>
-              <th>Owner</th>
-              <th>Progress</th>
-              <th>Status</th>
-              <th>QA Status</th>
-              <th>Priority</th>
-              <th>Due Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredProjectData.map((project) => (
-              <tr key={project.id} className="analytics-project-row">
-                <td>{project.id}</td>
-                <td className="text-dark analytics-project-name">
-                  {project.name}
-                </td>
-                <td>{project.owner}</td>
-                <td>
-                  <div
-                    className="progress analytics-progress-bar"
-                    style={{ height: "20px" }}
-                  >
-                    <div
-                      className="progress-bar analytics-progress-fill bg-primary"
-                      style={{ width: `${project.progress}%` }}
-                    >
-                      {project.progress}%
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <span className={getStatusBadgeClass(project.status)}>
-                    {project.status}
-                  </span>
-                </td>
-                <td>
-                  <span
-                    className={`badge ${
-                      project.qaStatus === "Failed"
-                        ? "bg-danger"
-                        : project.qaStatus === "Passed"
-                        ? "bg-success"
-                        : "bg-warning"
-                    }`}
-                  >
-                    {project.qaStatus}
-                  </span>
-                </td>
-                <td>
-                  <span className={getPriorityBadgeClass(project.priority)}>
-                    {project.priority}
-                  </span>
-                </td>
-                <td>{project.dueDate}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            {projectReportData.qaStatus || "—"}
+          </span>
+        </td>
+        <td>
+          <span className={getPriorityBadgeClass(projectReportData.projectPriority)}>
+            {projectReportData.projectPriority || "—"}
+          </span>
+        </td>
+        <td>{projectReportData.deadline || projectReportData.dueDate || "—"}</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
       </div>
     </div>
   );
@@ -649,27 +864,30 @@ const [projectStatusData, setProjectStatusData] = useState([]);
                   <div className="col-md-6">
                     <label className="form-label">Project</label>
                     <div className="position-relative">
-                      <input
+                      {/* <input
                         type="text"
-                        className="form-control"
-                        name="project"
+                        className="form-control mb-2"
+                        name="searchProject"
                         value={searchProject}
                         onChange={(e) => setSearchProject(e.target.value)}
                         placeholder="Search and select project"
-                      />
-                      {searchProject && (
-                        <div className="position-absolute top-100 start-0 end-0 bg-white shadow mt-1 z-3 rounded">
-                          {filteredProjects.map((project) => (
-                            <div
-                              key={project.id}
-                              className="p-2 border-bottom cursor-pointer hover-bg-light"
-                              onClick={() => handleProjectSelect(project)}
-                            >
-                              {project.name} (Due: {project.dueDate})
-                            </div>
+                      /> */}
+
+                      <select
+                        className="form-select"
+                        name="project"
+                        value={feedbackFormData.project}
+                        onChange={handleFeedbackInputChange}
+                      >
+                        <option value="">Select project</option>
+                        {Array.isArray(allProjects) &&
+                          allProjects.map((project) => (
+                            <option key={project.id} value={project.projectTitle}>
+                              {project.projectTitle}
+                            </option>
                           ))}
-                        </div>
-                      )}
+                      </select>
+                      
                     </div>
                     {feedbackFormData.project && (
                       <div className="mt-2">
@@ -797,9 +1015,7 @@ const [projectStatusData, setProjectStatusData] = useState([]);
                   type="button"
                   className="btn gradient-button"
                   onClick={submitFeedback}
-                  disabled={
-                    !feedbackFormData.project || !feedbackFormData.details
-                  }
+                 
                 >
                   Submit Feedback
                 </button>

@@ -1105,6 +1105,8 @@ const Calendar = ({ userRole }) => {
       </Modal>
 
       {/* Add Event Modal */}
+<<<<<<< HEAD
+=======
       <Modal
         show={showAddEventModal}
         onHide={() => setShowAddEventModal(false)}
@@ -1162,6 +1164,7 @@ const Calendar = ({ userRole }) => {
           </Button>
         </Modal.Footer>
       </Modal>
+>>>>>>> 6a51472785d0ae5469579c6996c4d991a4e0193c
         <Modal
       show={showAddEventModal}
       onHide={() => setShowAddEventModal(false)}
