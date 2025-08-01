@@ -8,6 +8,20 @@ import axios from "axios";
 import CreateNewProject from "../Project/CreateNewProject";
 import EditModal from "./EditModal";
 
+const assignees = [
+  { label: "Not Assigned", value: "" },
+  { label: "Sarah Williams", value: "Sarah Williams" },
+  { label: "David Brown", value: "David Brown" },
+  { label: "Emily Davis", value: "Emily Davis" },
+];
+
+const handleChange = (id, field, value) => {
+  const updated = files.map((file) =>
+    file.id === id ? { ...file, [field]: value } : file
+  );
+  setFiles(updated);
+};
+
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
@@ -18,24 +32,105 @@ const ActiveProject = () => {
   const isAdmin = userRole === "Admin";
   const token = localStorage.getItem("authToken");
 
+  const [deadline, setDeadline] = useState("");
+  const [allocatedHours, setAllocatedHours] = useState("");
+  const [priority, setPriority] = useState("Medium");
   const [fileHandlers, setFileHandlers] = useState({});
-
   const assignees = [
-    { label: "Not Assigned", value: "" },
-    { label: "John Doe", value: "John Doe" },
-    { label: "Jane Smith", value: "Jane Smith" },
-    { label: "Mike Johnson", value: "Mike Johnson" },
+    { label: "John Doe", value: "john" },
+    { label: "Jane Smith", value: "jane" },
+    { label: "Mike Johnson", value: "mike" },
   ];
-  const handleHandlerChange = (fileId, newHandler) => {
-    // Update handler for all selected files
-    const updatedHandlers = { ...fileHandlers };
 
-    selectedFiles.forEach((f) => {
-      updatedHandlers[f.id] = newHandler;
-    });
+  const files = [
+    {
+      id: 1,
+      name: "File_1_1.docx",
+      pages: 15,
+      language: "az",
+      application: "Visio",
+    },
+    {
+      id: 2,
+      name: "File_1_2.docx",
+      pages: 6,
+      language: "az",
+      application: "FM",
+    },
+    {
+      id: 3,
+      name: "File_1_3.docx",
+      pages: 5,
+      language: "yo",
+      application: "Visio",
+    },
+    {
+      id: 4,
+      name: "File_1_4.docx",
+      pages: 2,
+      language: "am",
+      application: "Word",
+    },
+  ];
 
-    setFileHandlers(updatedHandlers);
-    setHasUnsavedChanges(true);
+  const languageMap = { az: 1, yo: 2, am: 3 };
+  const applicationMap = { Visio: 1, FM: 2, Word: 3 };
+  const projectId = 3;
+
+  const toggleFileSelection = (file) => {
+    const alreadySelected = selectedFiles.some((f) => f.id === file.id);
+    if (alreadySelected) {
+      setSelectedFiles(selectedFiles.filter((f) => f.id !== file.id));
+    } else {
+      setSelectedFiles([...selectedFiles, file]);
+    }
+  };
+
+  const handleHandlerChange = (fileId, handler) => {
+    setFileHandlers((prev) => ({
+      ...prev,
+      [fileId]: handler,
+    }));
+  };
+
+  const handleSave = async () => {
+    for (const file of selectedFiles) {
+      const payload = {
+        projectId,
+        fileName: file.name,
+        pages: file.pages.toString(),
+        languageId: languageMap[file.language] || 1,
+        applicationId: applicationMap[file.application] || 1,
+        status: "Completed",
+        deadline,
+      };
+
+      try {
+        const response = await fetch(
+          "https://eminoids-backend-production.up.railway.app/api/projectFiles/addProjectFile",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+
+            body: JSON.stringify(payload),
+          }
+        );
+
+        const result = await response.json();
+
+        if (result.status) {
+          console.log("Success:", result.message);
+        } else {
+          console.error("Server Error:", result.message);
+        }
+      } catch (error) {
+        console.error("Network Error:", error);
+      }
+    }
   };
 
   const initialFormData = {
@@ -302,14 +397,6 @@ const ActiveProject = () => {
     setExpandedRow(expandedRow === project.id ? null : project.id);
   };
 
-  const toggleFileSelection = (file) => {
-    if (selectedFiles.some((f) => f.id === file.id)) {
-      setSelectedFiles(selectedFiles.filter((f) => f.id !== file.id));
-    } else {
-      setSelectedFiles([...selectedFiles, file]);
-    }
-    setHasUnsavedChanges(true);
-  };
   console.log("slectedFiles", selectedFiles);
   // console.log(
   //   "slselectedFiles.some((f) => f.id === file.idectedFiles",
@@ -842,36 +929,7 @@ const ActiveProject = () => {
                                     </tr>
                                   </thead>
                                   <tbody>
-                                    {[
-                                      {
-                                        id: 1,
-                                        name: "File_1_1.docx",
-                                        pages: 15,
-                                        language: "az",
-                                        application: "Visio",
-                                      },
-                                      {
-                                        id: 2,
-                                        name: "File_1_2.docx",
-                                        pages: 6,
-                                        language: "az",
-                                        application: "FM",
-                                      },
-                                      {
-                                        id: 3,
-                                        name: "File_1_3.docx",
-                                        pages: 5,
-                                        language: "yo",
-                                        application: "Visio",
-                                      },
-                                      {
-                                        id: 4,
-                                        name: "File_1_4.docx",
-                                        pages: 2,
-                                        language: "am",
-                                        application: "Word",
-                                      },
-                                    ].map((file) => (
+                                    {files.map((file) => (
                                       <tr key={file.id}>
                                         <td>
                                           <input
@@ -954,7 +1012,7 @@ const ActiveProject = () => {
                               </div>
                             </div>
 
-                            {/* Footer Row Controls */}
+                            {/* Footer Controls */}
                             <div className="row g-3 align-items-center mb-3">
                               <div className="col-md-3">
                                 <label className="form-label">
@@ -963,6 +1021,7 @@ const ActiveProject = () => {
                                 <input
                                   type="datetime-local"
                                   className="form-control"
+                                  onChange={(e) => setDeadline(e.target.value)}
                                 />
                               </div>
                               <div className="col-md-2 mt-5">
@@ -975,8 +1034,11 @@ const ActiveProject = () => {
                                   step="0.25"
                                   className="form-control"
                                   placeholder="0"
+                                  onChange={(e) =>
+                                    setAllocatedHours(e.target.value)
+                                  }
                                 />
-                                <div className="form-text">
+                                <div className=" text-whhite">
                                   (in multiple of 0.00 only)
                                 </div>
                               </div>
@@ -986,19 +1048,25 @@ const ActiveProject = () => {
                                   type="text"
                                   className="form-control"
                                   placeholder="--"
-                                  disabled
                                 />
                               </div>
                               <div className="col-md-2">
                                 <label className="form-label">Priority</label>
-                                <select className="form-select">
+                                <select
+                                  className="form-select"
+                                  value={priority}
+                                  onChange={(e) => setPriority(e.target.value)}
+                                >
                                   <option value="Low">Low</option>
                                   <option value="Medium">Medium</option>
                                   <option value="High">High</option>
                                 </select>
                               </div>
                               <div className="col-md-3 d-flex align-items-end justify-content-end gap-2">
-                                <button className="btn btn-success">
+                                <button
+                                  className="btn btn-success"
+                                  onClick={handleSave}
+                                >
                                   Save
                                 </button>
                                 <button className="btn btn-secondary">
@@ -1187,4 +1255,5 @@ const generateDummyProjects = (count) => {
   }
   return projects;
 };
-export default ActiveProject;
+export default ActiveProject;  
+           

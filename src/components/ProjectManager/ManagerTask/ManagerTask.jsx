@@ -382,7 +382,7 @@ function ManagerTask({ userRole = "manager" }) {
       case "Low":
         return "bg-primary text-white";
       case "Medium":
-        return "bg-warning text-dark";
+        return "bg-warning text-white";
       case "High":
         return "bg-danger text-white";
       case "Critical":
@@ -457,7 +457,7 @@ function ManagerTask({ userRole = "manager" }) {
               >
                 {task.priority}
               </span>
-              <div className="small text-muted mt-1">
+              <div className="small  mt-1">
                 {userRole === "manager" && (
                   <span>Assignee: {task.assignee}</span>
                 )}
