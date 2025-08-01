@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
 import * as echarts from "echarts";
 import axios from "axios";
-import dayjs from "dayjs"; // for formatting time to 12-hour
-import { use } from "react";
 import BASE_URL from "../../../config";
 
 const ShiftAllocation = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDepartment, setSelectedDepartment] =
-    useState("All Departments");
+  const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
   const [showAddShiftModal, setShowAddShiftModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showEmployeePanel, setShowEmployeePanel] = useState(false);
   const [employee, setEmployees] = useState();
   const token = localStorage.getItem("authToken");
+  const [selectedDayIndex, setSelectedDayIndex] = useState(null);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [currentShiftId, setCurrentShiftId] = useState(null);
 
   const [formData, setFormData] = useState({
     memberId: "",
@@ -41,7 +41,6 @@ const ShiftAllocation = () => {
   };
 
   const handleSubmit = async () => {
-    // Validate required fields
     if (!formData.memberId) {
       alert("Please select an employee");
       return;
@@ -52,7 +51,7 @@ const ShiftAllocation = () => {
     }
 
     const payload = {
-      memberId: parseInt(formData.memberId), // Ensure base 10 parsing
+      memberId: parseInt(formData.memberId),
       shiftDate: formData.shiftDate,
       startTime: formatTime12Hour(formData.startTime),
       endTime: formatTime12Hour(formData.endTime),
@@ -60,36 +59,62 @@ const ShiftAllocation = () => {
       notes: formData.notes,
     };
 
-    console.log("Submitting payload:", payload); // Debug log
-
     try {
-      const response = await axios.post(
-        `${BASE_URL}shift/createShift`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      let response;
+      if (isEditMode) {
+        response = await axios.patch(
+          `${BASE_URL}shift/updateShift/${currentShiftId}`,
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } else {
+        response = await axios.post(
+          `${BASE_URL}shift/createShift`,
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
 
       if (response.data.status) {
-        console.log("Shift created:", response.data);
+        fetchShifts(); // Refresh shift data
         setShowAddShiftModal(false);
+        resetForm();
       } else {
-        alert(response.data.message || "Error creating shift");
+        alert(response.data.message || "Error processing shift");
       }
     } catch (error) {
       console.error(
-        "Shift creation failed:",
+        "Shift operation failed:",
         error.response?.data || error.message
       );
       alert(
         error.response?.data?.message ||
-          "Error creating shift. Please try again."
+          "Error processing shift. Please try again."
       );
     }
   };
+
+  const resetForm = () => {
+    setFormData({
+      memberId: "",
+      shiftDate: "",
+      startTime: "",
+      endTime: "",
+      shiftType: "Half Day",
+      notes: "",
+    });
+    setIsEditMode(false);
+    setCurrentShiftId(null);
+  };
+
   // Get week dates based on current date
   const getWeekDates = () => {
     const dates = [];
@@ -117,84 +142,6 @@ const ShiftAllocation = () => {
     return date.toLocaleDateString("en-US", { weekday: "short" });
   };
 
-  // Time slots from 6 AM to 10 PM in 30-minute increments
-  const timeSlots = [];
-  for (let hour = 6; hour < 22; hour++) {
-    timeSlots.push(`${hour}:00`);
-    timeSlots.push(`${hour}:30`);
-  }
-
-  // Sample employees data
-  const employees = [
-    {
-      id: 1,
-      name: "John Smith",
-      department: "Customer Service",
-      shifts: [
-        { day: 0, start: "9:00", end: "17:00", type: "morning" },
-        { day: 2, start: "12:00", end: "20:00", type: "evening" },
-      ],
-    },
-    {
-      id: 2,
-      name: "Emma Johnson",
-      department: "Sales",
-      shifts: [
-        { day: 1, start: "8:00", end: "16:00", type: "morning" },
-        { day: 3, start: "8:00", end: "16:00", type: "morning" },
-        { day: 5, start: "10:00", end: "18:00", type: "morning" },
-      ],
-    },
-    {
-      id: 3,
-      name: "Michael Brown",
-      department: "IT Support",
-      shifts: [
-        { day: 0, start: "14:00", end: "22:00", type: "evening" },
-        { day: 2, start: "14:00", end: "22:00", type: "evening" },
-        { day: 4, start: "14:00", end: "22:00", type: "evening" },
-      ],
-    },
-    {
-      id: 4,
-      name: "Sarah Davis",
-      department: "HR",
-      shifts: [
-        { day: 1, start: "9:00", end: "17:00", type: "morning" },
-        { day: 3, start: "9:00", end: "17:00", type: "morning" },
-      ],
-    },
-    {
-      id: 5,
-      name: "Robert Wilson",
-      department: "Customer Service",
-      shifts: [
-        { day: 0, start: "22:00", end: "6:00", type: "night" },
-        { day: 2, start: "22:00", end: "6:00", type: "night" },
-        { day: 4, start: "22:00", end: "6:00", type: "night" },
-      ],
-    },
-    {
-      id: 6,
-      name: "Jennifer Lee",
-      department: "Sales",
-      shifts: [
-        { day: 1, start: "12:00", end: "20:00", type: "evening" },
-        { day: 3, start: "12:00", end: "20:00", type: "evening" },
-        { day: 5, start: "12:00", end: "20:00", type: "evening" },
-      ],
-    },
-    {
-      id: 7,
-      name: "David Miller",
-      department: "IT Support",
-      shifts: [
-        { day: 0, start: "9:00", end: "17:00", type: "morning" },
-        { day: 4, start: "9:00", end: "17:00", type: "morning" },
-      ],
-    },
-  ];
-
   // Department options
   const departments = [
     "All Departments",
@@ -203,12 +150,6 @@ const ShiftAllocation = () => {
     "IT Support",
     "HR",
   ];
-
-  // Filter employees by department
-  // const filteredEmployees =
-  //   selectedDepartment === "All Departments"
-  //     ? employees
-  //     : employees.filter((emp) => emp.department === selectedDepartment);
 
   // Navigate to previous week
   const goToPreviousWeek = () => {
@@ -244,160 +185,15 @@ const ShiftAllocation = () => {
     }
   };
 
-  // Check if employee has shift at specific day and time
-  const hasShift = (employeeId, day, time) => {
-    const employee = employees.find((emp) => emp.id === employeeId);
-    if (!employee) return null;
-
-    const shift = employee.shifts.find((s) => s.day === day);
-    if (!shift) return null;
-
-    const shiftStart = shift.start;
-    const shiftEnd = shift.end;
-
-    // Simple check if time is within shift hours
-    if (time >= shiftStart && time < shiftEnd) {
-      return shift.type;
-    }
-
-    return null;
-  };
-
-  // Initialize charts
-  useEffect(() => {
-    if (selectedEmployee) {
-      // Hours allocation chart
-      const hoursChart = echarts.init(document.getElementById("hours-chart"));
-      const hoursOption = {
-        animation: false,
-        tooltip: {
-          trigger: "item",
-        },
-        legend: {
-          orient: "vertical",
-          left: "left",
-          textStyle: {
-            fontSize: 12,
-          },
-        },
-        series: [
-          {
-            name: "Hours Allocation",
-            type: "pie",
-            radius: ["40%", "70%"],
-            avoidLabelOverlap: false,
-            itemStyle: {
-              borderRadius: 10,
-              borderColor: "#fff",
-              borderWidth: 2,
-            },
-            label: {
-              show: false,
-              position: "center",
-            },
-            emphasis: {
-              label: {
-                show: true,
-                fontSize: "18",
-                fontWeight: "bold",
-              },
-            },
-            labelLine: {
-              show: false,
-            },
-            data: [
-              { value: 24, name: "Morning Shifts" },
-              { value: 16, name: "Evening Shifts" },
-              { value: 8, name: "Night Shifts" },
-              { value: 120, name: "Available Hours" },
-            ],
-          },
-        ],
-      };
-      hoursChart.setOption(hoursOption);
-
-      // Attendance chart
-      const attendanceChart = echarts.init(
-        document.getElementById("attendance-chart")
-      );
-      const attendanceOption = {
-        animation: false,
-        tooltip: {
-          trigger: "axis",
-        },
-        legend: {
-          data: ["Scheduled", "Actual"],
-          textStyle: {
-            fontSize: 12,
-          },
-        },
-        grid: {
-          left: "3%",
-          right: "4%",
-          bottom: "3%",
-          containLabel: true,
-        },
-        xAxis: {
-          type: "category",
-          boundaryGap: false,
-          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-        },
-        yAxis: {
-          type: "value",
-          axisLabel: {
-            formatter: "{value} hrs",
-          },
-        },
-        series: [
-          {
-            name: "Scheduled",
-            type: "line",
-            data: [8, 8, 8, 8, 8, 0, 0],
-            smooth: true,
-          },
-          {
-            name: "Actual",
-            type: "line",
-            data: [7.5, 8.2, 8, 7.8, 8.3, 0, 0],
-            smooth: true,
-          },
-        ],
-      };
-      attendanceChart.setOption(attendanceOption);
-
-      // Handle resize
-      window.addEventListener("resize", () => {
-        hoursChart.resize();
-        attendanceChart.resize();
-      });
-
-      return () => {
-        hoursChart.dispose();
-        attendanceChart.dispose();
-        window.removeEventListener("resize", () => {
-          hoursChart.resize();
-          attendanceChart.resize();
-        });
-      };
-    }
-  }, [selectedEmployee]);
-
   // Format date for input
   const formatDateForInput = (date) => {
     return date.toISOString().split("T")[0];
   };
 
-  // Api For GetShift
-
-  // Fetch all shifts from API on mount
-
-  // ...existing code...
-
-  // Get Api For Shift
-
   const [filteredEmployees, setFilteredEmployees] = useState([]);
+  const [allShifts, setAllShifts] = useState([]);
 
-  useEffect(() => {
+  const fetchShifts = () => {
     axios
       .get(`${BASE_URL}shift/getAllShifts`, {
         headers: {
@@ -406,53 +202,73 @@ const ShiftAllocation = () => {
       })
       .then((res) => {
         if (res.data.status) {
-          console.log("sss", res.data.data);
-          const shiftData = res.data.data;
-
-          // Group by unique (memberId + fullName) combo
-          const employeesMap = {};
-
-          shiftData.forEach((shift) => {
-            const shiftDayIndex = new Date(shift.shiftDate).getDay(); // 0 = Sunday
-
-            const key = `${shift.memberId}-${shift.fullName}`;
-
-            if (!employeesMap[key]) {
-              employeesMap[key] = {
-                memberId: shift.memberId,
-                fullName: shift.fullName,
-                shifts: [],
-              };
-            }
-
-            employeesMap[key].shifts.push({
-              day: shiftDayIndex,
-              start: shift.startTime,
-              end: shift.endTime,
-              type: shift.shiftType,
-              notes: shift.notes,
-              date: shift.shiftDate,
-            });
-          });
-
-          setFilteredEmployees(Object.values(employeesMap));
+          setAllShifts(res.data.data); // Store all shifts
+          updateFilteredEmployees(res.data.data);
         }
       })
-
       .catch((err) => {
         console.error("Failed to fetch shifts:", err);
       });
-  }, []);
+  };
+
+  // Update filtered employees based on current week
+  const updateFilteredEmployees = (shiftData) => {
+    const weekStart = new Date(weekDates[0]);
+    const weekEnd = new Date(weekDates[6]);
+    weekEnd.setHours(23, 59, 59, 999);
+
+    // Filter shifts for the current week
+    const shiftsForWeek = shiftData.filter(shift => {
+      const shiftDate = new Date(shift.shiftDate);
+      return shiftDate >= weekStart && shiftDate <= weekEnd;
+    });
+
+    // Group by unique (memberId + fullName) combo
+    const employeesMap = {};
+
+    shiftsForWeek.forEach((shift) => {
+      const shiftDate = new Date(shift.shiftDate);
+      const shiftDayIndex = shiftDate.getDay(); // 0 = Sunday
+
+      const key = `${shift.memberId}-${shift.fullName}`;
+
+      if (!employeesMap[key]) {
+        employeesMap[key] = {
+          memberId: shift.memberId,
+          fullName: shift.fullName,
+          shifts: [],
+        };
+      }
+
+      employeesMap[key].shifts.push({
+        id: shift.id,
+        day: shiftDayIndex,
+        start: shift.startTime,
+        end: shift.endTime,
+        type: shift.shiftType,
+        notes: shift.notes,
+        date: shift.shiftDate,
+      });
+    });
+
+    setFilteredEmployees(Object.values(employeesMap));
+  };
 
   useEffect(() => {
-    if (filteredEmployees) {
-      console.log(filteredEmployees);
+    fetchShifts();
+  }, []);
+
+  // Update shifts when week changes
+  useEffect(() => {
+    if (allShifts.length > 0) {
+      updateFilteredEmployees(allShifts);
     }
-  }, [filteredEmployees]);
+  }, [currentDate]);
 
   useEffect(() => {
     fetchMember();
   }, []);
+
   const [member, setmember] = useState();
 
   const fetchMember = async () => {
@@ -463,10 +279,90 @@ const ShiftAllocation = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(response);
-
       setmember(response.data.data);
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error fetching members:", error);
+    }
+  };
+
+  const handleAddShift = (memberId, dayIndex) => {
+    const selectedEmployee = filteredEmployees.find(emp => emp.memberId === memberId);
+    if (!selectedEmployee) return;
+
+    const selectedDate = weekDates[dayIndex];
+    
+    setFormData({
+      memberId: memberId.toString(),
+      shiftDate: formatDateForInput(selectedDate),
+      startTime: "",
+      endTime: "",
+      shiftType: "Half Day",
+      notes: "",
+    });
+    
+    setIsEditMode(false);
+    setShowAddShiftModal(true);
+  };
+
+  const handleEditShift = (shift) => {
+    const convertTo24Hour = (time12) => {
+      if (!time12) return "";
+      const [time, modifier] = time12.split(" ");
+      let [hours, minutes] = time.split(":");
+      
+      if (hours === "12") {
+        hours = "00";
+      }
+      
+      if (modifier === "PM") {
+        hours = parseInt(hours, 10) + 12;
+      }
+      
+      return `${hours}:${minutes}`;
+    };
+
+    setFormData({
+      memberId: shift.memberId.toString(),
+      shiftDate: shift.date,
+      startTime: convertTo24Hour(shift.start),
+      endTime: convertTo24Hour(shift.end),
+      shiftType: shift.type,
+      notes: shift.notes || "",
+    });
+
+    setCurrentShiftId(shift.id);
+    setIsEditMode(true);
+    setShowAddShiftModal(true);
+  };
+
+  const handleRemoveShift = async (shiftId) => {
+    if (!window.confirm("Are you sure you want to delete this shift?")) return;
+
+    try {
+      const response = await axios.delete(
+        `${BASE_URL}shift/deleteShift/${shiftId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.status) {
+        fetchShifts();
+      } else {
+        alert(response.data.message || "Error deleting shift");
+      }
+    } catch (error) {
+      console.error(
+        "Shift deletion failed:",
+        error.response?.data || error.message
+      );
+      alert(
+        error.response?.data?.message ||
+          "Error deleting shift. Please try again."
+      );
+    }
   };
 
   return (
@@ -480,7 +376,10 @@ const ShiftAllocation = () => {
               <div className="d-flex gap-3">
                 <button
                   className="btn btn-primary"
-                  onClick={() => setShowAddShiftModal(true)}
+                  onClick={() => {
+                    resetForm();
+                    setShowAddShiftModal(true);
+                  }}
                 >
                   <i className="fas fa-plus me-2"></i> Add New Shift
                 </button>
@@ -600,6 +499,11 @@ const ShiftAllocation = () => {
                                   className={`border-start border-3 px-2 py-1 mb-1 rounded ${getShiftTypeColor(
                                     shift.type
                                   )}`}
+                                  onClick={() => handleEditShift({
+                                    ...shift,
+                                    memberId: employee.memberId
+                                  })}
+                                  style={{ cursor: "pointer" }}
                                 >
                                   <div className="fw-medium">
                                     {shift.start} - {shift.end}
@@ -617,27 +521,34 @@ const ShiftAllocation = () => {
                                 </div>
                               ))}
 
-                            {/* Add Shift Button */}
+                            {/* Add/Remove Shift Buttons */}
                             <div
                               className="d-flex justify-content-between position-relative"
                               style={{ height: "40px" }}
                             >
                               {/* Minus Button - Bottom Left */}
-                              <button
-                                className="position-absolute bottom-0 start-0 text-danger btn btn-sm"
-                                onClick={() =>
-                                  handleRemoveShift(employee.memberId, dayIndex)
-                                } // this should remove shift
-                              >
-                                <i className="fas fa-minus-circle"></i>
-                              </button>
+                              {employee.shifts.some(shift => shift.day === dayIndex) && (
+                                <button
+                                  className="position-absolute bottom-0 start-0 text-danger btn btn-sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const shift = employee.shifts.find(s => s.day === dayIndex);
+                                    if (shift) {
+                                      handleRemoveShift(shift.id);
+                                    }
+                                  }}
+                                >
+                                  <i className="fas fa-minus-circle"></i>
+                                </button>
+                              )}
 
                               {/* Plus Button - Bottom Right */}
                               <button
                                 className="position-absolute bottom-0 end-0 text-success btn btn-sm"
-                                onClick={() =>
-                                  handleAddShift(employee.memberId, dayIndex)
-                                } // this should add shift
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAddShift(employee.memberId, dayIndex);
+                                }}
                               >
                                 <i className="fas fa-plus-circle"></i>
                               </button>
@@ -786,17 +697,22 @@ const ShiftAllocation = () => {
           </div>
         </div>
 
-        {/* Add Shift Modal */}
+        {/* Add/Edit Shift Modal */}
         {showAddShiftModal && (
           <div className="modal fade show d-block" tabIndex={-1}>
             <div className="modal-dialog modal-lg custom-modal-dark">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">Add New Shift</h5>
+                  <h5 className="modal-title">
+                    {isEditMode ? "Edit Shift" : "Add New Shift"}
+                  </h5>
                   <button
                     type="button"
                     className="btn-close"
-                    onClick={() => setShowAddShiftModal(false)}
+                    onClick={() => {
+                      setShowAddShiftModal(false);
+                      resetForm();
+                    }}
                   ></button>
                 </div>
 
@@ -812,9 +728,10 @@ const ShiftAllocation = () => {
                       value={formData.memberId}
                       onChange={handleChange}
                       required
+                      disabled={isEditMode}
                     >
                       <option value="">Select Employee</option>
-                      {member.map((emp) => (
+                      {member?.map((emp) => (
                         <option key={emp.id} value={emp.id}>
                           {emp.fullName}
                         </option>
@@ -906,7 +823,10 @@ const ShiftAllocation = () => {
                   <button
                     type="button"
                     className="btn btn-secondary"
-                    onClick={() => setShowAddShiftModal(false)}
+                    onClick={() => {
+                      setShowAddShiftModal(false);
+                      resetForm();
+                    }}
                   >
                     Cancel
                   </button>
@@ -915,7 +835,7 @@ const ShiftAllocation = () => {
                     className="btn btn-primary"
                     onClick={handleSubmit}
                   >
-                    Add Shift
+                    {isEditMode ? "Update Shift" : "Add Shift"}
                   </button>
                 </div>
               </div>
