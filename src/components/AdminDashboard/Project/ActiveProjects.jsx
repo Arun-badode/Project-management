@@ -261,7 +261,7 @@ const ActiveProjects = () => {
     >
       {loading ? (
         <div className="text-center p-4">
-          <div className="spinner-border text-primary" role="status">
+          <div className="spinner-border text-primary" role="status" style={{ minWidth: 900 }}>
             <span className="visually-hidden">Loading...</span>
           </div>
           <p>Loading Projects...</p>

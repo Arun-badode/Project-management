@@ -75,7 +75,7 @@ function EditModal({ project, projects, setProjects, setShowEditModal }) {
           <input
             type="text"
             className="form-control"
-            value={editedProject.title || ''}
+            
             onChange={(e) =>
               setEditedProject({
                 ...editedProject,
@@ -109,7 +109,7 @@ function EditModal({ project, projects, setProjects, setShowEditModal }) {
           <label className="form-label">Task</label>
           <select
             className="form-select"
-            value={editedProject.tasks[0] || ''}
+            
             onChange={(e) =>
               setEditedProject({
                 ...editedProject,
@@ -130,7 +130,6 @@ function EditModal({ project, projects, setProjects, setShowEditModal }) {
           <label className="form-label">Language</label>
           <select
             className="form-select"
-            value={editedProject.languages[0] || ''}
             onChange={(e) =>
               setEditedProject({
                 ...editedProject,
