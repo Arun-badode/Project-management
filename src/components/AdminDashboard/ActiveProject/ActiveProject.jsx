@@ -351,7 +351,7 @@ const ActiveProject = () => {
   const {
     scrollContainerRef: scrollContainerRef1,
     fakeScrollbarRef: fakeScrollbarRef1,
-  } = useSyncScroll(true);
+  } = useSyncScroll(null);
 
   function calculateQCDue(startDate, hours) {
     if (!startDate || !hours) return "--";
