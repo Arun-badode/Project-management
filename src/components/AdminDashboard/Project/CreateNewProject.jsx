@@ -360,7 +360,7 @@ const CreateNewProject = () => {
   // Fetch clients on component mount
   useEffect(() => {
     axios
-      .get("https://eminoids-backend-production.up.railway.app/api/client/getAllClients", {
+      .get(`${BASE_URL}client/getAllClients`, {
         headers: { authorization: `Bearer ${token}` },
       })
       .then((res) => {

@@ -75,57 +75,44 @@ const ActiveProjects = () => {
   };
 
   const filteredProjects = projects.filter((project) => {
-    const matchesTab = project.status?.toLowerCase() === activeTab;
+    const matchesTab = project.status==="Active" || project.status==="Completed"?.toLowerCase() === activeTab;
     const matchesSearch =
       searchQuery === "" ||
-      (project.projectTitle &&
-        project.projectTitle.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (project.clientName &&
-        project.clientName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (project.country &&
-        project.country.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (project.projectManager &&
-        project.projectManager.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (project.projectTitle && project.projectTitle.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (project.clientName && project.clientName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (project.country && project.country.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (project.projectManager && project.projectManager.toLowerCase().includes(searchQuery.toLowerCase())) ||
       project.files?.some(
-        (file) =>
-          file.name && file.name.toLowerCase().includes(searchQuery.toLowerCase())
+        (file) => file.name && file.name.toLowerCase().includes(searchQuery.toLowerCase())
       );
+
     return matchesTab && matchesSearch;
   });
+  const markAsCompleted = async (projectId) => {
+    try {
+      const token = localStorage.getItem("authToken");
 
- const markAsCompleted = async (projectId) => {
-     try {
-       const token = localStorage.getItem("authToken");
- 
-       const res = await axios.patch(
-         `${BASE_URL}project/updateProject/${projectId}`,
-         {
-           status: "Completed", // 👈 Change the project status
-         },
-         {
-           headers: {
-             Authorization: `Bearer ${token}`,
-           },
-         }
-       );
- 
-       if (res.status === 200) {
-         alert("Project marked as Completed successfully!");
-         // optionally refresh the project list here
-         // refresh the list
-         const refreshed = await axios.get(`${BASE_URL}project/getAllProjects`, {
-           headers: { authorization: `Bearer ${token}` },
-         });
-         if (refreshed.data.status) {
-           setProjects(refreshed.data.projects);
-         }
-         //fetchProjects(); // you must define this function to reload projects
-       }
-     } catch (error) {
-       console.error("Failed to update project status:", error);
-       alert("Error updating project status");
-     }
-   };
+      const res = await axios.patch(
+        `${BASE_URL}project/updateProject/${projectId}`,
+        { status: "Completed" },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.status === 200) {
+        alert("Project marked as Completed successfully!");
+
+        setProjects((prevProjects) =>
+          prevProjects.map((project) =>
+            project.id === projectId ? { ...project, status: "Completed" } : project
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Failed to update project status:", error);
+      alert("Error updating project status");
+    }
+  };
+
 
   const handleEditProject = (projectId) => {
     console.log("Editing project:", projectId);
@@ -281,7 +268,7 @@ const ActiveProjects = () => {
           </div>
           <p>Loading Projects...</p>
         </div>
-      ) : filteredProjects.length === 0 ? (
+      ) : projects.length === 0 ? (
         <div className="text-center p-4">
           <p>No active projects found</p>
           <button className="btn btn-primary" onClick={fetchProjects}>
@@ -324,321 +311,329 @@ const ActiveProjects = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredProjects.map((project, index) => (
-              <React.Fragment key={project.id || index}>
-                <tr
-                  className={
-                    expandedRow === project.id
-                      ? "table-active text-center"
-                      : "text-center"
-                  }
-                >
-                  <td>{index + 1}</td>
-                  <td>{project.projectTitle || "-"}</td>
-                  <td>{project.full_name || "-"}</td>
-                  <td>{project.clientName || "-"}</td>
-                  <td>{project.country || "-"}</td>
-                  <td>{project.projectManagerId || "-"}</td>
-                  <td>
-                    <span className="badge bg-primary bg-opacity-10 text-primary">
-                      {project.task_name || "-"}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="badge bg-success bg-opacity-10 text-success">
-                      {project.language_name || "-"}
-                    </span>
-                  </td>
-                  <td>
-                    <span className="badge bg-purple bg-opacity-10 text-purple">
-                      {project.application_name || "-"}
-                    </span>
-                  </td>
-                  <td>{project.totalPagesLang || "-"}</td>
-                  <td>
-                    {project.deadline
-                      ? new Date(project.deadline).toLocaleDateString()
-                      : "-"}
-                  </td>
-                  <td>
-                    {project.readyQCDeadline
-                      ? new Date(project.readyQCDeadline).toLocaleDateString()
-                      : "-"}
-                  </td>
-                  <td>{project.qcHrs || "-"}</td>
-                  <td>
-                    {project.qcDueDate
-                      ? new Date(project.qcDueDate).toLocaleDateString()
-                      : "-"}
-                  </td>
-                  <td>
-                    <span className="badge bg-warning bg-opacity-10 text-warning">
-                      {project.status || "-"}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="d-flex align-items-center">
-                      <div
-                        className="progress flex-grow-1 me-2"
-                        style={{ height: "6px" }}
+            {projects.filter((p)=>p.status=="Active" || p.status=="Completed")
+              .map((project, index) => (
+                <React.Fragment key={project.id || index}>
+                  <tr
+                    className={
+                      expandedRow === project.id
+                        ? "table-active text-center"
+                        : "text-center"
+                    }
+                  >
+                    <td>{index + 1}</td>
+                    <td>{project.projectTitle || "-"}</td>
+                    <td>{project.full_name || "-"}</td>
+                    <td>{project.clientName || "-"}</td>
+                    <td>{project.country || "-"}</td>
+                    <td>{project.projectManagerId || "-"}</td>
+                    <td>
+                      <span className="badge bg-primary bg-opacity-10 text-primary">
+                        {project.task_name || "-"}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="badge bg-success bg-opacity-10 text-success">
+                        {project.language_name || "-"}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="badge bg-purple bg-opacity-10 text-purple">
+                        {project.application_name || "-"}
+                      </span>
+                    </td>
+                    <td>{project.totalPagesLang || "-"}</td>
+                    <td>
+                      {project.deadline
+                        ? new Date(project.deadline).toLocaleDateString()
+                        : "-"}
+                    </td>
+                    <td>
+                      {project.readyQCDeadline
+                        ? new Date(project.readyQCDeadline).toLocaleDateString()
+                        : "-"}
+                    </td>
+                    <td>{project.qcHrs || "-"}</td>
+                    <td>
+                      {project.qcDueDate
+                        ? new Date(project.qcDueDate).toLocaleDateString()
+                        : "-"}
+                    </td>
+                    <td>
+                      <span
+                        className={`badge ${project.status === "Completed"
+                          ? "bg-success text-white"
+                          : "bg-warning text-dark"
+                          }`}
                       >
+                        {project.status || "-"}
+                      </span>
+
+                    </td>
+                    <td>
+                      <div className="d-flex align-items-center">
                         <div
-                          className="progress-bar bg-primary"
-                          style={{
-                            width: `${project.progress || 0}%`,
-                          }}
-                        ></div>
+                          className="progress flex-grow-1 me-2"
+                          style={{ height: "6px" }}
+                        >
+                          <div
+                            className="progress-bar bg-primary"
+                            style={{
+                              width: `${project.progress || 0}%`,
+                            }}
+                          ></div>
+                        </div>
+                        <small className="text-primary">
+                          {project.progress || 0}%
+                        </small>
                       </div>
-                      <small className="text-primary">
-                        {project.progress || 0}%
-                      </small>
-                    </div>
-                  </td>
-                  <td>
-                    <span className="badge bg-info">
-                      {getFileCount(project.id)} Files
-                    </span>
-                  </td>
-                  <td className="text-end">
-                    <div className="d-flex justify-content-end gap-2">
-                      <button
-                        onClick={() => markAsCompleted(project.id)}
-                        className="btn btn-sm btn-success"
-                      >
-                        Mark as Completed
-                      </button>
-                      <button
-                        className="btn btn-sm btn-primary"
-                        onClick={() => handleViewProject(project)}
-                      >
-                        <i
-                          className={`fas ${
-                            expandedRow === project.id
+                    </td>
+                    <td>
+                      <span className="badge bg-info">
+                        {getFileCount(project.id)} Files
+                      </span>
+                    </td>
+                    <td className="text-end">
+                      <div className="d-flex justify-content-end gap-2">
+                        {project.status === "Completed" ? (
+                          <span className="text-success">✔️ Completed</span>
+                        ) : (
+                          <button onClick={() => markAsCompleted(project.id)} className="btn btn-sm btn-success">
+                            Mark as Completed
+                          </button>
+                        )}
+
+                        <button
+                          className="btn btn-sm btn-primary"
+                          onClick={() => handleViewProject(project)}
+                        >
+                          <i
+                            className={`fas ${expandedRow === project.id
                               ? "fa-chevron-up"
                               : "fa-eye"
-                          }`}
-                        ></i>
-                      </button>
-                      <button
-                        onClick={() => handleEditProject(project.id)}
-                        className="btn btn-sm btn-success"
-                      >
-                        <i className="fas fa-edit"></i>
-                      </button>
-                      <button
-                        onClick={() => handleDeleteProject(project.id)}
-                        className="btn btn-sm btn-danger"
-                      >
-                        <i className="fas fa-trash-alt"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-
-                {expandedRow === project.id && (
-                  <tr>
-                    <td colSpan={18} className="p-0 border-top-0">
-                      <div className="p-4">
-                        {/* Project Files Header */}
-                        <div className="mb-4">
-                          <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5 className="mb-0">Project Files ({getFileCount(project.id)})</h5>
-                            {selectedFiles.length > 0 && (
-                              <span className="badge bg-primary">
-                                {selectedFiles.length} files selected
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Files Table */}
-                          <div className="table-responsive">
-                            <table className="table table-sm table-striped table-hover">
-                              <thead>
-                                <tr className="text-center">
-                                  <th>
-                                    <input type="checkbox" />
-                                  </th>
-                                  <th>File Name</th>
-                                  <th>Pages</th>
-                                  <th>Language</th>
-                                  <th>Application</th>
-                                  <th>Handler</th>
-                                  <th>QA Reviewer</th>
-                                  <th>Status</th>
-                                  <th>Preview</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {[
-                                  {
-                                    id: 1,
-                                    name: "File_1_1.docx",
-                                    pages: 15,
-                                    language: "az",
-                                    application: "Visio",
-                                  },
-                                  {
-                                    id: 2,
-                                    name: "File_1_2.docx",
-                                    pages: 6,
-                                    language: "az",
-                                    application: "FM",
-                                  },
-                                  {
-                                    id: 3,
-                                    name: "File_1_3.docx",
-                                    pages: 5,
-                                    language: "yo",
-                                    application: "Visio",
-                                  },
-                                  {
-                                    id: 4,
-                                    name: "File_1_4.docx",
-                                    pages: 2,
-                                    language: "am",
-                                    application: "Word",
-                                  },
-                                ].map((file) => (
-                                  <tr key={file.id}>
-                                    <td>
-                                      <input
-                                        type="checkbox"
-                                        className="form-check-input"
-                                        checked={selectedFiles.some(
-                                          (f) => f.id === file.id
-                                        )}
-                                        onChange={() =>
-                                          toggleFileSelection(file)
-                                        }
-                                      />
-                                    </td>
-                                    <td>{file.name}</td>
-                                    <td>{file.pages}</td>
-                                    <td>{file.language}</td>
-                                    <td>{file.application}</td>
-                                    <td>
-                                      <select
-                                        className="form-select form-select-sm"
-                                        value={fileHandlers[file.id] || ""}
-                                        onChange={(e) =>
-                                          handleHandlerChange(
-                                            file.id,
-                                            e.target.value
-                                          )
-                                        }
-                                      >
-                                        <option value="">
-                                          Not Assigned
-                                        </option>
-                                        {assignees.map(
-                                          (assignee, index) => (
-                                            <option
-                                              key={index}
-                                              value={assignee.value}
-                                            >
-                                              {assignee.label}
-                                            </option>
-                                          )
-                                        )}
-                                      </select>
-                                    </td>
-                                    <td>
-                                      <select className="form-select form-select-sm">
-                                        <option value="">
-                                          Not Assigned
-                                        </option>
-                                        <option value="Sarah Williams">
-                                          Sarah Williams
-                                        </option>
-                                        <option value="David Brown">
-                                          David Brown
-                                        </option>
-                                        <option value="Emily Davis">
-                                          Emily Davis
-                                        </option>
-                                      </select>
-                                    </td>
-                                    <td>YTS</td>
-                                    <td>
-                                      {file.imageUrl ? (
-                                        <img
-                                          src={file.imageUrl}
-                                          alt={file.name}
-                                          style={{
-                                            width: "60px",
-                                            height: "40px",
-                                            objectFit: "cover",
-                                          }}
-                                        />
-                                      ) : (
-                                        <span>No Preview</span>
-                                      )}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-
-                        {/* Footer Row Controls */}
-                        <div className="row g-3 align-items-center mb-3">
-                          <div className="col-md-3">
-                            <label className="form-label">
-                              Ready for QC Due
-                            </label>
-                            <input
-                              type="datetime-local"
-                              className="form-control"
-                            />
-                          </div>
-                          <div className="col-md-2 mt-5">
-                            <label className="form-label">
-                              QC Allocated Hours
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.25"
-                              className="form-control"
-                              placeholder="0"
-                            />
-                            <div className="form-text">
-                              (in multiple of 0.00 only)
-                            </div>
-                          </div>
-                          <div className="col-md-2">
-                            <label className="form-label">QC Due</label>
-                            <input
-                              type="text"
-                              className="form-control"
-                              placeholder="--"
-                              disabled
-                            />
-                          </div>
-                          <div className="col-md-2">
-                            <label className="form-label">Priority</label>
-                            <select className="form-select">
-                              <option value="Low">Low</option>
-                              <option value="Medium">Medium</option>
-                              <option value="High">High</option>
-                            </select>
-                          </div>
-                          <div className="col-md-3 d-flex align-items-end justify-content-end gap-2">
-                            <button className="btn btn-success">
-                              Save
-                            </button>
-                            <button className="btn btn-secondary">
-                              Close
-                            </button>
-                          </div>
-                        </div>
+                              }`}
+                          ></i>
+                        </button>
+                        <button
+                          onClick={() => handleEditProject(project.id)}
+                          className="btn btn-sm btn-success"
+                        >
+                          <i className="fas fa-edit"></i>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteProject(project.id)}
+                          className="btn btn-sm btn-danger"
+                        >
+                          <i className="fas fa-trash-alt"></i>
+                        </button>
                       </div>
                     </td>
                   </tr>
-                )}
-              </React.Fragment>
-            ))}
+
+                  {expandedRow === project.id && (
+                    <tr>
+                      <td colSpan={18} className="p-0 border-top-0">
+                        <div className="p-4">
+                          {/* Project Files Header */}
+                          <div className="mb-4">
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                              <h5 className="mb-0">Project Files ({getFileCount(project.id)})</h5>
+                              {selectedFiles.length > 0 && (
+                                <span className="badge bg-primary">
+                                  {selectedFiles.length} files selected
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Files Table */}
+                            <div className="table-responsive">
+                              <table className="table table-sm table-striped table-hover">
+                                <thead>
+                                  <tr className="text-center">
+                                    <th>
+                                      <input type="checkbox" />
+                                    </th>
+                                    <th>File Name</th>
+                                    <th>Pages</th>
+                                    <th>Language</th>
+                                    <th>Application</th>
+                                    <th>Handler</th>
+                                    <th>QA Reviewer</th>
+                                    <th>Status</th>
+                                    <th>Preview</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {[
+                                    {
+                                      id: 1,
+                                      name: "File_1_1.docx",
+                                      pages: 15,
+                                      language: "az",
+                                      application: "Visio",
+                                    },
+                                    {
+                                      id: 2,
+                                      name: "File_1_2.docx",
+                                      pages: 6,
+                                      language: "az",
+                                      application: "FM",
+                                    },
+                                    {
+                                      id: 3,
+                                      name: "File_1_3.docx",
+                                      pages: 5,
+                                      language: "yo",
+                                      application: "Visio",
+                                    },
+                                    {
+                                      id: 4,
+                                      name: "File_1_4.docx",
+                                      pages: 2,
+                                      language: "am",
+                                      application: "Word",
+                                    },
+                                  ].map((file) => (
+                                    <tr key={file.id}>
+                                      <td>
+                                        <input
+                                          type="checkbox"
+                                          className="form-check-input"
+                                          checked={selectedFiles.some(
+                                            (f) => f.id === file.id
+                                          )}
+                                          onChange={() =>
+                                            toggleFileSelection(file)
+                                          }
+                                        />
+                                      </td>
+                                      <td>{file.name}</td>
+                                      <td>{file.pages}</td>
+                                      <td>{file.language}</td>
+                                      <td>{file.application}</td>
+                                      <td>
+                                        <select
+                                          className="form-select form-select-sm"
+                                          value={fileHandlers[file.id] || ""}
+                                          onChange={(e) =>
+                                            handleHandlerChange(
+                                              file.id,
+                                              e.target.value
+                                            )
+                                          }
+                                        >
+                                          <option value="">
+                                            Not Assigned
+                                          </option>
+                                          {assignees.map(
+                                            (assignee, index) => (
+                                              <option
+                                                key={index}
+                                                value={assignee.value}
+                                              >
+                                                {assignee.label}
+                                              </option>
+                                            )
+                                          )}
+                                        </select>
+                                      </td>
+                                      <td>
+                                        <select className="form-select form-select-sm">
+                                          <option value="">
+                                            Not Assigned
+                                          </option>
+                                          <option value="Sarah Williams">
+                                            Sarah Williams
+                                          </option>
+                                          <option value="David Brown">
+                                            David Brown
+                                          </option>
+                                          <option value="Emily Davis">
+                                            Emily Davis
+                                          </option>
+                                        </select>
+                                      </td>
+                                      <td>YTS</td>
+                                      <td>
+                                        {file.imageUrl ? (
+                                          <img
+                                            src={file.imageUrl}
+                                            alt={file.name}
+                                            style={{
+                                              width: "60px",
+                                              height: "40px",
+                                              objectFit: "cover",
+                                            }}
+                                          />
+                                        ) : (
+                                          <span>No Preview</span>
+                                        )}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+
+                          {/* Footer Row Controls */}
+                          <div className="row g-3 align-items-center mb-3">
+                            <div className="col-md-3">
+                              <label className="form-label">
+                                Ready for QC Due
+                              </label>
+                              <input
+                                type="datetime-local"
+                                className="form-control"
+                              />
+                            </div>
+                            <div className="col-md-2 mt-5">
+                              <label className="form-label">
+                                QC Allocated Hours
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.25"
+                                className="form-control"
+                                placeholder="0"
+                              />
+                              <div className="form-text">
+                                (in multiple of 0.00 only)
+                              </div>
+                            </div>
+                            <div className="col-md-2">
+                              <label className="form-label">QC Due</label>
+                              <input
+                                type="text"
+                                className="form-control"
+                                placeholder="--"
+                                disabled
+                              />
+                            </div>
+                            <div className="col-md-2">
+                              <label className="form-label">Priority</label>
+                              <select className="form-select">
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                              </select>
+                            </div>
+                            <div className="col-md-3 d-flex align-items-end justify-content-end gap-2">
+                              <button className="btn btn-success">
+                                Save
+                              </button>
+                              <button className="btn btn-secondary">
+                                Close
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              ))}
           </tbody>
         </table>
       )}
