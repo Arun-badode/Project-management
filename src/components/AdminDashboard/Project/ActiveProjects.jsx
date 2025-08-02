@@ -257,6 +257,13 @@ const ActiveProjects = () => {
     setHasUnsavedChanges(false);
   };
 
+  // Count files for each project
+  const getFileCount = (projectId) => {
+    // This is a mock function - replace with your actual file count logic
+    // For now, we'll return a fixed number for each project
+    return 4; // Assuming each project has 4 files
+  };
+
   return (
     <div
       className="table-responsive"
@@ -312,6 +319,7 @@ const ActiveProjects = () => {
               <th>QC Due Date</th>
               <th>Status</th>
               <th>Progress</th>
+              <th>Files</th> {/* New column for file count */}
               <th>Actions</th>
             </tr>
           </thead>
@@ -386,6 +394,11 @@ const ActiveProjects = () => {
                       </small>
                     </div>
                   </td>
+                  <td>
+                    <span className="badge bg-info">
+                      {getFileCount(project.id)} Files
+                    </span>
+                  </td>
                   <td className="text-end">
                     <div className="d-flex justify-content-end gap-2">
                       <button
@@ -424,11 +437,12 @@ const ActiveProjects = () => {
 
                 {expandedRow === project.id && (
                   <tr>
-                    <td colSpan={17} className="p-0 border-top-0">
+                    <td colSpan={18} className="p-0 border-top-0">
                       <div className="p-4">
+                        {/* Project Files Header */}
                         <div className="mb-4">
                           <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h5 className="mb-0">Project Files</h5>
+                            <h5 className="mb-0">Project Files ({getFileCount(project.id)})</h5>
                             {selectedFiles.length > 0 && (
                               <span className="badge bg-primary">
                                 {selectedFiles.length} files selected
@@ -436,294 +450,187 @@ const ActiveProjects = () => {
                             )}
                           </div>
 
-                          {project.files && project.files.length > 0 ? (
-                            <>
-                              <div className="mb-3">
-                                <div className="row g-3">
-                                  <div className="col-md-3">
-                                    <label className="form-label">Handler</label>
-                                    <select
-                                      className="form-select"
-                                      value={batchEditValues.handler}
-                                      onChange={(e) =>
-                                        setBatchEditValues({
-                                          ...batchEditValues,
-                                          handler: e.target.value,
-                                        })
-                                      }
-                                    >
-                                      {assignees.map((assignee, index) => (
-                                        <option key={index} value={assignee.value}>
-                                          {assignee.label}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </div>
-                                  <div className="col-md-3">
-                                    <label className="form-label">QA Reviewer</label>
-                                    <select
-                                      className="form-select"
-                                      value={batchEditValues.qaReviewer}
-                                      onChange={(e) =>
-                                        setBatchEditValues({
-                                          ...batchEditValues,
-                                          qaReviewer: e.target.value,
-                                        })
-                                      }
-                                    >
-                                      {qaReviewers.map((reviewer, index) => (
-                                        <option key={index} value={reviewer.value}>
-                                          {reviewer.label}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </div>
-                                  <div className="col-md-3">
-                                    <label className="form-label">QA Status</label>
-                                    <select
-                                      className="form-select"
-                                      value={batchEditValues.qaStatus}
-                                      onChange={(e) =>
-                                        setBatchEditValues({
-                                          ...batchEditValues,
-                                          qaStatus: e.target.value,
-                                        })
-                                      }
-                                    >
-                                      {qaStatuses.map((status, index) => (
-                                        <option key={index} value={status.value}>
-                                          {status.label}
-                                        </option>
-                                      ))}
-                                    </select>
-                                  </div>
-                                  <div className="col-md-3 d-flex align-items-end">
-                                    <button
-                                      className="btn btn-primary w-100"
-                                      onClick={handleBatchUpdate}
-                                      disabled={selectedFiles.length === 0}
-                                    >
-                                      Apply to Selected
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="table-responsive">
-                                <table className="table table-sm table-striped table-hover">
-                                  <thead
-                                    className="table-gradient-bg table"
-                                    style={{
-                                      position: "sticky",
-                                      top: 0,
-                                      zIndex: 0,
-                                      backgroundColor: "#fff",
-                                    }}
-                                  >
-                                    <tr className="text-center">
-                                      <th>
-                                        <input
-                                          type="checkbox"
-                                          className="form-check-input"
-                                          checked={
-                                            selectedFiles.length === project.files.length
-                                          }
-                                          onChange={(e) => {
-                                            if (e.target.checked) {
-                                              setSelectedFiles([...project.files]);
-                                            } else {
-                                              setSelectedFiles([]);
-                                            }
-                                            setHasUnsavedChanges(true);
-                                          }}
-                                        />
-                                      </th>
-                                      <th>File Name</th>
-                                      <th>Pages</th>
-                                      <th>Language</th>
-                                      <th>Application</th>
-                                      <th>Handler</th>
-                                      <th>QA Reviewer</th>
-                                      <th>QA Status</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {project.files.map((file) => (
-                                      <tr
-                                        key={file.id}
-                                        className={
-                                          selectedFiles.some((f) => f.id === file.id)
-                                            ? "table-primary text-center"
-                                            : "text-center"
+                          {/* Files Table */}
+                          <div className="table-responsive">
+                            <table className="table table-sm table-striped table-hover">
+                              <thead>
+                                <tr className="text-center">
+                                  <th>
+                                    <input type="checkbox" />
+                                  </th>
+                                  <th>File Name</th>
+                                  <th>Pages</th>
+                                  <th>Language</th>
+                                  <th>Application</th>
+                                  <th>Handler</th>
+                                  <th>QA Reviewer</th>
+                                  <th>Status</th>
+                                  <th>Preview</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {[
+                                  {
+                                    id: 1,
+                                    name: "File_1_1.docx",
+                                    pages: 15,
+                                    language: "az",
+                                    application: "Visio",
+                                  },
+                                  {
+                                    id: 2,
+                                    name: "File_1_2.docx",
+                                    pages: 6,
+                                    language: "az",
+                                    application: "FM",
+                                  },
+                                  {
+                                    id: 3,
+                                    name: "File_1_3.docx",
+                                    pages: 5,
+                                    language: "yo",
+                                    application: "Visio",
+                                  },
+                                  {
+                                    id: 4,
+                                    name: "File_1_4.docx",
+                                    pages: 2,
+                                    language: "am",
+                                    application: "Word",
+                                  },
+                                ].map((file) => (
+                                  <tr key={file.id}>
+                                    <td>
+                                      <input
+                                        type="checkbox"
+                                        className="form-check-input"
+                                        checked={selectedFiles.some(
+                                          (f) => f.id === file.id
+                                        )}
+                                        onChange={() =>
+                                          toggleFileSelection(file)
+                                        }
+                                      />
+                                    </td>
+                                    <td>{file.name}</td>
+                                    <td>{file.pages}</td>
+                                    <td>{file.language}</td>
+                                    <td>{file.application}</td>
+                                    <td>
+                                      <select
+                                        className="form-select form-select-sm"
+                                        value={fileHandlers[file.id] || ""}
+                                        onChange={(e) =>
+                                          handleHandlerChange(
+                                            file.id,
+                                            e.target.value
+                                          )
                                         }
                                       >
-                                        <td>
-                                          <input
-                                            type="checkbox"
-                                            className="form-check-input"
-                                            checked={selectedFiles.some(
-                                              (f) => f.id === file.id
-                                            )}
-                                            onChange={() => toggleFileSelection(file)}
-                                          />
-                                        </td>
-                                        <td>{file.name || "-"}</td>
-                                        <td>{file.pages || "-"}</td>
-                                        <td>{file.language || "-"}</td>
-                                        <td>{file.application || "-"}</td>
-                                        <td>
-                                          <select
-                                            className="form-select form-select-sm"
-                                            value={
-                                              fileHandlers[file.id] || file.handler || ""
-                                            }
-                                            onChange={(e) =>
-                                              handleHandlerChange(file.id, e.target.value)
-                                            }
-                                          >
-                                            {assignees.map((assignee, index) => (
-                                              <option key={index} value={assignee.value}>
-                                                {assignee.label}
-                                              </option>
-                                            ))}
-                                          </select>
-                                        </td>
-                                        <td>
-                                          <select
-                                            className="form-select form-select-sm"
-                                            value={
-                                              fileQAReviewers[file.id] ||
-                                              file.qaReviewer ||
-                                              ""
-                                            }
-                                            onChange={(e) =>
-                                              handleQAReviewerChange(
-                                                file.id,
-                                                e.target.value
-                                              )
-                                            }
-                                          >
-                                            {qaReviewers.map((reviewer, index) => (
-                                              <option key={index} value={reviewer.value}>
-                                                {reviewer.label}
-                                              </option>
-                                            ))}
-                                          </select>
-                                        </td>
-                                        <td>
-                                          <select
-                                            className="form-select form-select-sm"
-                                            value={
-                                              fileQAStatuses[file.id] ||
-                                              file.qaStatus ||
-                                              "Con WIP"
-                                            }
-                                            onChange={(e) =>
-                                              handleQAStatusChange(file.id, e.target.value)
-                                            }
-                                          >
-                                            {qaStatuses.map((status, index) => (
-                                              <option key={index} value={status.value}>
-                                                {status.label}
-                                              </option>
-                                            ))}
-                                          </select>
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </>
-                          ) : (
-                            <p>No files available for this project</p>
-                          )}
+                                        <option value="">
+                                          Not Assigned
+                                        </option>
+                                        {assignees.map(
+                                          (assignee, index) => (
+                                            <option
+                                              key={index}
+                                              value={assignee.value}
+                                            >
+                                              {assignee.label}
+                                            </option>
+                                          )
+                                        )}
+                                      </select>
+                                    </td>
+                                    <td>
+                                      <select className="form-select form-select-sm">
+                                        <option value="">
+                                          Not Assigned
+                                        </option>
+                                        <option value="Sarah Williams">
+                                          Sarah Williams
+                                        </option>
+                                        <option value="David Brown">
+                                          David Brown
+                                        </option>
+                                        <option value="Emily Davis">
+                                          Emily Davis
+                                        </option>
+                                      </select>
+                                    </td>
+                                    <td>YTS</td>
+                                    <td>
+                                      {file.imageUrl ? (
+                                        <img
+                                          src={file.imageUrl}
+                                          alt={file.name}
+                                          style={{
+                                            width: "60px",
+                                            height: "40px",
+                                            objectFit: "cover",
+                                          }}
+                                        />
+                                      ) : (
+                                        <span>No Preview</span>
+                                      )}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
 
-                          <div className="row g-3 mb-1 mt-4">
-                            <div className="col-md-2">
-                              <label className="form-label">Ready for QC Due</label>
-                            </div>
-                            <div className="col-md-2">
-                              <label className="form-label">QC Allocated Hours</label>
-                            </div>
-                            <div className="col-md-2">
-                              <label className="form-label">QC Due</label>
-                            </div>
-                            <div className="col-md-2">
-                              <label className="form-label">Priority</label>
-                            </div>
-                            <div className="col-md-4">
-                              <label className="form-label">Actions</label>
+                        {/* Footer Row Controls */}
+                        <div className="row g-3 align-items-center mb-3">
+                          <div className="col-md-3">
+                            <label className="form-label">
+                              Ready for QC Due
+                            </label>
+                            <input
+                              type="datetime-local"
+                              className="form-control"
+                            />
+                          </div>
+                          <div className="col-md-2 mt-5">
+                            <label className="form-label">
+                              QC Allocated Hours
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.25"
+                              className="form-control"
+                              placeholder="0"
+                            />
+                            <div className="form-text">
+                              (in multiple of 0.00 only)
                             </div>
                           </div>
-
-                          <div className="row g-3 mb-3 align-items-start">
-                            <div className="col-md-2">
-                              <DatePicker
-                                selected={selectedDateTime}
-                                onChange={(date) => setSelectedDateTime(date)}
-                                showTimeSelect
-                                timeFormat="HH:mm"
-                                timeIntervals={15}
-                                dateFormat="h:mm aa dd-MM-yyyy"
-                                placeholderText="Select date and time"
-                                className="form-control"
-                              />
-                            </div>
-
-                            <div className="col-md-2">
-                              <input
-                                type="number"
-                                className="form-control"
-                                min="0"
-                                max="100"
-                                placeholder="0"
-                                value={qcAllocatedHours}
-                                onChange={(e) => {
-                                  const val = parseInt(e.target.value);
-                                  if (!isNaN(val)) {
-                                    setQcAllocatedHours(Math.min(val, 100));
-                                  }
-                                }}
-                              />
-                              <div className="small text-muted">
-                                on number of 100 only
-                              </div>
-                            </div>
-
-                            <div className="col-md-2">
-                              <div className="form-control">
-                                {calculateQCDue(selectedDateTime, qcAllocatedHours)}
-                              </div>
-                            </div>
-
-                            <div className="col-md-2">
-                              <select
-                                className="form-select"
-                                value={priority}
-                                onChange={(e) => setPriority(e.target.value)}
-                              >
-                                <option value="Low">Low</option>
-                                <option value="Mid">Mid</option>
-                                <option value="High">High</option>
-                              </select>
-                            </div>
-
-                            <div className="col-md-4 d-flex gap-2">
-                              <button
-                                className="btn btn-success w-100"
-                                onClick={handleSaveChanges}
-                                disabled={!hasUnsavedChanges}
-                              >
-                                Save
-                              </button>
-                              <button
-                                className="btn btn-secondary w-100"
-                                onClick={handleClose}
-                              >
-                                Close
-                              </button>
-                            </div>
+                          <div className="col-md-2">
+                            <label className="form-label">QC Due</label>
+                            <input
+                              type="text"
+                              className="form-control"
+                              placeholder="--"
+                              disabled
+                            />
+                          </div>
+                          <div className="col-md-2">
+                            <label className="form-label">Priority</label>
+                            <select className="form-select">
+                              <option value="Low">Low</option>
+                              <option value="Medium">Medium</option>
+                              <option value="High">High</option>
+                            </select>
+                          </div>
+                          <div className="col-md-3 d-flex align-items-end justify-content-end gap-2">
+                            <button className="btn btn-success">
+                              Save
+                            </button>
+                            <button className="btn btn-secondary">
+                              Close
+                            </button>
                           </div>
                         </div>
                       </div>

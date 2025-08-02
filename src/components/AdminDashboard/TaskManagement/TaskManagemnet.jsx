@@ -33,20 +33,23 @@ const generateDummyProjects = (count) => {
     fileCount: Math.floor(Math.random() * 5) + 1,
     handlerNote: `Handler note for project ${i + 1}`,
     qaNote: `QA note for project ${i + 1}`,
-    files: Array.from({ length: Math.floor(Math.random() * 3) + 1 }, (_, j) => ({
-      id: j + 1,
-      name: `file${j + 1}.${["docx", "pdf", "xlsx", "psd"][j % 4]}`,
-      pages: Math.floor(Math.random() * 20) + 1,
-      language: languages[Math.floor(Math.random() * languages.length)],
-      platform: platforms[Math.floor(Math.random() * platforms.length)],
-      stage: ["Not Started", "In Progress", "Completed"][j % 3],
-      assigned: new Date(
-        Date.now() - Math.floor(Math.random() * 10) * 24 * 60 * 60 * 1000
-      ).toLocaleDateString(),
-      handler: `Handler ${j + 1}`,
-      qaReviewer: `QA ${j + 1}`,
-      qaStatus: ["Pending", "Approved", "Rejected"][j % 3],
-    })),
+    files: Array.from(
+      { length: Math.floor(Math.random() * 3) + 1 },
+      (_, j) => ({
+        id: j + 1,
+        name: `file${j + 1}.${["docx", "pdf", "xlsx", "psd"][j % 4]}`,
+        pages: Math.floor(Math.random() * 20) + 1,
+        language: languages[Math.floor(Math.random() * languages.length)],
+        platform: platforms[Math.floor(Math.random() * platforms.length)],
+        stage: ["Not Started", "In Progress", "Completed"][j % 3],
+        assigned: new Date(
+          Date.now() - Math.floor(Math.random() * 10) * 24 * 60 * 60 * 1000
+        ).toLocaleDateString(),
+        handler: `Handler ${j + 1}`,
+        qaReviewer: `QA ${j + 1}`,
+        qaStatus: ["Pending", "Approved", "Rejected"][j % 3],
+      })
+    ),
   }));
 };
 
@@ -130,7 +133,9 @@ const TaskManagement = () => {
   };
 
   const handleMarkComplete = (id) => {
-    if (window.confirm("Are you sure you want to mark this project as complete?")) {
+    if (
+      window.confirm("Are you sure you want to mark this project as complete?")
+    ) {
       setProjects(projects.filter((project) => project.id !== id));
     }
   };
@@ -225,7 +230,9 @@ const TaskManagement = () => {
         <ul className="nav nav-tabs mb-4">
           <li className="nav-item">
             <button
-              className={`nav-link ${activeProjectTab === "all" ? "active" : ""}`}
+              className={`nav-link ${
+                activeProjectTab === "all" ? "active" : ""
+              }`}
               onClick={() => setActiveProjectTab("all")}
             >
               All Active Projects
@@ -234,7 +241,9 @@ const TaskManagement = () => {
           {isManager && (
             <li className="nav-item">
               <button
-                className={`nav-link ${activeProjectTab === "my" ? "active" : ""}`}
+                className={`nav-link ${
+                  activeProjectTab === "my" ? "active" : ""
+                }`}
                 onClick={() => setActiveProjectTab("my")}
               >
                 My Tasks
@@ -262,22 +271,12 @@ const TaskManagement = () => {
           </>
         )}
 
-        {activeProjectTab === "my" && isManager && (
-          <>
-            <ProjectsTable
-              projects={myTasks}
-              onViewProject={handleViewProject}
-              onMarkComplete={handleMarkComplete}
-              onDeleteProject={handleDeleteProject}
-              expandedRow={expandedRow}
-            />
-            {selectedProject && expandedRow === selectedProject.id && (
-              <ProjectDetails 
-                project={selectedProject}
-                onClose={() => setExpandedRow(null)}
-              />
-            )}
-          </>
+        {/* Project Details */}
+        {selectedProject && expandedRow === selectedProject.id && (
+          <ProjectDetails
+            project={selectedProject}
+            onClose={() => setExpandedRow(null)}
+          />
         )}
       </div>
     </div>
