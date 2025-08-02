@@ -83,23 +83,29 @@ const CreateNewProject = () => {
     currency: "USD",
     cost: 0,
     inrCost: 0,
+    billingMode: "estimated", // Added default billing mode
+    estimatedHrs: 0, // Added estimatedHrs to initial state
   });
 
-
   // post Api
-  
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validate selected date
+    if (selectedDate === null) {
+      alert("Please select a deadline date");
+      return;
+    }
+
     // Prepare the data in the format expected by the API
     const formDataForApi = {
       projectTitle: formData.title,
-      clientId: formData.client, // You might need to map client names to IDs
+      clientId: formData.client,
       country: formData.country,
-      projectManagerId: formData.projectManager, // You might need to map manager names to IDs
-      taskId: formData.tasks[0], // Assuming single task - adjust if multiple are allowed
-      applicationId: formData.application[0], // Assuming single application - adjust if needed
-      languageId: formData.languages[0], // Assuming single language - adjust if needed
+      projectManagerId: formData.projectManager,
+      taskId: formData.tasks[0],
+      applicationId: formData.application[0],
+      languageId: formData.languages[0],
       totalPagesLang: formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0),
       totalProjectPages: formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0) * (formData.languages.length || 1),
       receiveDate: formData.receivedDate,
@@ -111,38 +117,32 @@ const CreateNewProject = () => {
       currency: formData.currency,
       totalCost: formData.cost || 0,
       deadline: `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}-${selectedDate.toString().padStart(2, '0')}`,
-      readyQCDeadline: "", // You might want to calculate this
-      qcHrs: 0, // You might want to add this field to your form
-      qcDueDate: "", // You might want to add this field to your form
-      priority: "Medium", // You might want to add this field to your form
+      readyQCDeadline: "",
+      qcHrs: 0,
+      qcDueDate: "",
+      priority: "Medium",
       status: "Active"
     };
 
     try {
       const response = await axios.post(
-        'https://eminoids-backend-production.up.railway.app/api/project/addProject',
+        `${BASE_URL}project/addProject`,
         formDataForApi,
         {
-         headers: {
+          headers: {
             "Authorization": `Bearer ${token}`,
           },
-         }
+        }
       );
    
       console.log('Project created successfully:', response?.data);
-      // You might want to show a success message or redirect here
       alert('Project created successfully!');
-      
-      // Reset the form if needed
-      // setFormData({...initialState});
       
     } catch (error) {
       console.error('Error creating project:', error);
-      // Show error message to user
       alert('Error creating project. Please try again.');
     }
   };
-
 
   const handleNextMonth = () => {
     if (selectedMonth === 11) {
@@ -178,8 +178,6 @@ const CreateNewProject = () => {
     "December",
   ];
 
-  // Options for dropdowns
-
   const gradientSelectStyles = {
     control: (provided, state) => ({
       ...provided,
@@ -211,9 +209,7 @@ const CreateNewProject = () => {
     }),
     option: (provided, state) => ({
       ...provided,
-      backgroundColor: state.isFocused
-        ? "#293d80"
-        : "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
+      backgroundColor: state.isFocused ? "#293d80" : "transparent",
       color: "white",
     }),
     menu: (provided) => ({
@@ -232,71 +228,74 @@ const CreateNewProject = () => {
   ];
 
   const [taskOptions, setTaskOptions] = useState([]);
-
-  useEffect(() => {
-    axios
-      .get(`${BASE_URL}tasks/getAllTasks`, {
-        headers: { authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        if (res.data.status) {
-          const options = res.data.tasks.map((task) => ({
-            value: task.id,
-            label: task.taskName,
-          }));
-          setTaskOptions(options);
-        }
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  }, []);
-
   const [applicationOptions, setApplicationOptions] = useState([]);
-
-  useEffect(() => {
-    axios
-      .get(`${BASE_URL}application/getAllApplication`, {
-        headers: { authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        if (res.data.status) {
-          const options = res.data.application.map((app) => ({
-            value: app.id,
-            label: app.applicationName,
-          }));
-          setApplicationOptions(options);
-        }
-      })
-      .catch((err) => console.error(err));
-  }, []);
-
   const [languageOptions, setLanguageOptions] = useState([]);
+  const [clientOptions, setClientOptions] = useState([]);
 
   useEffect(() => {
-    axios
-      .get(`${BASE_URL}language/getAlllanguage`, {
-        headers: { authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        if (res.data.status) {
-          const options = res.data.languages.map((lang) => ({
-            value: lang.id,
-            label: lang.languageName,
-          }));
-          setLanguageOptions(options);
-        }
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  }, []);
+    // Fetch tasks
+    axios.get(`${BASE_URL}tasks/getAllTasks`, {
+      headers: { authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      if (res.data.status) {
+        setTaskOptions(res.data.tasks.map((task) => ({
+          value: task.id,
+          label: task.taskName,
+        })));
+      }
+    })
+    .catch((err) => console.error("Error fetching tasks:", err));
+
+    // Fetch applications
+    axios.get(`${BASE_URL}application/getAllApplication`, {
+      headers: { authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      if (res.data.status) {
+        setApplicationOptions(res.data.application.map((app) => ({
+          value: app.id,
+          label: app.applicationName,
+        })));
+      }
+    })
+    .catch((err) => console.error("Error fetching applications:", err));
+
+    // Fetch languages
+    axios.get(`${BASE_URL}language/getAlllanguage`, {
+      headers: { authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      if (res.data.status) {
+        setLanguageOptions(res.data.languages.map((lang) => ({
+          value: lang.id,
+          label: lang.languageName,
+        })));
+      }
+    })
+    .catch((err) => console.error("Error fetching languages:", err));
+
+    // Fetch clients
+    axios.get(`${BASE_URL}client/getAllClients`, {
+      headers: { authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      if (res.data.status) {
+        setClientOptions(res.data.clients.map((client) => ({
+          value: client.id, // Changed from client.clientName to client.id to match API expectation
+          label: client.clientName,
+        })));
+      }
+    })
+    .catch((err) => console.error("Error fetching clients:", err))
+    .finally(() => setLoading(false));
+  }, [token]);
 
   const formatDateTime = () => {
     if (selectedDate === null) {
       return "00/00/00 00:00 AM";
     }
-    const date = `${selectedDate.toString().padStart(2, "0")}/${(
-      selectedMonth + 1
-    )
+    const date = `${selectedDate.toString().padStart(2, "0")}/${(selectedMonth + 1)
       .toString()
       .padStart(2, "0")}/${selectedYear.toString().slice(-2)}`;
     const time = `${selectedHour.toString().padStart(2, "0")}:${selectedMinute
@@ -312,28 +311,6 @@ const CreateNewProject = () => {
       [name]: value,
     }));
   };
-
-  const [clientOptions, setClientOptions] = useState([]);
-
-  // Fetch clients on component mount
- useEffect(() => {
-  axios
-    .get("https://eminoids-backend-production.up.railway.app/api/client/getAllClients", {
-      headers: { authorization: `Bearer ${token}` },
-    })
-    .then((res) => {
-      console.log("Fetching client options...", res.data.clients);
-      const options = res.data.clients.map((client) => ({
-        value: client.clientName,
-        label: client.clientName,
-      }));
-      setClientOptions(options);
-    })
-    .catch((err) => {
-      console.error("Error fetching client options", err);
-    });
-}, []);
-
 
   return (
     <div>
@@ -372,7 +349,7 @@ const CreateNewProject = () => {
               options={clientOptions}
               value={
                 formData.client
-                  ? { value: formData.client, label: formData.client }
+                  ? clientOptions.find(opt => opt.value === formData.client)
                   : null
               }
               onChange={(opt) =>
@@ -384,6 +361,7 @@ const CreateNewProject = () => {
               isSearchable
               placeholder="Select Client"
               styles={gradientSelectStyles}
+              required
             />
           </div>
 
@@ -444,11 +422,7 @@ const CreateNewProject = () => {
               name="task"
               options={taskOptions}
               value={
-                taskOptions?.length && formData?.tasks?.length
-                  ? taskOptions.filter((opt) =>
-                      formData.tasks.includes(opt.value)
-                    )
-                  : []
+                taskOptions?.filter(opt => formData.tasks.includes(opt.value))
               }
               onChange={(selectedOptions) =>
                 setFormData((prev) => ({
@@ -462,9 +436,10 @@ const CreateNewProject = () => {
               isSearchable
               placeholder={loading ? "Loading..." : "Select Task(s)"}
               styles={gradientSelectStyles}
+              required
             />
             <div className="form-text text-white">
-              {formData?.tasks?.length || 0} selected
+              {formData.tasks.length} selected
             </div>
           </div>
           <div className="col-md-6">
@@ -475,9 +450,9 @@ const CreateNewProject = () => {
               id="application"
               name="application"
               options={applicationOptions}
-              value={applicationOptions?.filter((opt) =>
-                formData?.application?.includes(opt.value)
-              )}
+              value={
+                applicationOptions?.filter(opt => formData.application.includes(opt.value))
+              }
               onChange={(selectedOptions) =>
                 setFormData((prev) => ({
                   ...prev,
@@ -490,6 +465,7 @@ const CreateNewProject = () => {
               isSearchable
               placeholder={loading ? "Loading..." : "Select Application(s)"}
               styles={gradientSelectStyles}
+              required
             />
           </div>
         </div>
@@ -501,9 +477,9 @@ const CreateNewProject = () => {
           </label>
           <Select
             options={languageOptions}
-            value={languageOptions?.filter((opt) =>
-              formData?.languages?.includes(opt.value)
-            )}
+            value={
+              languageOptions?.filter(opt => formData.languages.includes(opt.value))
+            }
             onChange={(selectedOptions) =>
               setFormData((prev) => ({
                 ...prev,
@@ -516,9 +492,10 @@ const CreateNewProject = () => {
             isSearchable
             placeholder={loading ? "Loading..." : "Select Languages"}
             styles={gradientSelectStyles}
+            required
           />
           <div className="form-text text-white">
-            {formData?.languages?.length} selected
+            {formData.languages.length} selected
           </div>
         </div>
 
@@ -622,6 +599,7 @@ const CreateNewProject = () => {
                           setFormData((prev) => ({ ...prev, files }));
                         }}
                         placeholder="File Name"
+                        required
                       />
                     </td>
 
@@ -637,6 +615,7 @@ const CreateNewProject = () => {
                           setFormData((prev) => ({ ...prev, files }));
                         }}
                         placeholder="Pages"
+                        required
                       />
                     </td>
 
@@ -658,6 +637,7 @@ const CreateNewProject = () => {
 
                           setFormData((prev) => ({ ...prev, files }));
                         }}
+                        required
                       >
                         <option value="">Select</option>
                         {applicationOptions.map((app) => (
@@ -767,7 +747,7 @@ const CreateNewProject = () => {
                   setFormData((prev) => ({
                     ...prev,
                     billingMode: e.target.value,
-                    rate: e.target.value === "estimated" ? "" : prev.rate,
+                    rate: e.target.value === "estimated" ? 0 : prev.rate,
                   }))
                 }
               />
@@ -790,10 +770,7 @@ const CreateNewProject = () => {
                 }));
               }}
               placeholder="00.00"
-              disabled={
-                formData.billingMode !== "estimated" &&
-                formData.billingMode !== undefined
-              }
+              disabled={formData.billingMode !== "estimated"}
             />
             <div className="form-text text-white">
               (in multiple of 0.25 only)
@@ -833,7 +810,7 @@ const CreateNewProject = () => {
                     ...prev,
                     billingMode: e.target.value,
                     estimatedHrs:
-                      e.target.value === "perPage" ? "" : prev.estimatedHrs,
+                      e.target.value === "perPage" ? 0 : prev.estimatedHrs,
                   }))
                 }
               />
@@ -1011,13 +988,13 @@ const CreateNewProject = () => {
 
                     <div className="calendar-section">
                       <div className="month-nav">
-                        <button onClick={handlePrevMonth}>
+                        <button type="button" onClick={handlePrevMonth}>
                           <ChevronLeft size={20} />
                         </button>
                         <h3>
                           {months[selectedMonth]}, {selectedYear}
                         </h3>
-                        <button onClick={handleNextMonth}>
+                        <button type="button" onClick={handleNextMonth}>
                           <ChevronRight size={20} />
                         </button>
                       </div>
@@ -1034,6 +1011,7 @@ const CreateNewProject = () => {
                         {calendarDays.map((dayObj, index) => (
                           <button
                             key={index}
+                            type="button"
                             onClick={() =>
                               dayObj.isCurrentMonth &&
                               setSelectedDate(dayObj.day)
@@ -1053,6 +1031,7 @@ const CreateNewProject = () => {
 
                       <div className="action-buttons">
                         <button
+                          type="button"
                           onClick={() => {
                             setSelectedDate(null);
                             setSelectedHour(0);
@@ -1064,6 +1043,7 @@ const CreateNewProject = () => {
                           Clear
                         </button>
                         <button
+                          type="button"
                           onClick={() => {
                             const today = new Date();
                             setSelectedDate(today.getDate());
@@ -1083,6 +1063,7 @@ const CreateNewProject = () => {
 
                   <div className="done-section">
                     <button
+                      type="button"
                       onClick={() => setIsOpen(false)}
                       className="done-button"
                     >
