@@ -335,6 +335,46 @@ const CreateNewProject = () => {
 }, []);
 
 
+
+
+
+
+
+
+// add BTN //
+
+
+const [showClientInput, setShowClientInput] = useState(false);
+const [newClientName, setNewClientName] = useState("");
+
+const handleAddClient = () => {
+  setShowClientInput((prev) => {
+    if (prev) setNewClientName("");
+    return !prev;
+  });
+};
+
+const handleConfirmAddClient = () => {
+  if (newClientName.trim() === "") return;
+
+  const newOption = { value: newClientName, label: newClientName };
+
+  // Update client options
+  setClientOptions((prev) => [...prev, newOption]);
+
+  // Set new client as selected
+  setFormData((prev) => ({
+    ...prev,
+    client: newClientName,
+  }));
+
+  // Hide input and reset
+  setNewClientName("");
+  setShowClientInput(false);
+};
+
+
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -362,35 +402,71 @@ const CreateNewProject = () => {
 
         {/* Client, Country, Project Manager */}
         <div className="row g-3 mb-3">
-          <div className="col-md-4">
-            <label htmlFor="client" className="form-label">
-              Client <span className="text-danger">*</span>
-            </label>
-            <Select
-              id="client"
-              name="client"
-              options={clientOptions}
-              value={
-                formData.client
-                  ? { value: formData.client, label: formData.client }
-                  : null
-              }
-              onChange={(opt) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  client: opt ? opt.value : "",
-                }))
-              }
-              isSearchable
-              placeholder="Select Client"
-              styles={gradientSelectStyles}
-            />
-          </div>
+    <div className="col-md-4">
+  <label htmlFor="client" className="form-label">
+    Client <span className="text-danger">*</span>
+  </label>
+  <button
+    type="button"
+    className="btn btn-outline-primary ms-5"
+    onClick={handleAddClient}
+    title="Add Client"
+  >
+    {showClientInput ? "×" : "+"}
+  </button>
+
+  <div className="d-flex align-items-center gap-2 mt-2">
+    <div style={{ flex: 1 }}>
+      <Select
+        id="client"
+        name="client"
+        options={clientOptions}
+        value={
+          formData.client
+            ? { value: formData.client, label: formData.client }
+            : null
+        }
+        onChange={(opt) =>
+          setFormData((prev) => ({
+            ...prev,
+            client: opt ? opt.value : "",
+          }))
+        }
+        isSearchable
+        placeholder="Select Client"
+        styles={gradientSelectStyles}
+      />
+
+      {/* ✅ Show input and Add button conditionally */}
+      {showClientInput && (
+        <div className="d-flex mt-2 gap-2">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Enter new client name"
+            value={newClientName}
+            onChange={(e) => setNewClientName(e.target.value)}
+          />
+          <button
+            type="button"
+            className="btn btn-success"
+            onClick={handleConfirmAddClient}
+          >
+            Add
+          </button>
+        </div>
+      )}
+    </div>
+  </div>
+</div>
+
+
 
           <div className="col-md-4">
             <label htmlFor="country" className="form-label">
               Country
             </label>
+        
             <input
               type="text"
               className="form-control"
