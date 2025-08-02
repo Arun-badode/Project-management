@@ -93,24 +93,39 @@ const ActiveProjects = () => {
     return matchesTab && matchesSearch;
   });
 
-  const markAsCompleted = (projectId) => {
-    if (window.confirm("Are you sure you want to mark this project as complete?")) {
-      axios
-        .put(
-          `${BASE_URL}project/updateProjectStatus/${projectId}`,
-          { status: "Completed" },
-          {
-            headers: { authorization: `Bearer ${token}` },
-          }
-        )
-        .then((res) => {
-          if (res.data.status) {
-            fetchProjects();
-          }
-        })
-        .catch((err) => console.error(err));
-    }
-  };
+ const markAsCompleted = async (projectId) => {
+     try {
+       const token = localStorage.getItem("authToken");
+ 
+       const res = await axios.patch(
+         `${BASE_URL}project/updateProject/${projectId}`,
+         {
+           status: "Completed", // 👈 Change the project status
+         },
+         {
+           headers: {
+             Authorization: `Bearer ${token}`,
+           },
+         }
+       );
+ 
+       if (res.status === 200) {
+         alert("Project marked as Completed successfully!");
+         // optionally refresh the project list here
+         // refresh the list
+         const refreshed = await axios.get(`${BASE_URL}project/getAllProjects`, {
+           headers: { authorization: `Bearer ${token}` },
+         });
+         if (refreshed.data.status) {
+           setProjects(refreshed.data.projects);
+         }
+         //fetchProjects(); // you must define this function to reload projects
+       }
+     } catch (error) {
+       console.error("Failed to update project status:", error);
+       alert("Error updating project status");
+     }
+   };
 
   const handleEditProject = (projectId) => {
     console.log("Editing project:", projectId);
@@ -250,18 +265,10 @@ const ActiveProjects = () => {
   };
 
   return (
-    <div
-      className="table-responsive"
-      style={{
-        maxHeight: "500px",
-        overflowX: "auto",
-        scrollbarWidth: "none",
-        msOverflowStyle: "none",
-      }}
-    >
+    <div >
       {loading ? (
         <div className="text-center p-4">
-          <div className="spinner-border text-primary" role="status">
+          <div className="spinner-border text-primary" role="status" style={{ minWidth: 900 }}>
             <span className="visually-hidden">Loading...</span>
           </div>
           <p>Loading Projects...</p>

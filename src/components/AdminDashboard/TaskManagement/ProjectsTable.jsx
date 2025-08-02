@@ -3,8 +3,8 @@ import React, { useRef, useEffect, useState } from "react";
 import BASE_URL from "../../../config";
 
 const ProjectsTable = ({  onViewProject, onMarkComplete, onDeleteProject, expandedRow }) => {
-  const scrollContainerRef = useRef(null);
-  const fakeScrollbarRef = useRef(null);
+  const scrollContainerRef = useRef("");
+  const fakeScrollbarRef = useRef("");
   const token = localStorage.getItem("authToken");
    const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -98,7 +98,7 @@ const ProjectsTable = ({  onViewProject, onMarkComplete, onDeleteProject, expand
           left: 0,
           right: 0,
           zIndex: 1050,
-          display: "none",
+          
         }}
       >
         <div style={{ width: "2000px", height: 1 }} />
