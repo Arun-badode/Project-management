@@ -225,8 +225,8 @@ const Project = () => {
   } = useSyncScroll(activeTab === "created");
 
   const {
-    scrollContainerRef: scrollContainerRef2,
-    fakeScrollbarRef: fakeScrollbarRef2,
+    scrollContainerRef: scrollContainerRef5,
+    fakeScrollbarRef: fakeScrollbarRef5,
   } = useSyncScroll(activeTab === "active");
 
   const {
@@ -438,7 +438,7 @@ const Project = () => {
             ) : (
               <div className="card">
                 <div
-                  ref={fakeScrollbarRef2}
+                  ref={fakeScrollbarRef5}
                   style={{
                     overflowX: "auto",
                     overflowY: "hidden",
@@ -455,7 +455,7 @@ const Project = () => {
                 {/* Scrollable Table 2 */}
                  <div
                   className="table-responsive table-gradient-bg"
-                  ref={scrollContainerRef2}
+                  ref={scrollContainerRef5}
                   style={{
                     maxHeight: "500px",
                     overflowX: "auto",
