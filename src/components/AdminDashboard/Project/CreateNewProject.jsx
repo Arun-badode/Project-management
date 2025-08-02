@@ -385,19 +385,6 @@ const CreateNewProject = () => {
     });
   };
 
-<<<<<<< HEAD
-  // Fetch clients on component mount
-  useEffect(() => {
-    axios
-      .get(`${BASE_URL}client/getAllClients`, {
-        headers: { authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        console.log("Fetching client options...", res.data.clients);
-        const options = res.data.clients.map((client) => ({
-          value: client.id,
-          label: client.clientName
-=======
   const handleConfirmAddClient = async () => {
     if (newClientName.trim() === "") return;
 
@@ -427,7 +414,6 @@ const CreateNewProject = () => {
         setFormData((prev) => ({
           ...prev,
           client: data.club.clientName,
->>>>>>> 7367d174b2a1928c29b05c36658e7ca3c53bbe93
         }));
 
         setNewClientName("");
