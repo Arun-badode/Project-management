@@ -65,6 +65,18 @@ const CreateNewProject = () => {
   const [loading, setLoading] = useState(true);
   const [managers, setManagers] = useState([]);
   const [loadingManagers, setLoadingManagers] = useState(true);
+  
+  // State for showing/hiding input fields
+  const [showClientInput, setShowClientInput] = useState(false);
+  const [showTaskInput, setShowTaskInput] = useState(false);
+  const [showApplicationInput, setShowApplicationInput] = useState(false);
+  const [showLanguageInput, setShowLanguageInput] = useState(false);
+  
+  // State for new item names
+  const [newClientName, setNewClientName] = useState("");
+  const [newTaskName, setNewTaskName] = useState("");
+  const [newApplicationName, setNewApplicationName] = useState("");
+  const [newLanguageName, setNewLanguageName] = useState("");
 
   const calendarDays = generateCalendarDays(selectedMonth, selectedYear);
 
@@ -87,63 +99,61 @@ const CreateNewProject = () => {
     inrCost: 0,
   });
 
-
-  // this is for getting managers form the api 
- useEffect(() => {
-  const fetchManagers = async () => {
-    try {
-      const token = localStorage.getItem("authToken");
-      const res = await axios.get(
-        `${BASE_URL}member/getAllMembers`,
-        {
+  // Fetch managers from the API
+  useEffect(() => {
+    const fetchManagers = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const res = await axios.get(`${BASE_URL}member/getAllMembers`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+        });
+
+        console.log("Fetched members:", res.data.data);
+
+        if (res.data.status && Array.isArray(res.data.data)) {
+          const onlyManagers = res.data.data.filter(
+            (member) => member.role?.toLowerCase() === "manager"
+          );
+
+          const formatted = onlyManagers.map((manager) => ({
+            value: manager.id,
+            label: manager.fullName,
+          }));
+
+          setManagers(formatted);
         }
-      );
-
-      console.log("Fetched members:", res.data.data);
-
-      if (res.data.status && Array.isArray(res.data.data)) {
-        const onlyManagers = res.data.data.filter(
-          (member) => member.role?.toLowerCase() === "manager"
-        );
-
-        const formatted = onlyManagers.map((manager) => ({
-          value: manager.id,
-          label: manager.fullName,
-        }));
-
-        setManagers(formatted);
+      } catch (err) {
+        console.error("Failed to fetch project managers:", err);
+      } finally {
+        setLoadingManagers(false);
       }
-    } catch (err) {
-      console.error("Failed to fetch project managers:", err);
-    } finally {
-      setLoadingManagers(false);
-    }
-  };
+    };
 
-  fetchManagers();
-}, []);
+    fetchManagers();
+  }, []);
 
-
-
-  // post Api
-
+  // Post API
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Prepare the data in the format expected by the API
     const formDataForApi = {
       projectTitle: formData.title,
-      clientId: formData.client, // You might need to map client names to IDs
+      clientId: formData.client,
       country: formData.country,
-      projectManagerId: formData.projectManager, // You might need to map manager names to IDs
-      taskId: formData.tasks[0], // Assuming single task - adjust if multiple are allowed
-      applicationId: formData.application[0], // Assuming single application - adjust if needed
-      languageId: formData.languages[0], // Assuming single language - adjust if needed
-      totalPagesLang: formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0),
-      totalProjectPages: formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0) * (formData.languages.length || 1),
+      projectManagerId: formData.projectManager,
+      taskId: formData.tasks[0],
+      applicationId: formData.application[0],
+      languageId: formData.languages[0],
+      totalPagesLang: formData.files.reduce(
+        (sum, file) => sum + (file.pageCount || 0),
+        0
+      ),
+      totalProjectPages:
+        formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0) *
+        (formData.languages.length || 1),
       receiveDate: formData.receivedDate,
       serverPath: formData.serverPath,
       notes: formData.notes,
@@ -152,39 +162,34 @@ const CreateNewProject = () => {
       perPageRate: formData.rate || 0,
       currency: formData.currency,
       totalCost: formData.cost || 0,
-      deadline: `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}-${selectedDate.toString().padStart(2, '0')}`,
-      readyQCDeadline: "", // You might want to calculate this
-      qcHrs: 0, // You might want to add this field to your form
-      qcDueDate: "", // You might want to add this field to your form
-      priority: "Medium", // You might want to add this field to your form
-      status: "Active"
+      deadline: `${selectedYear}-${(selectedMonth + 1)
+        .toString()
+        .padStart(2, "0")}-${selectedDate.toString().padStart(2, "0")}`,
+      readyQCDeadline: "",
+      qcHrs: 0,
+      qcDueDate: "",
+      priority: "Medium",
+      status: "Active",
     };
 
     try {
       const response = await axios.post(
-        'https://eminoids-backend-production.up.railway.app/api/project/addProject',
+        "https://eminoids-backend-production.up.railway.app/api/project/addProject",
         formDataForApi,
         {
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      console.log('Project created successfully:', response?.data);
-      // You might want to show a success message or redirect here
-      alert('Project created successfully!');
-
-      // Reset the form if needed
-      // setFormData({...initialState});
-
+      console.log("Project created successfully:", response?.data);
+      alert("Project created successfully!");
     } catch (error) {
-      console.error('Error creating project:', error);
-      // Show error message to user
-      alert('Error creating project. Please try again.');
+      console.error("Error creating project:", error);
+      alert("Error creating project. Please try again.");
     }
   };
-
 
   const handleNextMonth = () => {
     if (selectedMonth === 11) {
@@ -221,7 +226,6 @@ const CreateNewProject = () => {
   ];
 
   // Options for dropdowns
-
   const gradientSelectStyles = {
     control: (provided, state) => ({
       ...provided,
@@ -265,16 +269,14 @@ const CreateNewProject = () => {
     }),
   };
 
-  // const projectManagerOptions = [
-  //   "John Smith",
-  //   "Emily Johnson",
-  //   "Michael Brown",
-  //   "Sarah Wilson",
-  //   "David Lee",
-  // ];
-
   const [taskOptions, setTaskOptions] = useState([]);
+  const [applicationOptions, setApplicationOptions] = useState([]);
+  const [languageOptions, setLanguageOptions] = useState([]);
+  const [clientOptions, setClientOptions] = useState([]);
 
+  
+
+  // Fetch tasks
   useEffect(() => {
     axios
       .get(`${BASE_URL}tasks/getAllTasks`, {
@@ -293,8 +295,7 @@ const CreateNewProject = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const [applicationOptions, setApplicationOptions] = useState([]);
-
+  // Fetch applications
   useEffect(() => {
     axios
       .get(`${BASE_URL}application/getAllApplication`, {
@@ -312,8 +313,7 @@ const CreateNewProject = () => {
       .catch((err) => console.error(err));
   }, []);
 
-  const [languageOptions, setLanguageOptions] = useState([]);
-
+  // Fetch languages
   useEffect(() => {
     axios
       .get(`${BASE_URL}language/getAlllanguage`, {
@@ -330,6 +330,28 @@ const CreateNewProject = () => {
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
+  }, []);
+
+  // Fetch clients
+  useEffect(() => {
+    axios
+      .get(
+        "https://eminoids-backend-production.up.railway.app/api/client/getAllClients",
+        {
+          headers: { authorization: `Bearer ${token}` },
+        }
+      )
+      .then((res) => {
+        console.log("Fetching client options...", res.data.clients);
+        const options = res.data.clients.map((client) => ({
+          value: client.id,
+          label: client.clientName,
+        }));
+        setClientOptions(options);
+      })
+      .catch((err) => {
+        console.error("Error fetching client options", err);
+      });
   }, []);
 
   const formatDateTime = () => {
@@ -355,8 +377,15 @@ const CreateNewProject = () => {
     }));
   };
 
-  const [clientOptions, setClientOptions] = useState([]);
+  // Client functions
+  const handleAddClient = () => {
+    setShowClientInput((prev) => {
+      if (prev) setNewClientName("");
+      return !prev;
+    });
+  };
 
+<<<<<<< HEAD
   // Fetch clients on component mount
   useEffect(() => {
     axios
@@ -368,14 +397,199 @@ const CreateNewProject = () => {
         const options = res.data.clients.map((client) => ({
           value: client.id,
           label: client.clientName
-        }));
-        setClientOptions(options);
-      })
-      .catch((err) => {
-        console.error("Error fetching client options", err);
-      });
-  }, []);
+=======
+  const handleConfirmAddClient = async () => {
+    if (newClientName.trim() === "") return;
 
+    try {
+      const response = await axios.post(
+        "https://eminoids-backend-production.up.railway.app/api/client/addClients",
+        {
+          clientName: newClientName,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = response.data;
+
+      if (data.status && data.club) {
+        const newOption = {
+          value: data.club.clientName,
+          label: data.club.clientName,
+        };
+
+        setClientOptions((prev) => [...prev, newOption]);
+
+        setFormData((prev) => ({
+          ...prev,
+          client: data.club.clientName,
+>>>>>>> 7367d174b2a1928c29b05c36658e7ca3c53bbe93
+        }));
+
+        setNewClientName("");
+        setShowClientInput(false);
+      } else {
+        alert("Failed to add client. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error adding client:", error);
+      alert("An error occurred while adding client.");
+    }
+  };
+
+  // Task functions
+  const handleAddTask = () => {
+    setShowTaskInput((prev) => {
+      if (prev) setNewTaskName("");
+      return !prev;
+    });
+  };
+
+  const handleConfirmAddTask = async () => {
+    if (newTaskName.trim() === "") return;
+
+    try {
+      const response = await axios.post(
+        `${BASE_URL}tasks/addTasks`,
+        {
+          taskName: newTaskName,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = response.data;
+
+      if (data.status && data.task) {
+        const newOption = {
+          value: data.task.id,
+          label: data.task.taskName,
+        };
+
+        setTaskOptions((prev) => [...prev, newOption]);
+
+        setFormData((prev) => ({
+          ...prev,
+          tasks: [...prev.tasks, data.task.id],
+        }));
+
+        setNewTaskName("");
+        setShowTaskInput(false);
+      } else {
+        alert("Task added successfully!");
+      }
+    } catch (error) {
+      console.error("Error adding task:", error);
+      alert("An error occurred while adding task.");
+    }
+  };
+
+  // Application functions
+  const handleAddApplication = () => {
+    setShowApplicationInput((prev) => {
+      if (prev) setNewApplicationName("");
+      return !prev;
+    });
+  };
+
+  const handleConfirmAddApplication = async () => {
+    if (newApplicationName.trim() === "") return;
+
+    try {
+      const response = await axios.post(
+        `${BASE_URL}application/addApplication`,
+        {
+          applicationName: newApplicationName,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = response.data;
+
+      if (data.status && data.application) {
+        const newOption = {
+          value: data.application.id,
+          label: data.application.applicationName,
+        };
+
+        setApplicationOptions((prev) => [...prev, newOption]);
+
+        setFormData((prev) => ({
+          ...prev,
+          application: [...prev.application, data.application.id],
+        }));
+
+        setNewApplicationName("");
+        setShowApplicationInput(false);
+      } else {
+        alert("Failed to add application. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error adding application:", error);
+      alert("An error occurred while adding application.");
+    }
+  };
+
+  // Language functions
+  const handleAddLanguage = () => {
+    setShowLanguageInput((prev) => {
+      if (prev) setNewLanguageName("");
+      return !prev;
+    });
+  };
+
+  const handleConfirmAddLanguage = async () => {
+    if (newLanguageName.trim() === "") return;
+
+    try {
+      const response = await axios.post(
+        `${BASE_URL}language/addLanguage`,
+        {
+          languageName: newLanguageName,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = response.data;
+
+      if (data.status && data.language) {
+        const newOption = {
+          value: data.language.id,
+          label: data.language.languageName,
+        };
+
+        setLanguageOptions((prev) => [...prev, newOption]);
+
+        setFormData((prev) => ({
+          ...prev,
+          languages: [...prev.languages, data.language.id],
+        }));
+
+        setNewLanguageName("");
+        setShowLanguageInput(false);
+      } else {
+        alert("Failed to add language. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error adding language:", error);
+      alert("An error occurred while adding language.");
+    }
+  };
 
   return (
     <div>
@@ -404,33 +618,70 @@ const CreateNewProject = () => {
 
         {/* Client, Country, Project Manager */}
         <div className="row g-3 mb-3">
-          <div className="col-md-4">
-            <label htmlFor="client" className="form-label">
-              Client <span className="text-danger">*</span>
-            </label>
-            <Select
-              id="client"
-              name="client"
-              options={clientOptions}
-              value={
-                clientOptions.find((option) => option.value === formData.client) || null
-              }
-              onChange={(opt) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  client: opt ? opt.value : "", // store ID only
-                }))
-              }
-              isSearchable
-              placeholder="Select Client"
-              styles={gradientSelectStyles}
-            />
+          <div className="col-md-4 mt-2">
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <label htmlFor="client" className="form-label mb-0">
+                Client <span className="text-danger">*</span>
+              </label>
+              <button
+                type="button"
+                className="btn btn-outline-primary"
+                onClick={handleAddClient}
+                title="Add Client"
+              >
+                {showClientInput ? "×" : "+"}
+              </button>
+            </div>
+
+            <div className="d-flex align-items-center gap-2 mt-2">
+              <div style={{ flex: 1 }}>
+                <Select
+                  id="client"
+                  name="client"
+                  options={clientOptions}
+                  value={
+                    formData.client
+                      ? { value: formData.client, label: formData.client }
+                      : null
+                  }
+                  onChange={(opt) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      client: opt ? opt.value : "",
+                    }))
+                  }
+                  isSearchable
+                  placeholder="Select Client"
+                  styles={gradientSelectStyles}
+                />
+
+                {showClientInput && (
+                  <div className="d-flex mt-2 gap-2">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter new client name"
+                      value={newClientName}
+                      onChange={(e) => setNewClientName(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-success"
+                      onClick={handleConfirmAddClient}
+                    >
+                      Add
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
-          <div className="col-md-4">
+          <div className="col-md-4 mt-4">
             <label htmlFor="country" className="form-label">
               Country
             </label>
+
             <input
               type="text"
               className="form-control"
@@ -441,7 +692,7 @@ const CreateNewProject = () => {
               placeholder=""
             />
           </div>
-          <div className="col-md-4">
+          <div className="col-md-4 mt-4">
             <label htmlFor="projectManager" className="form-label">
               Project Manager
             </label>
@@ -450,7 +701,8 @@ const CreateNewProject = () => {
               name="projectManager"
               options={managers}
               value={
-                managers.find((opt) => opt.value === formData.projectManager) || null
+                managers.find((opt) => opt.value === formData.projectManager) ||
+                null
               }
               onChange={(opt) =>
                 setFormData((prev) => ({
@@ -459,20 +711,32 @@ const CreateNewProject = () => {
                 }))
               }
               isSearchable
-              placeholder={loadingManagers ? "Loading..." : "Select Project Manager"}
+              placeholder={
+                loadingManagers ? "Loading..." : "Select Project Manager"
+              }
               styles={gradientSelectStyles}
               isDisabled={loadingManagers}
             />
           </div>
-
         </div>
 
         {/* Task & Applications */}
         <div className="row g-3 mb-3">
           <div className="col-md-6">
-            <label htmlFor="task" className="form-label">
-              Task <span className="text-danger">*</span>
-            </label>
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <label htmlFor="task" className="form-label mb-0">
+                Task <span className="text-danger">*</span>
+              </label>
+              <button
+                type="button"
+                className="btn btn-outline-primary"
+                onClick={handleAddTask}
+                title="Add Task"
+              >
+                {showTaskInput ? "×" : "+"}
+              </button>
+            </div>
+
             <Select
               id="task"
               name="task"
@@ -480,8 +744,8 @@ const CreateNewProject = () => {
               value={
                 taskOptions?.length && formData?.tasks?.length
                   ? taskOptions.filter((opt) =>
-                    formData.tasks.includes(opt.value)
-                  )
+                      formData.tasks.includes(opt.value)
+                    )
                   : []
               }
               onChange={(selectedOptions) =>
@@ -500,11 +764,42 @@ const CreateNewProject = () => {
             <div className="form-text text-white">
               {formData?.tasks?.length || 0} selected
             </div>
+
+            {showTaskInput && (
+              <div className="d-flex mt-2 gap-2">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter new task name"
+                  value={newTaskName}
+                  onChange={(e) => setNewTaskName(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={handleConfirmAddTask}
+                >
+                  Add
+                </button>
+              </div>
+            )}
           </div>
+          
           <div className="col-md-6">
-            <label htmlFor="application" className="form-label">
-              Applications <span className="text-danger">*</span>
-            </label>
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <label htmlFor="application" className="form-label mb-0">
+                Applications <span className="text-danger">*</span>
+              </label>
+              <button
+                type="button"
+                className="btn btn-outline-primary"
+                onClick={handleAddApplication}
+                title="Add Application"
+              >
+                {showApplicationInput ? "×" : "+"}
+              </button>
+            </div>
+
             <Select
               id="application"
               name="application"
@@ -525,14 +820,44 @@ const CreateNewProject = () => {
               placeholder={loading ? "Loading..." : "Select Application(s)"}
               styles={gradientSelectStyles}
             />
+
+            {showApplicationInput && (
+              <div className="d-flex mt-2 gap-2">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Enter new application name"
+                  value={newApplicationName}
+                  onChange={(e) => setNewApplicationName(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={handleConfirmAddApplication}
+                >
+                  Add
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Languages */}
         <div className="mb-3">
-          <label className="form-label">
-            Languages <span className="text-danger">*</span>
-          </label>
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <label className="form-label mb-0">
+              Languages <span className="text-danger">*</span>
+            </label>
+            <button
+              type="button"
+              className="btn btn-outline-primary"
+              onClick={handleAddLanguage}
+              title="Add Language"
+            >
+              {showLanguageInput ? "×" : "+"}
+            </button>
+          </div>
+
           <Select
             options={languageOptions}
             value={languageOptions?.filter((opt) =>
@@ -554,6 +879,25 @@ const CreateNewProject = () => {
           <div className="form-text text-white">
             {formData?.languages?.length} selected
           </div>
+
+          {showLanguageInput && (
+            <div className="d-flex mt-2 gap-2">
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Enter new language name"
+                value={newLanguageName}
+                onChange={(e) => setNewLanguageName(e.target.value)}
+              />
+              <button
+                type="button"
+                className="btn btn-success"
+                onClick={handleConfirmAddLanguage}
+              >
+                Add
+              </button>
+            </div>
+          )}
         </div>
 
         {/* File Details */}
@@ -969,9 +1313,9 @@ const CreateNewProject = () => {
                     <div className="date">
                       {selectedDate !== null
                         ? `${months[selectedMonth].substring(
-                          0,
-                          3
-                        )}, ${selectedYear}`
+                            0,
+                            3
+                          )}, ${selectedYear}`
                         : "00/00/00"}
                     </div>
                   </div>
@@ -987,8 +1331,9 @@ const CreateNewProject = () => {
                                 <button
                                   key={hour}
                                   onClick={() => setSelectedHour(hour)}
-                                  className={`time-option ${selectedHour === hour ? "selected-hour" : ""
-                                    }`}
+                                  className={`time-option ${
+                                    selectedHour === hour ? "selected-hour" : ""
+                                  }`}
                                 >
                                   {hour.toString().padStart(2, "0")}
                                 </button>
@@ -1006,10 +1351,11 @@ const CreateNewProject = () => {
                               <button
                                 key={minute}
                                 onClick={() => setSelectedMinute(minute)}
-                                className={`time-option ${selectedMinute === minute
-                                  ? "selected-minute"
-                                  : ""
-                                  }`}
+                                className={`time-option ${
+                                  selectedMinute === minute
+                                    ? "selected-minute"
+                                    : ""
+                                }`}
                               >
                                 {minute.toString().padStart(2, "0")}
                               </button>
@@ -1023,15 +1369,17 @@ const CreateNewProject = () => {
                         <div className="period-options">
                           <button
                             onClick={() => setIsAM(true)}
-                            className={`period-option ${isAM ? "selected" : ""
-                              }`}
+                            className={`period-option ${
+                              isAM ? "selected" : ""
+                            }`}
                           >
                             AM
                           </button>
                           <button
                             onClick={() => setIsAM(false)}
-                            className={`period-option ${!isAM ? "selected" : ""
-                              }`}
+                            className={`period-option ${
+                              !isAM ? "selected" : ""
+                            }`}
                           >
                             PM
                           </button>
@@ -1068,12 +1416,13 @@ const CreateNewProject = () => {
                               dayObj.isCurrentMonth &&
                               setSelectedDate(dayObj.day)
                             }
-                            className={`calendar-day ${dayObj.isCurrentMonth
-                              ? selectedDate === dayObj.day
-                                ? "current-month selected"
-                                : "current-month"
-                              : "other-month"
-                              }`}
+                            className={`calendar-day ${
+                              dayObj.isCurrentMonth
+                                ? selectedDate === dayObj.day
+                                  ? "current-month selected"
+                                  : "current-month"
+                                : "other-month"
+                            }`}
                           >
                             {dayObj.day}
                           </button>

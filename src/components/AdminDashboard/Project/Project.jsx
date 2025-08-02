@@ -225,8 +225,8 @@ const Project = () => {
   } = useSyncScroll(activeTab === "created");
 
   const {
-    scrollContainerRef: scrollContainerRef2,
-    fakeScrollbarRef: fakeScrollbarRef2,
+    scrollContainerRef: scrollContainerRef5,
+    fakeScrollbarRef: fakeScrollbarRef5,
   } = useSyncScroll(activeTab === "active");
 
   const {
@@ -402,7 +402,7 @@ const Project = () => {
                     zIndex: 1050,
                   }}
                 >
-                  <div style={{ width: "2000px", height: 1 }} />
+                  <div style={{ width: "2500px", height: 1 }} />
                 </div>
 
                 {/* Scrollable Table */}
@@ -438,24 +438,24 @@ const Project = () => {
             ) : (
               <div className="card">
                 <div
-                  ref={fakeScrollbarRef2}
+                  ref={fakeScrollbarRef5}
                   style={{
                     overflowX: "auto",
                     overflowY: "hidden",
                     height: 16,
                     position: "fixed",
-                    bottom: 0, // Adjust as needed
+                    bottom: 0,
                     left: 0,
                     right: 0,
                     zIndex: 1050,
                   }}
                 >
-                  <div style={{ width: "2000px", height: 1 }} />
+                  <div style={{ width: "2500px", height: 1 }} />
                 </div>
                 {/* Scrollable Table 2 */}
-                <div
+                 <div
                   className="table-responsive table-gradient-bg"
-                  ref={scrollContainerRef2}
+                  ref={scrollContainerRef5}
                   style={{
                     maxHeight: "500px",
                     overflowX: "auto",
@@ -463,6 +463,7 @@ const Project = () => {
                     msOverflowStyle: "none", // IE/Edge
                   }}
                 >
+                  
                   <ActiveProjects />
                 </div>
               </div>
@@ -576,7 +577,7 @@ const Project = () => {
                       zIndex: 1050,
                     }}
                   >
-                    <div style={{ width: "2000px", height: 1 }} />
+                    <div style={{ width: "2500px", height: 1 }} />
                   </div>
 
                   <div

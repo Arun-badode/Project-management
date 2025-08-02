@@ -252,18 +252,10 @@ const ActiveProjects = () => {
   };
 
   return (
-    <div
-      className="table-responsive"
-      style={{
-        maxHeight: "500px",
-        overflowX: "auto",
-        scrollbarWidth: "none",
-        msOverflowStyle: "none",
-      }}
-    >
+    <div >
       {loading ? (
         <div className="text-center p-4">
-          <div className="spinner-border text-primary" role="status">
+          <div className="spinner-border text-primary" role="status" style={{ minWidth: 900 }}>
             <span className="visually-hidden">Loading...</span>
           </div>
           <p>Loading Projects...</p>
