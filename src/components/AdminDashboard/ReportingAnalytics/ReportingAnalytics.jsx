@@ -627,7 +627,6 @@ const ReportingAnalytics = () => {
       userId: getManagerIdByName(feedbackFormData.manager),
       resolution: feedbackFormData.resolution || null,
     };
-
     try {
       const token = localStorage.getItem("authToken");
       const response = await fetch("https://eminoids-backend-production.up.railway.app/api/feedback/addFeedback", {

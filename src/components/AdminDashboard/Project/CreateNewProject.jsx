@@ -63,6 +63,8 @@ const CreateNewProject = () => {
   const [isOpen, setIsOpen] = useState(false);
   const token = localStorage.getItem("authToken");
   const [loading, setLoading] = useState(true);
+  const [managers, setManagers] = useState([]);
+  const [loadingManagers, setLoadingManagers] = useState(true);
 
   const calendarDays = generateCalendarDays(selectedMonth, selectedYear);
 
@@ -86,11 +88,51 @@ const CreateNewProject = () => {
   });
 
 
+  // this is for getting managers form the api 
+ useEffect(() => {
+  const fetchManagers = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const res = await axios.get(
+        `${BASE_URL}member/getAllMembers`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Fetched members:", res.data.data);
+
+      if (res.data.status && Array.isArray(res.data.data)) {
+        const onlyManagers = res.data.data.filter(
+          (member) => member.role?.toLowerCase() === "manager"
+        );
+
+        const formatted = onlyManagers.map((manager) => ({
+          value: manager.id,
+          label: manager.fullName,
+        }));
+
+        setManagers(formatted);
+      }
+    } catch (err) {
+      console.error("Failed to fetch project managers:", err);
+    } finally {
+      setLoadingManagers(false);
+    }
+  };
+
+  fetchManagers();
+}, []);
+
+
+
   // post Api
-  
-    const handleSubmit = async (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Prepare the data in the format expected by the API
     const formDataForApi = {
       projectTitle: formData.title,
@@ -123,19 +165,19 @@ const CreateNewProject = () => {
         'https://eminoids-backend-production.up.railway.app/api/project/addProject',
         formDataForApi,
         {
-         headers: {
+          headers: {
             "Authorization": `Bearer ${token}`,
           },
-         }
+        }
       );
-   
+
       console.log('Project created successfully:', response?.data);
       // You might want to show a success message or redirect here
       alert('Project created successfully!');
-      
+
       // Reset the form if needed
       // setFormData({...initialState});
-      
+
     } catch (error) {
       console.error('Error creating project:', error);
       // Show error message to user
@@ -223,13 +265,13 @@ const CreateNewProject = () => {
     }),
   };
 
-  const projectManagerOptions = [
-    "John Smith",
-    "Emily Johnson",
-    "Michael Brown",
-    "Sarah Wilson",
-    "David Lee",
-  ];
+  // const projectManagerOptions = [
+  //   "John Smith",
+  //   "Emily Johnson",
+  //   "Michael Brown",
+  //   "Sarah Wilson",
+  //   "David Lee",
+  // ];
 
   const [taskOptions, setTaskOptions] = useState([]);
 
@@ -316,23 +358,23 @@ const CreateNewProject = () => {
   const [clientOptions, setClientOptions] = useState([]);
 
   // Fetch clients on component mount
- useEffect(() => {
-  axios
-    .get("https://eminoids-backend-production.up.railway.app/api/client/getAllClients", {
-      headers: { authorization: `Bearer ${token}` },
-    })
-    .then((res) => {
-      console.log("Fetching client options...", res.data.clients);
-      const options = res.data.clients.map((client) => ({
-        value: client.clientName,
-        label: client.clientName,
-      }));
-      setClientOptions(options);
-    })
-    .catch((err) => {
-      console.error("Error fetching client options", err);
-    });
-}, []);
+  useEffect(() => {
+    axios
+      .get("https://eminoids-backend-production.up.railway.app/api/client/getAllClients", {
+        headers: { authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        console.log("Fetching client options...", res.data.clients);
+        const options = res.data.clients.map((client) => ({
+          value: client.id,
+          label: client.clientName
+        }));
+        setClientOptions(options);
+      })
+      .catch((err) => {
+        console.error("Error fetching client options", err);
+      });
+  }, []);
 
 
   return (
@@ -371,14 +413,12 @@ const CreateNewProject = () => {
               name="client"
               options={clientOptions}
               value={
-                formData.client
-                  ? { value: formData.client, label: formData.client }
-                  : null
+                clientOptions.find((option) => option.value === formData.client) || null
               }
               onChange={(opt) =>
                 setFormData((prev) => ({
                   ...prev,
-                  client: opt ? opt.value : "",
+                  client: opt ? opt.value : "", // store ID only
                 }))
               }
               isSearchable
@@ -408,17 +448,9 @@ const CreateNewProject = () => {
             <Select
               id="projectManager"
               name="projectManager"
-              options={projectManagerOptions.map((pm) => ({
-                value: pm,
-                label: pm,
-              }))}
+              options={managers}
               value={
-                formData.projectManager
-                  ? {
-                      value: formData.projectManager,
-                      label: formData.projectManager,
-                    }
-                  : null
+                managers.find((opt) => opt.value === formData.projectManager) || null
               }
               onChange={(opt) =>
                 setFormData((prev) => ({
@@ -427,10 +459,12 @@ const CreateNewProject = () => {
                 }))
               }
               isSearchable
-              placeholder="Searchable Dropdown"
+              placeholder={loadingManagers ? "Loading..." : "Select Project Manager"}
               styles={gradientSelectStyles}
+              isDisabled={loadingManagers}
             />
           </div>
+
         </div>
 
         {/* Task & Applications */}
@@ -446,8 +480,8 @@ const CreateNewProject = () => {
               value={
                 taskOptions?.length && formData?.tasks?.length
                   ? taskOptions.filter((opt) =>
-                      formData.tasks.includes(opt.value)
-                    )
+                    formData.tasks.includes(opt.value)
+                  )
                   : []
               }
               onChange={(selectedOptions) =>
@@ -935,9 +969,9 @@ const CreateNewProject = () => {
                     <div className="date">
                       {selectedDate !== null
                         ? `${months[selectedMonth].substring(
-                            0,
-                            3
-                          )}, ${selectedYear}`
+                          0,
+                          3
+                        )}, ${selectedYear}`
                         : "00/00/00"}
                     </div>
                   </div>
@@ -953,9 +987,8 @@ const CreateNewProject = () => {
                                 <button
                                   key={hour}
                                   onClick={() => setSelectedHour(hour)}
-                                  className={`time-option ${
-                                    selectedHour === hour ? "selected-hour" : ""
-                                  }`}
+                                  className={`time-option ${selectedHour === hour ? "selected-hour" : ""
+                                    }`}
                                 >
                                   {hour.toString().padStart(2, "0")}
                                 </button>
@@ -973,11 +1006,10 @@ const CreateNewProject = () => {
                               <button
                                 key={minute}
                                 onClick={() => setSelectedMinute(minute)}
-                                className={`time-option ${
-                                  selectedMinute === minute
-                                    ? "selected-minute"
-                                    : ""
-                                }`}
+                                className={`time-option ${selectedMinute === minute
+                                  ? "selected-minute"
+                                  : ""
+                                  }`}
                               >
                                 {minute.toString().padStart(2, "0")}
                               </button>
@@ -991,17 +1023,15 @@ const CreateNewProject = () => {
                         <div className="period-options">
                           <button
                             onClick={() => setIsAM(true)}
-                            className={`period-option ${
-                              isAM ? "selected" : ""
-                            }`}
+                            className={`period-option ${isAM ? "selected" : ""
+                              }`}
                           >
                             AM
                           </button>
                           <button
                             onClick={() => setIsAM(false)}
-                            className={`period-option ${
-                              !isAM ? "selected" : ""
-                            }`}
+                            className={`period-option ${!isAM ? "selected" : ""
+                              }`}
                           >
                             PM
                           </button>
@@ -1038,13 +1068,12 @@ const CreateNewProject = () => {
                               dayObj.isCurrentMonth &&
                               setSelectedDate(dayObj.day)
                             }
-                            className={`calendar-day ${
-                              dayObj.isCurrentMonth
-                                ? selectedDate === dayObj.day
-                                  ? "current-month selected"
-                                  : "current-month"
-                                : "other-month"
-                            }`}
+                            className={`calendar-day ${dayObj.isCurrentMonth
+                              ? selectedDate === dayObj.day
+                                ? "current-month selected"
+                                : "current-month"
+                              : "other-month"
+                              }`}
                           >
                             {dayObj.day}
                           </button>
