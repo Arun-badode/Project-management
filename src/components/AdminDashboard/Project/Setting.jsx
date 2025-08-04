@@ -37,7 +37,10 @@ export default function SettingsPage() {
   const token = localStorage.getItem("authToken");
   const [applications, setApplications] = useState([]);
   const [newapplication, setNewapplication] = useState("");
+  const [projects, setProjects] = useState([]);
   const [clients, setClients] = useState(initialClients);
+  const [showAllClients, setShowAllClients] = useState(true); // default to showing all
+
   const [clientForm, setClientForm] = useState({
     alias: "",
     actual: "",
@@ -46,6 +49,51 @@ export default function SettingsPage() {
     hourlyRate: "",
     managers: "",
   });
+
+  const [countries, setCountries] = useState([]);
+
+
+  // fetch project detaisl form the api 
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}project/getAllProjects`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.data.status) {
+          setProjects(response.data.projects);
+        }
+      } catch (error) {
+        console.error("Failed to fetch projects:", error);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        const res = await fetch("https://restcountries.com/v3.1/all?fields=name");
+        const data = await res.json();
+
+        // Extract only common names
+        const countryList = data
+          .map((c) => c.name.common)
+          .sort((a, b) => a.localeCompare(b));
+
+        setCountries(countryList);
+      } catch (err) {
+        console.error("Failed to fetch countries", err);
+      }
+    };
+
+    fetchCountries();
+  }, []);
 
   // this is use effect for the fetch application list 
   useEffect(() => {
@@ -93,16 +141,23 @@ export default function SettingsPage() {
 
     fetchClients();
   }, []);
-  const handleClientChange = (e) => {
-    const selectedClientId = e.target.value;
-    const selectedClient = clients.find(
-      (client) => client.id === parseInt(selectedClientId)
-    );
-    setClientForm((prev) => ({
-      ...prev,
-      actual: selectedClient?.clientName || "",
-    }));
-  };
+ const handleClientChange = (e) => {
+  const { name, value } = e.target;
+
+  // Find selected client from full clients list
+  const selectedClient = clients.find(client => client.id.toString() === value);
+
+  setClientForm((prev) => ({
+    ...prev,
+    [name]: value,
+    country: selectedClient?.country || "",
+    currency: selectedClient?.currency || "",
+    hourlyRate: selectedClient?.hourlyRate || "",
+  }));
+
+  selectedClient(selectedClient ? [selectedClient] : []);
+};
+
 
   const [editClientIdx, setEditClientIdx] = useState(null);
 
@@ -434,30 +489,30 @@ export default function SettingsPage() {
     }
   };
 
- const handleDeleteLanguage = async (id) => {
-  const confirmDelete = window.confirm("Are you sure you want to delete this language?");
-  if (!confirmDelete) return;
+  const handleDeleteLanguage = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this language?");
+    if (!confirmDelete) return;
 
-  try {
-    const token = localStorage.getItem("authToken");
-    const res = await axios.delete(
-      `${BASE_URL}language/deleteLanguageById/${id}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
+    try {
+      const token = localStorage.getItem("authToken");
+      const res = await axios.delete(
+        `${BASE_URL}language/deleteLanguageById/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data.status) {
+        // Remove the deleted language from the UI
+        setLanguages((prev) => prev.filter((lang) => lang.id !== id));
+      } else {
+        alert("Failed to delete the language.");
       }
-    );
-
-    if (res.data.status) {
-      // Remove the deleted language from the UI
-      setLanguages((prev) => prev.filter((lang) => lang.id !== id));
-    } else {
-      alert("Failed to delete the language.");
+    } catch (err) {
+      console.error("Error deleting language:", err);
+      alert("Something went wrong while deleting.");
     }
-  } catch (err) {
-    console.error("Error deleting language:", err);
-    alert("Something went wrong while deleting.");
-  }
-};
+  };
 
 
 
@@ -525,7 +580,11 @@ export default function SettingsPage() {
     { name: "GBP", rate: "90" },
   ]);
 
- 
+  const selectedClientData = showAllClients
+    ? clients
+    : clients.filter((client) => client.id === parseInt(clientForm.actual));
+
+
   return (
     <div className="p-4 settings-main-unique py-4">
       <h2 className="gradient-heading mb-1">Client Management</h2>
@@ -536,6 +595,7 @@ export default function SettingsPage() {
         Manage your client details including currency, hourly rate, and project
         managers.
       </div>
+      
       <div className="settings-grid">
         <div className="settings-card">
           <h5 className="text-white">Manage Clients</h5>
@@ -546,10 +606,26 @@ export default function SettingsPage() {
               <select
                 name="actual"
                 value={clientForm.actual}
-                onChange={handleClientChange}
+                onChange={(e) => {
+                  const selectedClientId = parseInt(e.target.value);
+                  const relatedProjects = projects.filter(
+                    (project) => project.clientId === selectedClientId
+                  );
+
+                  const latestProject = relatedProjects[0]; // pick the first or latest
+
+                  setClientForm((prevForm) => ({
+                    ...prevForm,
+                    actual: selectedClientId,
+                    country: latestProject?.country || "",
+                    currency: latestProject?.currency || "",
+                    hourlyRate: latestProject?.hourlyRate || "",
+                    projectManager: latestProject?.full_name || "",
+                  }));
+                }}
                 className="form-control"
               >
-                <option value="client">-- Select Client --</option>
+                <option value="">-- Select Client --</option>
                 {clients.map((client) => (
                   <option key={client.id} value={client.id}>
                     {client.clientName}
@@ -557,6 +633,7 @@ export default function SettingsPage() {
                 ))}
               </select>
             </div>
+
             <div className="col-md-6 mb-2">
               <input
                 className="form-control"
@@ -572,14 +649,22 @@ export default function SettingsPage() {
           {/* Second row */}
           <div className="row mb-3">
             <div className="col-md-4 mb-2">
-              <input
+              <select
                 className="form-control"
-                style={{ background: "#181f3a", color: "#fff" }}
-                placeholder="Country*"
                 name="country"
                 value={clientForm.country}
                 onChange={handleClientChange}
-              />
+                style={{ background: "#181f3a", color: "#fff" }}
+              >
+                <option value="">-- Select Country --</option>
+                {countries.map((country, idx) => (
+                  <option key={idx} value={country}>
+                    {country}
+                  </option>
+                ))}
+              </select>
+
+
             </div>
 
             <div className="col-md-8 mb-2">
@@ -623,7 +708,14 @@ export default function SettingsPage() {
               className="form-control"
               name="managers"
               value={clientForm.managers}
-              onChange={handleClientChange}
+              onChange={(e) => {
+                const selectedId = e.target.value;
+
+                setClientForm((prevForm) => ({
+                  ...prevForm,
+                  managers: selectedId, // ✅ only manager ID stored here
+                }));
+              }}
               style={{ background: "#181f3a", color: "#fff" }}
             >
               <option value="">-- Select Project Manager --</option>
@@ -633,6 +725,7 @@ export default function SettingsPage() {
                 </option>
               ))}
             </select>
+
             <button
               className="btn btn-gradient"
               onClick={handleAddOrEditClient}
@@ -653,53 +746,55 @@ export default function SettingsPage() {
               border: "2px solid #7b2ff2",
               borderRadius: 10,
               background: "rgba(20,30,70,0.7)",
-              maxHeight: "400px", // Added fixed height
-              overflowY: "auto", // Added scroll for overflow
+              maxHeight: "400px",
+              overflowY: "auto",
               padding: "10px",
             }}
           >
-            {clients.map((c, idx) => (
-              <div
-                className="client-item d-flex justify-content-between align-items-start"
-                key={idx}
+           {!clientForm.actual ? (
+  <p className="text-white" style={{ opacity: 0.6 }}>
+    No client selected.
+  </p>
+) : (
+  <div className="client-item d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <b className="text-white">{clientForm.alias} (Alias)</b>{" "}
+      <span className="text-white" style={{ opacity: 0.7 }}>
+        ({clientForm.actual})
+      </span>
+      <div style={{ fontSize: "0.95em" }}>
+        <span className="text-white" style={{ opacity: 0.7 }}>
+          Country: {clientForm.country}
+        </span>
+        <br />
+        <span className="text-white" style={{ opacity: 0.7 }}>
+          Currency: {clientForm.currency} | Hourly: {clientForm.hourlyRate}
+        </span>
+        <br />
+        <span className="text-white" style={{ opacity: 0.7 }}>
+          PMs: {clientForm.managers}
+        </span>
+      </div>
+    </div>
+    <div>
+      <button
+        className="btn btn-sm btn-link text-light"
+        onClick={() => handleEditClient(0)}
+      >
+        <i className="bi bi-pencil"></i>
+      </button>
+      <button
+        className="btn btn-sm btn-link text-danger"
+        onClick={() => handleDeleteClient(0)}
+      >
+        <i className="bi bi-trash"></i>
+      </button>
+    </div>
+  </div>
+)}
 
-              >
-                <div>
-                  <b className="text-white">{c.alias} (Alias)</b>{" "}
-                  <span className="text-white" style={{ opacity: 0.7 }}>
-                    ({c.actual})
-                  </span>
-                  <div style={{ fontSize: "0.95em" }}>
-                    <span className="text-white" style={{ opacity: 0.7 }}>
-                      Country: {c.country}
-                    </span>
-                    <br />
-                    <span className="text-white" style={{ opacity: 0.7 }}>
-                      Currency: {c.currency} | Hourly: {c.hourlyRate}
-                    </span>
-                    <br />
-                    <span className="text-white" style={{ opacity: 0.7 }}>
-                      PMs: {c.managers}
-                    </span>
-                  </div>
-                </div>
-                <div>
-                  <button
-                    className="btn btn-sm btn-link text-light"
-                    onClick={() => handleEditClient(idx)}
-                  >
-                    <i className="bi bi-pencil"></i>
-                  </button>
-                  <button
-                    className="btn btn-sm btn-link text-danger"
-                    onClick={() => handleDeleteClient(idx)}
-                  >
-                    <i className="bi bi-trash"></i>
-                  </button>
-                </div>
-              </div>
-            ))}
           </div>
+
 
           {/* Manage Tasks List */}
           <div className="mb-4">
@@ -721,7 +816,15 @@ export default function SettingsPage() {
               </button>
             </div>
 
-            <div className="border rounded p-2 mb-2 border-secondary">
+            <div className="border rounded p-2 mb-2 border-secondary"
+              style={{
+                border: "2px solid #7b2ff2",
+                borderRadius: 10,
+                background: "rgba(20,30,70,0.7)",
+                maxHeight: "400px", // Added fixed height
+                overflowY: "auto", // Added scroll for overflow
+                padding: "10px",
+              }}>
               {tasks.map((task) => (
                 <div
                   key={task.id}
@@ -769,7 +872,15 @@ export default function SettingsPage() {
               </button>
 
             </div>
-            <div className="border rounded p-2 mb-2 border-secondary">
+            <div className="border rounded p-2 mb-2 border-secondary"
+              style={{
+                border: "2px solid #7b2ff2",
+                borderRadius: 10,
+                background: "rgba(20,30,70,0.7)",
+                maxHeight: "400px", // Added fixed height
+                overflowY: "auto", // Added scroll for overflow
+                padding: "10px",
+              }}>
               {applications.map((application) => (
                 <div
                   key={application.id}
@@ -819,7 +930,15 @@ export default function SettingsPage() {
               <button className="btn btn-primary" onClick={handleAddLanguage}
                 disabled={!newLanguage}>+</button>
             </div>
-            <div className="border rounded p-2 mb-2 border-secondary">
+            <div className="border rounded p-2 mb-2 border-secondary"
+              style={{
+                border: "2px solid #7b2ff2",
+                borderRadius: 10,
+                background: "rgba(20,30,70,0.7)",
+                maxHeight: "400px", // Added fixed height
+                overflowY: "auto", // Added scroll for overflow
+                padding: "10px",
+              }}>
               {languages.map((language, index) => (
                 <div
                   key={language.id}
@@ -889,7 +1008,15 @@ export default function SettingsPage() {
                 />
               </div>
             </div>
-            <div className="border rounded p-2 mb-2 border-secondary table-gradient-bg">
+            <div className="border rounded p-2 mb-2 border-secondary table-gradient-bg"
+              style={{
+                border: "2px solid #7b2ff2",
+                borderRadius: 10,
+                background: "rgba(20,30,70,0.7)",
+                maxHeight: "400px", // Added fixed height
+                overflowY: "auto", // Added scroll for overflow
+                padding: "10px",
+              }}>
               <table className="table table-dark table-sm mb-0">
                 <thead>
                   <tr>
