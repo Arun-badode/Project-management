@@ -44,39 +44,49 @@ const Created = () => {
 
 
 
-  const markAsCompleted = async (projectId) => {
-    try {
-      const token = localStorage.getItem("authToken");
+ const markAsCompleted = async (projectId) => {
+  try {
+    const token = localStorage.getItem("authToken");
 
-      const res = await axios.patch(
-        `${BASE_URL}project/updateProject/${projectId}`,
-        {
-          status: "Completed", // 👈 Change the project status
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    // Prompt user to enter deadline
+    const deadline = prompt("Enter new deadline date (YYYY-MM-DD):");
 
-      if (res.status === 200) {
-        alert("Project marked as Completed successfully!");
-        // optionally refresh the project list here
-        // refresh the list
-        const refreshed = await axios.get(`${BASE_URL}project/getAllProjects`, {
-          headers: { authorization: `Bearer ${token}` },
-        });
-        if (refreshed.data.status) {
-          setProjects(refreshed.data.projects);
-        }
-        //fetchProjects(); // you must define this function to reload projects
-      }
-    } catch (error) {
-      console.error("Failed to update project status:", error);
-      alert("Error updating project status");
+    if (!deadline || !/^\d{4}-\d{2}-\d{2}$/.test(deadline)) {
+      alert("Invalid or empty date. Please use YYYY-MM-DD format.");
+      return;
     }
-  };
+
+    const res = await axios.patch(
+      `${BASE_URL}project/updateProject/${projectId}`,
+      {
+        status: "Active",       // ✅ Set status to Active
+        deadline: deadline,     // ✅ Set deadline as user input
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (res.status === 200) {
+      alert("Project status updated and deadline set successfully!");
+
+      // Refresh project list
+      const refreshed = await axios.get(`${BASE_URL}project/getAllProjects`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (refreshed.data.status) {
+        setProjects(refreshed.data.projects);
+      }
+    }
+  } catch (error) {
+    console.error("Failed to update project status:", error);
+    alert("Error updating project status");
+  }
+};
+
 
 
   const handleEditProject = (id) => {
@@ -174,7 +184,7 @@ const Created = () => {
                         className="btn btn-sm btn-success"
                         title="Mark as Completed"
                       >
-                        <i className="fas fa-check"></i>
+                     <i className="fas fa-check"></i>   Mark as YTS
                       </button>
                       <button
                         onClick={() => handleEditProject(project.id)}

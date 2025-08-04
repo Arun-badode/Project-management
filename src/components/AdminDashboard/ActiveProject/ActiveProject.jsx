@@ -7,6 +7,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import CreateNewProject from "../Project/CreateNewProject";
 import EditModal from "./EditModal";
+import BASE_URL from "../../../config";
 
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
@@ -118,7 +119,7 @@ const ActiveProject = () => {
     const fetchProjects = async () => {
       try {
         const response = await fetch(
-          'https://eminoids-backend-production.up.railway.app/api/project/getAllProjects',
+          `${BASE_URL}project/getAllProjects`,
           {
             headers: { authorization: `Bearer ${token}` },
           }
