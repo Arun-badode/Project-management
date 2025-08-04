@@ -97,6 +97,8 @@ const CreateNewProject = () => {
     currency: "USD",
     cost: 0,
     inrCost: 0,
+    billingMode: "estimated", // Added default billing mode
+    estimatedHrs: 0, // Added estimatedHrs to initial state
   });
 
   // Fetch managers from the API
@@ -257,9 +259,7 @@ const CreateNewProject = () => {
     }),
     option: (provided, state) => ({
       ...provided,
-      backgroundColor: state.isFocused
-        ? "#293d80"
-        : "linear-gradient(to bottom right, #141c3a, #1b2f6e)",
+      backgroundColor: state.isFocused ? "#293d80" : "transparent",
       color: "white",
     }),
     menu: (provided) => ({
@@ -315,22 +315,63 @@ const CreateNewProject = () => {
 
   // Fetch languages
   useEffect(() => {
-    axios
-      .get(`${BASE_URL}language/getAlllanguage`, {
-        headers: { authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        if (res.data.status) {
-          const options = res.data.languages.map((lang) => ({
-            value: lang.id,
-            label: lang.languageName,
-          }));
-          setLanguageOptions(options);
-        }
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  }, []);
+    // Fetch tasks
+    axios.get(`${BASE_URL}tasks/getAllTasks`, {
+      headers: { authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      if (res.data.status) {
+        setTaskOptions(res.data.tasks.map((task) => ({
+          value: task.id,
+          label: task.taskName,
+        })));
+      }
+    })
+    .catch((err) => console.error("Error fetching tasks:", err));
+
+    // Fetch applications
+    axios.get(`${BASE_URL}application/getAllApplication`, {
+      headers: { authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      if (res.data.status) {
+        setApplicationOptions(res.data.application.map((app) => ({
+          value: app.id,
+          label: app.applicationName,
+        })));
+      }
+    })
+    .catch((err) => console.error("Error fetching applications:", err));
+
+    // Fetch languages
+    axios.get(`${BASE_URL}language/getAlllanguage`, {
+      headers: { authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      if (res.data.status) {
+        setLanguageOptions(res.data.languages.map((lang) => ({
+          value: lang.id,
+          label: lang.languageName,
+        })));
+      }
+    })
+    .catch((err) => console.error("Error fetching languages:", err));
+
+    // Fetch clients
+    axios.get(`${BASE_URL}client/getAllClients`, {
+      headers: { authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      if (res.data.status) {
+        setClientOptions(res.data.clients.map((client) => ({
+          value: client.id, // Changed from client.clientName to client.id to match API expectation
+          label: client.clientName,
+        })));
+      }
+    })
+    .catch((err) => console.error("Error fetching clients:", err))
+    .finally(() => setLoading(false));
+  }, [token]);
 
   // Fetch clients
   useEffect(() => {
@@ -358,9 +399,7 @@ const CreateNewProject = () => {
     if (selectedDate === null) {
       return "00/00/00 00:00 AM";
     }
-    const date = `${selectedDate.toString().padStart(2, "0")}/${(
-      selectedMonth + 1
-    )
+    const date = `${selectedDate.toString().padStart(2, "0")}/${(selectedMonth + 1)
       .toString()
       .padStart(2, "0")}/${selectedYear.toString().slice(-2)}`;
     const time = `${selectedHour.toString().padStart(2, "0")}:${selectedMinute
@@ -746,9 +785,10 @@ const CreateNewProject = () => {
               isSearchable
               placeholder={loading ? "Loading..." : "Select Task(s)"}
               styles={gradientSelectStyles}
+              required
             />
             <div className="form-text text-white">
-              {formData?.tasks?.length || 0} selected
+              {formData.tasks.length} selected
             </div>
 
             {showTaskInput && (
@@ -790,9 +830,9 @@ const CreateNewProject = () => {
               id="application"
               name="application"
               options={applicationOptions}
-              value={applicationOptions?.filter((opt) =>
-                formData?.application?.includes(opt.value)
-              )}
+              value={
+                applicationOptions?.filter(opt => formData.application.includes(opt.value))
+              }
               onChange={(selectedOptions) =>
                 setFormData((prev) => ({
                   ...prev,
@@ -805,6 +845,7 @@ const CreateNewProject = () => {
               isSearchable
               placeholder={loading ? "Loading..." : "Select Application(s)"}
               styles={gradientSelectStyles}
+              required
             />
 
             {showApplicationInput && (
@@ -846,9 +887,9 @@ const CreateNewProject = () => {
 
           <Select
             options={languageOptions}
-            value={languageOptions?.filter((opt) =>
-              formData?.languages?.includes(opt.value)
-            )}
+            value={
+              languageOptions?.filter(opt => formData.languages.includes(opt.value))
+            }
             onChange={(selectedOptions) =>
               setFormData((prev) => ({
                 ...prev,
@@ -861,9 +902,10 @@ const CreateNewProject = () => {
             isSearchable
             placeholder={loading ? "Loading..." : "Select Languages"}
             styles={gradientSelectStyles}
+            required
           />
           <div className="form-text text-white">
-            {formData?.languages?.length} selected
+            {formData.languages.length} selected
           </div>
 
           {showLanguageInput && (
@@ -986,6 +1028,7 @@ const CreateNewProject = () => {
                           setFormData((prev) => ({ ...prev, files }));
                         }}
                         placeholder="File Name"
+                        required
                       />
                     </td>
 
@@ -1001,6 +1044,7 @@ const CreateNewProject = () => {
                           setFormData((prev) => ({ ...prev, files }));
                         }}
                         placeholder="Pages"
+                        required
                       />
                     </td>
 
@@ -1022,6 +1066,7 @@ const CreateNewProject = () => {
 
                           setFormData((prev) => ({ ...prev, files }));
                         }}
+                        required
                       >
                         <option value="">Select</option>
                         {applicationOptions.map((app) => (
@@ -1131,7 +1176,7 @@ const CreateNewProject = () => {
                   setFormData((prev) => ({
                     ...prev,
                     billingMode: e.target.value,
-                    rate: e.target.value === "estimated" ? "" : prev.rate,
+                    rate: e.target.value === "estimated" ? 0 : prev.rate,
                   }))
                 }
               />
@@ -1154,10 +1199,7 @@ const CreateNewProject = () => {
                 }));
               }}
               placeholder="00.00"
-              disabled={
-                formData.billingMode !== "estimated" &&
-                formData.billingMode !== undefined
-              }
+              disabled={formData.billingMode !== "estimated"}
             />
             <div className="form-text text-white">
               (in multiple of 0.25 only)
@@ -1197,7 +1239,7 @@ const CreateNewProject = () => {
                     ...prev,
                     billingMode: e.target.value,
                     estimatedHrs:
-                      e.target.value === "perPage" ? "" : prev.estimatedHrs,
+                      e.target.value === "perPage" ? 0 : prev.estimatedHrs,
                   }))
                 }
               />
@@ -1375,13 +1417,13 @@ const CreateNewProject = () => {
 
                     <div className="calendar-section">
                       <div className="month-nav">
-                        <button onClick={handlePrevMonth}>
+                        <button type="button" onClick={handlePrevMonth}>
                           <ChevronLeft size={20} />
                         </button>
                         <h3>
                           {months[selectedMonth]}, {selectedYear}
                         </h3>
-                        <button onClick={handleNextMonth}>
+                        <button type="button" onClick={handleNextMonth}>
                           <ChevronRight size={20} />
                         </button>
                       </div>
@@ -1398,6 +1440,7 @@ const CreateNewProject = () => {
                         {calendarDays.map((dayObj, index) => (
                           <button
                             key={index}
+                            type="button"
                             onClick={() =>
                               dayObj.isCurrentMonth &&
                               setSelectedDate(dayObj.day)
@@ -1417,6 +1460,7 @@ const CreateNewProject = () => {
 
                       <div className="action-buttons">
                         <button
+                          type="button"
                           onClick={() => {
                             setSelectedDate(null);
                             setSelectedHour(0);
@@ -1428,6 +1472,7 @@ const CreateNewProject = () => {
                           Clear
                         </button>
                         <button
+                          type="button"
                           onClick={() => {
                             const today = new Date();
                             setSelectedDate(today.getDate());
@@ -1447,6 +1492,7 @@ const CreateNewProject = () => {
 
                   <div className="done-section">
                     <button
+                      type="button"
                       onClick={() => setIsOpen(false)}
                       className="done-button"
                     >

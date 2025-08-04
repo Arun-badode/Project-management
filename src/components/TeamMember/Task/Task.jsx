@@ -1,50 +1,17 @@
+import axios from "axios";
 import React, { useState, useEffect } from "react";
+import axiosInstance from "../../Utilities/axiosInstance";
 
 function Task() {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [allTasks, setAllTasks] = useState([
     {
       id: 1,
-      name: "Design Homepage Layout",
-      status: "YTS",
-      project: "Website Redesign",
-      dueDate: "2025-06-25",
-      assignee: "John Doe",
-      priority: "High",
-      files: ["homepage_mockup.psd", "assets_list.xlsx"],
-      comments: [
-        {
-          user: "Project Manager",
-          text: "Please follow the brand guidelines",
-          date: "2025-06-17",
-        },
-      ],
-      timeTracked: 0,
-      serverPath: "",
-    },
-    {
-      id: 2,
-      name: "Implement User Authentication",
-      status: "WIP",
-      project: "Mobile App Development",
-      dueDate: "2025-06-23",
-      assignee: "Jane Smith",
-      priority: "Critical",
-      files: ["auth_flow.pdf", "api_docs.md"],
-      comments: [
-        {
-          user: "Backend Dev",
-          text: "API endpoints are ready for integration",
-          date: "2025-06-18",
-        },
-      ],
-      timeTracked: 4.5,
-      serverPath: "",
-    },
-    {
-      id: 3,
       name: "QA Testing for Payment Module",
+      client:"jhon",
       status: "QC YTS",
-      project: "E-commerce Application",
+      project: "MSCNIP",
       dueDate: "2025-06-21",
       assignee: "Current User",
       priority: "Medium",
@@ -60,10 +27,12 @@ function Task() {
       serverPath: "",
     },
     {
-      id: 4,
+      id: 2,
       name: "Fix Navigation Bug",
+      client:"jhon",
+
       status: "Corr WIP",
-      project: "Mobile App Development",
+      project: "Help",
       dueDate: "2025-06-20",
       assignee: "Current User",
       priority: "High",
@@ -79,10 +48,12 @@ function Task() {
       serverPath: "",
     },
     {
-      id: 5,
+      id: 3,
       name: "Dashboard UI Design",
+      client:"jhon",
+
       status: "WIP",
-      project: "Design System",
+      project: "Help",
       dueDate: "2025-06-22",
       assignee: "Current User",
       priority: "High",
@@ -99,6 +70,58 @@ function Task() {
     },
   ]);
 
+  // Projects data
+  const [projectTasks, setProjectTasks] = useState([
+    {
+      id: 1,
+      projectTitle: "Project 1 (High)",
+      client: "Main Auditor",
+      task: "Image Localization",
+      language: "id",
+      application: "AI",
+      totalPages: 54,
+      assignedPages: "AI",
+      describe: "02:41 AM 14:08:26",
+      readyForGoDescribe: "3:41 AM 14:08:26",
+      goRunDate: "4:41 AM 14:08:26",
+      status: "QC WIP",
+      progress: "95%",
+      team: "2015-01-X, Tuesday"
+    },
+    {
+      id: 2,
+      projectTitle: "Project 2 (Y)",
+      client: "OTP",
+      task: "20-Hora",
+      language: "FM",
+      application: "",
+      totalPages: 50,
+      assignedPages: 50,
+      describe: "20:28 PM 11:08:26",
+      readyForGoDescribe: "21:28 PM 11:08:26",
+      goRunDate: "22:28 PM 11:08:26",
+      status: "QC YTS",
+      progress: "95%",
+      team: ""
+    },
+    {
+      id: 3,
+      projectTitle: "Project 3 (SS)",
+      client: "Image Localization",
+      task: "20-Hora",
+      language: "Project",
+      application: "",
+      totalPages: 30,
+      assignedPages: 30,
+      describe: "08:20 AM 21:08:25",
+      readyForGoDescribe: "9:20 AM 21:08:25",
+      goRunDate: "10:20 AM 21:08:25",
+      status: "Cear YTS",
+      progress: "75%",
+      team: ""
+    },
+  ]);
+
   // Filter tasks to show only those assigned to "Current User"
   const [tasks, setTasks] = useState(
     allTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS")
@@ -107,7 +130,6 @@ function Task() {
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showReassignModal, setShowReassignModal] = useState(false);
-  const [showTimerModal, setShowTimerModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
 
   const [serverPath, setServerPath] = useState("");
@@ -158,22 +180,21 @@ function Task() {
             updatedAllTasks[activeTaskIndex] = {
               ...updatedAllTasks[activeTaskIndex],
               status: "WIP (Paused)",
+              timeTracked: updatedAllTasks[activeTaskIndex].timeTracked + timerSeconds / 3600,
             };
           }
         }
 
         task.status = "WIP";
-        task.assignee = "Current User"; // Assign to current user when starting
+        task.assignee = "Current User";
         setActiveTaskId(taskId);
         setTimerRunning(true);
         setTimerSeconds(0);
-        setShowTimerModal(true);
         break;
       case "pause":
         task.status = "WIP (Paused)";
         setTimerRunning(false);
-        // Update time tracked for the task
-        task.timeTracked += timerSeconds / 3600; // Convert seconds to hours
+        task.timeTracked += timerSeconds / 3600;
         setTimerSeconds(0);
         setActiveTaskId(null);
         break;
@@ -194,25 +215,23 @@ function Task() {
         setShowDetailsModal(true);
         return;
       case "switch":
-        // Pause current task
+        // Pause current task if any
         if (activeTaskId) {
           const activeTaskIndex = allTasks.findIndex((t) => t.id === activeTaskId);
           if (activeTaskIndex !== -1) {
             updatedAllTasks[activeTaskIndex] = {
               ...updatedAllTasks[activeTaskIndex],
               status: "WIP (Paused)",
-              timeTracked:
-                updatedAllTasks[activeTaskIndex].timeTracked + timerSeconds / 3600,
+              timeTracked: updatedAllTasks[activeTaskIndex].timeTracked + timerSeconds / 3600,
             };
           }
         }
         // Start new task
         task.status = "WIP";
-        task.assignee = "Current User"; // Assign to current user when switching
+        task.assignee = "Current User";
         setActiveTaskId(taskId);
         setTimerRunning(true);
         setTimerSeconds(0);
-        setShowTimerModal(true);
         break;
       default:
         return;
@@ -220,7 +239,6 @@ function Task() {
 
     updatedAllTasks[taskIndex] = task;
     setAllTasks(updatedAllTasks);
-    // Update filtered tasks
     setTasks(updatedAllTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS"));
   };
 
@@ -242,7 +260,6 @@ function Task() {
       task.status = "RFD";
     }
 
-    // Add tracked time
     if (activeTaskId === task.id) {
       task.timeTracked += timerSeconds / 3600;
       setTimerRunning(false);
@@ -254,7 +271,6 @@ function Task() {
     updatedAllTasks[taskIndex] = task;
 
     setAllTasks(updatedAllTasks);
-    // Update filtered tasks
     setTasks(updatedAllTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS"));
     setShowCompleteModal(false);
     setServerPath("");
@@ -263,251 +279,249 @@ function Task() {
   };
 
   const handleReassignRequest = () => {
-    alert(
-      `Reassignment requested for task "${selectedTask.name}" with reason: ${reassignReason}`
-    );
+    alert(`Reassignment requested for task "${selectedTask.name}" with reason: ${reassignReason}`);
     setShowReassignModal(false);
     setReassignReason("");
   };
 
-  const renderActionButtons = (task) => {
+  const getStatusBadgeColor = (status) => {
+    switch (status) {
+      case "YTS": return "bg-light text-dark";
+      case "WIP": return "bg-info text-white";
+      case "WIP (Paused)": return "bg-warning text-dark";
+      case "QC YTS": return "bg-secondary text-white";
+      case "QC WIP": return "bg-primary text-white";
+      case "Corr WIP": return "bg-danger text-white";
+      case "RFD": return "bg-success text-white";
+      case "Cear YTS": return "bg-warning text-dark";
+      default: return "bg-light text-dark";
+    }
+  };
+
+  const renderTaskActions = (task) => {
     return (
-      <div className="d-flex flex-wrap gap-2">
-        {(task.status === "YTS" || task.status === "WIP (Paused)") && (
+      <div className="d-flex flex-wrap gap-1">
+        {task.status === "QC YTS" && (
           <button
-            onClick={() => handleTaskAction(task.id, "start")}
-            className="btn btn-primary btn-sm"
+            onClick={() => handleTaskAction(task.id, "self-assign")}
+            className="btn btn-sm btn-primary"
           >
-            <i className="fas fa-play me-2"></i>
-            {task.status === "YTS" ? "Start Work" : "Resume Work"}
+            Set/Assign
+          </button>
+        )}
+        <button
+          onClick={() => handleTaskAction(task.id, "switch")}
+          className="btn btn-sm btn-secondary"
+        >
+          Switch Task
+        </button>
+        <button
+          onClick={() => handleTaskAction(task.id, "reassign")}
+          className="btn btn-sm btn-warning"
+        >
+          Reassign
+        </button>
+        <button
+          onClick={() => handleTaskAction(task.id, "details")}
+          className="btn btn-sm btn-info"
+        >
+          Details
+        </button>
+        {(task.status === "WIP" || task.status === "Corr WIP") && (
+          <button
+            onClick={() => handleTaskAction(task.id, "complete")}
+            className="btn btn-sm btn-success"
+          >
+            Complete Task
           </button>
         )}
         {task.status === "WIP" && (
           <button
             onClick={() => handleTaskAction(task.id, "pause")}
-            className="btn btn-warning btn-sm"
+            className="btn btn-sm btn-danger"
           >
-            <i className="fas fa-pause me-2"></i>
             Pause Work
           </button>
         )}
-        {(task.status === "WIP" || task.status === "Corr WIP") && (
-          <button
-            onClick={() => handleTaskAction(task.id, "complete")}
-            className="btn btn-success btn-sm"
-          >
-            <i className="fas fa-check me-2"></i>
-            Complete Task
-          </button>
-        )}
-        {task.status === "QC YTS" && (
-          <button
-            onClick={() => handleTaskAction(task.id, "self-assign")}
-            className="btn btn-info btn-sm"
-          >
-            <i className="fas fa-user-check me-2"></i>
-            Self-Assign
-          </button>
-        )}
-        {task.status !== "YTS" && (
-          <button
-            onClick={() => handleTaskAction(task.id, "switch")}
-            className="btn btn-secondary "
-          >
-            <i className="fas fa-exchange-alt me-2"></i>
-            Switch Task
-          </button>
-        )}
-        <button
-          onClick={() => handleTaskAction(task.id, "reassign")}
-          className="btn btn-warning "
-        >
-          <i className="fas fa-exchange-alt me-2"></i>
-          Reassign
-        </button>
-        <button
-          onClick={() => handleTaskAction(task.id, "details")}
-          className="btn btn-secondary "
-        >
-          <i className="fas fa-expand-alt me-2"></i>
-          Details
-        </button>
       </div>
     );
   };
 
-  const getStatusBadgeColor = (status) => {
-    switch (status) {
-      case "YTS":
-        return "bg-light text-dark";
-      case "WIP":
-        return "bg-info text-white";
-      case "WIP (Paused)":
-        return "bg-warning text-dark";
-      case "QC YTS":
-        return "bg-secondary text-white";
-      case "QC WIP":
-        return "bg-primary text-white";
-      case "Corr WIP":
-        return "bg-danger text-white";
-      case "RFD":
-        return "bg-success text-white";
-      default:
-        return "bg-light text-dark";
-    }
-  };
-
-  const getPriorityBadgeColor = (priority) => {
-    switch (priority) {
-      case "Low":
-        return "bg-primary text-white";
-      case "Medium":
-        return "bg-warning text-dark";
-      case "High":
-        return "bg-danger text-white";
-      case "Critical":
-        return "bg-dark text-white";
-      default:
-        return "bg-light text-dark";
-    }
-  };
+  useEffect(() => {
+    axiosInstance
+      .get('project/getAllProjects', {})
+      .then((res) => {
+        if (res.data.status) {
+          const completedProjects = res.data.projects.filter(
+            (project) => project.status?.toLowerCase() === "completed"
+          );
+          setProjects(completedProjects);
+        }
+      })
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
-    <div className="p-3">
-      <h2 className="mb-4 gradient-heading">My Tasks</h2>
+    <div className="container-fluid p-3">
+      <h2 className="mb-4">My Tasks</h2>
 
-      {/* Timer Card - Similar to the image */}
+      {/* Active Task Timer */}
       {activeTaskId && (
-        <div className="card mb-4 bg-card">
-          <div className="card-header">
-            <h5>{allTasks.find(t => t.id === activeTaskId)?.name || "Active Task"}</h5>
-            <div className="small">Project: {allTasks.find(t => t.id === activeTaskId)?.project}</div>
-            <div className="small">Saturday, June 21, 2025</div>
-            <div className="small">Start time: 09:30 AM</div>
-          </div>
-          <div className="card-body d-flex flex-column justify-content-center align-items-center">
-            <div className="text-center">
-              <h2 className="mb-0">{formatTime(timerSeconds)}</h2>
-              <div className="text-muted small">
-                {timerRunning ? "Timer Running" : "Timer Paused"}
-              </div>
+        <div className="card mb-4">
+          <div className="card-header bg-light">
+            <h4 className="mb-0">
+              {allTasks.find(t => t.id === activeTaskId)?.project || "Active Task"}
+            </h4>
+            <div className="small">
+              {allTasks.find(t => t.id === activeTaskId)?.name || "No active task"}
             </div>
-            <br />
-            <div className="d-flex gap-2">
-              <button
+          </div>
+          <div className="card-body text-center">
+            <h1 className="display-4">{formatTime(timerSeconds).substring(0, 8)}</h1>
+            <div className="d-flex justify-content-center gap-3 mt-3">
+              <button 
                 className="btn btn-warning"
                 onClick={() => handleTaskAction(activeTaskId, "pause")}
-                disabled={!timerRunning}
               >
-                <i className="fas fa-pause me-2"></i>Pause Task
+                {timerRunning ? "Pause Task" : "Resume Task"}
               </button>
-              <button
-                className="btn btn-secondary"
-                onClick={() => setShowTimerModal(true)}
-              >
-                <i className="fas fa-exchange-alt me-2"></i>Switch Task
-              </button>
+              <button className="btn btn-secondary">Correct Time</button>
             </div>
           </div>
           <div className="card-footer text-center">
-            <div className="fw-bold">Task Description:</div>
-            <div>
-              {allTasks.find(t => t.id === activeTaskId)?.name} - Currently in progress
-            </div>
+            <strong>Task Description:</strong> {allTasks.find(t => t.id === activeTaskId)?.name}
           </div>
         </div>
       )}
 
-      {/* Task List */}
-      <div className="list-group overflow-auto">
-        {tasks.map((task) => (
-          <div
-            key={task.id}
-            className="list-group-item bg-card d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-2"
-          >
-            <div className="flex-grow-1 mb-2 mb-md-0">
-              <h5 className="mb-1">{task.name}</h5>
-              <span className={`badge ${getStatusBadgeColor(task.status)}`}>
-                {task.status}
-              </span>
-              <span
-                className={`badge ${getPriorityBadgeColor(task.priority)} ms-2`}
-              >
-                {task.priority}
-              </span>
-              <div className="small text-muted mt-1">
-                Time tracked: {task.timeTracked.toFixed(2)} hours
-              </div>
-            </div>
-            <div className="flex-shrink-0">{renderActionButtons(task)}</div>
-          </div>
-        ))}
+      {/* Projects Table */}
+      <div className="table-responsive mb-4">
+        <table className="table table-bordered table-hover">
+          <thead className="table-dark">
+            <tr>
+              <th>S. No.</th>
+              <th>Project Title</th>
+              <th>Client</th>
+              <th>Task</th>
+              <th>Language</th>
+              <th>Application</th>
+              <th>Total Pages</th>
+              <th>Assigned Pages</th>
+              <th>Describe</th>
+              <th>Ready For Go Describe</th>
+              <th>Go Run Date</th>
+              <th>Status</th>
+              <th>Progress</th>
+              <th>Actions</th>
+            
+            </tr>
+          </thead>
+          <tbody>
+            {projectTasks.map((project, index) => (
+              <tr key={project.id}>
+                <td>{index + 1}</td>
+                <td>{project.projectTitle}</td>
+                <td>{project.client}</td>
+                <td>{project.task}</td>
+                <td>{project.language}</td>
+                <td>{project.application}</td>
+                <td>{project.totalPages}</td>
+                <td>{project.assignedPages}</td>
+                <td>{project.describe}</td>
+                <td>{project.readyForGoDescribe}</td>
+                <td>{project.goRunDate}</td>
+                <td>
+                  <span className={`badge ${getStatusBadgeColor(project.status)}`}>
+                    {project.status}
+                  </span>
+                </td>
+                <td>{project.progress}</td>
+                <td>
+                 {renderTaskActions(project)}
+                </td>
+             
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Tasks Table */}
+      <div className="table-responsive">
+        <table className="table table-bordered table-hover">
+          <thead className="table-dark">
+            <tr>
+               <th>S. No.</th>
+              <th>Project Title</th>
+              <th>Client</th>
+              <th>Task Name</th>
+             
+              <th>Status</th>
+              <th>Due Date</th>
+              <th>Time Tracked</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tasks.map((task) => (
+              <tr key={task.id}>
+                <td>{task.id}</td>
+                <td>{task.project}</td>
+                <td>{task.client}</td>
+                <td>{task.name}</td>
+              
+                <td>
+                  <span className={`badge ${getStatusBadgeColor(task.status)}`}>
+                    {task.status}
+                  </span>
+                </td>
+                <td>{task.dueDate}</td>
+                <td>{task.timeTracked.toFixed(2)} hours</td>
+                <td>
+                  {renderTaskActions(task)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {/* Complete Task Modal */}
       {showCompleteModal && selectedTask && (
-        <div
-          className="modal fade show custom-modal-dark"
-          tabIndex={-1}
-          style={{ display: "block" }}
-          aria-hidden="true"
-        >
+        <div className="modal fade show" style={{ display: 'block' }}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Complete Task</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowCompleteModal(false)}
-                  aria-label="Close"
-                ></button>
+                <button type="button" className="btn-close" onClick={() => setShowCompleteModal(false)}></button>
               </div>
               <div className="modal-body">
                 <div className="mb-3">
-                  <label htmlFor="serverPath" className="form-label">
-                    Server Path
-                  </label>
+                  <label className="form-label">Server Path</label>
                   <input
                     type="text"
-                    id="serverPath"
+                    className={`form-control ${serverPathError ? 'is-invalid' : ''}`}
                     value={serverPath}
                     onChange={(e) => setServerPath(e.target.value)}
-                    className={`form-control ${serverPathError ? "is-invalid" : ""
-                      }`}
-                    placeholder="Enter server path"
                   />
-                  {serverPathError && (
-                    <div className="invalid-feedback">{serverPathError}</div>
-                  )}
+                  {serverPathError && <div className="invalid-feedback">{serverPathError}</div>}
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="notes" className="form-label">
-                    Notes
-                  </label>
+                  <label className="form-label">Notes</label>
                   <textarea
-                    id="notes"
+                    className="form-control"
+                    rows="3"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    rows={3}
-                    className="form-control"
-                    placeholder="Add any additional notes"
-                  />
+                  ></textarea>
                 </div>
               </div>
               <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary rounded-5"
-                  onClick={() => setShowCompleteModal(false)}
-                >
+                <button type="button" className="btn btn-secondary" onClick={() => setShowCompleteModal(false)}>
                   Cancel
                 </button>
-                <button
-                  type="button"
-                  className="btn gradient-button"
-                  onClick={handleCompleteTask}
-                >
+                <button type="button" className="btn btn-primary" onClick={handleCompleteTask}>
                   Complete Task
                 </button>
               </div>
@@ -518,51 +532,29 @@ function Task() {
 
       {/* Reassign Task Modal */}
       {showReassignModal && selectedTask && (
-        <div
-          className="modal fade show custom-modal-dark"
-          tabIndex={-1}
-          style={{ display: "block" }}
-          aria-hidden="true"
-        >
+        <div className="modal fade show" style={{ display: 'block' }}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title">Request Reassignment</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowReassignModal(false)}
-                  aria-label="Close"
-                ></button>
+                <button type="button" className="btn-close" onClick={() => setShowReassignModal(false)}></button>
               </div>
               <div className="modal-body">
                 <div className="mb-3">
-                  <label htmlFor="reassignReason" className="form-label">
-                    Reason for Reassignment
-                  </label>
+                  <label className="form-label">Reason for Reassignment</label>
                   <textarea
-                    id="reassignReason"
+                    className="form-control"
+                    rows="4"
                     value={reassignReason}
                     onChange={(e) => setReassignReason(e.target.value)}
-                    rows={4}
-                    className="form-control"
-                    placeholder="Please explain why you need this task to be reassigned"
-                  />
+                  ></textarea>
                 </div>
               </div>
               <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary rounded-5"
-                  onClick={() => setShowReassignModal(false)}
-                >
+                <button type="button" className="btn btn-secondary" onClick={() => setShowReassignModal(false)}>
                   Cancel
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-warning"
-                  onClick={handleReassignRequest}
-                >
+                <button type="button" className="btn btn-warning" onClick={handleReassignRequest}>
                   Submit Request
                 </button>
               </div>
@@ -573,77 +565,38 @@ function Task() {
 
       {/* Task Details Modal */}
       {showDetailsModal && selectedTask && (
-        <div
-          className="modal fade show custom-modal-dark"
-          tabIndex={-1}
-          style={{ display: "block" }}
-          aria-hidden="true"
-        >
+        <div className="modal fade show" style={{ display: 'block' }}>
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">
-                  Task Details: {selectedTask.name}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowDetailsModal(false)}
-                  aria-label="Close"
-                ></button>
+                <h5 className="modal-title">Task Details: {selectedTask.name}</h5>
+                <button type="button" className="btn-close" onClick={() => setShowDetailsModal(false)}></button>
               </div>
               <div className="modal-body">
                 <div className="row mb-3">
                   <div className="col-md-6">
+                    <div className="mb-2"><strong>Project:</strong> {selectedTask.project}</div>
                     <div className="mb-2">
-                      <strong>Project:</strong> {selectedTask.project}
-                    </div>
-                    <div className="mb-2">
-                      <strong>Status:</strong>{" "}
-                      <span
-                        className={`badge ${getStatusBadgeColor(
-                          selectedTask.status
-                        )}`}
-                      >
+                      <strong>Status:</strong> <span className={`badge ${getStatusBadgeColor(selectedTask.status)}`}>
                         {selectedTask.status}
                       </span>
                     </div>
-                    <div className="mb-2">
-                      <strong>Priority:</strong>{" "}
-                      <span
-                        className={`badge ${getPriorityBadgeColor(
-                          selectedTask.priority
-                        )}`}
-                      >
-                        {selectedTask.priority}
-                      </span>
-                    </div>
+                    <div className="mb-2"><strong>Priority:</strong> {selectedTask.priority}</div>
                   </div>
                   <div className="col-md-6">
-                    <div className="mb-2">
-                      <strong>Assignee:</strong> {selectedTask.assignee}
-                    </div>
-                    <div className="mb-2">
-                      <strong>Due Date:</strong> {selectedTask.dueDate}
-                    </div>
-                    <div className="mb-2">
-                      <strong>Time Tracked:</strong>{" "}
-                      {selectedTask.timeTracked.toFixed(2)} hours
-                    </div>
+                    <div className="mb-2"><strong>Assignee:</strong> {selectedTask.assignee}</div>
+                    <div className="mb-2"><strong>Due Date:</strong> {selectedTask.dueDate}</div>
+                    <div className="mb-2"><strong>Time Tracked:</strong> {selectedTask.timeTracked.toFixed(2)} hours</div>
                   </div>
                 </div>
-
                 <div className="mb-3">
                   <h6>Files:</h6>
                   <ul className="list-group">
                     {selectedTask.files.map((file, index) => (
-                      <li key={index} className="list-group-item">
-                        {file}
-                      </li>
+                      <li key={index} className="list-group-item">{file}</li>
                     ))}
                   </ul>
                 </div>
-
                 <div className="mb-3">
                   <h6>Comments:</h6>
                   {selectedTask.comments.map((comment, index) => (
@@ -660,125 +613,7 @@ function Task() {
                 </div>
               </div>
               <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary rounded-5"
-                  onClick={() => setShowDetailsModal(false)}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Timer/Active Task Modal */}
-      {showTimerModal && (
-        <div
-          className="modal fade show custom-modal-dark"
-          tabIndex={-1}
-          style={{ display: "block" }}
-          aria-hidden="true"
-        >
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Active Task</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowTimerModal(false)}
-                  aria-label="Close"
-                ></button>
-              </div>
-              <div className="modal-body">
-                <div className="text-center mb-4">
-                  <h2>{formatTime(timerSeconds)}</h2>
-                  <div className="text-muted">
-                    {timerRunning ? "Timer Running" : "Timer Paused"}
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">Current Task:</label>
-                  <div className="form-control">
-                    {activeTaskId
-                      ? allTasks.find((t) => t.id === activeTaskId)?.name ||
-                      "No task selected"
-                      : "No task selected"}
-                  </div>
-                </div>
-
-                <div className="d-flex gap-2 justify-content-center">
-                  {timerRunning ? (
-                    <button
-                      className="btn btn-warning"
-                      onClick={() => {
-                        const taskIndex = allTasks.findIndex(
-                          (t) => t.id === activeTaskId
-                        );
-                        if (taskIndex !== -1) {
-                          const updatedAllTasks = [...allTasks];
-                          updatedAllTasks[taskIndex] = {
-                            ...updatedAllTasks[taskIndex],
-                            status: "WIP (Paused)",
-                            timeTracked:
-                              updatedAllTasks[taskIndex].timeTracked +
-                              timerSeconds / 3600,
-                          };
-                          setAllTasks(updatedAllTasks);
-                          setTasks(updatedAllTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS"));
-                        }
-                        setTimerRunning(false);
-                      }}
-                    >
-                      <i className="fas fa-pause me-2"></i>Pause
-                    </button>
-                  ) : (
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => setTimerRunning(true)}
-                      disabled={!activeTaskId}
-                    >
-                      <i className="fas fa-play me-2"></i>Resume
-                    </button>
-                  )}
-
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => {
-                      if (activeTaskId) {
-                        const taskIndex = allTasks.findIndex(
-                          (t) => t.id === activeTaskId
-                        );
-                        if (taskIndex !== -1) {
-                          const updatedAllTasks = [...allTasks];
-                          updatedAllTasks[taskIndex] = {
-                            ...updatedAllTasks[taskIndex],
-                            timeTracked:
-                              updatedAllTasks[taskIndex].timeTracked +
-                              timerSeconds / 3600,
-                          };
-                          setAllTasks(updatedAllTasks);
-                          setTasks(updatedAllTasks.filter(task => task.assignee === "Current User" || task.status === "QC YTS"));
-                        }
-                      }
-                      setTimerRunning(false);
-                      setTimerSeconds(0);
-                      setActiveTaskId(null);
-                    }}
-                  >
-                    <i className="fas fa-stop me-2"></i>Stop
-                  </button>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary rounded-5"
-                  onClick={() => setShowTimerModal(false)}
-                >
+                <button type="button" className="btn btn-secondary" onClick={() => setShowDetailsModal(false)}>
                   Close
                 </button>
               </div>

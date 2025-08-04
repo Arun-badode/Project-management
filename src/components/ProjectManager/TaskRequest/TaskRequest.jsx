@@ -229,7 +229,7 @@ function TaskRequest() {
                       
                       {/* Reason (only shown when details are expanded) */}
                       {showDetails === request.id && (
-                        <div className="mb-3 bg-light p-3 rounded">
+                        <div className="mb-3 bg-card p-3 rounded">
                           <h6 className="small fw-bold mb-1">Reason for reassignment:</h6>
                           <p className="small mb-0">{request.reason}</p>
                         </div>
@@ -254,7 +254,7 @@ function TaskRequest() {
                               disabled={isLoading[request.id]?.approve || isLoading[request.id]?.reject}
                             >
                               {isLoading[request.id]?.approve ? (
-                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                <span className="spinner-border  spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                               ) : (
                                 <i className="fas fa-check me-2"></i>
                               )}
