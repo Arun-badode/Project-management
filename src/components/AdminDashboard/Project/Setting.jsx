@@ -40,6 +40,7 @@ export default function SettingsPage() {
   const [projects, setProjects] = useState([]);
   const [clients, setClients] = useState(initialClients);
   const [showAllClients, setShowAllClients] = useState(true); // default to showing all
+   const [currencyOptions, setCurrencyOptions] = useState([]); // storing currency option
 
   const [clientForm, setClientForm] = useState({
     alias: "",
@@ -51,7 +52,19 @@ export default function SettingsPage() {
   });
 
   const [countries, setCountries] = useState([]);
+useEffect(() => {
+    const fetchCurrencies = async () => {
+      try {
+        const res = await axios.get("https://open.er-api.com/v6/latest/USD");
+        const currencyCodes = Object.keys(res.data.rates);
+        setCurrencyOptions(currencyCodes);
+      } catch (error) {
+        console.error("Error fetching currencies:", error);
+      }
+    };
 
+    fetchCurrencies();
+  }, []);
 
   // fetch project detaisl form the api 
   useEffect(() => {
@@ -144,18 +157,25 @@ export default function SettingsPage() {
  const handleClientChange = (e) => {
   const { name, value } = e.target;
 
-  // Find selected client from full clients list
-  const selectedClient = clients.find(client => client.id.toString() === value);
+  if (name === "clientId") {
+    const selectedClient = clients.find(client => client.id.toString() === value);
 
-  setClientForm((prev) => ({
-    ...prev,
-    [name]: value,
-    country: selectedClient?.country || "",
-    currency: selectedClient?.currency || "",
-    hourlyRate: selectedClient?.hourlyRate || "",
-  }));
+    setClientForm((prev) => ({
+      ...prev,
+      [name]: value,
+      country: selectedClient?.country || "",
+      currency: selectedClient?.currency || "",
+      hourlyRate: selectedClient?.hourlyRate || "",
+    }));
 
-  selectedClient(selectedClient ? [selectedClient] : []);
+    // If you have a state to hold selected client (optional)
+    // setSelectedClient(selectedClient ? [selectedClient] : []);
+  } else {
+    setClientForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
 };
 
 
@@ -595,7 +615,7 @@ export default function SettingsPage() {
         Manage your client details including currency, hourly rate, and project
         managers.
       </div>
-      
+
       <div className="settings-grid">
         <div className="settings-card">
           <h5 className="text-white">Manage Clients</h5>
@@ -751,47 +771,47 @@ export default function SettingsPage() {
               padding: "10px",
             }}
           >
-           {!clientForm.actual ? (
-  <p className="text-white" style={{ opacity: 0.6 }}>
-    No client selected.
-  </p>
-) : (
-  <div className="client-item d-flex justify-content-between align-items-start mb-3">
-    <div>
-      <b className="text-white">{clientForm.alias} (Alias)</b>{" "}
-      <span className="text-white" style={{ opacity: 0.7 }}>
-        ({clientForm.actual})
-      </span>
-      <div style={{ fontSize: "0.95em" }}>
-        <span className="text-white" style={{ opacity: 0.7 }}>
-          Country: {clientForm.country}
-        </span>
-        <br />
-        <span className="text-white" style={{ opacity: 0.7 }}>
-          Currency: {clientForm.currency} | Hourly: {clientForm.hourlyRate}
-        </span>
-        <br />
-        <span className="text-white" style={{ opacity: 0.7 }}>
-          PMs: {clientForm.managers}
-        </span>
-      </div>
-    </div>
-    <div>
-      <button
-        className="btn btn-sm btn-link text-light"
-        onClick={() => handleEditClient(0)}
-      >
-        <i className="bi bi-pencil"></i>
-      </button>
-      <button
-        className="btn btn-sm btn-link text-danger"
-        onClick={() => handleDeleteClient(0)}
-      >
-        <i className="bi bi-trash"></i>
-      </button>
-    </div>
-  </div>
-)}
+            {!clientForm.actual ? (
+              <p className="text-white" style={{ opacity: 0.6 }}>
+                No client selected.
+              </p>
+            ) : (
+              <div className="client-item d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <b className="text-white">{clientForm.alias} (Alias)</b>{" "}
+                  <span className="text-white" style={{ opacity: 0.7 }}>
+                    ({clientForm.actual})
+                  </span>
+                  <div style={{ fontSize: "0.95em" }}>
+                    <span className="text-white" style={{ opacity: 0.7 }}>
+                      Country: {clientForm.country}
+                    </span>
+                    <br />
+                    <span className="text-white" style={{ opacity: 0.7 }}>
+                      Currency: {clientForm.currency} | Hourly: {clientForm.hourlyRate}
+                    </span>
+                    <br />
+                    <span className="text-white" style={{ opacity: 0.7 }}>
+                      PMs: {clientForm.managers}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <button
+                    className="btn btn-sm btn-link text-light"
+                    onClick={() => handleEditClient(0)}
+                  >
+                    <i className="bi bi-pencil"></i>
+                  </button>
+                  <button
+                    className="btn btn-sm btn-link text-danger"
+                    onClick={() => handleDeleteClient(0)}
+                  >
+                    <i className="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            )}
 
           </div>
 
