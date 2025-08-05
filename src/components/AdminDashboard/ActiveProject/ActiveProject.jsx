@@ -340,6 +340,7 @@ const ActiveProject = () => {
       
       // Prepare the data to send to API
       const updateData = {
+        projectId: parseInt(selectedProject?.id),
         readyForQcDue: readyForQcDueInput,
         qcAllocatedHours: parseFloat(qcAllocatedHours),
         qcDue: qcDueCalculated,
@@ -1017,110 +1018,113 @@ const ActiveProject = () => {
                               </div>
 
                               {/* Footer Row Controls */}
-                              <div className="row g-3 align-items-center mb-3">
-                                <div className="col-md-3">
-                                  <label className="form-label">
-                                    Ready for QC Due <span className="text-danger">*</span>
-                                  </label>
-                                  <input
-                                    type="datetime-local"
-                                    className="form-control"
-                                    value={readyForQcDueInput}
-                                    onChange={(e) => {
-                                      setReadyForQcDueInput(e.target.value);
-                                      setHasUnsavedChanges(true);
-                                    }}
-                                    required
-                                  />
-                                  {qcDueDelay && (
-                                    <small
-                                      className={`text-${
-                                        qcDueDelay.includes("Delayed")
-                                          ? "danger"
-                                          : "success"
-                                      }`}
-                                    >
-                                      {qcDueDelay}
-                                    </small>
-                                  )}
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">
-                                    QC Allocated Hours <span className="text-danger">*</span>
-                                  </label>
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    step="0.25"
-                                    className="form-control"
-                                    placeholder="0"
-                                    value={qcAllocatedHours}
-                                    onChange={(e) => {
-                                      setQcAllocatedHours(e.target.value);
-                                      setHasUnsavedChanges(true);
-                                    }}
-                                    required
-                                  />
-                                  <div className="form-text">
-                                    (in multiple of 0.25 only)
-                                  </div>
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">QC Due</label>
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    placeholder="--"
-                                    value={calculateQCDue(
-                                      readyForQcDueInput,
-                                      qcAllocatedHours
-                                    )}
-                                    disabled
-                                  />
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">Priority</label>
-                                  <select
-                                    className="form-select"
-                                    value={priorityAll}
-                                    onChange={(e) => {
-                                      setPriorityAll(e.target.value);
-                                      setHasUnsavedChanges(true);
-                                    }}
-                                  >
-                                    <option value="Low">Low</option>
-                                    <option value="Mid">Mid</option>
-                                    <option value="High">High</option>
-                                  </select>
-                                </div>
-                                <div className="col-md-3 d-flex align-items-end justify-content-end gap-2">
-                                  <button 
-                                    className="btn btn-success"
-                                    onClick={handleUpdateProjectFiles}
-                                    disabled={isUpdating || !readyForQcDueInput || !qcAllocatedHours}
-                                  >
-                                    {isUpdating ? (
-                                      <>
-                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                        Saving...
-                                      </>
-                                    ) : (
-                                      <>
-                                        <i className="fas fa-save me-2"></i>
-                                        Save
-                                      </>
-                                    )}
-                                  </button>
-                                  <button 
-                                    className="btn btn-secondary"
-                                    onClick={handleCloseProjectView}
-                                    disabled={isUpdating}
-                                  >
-                                    <i className="fas fa-times me-2"></i>
-                                    Close
-                                  </button>
-                                </div>
-                              </div>
+                            <div className="row g-3 align-items-start mb-3">
+  {/* Ready for QC Due */}
+  <div className="col-12 col-sm-6 col-md-3">
+    <label className="form-label">
+      Ready for QC Due <span className="text-danger">*</span>
+    </label>
+    <input
+      type="datetime-local"
+      className="form-control"
+      value={readyForQcDueInput}
+      onChange={(e) => {
+        setReadyForQcDueInput(e.target.value);
+        setHasUnsavedChanges(true);
+      }}
+      required
+    />
+    {qcDueDelay && (
+      <small
+        className={`text-${
+          qcDueDelay.includes("Delayed") ? "danger" : "success"
+        }`}
+      >
+        {qcDueDelay}
+      </small>
+    )}
+  </div>
+
+  {/* QC Allocated Hours */}
+  <div className="col-12 col-sm-6 col-md-2">
+    <label className="form-label">
+      QC Allocated Hours <span className="text-danger">*</span>
+    </label>
+    <input
+      type="number"
+      min="0"
+      step="0.25"
+      className="form-control"
+      placeholder="0"
+      value={qcAllocatedHours}
+      onChange={(e) => {
+        setQcAllocatedHours(e.target.value);
+        setHasUnsavedChanges(true);
+      }}
+      required
+    />
+    <div className="form-text">(in multiple of 0.25 only)</div>
+  </div>
+
+  {/* QC Due */}
+  <div className="col-12 col-sm-6 col-md-2">
+    <label className="form-label">QC Due</label>
+    <input
+      type="text"
+      className="form-control"
+      placeholder="--"
+      value={calculateQCDue(readyForQcDueInput, qcAllocatedHours)}
+      disabled
+    />
+  </div>
+
+  {/* Priority */}
+  <div className="col-12 col-sm-6 col-md-2">
+    <label className="form-label">Priority</label>
+    <select
+      className="form-select"
+      value={priorityAll}
+      onChange={(e) => {
+        setPriorityAll(e.target.value);
+        setHasUnsavedChanges(true);
+      }}
+    >
+      <option value="Low">Low</option>
+      <option value="Mid">Mid</option>
+      <option value="High">High</option>
+    </select>
+  </div>
+
+  {/* Action Buttons */}
+  <div className="col-12 col-md-3 d-flex flex-column flex-md-row justify-content-md-end align-items-stretch gap-2">
+    <button
+      className="btn btn-success w-100"
+      onClick={handleUpdateProjectFiles}
+      disabled={isUpdating || !readyForQcDueInput || !qcAllocatedHours}
+    >
+      {isUpdating ? (
+        <>
+          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Saving...
+        </>
+      ) : (
+        <>
+          <i className="fas fa-save me-2"></i>
+          Save
+        </>
+      )}
+    </button>
+    <button
+      className="btn btn-secondary w-100"
+      onClick={handleCloseProjectView}
+      disabled={isUpdating}
+    >
+      <i className="fas fa-times me-2"></i>
+      Close
+    </button>
+  </div>
+</div>
+
 
                               {/* Additional Info Section */}
                               {hasUnsavedChanges && (
