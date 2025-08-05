@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Setting.css";
+import axios from "axios";
+import BASE_URL from "../../../config";
 
 const currencyOptions = ["USD", "EUR", "INR", "GBP", "CAD", "AUD"];
 
@@ -31,6 +33,10 @@ const initialClients = [
 ];
 
 export default function SettingsPage() {
+
+  const token = localStorage.getItem("authToken");
+  const [applications, setApplications] = useState([]);
+  const [newapplication, setNewapplication] = useState("");
   const [clients, setClients] = useState(initialClients);
   const [clientForm, setClientForm] = useState({
     alias: "",
@@ -40,12 +46,112 @@ export default function SettingsPage() {
     hourlyRate: "",
     managers: "",
   });
+
+  // this is use effect for the fetch application list 
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        const res = await axios.get(
+          `${BASE_URL}application/getAllApplication`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (res.data.status) {
+          setApplications(res.data.application); // from API response
+        }
+      } catch (err) {
+        console.error("Failed to fetch applications:", err);
+      }
+    };
+
+    fetchApplications();
+  }, []);
+
+
+  // useeffect to fetch the clients from api 
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get(
+          `${BASE_URL}client/getAllClients`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (response.data.status) {
+          setClients(response.data.clients); // only dynamic data
+        }
+      } catch (error) {
+        console.error("Failed to fetch clients:", error);
+      }
+    };
+
+    fetchClients();
+  }, []);
+  const handleClientChange = (e) => {
+    const selectedClientId = e.target.value;
+    const selectedClient = clients.find(
+      (client) => client.id === parseInt(selectedClientId)
+    );
+    setClientForm((prev) => ({
+      ...prev,
+      actual: selectedClient?.clientName || "",
+    }));
+  };
+
   const [editClientIdx, setEditClientIdx] = useState(null);
 
-  const handleClientChange = (e) => {
-    const { name, value } = e.target;
-    setClientForm((prev) => ({ ...prev, [name]: value }));
-  };
+  const [managers, setManagers] = useState([]);
+  const [loadingManagers, setLoadingManagers] = useState(true);
+  // this is for getting managers form the api 
+  useEffect(() => {
+    const fetchManagers = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const res = await axios.get(
+          `${BASE_URL}member/getAllMembers`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("Fetched members:", res.data.data);
+
+        if (res.data.status && Array.isArray(res.data.data)) {
+          const onlyManagers = res.data.data.filter(
+            (member) => member.role?.toLowerCase() === "manager"
+          );
+
+          const formatted = onlyManagers.map((manager) => ({
+            value: manager.id,
+            label: manager.fullName,
+          }));
+
+          setManagers(formatted);
+        }
+      } catch (err) {
+        console.error("Failed to fetch project managers:", err);
+      } finally {
+        setLoadingManagers(false);
+      }
+    };
+
+    fetchManagers();
+  }, []);
+
+
+
+  // const handleClientChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setClientForm((prev) => ({ ...prev, [name]: value }));
+  // };
 
   const handleAddOrEditClient = () => {
     if (
@@ -94,78 +200,332 @@ export default function SettingsPage() {
   };
 
 
-   const [newTask, setNewTask] = useState("");
-    const [newLanguage, setNewLanguage] = useState("");
-    const [newapplication, setNewapplication] = useState("");
-    const [newCurrency, setNewCurrency] = useState({ name: "", rate: "" });
-  
-    const handleAddClient = () => {
-      if (newClient.alias && newClient.actualName && newClient.country) {
-        setClients([...clients, newClient]);
-        setNewClient({ alias: "", actualName: "", country: "", managers: "" });
-      }
-    };
-  
-    const handleAddTask = () => {
-      if (newTask) {
-        setTasks([...tasks, newTask]);
-        setNewTask("");
-      }
-    };
-  
-    const handleAddLanguage = () => {
-      if (newLanguage) {
-        setLanguages([...languages, newLanguage]);
-        setNewLanguage("");
-      }
-    };
-  
-    const handleAddapplication = () => {
-      if (newapplication) {
-        setapplications([...applications, newapplication]);
-        setNewapplication("");
-      }
-    };
-  
-    const handleAddCurrency = () => {
-      if (newCurrency.name && newCurrency.rate) {
-        setCurrencies([...currencies, newCurrency]);
-        setNewCurrency({ name: "", rate: "" });
-      }
-    };
+  const [newLanguage, setNewLanguage] = useState("");
 
-     const [tasks, setTasks] = useState([
-        "Backend Dev",
-        "API Integration",
-        "Frontend Dev",
-        "QA Testing",
-      ]);
-    
-      const [languages, setLanguages] = useState([
-        "English",
-        "Spanish",
-        "French",
-        "German",
-      ]);
-    
-      const [applications, setapplications] = useState([
-        "Web",
-        "Mobile Responsive",
-        "iOS",
-        "Android",
-      ]);
-    
-      const [currencies, setCurrencies] = useState([
-        { name: "USD", rate: "83" },
-        { name: "EUR", rate: "90" },
-        { name: "GBP", rate: "90" },
-      ]);
+  const [newCurrency, setNewCurrency] = useState({ name: "", rate: "" });
 
-        const handleDeleteItem = (list, setList, index) => {
-    const newList = [...list];
-    newList.splice(index, 1);
-    setList(newList);
+  const handleAddClient = () => {
+    if (newClient.alias && newClient.actualName && newClient.country) {
+      setClients([...clients, newClient]);
+      setNewClient({ alias: "", actualName: "", country: "", managers: "" });
+    }
   };
+
+  // this part of code is for set the task and disply the tasks dynamically 
+  const [newTask, setNewTask] = useState("");
+  const [tasks, setTasks] = useState([]);
+
+  // Fetch all tasks
+  const fetchTasks = async () => {
+    try {
+      const res = await axios.get(
+        `${BASE_URL}tasks/getAllTasks`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (res.data.status) {
+        setTasks(res.data.tasks);
+      }
+    } catch (err) {
+      console.error("Failed to fetch tasks", err);
+    }
+  };
+
+  // add task api
+  const handleAddTask = async () => {
+    try {
+      const res = await axios.post(
+        `${BASE_URL}tasks/addTasks`,
+        { taskName: newTask },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data.status) {
+        const newAddedTask = res.data.club; // from the response
+
+        setTasks((prevTasks) => [...prevTasks, newAddedTask]); // append to existing list
+        setNewTask(""); // clear input
+      }
+    } catch (err) {
+      console.error("Failed to add task", err);
+    }
+  };
+
+  // handle edit task api 
+  const handleEditTask = async (id, oldName) => {
+    const newTaskName = prompt("Enter new task name:", oldName);
+
+    if (!newTaskName || newTaskName.trim() === "" || newTaskName === oldName) return;
+
+    try {
+      const res = await axios.patch(
+        `${BASE_URL}tasks/updateTaskById/${id}`,
+        { taskName: newTaskName },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data.status) {
+        const updatedTask = res.data.task;
+
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === id ? updatedTask : task
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Failed to update task", err);
+    }
+  };
+
+  // handle delete task api 
+
+  const handleDeleteTask = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this task?");
+    if (!confirmDelete) return;
+
+    try {
+      const res = await axios.delete(
+        `${BASE_URL}tasks/deleteTaskById/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data.status) {
+        setTasks((prev) => prev.filter((task) => task.id !== id));
+      } else {
+        alert("Failed to delete task.");
+      }
+    } catch (err) {
+      console.error("Error deleting task:", err);
+      alert("An error occurred while deleting the task.");
+    }
+  };
+
+
+  useEffect(() => {
+    fetchTasks();
+  }, []);
+
+  const handleAddLanguage = async () => {
+    if (!newLanguage) return;
+
+    try {
+      const token = localStorage.getItem("authToken");
+      const res = await axios.post(
+        `${BASE_URL}language/addlanguage`,
+        { languageName: newLanguage },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Add language response:", res.data);
+
+      if (res.data.status) {
+        // Append the new language object to the current list
+        setLanguages([...languages, res.data.language]);
+        setNewLanguage(""); // Clear the input
+      } else {
+        console.error("Failed to add language");
+      }
+    } catch (error) {
+      console.error("Error adding language:", error);
+    }
+  };
+
+
+  // function to add the application 
+  const handleAddapplication = async () => {
+    if (!newapplication.trim()) return;
+
+    try {
+      const res = await axios.post(
+        `${BASE_URL}application/addApplication`,
+        { applicationName: newapplication },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data.status) {
+        const addedApp = res.data.application;
+
+        setApplications((prev) => [...prev, addedApp]);
+        setNewapplication("");
+      } else {
+        alert("Failed to add application.");
+      }
+    } catch (err) {
+      console.error("Error adding application:", err);
+      alert("Something went wrong.");
+    }
+  };
+
+  const handleEditLanguage = async (id, currentName) => {
+    const updatedName = prompt("Edit Language Name:", currentName);
+
+    if (!updatedName || updatedName.trim() === "" || updatedName === currentName) return;
+
+    try {
+      const token = localStorage.getItem("authToken");
+      const res = await axios.patch(
+        `${BASE_URL}language/updateLanguageById/${id}`,
+        { languageName: updatedName },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.data.status) {
+        const updatedLang = res.data.language;
+
+        setLanguages((prev) =>
+          prev.map((lang) => (lang.id === id ? updatedLang : lang))
+        );
+      } else {
+        alert("Failed to update language.");
+      }
+    } catch (err) {
+      console.error("Error updating language:", err);
+      alert("Something went wrong while updating.");
+    }
+  };
+
+
+  // this is for edit application function from api 
+  const handleEditApplication = async (id, currentName) => {
+    const updatedName = prompt("Edit Application Name:", currentName);
+
+    if (!updatedName || updatedName.trim() === "" || updatedName === currentName) return;
+
+    try {
+      const res = await axios.patch(
+        `${BASE_URL}application/updateApplicationById/${id}`,
+        { applicationName: updatedName },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data.status) {
+        const updatedApp = res.data.application;
+
+        setApplications((prev) =>
+          prev.map((app) => (app.id === id ? updatedApp : app))
+        );
+      } else {
+        alert("Failed to update application.");
+      }
+    } catch (err) {
+      console.error("Error updating application:", err);
+      alert("Something went wrong while updating.");
+    }
+  };
+
+ const handleDeleteLanguage = async (id) => {
+  const confirmDelete = window.confirm("Are you sure you want to delete this language?");
+  if (!confirmDelete) return;
+
+  try {
+    const token = localStorage.getItem("authToken");
+    const res = await axios.delete(
+      `${BASE_URL}language/deleteLanguageById/${id}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+
+    if (res.data.status) {
+      // Remove the deleted language from the UI
+      setLanguages((prev) => prev.filter((lang) => lang.id !== id));
+    } else {
+      alert("Failed to delete the language.");
+    }
+  } catch (err) {
+    console.error("Error deleting language:", err);
+    alert("Something went wrong while deleting.");
+  }
+};
+
+
+
+  const handleAddCurrency = () => {
+    if (newCurrency.name && newCurrency.rate) {
+      setCurrencies([...currencies, newCurrency]);
+      setNewCurrency({ name: "", rate: "" });
+    }
+  };
+
+  // const [tasks, setTasks] = useState([
+  //   "Backend Dev",
+  //   "API Integration",
+  //   "Frontend Dev",
+  //   "QA Testing",
+  // ]);
+
+  const [languages, setLanguages] = useState([]); // this is language state 
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const res = await axios.get(
+          `${BASE_URL}language/getAlllanguage`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("Fetched languages:", res.data.languages);
+
+        if (res.data.status && Array.isArray(res.data.languages)) {
+          setLanguages(res.data.languages); // store full objects: id, languageName, createdAt
+        }
+      } catch (err) {
+        console.error("Failed to fetch languages:", err);
+      } finally {
+        // Optional: setLoadingLanguages(false); if you're handling loading state
+      }
+    };
+
+    fetchLanguages();
+  }, []);
+
+
+  // const [languages, setLanguages] = useState([
+  //   "English",
+  //   "Spanish",
+  //   "French",
+  //   "German",
+  // ]);
+
+  // const [applications, setapplications] = useState([
+  //   "Web",
+  //   "Mobile Responsive",
+  //   "iOS",
+  //   "Android",
+  // ]);
+
+  const [currencies, setCurrencies] = useState([
+    { name: "USD", rate: "83" },
+    { name: "EUR", rate: "90" },
+    { name: "GBP", rate: "90" },
+  ]);
+
+ 
   return (
     <div className="p-4 settings-main-unique py-4">
       <h2 className="gradient-heading mb-1">Client Management</h2>
@@ -183,14 +543,19 @@ export default function SettingsPage() {
           {/* First row */}
           <div className="row mb-2">
             <div className="col-md-6 mb-2">
-              <input
-                className="form-control"
-                style={{ background: "#181f3a", color: "#fff" }}
-                placeholder="New Client Alias Name*"
-                name="alias"
-                value={clientForm.alias}
+              <select
+                name="actual"
+                value={clientForm.actual}
                 onChange={handleClientChange}
-              />
+                className="form-control"
+              >
+                <option value="client">-- Select Client --</option>
+                {clients.map((client) => (
+                  <option key={client.id} value={client.id}>
+                    {client.clientName}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="col-md-6 mb-2">
               <input
@@ -254,14 +619,20 @@ export default function SettingsPage() {
 
           {/* Third row */}
           <div className="d-flex gap-2 mb-2 flex-wrap">
-            <input
+            <select
               className="form-control"
-              style={{ background: "#181f3a", color: "#fff" }}
-              placeholder="Project Managers (comma-sep)"
               name="managers"
               value={clientForm.managers}
               onChange={handleClientChange}
-            />
+              style={{ background: "#181f3a", color: "#fff" }}
+            >
+              <option value="">-- Select Project Manager --</option>
+              {managers.map((manager) => (
+                <option key={manager.value} value={manager.value}>
+                  {manager.label}
+                </option>
+              ))}
+            </select>
             <button
               className="btn btn-gradient"
               onClick={handleAddOrEditClient}
@@ -291,7 +662,7 @@ export default function SettingsPage() {
               <div
                 className="client-item d-flex justify-content-between align-items-start"
                 key={idx}
-              
+
               >
                 <div>
                   <b className="text-white">{c.alias} (Alias)</b>{" "}
@@ -329,83 +700,223 @@ export default function SettingsPage() {
               </div>
             ))}
           </div>
-            {/* Manage Tasks List */}
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Tasks List</h6>
-                  <div className="input-group mb-2">
-                    <input
-                      type="text"
-                      className="form-control bg-secondary text-white border-secondary"
-                      placeholder="New task..."
-                      value={newTask}
-                      onChange={(e) => setNewTask(e.target.value)}
-                    />
-                    <button className="btn btn-primary"  onClick={handleAddTask}
-                    disabled={!newTask}>+</button>
-                  </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    {tasks.map((task, index) => (
-                      <div
-                        key={index}
-                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
-                      >
-                        <span className="text-white">{task}</span>
-                        <div className="btn-group btn-group-sm">
-                           <button
-                    className="btn btn-sm btn-link text-light"
-                    onClick={() => handleEditClient(idx)}
-                  >
-                    <i className="bi bi-pencil"></i>
-                  </button>
-                          <button
-                            className="btn btn-outline-danger"
-                            onClick={() =>
-                              handleDeleteItem(tasks, setTasks, index)
-                            }
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  {/* <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddTask}
-                    disabled={!newTask}
-                  >
-                    <i className="fas fa-plus me-1"></i> Add Task
-                  </button> */}
-                </div>
 
-                {/* Manage Application List */}
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Application List</h6>
-                  <div className="input-group mb-2">
-                    <input
-                      type="text"
-                      className="form-control bg-secondary text-white border-secondary"
-                      placeholder="New application..."
-                      value={newapplication}
-                      onChange={(e) => setNewapplication(e.target.value)}
-                    />
-                    <button className="btn btn-primary" onClick={handleAddapplication}
-                    disabled={!newapplication}>+</button>
+          {/* Manage Tasks List */}
+          <div className="mb-4">
+            <h6 className="mb-3 text-white">Manage Tasks List</h6>
+            <div className="input-group mb-2">
+              <input
+                type="text"
+                className="form-control bg-secondary text-white border-secondary"
+                placeholder="New task..."
+                value={newTask}
+                onChange={(e) => setNewTask(e.target.value)}
+              />
+              <button
+                className="btn btn-primary"
+                onClick={handleAddTask}
+                disabled={!newTask.trim()}
+              >
+                +
+              </button>
+            </div>
+
+            <div className="border rounded p-2 mb-2 border-secondary">
+              {tasks.map((task) => (
+                <div
+                  key={task.id}
+                  className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
+                >
+                  <span className="text-white">{task.taskName}</span>
+                  <div className="btn-group btn-group-sm">
+                    {/* Placeholder for future edit functionality */}
+                    <button
+                      className="btn btn-sm btn-link text-light"
+                      onClick={() => handleEditTask(task.id, task.taskName)}
+                    >
+                      <i className="bi bi-pencil"></i>
+                    </button>
+                    <button
+                      className="btn btn-outline-danger"
+                      onClick={() => handleDeleteTask(task.id)}
+                    >
+                      <i className="fas fa-trash-alt"></i>
+                    </button>
                   </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    {applications.map((application, index) => (
-                      <div
-                        key={index}
-                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
-                      >
-                        <span className="text-white">{application}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Manage Application List */}
+          <div className="mb-4">
+            <h6 className="mb-3 text-white">Manage Application List</h6>
+            <div className="input-group mb-2">
+              <input
+                type="text"
+                className="form-control bg-secondary text-white border-secondary"
+                placeholder="New application..."
+                value={newapplication}
+                onChange={(e) => setNewapplication(e.target.value)}
+              />
+
+              <button
+                className="btn btn-primary"
+                onClick={handleAddapplication}
+                disabled={!newapplication.trim()}
+              >
+                +
+              </button>
+
+            </div>
+            <div className="border rounded p-2 mb-2 border-secondary">
+              {applications.map((application) => (
+                <div
+                  key={application.id}
+                  className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
+                >
+                  <span className="text-white">{application.applicationName}</span>
+                  <div className="btn-group btn-group-sm">
+                    <button
+                      className="btn btn-sm btn-link text-light"
+                      onClick={() =>
+                        handleEditApplication(application.id, application.applicationName)
+                      }
+                    >
+                      <i className="bi bi-pencil"></i>
+                    </button>
+                    <button
+                      className="btn btn-outline-danger"
+                      onClick={() => handleDeleteApplication(application.id)}
+                    >
+                      <i className="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+            </div>
+            {/* <button
+                    className="btn btn-sm btn-primary"
+                    onClick={handleAddapplication}
+                    disabled={!newapplication}
+                  >
+                    <i className="fas fa-plus me-1"></i> Add application
+                  </button> */}
+          </div>
+
+          {/* Manage Languages List */}
+          <div className="mb-4">
+            <h6 className="mb-3 text-white">Manage Languages List</h6>
+            <div className="input-group mb-2">
+              <input
+                type="text"
+                className="form-control bg-secondary text-white border-secondary"
+                placeholder="New language..."
+                value={newLanguage}
+                onChange={(e) => setNewLanguage(e.target.value)}
+              />
+              <button className="btn btn-primary" onClick={handleAddLanguage}
+                disabled={!newLanguage}>+</button>
+            </div>
+            <div className="border rounded p-2 mb-2 border-secondary">
+              {languages.map((language, index) => (
+                <div
+                  key={language.id}
+                  className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
+                >
+                  <span className="text-white">{language.languageName}</span>
+                  <div className="btn-group btn-group-sm">
+                    <button
+                      className="btn btn-sm btn-link text-light"
+                      onClick={() => handleEditLanguage(language.id, language.languageName)}
+                    >
+                      <i className="bi bi-pencil"></i>
+                    </button>
+
+                    <button
+                      className="btn btn-outline-danger"
+                      onClick={() => handleDeleteLanguage(language.id)}
+                    >
+                      <i className="fas fa-trash-alt"></i>
+                    </button>
+
+                  </div>
+                </div>
+              ))}
+
+
+            </div>
+            {/* <button
+                    className="btn btn-sm btn-primary"
+                    onClick={handleAddLanguage}
+                    disabled={!newLanguage}
+                  >
+                    <i className="fas fa-plus me-1"></i> Add Language
+                  </button> */}
+          </div>
+
+          {/* Currency Conversion Rates */}
+          <div className="mb-4">
+            <h6 className="mb-3 text-white">Currency Conversion Rates</h6>
+            <div className="row g-2 mb-2">
+              <div className="col-md-6">
+                <input
+                  type="text"
+                  className="form-control bg-card text-white border-secondary"
+                  placeholder="Currency (e.g. USD)"
+                  value={newCurrency.name}
+                  onChange={(e) =>
+                    setNewCurrency({
+                      ...newCurrency,
+                      name: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="col-md-6">
+                <input
+                  type="text"
+                  className="form-control bg-card text-white border-secondary"
+                  placeholder="Rate to INR"
+                  value={newCurrency.rate}
+                  onChange={(e) =>
+                    setNewCurrency({
+                      ...newCurrency,
+                      rate: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+            <div className="border rounded p-2 mb-2 border-secondary table-gradient-bg">
+              <table className="table table-dark table-sm mb-0">
+                <thead>
+                  <tr>
+                    <th>Currency</th>
+                    <th>Rate to INR</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currencies.map((currency, index) => (
+                    <tr key={index}>
+                      <td>{currency.name}</td>
+                      <td>{currency.rate}</td>
+                      <td>
                         <div className="btn-group btn-group-sm">
+                          <button
+                            className="btn btn-sm btn-link text-light"
+                            onClick={() => handleEditClient(idx)}
+                          >
+                            <i className="bi bi-pencil"></i>
+                          </button>
                           <button
                             className="btn btn-outline-danger"
                             onClick={() =>
                               handleDeleteItem(
-                                applications,
-                                setapplications,
+                                currencies,
+                                setCurrencies,
                                 index
                               )
                             }
@@ -413,149 +924,20 @@ export default function SettingsPage() {
                             <i className="fas fa-trash-alt"></i>
                           </button>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                  {/* <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddapplication}
-                    disabled={!newapplication}
-                  >
-                    <i className="fas fa-plus me-1"></i> Add application
-                  </button> */}
-                </div>
-
-                {/* Manage Languages List */}
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Manage Languages List</h6>
-                  <div className="input-group mb-2">
-                    <input
-                      type="text"
-                      className="form-control bg-secondary text-white border-secondary"
-                      placeholder="New language..."
-                      value={newLanguage}
-                      onChange={(e) => setNewLanguage(e.target.value)}
-                    />
-                    <button className="btn btn-primary"  onClick={handleAddLanguage}
-                    disabled={!newLanguage}>+</button>
-                  </div>
-                  <div className="border rounded p-2 mb-2 border-secondary">
-                    {languages.map((language, index) => (
-                      <div
-                        key={index}
-                        className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
-                      >
-                        <span className="text-white">{language}</span>
-                        <div className="btn-group btn-group-sm">
-                           <button
-                    className="btn btn-sm btn-link text-light"
-                    onClick={() => handleEditClient(idx)}
-                  >
-                    <i className="bi bi-pencil"></i>
-                  </button>
-                          <button
-                            className="btn btn-outline-danger"
-                            onClick={() =>
-                              handleDeleteItem(languages, setLanguages, index)
-                            }
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  {/* <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddLanguage}
-                    disabled={!newLanguage}
-                  >
-                    <i className="fas fa-plus me-1"></i> Add Language
-                  </button> */}
-                </div>
-
-                {/* Currency Conversion Rates */}
-                <div className="mb-4">
-                  <h6 className="mb-3 text-white">Currency Conversion Rates</h6>
-                  <div className="row g-2 mb-2">
-                    <div className="col-md-6">
-                      <input
-                        type="text"
-                        className="form-control bg-card text-white border-secondary"
-                        placeholder="Currency (e.g. USD)"
-                        value={newCurrency.name}
-                        onChange={(e) =>
-                          setNewCurrency({
-                            ...newCurrency,
-                            name: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <input
-                        type="text"
-                        className="form-control bg-card text-white border-secondary"
-                        placeholder="Rate to INR"
-                        value={newCurrency.rate}
-                        onChange={(e) =>
-                          setNewCurrency({
-                            ...newCurrency,
-                            rate: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="border rounded p-2 mb-2 border-secondary table-gradient-bg">
-                    <table className="table table-dark table-sm mb-0">
-                      <thead>
-                        <tr>
-                          <th>Currency</th>
-                          <th>Rate to INR</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {currencies.map((currency, index) => (
-                          <tr key={index}>
-                            <td>{currency.name}</td>
-                            <td>{currency.rate}</td>
-                            <td>
-                              <div className="btn-group btn-group-sm">
-                                 <button
-                    className="btn btn-sm btn-link text-light"
-                    onClick={() => handleEditClient(idx)}
-                  >
-                    <i className="bi bi-pencil"></i>
-                  </button>
-                                <button
-                                  className="btn btn-outline-danger"
-                                  onClick={() =>
-                                    handleDeleteItem(
-                                      currencies,
-                                      setCurrencies,
-                                      index
-                                    )
-                                  }
-                                >
-                                  <i className="fas fa-trash-alt"></i>
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddCurrency}
-                    disabled={!newCurrency.name || !newCurrency.rate}
-                  >
-                    <i className="fas fa-plus me-1"></i> Add Currency
-                  </button>
-                </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <button
+              className="btn btn-sm btn-primary"
+              onClick={handleAddCurrency}
+              disabled={!newCurrency.name || !newCurrency.rate}
+            >
+              <i className="fas fa-plus me-1"></i> Add Currency
+            </button>
+          </div>
 
         </div>
       </div>
