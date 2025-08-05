@@ -4,6 +4,58 @@ import "./Collaboration.css"; // Import your CSS styles
 import axios from "axios";
 
 function Collaboration() {
+  // State for messages
+  // const [messages, setMessages] = useState([
+  //   {
+  //     id: 1,
+  //     sender: "Sarah Johnson",
+  //     senderId: 101,
+  //     avatar:
+  //       "https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20young%20woman%20with%20brown%20hair%20and%20friendly%20smile%2C%20business%20attire%2C%20neutral%20background%2C%20high%20quality%20portrait%20photo%2C%20soft%20lighting&width=80&height=80&seq=user1&orientation=squarish",
+  //     content:
+  //       "Hey team, I just uploaded the latest design files for the project. Could everyone please review and share your thoughts?",
+  //     timestamp: "10:32 AM",
+  //     reactions: [
+  //       { emoji: "👍", count: 3, reacted: true },
+  //       { emoji: "🔥", count: 1, reacted: false },
+  //     ],
+  //     isUnread: false,
+  //     isEdited: false,
+  //     replyTo: null,
+  //     seenBy: [101, 102, 103],
+  //   },
+  //   {
+  //     id: 2,
+  //     sender: "Michael Chen",
+  //     senderId: 102,
+  //     avatar:
+  //       "https://readdy.ai/api/search-image?query=professional%20headshot%20of%20an%20asian%20man%20with%20glasses%20wearing%20business%20casual%20attire%2C%20neutral%20background%2C%20high%20quality%20portrait%20photo%2C%20soft%20lighting&width=80&height=80&seq=user2&orientation=squarish",
+  //     content:
+  //       "I've looked through it and I think the color palette works really well with our brand guidelines. Nice work!",
+  //     timestamp: "10:45 AM",
+  //     reactions: [{ emoji: "👍", count: 2, reacted: false }],
+  //     isUnread: false,
+  //     isEdited: false,
+  //     replyTo: 1,
+  //     seenBy: [101, 102],
+  //   },
+  //   {
+  //     id: 3,
+  //     sender: "Alex Rodriguez",
+  //     senderId: 103,
+  //     avatar:
+  //       "https://readdy.ai/api/search-image?query=professional%20headshot%20of%20a%20latino%20man%20with%20short%20dark%20hair%20wearing%20a%20blue%20shirt%2C%20neutral%20background%2C%20high%20quality%20portrait%20photo%2C%20soft%20lighting&width=80&height=80&seq=user3&orientation=squarish",
+  //     content:
+  //       "I have some concerns about the mobile responsiveness of the new layout. Can we schedule a quick call to discuss?",
+  //     timestamp: "11:15 AM",
+  //     reactions: [],
+  //     isUnread: true,
+  //     isEdited: false,
+  //     replyTo: null,
+  //     seenBy: [103],
+  //   },
+  // ]);
+
   // State for team members
   const [teamMembers, setTeamMembers] = useState([
     {
@@ -61,7 +113,11 @@ function Collaboration() {
     isOnline: true,
     role: "Admin",
   };
-
+  // const ChatComponent = () => {
+  //   const [loading, setLoading] = useState(true);
+  //   const [error, setError] = useState(null);
+  //   const messageEndRef = useRef(null);
+  // };
   const [messages, setMessages] = useState([]);
 
   // State for UI
@@ -81,7 +137,6 @@ function Collaboration() {
   const [showMentionList, setShowMentionList] = useState(false);
   const [mentionPosition, setMentionPosition] = useState(0);
   const token = localStorage.getItem("authToken");
-  const [handleKeyDown, setHandleKeyDown] = useState(null);
 
   // Refs
   const messageEndRef = useRef(null);
@@ -89,183 +144,196 @@ function Collaboration() {
   const messageInputRef = useRef(null);
   const socketRef = useRef(null);
 
-  const [groups, setGroups] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [activeGroup, setActiveGroup] = useState(null);
-  const [replyTo, setReplyTo] = useState(null);
+  // // Initialize socket connection
+  // useEffect(() => {
+  //   // In a real app, you would connect to your actual server
+  //   socketRef.current = io("http://localhost:3001", {
+  //     auth: {
+  //       userId: currentUser.id,
+  //       userName: currentUser.name,
+  //     },
+  //   });
 
+  //   // Socket event listeners
+  //   socketRef.current.on("message", handleNewMessage);
+  //   socketRef.current.on("typing", handleTyping);
+  //   socketRef.current.on("messageSeen", handleMessageSeen);
+  //   socketRef.current.on("messageEdited", handleMessageEdited);
+  //   socketRef.current.on("messageDeleted", handleMessageDeleted);
+
+  //   return () => {
+  //     socketRef.current.disconnect();
+  //   };
+  // }, []);
+
+  // Scroll to bottom when messages change
   useEffect(() => {
-    fetchGroups();
-    fetchMessages();
-  }, []);
+    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  const fetchGroups = async () => {
-    try {
-      const response = await axios.get(
-        "https://eminoids-backend-production.up.railway.app/api/group/getAllGroups",
-        {
-          headers: { authorization: `Bearer ${token}` },
-        }
-      );
-      if (response.data.status) {
-        setGroups(response.data.data);
-      } else {
-        setError(response.data.message || "Failed to fetch groups");
-      }
-      setLoading(false);
-    } catch (err) {
-      console.error("Failed to fetch groups:", err);
-      setError(err.message);
-      setLoading(false);
+  // Simulate typing indicator
+  useEffect(() => {
+    const typingTimeout = setTimeout(() => {
+      setIsTyping(false);
+      setTypingUser(null);
+    }, 3000);
+    return () => clearTimeout(typingTimeout);
+  }, [isTyping]);
+
+  // Handle @mentions in message input
+  useEffect(() => {
+    if (newMessage.includes("@")) {
+      const atPosition = newMessage.lastIndexOf("@");
+      setMentionPosition(atPosition);
+      const query = newMessage.substring(atPosition + 1);
+      setMentionQuery(query);
+      setShowMentionList(query.length > 0);
+    } else {
+      setShowMentionList(false);
+    }
+  }, [newMessage]);
+
+  // Socket event handlers
+  const handleNewMessage = (message) => {
+    setMessages((prev) => [...prev, message]);
+  };
+
+  const handleTyping = ({ userId, isTyping }) => {
+    if (isTyping) {
+      setIsTyping(true);
+      const user = teamMembers.find((m) => m.id === userId);
+      setTypingUser(user);
+    } else {
+      setIsTyping(false);
+      setTypingUser(null);
     }
   };
 
-  const fetchMessages = async () => {
-    try {
-      const response = await axios.get(
-        "https://eminoids-backend-production.up.railway.app/api/groupChat/getAllGroupMessages",
-        {
-          headers: { authorization: `Bearer ${token}` },
+  const handleMessageSeen = ({ messageId, userId }) => {
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.id === messageId && !msg.seenBy.includes(userId)) {
+          return { ...msg, seenBy: [...msg.seenBy, userId] };
         }
-      );
-      if (response.data.status) {
-        const formattedMessages = response.data.data.map((msg) => ({
-          id: msg.id,
-          groupId: msg.groupId,
-          senderId: msg.memberId,
-          sender: msg.memberName,
-          avatar: "/default-avatar.png",
-          content: msg.message,
-          replyTo: msg.replyTo ? parseInt(msg.replyTo) : null,
-          reactions: groupReactions(msg.reaction),
-          timestamp: msg.createdAt
-            ? new Date(msg.createdAt).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : "Just now",
-          isEdited: false,
-          seenBy: [],
-          mentionedUsers: [],
-        }));
-        setMessages(formattedMessages);
-      }
-    } catch (err) {
-      console.error("Failed to fetch messages:", err);
-    }
+        return msg;
+      })
+    );
   };
 
-  const groupReactions = (reactionsArray) => {
-    if (!reactionsArray || !Array.isArray(reactionsArray)) return [];
+  const handleMessageEdited = ({ messageId, newContent }) => {
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.id === messageId) {
+          return { ...msg, content: newContent, isEdited: true };
+        }
+        return msg;
+      })
+    );
+  };
 
-    const reactionMap = {};
-    reactionsArray.forEach(({ emoji, by }) => {
-      if (!reactionMap[emoji]) {
-        reactionMap[emoji] = { emoji, count: 0, users: [] };
+  const handleMessageDeleted = (messageId) => {
+    setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+  };
+
+  // Message handlers
+
+  const handleReaction = (messageId, emoji) => {
+    const updatedMessages = messages.map((msg) => {
+      if (msg.id === messageId) {
+        const existingReactionIndex = msg.reactions.findIndex(
+          (r) => r.emoji === emoji
+        );
+        if (existingReactionIndex >= 0) {
+          // Toggle reaction
+          const updatedReactions = [...msg.reactions];
+          const reaction = updatedReactions[existingReactionIndex];
+          if (reaction.reacted) {
+            reaction.count -= 1;
+            reaction.reacted = false;
+            if (reaction.count === 0) {
+              updatedReactions.splice(existingReactionIndex, 1);
+            }
+          } else {
+            reaction.count += 1;
+            reaction.reacted = true;
+          }
+          return { ...msg, reactions: updatedReactions };
+        } else {
+          // Add new reaction
+          return {
+            ...msg,
+            reactions: [...msg.reactions, { emoji, count: 1, reacted: true }],
+          };
+        }
       }
-      reactionMap[emoji].count++;
-      reactionMap[emoji].users.push(by);
+      return msg;
     });
 
-    return Object.values(reactionMap).map((r) => ({
-      emoji: r.emoji,
-      count: r.count,
-      reacted: r.users.includes(currentUser.id),
-    }));
+    setMessages(updatedMessages);
+    setShowEmojiPicker(false);
   };
 
-  const fetchGroupMessages = async (groupId) => {
-    try {
-      const response = await axios.get(
-        `https://eminoids-backend-production.up.railway.app/api/groupChat/getGroupMessages/${groupId}`,
-        {
-          headers: { authorization: `Bearer ${token}` },
+  const handleReply = (messageId) => {
+    const messageToReply = messages.find((m) => m.id === messageId);
+    messageInputRef.current.focus();
+    setNewMessage(`@${messageToReply.sender} `);
+  };
+
+  const handleEditMessage = (messageId) => {
+    const messageToEdit = messages.find((m) => m.id === messageId);
+    setEditingMessageId(messageId);
+    setEditedMessageContent(messageToEdit.content);
+  };
+
+  const handleSaveEdit = () => {
+    if (editedMessageContent.trim() === "") return;
+
+    // In a real app, you would emit this to the server
+    // socketRef.current.emit('editMessage', {
+    //     messageId: editingMessageId,
+    //     newContent: editedMessageContent
+    // });
+
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.id === editingMessageId) {
+          return { ...msg, content: editedMessageContent, isEdited: true };
         }
-      );
-      if (response.data.status) {
-        const formattedMessages = response.data.data.map((msg) => ({
-          id: msg.id,
-          groupId: msg.groupId,
-          senderId: msg.memberId,
-          sender: msg.memberName,
-          avatar: "/default-avatar.png",
-          content: msg.message,
-          replyTo: msg.replyTo ? parseInt(msg.replyTo) : null,
-          reactions: groupReactions(msg.reaction),
-          timestamp: msg.createdAt
-            ? new Date(msg.createdAt).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : "Just now",
-          isEdited: false,
-          seenBy: [],
-          mentionedUsers: [],
-        }));
-        setMessages(formattedMessages);
+        return msg;
+      })
+    );
+
+    setEditingMessageId(null);
+    setEditedMessageContent("");
+  };
+
+  const handleDeleteMessage = (messageId) => {
+    // In a real app, you would emit this to the server
+    // socketRef.current.emit('deleteMessage', messageId);
+
+    setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (editingMessageId) {
+        handleSaveEdit();
+      } else {
+        handleSendMessage();
       }
-    } catch (err) {
-      console.error("Failed to fetch group messages:", err);
     }
   };
 
-  const handleSendMessage = async () => {
-    if (newMessage.trim() === "" || !activeGroup) return;
-
-    try {
-      const response = await axios.post(
-        "https://eminoids-backend-production.up.railway.app/api/groupChat/addGroupMessage",
-        {
-          groupId: activeGroup.id,
-          memberId: currentUser.id,
-          memberName: currentUser.name,
-          message: newMessage,
-          replyTo: replyTo || null,
-          groupName: activeGroup.name,
-          role: currentUser.role,
-          reaction: [],
-        },
-        {
-          headers: { authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (response.data.status) {
-        const newMsg = {
-          id: response.data.data.id,
-          groupId: activeGroup.id,
-          senderId: currentUser.id,
-          sender: currentUser.name,
-          avatar: currentUser.avatar,
-          role: currentUser.role,
-          content: newMessage,
-          replyTo: replyTo || null,
-          groupName: activeGroup.name,
-          reactions: [],
-          timestamp: "Just now",
-          isEdited: false,
-          seenBy: [],
-          mentionedUsers: [],
-        };
-
-        setMessages((prev) => [...prev, newMsg]);
-        setNewMessage("");
-        setReplyTo(null);
-
-        // Scroll to bottom after adding new message
-        setTimeout(() => {
-          messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
-      alert("Failed to send message. Please try again.");
-    }
+  const handleMentionSelect = (user) => {
+    const messageBefore = newMessage.substring(0, mentionPosition);
+    const messageAfter = newMessage.substring(
+      mentionPosition + mentionQuery.length + 1
+    );
+    setNewMessage(`${messageBefore}@${user.name} ${messageAfter}`);
+    setShowMentionList(false);
+    messageInputRef.current.focus();
   };
-
-  // Rest of your component code remains the same...
-  // (All the other functions and JSX)
 
   const handleCreateGroup = () => {
     if (newGroupName.trim() === "" || selectedMembers.length === 0) return;
@@ -299,6 +367,123 @@ function Collaboration() {
         : [...prev, memberId]
     );
   };
+
+  // const filteredMessages = messages.filter((msg) => {
+  //   if (activeFilter === "All") return true;
+  //   if (activeFilter === "Unread") return msg.isUnread;
+  //   if (activeFilter === "Mentions")
+  //     return msg.mentionedUsers && msg.mentionedUsers.includes(currentUser.id);
+  //   return true;
+  // });
+
+  const emojis = ["👍", "❤️", "😂", "🎉", "🔥", "💯", "👏", "🙌", "A"];
+  const [groups, setGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeGroup, setActiveGroup] = useState(null);
+
+  useEffect(() => {
+    fetch(
+      "https://eminoids-backend-production.up.railway.app/api/group/getAllGroups",
+      {
+        headers: { authorization: `Bearer ${token}` },
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status) {
+          setGroups(data.data);
+        } else {
+          setError(data.message || "Failed to fetch groups");
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch messages:", err);
+        setError(err.message);
+        setLoading(false);
+      });
+
+    fetch(
+      "https://eminoids-backend-production.up.railway.app/api/groupChat/getAllGroupMessages",
+      {
+        headers: { authorization: `Bearer ${token}` },
+      }
+    ) // Replace with your actual endpoint
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status) {
+          const formattedMessages = data.data.map((msg) => ({
+            id: msg.id,
+            groupId: msg.groupId,
+            senderId: msg.memberId,
+            sender: msg.memberName,
+            avatar: "/default-avatar.png", // Replace with actual if available
+            content: msg.message,
+            replyTo: msg.replyTo ? parseInt(msg.replyTo) : null,
+            reactions: groupReactions(msg.reaction),
+            timestamp: msg.createdAt
+              ? new Date(msg.createdAt).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "Just now",
+            isEdited: false,
+            seenBy: [],
+            mentionedUsers: [],
+          }));
+          setMessages(formattedMessages);
+        }
+      })
+      .catch((err) => {
+        console.error("Failed to fetch messages:", err);
+      });
+  }, []);
+
+  const groupReactions = (reactionsArray) => {
+    const reactionMap = {};
+    reactionsArray.forEach(({ emoji, by }) => {
+      if (!reactionMap[emoji]) {
+        reactionMap[emoji] = { emoji, count: 0, users: [] };
+      }
+      reactionMap[emoji].count++;
+      reactionMap[emoji].users.push(by);
+    });
+
+    return Object.values(reactionMap).map((r) => ({
+      emoji: r.emoji,
+      count: r.count,
+      reacted: false, // You can check if current user reacted here
+    }));
+  };
+
+  
+
+  const handleSendMessage = async () => {
+    if (newMessage.trim() === "") return;
+
+    try {
+      const response = await axios.post(
+        "https://eminoids-backend-production.up.railway.app/api/groupChat/addGroupMessage",
+        {
+          groupId: activeGroup.id, // Use activeGroup state to get current group ID
+          groupId,
+          memberId,
+          memberName,
+          message: newMessage,
+          replyTo: replyTo || null,
+          reaction: [],
+           
+        }
+      );
+
+      console.log("Message Sent:", response.data);
+      setNewMessage(""); // Clear textarea after successful send
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
   return (
     <div className=" container-fluid d-flex flex-column">
       {/* Main Content */}
@@ -372,6 +557,7 @@ function Collaboration() {
                       onClick={() => {
                         setActiveGroup(group);
                         setActivePrivateChat(null); // Clear private chat if any
+                        // Fetch messages for this group
                         fetchGroupMessages(group.id);
                       }}
                     >
@@ -418,7 +604,7 @@ function Collaboration() {
                             className="position-absolute bottom-0 end-0 bg-success rounded-circle"
                             style={{
                               width: "10px",
-                              height: "10px",
+
                               border: "2px solid #f8f9fa",
                             }}
                           ></span>
@@ -545,6 +731,7 @@ function Collaboration() {
                 className="chat-messages-scrollable h-100 scrollbar-hidden overflow-auto p-3 bg-main"
                 style={{ backgroundColor: "#1e1e1e" }}
               >
+                <div ref={messageEndRef} />
                 {messages
                   .filter((message) =>
                     activePrivateChat
@@ -641,10 +828,7 @@ function Collaboration() {
                           >
                             <button
                               className="btn btn-sm p-0 text-white-50"
-                              onClick={() => {
-                                setReplyTo(message.id);
-                                messageInputRef.current.focus();
-                              }}
+                              onClick={() => handleReply(message.id)}
                               title="Reply"
                             >
                               <i className="fas fa-reply"></i>
@@ -762,7 +946,8 @@ function Collaboration() {
                 )}
 
                 <div ref={messageEndRef} />
-              </div>
+              </div>{" "}
+              {/* Messages Area */}
               {/* Message Input */}
               <div className="p-3 border-top bg-main chat-footer-sticky">
                 <div className="position-relative">
@@ -809,24 +994,6 @@ function Collaboration() {
                     </div>
                   )}
 
-                  {replyTo && (
-                    <div className="bg-dark p-2 mb-2 rounded d-flex justify-content-between align-items-center">
-                      <small className="text-white">
-                        Replying to:{" "}
-                        {messages
-                          .find((m) => m.id === replyTo)
-                          ?.content.substring(0, 50)}
-                        ...
-                      </small>
-                      <button
-                        className="btn btn-sm btn-outline-light"
-                        onClick={() => setReplyTo(null)}
-                      >
-                        <i className="fas fa-times"></i>
-                      </button>
-                    </div>
-                  )}
-
                   <textarea
                     ref={messageInputRef}
                     value={editingMessageId ? editedMessageContent : newMessage}
@@ -857,12 +1024,12 @@ function Collaboration() {
                       disabled={
                         editingMessageId
                           ? editedMessageContent.trim() === ""
-                          : newMessage.trim() === "" || !activeGroup
+                          : newMessage.trim() === ""
                       }
                       className={`btn ${
                         editingMessageId
                           ? "btn-warning"
-                          : newMessage.trim() === "" || !activeGroup
+                          : newMessage.trim() === ""
                           ? "btn-outline-primary"
                           : "btn-primary"
                       }`}
@@ -992,3 +1159,6 @@ function Collaboration() {
 }
 
 export default Collaboration;
+https://eminoids-backend-production.up.railway.app/api/groupChat/addGroupMessage
+
+post ki api nhi chal rhi hai send kaene par data post hona chahiye give me all code proper
