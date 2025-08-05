@@ -429,7 +429,7 @@ const CreateNewProject = () => {
 
     try {
       const response = await axios.post(
-        "https://eminoids-backend-production.up.railway.app/api/client/addClients",
+        `${BASE_URL}client/addClients`,
         {
           clientName: newClientName,
         },
