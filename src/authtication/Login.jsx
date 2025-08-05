@@ -80,6 +80,9 @@ const LoginPage = () => {
       localStorage.setItem('userRole', role);
       localStorage.setItem('userEmail', email);
       localStorage.setItem('userData', JSON.stringify(data.user));
+//       // after successful login
+// localStorage.setItem("username", response.data.user.username); // or use email
+
 
       // Store managerId based on different possible response structures
       const managerId = data.user?.id || data?.id;

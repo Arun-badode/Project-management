@@ -1,121 +1,82 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import BASE_URL from "../../../config";
 
 function ActivitySummary() {
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [activityData, setActivityData] = useState([]);
 
-  // Mock data for activity summary
-  const activityData = [
-    {
-      month: "June 2025",
-      tasks: [
-        {
-          name: "Website Redesign",
-          hours: 24.5,
-          timestamps: [
-            "Jun 15, 2025 - 09:30 AM to 12:45 PM",
-            "Jun 16, 2025 - 10:15 AM to 03:30 PM",
-            "Jun 18, 2025 - 08:00 AM to 11:45 AM",
-          ],
-        },
-        {
-          name: "Client Meeting Preparation",
-          hours: 8.75,
-          timestamps: [
-            "Jun 10, 2025 - 01:30 PM to 04:15 PM",
-            "Jun 12, 2025 - 09:00 AM to 03:00 PM",
-          ],
-        },
-        {
-          name: "Marketing Campaign Planning",
-          hours: 16.25,
-          timestamps: [
-            "Jun 05, 2025 - 10:00 AM to 02:30 PM",
-            "Jun 06, 2025 - 09:15 AM to 05:00 PM",
-            "Jun 07, 2025 - 11:00 AM to 03:00 PM",
-          ],
-        },
-      ],
-    },
-    {
-      month: "May 2025",
-      tasks: [
-        {
-          name: "Product Development",
-          hours: 32.5,
-          timestamps: [
-            "May 20, 2025 - 08:30 AM to 05:30 PM",
-            "May 21, 2025 - 09:00 AM to 04:30 PM",
-            "May 22, 2025 - 10:15 AM to 06:15 PM",
-            "May 25, 2025 - 08:00 AM to 02:00 PM",
-          ],
-        },
-        {
-          name: "User Testing Sessions",
-          hours: 12.0,
-          timestamps: [
-            "May 15, 2025 - 01:00 PM to 05:00 PM",
-            "May 16, 2025 - 10:00 AM to 06:00 PM",
-          ],
-        },
-        {
-          name: "Quarterly Report Preparation",
-          hours: 18.75,
-          timestamps: [
-            "May 05, 2025 - 09:30 AM to 03:45 PM",
-            "May 06, 2025 - 10:00 AM to 04:30 PM",
-            "May 07, 2025 - 11:15 AM to 05:15 PM",
-          ],
-        },
-      ],
-    },
-  ];
+  useEffect(() => {
+    const fetchActivityLogs = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+
+        const response = await axios.get(
+          `${BASE_URL}activityLogs/getActivityLogs`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const logs = response.data.data;
+
+        // Group by Month
+        const groupedByMonth = {};
+
+        logs.forEach((log) => {
+          const logDate = new Date(log.timestamp);
+          const monthYear = logDate.toLocaleString("default", {
+            month: "long",
+            year: "numeric",
+          });
+
+          const hoursDiff = Math.abs(new Date() - new Date(log.timestamp)) / 36e5;
+
+          if (!groupedByMonth[monthYear]) {
+            groupedByMonth[monthYear] = [];
+          }
+
+          groupedByMonth[monthYear].push({
+            id: log.id,
+            name: log.role,
+            hours: parseFloat(hoursDiff.toFixed(2)),
+            timestamp: new Date(log.timestamp).toLocaleString(),
+          });
+        });
+
+        const formattedData = Object.entries(groupedByMonth).map(
+          ([month, logs]) => {
+            const tasks = logs.map((entry) => ({
+              id: entry.id,
+              name: entry.name,
+              hours: entry.hours,
+              timestamps: [entry.timestamp],
+            }));
+            return { month, tasks };
+          }
+        );
+
+        setActivityData(formattedData);
+      } catch (error) {
+        console.error("Failed to fetch activity logs:", error);
+      }
+    };
+
+    fetchActivityLogs();
+  }, []);
 
   return (
-    <div className="container-fluid ">
+    <div className="container-fluid">
       <div className="row p-3">
-        {/* Header with notifications */}
         <div className="col-12 d-flex justify-content-between align-items-center mb-4">
-          <h2 className=" gradient-heading ">Activity Summary</h2>
-          <div className="dropdown">
-
-
-            {/* Notification dropdown */}
-            {showNotifications && (
-              <div
-                className="dropdown-menu dropdown-menu-end p-3"
-                style={{ maxHeight: "400px", overflowY: "auto" }}
-              >
-                <h6 className="font-weight-bold">Notifications</h6>
-                {activityData.map((data, index) => (
-                  <div key={index} className="p-3 mb-2 border-bottom">
-                    <p className="text-muted mb-1">{data.month}</p>
-                    {data.tasks.map((task, taskIndex) => (
-                      <div key={taskIndex}>
-                        <p className="font-weight-bold">{task.name}</p>
-                        <p>Hours: {task.hours}</p>
-                        {task.timestamps.map((timestamp, timestampIndex) => (
-                          <small
-                            key={timestampIndex}
-                            className="d-block text-muted"
-                          >
-                            {timestamp}
-                          </small>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <h2 className="gradient-heading">Activity Summary</h2>
         </div>
 
-        {/* Activity Summary */}
         <div className="card shadow-sm bg-card">
-          <div className="card-body ">
-            <h2 className="h4 font-weight-bold mb-4 ">Activity Summary</h2>
+          <div className="card-body">
+            <h2 className="h4 font-weight-bold mb-4">Activity Summary</h2>
 
-            {/* Activity list by month */}
             {activityData.map((monthData, monthIndex) => (
               <div
                 key={monthIndex}
@@ -123,53 +84,47 @@ function ActivitySummary() {
               >
                 <h4 className="font-weight-bold">{monthData.month}</h4>
 
-                {/* Task table */}
-                <div className="table-responsive"
-                  style={{ maxHeight: "400px", overflowY: "auto" }}>
+                <div
+                  className="table-responsive"
+                  style={{ maxHeight: "400px", overflowY: "auto" }}
+                >
                   <table className="table table-striped table-gradient-bg table-bordered">
-                     <thead
-                          className="table-gradient-bg table "
-                          style={{
-                            position: "sticky",
-                            top: 0,
-                            zIndex: 0,
-                            backgroundColor: "#fff", // Match your background color
-                          }}
-                        >
-                      <tr  className="text-center">
-                        <th className="text-start">ID</th> {/* New ID column */}
-                        <th className="text-start">Task Name</th>
+                    <thead
+                      className="table-gradient-bg"
+                      style={{
+                        position: "sticky",
+                        top: 0,
+                        zIndex: 0,
+                        backgroundColor: "#fff",
+                      }}
+                    >
+                      <tr className="text-center">
+                        <th className="text-start">ID</th>
+                        <th className="text-start">Task Name (Role)</th>
                         <th className="text-center">Total Hours</th>
                         <th className="text-end">Timestamps</th>
                       </tr>
                     </thead>
                     <tbody>
                       {monthData.tasks.map((task, taskIndex) => (
-                        <tr key={taskIndex}  className="text-center">
-                          <td className="text-start">{taskIndex + 1}</td> {/* Display ID */}
+                        <tr key={taskIndex} className="text-center">
+                          <td className="text-start">{task.id}</td>
                           <td className="text-start">{task.name}</td>
                           <td className="text-center">{task.hours}</td>
                           <td className="text-end">
-                            <div>
-                              {task.timestamps.map((timestamp, timeIndex) => (
-                                <span key={timeIndex} className="d-block">
-                                  {timestamp}
-                                </span>
-                              ))}
-                            </div>
+                            {task.timestamps.map((ts, idx) => (
+                              <span key={idx} className="d-block">{ts}</span>
+                            ))}
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-
                 </div>
               </div>
             ))}
-          </div>
-        </div>
 
-        {/* In-App Messaging Preview */}
+                 {/* In-App Messaging Preview */}
         <div className="card shadow-sm mt-5 bg-card">
           <div className="card-body ">
             <div className="d-flex justify-content-between align-items-center mb-4">
@@ -248,6 +203,9 @@ function ActivitySummary() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
           </div>
         </div>
       </div>

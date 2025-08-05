@@ -17,7 +17,7 @@ const ActiveProject = () => {
   const [expandedRow, setExpandedRow] = useState(null);
   const [selectedDateTime, setSelectedDateTime] = useState(null);
   const isAdmin = userRole === "Admin";
-  const token = localStorage.getItem("authToken"); 
+  const token =localStorage.getItem("authToken"); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -98,6 +98,10 @@ const ActiveProject = () => {
   });
 
   const [qcDueDelay, setQcDueDelay] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Store project files data
+  const [projectFiles, setProjectFiles] = useState({});
 
   const statuses = [
     { key: "allstatus", label: "All Status" },
@@ -266,6 +270,13 @@ const ActiveProject = () => {
       qcAllocatedHours: "",
       priority: "",
     });
+    
+    // Reset form values when opening a new project
+    setReadyForQcDueInput("");
+    setQcAllocatedHours(0.0);
+    setPriorityAll("Mid");
+    setQcDueDelay("");
+    
     setExpandedRow(expandedRow === project.id ? null : project.id);
   };
 
@@ -301,6 +312,108 @@ const ActiveProject = () => {
       setShowEditModal(false);
       setEditedProject(null);
     }
+  };
+
+  // New function to update project files via API
+  const handleUpdateProjectFiles = async () => {
+    if (!selectedProject || !selectedProject.id) {
+      alert("No project selected");
+      return;
+    }
+
+    // Validate required fields
+    if (!readyForQcDueInput) {
+      alert("Please select Ready for QC Due date and time");
+      return;
+    }
+
+    if (!qcAllocatedHours || qcAllocatedHours <= 0) {
+      alert("Please enter valid QC Allocated Hours");
+      return;
+    }
+
+    setIsUpdating(true);
+
+    try {
+      // Calculate QC Due Date
+      const qcDueCalculated = calculateQCDue(readyForQcDueInput, qcAllocatedHours);
+      
+      // Prepare the data to send to API
+      const updateData = {
+        projectId: parseInt(selectedProject?.id),
+        readyForQcDue: readyForQcDueInput,
+        qcAllocatedHours: parseFloat(qcAllocatedHours),
+        qcDue: qcDueCalculated,
+        priority: priorityAll,
+        // You can add more fields here as needed
+        handler: fileHandlers[selectedProject.id] || "",
+      };
+
+      // Make API call
+      const response = await axios.patch(
+        `https://eminoids-backend-production.up.railway.app/api/projectFiles/updateProjectFile/${selectedProject.id}`,
+        updateData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.status === 200) {
+        // Update the project in local state
+        const updatedProjects = projects.map(project => {
+          if (project.id === selectedProject.id) {
+            return {
+              ...project,
+              readyQCDeadline: readyForQcDueInput,
+              qcHrs: qcAllocatedHours,
+              qcDueDate: qcDueCalculated,
+              priority: priorityAll,
+              handler: fileHandlers[selectedProject.id] || project.handler,
+            };
+          }
+          return project;
+        });
+
+        setProjects(updatedProjects);
+        setSelectedProject({
+          ...selectedProject,
+          readyQCDeadline: readyForQcDueInput,
+          qcHrs: qcAllocatedHours,
+          qcDueDate: qcDueCalculated,
+          priority: priorityAll,
+        });
+
+        setHasUnsavedChanges(false);
+        alert("Project files updated successfully!");
+        
+        // Optionally close the expanded view
+        // setExpandedRow(null);
+        
+      } else {
+        throw new Error('Failed to update project files');
+      }
+
+    } catch (error) {
+      console.error('Error updating project files:', error);
+      alert(`Failed to update project files: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleCloseProjectView = () => {
+    setExpandedRow(null);
+    setSelectedProject(null);
+    setSelectedFiles([]);
+    setHasUnsavedChanges(false);
+    setReadyForQcDueInput("");
+    setQcAllocatedHours(0.0);
+    setPriorityAll("Mid");
+    setQcDueDelay("");
+    setFileHandlers({});
   };
 
   useEffect(() => {
@@ -351,12 +464,12 @@ const ActiveProject = () => {
   const {
     scrollContainerRef: scrollContainerRef1,
     fakeScrollbarRef: fakeScrollbarRef1,
-  } = useSyncScroll(true);
+  } = useSyncScroll(null);
 
   function calculateQCDue(startDate, hours) {
     if (!startDate || !hours) return "--";
     const endDate = new Date(startDate);
-    endDate.setHours(endDate.getHours() + hours);
+    endDate.setHours(endDate.getHours() + parseFloat(hours));
     return endDate.toLocaleString("en-GB", {
       hour: "2-digit",
       minute: "2-digit",
@@ -754,6 +867,14 @@ const ActiveProject = () => {
                         <tr>
                           <td colSpan={14} className="p-0 border-top-0">
                             <div className="p-4">
+                              {/* Unsaved Changes Warning */}
+                              {hasUnsavedChanges && (
+                                <div className="alert alert-warning mb-3">
+                                  <i className="fas fa-exclamation-triangle me-2"></i>
+                                  You have unsaved changes. Please save or discard them.
+                                </div>
+                              )}
+
                               {/* Project Files Header */}
                               <div className="mb-4">
                                 <div className="d-flex justify-content-between align-items-center mb-3">
@@ -897,86 +1018,125 @@ const ActiveProject = () => {
                               </div>
 
                               {/* Footer Row Controls */}
-                              <div className="row g-3 align-items-center mb-3">
-                                <div className="col-md-3">
-                                  <label className="form-label">
-                                    Ready for QC Due
-                                  </label>
-                                  <input
-                                    type="datetime-local"
-                                    className="form-control"
-                                    value={readyForQcDueInput}
-                                    onChange={(e) =>
-                                      setReadyForQcDueInput(e.target.value)
-                                    }
-                                  />
-                                  {qcDueDelay && (
-                                    <small
-                                      className={`text-${
-                                        qcDueDelay.includes("Delayed")
-                                          ? "danger"
-                                          : "success"
-                                      }`}
-                                    >
-                                      {qcDueDelay}
-                                    </small>
-                                  )}
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">
-                                    QC Allocated Hours
-                                  </label>
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    step="0.25"
-                                    className="form-control"
-                                    placeholder="0"
-                                    value={qcAllocatedHours}
-                                    onChange={(e) =>
-                                      setQcAllocatedHours(e.target.value)
-                                    }
-                                  />
-                                  <div className="form-text">
-                                    (in multiple of 0.00 only)
+                            <div className="row g-3 align-items-start mb-3">
+  {/* Ready for QC Due */}
+  <div className="col-12 col-sm-6 col-md-3">
+    <label className="form-label">
+      Ready for QC Due <span className="text-danger">*</span>
+    </label>
+    <input
+      type="datetime-local"
+      className="form-control"
+      value={readyForQcDueInput}
+      onChange={(e) => {
+        setReadyForQcDueInput(e.target.value);
+        setHasUnsavedChanges(true);
+      }}
+      required
+    />
+    {qcDueDelay && (
+      <small
+        className={`text-${
+          qcDueDelay.includes("Delayed") ? "danger" : "success"
+        }`}
+      >
+        {qcDueDelay}
+      </small>
+    )}
+  </div>
+
+  {/* QC Allocated Hours */}
+  <div className="col-12 col-sm-6 col-md-2">
+    <label className="form-label">
+      QC Allocated Hours <span className="text-danger">*</span>
+    </label>
+    <input
+      type="number"
+      min="0"
+      step="0.25"
+      className="form-control"
+      placeholder="0"
+      value={qcAllocatedHours}
+      onChange={(e) => {
+        setQcAllocatedHours(e.target.value);
+        setHasUnsavedChanges(true);
+      }}
+      required
+    />
+    <div className="form-text">(in multiple of 0.25 only)</div>
+  </div>
+
+  {/* QC Due */}
+  <div className="col-12 col-sm-6 col-md-2">
+    <label className="form-label">QC Due</label>
+    <input
+      type="text"
+      className="form-control"
+      placeholder="--"
+      value={calculateQCDue(readyForQcDueInput, qcAllocatedHours)}
+      disabled
+    />
+  </div>
+
+  {/* Priority */}
+  <div className="col-12 col-sm-6 col-md-2">
+    <label className="form-label">Priority</label>
+    <select
+      className="form-select"
+      value={priorityAll}
+      onChange={(e) => {
+        setPriorityAll(e.target.value);
+        setHasUnsavedChanges(true);
+      }}
+    >
+      <option value="Low">Low</option>
+      <option value="Mid">Mid</option>
+      <option value="High">High</option>
+    </select>
+  </div>
+
+  {/* Action Buttons */}
+  <div className="col-12 col-md-3 d-flex flex-column flex-md-row justify-content-md-end align-items-stretch gap-2">
+    <button
+      className="btn btn-success w-100"
+      onClick={handleUpdateProjectFiles}
+      disabled={isUpdating || !readyForQcDueInput || !qcAllocatedHours}
+    >
+      {isUpdating ? (
+        <>
+          <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Saving...
+        </>
+      ) : (
+        <>
+          <i className="fas fa-save me-2"></i>
+          Save
+        </>
+      )}
+    </button>
+    <button
+      className="btn btn-secondary w-100"
+      onClick={handleCloseProjectView}
+      disabled={isUpdating}
+    >
+      <i className="fas fa-times me-2"></i>
+      Close
+    </button>
+  </div>
+</div>
+
+
+                              {/* Additional Info Section */}
+                              {hasUnsavedChanges && (
+                                <div className="row">
+                                  <div className="col-12">
+                                    <div className="alert alert-info">
+                                      <i className="fas fa-info-circle me-2"></i>
+                                      <strong>Note:</strong> Make sure to save your changes before closing or switching to another project.
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">QC Due</label>
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    placeholder="--"
-                                    value={calculateQCDue(
-                                      readyForQcDueInput,
-                                      qcAllocatedHours
-                                    )}
-                                    disabled
-                                  />
-                                </div>
-                                <div className="col-md-2">
-                                  <label className="form-label">Priority</label>
-                                  <select
-                                    className="form-select"
-                                    value={priorityAll}
-                                    onChange={(e) =>
-                                      setPriorityAll(e.target.value)
-                                    }
-                                  >
-                                    <option value="Low">Low</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="High">High</option>
-                                  </select>
-                                </div>
-                                <div className="col-md-3 d-flex align-items-end justify-content-end gap-2">
-                                  <button className="btn btn-success">
-                                    Save
-                                  </button>
-                                  <button className="btn btn-secondary">
-                                    Close
-                                  </button>
-                                </div>
-                              </div>
+                              )}
                             </div>
                           </td>
                         </tr>

@@ -176,7 +176,7 @@ const CreateNewProject = () => {
 
     try {
       const response = await axios.post(
-      `${BASE_URL}project/addProject`,
+       `${BASE_URL}project/addProject`,
         formDataForApi,
         {
           headers: {
@@ -429,7 +429,7 @@ const CreateNewProject = () => {
 
     try {
       const response = await axios.post(
-      `${BASE_URL}client/addClients`,
+        `${BASE_URL}client/addClients`,
         {
           clientName: newClientName,
         },
