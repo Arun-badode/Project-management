@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import BASE_URL from "../../../config";
 
 const Created = () => {
+  const [fileDeadlines, setFileDeadlines] = useState({});
+
   const [activeTab, setActiveTab] = React.useState("created");
   const [searchQuery, setSearchQuery] = useState("");
   const token = localStorage.getItem("authToken");
@@ -11,8 +13,41 @@ const Created = () => {
   const [loading, setLoading] = useState(true);
   const [expandedProjectId, setExpandedProjectId] = useState(null);
 
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  // this state variables is for storing the files details and storing them in database using api 
+  const [allFiles, setAllFiles] = useState([]);
   const [fileStatuses, setFileStatuses] = useState({});
+  const [selectedFiles, setSelectedFiles] = useState([]);
+
+  // THIS API IS FOR fetching files from the api 
+  // ✅ Fetch all project files on mount
+  useEffect(() => {
+    const fetchFiles = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}projectFiles/getAllProjectFiles`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.data.status) {
+          setAllFiles(response.data.data);  // Use `data`, not `files`
+          console.log("Fetched Files:", response.data.data); // Log directly from response
+        } else {
+          console.error("Error in response:", response.data.message);
+        }
+      } catch (err) {
+        console.error("Error fetching files:", err);
+      }
+    };
+
+    fetchFiles();
+  }, []);
+
+
+
+
+
+  // // Filter files for the given projectId
+  // const filteredFiles = allFiles.filter((file) => file.projectId === projectId);
+
 
   const dummyFiles = [
     { id: 1, name: "File_1_1.docx", pages: 15, language: "az", application: "Visio" },
@@ -55,49 +90,86 @@ const Created = () => {
 
 
 
- const markAsCompleted = async (projectId) => {
-  try {
-    const token = localStorage.getItem("authToken");
+  const markAsCompleted = async (projectId) => {
+    try {
+      const project = projects.find(p => p.id === projectId);
+      const deadline = project.deadline;
 
-    // Prompt user to enter deadline
-    const deadline = prompt("Enter new deadline date (YYYY-MM-DD):");
-
-    if (!deadline || !/^\d{4}-\d{2}-\d{2}$/.test(deadline)) {
-      alert("Invalid or empty date. Please use YYYY-MM-DD format.");
-      return;
-    }
-
-    const res = await axios.patch(
-      `${BASE_URL}project/updateProject/${projectId}`,
-      {
-        status: "Active",       // ✅ Set status to Active
-        deadline: deadline,     // ✅ Set deadline as user input
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      if (!deadline) {
+        alert("Please set a deadline before saving.");
+        return;
       }
-    );
 
-    if (res.status === 200) {
-      alert("Project status updated and deadline set successfully!");
+      // // 1. Update Project
+      // await axios.patch(
+      //   `${BASE_URL}projectFiles/updateProjectFile/${projectId}`,
+      //   {
+      //     status: "In Progress",
+      //     deadline,
+      //   },
+      //   {
+      //     headers: { Authorization: `Bearer ${token}` },
+      //   }
+      // );
 
-      // Refresh project list
-      const refreshed = await axios.get(`${BASE_URL}project/getAllProjects`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // 2. Update Files for the Project
+      const projectFiles = allFiles.filter(file => file.projectId === projectId);
+      const updatedFiles = projectFiles
+        .filter(file => selectedFiles.includes(file.id))
+        .map(file => ({
+          id: file.id,
+          status: fileStatuses[file.id] || file.status,
+          projectId: file.projectId, // Keep the projectId
+        }))
 
-      if (refreshed.data.status) {
-        setProjects(refreshed.data.projects);
+      for (const file of updatedFiles) {
+        const originalFile = allFiles.find(f => f.id === file.id);
+
+        await axios.patch(
+          `${BASE_URL}projectFiles/updateProjectFile/${file.id}`,
+          {
+            projectId: originalFile.projectId,
+            fileName: originalFile.fileName,
+            applicationId: originalFile.applicationId,
+            languageId: originalFile.languageId,
+            pages: originalFile.pages,
+            deadline: fileDeadlines[originalFile.projectId] || "0000-00-00T00:00", // Default if missing
+            status: file.status,
+          },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
       }
-    }
-  } catch (error) {
-    console.error("Failed to update project status:", error);
-    alert("Error updating project status");
-  }
-};
 
+      alert("Project and files updated successfully!");
+
+      // // Refresh project list and files
+      // const refreshed = await axios.get(`${BASE_URL}project/getAllProjects`, {
+      //   headers: { Authorization: `Bearer ${token}` },
+      // });
+
+      // if (refreshed.data.status) {
+      //   setProjects(refreshed.data.projects);
+      // }
+
+      // const refreshedFiles = await axios.get(`${BASE_URL}projectFile/getAllFiles`, {
+      //   headers: { Authorization: `Bearer ${token}` },
+      // });
+
+      // if (refreshedFiles.data.status) {
+      //   setAllFiles(refreshedFiles.data.files);
+      // }
+
+    } catch (error) {
+      console.error("Failed to update project status:", error);
+      alert("Error updating project or files");
+    }
+  };
+
+
+
+  const filteredFiles = (allFiles || []).filter(file => file.projectId === projects);
 
 
   const handleEditProject = (id) => {
@@ -110,7 +182,7 @@ const Created = () => {
     console.log("Delete project:", id);
   };
 
-  
+
 
   return (
     <div>
@@ -148,7 +220,7 @@ const Created = () => {
           <tbody>
             {projects
               // .filter((project) => project.status != "Completed")
-              .filter((project) => project.status == "Active" || project.status == "In Progress" )
+              .filter((project) => project.status == "In Progress")
               .map((project, index) => (
                 <React.Fragment key={project.id}>
                   <tr className="text-center">
@@ -243,10 +315,14 @@ const Created = () => {
                                   <th>
                                     <input
                                       type="checkbox"
-                                      checked={selectedFiles.length === dummyFiles.length}
+                                      checked={
+                                        selectedFiles.length ===
+                                        allFiles.filter((file) => file.projectId === project.id).length
+                                      }
                                       onChange={(e) => {
+                                        const projectFiles = allFiles.filter((file) => file.projectId === project.id);
                                         if (e.target.checked) {
-                                          setSelectedFiles(dummyFiles.map((file) => file.id));
+                                          setSelectedFiles(projectFiles.map((file) => file.id));
                                         } else {
                                           setSelectedFiles([]);
                                         }
@@ -259,97 +335,92 @@ const Created = () => {
                                   <th>Language</th>
                                   <th>Application</th>
                                   <th>Status</th>
-                                  {/* ...other columns... */}
                                 </tr>
                               </thead>
                               <tbody>
-                                {dummyFiles.map((file) => (
-                                  <tr key={file.id}>
-                                    <td>
-                                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                        <input
-                                          type="checkbox"
-                                          checked={selectedFiles.includes(file.id)}
-                                          onChange={(e) => {
-                                            setSelectedFiles((prev) =>
-                                              e.target.checked
-                                                ? [...prev, file.id]
-                                                : prev.filter((id) => id !== file.id)
-                                            );
-                                          }}
-                                        />
-                                        <span>{file.id}</span>
-                                      </div>
-                                    </td>
-                                    <td>{file.name}</td>
-                                    <td>{file.pages}</td>
-                                    <td>{file.language}</td>
-                                    <td>{file.application}</td>
-                                    <td>
-                                      <select
-                                        value={fileStatuses[file.id] || file.status || "Pending"}
-                                        onChange={(e) =>
-                                          setFileStatuses((prev) => ({
-                                            ...prev,
-                                            [file.id]: e.target.value,
-                                          }))
-                                        }
-                                      >
-                                        <option value="Pending">Pending</option>
-                                        <option value="YTS">YTS</option>
-                                        <option value="Approved">Approved</option>
-                                      </select>
-                                    </td>
-                                    {/* ...other columns... */}
-                                  </tr>
-                                ))}
+                                {allFiles
+                                  .filter((file) => file.projectId === project.id)
+                                  .map((file) => (
+                                    <tr key={file.id}>
+                                      <td>
+                                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                          <input
+                                            type="checkbox"
+                                            checked={selectedFiles.includes(file.id)}
+                                            onChange={(e) => {
+                                              setSelectedFiles((prev) =>
+                                                e.target.checked
+                                                  ? [...prev, file.id]
+                                                  : prev.filter((id) => id !== file.id)
+                                              );
+                                            }}
+                                          />
+                                          <span>{file.id}</span>
+                                        </div>
+                                      </td>
+                                      <td>{file.fileName}</td>
+                                      <td>{file.pages}</td>
+                                      <td>{file.languageName || "N/A"}</td>
+                                      <td>{file.applicationName || "N/A"}</td>
+                                      <td>
+                                        <select
+                                          value={fileStatuses[file.id] || file.status || "Pending"}
+                                          onChange={(e) =>
+                                            setFileStatuses((prev) => ({
+                                              ...prev,
+                                              [file.id]: e.target.value,
+                                            }))
+                                          }
+                                        >
+                                          <option value="Pending">Pending</option>
+                                          <option value="YTS">YTS</option>
+                                          <option value="Approved">Approved</option>
+                                        </select>
+                                      </td>
+                                    </tr>
+                                  ))}
                               </tbody>
                             </table>
                           </div>
 
                           <div className="d-flex justify-content-between align-items-center mt-3">
                             <div>
-  <label className="form-label me-2">
-    Deadline:
-  </label>  
+                              <label className="form-label me-2">Deadline:</label>
+                              <input
+                                type="datetime-local"
+                                className="form-control"
+                                style={{ width: "250px" }}
+                                value={fileDeadlines[project.id] || ""}
+                                onChange={(e) => {
+                                  const newDeadline = e.target.value;
+                                  setFileDeadlines((prev) => ({
+                                    ...prev,
+                                    [project.id]: newDeadline,
+                                  }));
+                                }}
+                              />
 
-  <input
-    type="datetime-local"
-    className="form-control"
-    style={{ width: "250px" }} // 👈 Adjusted width here
-    value={project.deadline || ""}
-    onChange={(e) => {
-      const newDeadline = e.target.value;
-      setProjects((prevProjects) =>
-        prevProjects.map((proj) =>
-          proj.id === project.id
-            ? { ...proj, deadline: newDeadline }
-            : proj
-        )
-      );
-    }}
-  />
-</div>
-  <div>
-    <button
-      className="btn btn-primary mt-2"
-      onClick={() => markAsCompleted(project.id)}
-    >
-      Save
-    </button>
-    <button
-      className="btn btn-secondary mt-2 ms-2"
-      onClick={() => setExpandedProjectId(null)}
-    >
-      Close
-    </button>
-  </div>
-</div>
-
+                            </div>
+                            <div>
+                              <button
+                                className="btn btn-primary mt-2"
+                                onClick={() => markAsCompleted(project.id)}
+                              >
+                                Save
+                              </button>
+                              <button
+                                className="btn btn-secondary mt-2 ms-2"
+                                onClick={() => setExpandedProjectId(null)}
+                              >
+                                Close
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </td>
                     </tr>
                   )}
+
                 </React.Fragment>
               ))}
           </tbody>
