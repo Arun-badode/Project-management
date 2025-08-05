@@ -149,10 +149,6 @@ const CreateNewProject = () => {
       taskId: formData.tasks[0],
       applicationId: formData.application[0],
       languageId: formData.languages[0],
-<<<<<<< HEAD
-      totalPagesLang: formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0),
-      totalProjectPages: formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0) * (formData.languages.length || 1),
-=======
       totalPagesLang: formData.files.reduce(
         (sum, file) => sum + (file.pageCount || 0),
         0
@@ -160,7 +156,6 @@ const CreateNewProject = () => {
       totalProjectPages:
         formData.files.reduce((sum, file) => sum + (file.pageCount || 0), 0) *
         (formData.languages.length || 1),
->>>>>>> cb1b3e9e4530220b2541df992eadc407ad9e1270
       receiveDate: formData.receivedDate,
       serverPath: formData.serverPath,
       notes: formData.notes,
@@ -169,31 +164,19 @@ const CreateNewProject = () => {
       perPageRate: formData.rate || 0,
       currency: formData.currency,
       totalCost: formData.cost || 0,
-<<<<<<< HEAD
-      deadline: `${selectedYear}-${(selectedMonth + 1).toString().padStart(2, '0')}-${selectedDate.toString().padStart(2, '0')}`,
-=======
       deadline: `${selectedYear}-${(selectedMonth + 1)
         .toString()
         .padStart(2, "0")}-${selectedDate.toString().padStart(2, "0")}`,
->>>>>>> cb1b3e9e4530220b2541df992eadc407ad9e1270
       readyQCDeadline: "",
       qcHrs: 0,
       qcDueDate: "",
       priority: "Medium",
-<<<<<<< HEAD
-      status: "Active"
-=======
       status: "Active",
->>>>>>> cb1b3e9e4530220b2541df992eadc407ad9e1270
     };
 
     try {
       const response = await axios.post(
-<<<<<<< HEAD
-        `${BASE_URL}project/addProject`,
-=======
-        "https://eminoids-backend-production.up.railway.app/api/project/addProject",
->>>>>>> cb1b3e9e4530220b2541df992eadc407ad9e1270
+      `${BASE_URL}project/addProject`,
         formDataForApi,
         {
           headers: {
@@ -202,23 +185,11 @@ const CreateNewProject = () => {
         }
       );
 
-<<<<<<< HEAD
-      console.log('Project created successfully:', response?.data);
-      alert('Project created successfully!');
-
-      // Reset the form if needed
-      // setFormData({...initialState});
-
-    } catch (error) {
-      console.error('Error creating project:', error);
-      alert('Error creating project. Please try again.');
-=======
       console.log("Project created successfully:", response?.data);
       alert("Project created successfully!");
     } catch (error) {
       console.error("Error creating project:", error);
       alert("Error creating project. Please try again.");
->>>>>>> cb1b3e9e4530220b2541df992eadc407ad9e1270
     }
   };
 
@@ -256,10 +227,7 @@ const CreateNewProject = () => {
     "December",
   ];
 
-<<<<<<< HEAD
-=======
   // Options for dropdowns
->>>>>>> cb1b3e9e4530220b2541df992eadc407ad9e1270
   const gradientSelectStyles = {
     control: (provided, state) => ({
       ...provided,
@@ -306,8 +274,6 @@ const CreateNewProject = () => {
   const [languageOptions, setLanguageOptions] = useState([]);
   const [clientOptions, setClientOptions] = useState([]);
 
-<<<<<<< HEAD
-=======
   
 
   // Fetch tasks
@@ -348,7 +314,6 @@ const CreateNewProject = () => {
   }, []);
 
   // Fetch languages
->>>>>>> cb1b3e9e4530220b2541df992eadc407ad9e1270
   useEffect(() => {
     // Fetch tasks
     axios.get(`${BASE_URL}tasks/getAllTasks`, {
@@ -412,7 +377,7 @@ const CreateNewProject = () => {
   useEffect(() => {
     axios
       .get(
-        "https://eminoids-backend-production.up.railway.app/api/client/getAllClients",
+       ` ${BASE_URL}client/getAllClients`,
         {
           headers: { authorization: `Bearer ${token}` },
         }
@@ -451,9 +416,6 @@ const CreateNewProject = () => {
     }));
   };
 
-<<<<<<< HEAD
-
-=======
   // Client functions
   const handleAddClient = () => {
     setShowClientInput((prev) => {
@@ -461,14 +423,13 @@ const CreateNewProject = () => {
       return !prev;
     });
   };
->>>>>>> cb1b3e9e4530220b2541df992eadc407ad9e1270
 
   const handleConfirmAddClient = async () => {
     if (newClientName.trim() === "") return;
 
     try {
       const response = await axios.post(
-        "https://eminoids-backend-production.up.railway.app/api/client/addClients",
+      `${BASE_URL}client/addClients`,
         {
           clientName: newClientName,
         },
@@ -682,30 +643,6 @@ const CreateNewProject = () => {
 
         {/* Client, Country, Project Manager */}
         <div className="row g-3 mb-3">
-<<<<<<< HEAD
-          <div className="col-md-4">
-            <label htmlFor="client" className="form-label">
-              Client <span className="text-danger">*</span>
-            </label>
-            <Select
-              id="client"
-              name="client"
-              options={clientOptions}
-              value={
-                clientOptions.find((option) => option.value === formData.client) || null
-              }
-              onChange={(opt) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  client: opt ? opt.value : "", // store ID only
-                }))
-              }
-              isSearchable
-              placeholder="Select Client"
-              styles={gradientSelectStyles}
-              required
-            />
-=======
           <div className="col-md-4 mt-2">
             <div className="d-flex justify-content-between align-items-center mb-2">
               <label htmlFor="client" className="form-label mb-0">
@@ -763,7 +700,6 @@ const CreateNewProject = () => {
                 )}
               </div>
             </div>
->>>>>>> cb1b3e9e4530220b2541df992eadc407ad9e1270
           </div>
 
           <div className="col-md-4 mt-4">
