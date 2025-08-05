@@ -65,13 +65,13 @@ const CreateNewProject = () => {
   const [loading, setLoading] = useState(true);
   const [managers, setManagers] = useState([]);
   const [loadingManagers, setLoadingManagers] = useState(true);
-  
+
   // State for showing/hiding input fields
   const [showClientInput, setShowClientInput] = useState(false);
   const [showTaskInput, setShowTaskInput] = useState(false);
   const [showApplicationInput, setShowApplicationInput] = useState(false);
   const [showLanguageInput, setShowLanguageInput] = useState(false);
-  
+
   // State for new item names
   const [newClientName, setNewClientName] = useState("");
   const [newTaskName, setNewTaskName] = useState("");
@@ -100,6 +100,11 @@ const CreateNewProject = () => {
     billingMode: "estimated", // Added default billing mode
     estimatedHrs: 0, // Added estimatedHrs to initial state
   });
+
+  // this state is for storing the file data form the ui 
+  const [fileList, setFileList] = useState([
+    { fileName: "", pages: "", application: "" }
+  ]);
 
   // Fetch managers from the API
   useEffect(() => {
@@ -139,8 +144,14 @@ const CreateNewProject = () => {
   // Post API
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const deadline =
+  selectedYear && selectedMonth !== null && selectedDate !== null
+    ? `${selectedYear}-${(selectedMonth + 1)
+        .toString()
+        .padStart(2, "0")}-${selectedDate.toString().padStart(2, "0")}`
+    : "0000-00-00";
 
-    // Prepare the data in the format expected by the API
+    // Step 1: Prepare project data
     const formDataForApi = {
       projectTitle: formData.title,
       clientId: formData.client,
@@ -164,19 +175,18 @@ const CreateNewProject = () => {
       perPageRate: formData.rate || 0,
       currency: formData.currency,
       totalCost: formData.cost || 0,
-      deadline: `${selectedYear}-${(selectedMonth + 1)
-        .toString()
-        .padStart(2, "0")}-${selectedDate.toString().padStart(2, "0")}`,
+      deadline,
       readyQCDeadline: "",
       qcHrs: 0,
       qcDueDate: "",
       priority: "Medium",
-      status: "Active",
+       status: deadline === "0000-00-00" ? "In Progress" : "Active"
     };
 
     try {
+      // Step 2: Create project
       const response = await axios.post(
-        "https://eminoids-backend-production.up.railway.app/api/project/addProject",
+        `${BASE_URL}project/addProject`,
         formDataForApi,
         {
           headers: {
@@ -185,11 +195,44 @@ const CreateNewProject = () => {
         }
       );
 
-      console.log("Project created successfully:", response?.data);
-      alert("Project created successfully!");
+      const projectId = response?.data?.project?.id;
+
+      console.log("✅ Project created:", response?.data);
+
+      // Step 3: Loop and add each project file
+      const languageId = formData.languages[0];
+      const applicationId = formData.application[0];
+      const deadline = formDataForApi.deadline;
+      const status = "Completed"; // Default status
+
+      for (const file of formData.files) {
+        const filePayload = {
+          projectId,
+          fileName: file.fileName,
+          pages: file.pageCount?.toString() || "0",
+          languageId,
+          applicationId,
+          status,
+          deadline,
+        };
+
+        await axios.post(
+          `${BASE_URL}projectFiles/addProjectFile`,
+          filePayload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        console.log("📁 File added:", filePayload);
+      }
+
+      alert("Project and all files created successfully!");
     } catch (error) {
-      console.error("Error creating project:", error);
-      alert("Error creating project. Please try again.");
+      console.error("❌ Error:", error);
+      alert("Error creating project or adding files. Please try again.");
     }
   };
 
@@ -274,7 +317,7 @@ const CreateNewProject = () => {
   const [languageOptions, setLanguageOptions] = useState([]);
   const [clientOptions, setClientOptions] = useState([]);
 
-  
+
 
   // Fetch tasks
   useEffect(() => {
@@ -319,58 +362,58 @@ const CreateNewProject = () => {
     axios.get(`${BASE_URL}tasks/getAllTasks`, {
       headers: { authorization: `Bearer ${token}` },
     })
-    .then((res) => {
-      if (res.data.status) {
-        setTaskOptions(res.data.tasks.map((task) => ({
-          value: task.id,
-          label: task.taskName,
-        })));
-      }
-    })
-    .catch((err) => console.error("Error fetching tasks:", err));
+      .then((res) => {
+        if (res.data.status) {
+          setTaskOptions(res.data.tasks.map((task) => ({
+            value: task.id,
+            label: task.taskName,
+          })));
+        }
+      })
+      .catch((err) => console.error("Error fetching tasks:", err));
 
     // Fetch applications
     axios.get(`${BASE_URL}application/getAllApplication`, {
       headers: { authorization: `Bearer ${token}` },
     })
-    .then((res) => {
-      if (res.data.status) {
-        setApplicationOptions(res.data.application.map((app) => ({
-          value: app.id,
-          label: app.applicationName,
-        })));
-      }
-    })
-    .catch((err) => console.error("Error fetching applications:", err));
+      .then((res) => {
+        if (res.data.status) {
+          setApplicationOptions(res.data.application.map((app) => ({
+            value: app.id,
+            label: app.applicationName,
+          })));
+        }
+      })
+      .catch((err) => console.error("Error fetching applications:", err));
 
     // Fetch languages
     axios.get(`${BASE_URL}language/getAlllanguage`, {
       headers: { authorization: `Bearer ${token}` },
     })
-    .then((res) => {
-      if (res.data.status) {
-        setLanguageOptions(res.data.languages.map((lang) => ({
-          value: lang.id,
-          label: lang.languageName,
-        })));
-      }
-    })
-    .catch((err) => console.error("Error fetching languages:", err));
+      .then((res) => {
+        if (res.data.status) {
+          setLanguageOptions(res.data.languages.map((lang) => ({
+            value: lang.id,
+            label: lang.languageName,
+          })));
+        }
+      })
+      .catch((err) => console.error("Error fetching languages:", err));
 
     // Fetch clients
     axios.get(`${BASE_URL}client/getAllClients`, {
       headers: { authorization: `Bearer ${token}` },
     })
-    .then((res) => {
-      if (res.data.status) {
-        setClientOptions(res.data.clients.map((client) => ({
-          value: client.id, // Changed from client.clientName to client.id to match API expectation
-          label: client.clientName,
-        })));
-      }
-    })
-    .catch((err) => console.error("Error fetching clients:", err))
-    .finally(() => setLoading(false));
+      .then((res) => {
+        if (res.data.status) {
+          setClientOptions(res.data.clients.map((client) => ({
+            value: client.id, // Changed from client.clientName to client.id to match API expectation
+            label: client.clientName,
+          })));
+        }
+      })
+      .catch((err) => console.error("Error fetching clients:", err))
+      .finally(() => setLoading(false));
   }, [token]);
 
   // Fetch clients
@@ -769,8 +812,8 @@ const CreateNewProject = () => {
               value={
                 taskOptions?.length && formData?.tasks?.length
                   ? taskOptions.filter((opt) =>
-                      formData.tasks.includes(opt.value)
-                    )
+                    formData.tasks.includes(opt.value)
+                  )
                   : []
               }
               onChange={(selectedOptions) =>
@@ -810,7 +853,7 @@ const CreateNewProject = () => {
               </div>
             )}
           </div>
-          
+
           <div className="col-md-6">
             <div className="d-flex justify-content-between align-items-center mb-2">
               <label htmlFor="application" className="form-label mb-0">
@@ -947,12 +990,14 @@ const CreateNewProject = () => {
                     { length: count },
                     (_, i) =>
                       prev.files[i] || {
-                        name: "",
+                        fileName: "",
                         pageCount: 0,
-                        application: "",
+                        applicationId: "",
+                        selected: false
                       }
                   ),
                 }));
+
               }}
             />
             <button
@@ -1021,10 +1066,10 @@ const CreateNewProject = () => {
                       <input
                         type="text"
                         className="form-control"
-                        value={file.name}
+                        value={file.fileName || ""}
                         onChange={(e) => {
                           const files = [...formData.files];
-                          files[idx].name = e.target.value;
+                          files[idx].fileName = e.target.value;
                           setFormData((prev) => ({ ...prev, files }));
                         }}
                         placeholder="File Name"
@@ -1051,17 +1096,17 @@ const CreateNewProject = () => {
                     <td>
                       <select
                         className="form-select"
-                        value={file.application || ""}
+                        value={file.applicationId || ""}
                         onChange={(e) => {
-                          const newApp = e.target.value;
+                          const newAppId = Number(e.target.value);
                           const files = [...formData.files];
 
                           if (files[idx].selected) {
                             files.forEach((f) => {
-                              if (f.selected) f.application = newApp;
+                              if (f.selected) f.applicationId = newAppId;
                             });
                           } else {
-                            files[idx].application = newApp;
+                            files[idx].applicationId = newAppId;
                           }
 
                           setFormData((prev) => ({ ...prev, files }));
@@ -1078,6 +1123,7 @@ const CreateNewProject = () => {
                     </td>
                   </tr>
                 ))}
+
               </tbody>
             </table>
           </div>
@@ -1341,9 +1387,9 @@ const CreateNewProject = () => {
                     <div className="date">
                       {selectedDate !== null
                         ? `${months[selectedMonth].substring(
-                            0,
-                            3
-                          )}, ${selectedYear}`
+                          0,
+                          3
+                        )}, ${selectedYear}`
                         : "00/00/00"}
                     </div>
                   </div>
@@ -1359,9 +1405,8 @@ const CreateNewProject = () => {
                                 <button
                                   key={hour}
                                   onClick={() => setSelectedHour(hour)}
-                                  className={`time-option ${
-                                    selectedHour === hour ? "selected-hour" : ""
-                                  }`}
+                                  className={`time-option ${selectedHour === hour ? "selected-hour" : ""
+                                    }`}
                                 >
                                   {hour.toString().padStart(2, "0")}
                                 </button>
@@ -1379,11 +1424,10 @@ const CreateNewProject = () => {
                               <button
                                 key={minute}
                                 onClick={() => setSelectedMinute(minute)}
-                                className={`time-option ${
-                                  selectedMinute === minute
-                                    ? "selected-minute"
-                                    : ""
-                                }`}
+                                className={`time-option ${selectedMinute === minute
+                                  ? "selected-minute"
+                                  : ""
+                                  }`}
                               >
                                 {minute.toString().padStart(2, "0")}
                               </button>
@@ -1397,17 +1441,15 @@ const CreateNewProject = () => {
                         <div className="period-options">
                           <button
                             onClick={() => setIsAM(true)}
-                            className={`period-option ${
-                              isAM ? "selected" : ""
-                            }`}
+                            className={`period-option ${isAM ? "selected" : ""
+                              }`}
                           >
                             AM
                           </button>
                           <button
                             onClick={() => setIsAM(false)}
-                            className={`period-option ${
-                              !isAM ? "selected" : ""
-                            }`}
+                            className={`period-option ${!isAM ? "selected" : ""
+                              }`}
                           >
                             PM
                           </button>
@@ -1445,13 +1487,12 @@ const CreateNewProject = () => {
                               dayObj.isCurrentMonth &&
                               setSelectedDate(dayObj.day)
                             }
-                            className={`calendar-day ${
-                              dayObj.isCurrentMonth
-                                ? selectedDate === dayObj.day
-                                  ? "current-month selected"
-                                  : "current-month"
-                                : "other-month"
-                            }`}
+                            className={`calendar-day ${dayObj.isCurrentMonth
+                              ? selectedDate === dayObj.day
+                                ? "current-month selected"
+                                : "current-month"
+                              : "other-month"
+                              }`}
                           >
                             {dayObj.day}
                           </button>
