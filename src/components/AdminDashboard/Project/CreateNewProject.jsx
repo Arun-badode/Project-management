@@ -186,7 +186,7 @@ const CreateNewProject = () => {
     try {
       // Step 2: Create project
       const response = await axios.post(
-        `${BASE_URL}project/addProject`,
+       `${BASE_URL}project/addProject`,
         formDataForApi,
         {
           headers: {
@@ -420,7 +420,7 @@ const CreateNewProject = () => {
   useEffect(() => {
     axios
       .get(
-        "https://eminoids-backend-production.up.railway.app/api/client/getAllClients",
+       ` ${BASE_URL}client/getAllClients`,
         {
           headers: { authorization: `Bearer ${token}` },
         }
