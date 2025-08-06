@@ -12,12 +12,11 @@ function UserManagement({ isViewMode, isEditMode }) {
   const [selectedApplications, setSelectedApplications] = useState([]);
   const [activeTab, setActiveTab] = useState("live");
   const [isLoading, setIsLoading] = useState(false);
-  
-  const[id , setId] = useState("");
+  const [id, setId] = useState("");
+  const [applicationsOptions, setApplicationsOptions] = useState([]);
 
   // State for team members data
   const [teamMembers, setTeamMembers] = useState([]);
-console.log("api response", teamMembers);
 
   // Fetch team members on component mount
   useEffect(() => {
@@ -31,7 +30,6 @@ console.log("api response", teamMembers);
             "Authorization": `Bearer ${token}`,
           },
         });
-        console.log(response.data.data);
         
         if (response.data && Array.isArray(response.data.data)) {
           setTeamMembers(response.data.data);
@@ -57,9 +55,6 @@ console.log("api response", teamMembers);
     username: "",
     password: "",
   });
-
-
-
 
   // Filter members based on active tab
   const liveMembers = teamMembers.filter((m) => m.status === "active");
@@ -108,21 +103,6 @@ console.log("api response", teamMembers);
       color: "white",
     }),
   };
-
-  // Application options for skills select
-  const applicationsOptions = [
-    { value: "Word", label: "Word" },
-    { value: "PPT", label: "PPT" },
-    { value: "Excel", label: "Excel" },
-    { value: "INDD", label: "INDD" },
-    { value: "AI", label: "AI" },
-    { value: "PSD", label: "PSD" },
-    { value: "AE", label: "AE" },
-    { value: "CDR", label: "CDR" },
-    { value: "Visio", label: "Visio" },
-    { value: "Project", label: "Project" },
-    { value: "FM", label: "FM" },
-  ];
 
   // Toggle member status between active and freezed
   const toggleFreezeMember = async (empId) => {
@@ -184,7 +164,7 @@ console.log("api response", teamMembers);
       if (modalType === "edit") {
         // Update member
         const response = await axios.put(
-          `${BASE_URL}member/updateMember/${empId}`,
+          `${BASE_URL}member/updateMember/${form.empId}`,
           payload,
           {
             headers: {
@@ -276,18 +256,18 @@ console.log("api response", teamMembers);
         dob: member.dob,
         team: member.team,
         role: member.role,
-        appSkills: member.appSkills,
+        appSkills: member.appSkills || [],
         username: member.username,
         password: "", // Password is not stored for security reasons
       });
 
       // Set selected applications for the select component
-      setSelectedApplications(
-        member.appSkills.map((skill) => ({
-          value: skill,
-          label: skill,
-        }))
-      );
+      const appSkills = member.appSkills || [];
+      const formattedAppSkills = Array.isArray(appSkills) 
+        ? appSkills.map(skill => ({ value: skill, label: skill }))
+        : [];
+      
+      setSelectedApplications(formattedAppSkills);
     } else {
       resetForm();
     }
@@ -315,14 +295,14 @@ console.log("api response", teamMembers);
           return;
         }
 
-        await axios.delete(`${BASE_URL}member/deleteMember/${id}`, {
+        await axios.delete(`${BASE_URL}member/deleteMember/${empId}`, {
           headers: {
             "Authorization": `Bearer ${token}`,
           },
         });
 
         setTeamMembers((prevMembers) =>
-          prevMembers.filter((member) => member.id !== id)
+          prevMembers.filter((member) => member.empId !== empId)
         );
 
         Swal.fire("Deleted!", "Member has been deleted.", "success");
@@ -333,32 +313,30 @@ console.log("api response", teamMembers);
     }
   };
 
-
-    useEffect(() => {
-      const fetchApplications = async () => {
-        try {
-          const response = await axios.get(
-            `${BASE_URL}application/getAllApplication`, {
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
-              },
-            }
-          );
-          if (response.data.status) {
-            const formattedOptions = response.data.application.map((app) => ({
-              value: app.applicationName, // ya app.id agar id chahiye
-              label: app.applicationName
-            }));
-            setApplicationsOptions(formattedOptions);
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        const response = await axios.get(
+          `${BASE_URL}application/getAllApplication`, {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+            },
           }
-        } catch (error) {
-          console.error("API Error:", error);
+        );
+        if (response.data.status) {
+          const formattedOptions = response.data.application.map((app) => ({
+            value: app.applicationName,
+            label: app.applicationName
+          }));
+          setApplicationsOptions(formattedOptions);
         }
-      };
-      fetchApplications();
-    }, []);
-
+      } catch (error) {
+        console.error("API Error:", error);
+      }
+    };
+    fetchApplications();
+  }, []);
 
   // Render the members table
   const renderTable = () => (
@@ -428,7 +406,11 @@ console.log("api response", teamMembers);
                     <td>{member.dob}</td>
                     <td>{member.team}</td>
                     <td>{member.role}</td>
-                    <td>{member.appSkills}</td>
+                    <td>
+                      {Array.isArray(member.appSkills) 
+                        ? member.appSkills.join(", ") 
+                        : member.appSkills || "N/A"}
+                    </td>
                     <td>{member.username}</td>
                     <td>
                       <span className="badge bg-success">Active</span>
@@ -516,7 +498,11 @@ console.log("api response", teamMembers);
                     <td>{member.dob}</td>
                     <td>{member.team}</td>
                     <td>{member.role}</td>
-                    <td>{member.appSkills}</td>
+                    <td>
+                      {Array.isArray(member.appSkills) 
+                        ? member.appSkills.join(", ") 
+                        : member.appSkills || "N/A"}
+                    </td>
                     <td>{member.username}</td>
                     <td>
                       <span className="badge bg-secondary">Freezed</span>
@@ -649,18 +635,18 @@ console.log("api response", teamMembers);
               disabled={isViewMode}
             />
           </div>
-         <div className="mb-3">
-      <label className="form-label text-white">App Skills</label>
-      <Select
-        options={applicationsOptions}
-        isMulti
-        value={selectedApplications}
-        onChange={setSelectedApplications}
-        placeholder="Select"
-        styles={gradientSelectStyles}
-        isDisabled={isViewMode}
-      />
-    </div>
+          <div className="mb-3">
+            <label className="form-label text-white">App Skills</label>
+            <Select
+              options={applicationsOptions}
+              isMulti
+              value={selectedApplications}
+              onChange={setSelectedApplications}
+              placeholder="Select"
+              styles={gradientSelectStyles}
+              isDisabled={isViewMode}
+            />
+          </div>
           <div className="mb-3">
             <label className="form-label">Username</label>
             <input
@@ -753,7 +739,7 @@ console.log("api response", teamMembers);
                 </h5>
                 <button
                   type="button"
-                  className="btn-close"mem
+                  className="btn-close"
                   onClick={() => setShowModal(false)}
                   disabled={isLoading}
                 ></button>
@@ -767,4 +753,4 @@ console.log("api response", teamMembers);
   );
 }
 
-export default UserManagement;
+export default UserManagement;           
