@@ -351,7 +351,7 @@ const ActiveProject = () => {
 
       // Make API call
       const response = await axios.patch(
-        `https://eminoids-backend-production.up.railway.app/api/projectFiles/updateProjectFile/${selectedProject.id}`,
+        `${BASE_URL}projectFiles/updateProjectFile/${selectedProject.id}`,
         updateData,
         {
           headers: {

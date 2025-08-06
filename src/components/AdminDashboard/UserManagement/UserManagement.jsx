@@ -12,6 +12,7 @@ function UserManagement({ isViewMode, isEditMode }) {
   const [selectedApplications, setSelectedApplications] = useState([]);
   const [activeTab, setActiveTab] = useState("live");
   const [isLoading, setIsLoading] = useState(false);
+  
   const[id , setId] = useState("");
 
   // State for team members data
@@ -332,6 +333,33 @@ console.log("api response", teamMembers);
     }
   };
 
+
+    useEffect(() => {
+      const fetchApplications = async () => {
+        try {
+          const response = await axios.get(
+            `${BASE_URL}application/getAllApplication`, {
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+              },
+            }
+          );
+          if (response.data.status) {
+            const formattedOptions = response.data.application.map((app) => ({
+              value: app.applicationName, // ya app.id agar id chahiye
+              label: app.applicationName
+            }));
+            setApplicationsOptions(formattedOptions);
+          }
+        } catch (error) {
+          console.error("API Error:", error);
+        }
+      };
+      fetchApplications();
+    }, []);
+
+
   // Render the members table
   const renderTable = () => (
     <div className="table-container">
@@ -621,18 +649,18 @@ console.log("api response", teamMembers);
               disabled={isViewMode}
             />
           </div>
-          <div className="mb-3">
-            <label className="form-label text-white">App Skills</label>
-            <Select
-              options={applicationsOptions}
-              isMulti
-              value={selectedApplications}
-              onChange={setSelectedApplications}
-              placeholder="Select"
-              styles={gradientSelectStyles}
-              isDisabled={isViewMode}
-            />
-          </div>
+         <div className="mb-3">
+      <label className="form-label text-white">App Skills</label>
+      <Select
+        options={applicationsOptions}
+        isMulti
+        value={selectedApplications}
+        onChange={setSelectedApplications}
+        placeholder="Select"
+        styles={gradientSelectStyles}
+        isDisabled={isViewMode}
+      />
+    </div>
           <div className="mb-3">
             <label className="form-label">Username</label>
             <input
