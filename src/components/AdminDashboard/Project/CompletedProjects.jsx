@@ -79,7 +79,7 @@ const CompletedProjects = () => {
               <th>Received Date</th>
               <th>Estimated Hrs</th>
               <th>Actual Hrs</th>
-              <th>Efficiency</th>
+              {/* <th>Efficiency</th> */}
               <th>Cost with Currency</th>
               <th>Cost in INR</th>
               <th className="text-end">Actions</th>
@@ -122,9 +122,9 @@ const CompletedProjects = () => {
                 </td>
                 <td>{project.estimatedHours || "-"}</td>
                 <td>{project.hourlyRate || "-"}</td>
-                <td>
+                {/* <td>
                   {calculateEfficiency(project.expectedHours, project.hourlyRate)}
-                </td>
+                </td> */}
                 <td>
                   {project.currency 
                     ? `${project.currency} `

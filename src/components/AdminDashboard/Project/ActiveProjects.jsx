@@ -28,6 +28,232 @@ const ActiveProjects = () => {
   const [fileQAReviewers, setFileQAReviewers] = useState({});
   const [fileQAStatuses, setFileQAStatuses] = useState({});
   const [priority, setPriority] = useState("Low");
+  const [readyForQcDueInput, setReadyForQcDueInput] = useState("");
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [priorityAll, setPriorityAll] = useState("Mid");
+  const [qcDueDelay, setQcDueDelay] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const [allFiles, setAllFiles] = useState([]);
+  useEffect(() => {
+    const fetchFiles = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}projectFiles/getAllProjectFiles`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.data.status) {
+          setAllFiles(response.data.data);  // Use `data`, not `files`
+          console.log("Fetched Files:", response.data.data); // Log directly from response
+        } else {
+          console.error("Error in response:", response.data.message);
+        }
+      } catch (err) {
+        console.error("Error fetching files:", err);
+      }
+    };
+
+    fetchFiles();
+  }, []);
+
+
+  // this is for fetching members to show in filed handler option
+  const [members, setMembers] = useState([]);
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}member/getAllMembers`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.data.status) {
+          setMembers(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching members:", error);
+      }
+    };
+
+    fetchMembers();
+  }, []);
+
+  // New function to update project files via API
+  const handleUpdateProjectFiles = async () => {
+    if (!selectedProject || !selectedProject.id) {
+      alert("No project selected");
+      return;
+    }
+
+    // Validate required fields
+    if (!readyForQcDueInput) {
+      alert("Please select Ready for QC Due date and time");
+      return;
+    }
+
+    if (!qcAllocatedHours || qcAllocatedHours <= 0) {
+      alert("Please enter valid QC Allocated Hours");
+      return;
+    }
+
+    setIsUpdating(true);
+
+    try {
+      // Calculate QC Due Date
+      const qcDueCalculated = calculateQCDue(readyForQcDueInput, qcAllocatedHours);
+
+      // -----------------------------------
+      // 1. Update the Project File
+      // -----------------------------------
+      const fileUpdateData = {
+        projectId: parseInt(selectedProject.id),
+        readyForQcDue: readyForQcDueInput,
+        qcAllocatedHours: parseFloat(qcAllocatedHours),
+        qcDue: qcDueCalculated,
+        priority: priorityAll,
+        handler: fileHandlers[selectedProject.id] || "",
+      };
+
+      const fileUpdateResponse = await axios.patch(
+        `https://eminoids-backend-production.up.railway.app/api/projectFiles/updateProjectFile/${selectedProject.id}`,
+        fileUpdateData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (fileUpdateResponse.status !== 200) {
+        throw new Error('Failed to update project file');
+      }
+
+      // -----------------------------------
+      // 2. Update the Project (excluding status update)
+      // -----------------------------------
+      const fullProject = projects.find(p => p.id === selectedProject.id);
+
+      if (!fullProject) {
+        throw new Error("Full project details not found");
+      }
+
+      const projectUpdateData = {
+        projectTitle: fullProject.projectTitle,
+        clientId: fullProject.clientId,
+        country: fullProject.country,
+        projectManagerId: fullProject.projectManagerId,
+        taskId: fullProject.taskId,
+        applicationId: fullProject.applicationId,
+        languageId: fullProject.languageId,
+        totalPagesLang: fullProject.totalPagesLang,
+        totalProjectPages: fullProject.totalProjectPages,
+        receiveDate: fullProject.receiveDate,
+        serverPath: fullProject.serverPath,
+        notes: fullProject.notes,
+        estimatedHours: fullProject.estimatedHours,
+        hourlyRate: fullProject.hourlyRate,
+        perPageRate: fullProject.perPageRate,
+        currency: fullProject.currency,
+        totalCost: fullProject.totalCost,
+        deadline: fullProject.deadline,
+
+        // ✅ Updated fields (status removed)
+        readyQCDeadline: readyForQcDueInput,
+        qcHrs: parseFloat(qcAllocatedHours),
+        qcDueDate: qcDueCalculated,
+      };
+
+      const projectUpdateResponse = await axios.patch(
+        `https://eminoids-backend-production.up.railway.app/api/project/updateProject/${selectedProject.id}`,
+        projectUpdateData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (projectUpdateResponse.status !== 200) {
+        throw new Error('Failed to update main project');
+      }
+
+      const updatedProjects = projects.map(project => {
+        if (project.id === selectedProject.id) {
+          return {
+            ...project,
+            readyQCDeadline: readyForQcDueInput,
+            qcHrs: qcAllocatedHours,
+            qcDueDate: qcDueCalculated,
+            // priority remains in file, not in project
+            handler: fileHandlers[selectedProject.id] || project.handler,
+          };
+        }
+        return project;
+      });
+
+      setProjects(updatedProjects);
+
+      setSelectedProject(prev => ({
+        ...prev,
+        readyQCDeadline: readyForQcDueInput,
+        qcHrs: qcAllocatedHours,
+        qcDueDate: qcDueCalculated,
+      }));
+
+      setHasUnsavedChanges(false);
+      alert("Project and project file updated successfully!");
+    } catch (error) {
+      console.error("Error updating project or file:", error);
+      alert(`Failed to update: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+  const handleCloseProjectView = () => {
+    setExpandedRow(null);
+    setSelectedProject(null);
+    setSelectedFiles([]);
+    setHasUnsavedChanges(false);
+    setReadyForQcDueInput("");
+    setQcAllocatedHours(0.0);
+    setPriorityAll("Mid");
+    setQcDueDelay("");
+    setFileHandlers({});
+  };
+
+  useEffect(() => {
+    if (!readyForQcDueInput) {
+      setQcDueDelay("");
+      return;
+    }
+
+    const updateDelay = () => {
+      const delayText = calculateTimeDiff(readyForQcDueInput);
+      setQcDueDelay(delayText);
+    };
+
+    updateDelay();
+    const interval = setInterval(updateDelay, 60000);
+    return () => clearInterval(interval);
+  }, [readyForQcDueInput]);
+
+  function calculateTimeDiff(targetDateStr) {
+    const now = new Date();
+    const target = new Date(targetDateStr);
+    const diffMs = now - target;
+    const diffMinutes = Math.floor(Math.abs(diffMs) / (1000 * 60));
+    const isPast = diffMs > 0;
+    if (diffMinutes < 1) return isPast ? "Just now" : "In a few seconds";
+    const hours = Math.floor(diffMinutes / 60);
+    const minutes = diffMinutes % 60;
+    let timeStr = "";
+    if (hours > 0) timeStr += `${hours}h `;
+    timeStr += `${minutes}m`;
+    return isPast ? `Delayed by ${timeStr}` : `Due in ${timeStr}`;
+  }
+
 
   const assignees = [
     { label: "Not Assigned", value: "" },
@@ -75,7 +301,7 @@ const ActiveProjects = () => {
   };
 
   const filteredProjects = projects.filter((project) => {
-    const matchesTab = project.status==="Active" || project.status==="Completed"?.toLowerCase() === activeTab;
+    const matchesTab = project.status === "Active" || project.status === "Completed"?.toLowerCase() === activeTab;
     const matchesSearch =
       searchQuery === "" ||
       (project.projectTitle && project.projectTitle.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -90,7 +316,6 @@ const ActiveProjects = () => {
   });
   const markAsCompleted = async (projectId) => {
     try {
-      const token = localStorage.getItem("authToken");
 
       const res = await axios.patch(
         `${BASE_URL}project/updateProject/${projectId}`,
@@ -134,21 +359,26 @@ const ActiveProjects = () => {
   };
 
   const handleViewProject = (project) => {
-    setExpandedRow(expandedRow === project.id ? null : project.id);
-    setSelectedFiles([]);
+    setSelectedProject(project);
+    setSelectedFiles(project.files ? project.files.map(f => ({ id: f.id })) : []);
+    setShowDetailModal(false);
     setHasUnsavedChanges(false);
     setBatchEditValues({
       application: "",
       handler: "",
       qaReviewer: "",
-      qaStatus: "",
       qcDue: "",
       qcAllocatedHours: "",
       priority: "",
     });
-    setSelectedDateTime(null);
-    setQcAllocatedHours(0);
-    setPriority("Low");
+
+    // Reset form values when opening a new project
+    setReadyForQcDueInput("");
+    setQcAllocatedHours(0.0);
+    setPriorityAll("Mid");
+    setQcDueDelay("");
+
+    setExpandedRow(expandedRow === project.id ? null : project.id);
   };
 
   const toggleFileSelection = (file) => {
@@ -245,11 +475,13 @@ const ActiveProjects = () => {
   };
 
   // Count files for each project
-  const getFileCount = (projectId) => {
-    // This is a mock function - replace with your actual file count logic
-    // For now, we'll return a fixed number for each project
-    return 4; // Assuming each project has 4 files
-  };
+// allProjectFiles should be an array of file objects with a projectId field
+
+const getFileCount = (projectId) => {
+  if (!Array.isArray(allFiles)) return 0;
+
+  return allFiles.filter(file => file.projectId === projectId).length;
+};
 
   return (
     <div >
@@ -303,7 +535,7 @@ const ActiveProjects = () => {
             </tr>
           </thead>
           <tbody>
-            {projects.filter((p)=>p.status=="Active" || p.status=="Completed")
+            {projects.filter((p) => p.status == "Active" || p.status == "Completed")
               .map((project, index) => (
                 <React.Fragment key={project.id || index}>
                   <tr
@@ -456,132 +688,106 @@ const ActiveProjects = () => {
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  {[
-                                    {
-                                      id: 1,
-                                      name: "File_1_1.docx",
-                                      pages: 15,
-                                      language: "az",
-                                      application: "Visio",
-                                    },
-                                    {
-                                      id: 2,
-                                      name: "File_1_2.docx",
-                                      pages: 6,
-                                      language: "az",
-                                      application: "FM",
-                                    },
-                                    {
-                                      id: 3,
-                                      name: "File_1_3.docx",
-                                      pages: 5,
-                                      language: "yo",
-                                      application: "Visio",
-                                    },
-                                    {
-                                      id: 4,
-                                      name: "File_1_4.docx",
-                                      pages: 2,
-                                      language: "am",
-                                      application: "Word",
-                                    },
-                                  ].map((file) => (
-                                    <tr key={file.id}>
-                                      <td>
-                                        <input
-                                          type="checkbox"
-                                          className="form-check-input"
-                                          checked={selectedFiles.some(
-                                            (f) => f.id === file.id
-                                          )}
-                                          onChange={() =>
-                                            toggleFileSelection(file)
-                                          }
-                                        />
-                                      </td>
-                                      <td>{file.name}</td>
-                                      <td>{file.pages}</td>
-                                      <td>{file.language}</td>
-                                      <td>{file.application}</td>
-                                      <td>
-                                        <select
-                                          className="form-select form-select-sm"
-                                          value={fileHandlers[file.id] || ""}
-                                          onChange={(e) =>
-                                            handleHandlerChange(
-                                              file.id,
-                                              e.target.value
-                                            )
-                                          }
-                                        >
-                                          <option value="">
-                                            Not Assigned
-                                          </option>
-                                          {assignees.map(
-                                            (assignee, index) => (
-                                              <option
-                                                key={index}
-                                                value={assignee.value}
-                                              >
-                                                {assignee.label}
-                                              </option>
-                                            )
-                                          )}
-                                        </select>
-                                      </td>
-                                      <td>
-                                        <select className="form-select form-select-sm">
-                                          <option value="">
-                                            Not Assigned
-                                          </option>
-                                          <option value="Sarah Williams">
-                                            Sarah Williams
-                                          </option>
-                                          <option value="David Brown">
-                                            David Brown
-                                          </option>
-                                          <option value="Emily Davis">
-                                            Emily Davis
-                                          </option>
-                                        </select>
-                                      </td>
-                                      <td>YTS</td>
-                                      <td>
-                                        {file.imageUrl ? (
-                                          <img
-                                            src={file.imageUrl}
-                                            alt={file.name}
-                                            style={{
-                                              width: "60px",
-                                              height: "40px",
-                                              objectFit: "cover",
-                                            }}
+                                  {allFiles
+                                    .filter((file) => file.projectId === project.id)
+                                    .map((file) => (
+                                      <tr key={file.id}>
+                                        <td>
+                                          <input
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            checked={selectedFiles.some((f) => f.id === file.id)}
+                                            onChange={() => toggleFileSelection(file)}
                                           />
-                                        ) : (
-                                          <span>No Preview</span>
-                                        )}
-                                      </td>
-                                    </tr>
-                                  ))}
+                                        </td>
+                                        <td>{file.fileName}</td>
+                                        <td>{file.pages}</td>
+                                        <td>{file.languageName}</td>
+                                        <td>{file.applicationName}</td>
+                                        <td>
+                                          <select
+                                            className="form-select form-select-sm"
+                                            value={fileHandlers[file.id] || ""}
+                                            onChange={(e) => handleHandlerChange(file.id, e.target.value)}
+                                          >
+                                            <option value="">Not Assigned</option>
+                                            {members
+                                              .filter((member) =>
+                                                member.appSkills
+                                                  ?.toLowerCase()
+                                                  .includes(file.applicationName?.toLowerCase())
+                                              )
+                                              .map((filteredMember) => (
+                                                <option key={filteredMember.id} value={filteredMember.fullName}>
+                                                  {filteredMember.fullName}
+                                                </option>
+                                              ))}
+                                          </select>
+
+                                        </td>
+                                        <td>
+                                          <select className="form-select form-select-sm">
+                                            <option value="">Not Assigned</option>
+                                            <option value="Sarah Williams">Sarah Williams</option>
+                                            <option value="David Brown">David Brown</option>
+                                            <option value="Emily Davis">Emily Davis</option>
+                                          </select>
+                                        </td>
+                                        <td>{file.status || "Pending"}</td>
+                                        <td>
+                                          {file.imageUrl ? (
+                                            <img
+                                              src={file.imageUrl}
+                                              alt={file.fileName}
+                                              style={{
+                                                width: "60px",
+                                                height: "40px",
+                                                objectFit: "cover",
+                                              }}
+                                            />
+                                          ) : (
+                                            <span>No Preview</span>
+                                          )}
+                                        </td>
+                                      </tr>
+                                    ))}
                                 </tbody>
+
                               </table>
                             </div>
                           </div>
 
                           {/* Footer Row Controls */}
                           <div className="row g-3 align-items-center mb-3">
-                            <div className="col-md-3">
+                            {/* Ready for QC Due */}
+                            <div className="col-12 col-sm-6 col-md-3">
                               <label className="form-label">
-                                Ready for QC Due
+                                Ready for QC Due <span className="text-danger">*</span>
                               </label>
                               <input
                                 type="datetime-local"
                                 className="form-control"
+                                value={readyForQcDueInput}
+                                onChange={(e) => {
+                                  setReadyForQcDueInput(e.target.value);
+                                  setHasUnsavedChanges(true);
+                                }}
+                                required
                               />
+                              {qcDueDelay && (
+                                <small
+                                  className={`text-${qcDueDelay.includes("Delayed") ? "danger" : "success"
+                                    }`}
+                                >
+                                  {qcDueDelay}
+                                </small>
+                              )}
                             </div>
-                            <div className="col-md-2 mt-5">
+
+                            {/* QC Allocated Hours */}
+                            <div className="col-12 col-sm-6 col-md-2">
                               <label className="form-label">
-                                QC Allocated Hours
+                                QC Allocated Hours <span className="text-danger">*</span>
                               </label>
                               <input
                                 type="number"
@@ -589,33 +795,71 @@ const ActiveProjects = () => {
                                 step="0.25"
                                 className="form-control"
                                 placeholder="0"
+                                value={qcAllocatedHours}
+                                onChange={(e) => {
+                                  setQcAllocatedHours(e.target.value);
+                                  setHasUnsavedChanges(true);
+                                }}
+                                required
                               />
-                              <div className="form-text">
-                                (in multiple of 0.00 only)
-                              </div>
+                              <div className="form-text">(in multiple of 0.25 only)</div>
                             </div>
-                            <div className="col-md-2">
+
+                            {/* QC Due */}
+                            <div className="col-12 col-sm-6 col-md-2">
                               <label className="form-label">QC Due</label>
                               <input
                                 type="text"
                                 className="form-control"
                                 placeholder="--"
+                                value={calculateQCDue(readyForQcDueInput, qcAllocatedHours)}
                                 disabled
                               />
                             </div>
-                            <div className="col-md-2">
+
+
+                            <div className="col-12 col-sm-6 col-md-2">
                               <label className="form-label">Priority</label>
-                              <select className="form-select">
+                              <select
+                                className="form-select"
+                                value={priorityAll}
+                                onChange={(e) => {
+                                  setPriorityAll(e.target.value);
+                                  setHasUnsavedChanges(true);
+                                }}
+                              >
                                 <option value="Low">Low</option>
-                                <option value="Medium">Medium</option>
+                                <option value="Mid">Mid</option>
                                 <option value="High">High</option>
                               </select>
                             </div>
-                            <div className="col-md-3 d-flex align-items-end justify-content-end gap-2">
-                              <button className="btn btn-success">
-                                Save
+
+
+                            {/* Action Buttons */}
+                            <div className="col-12 col-md-3 d-flex flex-column flex-md-row justify-content-md-end align-items-stretch gap-2">
+                              <button
+                                className="btn btn-success w-100"
+                                onClick={handleUpdateProjectFiles}
+                                disabled={isUpdating || !readyForQcDueInput || !qcAllocatedHours}
+                              >
+                                {isUpdating ? (
+                                  <>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Saving...
+                                  </>
+                                ) : (
+                                  <>
+                                    <i className="fas fa-save me-2"></i>
+                                    Save
+                                  </>
+                                )}
                               </button>
-                              <button className="btn btn-secondary">
+                              <button
+                                className="btn btn-secondary w-100"
+                                onClick={handleCloseProjectView}
+                                disabled={isUpdating}
+                              >
+                                <i className="fas fa-times me-2"></i>
                                 Close
                               </button>
                             </div>

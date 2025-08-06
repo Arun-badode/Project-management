@@ -24,6 +24,35 @@ const ShiftAllocation = () => {
     notes: "",
   });
 
+  const getShiftLabel = (start, end, type) => {
+    const shiftLabels = {
+      "11:30 AM - 8:30 PM": { symbol: "α", bg: "#aef1f8" },
+      "1:00 PM - 10:00 PM": { symbol: "β", bg: "#b7f280" },
+      "2:30 PM - 11:30 PM": { symbol: "γ", bg: "#d9c8f3" },
+      "6:30 PM - 3:30 AM": { symbol: "δ", bg: "#f7d4b5" },
+      "WO": { symbol: "WO", bg: "#ffd966" },
+      "Holiday": { symbol: "Holiday", bg: "#93c47d" },
+    };
+
+    const formattedTime = `${start} - ${end}`;
+    const label = shiftLabels[formattedTime] || shiftLabels[type] || null;
+
+    return label ? (
+      <span
+        style={{
+          backgroundColor: label.bg,
+          fontWeight: "bold",
+          padding: "2px 8px",
+          borderRadius: "4px",
+          display: "inline-block",
+          color: "black", // ✅ Make the text color black
+        }}
+      >
+        {label.symbol}
+      </span>
+    ) : null;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -97,7 +126,7 @@ const ShiftAllocation = () => {
       );
       alert(
         error.response?.data?.message ||
-          "Error processing shift. Please try again."
+        "Error processing shift. Please try again."
       );
     }
   };
@@ -116,19 +145,23 @@ const ShiftAllocation = () => {
   };
 
   // Get week dates based on current date
-  const getWeekDates = () => {
-    const dates = [];
-    const startOfWeek = new Date(currentDate);
-    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+const getWeekDates = () => {
+  const dates = [];
+  const startOfWeek = new Date(currentDate);
+  const day = currentDate.getDay(); // 0 (Sun) to 6 (Sat)
+  const mondayOffset = day === 0 ? -6 : 1 - day;
 
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startOfWeek);
-      date.setDate(startOfWeek.getDate() + i);
-      dates.push(date);
-    }
+  startOfWeek.setDate(currentDate.getDate() + mondayOffset);
 
-    return dates;
-  };
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(startOfWeek);
+    date.setDate(startOfWeek.getDate() + i);
+    dates.push(date);
+  }
+
+  return dates;
+};
+
 
   const weekDates = getWeekDates();
 
@@ -184,6 +217,23 @@ const ShiftAllocation = () => {
         return "bg-secondary bg-opacity-10 border-secondary";
     }
   };
+
+  const formatDateRange = (date) => {
+  const startOfWeek = new Date(date);
+  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1); // Monday
+
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
+
+  const format = (d) => {
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
+  return `${format(startOfWeek)} - ${format(endOfWeek)}`;
+};
 
   // Format date for input
   const formatDateForInput = (date) => {
@@ -290,7 +340,7 @@ const ShiftAllocation = () => {
     if (!selectedEmployee) return;
 
     const selectedDate = weekDates[dayIndex];
-    
+
     setFormData({
       memberId: memberId.toString(),
       shiftDate: formatDateForInput(selectedDate),
@@ -299,7 +349,7 @@ const ShiftAllocation = () => {
       shiftType: "Half Day",
       notes: "",
     });
-    
+
     setIsEditMode(false);
     setShowAddShiftModal(true);
   };
@@ -309,15 +359,15 @@ const ShiftAllocation = () => {
       if (!time12) return "";
       const [time, modifier] = time12.split(" ");
       let [hours, minutes] = time.split(":");
-      
+
       if (hours === "12") {
         hours = "00";
       }
-      
+
       if (modifier === "PM") {
         hours = parseInt(hours, 10) + 12;
       }
-      
+
       return `${hours}:${minutes}`;
     };
 
@@ -360,7 +410,7 @@ const ShiftAllocation = () => {
       );
       alert(
         error.response?.data?.message ||
-          "Error deleting shift. Please try again."
+        "Error deleting shift. Please try again."
       );
     }
   };
@@ -402,13 +452,12 @@ const ShiftAllocation = () => {
                     <i className="fas fa-chevron-left me-2"></i> Previous Week
                   </button>
 
-                  <div>
-                    <input
-                      type="date"
-                      className="form-control"
-                      value={formatDateForInput(currentDate)}
-                      onChange={handleDateChange}
-                    />
+                  <div
+                    className="form-control d-flex justify-content-between align-items-center"
+                    style={{ minWidth: "230px", fontWeight: "bold", backgroundColor: "white" }}
+                  >
+                    {formatDateRange(currentDate)}
+                    <i className="fas fa-calendar-alt text-muted ms-2"></i>
                   </div>
 
                   <button
@@ -448,9 +497,8 @@ const ShiftAllocation = () => {
           <div className="">
             {/* Main Schedule */}
             <div
-              className={`card table-gradient-bg ${
-                showEmployeePanel ? "me-3" : ""
-              }`}
+              className={`card table-gradient-bg ${showEmployeePanel ? "me-3" : ""
+                }`}
             >
               <div className="table-responsive ">
                 <table className="table">
@@ -496,30 +544,21 @@ const ShiftAllocation = () => {
                               .map((shift, idx) => (
                                 <div
                                   key={idx}
-                                  className={`border-start border-3 px-2 py-1 mb-1 rounded ${getShiftTypeColor(
-                                    shift.type
-                                  )}`}
-                                  onClick={() => handleEditShift({
-                                    ...shift,
-                                    memberId: employee.memberId
-                                  })}
+                                  className={`border-start border-3 px-2 py-1 mb-1 rounded ${getShiftTypeColor(shift.type)}`}
+                                  onClick={() =>
+                                    handleEditShift({
+                                      ...shift,
+                                      memberId: employee.memberId,
+                                    })
+                                  }
                                   style={{ cursor: "pointer" }}
                                 >
-                                  <div className="fw-medium">
-                                    {shift.start} - {shift.end}
+                                  <div className="fw-medium d-flex justify-content-center">
+                                    {getShiftLabel(shift.start, shift.end, shift.type)}
                                   </div>
-                                  <div className="small">
-                                    {shift.type.charAt(0).toUpperCase() +
-                                      shift.type.slice(1)}{" "}
-                                    Shift
-                                  </div>
-                                  {shift.notes && (
-                                    <div className="text-white-500 small fst-italic">
-                                      {shift.notes}
-                                    </div>
-                                  )}
                                 </div>
                               ))}
+
 
                             {/* Add/Remove Shift Buttons */}
                             <div

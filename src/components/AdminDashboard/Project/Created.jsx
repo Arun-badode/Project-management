@@ -90,82 +90,49 @@ const Created = () => {
 
 
 
-  const markAsCompleted = async (projectId) => {
-    try {
-      const project = projects.find(p => p.id === projectId);
-      const deadline = project.deadline;
+const markAsCompleted = async (projectId) => {
+  try {
+    const token = localStorage.getItem("authToken");
 
-      if (!deadline) {
-        alert("Please set a deadline before saving.");
-        return;
-      }
+    // Prompt user to enter deadline
+    const deadline = prompt("Enter new deadline date (YYYY-MM-DD):");
 
-      // // 1. Update Project
-      // await axios.patch(
-      //   `${BASE_URL}projectFiles/updateProjectFile/${projectId}`,
-      //   {
-      //     status: "In Progress",
-      //     deadline,
-      //   },
-      //   {
-      //     headers: { Authorization: `Bearer ${token}` },
-      //   }
-      // );
-
-      // 2. Update Files for the Project
-      const projectFiles = allFiles.filter(file => file.projectId === projectId);
-      const updatedFiles = projectFiles
-        .filter(file => selectedFiles.includes(file.id))
-        .map(file => ({
-          id: file.id,
-          status: fileStatuses[file.id] || file.status,
-          projectId: file.projectId, // Keep the projectId
-        }))
-
-      for (const file of updatedFiles) {
-        const originalFile = allFiles.find(f => f.id === file.id);
-
-        await axios.patch(
-          `${BASE_URL}projectFiles/updateProjectFile/${file.id}`,
-          {
-            projectId: originalFile.projectId,
-            fileName: originalFile.fileName,
-            applicationId: originalFile.applicationId,
-            languageId: originalFile.languageId,
-            pages: originalFile.pages,
-            deadline: fileDeadlines[originalFile.projectId] || "0000-00-00T00:00", // Default if missing
-            status: file.status,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-      }
-
-      alert("Project and files updated successfully!");
-
-      // // Refresh project list and files
-      // const refreshed = await axios.get(`${BASE_URL}project/getAllProjects`, {
-      //   headers: { Authorization: `Bearer ${token}` },
-      // });
-
-      // if (refreshed.data.status) {
-      //   setProjects(refreshed.data.projects);
-      // }
-
-      // const refreshedFiles = await axios.get(`${BASE_URL}projectFile/getAllFiles`, {
-      //   headers: { Authorization: `Bearer ${token}` },
-      // });
-
-      // if (refreshedFiles.data.status) {
-      //   setAllFiles(refreshedFiles.data.files);
-      // }
-
-    } catch (error) {
-      console.error("Failed to update project status:", error);
-      alert("Error updating project or files");
+    if (!deadline || !/^\d{4}-\d{2}-\d{2}$/.test(deadline)) {
+      alert("Invalid or empty date. Please use YYYY-MM-DD format.");
+      return;
     }
-  };
+
+    const res = await axios.patch(
+      `${BASE_URL}project/updateProject/${projectId}`,
+      {
+        status: "Active",       // ✅ Set status to Active
+        deadline: deadline,     // ✅ Set deadline as user input
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (res.status === 200) {
+      alert("Project status updated and deadline set successfully!");
+
+      // Refresh project list
+      const refreshed = await axios.get(`${BASE_URL}project/getAllProjects`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (refreshed.data.status) {
+        setProjects(refreshed.data.projects);
+      }
+    }
+  } catch (error) {
+    console.error("Failed to update project status:", error);
+    alert("Error updating project status");
+  }
+};
+
 
 
 

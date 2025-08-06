@@ -361,146 +361,138 @@ const ActiveProject = () => {
     }
   };
 
-  // New function to update project files via API
-  const handleUpdateProjectFiles = async () => {
-    if (!selectedProject || !selectedProject.id) {
-      alert("No project selected");
-      return;
-    }
+const handleUpdateProjectFiles = async () => {
+  if (!selectedProject || !selectedProject.id) {
+    alert("No project selected");
+    return;
+  }
 
-    // Validate required fields
-    if (!readyForQcDueInput) {
-      alert("Please select Ready for QC Due date and time");
-      return;
-    }
+  // Validate required fields
+  if (!readyForQcDueInput) {
+    alert("Please select Ready for QC Due date and time");
+    return;
+  }
 
-    if (!qcAllocatedHours || qcAllocatedHours <= 0) {
-      alert("Please enter valid QC Allocated Hours");
-      return;
-    }
+  if (!qcAllocatedHours || qcAllocatedHours <= 0) {
+    alert("Please enter valid QC Allocated Hours");
+    return;
+  }
 
-    setIsUpdating(true);
+  setIsUpdating(true);
 
-    try {
-      // Calculate QC Due Date
-      const qcDueCalculated = calculateQCDue(readyForQcDueInput, qcAllocatedHours);
+  try {
+    // Calculate QC Due Date
+    const qcDueCalculated = calculateQCDue(readyForQcDueInput, qcAllocatedHours);
 
-      // -----------------------------------
-      // 1. Update the Project File
-      // -----------------------------------
-      const fileUpdateData = {
-        projectId: parseInt(selectedProject.id),
-        readyForQcDue: readyForQcDueInput,
-        qcAllocatedHours: parseFloat(qcAllocatedHours),
-        qcDue: qcDueCalculated,
-        priority: priorityAll,
-        handler: fileHandlers[selectedProject.id] || "",
-      };
+    // -----------------------------------
+    // 1. Update the Project File
+    // -----------------------------------
+    const fileUpdateData = {
+      projectId: parseInt(selectedProject.id),
+      readyForQcDue: readyForQcDueInput,
+      qcAllocatedHours: parseFloat(qcAllocatedHours),
+      qcDue: qcDueCalculated,
+      priority: priorityAll,
+      handler: fileHandlers[selectedProject.id] || "",
+    };
 
-      const fileUpdateResponse = await axios.patch(
-        `https://eminoids-backend-production.up.railway.app/api/projectFiles/updateProjectFile/${selectedProject.id}`,
-        fileUpdateData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+    const fileUpdateResponse = await axios.patch(
+      `https://eminoids-backend-production.up.railway.app/api/projectFiles/updateProjectFile/${selectedProject.id}`,
+      fileUpdateData,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
-      );
-
-      if (fileUpdateResponse.status !== 200) {
-        throw new Error('Failed to update project file');
       }
+    );
 
-      // -----------------------------------
-      // 2. Update the Project with all fields
-      // -----------------------------------
-
-      // Find the full original project from the list
-      const fullProject = projects.find(p => p.id === selectedProject.id);
-
-      if (!fullProject) {
-        throw new Error("Full project details not found");
-      }
-
-      const projectUpdateData = {
-        projectTitle: fullProject.projectTitle,
-        clientId: fullProject.clientId,
-        country: fullProject.country,
-        projectManagerId: fullProject.projectManagerId,
-        taskId: fullProject.taskId,
-        applicationId: fullProject.applicationId,
-        languageId: fullProject.languageId,
-        totalPagesLang: fullProject.totalPagesLang,
-        totalProjectPages: fullProject.totalProjectPages,
-        receiveDate: fullProject.receiveDate,
-        serverPath: fullProject.serverPath,
-        notes: fullProject.notes,
-        estimatedHours: fullProject.estimatedHours,
-        hourlyRate: fullProject.hourlyRate,
-        perPageRate: fullProject.perPageRate,
-        currency: fullProject.currency,
-        totalCost: fullProject.totalCost,
-        deadline: fullProject.deadline,
-
-        // ✅ These are the updated fields
-        readyQCDeadline: readyForQcDueInput,
-        qcHrs: parseFloat(qcAllocatedHours),
-        qcDueDate: qcDueCalculated,
-        status: priorityAll
-      };
-
-      const projectUpdateResponse = await axios.patch(
-        `https://eminoids-backend-production.up.railway.app/api/project/updateProject/${selectedProject.id}`,
-        projectUpdateData,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-
-      if (projectUpdateResponse.status !== 200) {
-        throw new Error('Failed to update main project');
-      }
-
-      // Update state
-      const updatedProjects = projects.map(project => {
-        if (project.id === selectedProject.id) {
-          return {
-            ...project,
-            readyQCDeadline: readyForQcDueInput,
-            qcHrs: qcAllocatedHours,
-            qcDueDate: qcDueCalculated,
-            priority: priorityAll,
-            status: priorityAll,
-            handler: fileHandlers[selectedProject.id] || project.handler,
-          };
-        }
-        return project;
-      });
-
-      setProjects(updatedProjects);
-
-      setSelectedProject(prev => ({
-        ...prev,
-        readyQCDeadline: readyForQcDueInput,
-        qcHrs: qcAllocatedHours,
-        qcDueDate: qcDueCalculated,
-        status: priorityAll,
-      }));
-
-      setHasUnsavedChanges(false);
-      alert("Project and project file updated successfully!");
-    } catch (error) {
-      console.error("Error updating project or file:", error);
-      alert(`Failed to update: ${error.response?.data?.message || error.message}`);
-    } finally {
-      setIsUpdating(false);
+    if (fileUpdateResponse.status !== 200) {
+      throw new Error('Failed to update project file');
     }
-  };
+
+    // -----------------------------------
+    // 2. Update the Project (excluding status update)
+    // -----------------------------------
+    const fullProject = projects.find(p => p.id === selectedProject.id);
+
+    if (!fullProject) {
+      throw new Error("Full project details not found");
+    }
+
+    const projectUpdateData = {
+      projectTitle: fullProject.projectTitle,
+      clientId: fullProject.clientId,
+      country: fullProject.country,
+      projectManagerId: fullProject.projectManagerId,
+      taskId: fullProject.taskId,
+      applicationId: fullProject.applicationId,
+      languageId: fullProject.languageId,
+      totalPagesLang: fullProject.totalPagesLang,
+      totalProjectPages: fullProject.totalProjectPages,
+      receiveDate: fullProject.receiveDate,
+      serverPath: fullProject.serverPath,
+      notes: fullProject.notes,
+      estimatedHours: fullProject.estimatedHours,
+      hourlyRate: fullProject.hourlyRate,
+      perPageRate: fullProject.perPageRate,
+      currency: fullProject.currency,
+      totalCost: fullProject.totalCost,
+      deadline: fullProject.deadline,
+
+      // ✅ Updated fields (status removed)
+      readyQCDeadline: readyForQcDueInput,
+      qcHrs: parseFloat(qcAllocatedHours),
+      qcDueDate: qcDueCalculated,
+    };
+
+    const projectUpdateResponse = await axios.patch(
+      `https://eminoids-backend-production.up.railway.app/api/project/updateProject/${selectedProject.id}`,
+      projectUpdateData,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    if (projectUpdateResponse.status !== 200) {
+      throw new Error('Failed to update main project');
+    }
+
+    const updatedProjects = projects.map(project => {
+      if (project.id === selectedProject.id) {
+        return {
+          ...project,
+          readyQCDeadline: readyForQcDueInput,
+          qcHrs: qcAllocatedHours,
+          qcDueDate: qcDueCalculated,
+          // priority remains in file, not in project
+          handler: fileHandlers[selectedProject.id] || project.handler,
+        };
+      }
+      return project;
+    });
+
+    setProjects(updatedProjects);
+
+    setSelectedProject(prev => ({
+      ...prev,
+      readyQCDeadline: readyForQcDueInput,
+      qcHrs: qcAllocatedHours,
+      qcDueDate: qcDueCalculated,
+    }));
+
+    setHasUnsavedChanges(false);
+    alert("Project and project file updated successfully!");
+  } catch (error) {
+    console.error("Error updating project or file:", error);
+    alert(`Failed to update: ${error.response?.data?.message || error.message}`);
+  } finally {
+    setIsUpdating(false);
+  }
+};
 
 
 
