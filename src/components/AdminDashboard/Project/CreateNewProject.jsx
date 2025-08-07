@@ -111,7 +111,7 @@ const CreateNewProject = () => {
   useEffect(() => {
     const fetchManagers = async () => {
       try {
-        const token = localStorage.getItem("authToken");
+
         const res = await axios.get(`${BASE_URL}member/getAllMembers`, {
           headers: {
             Authorization: `Bearer ${token}`,
