@@ -1,0 +1,1384 @@
+{
+	"info": {
+		"_postman_id": "b6d96685-e931-4c26-9e58-b6530e38ba07",
+		"name": "projectManagement",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38687262",
+		"_collection_link": "https://smart-hr-team.postman.co/workspace/My-Workspace~fb37a001-f15a-4b79-884b-e2ded81648ae/collection/38687262-b6d96685-e931-4c26-9e58-b6530e38ba07?action=share&source=collection_link&creator=38687262"
+	},
+	"item": [
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"staff@example.com\",\r\n    \"password\": \"staff@123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://projectmanagement-backend-production.up.railway.app/api/user/login",
+							"protocol": "https",
+							"host": [
+								"projectmanagement-backend-production",
+								"up",
+								"railway",
+								"app"
+							],
+							"path": [
+								"api",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addUser",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1NDAzMTE0OSwiZXhwIjoxNzU0MDQ1NTQ5fQ.6tdHkA5-geUjLIUjGVzNK6PH0XR-zlb6LOoqvE15BWE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"rajeev\",\r\n  \"email\": \"rajeev@example.com\",\r\n  \"role\": \"Viewer\",\r\n  \"password\": \"123456\",\r\n  \"permissions\": {\r\n    \"can_view\": true,\r\n    \"can_edit\": true,\r\n    \"can_delete\": false,\r\n    \"only_assigned_tasks\": true\r\n  },\r\n  \"assignedTasks\": [\"Bug Report Review\", \"Daily Logs\", \"Client Feedback\"]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://projectmanagement-backend-production.up.railway.app/api/user/addUser",
+							"protocol": "https",
+							"host": [
+								"projectmanagement-backend-production",
+								"up",
+								"railway",
+								"app"
+							],
+							"path": [
+								"api",
+								"user",
+								"addUser"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllUsers",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/user/getAllUsers",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"user",
+								"getAllUsers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getUserById",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/user/getUserById/4",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"user",
+								"getUserById",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateUser",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1NDAzMTE0OSwiZXhwIjoxNzU0MDQ1NTQ5fQ.6tdHkA5-geUjLIUjGVzNK6PH0XR-zlb6LOoqvE15BWE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"kuldeep singh\",\r\n  \"email\": \"kuldeep.singh@example.com\",\r\n  \"role\": \"editor\",\r\n  \"password\": \"458932\",\r\n  \"permissions\": {\r\n    \"can_view\": true,\r\n    \"can_edit\": false,\r\n    \"can_delete\": false,\r\n    \"only_assigned_tasks\": true\r\n  },\r\n  \"assignedTasks\": [\"Bug Report Review\", \"Daily Logs\", \"Client Feedback\"]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://projectmanagement-backend-production.up.railway.app/api/user/updateUser/14",
+							"protocol": "https",
+							"host": [
+								"projectmanagement-backend-production",
+								"up",
+								"railway",
+								"app"
+							],
+							"path": [
+								"api",
+								"user",
+								"updateUser",
+								"14"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteUser",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1Mzk1NDQ4MywiZXhwIjoxNzUzOTY4ODgzfQ.1dMvRod-Ahe_y9Bqgno-wXAbyRI-bM8GjtrmgLDkko4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/user/deleteUser/6",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"user",
+								"deleteUser",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "changePassword",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1Mzk1NDQ4MywiZXhwIjoxNzUzOTY4ODgzfQ.1dMvRod-Ahe_y9Bqgno-wXAbyRI-bM8GjtrmgLDkko4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userId\": 5,\r\n  \"currentPassword\": \"password@123\",\r\n  \"newPassword\": \"newpassword456\",\r\n  \"confirmPassword\": \"newpassword456\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/user/changePassword",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"user",
+								"changePassword"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "tasks",
+			"item": [
+				{
+					"name": "addTask",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1NDAzNjkwMSwiZXhwIjoxNzU0MDUxMzAxfQ.RDA3cfkc8OGbJpvH0Ww--L0W85zbxubFTgEXTvn0LuI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Write API Documentation\",\r\n  \"description\": \"Prepare Swagger docs for the entire backend including task routes.\",\r\n  \"status\": \"To Do\",\r\n  \"priority\": \"Medium\", \r\n  \"assignedTo\": 4,\r\n  \"taskType\": \"description\",\r\n  \"invoiceAmount\": 45.20,\r\n  \"dueDate\": \"2025-08-10\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://projectmanagement-backend-production.up.railway.app/api/tasks/addTask",
+							"protocol": "https",
+							"host": [
+								"projectmanagement-backend-production",
+								"up",
+								"railway",
+								"app"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"addTask"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllTasks",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/tasks/getAllTasks",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"getAllTasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getTaskById",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/tasks/getTaskById/2",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"getTaskById",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateTask",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1Mzk1NDQ4MywiZXhwIjoxNzUzOTY4ODgzfQ.1dMvRod-Ahe_y9Bqgno-wXAbyRI-bM8GjtrmgLDkko4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Write API Documentation 12\",\r\n  \"description\": \"Prepare Swagger docs for the entire backend including task routes. 12\",\r\n  \"status\": \"To Do\",\r\n  \"priority\": \"Medium\",\r\n  \"assignedTo\": 4,\r\n  \"dueDate\": \"2025-08-10\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/tasks/updateTask/4",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"updateTask",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteTask",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1Mzk1NDQ4MywiZXhwIjoxNzUzOTY4ODgzfQ.1dMvRod-Ahe_y9Bqgno-wXAbyRI-bM8GjtrmgLDkko4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/tasks/deleteTask/4",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"deleteTask",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getTaskStatus",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/tasks/getTaskStatus",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"getTaskStatus"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "email",
+			"item": [
+				{
+					"name": "addEmailReport",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1Mzk1NDQ4MywiZXhwIjoxNzUzOTY4ODgzfQ.1dMvRod-Ahe_y9Bqgno-wXAbyRI-bM8GjtrmgLDkko4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"recipient\": \"Project Manager\",\r\n  \"subject\": \"Feature Deployment Confirmation\",\r\n  \"message\": \"The API integration feature has been deployed to production successfully.\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/email/addEmailReport",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"email",
+								"addEmailReport"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllEmailReports",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/email/getAllEmailReports",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"email",
+								"getAllEmailReports"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getEmailReportById",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/email/getEmailReportById/2",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"email",
+								"getEmailReportById",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateEmailReport",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1Mzk1NDQ4MywiZXhwIjoxNzUzOTY4ODgzfQ.1dMvRod-Ahe_y9Bqgno-wXAbyRI-bM8GjtrmgLDkko4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"recipient\": \"Project Manager 12\",\r\n  \"subject\": \"Feature Deployment Confirmation\",\r\n  \"message\": \"The API integration feature has been deployed to production successfully.\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/email/updateEmailReport/4",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"email",
+								"updateEmailReport",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteEmailReport",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1Mzk1NDQ4MywiZXhwIjoxNzUzOTY4ODgzfQ.1dMvRod-Ahe_y9Bqgno-wXAbyRI-bM8GjtrmgLDkko4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/email/deleteEmailReport/4",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"email",
+								"deleteEmailReport",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "employeeTask",
+			"item": [
+				{
+					"name": "addEmployeeTask",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1Mzk1NDQ4MywiZXhwIjoxNzUzOTY4ODgzfQ.1dMvRod-Ahe_y9Bqgno-wXAbyRI-bM8GjtrmgLDkko4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Client Onboarding Session\",\r\n  \"assignedTo\": 5,\r\n  \"startDateTime\": \"2025-08-05\",\r\n  \"endDateTime\": \"2025-08-05\",\r\n  \"status\": \"In Progress\",\r\n  \"description\": \"Conduct training session for new enterprise client.\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/employeeTask/addEmployeeTask",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"employeeTask",
+								"addEmployeeTask"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllEmployeeTasks",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/employeeTask/getAllEmployeeTasks",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"employeeTask",
+								"getAllEmployeeTasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getEmployeeTaskById",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/employeeTask/getEmployeeTaskById/2",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"employeeTask",
+								"getEmployeeTaskById",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateEmployeeTask",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1Mzk1NDQ4MywiZXhwIjoxNzUzOTY4ODgzfQ.1dMvRod-Ahe_y9Bqgno-wXAbyRI-bM8GjtrmgLDkko4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"title\": \"Client Onboarding Session 12\",\r\n  \"assignedTo\": 5,\r\n  \"startDateTime\": \"2025-08-05\",\r\n  \"endDateTime\": \"2025-08-05\",\r\n  \"status\": \"In Progress\",\r\n  \"description\": \"Conduct training session for new enterprise client.\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/employeeTask/updateEmployeeTask/4",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"employeeTask",
+								"updateEmployeeTask",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteEmployeeTask",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1Mzk1NDQ4MywiZXhwIjoxNzUzOTY4ODgzfQ.1dMvRod-Ahe_y9Bqgno-wXAbyRI-bM8GjtrmgLDkko4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/employeeTask/deleteEmployeeTask/4",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"employeeTask",
+								"deleteEmployeeTask",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "dashboard",
+			"item": [
+				{
+					"name": "getDashboardData",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/dashboard/getDashboardData",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"dashboard",
+								"getDashboardData"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "emailTask",
+			"item": [
+				{
+					"name": "createEmailTask",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1NDAzNDI2MiwiZXhwIjoxNzU0MDQ4NjYyfQ.H9-093vPOmIkOm5TFXhWeb-ez3Ng78PpiNky_iPIGiY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Monthly Performance Summary",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Add the final version of the July performance charts and KPIs.",
+									"type": "text"
+								},
+								{
+									"key": "priority",
+									"value": "Medium",
+									"type": "text"
+								},
+								{
+									"key": "deadline",
+									"value": "2025-08-05",
+									"type": "text"
+								},
+								{
+									"key": "assignedTo",
+									"value": "5",
+									"type": "text"
+								},
+								{
+									"key": "taskType",
+									"value": "description",
+									"type": "text"
+								},
+								{
+									"key": "invoiceAmount",
+									"value": "100.20",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "oCE1EM2Os/p1.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://projectmanagement-backend-production.up.railway.app/api/emailTask/createEmailTask",
+							"protocol": "https",
+							"host": [
+								"projectmanagement-backend-production",
+								"up",
+								"railway",
+								"app"
+							],
+							"path": [
+								"api",
+								"emailTask",
+								"createEmailTask"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllEmailTasks",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://projectmanagement-backend-production.up.railway.app/api/emailTask/getAllEmailTasks",
+							"protocol": "https",
+							"host": [
+								"projectmanagement-backend-production",
+								"up",
+								"railway",
+								"app"
+							],
+							"path": [
+								"api",
+								"emailTask",
+								"getAllEmailTasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getEmailTaskById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://projectmanagement-backend-production.up.railway.app/api/emailTask/getEmailTaskById/7",
+							"protocol": "https",
+							"host": [
+								"projectmanagement-backend-production",
+								"up",
+								"railway",
+								"app"
+							],
+							"path": [
+								"api",
+								"emailTask",
+								"getEmailTaskById",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateEmailTask",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1NDAzNDI2MiwiZXhwIjoxNzU0MDQ4NjYyfQ.H9-093vPOmIkOm5TFXhWeb-ez3Ng78PpiNky_iPIGiY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Monthly Performance Summary 12",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Add the final version of the July performance charts and KPIs.",
+									"type": "text"
+								},
+								{
+									"key": "priority",
+									"value": "Medium",
+									"type": "text"
+								},
+								{
+									"key": "deadline",
+									"value": "2025-08-05",
+									"type": "text"
+								},
+								{
+									"key": "assignedTo",
+									"value": "56",
+									"type": "text"
+								},
+								{
+									"key": "taskType",
+									"value": "des",
+									"type": "text"
+								},
+								{
+									"key": "invoiceAmount",
+									"value": "455.2",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "dE36R0-Ou/p1.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/emailTask/updateEmailTask/6",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"emailTask",
+								"updateEmailTask",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteEmailTask",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1NDAzNDI2MiwiZXhwIjoxNzU0MDQ4NjYyfQ.H9-093vPOmIkOm5TFXhWeb-ez3Ng78PpiNky_iPIGiY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://hrb5wx2v-7000.inc1.devtunnels.ms/api/emailTask/deleteEmailTask/6",
+							"protocol": "https",
+							"host": [
+								"hrb5wx2v-7000",
+								"inc1",
+								"devtunnels",
+								"ms"
+							],
+							"path": [
+								"api",
+								"emailTask",
+								"deleteEmailTask",
+								"6"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "dailyReport",
+			"item": [
+				{
+					"name": "createDailyReport",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1NDA0MzAxMSwiZXhwIjoxNzU0MDU3NDExfQ.2ygYZFS7gzVgVOoqo05yUEP2e6k0WD4Wa7hIlimrj48",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"reportDate\": \"08/01/2025\",\r\n  \"durationSpent\": 3.25,\r\n  \"taskTitle\": \"Bug Fixing and Deployment\",\r\n  \"whatWasDone\": \"Fixed critical bugs reported by QA and deployed patch to staging server.\",\r\n  \"issues\": \"Staging server was briefly unresponsive during deployment.\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://projectmanagement-backend-production.up.railway.app/api/dailyReport/createDailyReport",
+							"protocol": "https",
+							"host": [
+								"projectmanagement-backend-production",
+								"up",
+								"railway",
+								"app"
+							],
+							"path": [
+								"api",
+								"dailyReport",
+								"createDailyReport"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllDailyReports",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://projectmanagement-backend-production.up.railway.app/api/dailyReport/getAllDailyReports",
+							"protocol": "https",
+							"host": [
+								"projectmanagement-backend-production",
+								"up",
+								"railway",
+								"app"
+							],
+							"path": [
+								"api",
+								"dailyReport",
+								"getAllDailyReports"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getDailyReportById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://projectmanagement-backend-production.up.railway.app/api/dailyReport/getDailyReportById/2",
+							"protocol": "https",
+							"host": [
+								"projectmanagement-backend-production",
+								"up",
+								"railway",
+								"app"
+							],
+							"path": [
+								"api",
+								"dailyReport",
+								"getDailyReportById",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateDailyReport",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1NDAzOTkyNSwiZXhwIjoxNzU0MDU0MzI1fQ.8mFxeP9hGWNkQnNo7qY2lG1SGw0XDYYuH5Qpm6ExG0o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"reportDate\": \"08/05/2025\",\r\n  \"durationSpent\": 3.25,\r\n  \"taskTitle\": \"Bug Fixing and Deployment 12\",\r\n  \"whatWasDone\": \"Fixed critical bugs reported by QA and deployed patch to staging server.\",\r\n  \"issues\": \"Staging server was briefly unresponsive during deployment.\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://projectmanagement-backend-production.up.railway.app/api/dailyReport/updateDailyReport/4",
+							"protocol": "https",
+							"host": [
+								"projectmanagement-backend-production",
+								"up",
+								"railway",
+								"app"
+							],
+							"path": [
+								"api",
+								"dailyReport",
+								"updateDailyReport",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteDailyReport",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZW1haWwiOiJzdGFmZkBleGFtcGxlLmNvbSIsInJvbGUiOiJzdGFmZiIsImlhdCI6MTc1NDAzOTkyNSwiZXhwIjoxNzU0MDU0MzI1fQ.8mFxeP9hGWNkQnNo7qY2lG1SGw0XDYYuH5Qpm6ExG0o",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://projectmanagement-backend-production.up.railway.app/api/dailyReport/deleteDailyReport/4",
+							"protocol": "https",
+							"host": [
+								"projectmanagement-backend-production",
+								"up",
+								"railway",
+								"app"
+							],
+							"path": [
+								"api",
+								"dailyReport",
+								"deleteDailyReport",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "staffDashboard",
+			"item": [
+				{
+					"name": "getStaffDashboardData",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://projectmanagement-backend-production.up.railway.app/api/staffDashboard/getStaffDashboardData/4",
+							"protocol": "https",
+							"host": [
+								"projectmanagement-backend-production",
+								"up",
+								"railway",
+								"app"
+							],
+							"path": [
+								"api",
+								"staffDashboard",
+								"getStaffDashboardData",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import * as echarts from "echarts";
 import axios from "axios";
 import BASE_URL from "../../../config";
-
+import ShiftLegend from "./ShiftLegend";
 const ShiftAllocation = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
@@ -252,6 +252,7 @@ const getWeekDates = () => {
       })
       .then((res) => {
         if (res.data.status) {
+          console.log("Fetched shifts:", res.data.data);
           setAllShifts(res.data.data); // Store all shifts
           updateFilteredEmployees(res.data.data);
         }
@@ -327,9 +328,11 @@ const getWeekDates = () => {
       const response = await axios.get(`${BASE_URL}member/getAllMembers`, {
         headers: {
           Authorization: `Bearer ${token}`,
-        },
+        }
       });
+     
       setmember(response.data.data);
+
     } catch (error) {
       console.error("Error fetching members:", error);
     }
@@ -527,8 +530,47 @@ const getWeekDates = () => {
                     {filteredEmployees?.map((employee) => (
                       <tr key={employee.memberId} className="text-center">
                         {/* Employee Name Cell */}
-                        <td className="sticky-start bg-white border-end text-start">
-                          {employee.fullName}
+                        <td className="sticky-start bg-white border-end text-start p-2" style={{ backgroundColor: "#0b1a3c", color: "white" }}>
+                          {/* Employee ID */}
+                          <div
+                            style={{
+                              fontSize: "0.7rem",
+                              backgroundColor: "#00d2ff",
+                              color: "#000",
+                              padding: "2px 6px",
+                              borderRadius: "4px",
+                              display: "inline-block",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            {employee.empId}
+                          </div>
+
+                          {/* Name */}
+                          <div style={{ fontWeight: "bold", fontSize: "1rem", marginTop: "4px" }}>
+                            {employee.fullName}
+                          </div>
+
+                          {/* Team Badge */}
+                          <div
+                            style={{
+                              background: "linear-gradient(90deg, #a18cd1 0%, #fbc2eb 100%)",
+                              color: "#000",
+                              padding: "2px 8px",
+                              borderRadius: "12px",
+                              fontSize: "0.75rem",
+                              display: "inline-block",
+                              marginTop: "2px",
+                              fontWeight: "500",
+                            }}
+                          >
+                            {employee.team}
+                          </div>
+
+                          {/* Designation */}
+                          <div style={{ fontSize: "0.85rem", marginTop: "4px", fontWeight: "500" }}>
+                            {employee.designation}
+                          </div>
                         </td>
 
                         {/* Loop through days of week (0 = Sunday to 6 = Saturday) */}
@@ -734,6 +776,12 @@ const getWeekDates = () => {
               <i className="fas fa-paper-plane me-2"></i> Publish Schedule
             </button>
           </div>
+        </div>
+
+        {/* Shift Legend */}
+        <div className="container mt-4">
+          <h5 className="mb-3" style={{color: "white"}}>Shift Allocation info</h5>
+          <ShiftLegend />
         </div>
 
         {/* Add/Edit Shift Modal */}
