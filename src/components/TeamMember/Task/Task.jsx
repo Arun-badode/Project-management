@@ -392,6 +392,8 @@ function Task() {
 
   
   const renderTaskActions = (task) => {
+     const isRunningOrPaused = task.status === "WIP" || task.status === "WIP (Paused)" || task.status === "Running";
+  const isStopped = task.status === "Completed";
     return (
       <div className="d-flex flex-wrap gap-1">
         {task.status === "QC YTS" && (
@@ -405,11 +407,12 @@ function Task() {
           </button>
         )}
         <button
-          onClick={() => handleTaskAction(task.id, task.memberId, "switch")}
-          className="btn btn-sm btn-secondary"
-        >
-          Start Task
-        </button>
+        onClick={() => handleTaskAction(task.id, task.memberId, "switch")}
+        className="btn btn-sm btn-secondary"
+        disabled={isStopped || !isRunningOrPaused}
+      >
+        Start Task
+      </button>
         <button
           onClick={() => handleTaskAction(task.id, task.memberId, "reassign")}
           className="btn btn-sm btn-warning"

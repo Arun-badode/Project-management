@@ -37,7 +37,6 @@ const ActiveProject = () => {
 
         if (response.data.status) {
           setAllFiles(response.data.data);  // Use `data`, not `files`
-          console.log("Fetched Files:", response.data.data); // Log directly from response
         } else {
           console.error("Error in response:", response.data.message);
         }
@@ -194,11 +193,22 @@ const ActiveProject = () => {
   useEffect(() => {
     let result = [...projects];
 
+    // Only show "active" projects (not completed/cancelled/archived)
+    result = result.filter(
+      (project) =>
+        !["Completed", "Cancelled", "Archived"].includes(
+          (project.status || "").toLowerCase()
+        )
+    );
+
     // Apply tab filter
     if (activeTab === "unhandled") {
-      result = result.filter(
-        (project) => !project.handler || project.handler === ""
-      );
+      // Show projects where at least one file is unassigned
+      result = result.filter((project) => {
+        const filesForProject = allFiles.filter(f => f.projectId === project.id);
+        // If any file does NOT have a handler, include this project
+        return filesForProject.some(f => !fileHandlers[f.id]);
+      });
     }
 
     // Apply button filters
@@ -261,38 +271,30 @@ const ActiveProject = () => {
     // Sort by deadline
     result.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
     setFilteredProjects(result);
-  }, [projects, activeTab, activeButton, clientFilter, taskFilter, languageFilter, selectedApplications]);
+  }, [projects, activeTab, activeButton, clientFilter, taskFilter, languageFilter, selectedApplications, allFiles, fileHandlers]);
 
-  const handleDeleteProject = (id) => {
+  const handleDeleteProject = async (id) => {
     const project = projects.find((p) => p.id === id);
     if (!project) return;
 
     if (window.confirm("Are you sure you want to delete this project?")) {
-      // Case 1: If any file status is "YTS"
-      const ytsStatuses = ["YTS"];
-      const amendmentStatuses = [
-        "V1 YTS",
-        "V2 YTS",
-        "Amendment",
-        "Amendment YTS",
-      ];
-      let moveTo = "created";
-      let updatedFiles = project.files.map((file) => {
-        if (ytsStatuses.includes(file.qaStatus)) {
-          return { ...file, qaStatus: "" };
+      try {
+        const response = await axios.delete(
+          `${BASE_URL}project/deleteProject/${id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (response.status === 200) {
+          setProjects(projects.filter((p) => p.id !== id));
+          alert("Project deleted successfully!");
+        } else {
+          alert("Failed to delete project.");
         }
-        return file;
-      });
-
-      // If any file has amendment status, move to completed
-      if (
-        project.files.some((file) => amendmentStatuses.includes(file.qaStatus))
-      ) {
-        moveTo = "completed";
-        // Retain status
+      } catch (error) {
+        console.error("Error deleting project:", error);
+        alert("Error deleting project.");
       }
-
-      setProjects(projects.filter((p) => p.id !== id));
     }
   };
 
@@ -397,7 +399,7 @@ const handleUpdateProjectFiles = async () => {
     };
 
     const fileUpdateResponse = await axios.patch(
-      `https://eminoids-backend-production.up.railway.app/api/projectFiles/updateProjectFile/${selectedProject.id}`,
+      `${BASE_URL}projectFiles/updateProjectFile/${selectedProject.id}`,
       fileUpdateData,
       {
         headers: {
@@ -447,7 +449,7 @@ const handleUpdateProjectFiles = async () => {
     };
 
     const projectUpdateResponse = await axios.patch(
-      `https://eminoids-backend-production.up.railway.app/api/project/updateProject/${selectedProject.id}`,
+      `${BASE_URL}project/updateProject/${selectedProject.id}`,
       projectUpdateData,
       {
         headers: {
@@ -558,11 +560,77 @@ const handleUpdateProjectFiles = async () => {
     fakeScrollbarRef: fakeScrollbarRef1,
   } = useSyncScroll(null);
 
+  // Add your office holidays here (format: 'YYYY-MM-DD')
+  const officeHolidays = [
+    "2025-08-15", // Example: Independence Day
+    // Add more dates as needed
+  ];
+
+  function isWorkingDay(date) {
+    const day = date.getDay();
+    // 0 = Sunday, 6 = Saturday (but Saturday is working)
+    return day !== 0;
+  }
+
+  function isHoliday(date) {
+    const dateStr = date.toISOString().split("T")[0];
+    return officeHolidays.includes(dateStr);
+  }
+
+  function getNextWorkingStart(date) {
+    // If after 11:30 PM, move to next day 11:30 AM
+    let next = new Date(date);
+    if (next.getHours() > 23 || (next.getHours() === 23 && next.getMinutes() > 30)) {
+      next.setDate(next.getDate() + 1);
+      next.setHours(11, 30, 0, 0);
+    } else if (next.getHours() < 11 || (next.getHours() === 11 && next.getMinutes() < 30)) {
+      next.setHours(11, 30, 0, 0);
+    }
+    // Skip holidays and Sundays
+    while (!isWorkingDay(next) || isHoliday(next)) {
+      next.setDate(next.getDate() + 1);
+      next.setHours(11, 30, 0, 0);
+    }
+    return next;
+  }
+
   function calculateQCDue(startDate, hours) {
     if (!startDate || !hours) return "--";
-    const endDate = new Date(startDate);
-    endDate.setHours(endDate.getHours() + parseFloat(hours));
-    return endDate.toLocaleString("en-GB", {
+    let remaining = parseFloat(hours);
+    let current = new Date(startDate);
+
+    // If start is outside working hours, move to next working start
+    if (
+      current.getHours() < 11 ||
+      (current.getHours() === 11 && current.getMinutes() < 30) ||
+      current.getHours() > 23 ||
+      (current.getHours() === 23 && current.getMinutes() > 30) ||
+      !isWorkingDay(current) ||
+      isHoliday(current)
+    ) {
+      current = getNextWorkingStart(current);
+    }
+
+    while (remaining > 0) {
+      // End of today's working hours
+      let endOfDay = new Date(current);
+      endOfDay.setHours(23, 30, 0, 0);
+
+      let minutesLeftToday =
+        (endOfDay - current) / (1000 * 60); // minutes
+
+      let allocMinutes = Math.min(remaining * 60, minutesLeftToday);
+
+      current.setMinutes(current.getMinutes() + allocMinutes);
+      remaining -= allocMinutes / 60;
+
+      // If still time left, move to next working day
+      if (remaining > 0) {
+        current = getNextWorkingStart(new Date(current.setDate(current.getDate() + 1)));
+      }
+    }
+
+    return current.toLocaleString("en-GB", {
       hour: "2-digit",
       minute: "2-digit",
       day: "2-digit",
@@ -804,7 +872,10 @@ const handleUpdateProjectFiles = async () => {
             className={`nav-link ${activeTab === "unhandled" ? "active" : ""}`}
             onClick={() => setActiveTab("unhandled")}
           >
-            Unhandled Projects
+            Unhandled Projects ({projects.filter(
+              (project) =>
+                !allFiles.some(f => f.projectId === project.id && fileHandlers[f.id])
+            ).length})
           </button>
         </li>
       </ul>
@@ -881,7 +952,7 @@ const handleUpdateProjectFiles = async () => {
                       >
                         <td>{index + 1}</td>
                         <td>{project.projectTitle}</td>
-                        <td>{project.clientId}</td>
+                        <td>{project.clientName}</td>
                         <td>{project.task_name}</td>
                         <td>{project.language_name}</td>
                         <td>{project.application_name}</td>

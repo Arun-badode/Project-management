@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import Select from "react-select";
 import axios from "axios";
 import BASE_URL from "../../../config";
+import * as XLSX from "xlsx";
 
 // Helper functions moved outside the component
 const getDaysInMonth = (month, year) => {
@@ -659,6 +660,33 @@ const CreateNewProject = () => {
     }
   };
 
+  const handleExcelUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const data = evt.target.result;
+      const workbook = XLSX.read(data, { type: "binary" });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(sheet);
+
+      // Expecting columns: fileName, pageCount, applicationId
+      const files = rows.map((row) => ({
+        fileName: row.fileName || "",
+        pageCount: Number(row.pageCount) || 0,
+        applicationId: row.applicationId || "",
+        selected: false,
+      }));
+
+      setFormData((prev) => ({
+        ...prev,
+        files: files.length ? files : prev.files,
+      }));
+    };
+    reader.readAsBinaryString(file);
+  };
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -997,15 +1025,20 @@ const CreateNewProject = () => {
                       }
                   ),
                 }));
-
               }}
+            />
+            {/* Hidden file input for Excel upload */}
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              style={{ display: "none" }}
+              id="excel-upload"
+              onChange={handleExcelUpload}
             />
             <button
               type="button"
               className="btn btn-success btn-sm"
-              onClick={() => {
-                /* handle excel upload */
-              }}
+              onClick={() => document.getElementById("excel-upload").click()}
             >
               Upload Excel
             </button>
