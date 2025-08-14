@@ -516,22 +516,33 @@ const handleEmployeeSelect = (id) => {
     outTime: "",
     remarks: ""
   });
+useEffect(() => {
+  const modalElement = document.getElementById("attendanceModal");
 
-  // Fetch members list when component mounts
-  useEffect(() => {
-    if (viewMode === "attendence") {
-      axios.get(`${BASE_URL}member/getAllMembers`, {
-        headers: {
-          Authorization: `Bearer ${token}`,// or wherever you store the token
-        }
+  if (!modalElement) return;
+
+  const handleModalShow = () => {
+    axios.get(`${BASE_URL}member/getAllMembers`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(res => {
+        console.log("Members fetched successfully", res.data.data);
+        setMembers(res.data.data);
       })
-        .then(res => {
-          console.log("Members fetched successfully", res.data.data);
-          setMembers(res.data.data)
-        })
-        .catch(err => console.error("Error fetching members", err));
-    }
-  }, [viewMode]);
+      .catch(err => console.error("Error fetching members", err));
+  };
+
+  modalElement.addEventListener("show.bs.modal", handleModalShow);
+
+  // Cleanup
+  return () => {
+    modalElement.removeEventListener("show.bs.modal", handleModalShow);
+  };
+}, [token]);
+
+
 
 
   const handleChange = (e) => {
@@ -939,7 +950,7 @@ const handleEmployeeSelect = (id) => {
                 >
                   <tr className="text-center">
                     <th>Employee</th>
-                    <th>Department</th>
+                    {/* <th>Department</th> */}
                     <th>Present Days</th>
                     <th>Absent Days</th>
                     <th>Late Arrivals</th>
@@ -966,14 +977,14 @@ const handleEmployeeSelect = (id) => {
                           </div>
                           <div>
                             <div className="fw-semibold">{employee.employeeName}</div>
-                            <div className="small">{employee.employeeId}</div>
+                            <div className="small">{employee.id}</div>
                           </div>
                         </div>
                       </td>
-                      <td>
+                      {/* <td>
                         <div>{employee.department}</div>
                         <div className="small">{employee.position}</div>
-                      </td>
+                      </td> */}
                       <td>
                         <span className="badge bg-success-subtle text-success">
                           {employee.daysPresent}
