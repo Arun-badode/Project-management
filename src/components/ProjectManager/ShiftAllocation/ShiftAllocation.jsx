@@ -344,12 +344,6 @@ const updateFilteredEmployees = (shiftData, members) => {
     }
   };
 
-  
-useEffect(() => {
-  if (allShifts.length > 0 && member.length > 0) {
-    updateFilteredEmployees(allShifts, member); // ✅ pass members here
-  }
-}, [currentDate, allShifts, member]);
 
   const handleAddShift = (memberId, dayIndex) => {
     const selectedEmployee = filteredEmployees.find(emp => emp.memberId === memberId);
@@ -430,6 +424,12 @@ useEffect(() => {
       );
     }
   };
+
+  useEffect(() => {
+  if (allShifts.length > 0 && member.length > 0) {
+    updateFilteredEmployees(allShifts, member); // ✅ pass members here
+  }
+}, [currentDate, allShifts, member]);
 
   return (
     <div>

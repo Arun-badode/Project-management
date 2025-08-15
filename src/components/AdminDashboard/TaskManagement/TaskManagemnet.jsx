@@ -230,9 +230,8 @@ const TaskManagement = () => {
         <ul className="nav nav-tabs mb-4">
           <li className="nav-item">
             <button
-              className={`nav-link ${
-                activeProjectTab === "all" ? "active" : ""
-              }`}
+              className={`nav-link ${activeProjectTab === "all" ? "active" : ""
+                }`}
               onClick={() => setActiveProjectTab("all")}
             >
               All Active Projects
@@ -241,9 +240,8 @@ const TaskManagement = () => {
           {isManager && (
             <li className="nav-item">
               <button
-                className={`nav-link ${
-                  activeProjectTab === "my" ? "active" : ""
-                }`}
+                className={`nav-link ${activeProjectTab === "my" ? "active" : ""
+                  }`}
                 onClick={() => setActiveProjectTab("my")}
               >
                 My Tasks
@@ -263,7 +261,7 @@ const TaskManagement = () => {
               expandedRow={expandedRow}
             />
             {selectedProject && expandedRow === selectedProject.id && (
-              <ProjectDetails 
+              <ProjectDetails
                 project={selectedProject}
                 onClose={() => setExpandedRow(null)}
               />
