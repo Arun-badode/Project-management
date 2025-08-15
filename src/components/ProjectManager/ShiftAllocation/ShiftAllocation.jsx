@@ -262,59 +262,65 @@ const getWeekDates = () => {
       });
   };
 
-  // Update filtered employees based on current week
-  const updateFilteredEmployees = (shiftData) => {
-    const weekStart = new Date(weekDates[0]);
-    const weekEnd = new Date(weekDates[6]);
-    weekEnd.setHours(23, 59, 59, 999);
+// Update filtered employees based on current week
+// Update filtered employees based on current week
+// Pass members as second argument
+const updateFilteredEmployees = (shiftData, members) => {
+  const weekStart = new Date(weekDates[0]);
+  const weekEnd = new Date(weekDates[6]);
+  weekEnd.setHours(23, 59, 59, 999);
 
-    // Filter shifts for the current week
-    const shiftsForWeek = shiftData.filter(shift => {
-      const shiftDate = new Date(shift.shiftDate);
-      return shiftDate >= weekStart && shiftDate <= weekEnd;
+  const shiftsForWeek = shiftData.filter((shift) => {
+    const shiftDate = new Date(shift.shiftDate);
+    return shiftDate >= weekStart && shiftDate <= weekEnd;
+  });
+
+  // ✅ Build a Map for faster member lookups
+  const memberMap = new Map(members.map(m => [m.id, m]));
+
+  const employeesMap = {};
+
+  shiftsForWeek.forEach((shift) => {
+    const memberInfo = memberMap.get(shift.memberId);
+
+    const shiftDate = new Date(shift.shiftDate);
+    const shiftDayIndex = shiftDate.getDay();
+
+    const key = `${shift.memberId}-${shift.fullName}`;
+
+    if (!employeesMap[key]) {
+      employeesMap[key] = {
+        memberId: shift.memberId,
+        empId: memberInfo?.empId || "N/A",
+        team: memberInfo?.team || "N/A",
+        fullName: shift.fullName || memberInfo?.fullName || "Unknown",
+        shifts: [],
+      };
+    }
+
+    employeesMap[key].shifts.push({
+      id: shift.id,
+      day: shiftDayIndex,
+      start: shift.startTime,
+      end: shift.endTime,
+      type: shift.shiftType,
+      notes: shift.notes,
+      date: shift.shiftDate,
     });
+  });
 
-    // Group by unique (memberId + fullName) combo
-    const employeesMap = {};
+  setFilteredEmployees(Object.values(employeesMap));
+  console.log("Filtered employees:", Object.values(employeesMap));
+};
 
-    shiftsForWeek.forEach((shift) => {
-      const shiftDate = new Date(shift.shiftDate);
-      const shiftDayIndex = shiftDate.getDay(); // 0 = Sunday
 
-      const key = `${shift.memberId}-${shift.fullName}`;
 
-      if (!employeesMap[key]) {
-        employeesMap[key] = {
-          memberId: shift.memberId,
-          fullName: shift.fullName,
-          shifts: [],
-        };
-      }
-
-      employeesMap[key].shifts.push({
-        id: shift.id,
-        day: shiftDayIndex,
-        start: shift.startTime,
-        end: shift.endTime,
-        type: shift.shiftType,
-        notes: shift.notes,
-        date: shift.shiftDate,
-      });
-    });
-
-    setFilteredEmployees(Object.values(employeesMap));
-  };
 
   useEffect(() => {
     fetchShifts();
   }, []);
 
-  // Update shifts when week changes
-  useEffect(() => {
-    if (allShifts.length > 0) {
-      updateFilteredEmployees(allShifts);
-    }
-  }, [currentDate]);
+
 
   useEffect(() => {
     fetchMember();
@@ -337,6 +343,13 @@ const getWeekDates = () => {
       console.error("Error fetching members:", error);
     }
   };
+
+  
+useEffect(() => {
+  if (allShifts.length > 0 && member.length > 0) {
+    updateFilteredEmployees(allShifts, member); // ✅ pass members here
+  }
+}, [currentDate, allShifts, member]);
 
   const handleAddShift = (memberId, dayIndex) => {
     const selectedEmployee = filteredEmployees.find(emp => emp.memberId === memberId);
