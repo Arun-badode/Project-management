@@ -24,6 +24,16 @@ const ShiftAllocation = () => {
     notes: "",
   });
 
+  // it is shift mapping for the shifts
+  const shiftMappings = {
+    α: { start: "11:30", end: "20:30" },   // 11:30 AM – 8:30 PM
+    β: { start: "13:00", end: "22:00" },   // 1:00 PM – 10:00 PM
+    γ: { start: "14:30", end: "23:30" },   // 2:30 PM – 11:30 PM
+    δ: { start: "18:30", end: "03:30" },   // 6:30 PM – 3:30 AM
+    WO: { start: "", end: "" },            // Week Off → no time
+    Holiday: { start: "", end: "" },       // Holiday → no time
+  };
+
   const getShiftLabel = (start, end, type) => {
     const shiftLabels = {
       "11:30 AM - 8:30 PM": { symbol: "α", bg: "#aef1f8" },
@@ -145,22 +155,22 @@ const ShiftAllocation = () => {
   };
 
   // Get week dates based on current date
-const getWeekDates = () => {
-  const dates = [];
-  const startOfWeek = new Date(currentDate);
-  const day = currentDate.getDay(); // 0 (Sun) to 6 (Sat)
-  const mondayOffset = day === 0 ? -6 : 1 - day;
+  const getWeekDates = () => {
+    const dates = [];
+    const startOfWeek = new Date(currentDate);
+    const day = currentDate.getDay(); // 0 (Sun) to 6 (Sat)
+    const mondayOffset = day === 0 ? -6 : 1 - day;
 
-  startOfWeek.setDate(currentDate.getDate() + mondayOffset);
+    startOfWeek.setDate(currentDate.getDate() + mondayOffset);
 
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(startOfWeek);
-    date.setDate(startOfWeek.getDate() + i);
-    dates.push(date);
-  }
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+      dates.push(date);
+    }
 
-  return dates;
-};
+    return dates;
+  };
 
 
   const weekDates = getWeekDates();
@@ -219,21 +229,21 @@ const getWeekDates = () => {
   };
 
   const formatDateRange = (date) => {
-  const startOfWeek = new Date(date);
-  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1); // Monday
+    const startOfWeek = new Date(date);
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1); // Monday
 
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
 
-  const format = (d) => {
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-    return `${day}-${month}-${year}`;
+    const format = (d) => {
+      const day = String(d.getDate()).padStart(2, "0");
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const year = d.getFullYear();
+      return `${day}-${month}-${year}`;
+    };
+
+    return `${format(startOfWeek)} - ${format(endOfWeek)}`;
   };
-
-  return `${format(startOfWeek)} - ${format(endOfWeek)}`;
-};
 
   // Format date for input
   const formatDateForInput = (date) => {
@@ -262,56 +272,56 @@ const getWeekDates = () => {
       });
   };
 
-// Update filtered employees based on current week
-// Update filtered employees based on current week
-// Pass members as second argument
-const updateFilteredEmployees = (shiftData, members) => {
-  const weekStart = new Date(weekDates[0]);
-  const weekEnd = new Date(weekDates[6]);
-  weekEnd.setHours(23, 59, 59, 999);
+  // Update filtered employees based on current week
+  // Update filtered employees based on current week
+  // Pass members as second argument
+  const updateFilteredEmployees = (shiftData, members) => {
+    const weekStart = new Date(weekDates[0]);
+    const weekEnd = new Date(weekDates[6]);
+    weekEnd.setHours(23, 59, 59, 999);
 
-  const shiftsForWeek = shiftData.filter((shift) => {
-    const shiftDate = new Date(shift.shiftDate);
-    return shiftDate >= weekStart && shiftDate <= weekEnd;
-  });
-
-  // ✅ Build a Map for faster member lookups
-  const memberMap = new Map(members.map(m => [m.id, m]));
-
-  const employeesMap = {};
-
-  shiftsForWeek.forEach((shift) => {
-    const memberInfo = memberMap.get(shift.memberId);
-
-    const shiftDate = new Date(shift.shiftDate);
-    const shiftDayIndex = shiftDate.getDay();
-
-    const key = `${shift.memberId}-${shift.fullName}`;
-
-    if (!employeesMap[key]) {
-      employeesMap[key] = {
-        memberId: shift.memberId,
-        empId: memberInfo?.empId || "N/A",
-        team: memberInfo?.team || "N/A",
-        fullName: shift.fullName || memberInfo?.fullName || "Unknown",
-        shifts: [],
-      };
-    }
-
-    employeesMap[key].shifts.push({
-      id: shift.id,
-      day: shiftDayIndex,
-      start: shift.startTime,
-      end: shift.endTime,
-      type: shift.shiftType,
-      notes: shift.notes,
-      date: shift.shiftDate,
+    const shiftsForWeek = shiftData.filter((shift) => {
+      const shiftDate = new Date(shift.shiftDate);
+      return shiftDate >= weekStart && shiftDate <= weekEnd;
     });
-  });
 
-  setFilteredEmployees(Object.values(employeesMap));
-  console.log("Filtered employees:", Object.values(employeesMap));
-};
+    // ✅ Build a Map for faster member lookups
+    const memberMap = new Map(members.map(m => [m.id, m]));
+
+    const employeesMap = {};
+
+    shiftsForWeek.forEach((shift) => {
+      const memberInfo = memberMap.get(shift.memberId);
+
+      const shiftDate = new Date(shift.shiftDate);
+      const shiftDayIndex = shiftDate.getDay();
+
+      const key = `${shift.memberId}-${shift.fullName}`;
+
+      if (!employeesMap[key]) {
+        employeesMap[key] = {
+          memberId: shift.memberId,
+          empId: memberInfo?.empId || "N/A",
+          team: memberInfo?.team || "N/A",
+          fullName: shift.fullName || memberInfo?.fullName || "Unknown",
+          shifts: [],
+        };
+      }
+
+      employeesMap[key].shifts.push({
+        id: shift.id,
+        day: shiftDayIndex,
+        start: shift.startTime,
+        end: shift.endTime,
+        type: shift.shiftType,
+        notes: shift.notes,
+        date: shift.shiftDate,
+      });
+    });
+
+    setFilteredEmployees(Object.values(employeesMap));
+    console.log("Filtered employees:", Object.values(employeesMap));
+  };
 
 
 
@@ -336,7 +346,7 @@ const updateFilteredEmployees = (shiftData, members) => {
           Authorization: `Bearer ${token}`,
         }
       });
-     
+
       setmember(response.data.data);
 
     } catch (error) {
@@ -395,6 +405,12 @@ const updateFilteredEmployees = (shiftData, members) => {
     setShowAddShiftModal(true);
   };
 
+  useEffect(() => {
+    if (allShifts.length > 0 && member.length > 0) {
+      updateFilteredEmployees(allShifts, member); // ✅ pass members here
+    }
+  }, [currentDate, allShifts, member]);
+  
   const handleRemoveShift = async (shiftId) => {
     if (!window.confirm("Are you sure you want to delete this shift?")) return;
 
@@ -425,11 +441,6 @@ const updateFilteredEmployees = (shiftData, members) => {
     }
   };
 
-  useEffect(() => {
-  if (allShifts.length > 0 && member.length > 0) {
-    updateFilteredEmployees(allShifts, member); // ✅ pass members here
-  }
-}, [currentDate, allShifts, member]);
 
   return (
     <div>
@@ -588,67 +599,59 @@ const updateFilteredEmployees = (shiftData, members) => {
 
                         {/* Loop through days of week (0 = Sunday to 6 = Saturday) */}
                         {weekDates.map((_, dayIndex) => (
-                          <td
-                            key={dayIndex}
-                            className="position-relative align-top"
-                            style={{ minHeight: "80px" }}
-                          >
-                            {/* Render all shifts for this day */}
-                            {employee.shifts
-                              .filter((shift) => shift.day === dayIndex)
-                              .map((shift, idx) => (
-                                <div
-                                  key={idx}
-                                  className={`border-start border-3 px-2 py-1 mb-1 rounded ${getShiftTypeColor(shift.type)}`}
-                                  onClick={() =>
-                                    handleEditShift({
-                                      ...shift,
-                                      memberId: employee.memberId,
-                                    })
-                                  }
-                                  style={{ cursor: "pointer" }}
-                                >
-                                  <div className="fw-medium d-flex justify-content-center">
-                                    {getShiftLabel(shift.start, shift.end, shift.type)}
-                                  </div>
+                          <td key={dayIndex} className="position-relative align-top" style={{ minHeight: "80px" }}>
+                            {dayIndex ===  6 ? (
+                              // ✅ Sunday → Always Holiday
+                              <div className="text-center">
+                                {getShiftLabel("", "", "Holiday")}
+                              </div>
+                            ) : (
+                              <>
+                                {/* Render shifts */}
+                                {employee.shifts
+                                  .filter((shift) => shift.day === dayIndex)
+                                  .map((shift, idx) => (
+                                    <div
+                                      key={idx}
+                                      className={`border-start border-3 px-2 py-1 mb-1 rounded ${getShiftTypeColor(shift.type)}`}
+                                      onClick={() => handleEditShift({ ...shift, memberId: employee.memberId })}
+                                      style={{ cursor: "pointer" }}
+                                    >
+                                      <div className="fw-medium d-flex justify-content-center">
+                                        {getShiftLabel(shift.start, shift.end, shift.type)}
+                                      </div>
+                                    </div>
+                                  ))}
+
+                                {/* Add/Remove buttons */}
+                                <div className="d-flex justify-content-between position-relative" style={{ height: "40px" }}>
+                                  {employee.shifts.some(shift => shift.day === dayIndex) && (
+                                    <button
+                                      className="position-absolute bottom-0 start-0 text-danger btn btn-sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        const shift = employee.shifts.find(s => s.day === dayIndex);
+                                        if (shift) handleRemoveShift(shift.id);
+                                      }}
+                                    >
+                                      <i className="fas fa-minus-circle"></i>
+                                    </button>
+                                  )}
+                                  <button
+                                    className="position-absolute bottom-0 end-0 text-success btn btn-sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleAddShift(employee.memberId, dayIndex);
+                                    }}
+                                  >
+                                    <i className="fas fa-plus-circle"></i>
+                                  </button>
                                 </div>
-                              ))}
-
-
-                            {/* Add/Remove Shift Buttons */}
-                            <div
-                              className="d-flex justify-content-between position-relative"
-                              style={{ height: "40px" }}
-                            >
-                              {/* Minus Button - Bottom Left */}
-                              {employee.shifts.some(shift => shift.day === dayIndex) && (
-                                <button
-                                  className="position-absolute bottom-0 start-0 text-danger btn btn-sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    const shift = employee.shifts.find(s => s.day === dayIndex);
-                                    if (shift) {
-                                      handleRemoveShift(shift.id);
-                                    }
-                                  }}
-                                >
-                                  <i className="fas fa-minus-circle"></i>
-                                </button>
-                              )}
-
-                              {/* Plus Button - Bottom Right */}
-                              <button
-                                className="position-absolute bottom-0 end-0 text-success btn btn-sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleAddShift(employee.memberId, dayIndex);
-                                }}
-                              >
-                                <i className="fas fa-plus-circle"></i>
-                              </button>
-                            </div>
+                              </>
+                            )}
                           </td>
                         ))}
+
                       </tr>
                     ))}
                   </tbody>
@@ -793,7 +796,7 @@ const updateFilteredEmployees = (shiftData, members) => {
 
         {/* Shift Legend */}
         <div className="container mt-4">
-          <h5 className="mb-3" style={{color: "white"}}>Shift Allocation info</h5>
+          <h5 className="mb-3" style={{ color: "white" }}>Shift Allocation info</h5>
           <ShiftLegend />
         </div>
 
@@ -853,6 +856,38 @@ const updateFilteredEmployees = (shiftData, members) => {
                       required
                     />
                   </div>
+
+                  {/* // Time Inputs accroding to shift mapping */}
+                  <div className="mb-3">
+                    <label htmlFor="shiftSymbol" className="form-label">
+                      Shift Type
+                    </label>
+                    <select
+                      id="shiftSymbol"
+                      name="shiftSymbol"
+                      className="form-select"
+                      value={formData.shiftSymbol || ""}
+                      onChange={(e) => {
+                        const selected = e.target.value;
+                        setFormData((prev) => ({
+                          ...prev,
+                          shiftSymbol: selected,
+                          startTime: shiftMappings[selected]?.start || "",
+                          endTime: shiftMappings[selected]?.end || "",
+                        }));
+                      }}
+                      required
+                    >
+                      <option value="">Select Shift</option>
+                      <option value="α">α (11:30 AM – 8:30 PM)</option>
+                      <option value="β">β (1:00 PM – 10:00 PM)</option>
+                      <option value="γ">γ (2:30 PM – 11:30 PM)</option>
+                      <option value="δ">δ (6:30 PM – 3:30 AM)</option>
+                      <option value="WO">Week Off</option>
+                      <option value="Holiday">Holiday</option>
+                    </select>
+                  </div>
+
 
                   <div className="row mb-3">
                     <div className="col">

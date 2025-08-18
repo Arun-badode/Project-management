@@ -45,6 +45,7 @@ function UserManagement({ isViewMode, isEditMode }) {
 
   // Form state for adding/editing members
   const [form, setForm] = useState({
+    id : null,
     empId: "",
     fullName: "",
     doj: "",
@@ -55,6 +56,39 @@ function UserManagement({ isViewMode, isEditMode }) {
     username: "",
     password: "",
   });
+
+  // ✅ helper: build a clean payload for your API
+const buildMemberPayload = (form, selectedApplications) => {
+  const payload = {
+    empId: form.empId?.trim(),
+    fullName: form.fullName?.trim(),
+    doj: form.doj, // YYYY-MM-DD
+    dob: form.dob, // YYYY-MM-DD
+    team: form.team?.trim(),
+    role: form.role?.trim(),
+    username: form.username?.trim(),
+    status: form.status || "active",
+    // API expects a string, not an array
+    appSkills: Array.isArray(selectedApplications)
+      ? selectedApplications.map(a => a.value).join(", ")
+      : Array.isArray(form.appSkills)
+        ? form.appSkills.join(", ")
+        : (typeof form.appSkills === "string" ? form.appSkills : ""),
+  };
+
+  // include password only when user actually entered something
+  if (form.password && form.password.trim() !== "") {
+    payload.password = form.password;
+  }
+
+  // remove undefined/null to avoid ", field =" bugs in backend query builder
+  Object.keys(payload).forEach(
+    key => (payload[key] === undefined || payload[key] === null) && delete payload[key]
+  );
+
+  return payload;
+};
+
 
   // Filter members based on active tab
   const liveMembers = teamMembers.filter((m) => m.status === "active");
@@ -105,119 +139,131 @@ function UserManagement({ isViewMode, isEditMode }) {
   };
 
   // Toggle member status between active and freezed
-  const toggleFreezeMember = async (empId) => {
-    try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        Swal.fire("Error", "No token found. Please login again.", "error");
-        return;
-      }
-
-      const member = teamMembers.find(m => m.empId === empId);
-      const newStatus = member.status === "active" ? "freezed" : "active";
-
-      const response = await axios.put(
-        `${BASE_URL}member/updateStatus/${empId}`,
-        { status: newStatus },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-        }
-      );
-
-      setTeamMembers((prevMembers) =>
-        prevMembers.map((member) =>
-          member.empId === empId
-            ? { ...member, status: newStatus }
-            : member
-        )
-      );
-
-      Swal.fire("Success!", `Member status updated to ${newStatus}`, "success");
-    } catch (error) {
-      console.error("Error updating member status:", error);
-      Swal.fire("Error", "Failed to update member status", "error");
+const toggleFreezeMember = async (id) => {
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      Swal.fire("Error", "No token found. Please login again.", "error");
+      return;
     }
-  };
+
+    // Find the member by id
+    const member = teamMembers.find(m => m.id === id);
+    if (!member) {
+      Swal.fire("Error", "Member not found", "error");
+      return;
+    }
+
+    // Flip status
+    const newStatus = member.status === "active" ? "freezed" : "active";
+    console.log("Updating member status to:", newStatus);
+
+    // ✅ Build minimal payload for API
+    const payload = {
+      empId: member.empId,
+      status: newStatus
+    };
+
+    // ✅ Call updateMemberStatus API
+    const response = await axios.patch(
+      `${BASE_URL}member/updateMemberStatus/${id}`,
+      payload,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      }
+    );
+
+    const updatedMember = response.data.data ?? { ...member, status: newStatus };
+
+    // ✅ Update state with new status only
+    setTeamMembers(prevMembers =>
+      prevMembers.map(m => (m.id === id ? updatedMember : m))
+    );
+
+    Swal.fire("Success!", `Member status updated to ${newStatus}`, "success");
+  } catch (error) {
+    console.error("Error updating member status:", error);
+    Swal.fire("Error", "Failed to update member status", "error");
+  }
+};
+
+
+
+
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+// ✅ handleSubmit using id for edit, and clean payload
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-    try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        Swal.fire("Error", "No token found. Please login again.", "error");
-        setIsLoading(false);
-        return;
-      }
-
-      const payload = {
-        ...form,
-        appSkills: selectedApplications.map((app) => app.value),
-        status: "active" // Default status for new members
-      };
-
-      if (modalType === "edit") {
-        // Update member
-        const response = await axios.put(
-          `${BASE_URL}member/updateMember/${form.empId}`,
-          payload,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`,
-            },
-          }
-        );
-
-        setTeamMembers((prevMembers) =>
-          prevMembers.map((member) =>
-            member.empId === form.empId ? response.data : member
-          )
-        );
-        Swal.fire("Updated!", "Member updated successfully.", "success");
-      } else {
-        // Add new member
-        const response = await axios.post(
-          `${BASE_URL}member/addMember`,
-          payload,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}`,
-            },
-          }
-        );
-
-        setTeamMembers((prev) => [...prev, response.data]);
-        Swal.fire("Success!", "Member added successfully.", "success");
-      }
-
-      setShowModal(false);
-      resetForm();
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      let errorMessage = "Failed to submit form. Please try again.";
-      
-      if (error.response) {
-        if (error.response.status === 400) {
-          errorMessage = error.response.data.message || "Invalid data provided.";
-        } else if (error.response.status === 401) {
-          errorMessage = "Unauthorized. Please login again.";
-        } else if (error.response.status === 500) {
-          errorMessage = "Server error. Please try again later.";
-        }
-      }
-      
-      Swal.fire("Error", errorMessage, "error");
-    } finally {
+  try {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      Swal.fire("Error", "No token found. Please login again.", "error");
       setIsLoading(false);
+      return;
     }
-  };
+
+    const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    };
+
+    const payload = buildMemberPayload(form, selectedApplications);
+
+    if (modalType === "edit") {
+      // ⚠️ use backend id in URL; do NOT send id in body
+      const res = await axios.patch(
+        `${BASE_URL}member/updateMember/${form.id}`,
+        payload,
+        { headers }
+      );
+
+      const updated = res?.data?.data ?? res?.data ?? payload;
+
+      setTeamMembers(prev =>
+        prev.map(m => (m.id === form.id ? { ...m, ...updated } : m))
+      );
+
+      Swal.fire("Updated!", "Member updated successfully.", "success");
+    } else {
+      // Add new member
+      const res = await axios.post(
+        `${BASE_URL}member/addMember`,
+        payload,
+        { headers }
+      );
+
+      const created = res?.data?.data ?? res?.data;
+
+      // store the generated id in form (if you keep the modal open later)
+      setForm(prev => ({ ...prev, id: created.id }));
+
+      setTeamMembers(prev => [...prev, created]);
+      Swal.fire("Success!", "Member added successfully.", "success");
+    }
+
+    setShowModal(false);
+    resetForm();
+  } catch (error) {
+    console.error("Error submitting form:", error);
+    let errorMessage = "Failed to submit form. Please try again.";
+    if (error.response) {
+      if (error.response.status === 400) errorMessage = error.response.data.message || "Invalid data provided.";
+      else if (error.response.status === 401) errorMessage = "Unauthorized. Please login again.";
+      else if (error.response.status === 500) errorMessage = "Server error. Please try again later.";
+    }
+    Swal.fire("Error", errorMessage, "error");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
 
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
@@ -228,90 +274,104 @@ function UserManagement({ isViewMode, isEditMode }) {
   };
 
   // Reset form to initial state
-  const resetForm = () => {
-    setForm({
-      empId: "",
-      fullName: "",
-      doj: "",
-      dob: "",
-      team: "",
-      role: "",
-      appSkills: [],
-      username: "",
-      password: "",
-    });
-    setSelectedApplications([]);
-  };
+const resetForm = () => {
+  setForm({
+    id: null,    // clear id
+    empId: "",
+    fullName: "",
+    doj: "",
+    dob: "",
+    team: "",
+    role: "",
+    appSkills: [],
+    username: "",
+    password: "",
+  });
+  setSelectedApplications([]);
+};
 
   // Open modal for viewing/editing a member
-  const openMemberModal = (type, member) => {
-    setModalType(type);
-    setSelectedMember(member);
+ // ✅ when opening the edit modal, normalize appSkills into the multi-select format
+const openMemberModal = (type, member) => {
+  setModalType(type);
+  setSelectedMember(member);
 
-    if (type !== "add") {
-      setForm({
-        empId: member.empId,
-        fullName: member.fullName,
-        doj: member.doj,
-        dob: member.dob,
-        team: member.team,
-        role: member.role,
-        appSkills: member.appSkills || [],
-        username: member.username,
-        password: "", // Password is not stored for security reasons
-      });
+  if (type !== "add") {
+    // convert appSkills string -> [{value,label}, ...]
+    const formattedAppSkills =
+      typeof member.appSkills === "string"
+        ? member.appSkills
+            .split(",")
+            .map(s => s.trim())
+            .filter(Boolean)
+            .map(s => ({ value: s, label: s }))
+        : Array.isArray(member.appSkills)
+          ? member.appSkills.map(s => ({ value: s, label: s }))
+          : [];
 
-      // Set selected applications for the select component
-      const appSkills = member.appSkills || [];
-      const formattedAppSkills = Array.isArray(appSkills) 
-        ? appSkills.map(skill => ({ value: skill, label: skill }))
-        : [];
-      
-      setSelectedApplications(formattedAppSkills);
-    } else {
-      resetForm();
-    }
-
-    setShowModal(true);
-  };
-
-  // Delete a member
-  const deleteMember = async (empId) => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+    setForm({
+      id: member.id,                 // use backend id for future edits
+      empId: member.empId || "",
+      fullName: member.fullName || "",
+      doj: member.doj || "",
+      dob: member.dob || "",
+      team: member.team || "",
+      role: member.role || "",
+      appSkills: member.appSkills || "",
+      username: member.username || "",
+      status: member.status || "active",
+      password: "",                  // empty => won't be sent
     });
 
-    if (result.isConfirmed) {
-      try {
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-          Swal.fire("Error", "No token found. Please login again.", "error");
-          return;
-        }
+    setSelectedApplications(formattedAppSkills);
+  } else {
+    resetForm();
+  }
 
-        await axios.delete(`${BASE_URL}member/deleteMember/${empId}`, {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-          },
-        });
+  setShowModal(true);
+};
 
-        setTeamMembers((prevMembers) =>
-          prevMembers.filter((member) => member.empId !== empId)
-        );
+  // Delete a member
+ // Delete a member
+const deleteMember = async (id) => {
+  const result = await Swal.fire({
+    title: "Are you sure?",
+    text: "You won't be able to revert this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, delete it!",
+  });
 
-        Swal.fire("Deleted!", "Member has been deleted.", "success");
-      } catch (error) {
-        console.error("Error deleting member:", error);
-        Swal.fire("Error", "Failed to delete member", "error");
+  if (result.isConfirmed) {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        Swal.fire("Error", "No token found. Please login again.", "error");
+        return;
       }
+
+      // ✅ Delete by id
+      await axios.delete(`${BASE_URL}member/deleteMember/${id}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      // ✅ Remove from state
+      setTeamMembers((prevMembers) =>
+        prevMembers.filter((member) => member.id !== id)
+      );
+
+      Swal.fire("Deleted!", "Member has been deleted.", "success");
+    } catch (error) {
+      console.error("Error deleting member:", error);
+      Swal.fire("Error", "Failed to delete member", "error");
     }
-  };
+  }
+};
+
 
   useEffect(() => {
     const fetchApplications = async () => {
@@ -432,14 +492,14 @@ function UserManagement({ isViewMode, isEditMode }) {
                       </button>
                       <button
                         className="btn btn-sm btn-warning me-2"
-                        onClick={() => toggleFreezeMember(member.empId)}
+                        onClick={() => toggleFreezeMember(member.id)}
                         title="Freeze Account"
                       >
                         <i className="fas fa-snowflake"></i>
                       </button>
                       <button
                         className="btn btn-sm btn-danger"
-                        onClick={() => deleteMember(member.empId)}
+                        onClick={() => deleteMember(member.id)}
                         title="Delete Member"
                       >
                         <i className="fas fa-trash"></i>
@@ -524,14 +584,14 @@ function UserManagement({ isViewMode, isEditMode }) {
                       </button>
                       <button
                         className="btn btn-sm btn-success me-2"
-                        onClick={() => toggleFreezeMember(member.empId)}
+                        onClick={() => toggleFreezeMember(member.id)}
                         title="Activate Account"
                       >
                         <i className="fas fa-sun"></i>
                       </button>
                       <button
                         className="btn btn-sm btn-danger"
-                        onClick={() => deleteMember(member.empId)}
+                        onClick={() => deleteMember(member.id)}
                         title="Delete Member"
                       >
                         <i className="fas fa-trash"></i>

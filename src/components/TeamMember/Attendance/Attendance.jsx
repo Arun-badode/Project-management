@@ -516,6 +516,8 @@ const handleEmployeeSelect = (id) => {
     outTime: "",
     remarks: ""
   });
+
+  
 useEffect(() => {
   const modalElement = document.getElementById("attendanceModal");
 
@@ -875,7 +877,7 @@ useEffect(() => {
                     <th>Login Time</th>
                     <th>Logout Time</th>
                     <th>Net Working Hours</th>
-                    <th>Task-Active Time</th>
+                    {/* <th>Task-Active Time</th> */}
                     <th>Status</th>
                     <th>Remark</th>
                   </tr>
@@ -888,7 +890,7 @@ useEffect(() => {
                       <td>{record.loginTime}</td>
                       <td>{record.logoutTime}</td>
                       <td>{record.netWorkingHours}</td>
-                      <td>{record.taskActiveTime}</td>
+                      {/* <td>{record.taskActiveTime}</td> */}
                       <td>
                         <span
                           className={`badge ${record.status === "Present"

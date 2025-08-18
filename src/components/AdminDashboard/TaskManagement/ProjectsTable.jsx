@@ -136,7 +136,8 @@ const getStatusProgress = (status) => {
           className="hide-scrollbar"
         >
           {Employeeprojects?.slice().reverse().map((employee) => (
-            <table
+          <div className="table-responsive">
+              <table
               key={employee.empId}
               className="table-gradient-bg align-middle mt-0 table table-bordered table-hover"
               style={{ width: "100%" }}
@@ -372,6 +373,7 @@ const getStatusProgress = (status) => {
 
               </tbody>
             </table>
+          </div>
           ))}
         </div>
       </div>

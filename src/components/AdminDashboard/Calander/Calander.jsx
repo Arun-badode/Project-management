@@ -206,7 +206,7 @@ const Calendar = ({ userRole }) => {
     setCompanyHolidaysList(holidays);
   }, []);
 
-  const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   const getFilteredEvents = (date) => {
     return events.filter((event) => {
@@ -265,32 +265,41 @@ const Calendar = ({ userRole }) => {
     );
   };
 
-  const generateCalendarGrid = () => {
-    const year = selectedDate.getFullYear();
-    const month = selectedDate.getMonth();
+const generateCalendarGrid = () => {
+  const year = selectedDate.getFullYear();
+  const month = selectedDate.getMonth();
 
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+  // Get the day of the week for the 1st (0 = Sun, 1 = Mon, ...)
+  let firstDay = new Date(year, month, 1).getDay();
 
-    const days = [];
-    for (let i = 0; i < firstDay; i++) days.push(null);
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push(new Date(year, month, i));
+  // Adjust so Monday = 0, Sunday = 6
+  firstDay = (firstDay + 6) % 7;
+
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const days = [];
+  // Empty slots before the 1st day
+  for (let i = 0; i < firstDay; i++) days.push(null);
+
+  // Fill days of the month
+  for (let i = 1; i <= daysInMonth; i++) {
+    days.push(new Date(year, month, i));
+  }
+
+  // Break into weeks (Mon → Sun)
+  const weeks = [];
+  let week = [];
+
+  days.forEach((day, index) => {
+    week.push(day);
+    if (week.length === 7 || index === days.length - 1) {
+      weeks.push(week);
+      week = [];
     }
+  });
 
-    const weeks = [];
-    let week = [];
-
-    days.forEach((day, index) => {
-      week.push(day);
-      if (week.length === 7 || index === days.length - 1) {
-        weeks.push(week);
-        week = [];
-      }
-    });
-
-    return weeks;
-  };
+  return weeks;
+};
 
   const calendarWeeks = generateCalendarGrid();
 
@@ -1204,8 +1213,8 @@ const Calendar = ({ userRole }) => {
                 <option value="doj">Joining Date</option>
                 <option value="companyHoliday">Company Holiday</option>
                 <option value="clientHoliday">Client Holiday</option>
-                <option value="approvedLeave">Leave</option>
-                <option value="weekOff">Week Off</option>
+                {/* <option value="approvedLeave">Leave</option>
+                <option value="weekOff">Week Off</option> */}
                 <option value="note">Note</option>
               </Form.Select>
             </Form.Group>
