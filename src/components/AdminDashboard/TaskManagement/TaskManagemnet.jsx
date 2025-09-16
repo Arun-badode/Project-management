@@ -192,7 +192,7 @@ const TaskManagement = () => {
               </div>
 
               <div className="col-md-6 text-md-end d-flex justify-content-between">
-                <div className="d-flex gap-2">
+                {/* <div className="d-flex gap-2">
                   <div>
                     <button
                       className="gradient-button"
@@ -217,7 +217,7 @@ const TaskManagement = () => {
                       Adobe
                     </button>
                   </div>
-                </div>
+                </div> */}
                 <span className="text-light small">
                   Today: 2025-06-24, Tuesday
                 </span>
