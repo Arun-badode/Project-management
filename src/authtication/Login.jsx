@@ -41,20 +41,11 @@ const LoginPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const roleCredentials = {
-    Admin: { email: "admin@example.com", password: "admin@123" },
-    Manager: { email: "manager@example.com", password: "manager@123" },
-    "Team Member": { email: "team@example.com", password: "team@123" },
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!role) {
-      setError("Please select a role.");
-      return;
-    }
 
     setIsLoading(true);
 
@@ -68,26 +59,23 @@ const LoginPage = () => {
         }
       });
 
-      const { data } = response.data;
+      const { id , token, role , roleId} = response.data.data;
       console.log('Login response:', response.data); // Debug log
 
-      if (!data) {
-        throw new Error('Invalid response from server');
-      }
-
+   
       // Store authentication data
-      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('authToken', token);
       localStorage.setItem('userRole', role);
       localStorage.setItem('userEmail', email);
-      localStorage.setItem('userData', JSON.stringify(data.user));
+      localStorage.setItem('roleId', roleId);
+      localStorage.setItem('userData', JSON.stringify(response.data.data));
 //       // after successful login
 // localStorage.setItem("username", response.data.user.username); // or use email
 
 
       // Store managerId based on different possible response structures
-      const managerId = data.user?.id || data?.id;
-      if (managerId) {
-        localStorage.setItem("managerId", managerId);
+      if (id) {
+        localStorage.setItem("managerId", id);
       } else {
         console.warn('No managerId found in response');
       }
@@ -100,7 +88,7 @@ const LoginPage = () => {
         case "Manager":
           navigate("/manager-dashboard");
           break;
-        case "Team Member":
+        case "Team-Member":
           navigate("/team-dashboard");
           break;
         default:
@@ -115,31 +103,26 @@ const LoginPage = () => {
     }
   };
 
-  const handleRoleSelect = (selectedRole) => {
-    setRole(selectedRole);
-    setEmail(roleCredentials[selectedRole].email);
-    setPassword(roleCredentials[selectedRole].password);
-  };
 
-  if (showVideo) {
-    return (
-      <div className={`video-splash-screen ${fadeOut ? "" : ""}`}>
-        <video 
-          autoPlay 
-          muted 
-          playsInline 
-          className="splash-video"
-          style={{ height: isMobile ? "100%" : "100%" }}
-        >
-          <source 
-            src={isMobile ? "Video/mob.mp4" : "/Video/web.mp4"} 
-            type="video/mp4" 
-          />
-          Your browser does not support the video tag.
-        </video>
-      </div>
-    );
-  }
+  // if (showVideo) {
+  //   return (
+  //     <div className={`video-splash-screen ${fadeOut ? "" : ""}`}>
+  //       <video 
+  //         autoPlay 
+  //         muted 
+  //         playsInline 
+  //         className="splash-video"
+  //         style={{ height: isMobile ? "100%" : "100%" }}
+  //       >
+  //         <source 
+  //           src={isMobile ? "Video/mob.mp4" : "/Video/web.mp4"} 
+  //           type="video/mp4" 
+  //         />
+  //         Your browser does not support the video tag.
+  //       </video>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="login-page">
@@ -211,20 +194,7 @@ const LoginPage = () => {
               </div>
 
               {/* Role Selection Buttons */}
-              <div className="d-flex flex-wrap justify-content-center mt-3 gap-2">
-                {Object.keys(roleCredentials).map((r) => (
-                  <button
-                    type="button"
-                    key={r}
-                    className={`btn btn-outline-secondary ${
-                      role === r ? "active" : ""
-                    }`}
-                    onClick={() => handleRoleSelect(r)}
-                  >
-                    {r}
-                  </button>
-                ))}
-              </div>
+          
 
               <button 
                 type="submit" 
