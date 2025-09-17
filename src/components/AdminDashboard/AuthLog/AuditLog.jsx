@@ -235,7 +235,7 @@ const [changesHistoryData ,setChangesHistoryData] = useState([])
 
   // ];
 
-  const roles = ["Admin", "Manager", "User"];
+  const roles = ["Admin", "Manager", "Interim Manager", "Team Member"];
   const statuses = ["Success", "Failed"];
   const actions = ["Login", "Logout"];
   const entityActions = ["Created", "Updated", "Deleted"];

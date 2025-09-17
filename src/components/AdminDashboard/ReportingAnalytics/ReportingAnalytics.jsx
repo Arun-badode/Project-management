@@ -31,6 +31,7 @@ import {
   Target,
   Settings,
   Plus,
+  X,
 } from "lucide-react";
 import useSyncScroll from "../Hooks/useSyncScroll";
 import { Tab, Tabs } from "react-bootstrap";
@@ -52,8 +53,10 @@ const ReportingAnalytics = () => {
   const [selectedPriority, setSelectedPriority] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [selectedMonth, setSelectedMonth] = useState("Current Month");
-    const [teamPerformanceData, setTeamPerformanceData] = useState([]); // this is for set the team performace data
-  
+  const [selectedYear, setSelectedYear] = useState("Current Year");
+  const [teamPerformanceData, setTeamPerformanceData] = useState([]); // this is for set the team performace data
+  const [qaReportFilter, setQaReportFilter] = useState("All");
+  const [completedStatusFilter, setCompletedStatusFilter] = useState("All");
 
   const [feedbackList, setFeedbackList] = useState([]); // for getting feedback logs form the api 
   //const [filteredFeedback, setFilteredFeedback] = useState([]);
@@ -61,6 +64,7 @@ const ReportingAnalytics = () => {
 
   const [feedbackFormData, setFeedbackFormData] = useState({
     project: "",
+    client: "",
     details: "",
     accountable: "",
     manager: "",
@@ -88,6 +92,9 @@ const ReportingAnalytics = () => {
   } = useSyncScroll(activeReportTab === "team-performance");
 
   const [allProjects, setAllProjects] = useState([]);
+  const [allClients, setAllClients] = useState([]); // State for clients
+  const [selectedClient, setSelectedClient] = useState("All"); // State for selected client
+  
   useEffect(() => {
     const fetchFeedbackData = async () => {
       try {
@@ -141,6 +148,33 @@ const ReportingAnalytics = () => {
   }, []);
 
   useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await axios.get(
+          `${BASE_URL}client/getAllClients`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        console.log(response.data);
+        
+        
+        if (response.data.status && Array.isArray(response.data.clients)) {
+          setAllClients(response.data.clients);
+        } else {
+          console.error("Error fetching clients:", response.data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching clients:", error);
+      }
+    };
+
+    fetchClients();
+  }, []);
+
+  useEffect(() => {
   const fetchPerformanceData = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -188,7 +222,7 @@ const ReportingAnalytics = () => {
         //const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc1Mzg2MzM1MiwiZXhwIjoxNzUzODc3NzUyfQ.OcSAYv6lhiLJUtiIUO-1rMpgpnybckcPCvvMZm_6BQ8";
 
         const response = await axios.get(
-          "https://eminoids-backend-production.up.railway.app/api/projectsStatusReport/getProjectStatusReport",
+          `${BASE_URL}projectsStatusReport/getProjectStatusReport`,
           {
             params: { owner, status, month, year },
             headers: { Authorization: `Bearer ${token}` },
@@ -309,9 +343,18 @@ const ReportingAnalytics = () => {
     const matchStatus =
       selectedStatus === "All" || project.status === selectedStatus;
 
+    const matchQAReport =
+      qaReportFilter === "All" || project.qaStatus === qaReportFilter;
+
+    const matchCompletedStatus =
+      completedStatusFilter === "All" || 
+      (completedStatusFilter === "Completed" && project.status === "Completed") ||
+      (completedStatusFilter === "Not Completed" && project.status !== "Completed");
+
     const projectDate = new Date(project.deadline || project.dueDate);
     const now = new Date();
     let matchMonth = true;
+    let matchYear = true;
 
     if (selectedMonth === "Current Month") {
       matchMonth =
@@ -326,9 +369,14 @@ const ReportingAnalytics = () => {
       const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 2, 1);
       matchMonth = projectDate >= threeMonthsAgo && projectDate <= now;
     }
-    // Skip "Custom Range" for now unless you implement a date picker
+    
+    if (selectedYear === "Current Year") {
+      matchYear = projectDate.getFullYear() === now.getFullYear();
+    } else if (selectedYear !== "All") {
+      matchYear = projectDate.getFullYear() === parseInt(selectedYear);
+    }
 
-    return matchOwner && matchPriority && matchStatus && matchMonth;
+    return matchOwner && matchPriority && matchStatus && matchMonth && matchYear && matchQAReport && matchCompletedStatus;
   });
 
   // Feedback log data
@@ -336,6 +384,7 @@ const ReportingAnalytics = () => {
     {
       id: 1,
       project: "Website Redesign",
+      client: "Client A",
       date: "2025-06-15",
       feedback: "UI needs improvement",
       accountable: "John Doe",
@@ -347,6 +396,7 @@ const ReportingAnalytics = () => {
     {
       id: 2,
       project: "Mobile App Development",
+      client: "Client B",
       date: "2025-06-10",
       feedback: "Performance issues on Android",
       accountable: "Jane Smith",
@@ -358,6 +408,7 @@ const ReportingAnalytics = () => {
     {
       id: 3,
       project: "Database Migration",
+      client: "Client C",
       date: "2025-05-20",
       feedback: "Data validation required",
       accountable: "Mike Johnson",
@@ -604,6 +655,12 @@ const ReportingAnalytics = () => {
     return project ? project.id : null;
   };
 
+  // Get clientId using client name
+  const getClientId = (name) => {
+    const client = allClients.find((c) => c.clientName === name);
+    return client ? client.id : null;
+  };
+
   // Get memberId using name
   const getMemberIdByName = (name) => {
     const member = teamMembers.find((m) => m.name === name);
@@ -619,17 +676,18 @@ const ReportingAnalytics = () => {
   // Submit feedback to backend
   const submitFeedback = async () => {
     const newFeedback = {
-      projectId: selectedProject?.id || getProjectId(feedbackFormData.project),  // ← this line handles both dropdown and manual input
+      projectId: selectedProject?.id || getProjectId(feedbackFormData.project),
       month: feedbackFormData.month || null,
       year: feedbackFormData.year || null,
       feedbackDetails: feedbackFormData.details || null,
       memberId: getMemberIdByName(feedbackFormData.accountable),
       userId: getManagerIdByName(feedbackFormData.manager),
       resolution: feedbackFormData.resolution || null,
+      clientId: getClientId(feedbackFormData.client) || null,
     };
     try {
       const token = localStorage.getItem("authToken");
-      const response = await fetch("https://eminoids-backend-production.up.railway.app/api/feedback/addFeedback", {
+      const response = await fetch(`${BASE_URL}feedback/addFeedback`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -646,6 +704,7 @@ const ReportingAnalytics = () => {
         setShowFeedbackForm(false);
         setFeedbackFormData({
           project: "",
+          client: "",
           details: "",
           accountable: "",
           manager: "",
@@ -681,6 +740,18 @@ const ReportingAnalytics = () => {
     alert("Exporting data as CSV...");
   };
 
+  // Clear all filters
+  const clearAllFilters = () => {
+    setSelectedOwner("All");
+    setSelectedPriority("All");
+    setSelectedStatus("All");
+    setSelectedMonth("Current Month");
+    setSelectedYear("Current Year");
+    setQaReportFilter("All");
+    setCompletedStatusFilter("All");
+    setSelectedClient("All");
+  };
+
   const renderProjectStatusReport = () => (
     <div className="bg-card">
       <div className="d-flex justify-content-between align-items-center mb-4 bg-card">
@@ -691,12 +762,14 @@ const ReportingAnalytics = () => {
           <button
             className="btn btn-outline-primary  me-2 analytics-export-btn"
             onClick={exportToPDF}
+            disabled
           >
             <Download size={16} className="me-1" /> PDF
           </button>
           <button
             className="btn btn-outline-primary  analytics-export-btn"
             onClick={exportToExcel}
+            disabled
           >
             <Download size={16} className="me-1" /> Excel
           </button>
@@ -705,67 +778,129 @@ const ReportingAnalytics = () => {
 
       <div className="row mb-3">
         <div className="col-md-3">
-          {/* // owner  */}
+          {/* Projects filter */}
+          <div className="position-relative">
+            <input
+              type="text"
+              className="form-control analytics-filter-select mb-1"
+              placeholder="Search Projects..."
+              value={searchProject}
+              onChange={(e) => setSearchProject(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="col-md-3">
+          {/* Client Name filter */}
           <select
             className="form-select analytics-filter-select mb-1"
-            value={selectedOwner}
-            onChange={(e) => setSelectedOwner(e.target.value)}
+            value={selectedClient}
+            onChange={(e) => setSelectedClient(e.target.value)}
           >
-            <option value="All">All Owners</option>
-            {uniqueOwners.map((owner, index) => (
-              <option key={index} value={owner}>
-                {owner}
+            <option value="All">All Clients</option>
+            {allClients.map((client, index) => (
+              <option key={index} value={client.clientName}>
+                {client.clientName}
               </option>
             ))}
           </select>
         </div>
 
-        {/* // priority */}
         <div className="col-md-3">
-          <select
-            className="form-select analytics-filter-select mb-1"
-            value={selectedPriority}
-            onChange={(e) => setSelectedPriority(e.target.value)}
-          >
-            <option value="All">All Priorities</option>
-            {priorities.map((priority, index) => (
-              <option key={index} value={priority}>
-                {priority}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* // status  */}
-        <div className="col-md-3">
+          {/* Status filter */}
           <select
             className="form-select analytics-filter-select mb-1"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
           >
             <option value="All">All Statuses</option>
-            {status.map((statusItem, index) => (
-              <option key={index} value={statusItem}>
-                {statusItem}
-              </option>
-            ))}
+            <option value="Active">Active</option>
+            <option value="Completed">Completed</option>
+            <option value="Delayed in Process">Delayed in Process</option>
+            <option value="Delayed in QA">Delayed in QA</option>
+            <option value="Failed in QA">Failed in QA</option>
           </select>
         </div>
 
-        {/* // date */}
         <div className="col-md-3">
+          {/* QA Report filter */}
           <select
-            className="form-select analytics-filter-select"
+            className="form-select analytics-filter-select mb-1"
+            value={qaReportFilter}
+            onChange={(e) => setQaReportFilter(e.target.value)}
+          >
+            <option value="All">All QA Reports</option>
+            <option value="Passed">Passed</option>
+            <option value="Failed">Failed</option>
+            <option value="Critical">Critical</option>
+          </select>
+        </div>
+
+        <div className="col-md-3">
+          {/* Priority filter */}
+          <select
+            className="form-select analytics-filter-select mb-1"
+            value={selectedPriority}
+            onChange={(e) => setSelectedPriority(e.target.value)}
+          >
+            <option value="All">All Priorities</option>
+            <option value="Critical">Critical</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+
+        <div className="col-md-3">
+          {/* Completed Status filter */}
+          <select
+            className="form-select analytics-filter-select mb-1"
+            value={completedStatusFilter}
+            onChange={(e) => setCompletedStatusFilter(e.target.value)}
+          >
+            <option value="All">All</option>
+            <option value="Completed">Completed</option>
+            <option value="Not Completed">Not Completed</option>
+          </select>
+        </div>
+
+        <div className="col-md-3">
+          {/* Month filter */}
+          <select
+            className="form-select analytics-filter-select mb-1"
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
           >
             <option value="Current Month">Current Month</option>
             <option value="Last Month">Last Month</option>
             <option value="Last 3 Months">Last 3 Months</option>
-            <option value="Custom Range">Custom Range</option>
+            <option value="All">All Months</option>
           </select>
-
         </div>
+
+        <div className="col-md-3">
+          {/* Year filter */}
+          <select
+            className="form-select analytics-filter-select"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(e.target.value)}
+          >
+            <option value="Current Year">Current Year</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="All">All Years</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="d-flex justify-content-end mb-3">
+        <button
+          className="btn btn-outline-secondary me-2"
+          onClick={clearAllFilters}
+        >
+          <X size={16} className="me-1" /> Clear All Filters
+        </button>
       </div>
 
       <div
@@ -803,59 +938,52 @@ const ReportingAnalytics = () => {
             }}
           >
             <tr className="text-center">
-              <th>ID</th>
-              <th>Project Name</th>
-              <th>Owner</th>
-              <th>Progress</th>
+              <th>Projects</th>
+              <th>Client</th>
               <th>Status</th>
-              <th>QA Status</th>
+              <th>QA Report</th>
               <th>Priority</th>
-              <th>Deadline</th>
+              <th>Completed Status</th>
+              <th>Month</th>
+              <th>Year</th>
             </tr>
           </thead>
           <tbody>
-            {projectReportData.map((projectReportData) => (
-              <tr key={projectReportData.id} className="analytics-project-row">
-                <td>{projectReportData.id}</td>
-                <td className="text-dark analytics-project-name">{projectReportData.projectName}</td>
-                <td>{projectReportData.owner}</td>
+            {filteredProjectData.map((project) => (
+              <tr key={project.id} className="analytics-project-row">
+                <td className="text-dark analytics-project-name">{project.projectName}</td>
+                <td>{project.owner}</td>
                 <td>
-                  {projectReportData.qcHrs !== undefined ? (
-                    <div className="progress analytics-progress-bar" style={{ height: "20px" }}>
-                      <div
-                        className="progress-bar analytics-progress-fill bg-primary"
-                        style={{ width: `${projectReportData.qcHrs}%` }}
-                      >
-                        {projectReportData.qcHrs}%
-                      </div>
-                    </div>
-                  ) : (
-                    "—"
-                  )}
-                </td>
-                <td>
-                  <span className={getStatusBadgeClass(projectReportData.status)}>
-                    {projectReportData.status || "—"}
+                  <span className={getStatusBadgeClass(project.status)}>
+                    {project.status || "—"}
                   </span>
                 </td>
                 <td>
                   <span
-                    className={`badge ${projectReportData.qaStatus === "Failed"
+                    className={`badge ${project.qaStatus === "Failed"
                         ? "bg-danger"
-                        : projectReportData.qaStatus === "Passed"
+                        : project.qaStatus === "Passed"
                           ? "bg-success"
-                          : "bg-warning"
+                          : project.qaStatus === "Critical"
+                            ? "bg-warning"
+                            : "bg-secondary"
                       }`}
                   >
-                    {projectReportData.qaStatus || "—"}
+                    {project.qaStatus || "—"}
                   </span>
                 </td>
                 <td>
-                  <span className={getPriorityBadgeClass(projectReportData.projectPriority)}>
-                    {projectReportData.projectPriority || "—"}
+                  <span className={getPriorityBadgeClass(project.projectPriority)}>
+                    {project.projectPriority || "—"}
                   </span>
                 </td>
-                <td>{projectReportData.deadline || projectReportData.dueDate || "—"}</td>
+                <td>
+                  <span className={`badge ${project.status === "Completed" ? "bg-success" : "bg-warning"}`}>
+                    {project.status === "Completed" ? "Completed" : "Not Completed"}
+                  </span>
+                </td>
+                <td>{new Date(project.deadline || project.dueDate).toLocaleString('default', { month: 'long' }) || "—"}</td>
+                <td>{new Date(project.deadline || project.dueDate).getFullYear() || "—"}</td>
               </tr>
             ))}
           </tbody>
@@ -876,7 +1004,7 @@ const ReportingAnalytics = () => {
             className="btn btn-primary  me-2 analytics-add-btn"
             onClick={() => setShowFeedbackForm(true)}
           >
-            <Plus size={16} className="me-1" /> Add Feedback
+            <Plus size={16} className="me-1" /> Add New Feedback
           </button>
           <select
             className="form-select d-inline-block me-2 analytics-date-selector"
@@ -898,6 +1026,13 @@ const ReportingAnalytics = () => {
             <option>Jane Smith</option>
             <option>Mike Johnson</option>
           </select>
+          <button
+            className="btn btn-outline-primary ms-2"
+            onClick={exportToExcel}
+            disabled
+          >
+            <Download size={16} className="me-1" /> Export
+          </button>
         </div>
       </div>
 
@@ -920,17 +1055,24 @@ const ReportingAnalytics = () => {
               <div className="modal-body">
                 <div className="row mb-3">
                   <div className="col-md-6">
-                    <label className="form-label">Project</label>
+                    <label className="form-label">Select Client</label>
+                    <select
+                      className="form-select"
+                      name="client"
+                      value={feedbackFormData.client}
+                      onChange={handleFeedbackInputChange}
+                    >
+                      <option value="">Select client</option>
+                      {allClients.map((client, index) => (
+                        <option key={index} value={client.clientName}>
+                          {client.clientName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">Search Project</label>
                     <div className="position-relative">
-                      {/* <input
-                        type="text"
-                        className="form-control mb-2"
-                        name="searchProject"
-                        value={searchProject}
-                        onChange={(e) => setSearchProject(e.target.value)}
-                        placeholder="Search and select project"
-                      /> */}
-
                       <select
                         className="form-select"
                         name="project"
@@ -945,26 +1087,25 @@ const ReportingAnalytics = () => {
                             </option>
                           ))}
                       </select>
-
                     </div>
-                    {feedbackFormData.project && (
-                      <div className="mt-2">
-                        <span className="badge bg-primary">
-                          {feedbackFormData.project}
-                          <button
-                            type="button"
-                            className="btn-close btn-close-white ms-2"
-                            onClick={() =>
-                              setFeedbackFormData((prev) => ({
-                                ...prev,
-                                project: "",
-                              }))
-                            }
-                            style={{ fontSize: "0.5rem" }}
-                          ></button>
-                        </span>
-                      </div>
-                    )}
+                  </div>
+                </div>
+                <div className="row mb-3">
+                  <div className="col-md-6">
+                    <label className="form-label">Team Members</label>
+                    <select
+                      className="form-select"
+                      name="accountable"
+                      value={feedbackFormData.accountable}
+                      onChange={handleFeedbackInputChange}
+                    >
+                      <option value="">Select team member</option>
+                      {teamMembers.map((member) => (
+                        <option key={member.id} value={member.name}>
+                          {member.name} ({member.role})
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="col-md-3">
                     <label className="form-label">Month</label>
@@ -1013,42 +1154,6 @@ const ReportingAnalytics = () => {
                     placeholder="Enter detailed feedback..."
                   ></textarea>
                 </div>
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label className="form-label">
-                      Accountable Team Member
-                    </label>
-                    <select
-                      className="form-select"
-                      name="accountable"
-                      value={feedbackFormData.accountable}
-                      onChange={handleFeedbackInputChange}
-                    >
-                      <option value="">Select team member</option>
-                      {teamMembers.map((member) => (
-                        <option key={member.id} value={member.name}>
-                          {member.name} ({member.role})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label">Manager</label>
-                    <select
-                      className="form-select"
-                      name="manager"
-                      value={feedbackFormData.manager}
-                      onChange={handleFeedbackInputChange}
-                    >
-                      <option value="">Select manager</option>
-                      {managers.map((manager) => (
-                        <option key={manager.id} value={manager.name}>
-                          {manager.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
                 <div className="mb-3">
                   <label className="form-label">Resolution/Action Taken</label>
                   <textarea
@@ -1073,7 +1178,6 @@ const ReportingAnalytics = () => {
                   type="button"
                   className="btn gradient-button"
                   onClick={submitFeedback}
-
                 >
                   Submit Feedback
                 </button>
@@ -1117,6 +1221,7 @@ const ReportingAnalytics = () => {
             <tr className="text-center">
               <th>ID</th>
               <th>Project</th>
+              <th>Client</th>
               <th>Date</th>
               <th>Feedback</th>
               <th>Accountable</th>
@@ -1129,6 +1234,7 @@ const ReportingAnalytics = () => {
               <tr key={feedback.id} className="text-white analytics-feedback-row">
                 <td>{feedback.id}</td>
                 <td>{feedback.project || "-"}</td>
+                <td>{feedback.client || "-"}</td>
                 <td>{feedback.date}</td>
                 <td className="analytics-feedback-text">{feedback.feedback || "-"}</td>
                 <td>{feedback.accountable || "-"}</td>
@@ -1143,140 +1249,140 @@ const ReportingAnalytics = () => {
     </div>
   );
 
-  const renderTeamPerformanceReport = () => (
-    <div className="analytics-report-container">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4 className="analytics-report-title gradient-heading">
-          Team Performance Report
-        </h4>
-        <div className="analytics-performance-filters">
-          <select
-            className="form-select d-inline-block me-2 analytics-team-filter"
-            style={{ width: "auto" }}
-          >
-            <option>All Teams</option>
-            <option>Adobe</option>
-            <option>MS Office</option>
-            <option>QA</option>
-          </select>
-          <select
-            className="form-select d-inline-block me-2 analytics-role-filter"
-            style={{ width: "auto" }}
-          >
-            <option>All Roles</option>
-            <option>DTP Specialist</option>
-            <option>Quality Analyst</option>
-          </select>
-          <select
-            className="form-select d-inline-block analytics-time-filter"
-            style={{ width: "auto" }}
-          >
-            <option>Current Month</option>
-            <option>Last Month</option>
-            <option>Last 3 Months</option>
-            <option>This Year</option>
-            <option>All Time</option>
-          </select>
-        </div>
+const renderTeamPerformanceReport = () => (
+  <div className="analytics-report-container">
+    <div className="d-flex justify-content-between align-items-center mb-4">
+      <h4 className="analytics-report-title gradient-heading">
+        Performance Report (Includes Team Members & Interim Managers, Excludes Managers)
+      </h4>
+      <div className="analytics-performance-filters">
+        <select
+          className="form-select d-inline-block me-2 analytics-team-filter"
+          style={{ width: "auto" }}
+        >
+          <option>All Teams</option>
+          <option>Adobe</option>
+          <option>MS Office</option>
+          <option>QA</option>
+        </select>
+        <select
+          className="form-select d-inline-block me-2 analytics-role-filter"
+          style={{ width: "auto" }}
+        >
+          <option>All Roles</option>
+          <option>DTP Specialist</option>
+          <option>Quality Analyst</option>
+        </select>
+        <select
+          className="form-select d-inline-block analytics-time-filter"
+          style={{ width: "auto" }}
+        >
+          <option>Current Month</option>
+          <option>Last Month</option>
+          <option>Last 3 Months</option>
+          <option>This Year</option>
+          <option>All Time</option>
+        </select>
       </div>
+    </div>
 
-      <div className="row">
-        <div className="col-lg-12">
-          <div
-            ref={fakePerformanceRef}
-            style={{
-              overflowX: "auto",
-              overflowY: "hidden",
-              height: 16,
-              position: "fixed",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              zIndex: 1050,
-            }}
-          >
-            <div style={{ width: "2000px", height: 1 }} />
-          </div>
+    <div className="row">
+      <div className="col-lg-12">
+        <div
+          ref={fakePerformanceRef}
+          style={{
+            overflowX: "auto",
+            overflowY: "hidden",
+            height: 16,
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1050,
+          }}
+        >
+          <div style={{ width: "2000px", height: 1 }} />
+        </div>
 
-          <div
-            ref={scrollPerformanceRef}
-            className="table-responsive"
-            style={{ overflowX: "auto", maxHeight: "400px" }}
-          >
-            <table className="table analytics-performance-table table-gradient-bg">
-              <thead
-                className="table-gradient-bg table "
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 0,
-                  backgroundColor: "#fff", // Match your background color
-                }}
-              >
-                <tr className="text-center">
-                  <th>EMP ID</th>
-                  <th>Team Member</th>
-                  <th>Role</th>
-                  <th>Team</th>
-                  <th>Completed Tasks</th>
-                  {/* <th>On-Time %</th>
-                  <th>Net Logged Hours</th>
-                  <th>Task Active Hours</th>
-                  <th>QA Failed</th> */}
-                  <th>Performance</th>
-                </tr>
-              </thead>
-              <tbody>
-                {teamPerformanceData.map((member) => (
-                  <tr
-                    key={member.empId}
-                    className="text-white analytics-performance-row"
-                  >
-                    <td>{member.empId}</td>
-                    <td className="text-white analytics-member-name">
-                      {member.fullName}
-                    </td>
-                    <td>{member.role}</td>
-                    <td>{member.team}</td>
-                    <td>
-                      <span className="badge bg-primary analytics-task-badge">
-                        {member.completedTasks}
-                      </span>
-                    </td>
-                    {/* <td>
+        <div
+          ref={scrollPerformanceRef}
+          className="table-responsive"
+          style={{ overflowX: "auto", maxHeight: "400px" }}
+        >
+          <table className="table analytics-performance-table table-gradient-bg">
+            <thead
+              className="table-gradient-bg table "
+              style={{
+                position: "sticky",
+                top: 0,
+                zIndex: 0,
+                backgroundColor: "#fff", // Match your background color
+              }}
+            >
+              <tr className="text-center">
+                <th>EMP ID</th>
+                <th>Team Member</th>
+                <th>Role</th>
+                <th>Team</th>
+                <th>Completed Tasks</th>
+                <th>On-Time %</th>
+                <th>Net Logged hours</th>
+                <th>Task Active Hours</th>
+                <th>QA Report Failed /Critical</th>
+                <th>Performance</th>
+              </tr>
+            </thead>
+            <tbody>
+              {teamPerformanceData.map((member) => (
+                <tr
+                  key={member.empId}
+                  className="text-white analytics-performance-row"
+                >
+                  <td>{member.empId}</td>
+                  <td className="text-white analytics-member-name">
+                    {member.fullName}
+                  </td>
+                  <td>{member.role}</td>
+                  <td>{member.team}</td>
+                  <td>
+                    <span className="badge bg-primary analytics-task-badge">
+                      {member.completedTasks}
+                    </span>
+                  </td>
+                  <td>
+                    <div
+                      className="progress analytics-ontime-progress"
+                      style={{ height: "15px" }}
+                    >
                       <div
-                        className="progress analytics-ontime-progress"
-                        style={{ height: "15px" }}
+                        className="progress-bar bg-success"
+                        style={{ width: `${member.onTimePercentage}%` }}
                       >
-                        <div
-                          className="progress-bar bg-success"
-                          style={{ width: `${member.onTimePercentage}%` }}
-                        >
-                          {member.onTimePercentage}%
-                        </div>
+                        {member.onTimePercentage}%
                       </div>
-                    </td> */}
-                    {/* <td>{member.hoursLogged}h</td>
-                    <td>{member.activeHours}h</td>
-                    <td>
-                      {member.qaFailed !== null ? (
-                        <span className="badge bg-danger">
-                          {member.qaFailed}
-                        </span>
-                      ) : (
-                        "-"
-                      )}
-                    </td> */}
-                    <td>{getPerformanceBadge(member.performance)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                  </td>
+                  <td>{member.hoursLogged}h</td>
+                  <td>{member.activeHours}h</td>
+                  <td>
+                    {member.qaFailed !== null ? (
+                      <span className="badge bg-danger">{member.qaFailed}</span>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+                  <td>{getPerformanceBadge(member.performance)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
-  );
+  </div>
+);
+
+
 
   const renderRevenueReport = () => (
     <div className="analytics-report-container">
