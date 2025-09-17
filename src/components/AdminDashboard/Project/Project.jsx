@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import BASE_URL from "../../../config";
 import * as echarts from "echarts";
 import useSyncScroll from "../Hooks/useSyncScroll";
 import "react-datepicker/dist/react-datepicker.css";
@@ -15,7 +17,6 @@ const Project = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [selectedClient, setSelectedClient] = useState("");
   const [selectedTask, setSelectedTask] = useState("");
@@ -235,6 +236,27 @@ const Project = () => {
   } = useSyncScroll(activeTab === "completed");
 
   const [selectedMonth, setSelectedMonth] = useState(6); // July (0-indexed)
+  const [permissions, setPermissions] = useState([]);
+  const roleId = localStorage.getItem("roleId");
+
+  // 🔹 Fetch permissions from API
+  useEffect(() => {
+    axios
+      .get(`${BASE_URL}roles/permission/${roleId}`)
+      .then((res) => {
+        if (res.data.status) {
+          setPermissions(res.data.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching permissions", err);
+      });
+  }, [roleId])
+
+  const projectPermission = permissions.find(p => p.featureName === "Projects");
+  const CreateProjectPermission = Number(projectPermission?.canAdd);
+  const UpdateProjectPermission = Number(projectPermission?.canEdit);
+  const DeleteProjectPermission = Number(projectPermission?.canDelete);
 
   return (
     <div className="conatiner-fluid bg-main mt-4">
@@ -264,7 +286,7 @@ const Project = () => {
                   Ctrl+F
                 </div>
               </div>
-              {isAdmin && (
+              {CreateProjectPermission === 1 && (
                 <div className="d-flex gap-2 mt-2 mt-md-0">
                   <button
                     onClick={() => setShowCreateModal(true)}
@@ -289,12 +311,11 @@ const Project = () => {
             <ul className="nav nav-tabs border-bottom-0 flex-wrap">
               <li className="nav-item">
                 <button
-                  className={`nav-link ${
-                    activeTab === "created" ? "active" : ""
-                  }`}
+                  className={`nav-link ${activeTab === "created" ? "active" : ""
+                    }`}
                   onClick={() => setActiveTab("created")}
                 >
-                 Created Projects
+                  Created Projects
                   <span className="badge bg-light text-dark ms-2">
                     {
                       projects.filter(
@@ -306,9 +327,8 @@ const Project = () => {
               </li>
               <li className="nav-item">
                 <button
-                  className={`nav-link ${
-                    activeTab === "active" ? "active" : ""
-                  }`}
+                  className={`nav-link ${activeTab === "active" ? "active" : ""
+                    }`}
                   onClick={() => setActiveTab("active")}
                 >
                   Active Projects
@@ -323,9 +343,8 @@ const Project = () => {
               </li>
               <li className="nav-item">
                 <button
-                  className={`nav-link ${
-                    activeTab === "completed" ? "active" : ""
-                  }`}
+                  className={`nav-link ${activeTab === "completed" ? "active" : ""
+                    }`}
                   onClick={() => setActiveTab("completed")}
                 >
                   Completed Projects
@@ -416,7 +435,7 @@ const Project = () => {
                     msOverflowStyle: "none", // IE/Edge
                   }}
                 >
-                  <Created />
+                  <Created data={{ UpdateProjectPermission, DeleteProjectPermission }} />
                 </div>
               </div>
             )}
@@ -453,7 +472,7 @@ const Project = () => {
                   <div style={{ width: "2500px", height: 1 }} />
                 </div>
                 {/* Scrollable Table 2 */}
-                 <div
+                <div
                   className="table-responsive table-gradient-bg"
                   ref={scrollContainerRef5}
                   style={{
@@ -463,7 +482,7 @@ const Project = () => {
                     msOverflowStyle: "none", // IE/Edge
                   }}
                 >
-                  
+
                   <ActiveProjects />
                 </div>
               </div>
@@ -481,7 +500,7 @@ const Project = () => {
 
             {/* Filters */}
             <div className="row g-3 mb-3">
-             
+
               <div className="col-md-3">
                 <label className="form-label text-white">Client</label>
                 <select
@@ -537,7 +556,7 @@ const Project = () => {
                 </select>
               </div>
 
-            
+
               <div className="col-md-3">
                 <label className="form-label text-white">Month/Year</label>
                 <input

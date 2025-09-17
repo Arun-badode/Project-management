@@ -2,7 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import BASE_URL from "../../../config";
 
-const Created = () => {
+const Created = ({ data }) => {
+  console.log("UpdateUpdateProjectPermissionUpdateProjectPermissionUpdateProjectPermission",data);
   const [fileDeadlines, setFileDeadlines] = useState({});
 
   const [activeTab, setActiveTab] = React.useState("created");
@@ -95,7 +96,7 @@ const Created = () => {
     try {
       // Prompt user to enter deadline with date and time
       const deadline = prompt("Enter deadline date and time (YYYY-MM-DD HH:MM):");
-      
+
       if (!deadline || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(deadline)) {
         alert("Invalid or empty datetime. Please use YYYY-MM-DD HH:MM format.");
         return;
@@ -118,7 +119,7 @@ const Created = () => {
       if (res.status === 200) {
         // Update all files in the project to YTS status
         const projectFiles = allFiles.filter(file => file.projectId === projectId);
-        
+
         for (const file of projectFiles) {
           await axios.patch(
             `${BASE_URL}projectFiles/updateFileStatus/${file.id}`,
@@ -135,7 +136,7 @@ const Created = () => {
         }
 
         alert("Project status updated to Active and all files marked as YTS!");
-        
+
         // Refresh project list
         const refreshed = await axios.get(`${BASE_URL}project/getAllProjects`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -195,7 +196,7 @@ const Created = () => {
 
       if (response.data.status) {
         alert("Project updated successfully!");
-        
+
         // Refresh project list
         const refreshed = await axios.get(`${BASE_URL}project/getAllProjects`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -204,7 +205,7 @@ const Created = () => {
         if (refreshed.data.status) {
           setProjects(refreshed.data.projects);
         }
-        
+
         setShowEditModal(false);
       } else {
         alert("Failed to update project");
@@ -234,18 +235,18 @@ const Created = () => {
       axios.delete(`${BASE_URL}project/deleteProject/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then(res => {
-        if (res.data.status) {
-          alert("Project deleted successfully!");
-          setProjects(projects.filter(project => project.id !== id));
-        } else {
-          alert("Failed to delete project");
-        }
-      })
-      .catch(err => {
-        console.error("Error deleting project:", err);
-        alert("Error deleting project");
-      });
+        .then(res => {
+          if (res.data.status) {
+            alert("Project deleted successfully!");
+            setProjects(projects.filter(project => project.id !== id));
+          } else {
+            alert("Failed to delete project");
+          }
+        })
+        .catch(err => {
+          console.error("Error deleting project:", err);
+          alert("Error deleting project");
+        });
     }
   };
 
@@ -253,7 +254,7 @@ const Created = () => {
   const saveFileStatusUpdates = async (projectId) => {
     try {
       const deadline = fileDeadlines[projectId];
-      
+
       if (!deadline) {
         alert("Please set a deadline before saving.");
         return;
@@ -276,7 +277,7 @@ const Created = () => {
       }
 
       alert("File statuses updated successfully!");
-      
+
       // Refresh files list
       const filesResponse = await axios.get(`${BASE_URL}projectFiles/getAllProjectFiles`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -285,7 +286,7 @@ const Created = () => {
       if (filesResponse.data.status) {
         setAllFiles(filesResponse.data.data);
       }
-      
+
       // Clear selections
       setSelectedFiles([]);
       setFileDeadlines(prev => ({ ...prev, [projectId]: "" }));
@@ -294,6 +295,12 @@ const Created = () => {
       alert("Error updating file statuses");
     }
   };
+  // const CreateProjectPermission = Number(projectPermission?.canAdd);
+  // const UpdateProjectPermission = Number(projectPermission?.canEdit);
+  // const DeleteProjectPermission = Number(projectPermission?.canDelete);
+  // console.log("CreateProjectPermission", CreateProjectPermission);
+  // console.log("UpdateProjectPermission", UpdateProjectPermission);
+  // console.log("DeleteProjectPermission", DeleteProjectPermission);
 
   return (
     <div>
@@ -392,13 +399,16 @@ const Created = () => {
                         >
                           <i className="fas fa-check"></i>
                         </button>
-                        <button
-                          onClick={() => handleEditProject(project)}
-                          className="btn btn-sm btn-primary"
-                          title="Edit"
-                        >
-                          <i className="fas fa-edit"></i>
-                        </button>
+                        {data?.UpdateProjectPermission === 1 &&
+                          (
+                            <button
+                              onClick={() => handleEditProject(project)}
+                              className="btn btn-sm btn-primary"
+                              title="Edit"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                          )}
                         <button
                           onClick={() => copyServerPath(project)}
                           className="btn btn-sm btn-info"
@@ -406,13 +416,17 @@ const Created = () => {
                         >
                           <i className="fas fa-copy"></i>
                         </button>
-                        <button
-                          onClick={() => handleDeleteProject(project.id)}
-                          className="btn btn-sm btn-danger"
-                          title="Delete"
-                        >
-                          <i className="fas fa-trash-alt"></i>
-                        </button>
+                        {
+                          data?.DeleteProjectPermission === 1 && (
+                            <button
+                              onClick={() => handleDeleteProject(project.id)}
+                              className="btn btn-sm btn-danger"
+                              title="Delete"
+                            >
+                              <i className="fas fa-trash-alt"></i>
+                            </button>
+                          )
+                        }
                       </div>
                     </td>
                   </tr>
@@ -553,7 +567,7 @@ const Created = () => {
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title " style={{color:"black"}} >Edit Project</h5>
+                <h5 className="modal-title " style={{ color: "black" }} >Edit Project</h5>
                 <button type="button" className="btn-close" onClick={() => setShowEditModal(false)}></button>
               </div>
               <div className="modal-body">
@@ -580,7 +594,7 @@ const Created = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="row mb-3">
                     <div className="col-md-6">
                       <label className="form-label text-dark">Country</label>
@@ -603,7 +617,7 @@ const Created = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="row mb-3">
                     <div className="col-md-4">
                       <label className="form-label text-dark">Task</label>
@@ -625,7 +639,7 @@ const Created = () => {
                         onChange={handleEditFormChange}
                       />
                     </div>
-                    <div className="col-md-4"> 
+                    <div className="col-md-4">
                       <label className="form-label text-dark">Application</label>
                       <input
                         type="text"
@@ -636,7 +650,7 @@ const Created = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="row mb-3">
                     <div className="col-md-4">
                       <label className="form-label text-dark">Total Pages</label>
@@ -669,7 +683,7 @@ const Created = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div className="row mb-3">
                     <div className="col-md-6">
                       <label className="form-label text-dark">Currency</label>

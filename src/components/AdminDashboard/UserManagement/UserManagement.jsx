@@ -14,9 +14,38 @@ function UserManagement({ isViewMode, isEditMode }) {
   const [isLoading, setIsLoading] = useState(false);
   const [id, setId] = useState("");
   const [applicationsOptions, setApplicationsOptions] = useState([]);
+  const [roleOptions, setRoleOptions] = useState([]);
 
   // State for team members data
   const [teamMembers, setTeamMembers] = useState([]);
+
+  // Format date to DD-MM-YYYY
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    
+    // If date is already in DD-MM-YYYY format, return as is
+    if (/^\d{1,2}-\d{1,2}-\d{4}$/.test(dateString)) {
+      return dateString;
+    }
+    
+    // Try to parse ISO format (YYYY-MM-DD)
+    if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(dateString)) {
+      const [year, month, day] = dateString.split('-');
+      return `${day}-${month}-${year}`;
+    }
+    
+    // Try to parse Date object or timestamp
+    const date = new Date(dateString);
+    if (!isNaN(date.getTime())) {
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}-${month}-${year}`;
+    }
+    
+    // If unable to parse, return original string
+    return dateString;
+  };
 
   // Fetch team members on component mount
   useEffect(() => {
@@ -30,9 +59,11 @@ function UserManagement({ isViewMode, isEditMode }) {
             "Authorization": `Bearer ${token}`,
           },
         });
-        
+
         if (response.data && Array.isArray(response.data.data)) {
-          setTeamMembers(response.data.data);
+          // Filter out freezed members from the main list
+          const activeMembers = response.data.data.filter(member => member.status !== "freezed");
+          setTeamMembers(activeMembers);
         }
       } catch (error) {
         console.error("Error fetching team members:", error);
@@ -43,9 +74,39 @@ function UserManagement({ isViewMode, isEditMode }) {
     fetchTeamMembers();
   }, []);
 
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await axios.get(
+          `${BASE_URL}roles/getAllRoles`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+            },
+          }
+        );
+        console.log("response", response);
+
+        if (response?.data?.data) {
+          // maan lo response.data.roles = [{id: 1, name: "Admin"}, ...]
+          const formattedRoles = response?.data?.data?.map((role) => ({
+            value: role.id,
+            label: role.roleName,
+          }));
+          setRoleOptions(formattedRoles);
+        }
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+      }
+    };
+
+    fetchRoles();
+  }, []);
+
   // Form state for adding/editing members
   const [form, setForm] = useState({
-    id : null,
+    id: null,
     empId: "",
     fullName: "",
     doj: "",
@@ -55,40 +116,43 @@ function UserManagement({ isViewMode, isEditMode }) {
     skills: [],
     username: "",
     password: "",
+    currentSalary: "", // Added currentSalary to initial state
   });
 
   // ✅ helper: build a clean payload for your API
-const buildMemberPayload = (form, selectedApplications) => {
-  const payload = {
-    empId: form.empId?.trim(),
-    fullName: form.fullName?.trim(),
-    doj: form.doj, // YYYY-MM-DD
-    dob: form.dob, // YYYY-MM-DD
-    team: form.team?.trim(),
-    role: form.role?.trim(),
-    username: form.username?.trim(),
-    status: form.status || "active",
-    // API expects a string, not an array
-    appSkills: Array.isArray(selectedApplications)
-      ? selectedApplications.map(a => a.value).join(", ")
-      : Array.isArray(form.appSkills)
-        ? form.appSkills.join(", ")
-        : (typeof form.appSkills === "string" ? form.appSkills : ""),
+  const buildMemberPayload = (form, selectedApplications) => {
+    console.log("form", form);
+    const payload = {
+      empId: form.empId?.trim(),
+      fullName: form.fullName?.trim(),
+      doj: form.doj, // YYYY-MM-DD
+      dob: form.dob, // YYYY-MM-DD
+      team: form.team?.trim(),
+      role: form.role,
+      username: form.username?.trim(),
+      status: form.status || "active",
+      // Add currentSalary to the payload
+      currentSalary: form.currentSalary ? form.currentSalary.toString().replace(/[^\d]/g, "") : "",
+      // API expects a string, not an array
+      appSkills: Array.isArray(selectedApplications)
+        ? selectedApplications.map(a => a.value).join(", ")
+        : Array.isArray(form.appSkills)
+          ? form.appSkills.join(", ")
+          : (typeof form.appSkills === "string" ? form.appSkills : ""),
+    };
+
+    // include password only when user actually entered something
+    if (form.password && form.password.trim() !== "") {
+      payload.password = form.password;
+    }
+
+    // remove undefined/null to avoid ", field =" bugs in backend query builder
+    Object.keys(payload).forEach(
+      key => (payload[key] === undefined || payload[key] === null) && delete payload[key]
+    );
+
+    return payload;
   };
-
-  // include password only when user actually entered something
-  if (form.password && form.password.trim() !== "") {
-    payload.password = form.password;
-  }
-
-  // remove undefined/null to avoid ", field =" bugs in backend query builder
-  Object.keys(payload).forEach(
-    key => (payload[key] === undefined || payload[key] === null) && delete payload[key]
-  );
-
-  return payload;
-};
-
 
   // Filter members based on active tab
   const liveMembers = teamMembers.filter((m) => m.status === "active");
@@ -139,131 +203,125 @@ const buildMemberPayload = (form, selectedApplications) => {
   };
 
   // Toggle member status between active and freezed
-const toggleFreezeMember = async (id) => {
-  try {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      Swal.fire("Error", "No token found. Please login again.", "error");
-      return;
-    }
-
-    // Find the member by id
-    const member = teamMembers.find(m => m.id === id);
-    if (!member) {
-      Swal.fire("Error", "Member not found", "error");
-      return;
-    }
-
-    // Flip status
-    const newStatus = member.status === "active" ? "freezed" : "active";
-    console.log("Updating member status to:", newStatus);
-
-    // ✅ Build minimal payload for API
-    const payload = {
-      empId: member.empId,
-      status: newStatus
-    };
-
-    // ✅ Call updateMemberStatus API
-    const response = await axios.patch(
-      `${BASE_URL}member/updateMemberStatus/${id}`,
-      payload,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-        },
+  const toggleFreezeMember = async (id) => {
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        Swal.fire("Error", "No token found. Please login again.", "error");
+        return;
       }
-    );
 
-    const updatedMember = response.data.data ?? { ...member, status: newStatus };
+      // Find the member by id
+      const member = teamMembers.find(m => m.id === id);
+      if (!member) {
+        Swal.fire("Error", "Member not found", "error");
+        return;
+      }
 
-    // ✅ Update state with new status only
-    setTeamMembers(prevMembers =>
-      prevMembers.map(m => (m.id === id ? updatedMember : m))
-    );
+      // Flip status
+      const newStatus = member.status === "active" ? "freezed" : "active";
+      console.log("Updating member status to:", newStatus);
 
-    Swal.fire("Success!", `Member status updated to ${newStatus}`, "success");
-  } catch (error) {
-    console.error("Error updating member status:", error);
-    Swal.fire("Error", "Failed to update member status", "error");
-  }
-};
+      // ✅ Build minimal payload for API
+      const payload = {
+        empId: member.empId,
+        status: newStatus
+      };
 
+      // ✅ Call updateMemberStatus API
+      const response = await axios.patch(
+        `${BASE_URL}member/updateMemberStatus/${id}`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        }
+      );
 
+      const updatedMember = response.data.data ?? { ...member, status: newStatus };
 
+      // ✅ Update state with new status only
+      setTeamMembers(prevMembers =>
+        prevMembers.map(m => (m.id === id ? updatedMember : m))
+      );
 
+      Swal.fire("Success!", `Member status updated to ${newStatus}`, "success");
+    } catch (error) {
+      console.error("Error updating member status:", error);
+      Swal.fire("Error", "Failed to update member status", "error");
+    }
+  };
 
   // Handle form submission
-// ✅ handleSubmit using id for edit, and clean payload
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
+  // ✅ handleSubmit using id for edit, and clean payload
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-  try {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      Swal.fire("Error", "No token found. Please login again.", "error");
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        Swal.fire("Error", "No token found. Please login again.", "error");
+        setIsLoading(false);
+        return;
+      }
+
+      const headers = {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      };
+
+      const payload = buildMemberPayload(form, selectedApplications);
+
+      if (modalType === "edit") {
+        // ⚠️ use backend id in URL; do NOT send id in body
+        const res = await axios.patch(
+          `${BASE_URL}member/updateMember/${form.id}`,
+          payload,
+          { headers }
+        );
+
+        const updated = res?.data?.data ?? res?.data ?? payload;
+
+        setTeamMembers(prev =>
+          prev.map(m => (m.id === form.id ? { ...m, ...updated } : m))
+        );
+
+        Swal.fire("Updated!", "Member updated successfully.", "success");
+      } else {
+        // Add new member
+        const res = await axios.post(
+          `${BASE_URL}member/addMember`,
+          payload,
+          { headers }
+        );
+
+        const created = res?.data?.data ?? res?.data;
+
+        // store the generated id in form (if you keep the modal open later)
+        setForm(prev => ({ ...prev, id: created.id }));
+
+        setTeamMembers(prev => [...prev, created]);
+        Swal.fire("Success!", "Member added successfully.", "success");
+      }
+
+      setShowModal(false);
+      resetForm();
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      let errorMessage = "Failed to submit form. Please try again.";
+      if (error.response) {
+        if (error.response.status === 400) errorMessage = error.response.data.message || "Invalid data provided.";
+        else if (error.response.status === 401) errorMessage = "Unauthorized. Please login again.";
+        else if (error.response.status === 500) errorMessage = "Server error. Please try again later.";
+      }
+      Swal.fire("Error", errorMessage, "error");
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    const headers = {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
-    };
-
-    const payload = buildMemberPayload(form, selectedApplications);
-
-    if (modalType === "edit") {
-      // ⚠️ use backend id in URL; do NOT send id in body
-      const res = await axios.patch(
-        `${BASE_URL}member/updateMember/${form.id}`,
-        payload,
-        { headers }
-      );
-
-      const updated = res?.data?.data ?? res?.data ?? payload;
-
-      setTeamMembers(prev =>
-        prev.map(m => (m.id === form.id ? { ...m, ...updated } : m))
-      );
-
-      Swal.fire("Updated!", "Member updated successfully.", "success");
-    } else {
-      // Add new member
-      const res = await axios.post(
-        `${BASE_URL}member/addMember`,
-        payload,
-        { headers }
-      );
-
-      const created = res?.data?.data ?? res?.data;
-
-      // store the generated id in form (if you keep the modal open later)
-      setForm(prev => ({ ...prev, id: created.id }));
-
-      setTeamMembers(prev => [...prev, created]);
-      Swal.fire("Success!", "Member added successfully.", "success");
-    }
-
-    setShowModal(false);
-    resetForm();
-  } catch (error) {
-    console.error("Error submitting form:", error);
-    let errorMessage = "Failed to submit form. Please try again.";
-    if (error.response) {
-      if (error.response.status === 400) errorMessage = error.response.data.message || "Invalid data provided.";
-      else if (error.response.status === 401) errorMessage = "Unauthorized. Please login again.";
-      else if (error.response.status === 500) errorMessage = "Server error. Please try again later.";
-    }
-    Swal.fire("Error", errorMessage, "error");
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-
+  };
 
   const handleFieldChange = (e) => {
     const { name, value } = e.target;
@@ -274,115 +332,115 @@ const handleSubmit = async (e) => {
   };
 
   // Reset form to initial state
-const resetForm = () => {
-  setForm({
-    id: null,    // clear id
-    empId: "",
-    fullName: "",
-    doj: "",
-    dob: "",
-    team: "",
-    role: "",
-    appSkills: [],
-    username: "",
-    password: "",
-  });
-  setSelectedApplications([]);
-};
+  const resetForm = () => {
+    setForm({
+      id: null,    // clear id
+      empId: "",
+      fullName: "",
+      doj: "",
+      dob: "",
+      team: "",
+      role: "",
+      appSkills: [],
+      currentSalary: "", // Added currentSalary to reset form
+      username: "",
+      password: "",
+    });
+    setSelectedApplications([]);
+  };
 
   // Open modal for viewing/editing a member
- // ✅ when opening the edit modal, normalize appSkills into the multi-select format
-const openMemberModal = (type, member) => {
-  setModalType(type);
-  setSelectedMember(member);
+  // ✅ when opening the edit modal, normalize appSkills into the multi-select format
+  const openMemberModal = (type, member) => {
+    setModalType(type);
+    setSelectedMember(member);
 
-  if (type !== "add") {
-    // convert appSkills string -> [{value,label}, ...]
-    const formattedAppSkills =
-      typeof member.appSkills === "string"
-        ? member.appSkills
+    if (type !== "add") {
+      // convert appSkills string -> [{value,label}, ...]
+      const formattedAppSkills =
+        typeof member.appSkills === "string"
+          ? member.appSkills
             .split(",")
             .map(s => s.trim())
             .filter(Boolean)
             .map(s => ({ value: s, label: s }))
-        : Array.isArray(member.appSkills)
-          ? member.appSkills.map(s => ({ value: s, label: s }))
-          : [];
+          : Array.isArray(member.appSkills)
+            ? member.appSkills.map(s => ({ value: s, label: s }))
+            : [];
 
-    setForm({
-      id: member.id,                 // use backend id for future edits
-      empId: member.empId || "",
-      fullName: member.fullName || "",
-      doj: member.doj || "",
-      dob: member.dob || "",
-      team: member.team || "",
-      role: member.role || "",
-      appSkills: member.appSkills || "",
-      username: member.username || "",
-      status: member.status || "active",
-      password: "",                  // empty => won't be sent
-    });
-
-    setSelectedApplications(formattedAppSkills);
-  } else {
-    resetForm();
-  }
-
-  setShowModal(true);
-};
-
-  // Delete a member
- // Delete a member
-const deleteMember = async (id) => {
-  const result = await Swal.fire({
-    title: "Are you sure?",
-    text: "You won't be able to revert this!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Yes, delete it!",
-  });
-
-  if (result.isConfirmed) {
-    try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        Swal.fire("Error", "No token found. Please login again.", "error");
-        return;
-      }
-
-      // ✅ Delete by id
-      await axios.delete(`${BASE_URL}member/deleteMember/${id}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
+      setForm({
+        id: member.id,                 // use backend id for future edits
+        empId: member.empId || "",
+        fullName: member.fullName || "",
+        doj: member.doj || "",
+        dob: member.dob || "",
+        team: member.team || "",
+        role: member.role || "",
+        appSkills: member.appSkills || "",
+        currentSalary: member.currentSalary || "", // Added currentSalary to form
+        username: member.username || "",
+        status: member.status || "active",
+        password: "",                  // empty => won't be sent
       });
 
-      // ✅ Remove from state
-      setTeamMembers((prevMembers) =>
-        prevMembers.filter((member) => member.id !== id)
-      );
-
-      Swal.fire("Deleted!", "Member has been deleted.", "success");
-    } catch (error) {
-      console.error("Error deleting member:", error);
-      Swal.fire("Error", "Failed to delete member", "error");
+      setSelectedApplications(formattedAppSkills);
+    } else {
+      resetForm();
     }
-  }
-};
 
+    setShowModal(true);
+  };
+
+  // Delete a member
+  const deleteMember = async (id) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          Swal.fire("Error", "No token found. Please login again.", "error");
+          return;
+        }
+
+        // ✅ Delete by id
+        await axios.delete(`${BASE_URL}member/deleteMember/${id}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        // ✅ Remove from state
+        setTeamMembers((prevMembers) =>
+          prevMembers.filter((member) => member.id !== id)
+        );
+
+        Swal.fire("Deleted!", "Member has been deleted.", "success");
+      } catch (error) {
+        console.error("Error deleting member:", error);
+        Swal.fire("Error", "Failed to delete member", "error");
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchApplications = async () => {
       try {
         const response = await axios.get(
           `${BASE_URL}application/getAllApplication`, {
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
-            },
-          }
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
         );
         if (response.data.status) {
           const formattedOptions = response.data.application.map((app) => ({
@@ -397,6 +455,28 @@ const deleteMember = async (id) => {
     };
     fetchApplications();
   }, []);
+
+  const [permissions, setPermissions] = useState([]);
+  const roleId = localStorage.getItem("roleId");
+
+  // 🔹 Fetch permissions from API
+  useEffect(() => {
+    axios
+      .get(`${BASE_URL}roles/permission/${roleId}`)
+      .then((res) => {
+        if (res.data.status) {
+          setPermissions(res.data.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching permissions", err);
+      });
+  }, [roleId])
+
+  const projectPermission = permissions.find(p => p.featureName === "User");
+  const CreateUserPermission = Number(projectPermission?.canAdd);
+  const EditUserPermission = Number(projectPermission?.canEdit);
+  const DeleteUserPermission = Number(projectPermission?.canDelete);
 
   // Render the members table
   const renderTable = () => (
@@ -437,45 +517,55 @@ const deleteMember = async (id) => {
                 backgroundColor: "#fff",
               }}
             >
-              <tr className="text-center">
-                <th>Emp ID</th>
-                <th>Full Name</th>
-                <th>DOJ</th>
-                <th>DOB</th>
-                <th>Team</th>
-                <th>Role</th>
-                <th>App Skills</th>
-                <th>Username</th>
-                <th>Status</th>
-                <th>Actions</th>
+              <tr>
+                <th className="text-center">Emp ID</th>
+                <th className="text-start">Full Name</th>
+                <th className="text-center">DOJ</th>
+                <th className="text-center">DOB</th>
+                <th className="text-center">Team</th>
+                <th className="text-center">Role</th>
+                <th className="text-start">App Skills</th>
+                <th className="text-center">Current Salary</th>
+                <th className="text-center">Username</th>
+                <th className="text-center">Status</th>
+                <th className="text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {liveMembers.length === 0 ? (
                 <tr>
-                  <td colSpan="10" className="text-center text-muted">
+                  <td colSpan="11" className="text-center text-muted">
                     No active members found.
                   </td>
                 </tr>
               ) : (
                 liveMembers?.map((member, idx) => (
-                  <tr key={idx} className="text-center">
-                    <td>{member.empId}</td>
-                    <td>{member.fullName}</td>
-                    <td>{member.doj}</td>
-                    <td>{member.dob}</td>
-                    <td>{member.team}</td>
-                    <td>{member.role}</td>
-                    <td>
-                      {Array.isArray(member.appSkills) 
-                        ? member.appSkills.join(", ") 
+                  <tr key={idx}>
+                    <td className="text-center">{member.empId}</td>
+                    <td className="text-start">{member.fullName}</td>
+                    <td className="text-center">{formatDate(member.doj)}</td>
+                    <td className="text-center">{formatDate(member.dob)}</td>
+                    <td className="text-center">{member.team}</td>
+                    <td className="text-center">{member.role}</td>
+                    <td className="text-start">
+                      {Array.isArray(member.appSkills)
+                        ? member.appSkills.join(", ")
                         : member.appSkills || "N/A"}
                     </td>
-                    <td>{member.username}</td>
-                    <td>
+                    <td className="text-center">
+                      {member.currentSalary 
+                        ? Number(member.currentSalary).toLocaleString('en-IN', {
+                            style: 'currency',
+                            currency: 'INR',
+                            maximumFractionDigits: 0,
+                          })
+                        : "N/A"}
+                    </td>
+                    <td className="text-center">{member.username}</td>
+                    <td className="text-center">
                       <span className="badge bg-success">Active</span>
                     </td>
-                    <td>
+                    <td className="text-center">
                       <button
                         className="btn btn-sm btn-primary me-2"
                         onClick={() => openMemberModal("view", member)}
@@ -483,13 +573,16 @@ const deleteMember = async (id) => {
                       >
                         <i className="fas fa-eye"></i>
                       </button>
-                      <button
-                        className="btn btn-sm btn-info me-2"
-                        onClick={() => openMemberModal("edit", member)}
-                        title="Edit Member"
-                      >
-                        <i className="fas fa-edit"></i>
-                      </button>
+                      {
+                        EditUserPermission === 1 &&
+                        (<button
+                          className="btn btn-sm btn-info me-2"
+                          onClick={() => openMemberModal("edit", member)}
+                          title="Edit Member"
+                        >
+                          <i className="fas fa-edit"></i>
+                        </button>)
+                      }
                       <button
                         className="btn btn-sm btn-warning me-2"
                         onClick={() => toggleFreezeMember(member.id)}
@@ -497,13 +590,15 @@ const deleteMember = async (id) => {
                       >
                         <i className="fas fa-snowflake"></i>
                       </button>
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => deleteMember(member.id)}
-                        title="Delete Member"
-                      >
-                        <i className="fas fa-trash"></i>
-                      </button>
+                      {DeleteUserPermission === 1 &&
+                        (<button
+                          className="btn btn-sm btn-danger"
+                          onClick={() => deleteMember(member.id)}
+                          title="Delete Member"
+                        >
+                          <i className="fas fa-trash"></i>
+                        </button>)
+                      }
                     </td>
                   </tr>
                 ))
@@ -529,45 +624,55 @@ const deleteMember = async (id) => {
                 backgroundColor: "#fff",
               }}
             >
-              <tr className="text-center">
-                <th>Emp ID</th>
-                <th>Full Name</th>
-                <th>DOJ</th>
-                <th>DOB</th>
-                <th>Team</th>
-                <th>Role</th>
-                <th>App Skills</th>
-                <th>Username</th>
-                <th>Status</th>
-                <th>Actions</th>
+              <tr>
+                <th className="text-center">Emp ID</th>
+                <th className="text-start">Full Name</th>
+                <th className="text-center">DOJ</th>
+                <th className="text-center">DOB</th>
+                <th className="text-center">Team</th>
+                <th className="text-center">Role</th>
+                <th className="text-start">App Skills</th>
+                <th className="text-center">Current Salary</th>
+                <th className="text-center">Username</th>
+                <th className="text-center">Status</th>
+                <th className="text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {freezedMembers?.length === 0 ? (
                 <tr>
-                  <td colSpan="10" className="text-center text-muted">
+                  <td colSpan="11" className="text-center text-muted">
                     No freezed members found.
                   </td>
                 </tr>
               ) : (
                 freezedMembers?.map((member, idx) => (
-                  <tr key={idx} className="text-center">
-                    <td>{member.empId}</td>
-                    <td>{member.fullName}</td>
-                    <td>{member.doj}</td>
-                    <td>{member.dob}</td>
-                    <td>{member.team}</td>
-                    <td>{member.role}</td>
-                    <td>
-                      {Array.isArray(member.appSkills) 
-                        ? member.appSkills.join(", ") 
+                  <tr key={idx}>
+                    <td className="text-center">{member.empId}</td>
+                    <td className="text-start">{member.fullName}</td>
+                    <td className="text-center">{formatDate(member.doj)}</td>
+                    <td className="text-center">{formatDate(member.dob)}</td>
+                    <td className="text-center">{member.team}</td>
+                    <td className="text-center">{member.role}</td>
+                    <td className="text-start">
+                      {Array.isArray(member.appSkills)
+                        ? member.appSkills.join(", ")
                         : member.appSkills || "N/A"}
                     </td>
-                    <td>{member.username}</td>
-                    <td>
+                    <td className="text-center">
+                      {member.currentSalary 
+                        ? Number(member.currentSalary).toLocaleString('en-IN', {
+                            style: 'currency',
+                            currency: 'INR',
+                            maximumFractionDigits: 0,
+                          })
+                        : "N/A"}
+                    </td>
+                    <td className="text-center">{member.username}</td>
+                    <td className="text-center">
                       <span className="badge bg-secondary">Freezed</span>
                     </td>
-                    <td>
+                    <td className="text-center">
                       <button
                         className="btn btn-sm btn-primary me-2"
                         onClick={() => openMemberModal("view", member)}
@@ -613,7 +718,7 @@ const deleteMember = async (id) => {
     const isViewMode = modalType === "view";
 
     return (
-      <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}>
         <div className="modal-body">
           <div className="mb-3">
             <label className="form-label">Emp ID</label>
@@ -663,6 +768,7 @@ const deleteMember = async (id) => {
               disabled={isViewMode}
             />
           </div>
+        
           <div className="mb-3">
             <label className="form-label">Team</label>
             <select
@@ -674,27 +780,26 @@ const deleteMember = async (id) => {
               disabled={isViewMode}
             >
               <option value="">Select Team</option>
-              <option value="Dev">Dev</option>
-              <option value="QA">QA</option>
-              <option value="Design">Design</option>
-              <option value="DevOps">DevOps</option>
-              <option value="HR">HR</option>
-              <option value="IT Support">IT Support</option>
-              <option value="Marketing">Marketing</option>
+              <option value="Dev">Adobe</option>
+              <option value="QA">MS Office</option>
+              <option value="Design">QA</option>
+              
             </select>
           </div>
           <div className="mb-3">
-            <label className="form-label">Role</label>
-            <input
-              type="text"
-              className="form-control"
-              name="role"
-              value={form.role}
-              onChange={handleFieldChange}
-              required
-              disabled={isViewMode}
+            <label className="form-label text-white">Role</label>
+            <Select
+              options={roleOptions}
+              value={roleOptions.find(r => r.value === form.role) || null}
+              onChange={(selected) =>
+                setForm((prev) => ({ ...prev, role: selected.value }))
+              }
+              placeholder="Select Role"
+              styles={gradientSelectStyles}
+              isDisabled={isViewMode}
             />
           </div>
+
           <div className="mb-3">
             <label className="form-label text-white">App Skills</label>
             <Select
@@ -705,6 +810,27 @@ const deleteMember = async (id) => {
               placeholder="Select"
               styles={gradientSelectStyles}
               isDisabled={isViewMode}
+            />
+          </div>
+            <div className="mb-3">
+            <label className="form-label">Current Salary</label>
+            <input
+              type="text"
+              className="form-control"
+              name="currentSalary"
+              value={form.currentSalary ? form.currentSalary.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""}
+              onChange={(e) => {
+                // Remove non-digit characters and thousand separators
+                const value = e.target.value.replace(/[^\d]/g, "");
+                handleFieldChange({
+                  target: {
+                    name: "currentSalary",
+                    value: value
+                  }
+                });
+              }}
+              required
+              disabled={isViewMode}
             />
           </div>
           <div className="mb-3">
@@ -744,8 +870,8 @@ const deleteMember = async (id) => {
             Cancel
           </button>
           {!isViewMode && (
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn gradient-button"
               disabled={isLoading}
             >
@@ -770,12 +896,15 @@ const deleteMember = async (id) => {
       <div className="d-flex justify-content-between">
         <h2 className="gradient-heading mt-2">User Management</h2>
         <div className="text-end mb-3">
-          <button
-            className="btn gradient-button"
-            onClick={() => openMemberModal("add", null)}
-          >
-            + Add Member
-          </button>
+          {
+            CreateUserPermission === 1 &&
+            (<button
+              className="btn gradient-button"
+              onClick={() => openMemberModal("add", null)}
+            >
+              + Add Member
+            </button>)
+          }
         </div>
       </div>
 
@@ -794,8 +923,8 @@ const deleteMember = async (id) => {
                   {modalType === "edit"
                     ? "Edit Member"
                     : modalType === "view"
-                    ? "View Member"
-                    : "Add Member"}
+                      ? "View Member"
+                      : "Add Member"}
                 </h5>
                 <button
                   type="button"
@@ -813,4 +942,4 @@ const deleteMember = async (id) => {
   );
 }
 
-export default UserManagement;           
+export default UserManagement;

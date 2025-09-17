@@ -2,7 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import BASE_URL from "../../../config";
 
-const CompletedProjects = () => {
+const CompletedProjects = ({projectPermission}) => {
+  console.log("projectPermission",projectPermission);
   const [activeTab, setActiveTab] = useState("completed");
   const [searchQuery, setSearchQuery] = useState("");
   const token = localStorage.getItem("authToken");
@@ -312,7 +313,6 @@ const CompletedProjects = () => {
               <th className="text-dark">Received Date</th>
               <th className="text-dark">Estimated Hrs</th>
               <th className="text-dark">Actual Hrs</th>
-              {/* <th className="text-dark">Efficiency</th> */}
               <th className="text-dark">Cost with Currency</th>
               <th className="text-dark">Cost in INR</th>
               <th className="text-end text-dark">Actions</th>

@@ -1522,12 +1522,12 @@ const ShiftAllocation = () => {
         payload.shiftType = formData.shiftType;
       }
       payload.notes = formData.notes;
-    } 
+    }
     // Handle Others options
     else {
       payload.shiftType = "Others";
       payload.otherType = selectedOthersOption;
-      
+
       if (selectedOthersOption === "Permission") {
         payload.duration = permissionDuration;
         payload.permissionApply = permissionTiming;
@@ -1790,7 +1790,7 @@ const ShiftAllocation = () => {
       members.forEach(member => {
         // Exclude managers if needed
         if (member.role === "Manager") return;
-        
+
         const key = `${member.id}-${member.fullName}`;
         employeesMap[key] = {
           memberId: member.id,
@@ -1806,7 +1806,7 @@ const ShiftAllocation = () => {
     // Then add shifts for those employees
     shiftData.forEach((shift) => {
       const memberInfo = memberMap.get(shift.memberId);
-      
+
       // Skip if member is a manager
       if (memberInfo && memberInfo.role === "Manager") return;
 
@@ -1910,62 +1910,63 @@ const ShiftAllocation = () => {
     setSelectedOthersOption("");
   };
 
-  const handleEditShift = (shift) => {
-    const convertTo24Hour = (time12) => {
-      if (!time12) return "";
-      const [time, modifier] = time12.split(" ");
-      let [hours, minutes] = time.split(":");
+ // ...existing code...
+const handleEditShift = (shift) => {
+  const convertTo24Hour = (time12) => {
+    if (!time12) return "";
+    const [time, modifier] = time12.split(" ");
+    let [hours, minutes] = time.split(":");
 
-      if (hours === "12") {
-        hours = "00";
-      }
-
-      if (modifier === "PM") {
-        hours = parseInt(hours, 10) + 12;
-      }
-
-      return `${hours}:${minutes}`;
-    };
-
-    // Check if this is an "Others" type shift
-    const isOthersType = shift.type === "Others" || 
-                        shift.otherType === "Permission" || 
-                        shift.otherType === "Leave" || 
-                        shift.otherType === "Absent";
-
-    setFormData({
-      memberId: shift.memberId.toString(),
-      shiftDate: shift.date,
-      startTime: isOthersType ? "" : convertTo24Hour(shift.start),
-      endTime: isOthersType ? "" : convertTo24Hour(shift.end),
-      shiftType: isOthersType ? "Others" : shift.type,
-      notes: shift.notes || "",
-      shiftSymbol: shift.shiftSymbol || "",
-    });
-
-    setCurrentShiftId(shift.id);
-    setIsEditMode(true);
-    setShowAddShiftModal(true);
-    
-    // Set Others options if applicable
-    if (isOthersType) {
-      setShowOthersOptions(true);
-      if (shift.otherType === "Permission") {
-        setSelectedOthersOption("Permission");
-        setPermissionDuration(shift.duration || "");
-        setPermissionTiming(shift.permissionApply || "");
-      } else if (shift.otherType === "Leave") {
-        setSelectedOthersOption("Leave");
-        setLeaveType(shift.duration || "");
-      } else if (shift.otherType === "Absent") {
-        setSelectedOthersOption("Absent");
-      }
-    } else {
-      setShowOthersOptions(false);
-      setSelectedOthersOption("");
+    if (hours === "12") {
+      hours = "00";
     }
+
+    if (modifier === "PM") {
+      hours = parseInt(hours, 10) + 12;
+    }
+
+    return `${hours}:${minutes}`;
   };
 
+  // Check if this is an "Others" type shift
+  const isOthersType = shift.type === "Others" ||
+    shift.otherType === "Permission" ||
+    shift.otherType === "Leave" ||
+    shift.otherType === "Absent";
+
+  setFormData({
+    memberId: shift.memberId.toString(),
+    shiftDate: shift.date,
+    startTime: isOthersType ? "" : convertTo24Hour(shift.start),
+    endTime: isOthersType ? "" : convertTo24Hour(shift.end),
+    shiftType: isOthersType ? "Others" : shift.type,
+    notes: shift.notes || "",
+    shiftSymbol: shift.shiftSymbol || "",
+  });
+
+  setCurrentShiftId(shift.id);
+  setIsEditMode(true);
+  setShowAddShiftModal(true);
+
+  // Set Others options if applicable
+  if (isOthersType) {
+    setShowOthersOptions(true);
+    if (shift.otherType === "Permission") {
+      setSelectedOthersOption("Permission");
+      setPermissionDuration(shift.duration || "");
+      setPermissionTiming(shift.permissionApply || "");
+    } else if (shift.otherType === "Leave") {
+      setSelectedOthersOption("Leave");
+      setLeaveType(shift.duration || "");
+    } else if (shift.otherType === "Absent") {
+      setSelectedOthersOption("Absent");
+    }
+  } else {
+    setShowOthersOptions(false);
+    setSelectedOthersOption("");
+  }
+};
+// ...existing code...
   useEffect(() => {
     if (allShifts.length > 0 && employees.length > 0) {
       updateFilteredEmployees(allShifts, employees);
@@ -2015,6 +2016,27 @@ const ShiftAllocation = () => {
     }
   };
 
+  const [permissions, setPermissions] = useState([]);
+  const roleId = localStorage.getItem("roleId");
+
+  // 🔹 Fetch permissions from API
+  useEffect(() => {
+    axios
+      .get(`${BASE_URL}roles/permission/${roleId}`)
+      .then((res) => {
+        if (res.data.status) {
+          setPermissions(res.data.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching permissions", err);
+      });
+  }, [roleId])
+
+  const projectPermission = permissions.find(p => p.featureName === "Shift Allocation");
+  console.log("projectPermissiocedfen", projectPermission);
+  const CreateShiftPermission = Number(projectPermission?.canAdd);
+console.log("CreateShiftPermission",CreateShiftPermission);
   return (
     <div>
       <div className="container-fluid bg-main">
@@ -2024,15 +2046,17 @@ const ShiftAllocation = () => {
             <div className="d-flex justify-content-between align-items-center">
               <h1 className="h3 mb-0">Shift Allocation</h1>
               <div className="d-flex gap-3">
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    resetForm();
-                    setShowAddShiftModal(true);
-                  }}
-                >
-                  <i className="fas fa-plus me-2"></i> Add New Shift
-                </button>
+                {CreateShiftPermission === 1 &&
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => {
+                      resetForm();
+                      setShowAddShiftModal(true);
+                    }}
+                  >
+                    <i className="fas fa-plus me-2"></i> Add New Shift
+                  </button>
+                }
               </div>
             </div>
           </div>

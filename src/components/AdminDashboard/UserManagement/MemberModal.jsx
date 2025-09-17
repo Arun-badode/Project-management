@@ -276,14 +276,14 @@ const MemberModal = ({
                     disabled={isViewMode}
                     style={teamSelectStyle}
                   >
-                    <option value="">Select Team</option>
+                    {/* <option value="">Select Team</option>
                     <option value="Dev">Development</option>
                     <option value="QA">Quality Assurance</option>
                     <option value="Design">Design</option>
                     <option value="DevOps">DevOps</option>
                     <option value="HR">Human Resources</option>
                     <option value="IT Support">IT Support</option>
-                    <option value="Marketing">Marketing</option>
+                    <option value="Marketing">Marketing</option> */}
                   </select>
                 </div>
                 <div className="col-md-6 mb-3">

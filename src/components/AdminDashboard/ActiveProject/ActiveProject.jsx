@@ -38,7 +38,7 @@ const ActiveProject = () => {
 
         if (response.data.status) {
           setAllFiles(response.data.data);  // Use `data`, not `files`
-          
+
           // Initialize file handlers state with existing handlers
           const handlers = {};
           response.data.data.forEach(file => {
@@ -150,6 +150,7 @@ const ActiveProject = () => {
     qcAllocatedHours: "",
     priority: "",
   });
+  const [permissions, setPermissions] = useState([]);
 
   const [qcDueDelay, setQcDueDelay] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
@@ -172,6 +173,21 @@ const ActiveProject = () => {
     { value: "Adobe", label: "Adobe" },
     { value: "MSOffice", label: "MS Office" },
   ];
+  const roleId = localStorage.getItem("roleId");
+
+  // 🔹 Fetch permissions from API
+  useEffect(() => {
+    axios
+      .get(`${BASE_URL}roles/permission/${roleId}`)
+      .then((res) => {
+        if (res.data.status) {
+          setPermissions(res.data.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching permissions", err);
+      });
+  }, [roleId]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -206,7 +222,7 @@ const ActiveProject = () => {
   // Function to calculate progress percentage based on status
   const getProgressPercentage = (status) => {
     if (!status) return 0;
-    
+
     const statusLower = status.toLowerCase();
     if (statusLower === "yts") return 0;
     if (statusLower === "wip") return 30;
@@ -215,7 +231,7 @@ const ActiveProject = () => {
     if (statusLower === "corr yts" || statusLower === "corryts") return 75;
     if (statusLower === "corr wip" || statusLower === "corrwip") return 90;
     if (statusLower === "rfd") return 100;
-    
+
     return 0; // Default case
   };
 
@@ -396,66 +412,118 @@ const ActiveProject = () => {
     }
   };
 
-const handleUpdateProjectFiles = async () => {
-  if (!selectedProject || !selectedProject.id) {
-    alert("No project selected");
-    return;
-  }
-
-  // Validate required fields
-  if (!readyForQcDueInput) {
-    alert("Please select Ready for QC Due date and time");
-    return;
-  }
-
-  if (!qcAllocatedHours || qcAllocatedHours <= 0) {
-    alert("Please enter valid QC Allocated Hours");
-    return;
-  }
-
-  setIsUpdating(true);
-
-  try {
-    // Calculate QC Due Date
-    const qcDueCalculated = calculateQCDue(readyForQcDueInput, qcAllocatedHours);
-
-    // Get all files for this project
-    const projectFiles = allFiles.filter(file => file.projectId === selectedProject.id);
-    
-    // Check if all files have handlers assigned
-    const allFilesAssigned = projectFiles.every(file => fileHandlers[file.id]);
-
-    // Determine project status based on file assignments
-    let projectStatus = selectedProject.status;
-    if (allFilesAssigned) {
-      // If all files have handlers, update status to "WIP" if it was "YTS"
-      if (projectStatus === "YTS") {
-        projectStatus = "WIP";
-      }
+  const handleUpdateProjectFiles = async () => {
+    if (!selectedProject || !selectedProject.id) {
+      alert("No project selected");
+      return;
     }
 
-    // -----------------------------------
-    // 1. Update each Project File individually
-    // -----------------------------------
-    for (const file of projectFiles) {
-      const fileUpdateData = {
-        projectId: parseInt(selectedProject.id),
-        fileName: file.fileName, // Include the fileName
-        languageId: file.languageId, // Include the languageId
-        applicationId: file.applicationId, // Include the applicationId
-        pages: file.pages, // Include the pages
-        status: file.status || "Pending", // Include the status
-        deadline: file.deadline, // Include the deadline
-        readyForQcDue: readyForQcDueInput,
-        qcAllocatedHours: parseFloat(qcAllocatedHours),
-        qcDue: qcDueCalculated,
-        priority: priorityAll,
-        handler: fileHandlers[file.id] || "",
+    // Validate required fields
+    if (!readyForQcDueInput) {
+      alert("Please select Ready for QC Due date and time");
+      return;
+    }
+
+    if (!qcAllocatedHours || qcAllocatedHours <= 0) {
+      alert("Please enter valid QC Allocated Hours");
+      return;
+    }
+
+    setIsUpdating(true);
+
+    try {
+      // Calculate QC Due Date
+      const qcDueCalculated = calculateQCDue(readyForQcDueInput, qcAllocatedHours);
+
+      // Get all files for this project
+      const projectFiles = allFiles.filter(file => file.projectId === selectedProject.id);
+
+      // Check if all files have handlers assigned
+      const allFilesAssigned = projectFiles.every(file => fileHandlers[file.id]);
+
+      // Determine project status based on file assignments
+      let projectStatus = selectedProject.status;
+      if (allFilesAssigned) {
+        // If all files have handlers, update status to "WIP" if it was "YTS"
+        if (projectStatus === "YTS") {
+          projectStatus = "WIP";
+        }
+      }
+
+      // -----------------------------------
+      // 1. Update each Project File individually
+      // -----------------------------------
+      for (const file of projectFiles) {
+        const fileUpdateData = {
+          projectId: parseInt(selectedProject.id),
+          fileName: file.fileName, // Include the fileName
+          languageId: file.languageId, // Include the languageId
+          applicationId: file.applicationId, // Include the applicationId
+          pages: file.pages, // Include the pages
+          status: file.status || "Pending", // Include the status
+          deadline: file.deadline, // Include the deadline
+          readyForQcDue: readyForQcDueInput,
+          qcAllocatedHours: parseFloat(qcAllocatedHours),
+          qcDue: qcDueCalculated,
+          priority: priorityAll,
+          handler: fileHandlers[file.id] || "",
+        };
+
+        const fileUpdateResponse = await axios.patch(
+          `${BASE_URL}projectFiles/updateProjectFile/${file.id}`, // Use file ID instead of project ID
+          fileUpdateData,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+
+        if (fileUpdateResponse.status !== 200) {
+          throw new Error(`Failed to update project file ${file.fileName}`);
+        }
+      }
+
+      // -----------------------------------
+      // 2. Update the Project
+      // -----------------------------------
+      const fullProject = projects.find(p => p.id === selectedProject.id);
+
+      if (!fullProject) {
+        throw new Error("Full project details not found");
+      }
+
+      const projectUpdateData = {
+        projectTitle: fullProject.projectTitle,
+        clientId: fullProject.clientId,
+        country: fullProject.country,
+        projectManagerId: fullProject.projectManagerId,
+        taskId: fullProject.taskId,
+        applicationId: fullProject.applicationId,
+        languageId: fullProject.languageId,
+        totalPagesLang: fullProject.totalPagesLang,
+        totalProjectPages: fullProject.totalProjectPages,
+        receiveDate: fullProject.receiveDate,
+        serverPath: fullProject.serverPath,
+        notes: fullProject.notes,
+        estimatedHours: fullProject.estimatedHours,
+        hourlyRate: fullProject.hourlyRate,
+        perPageRate: fullProject.perPageRate,
+        currency: fullProject.currency,
+        totalCost: fullProject.totalCost,
+        deadline: fullProject.deadline,
+
+        // Updated fields
+        readyQCDeadline: readyForQcDueInput,
+        qcHrs: parseFloat(qcAllocatedHours),
+        qcDueDate: qcDueCalculated,
+        status: projectStatus, // Update status based on file assignments
       };
 
-      const fileUpdateResponse = await axios.patch(
-        `${BASE_URL}projectFiles/updateProjectFile/${file.id}`, // Use file ID instead of project ID
-        fileUpdateData,
+      const projectUpdateResponse = await axios.patch(
+        `${BASE_URL}project/updateProject/${selectedProject.id}`,
+        projectUpdateData,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -464,98 +532,46 @@ const handleUpdateProjectFiles = async () => {
         }
       );
 
-      if (fileUpdateResponse.status !== 200) {
-        throw new Error(`Failed to update project file ${file.fileName}`);
+      if (projectUpdateResponse.status !== 200) {
+        throw new Error('Failed to update main project');
       }
-    }
 
-    // -----------------------------------
-    // 2. Update the Project
-    // -----------------------------------
-    const fullProject = projects.find(p => p.id === selectedProject.id);
-
-    if (!fullProject) {
-      throw new Error("Full project details not found");
-    }
-
-    const projectUpdateData = {
-      projectTitle: fullProject.projectTitle,
-      clientId: fullProject.clientId,
-      country: fullProject.country,
-      projectManagerId: fullProject.projectManagerId,
-      taskId: fullProject.taskId,
-      applicationId: fullProject.applicationId,
-      languageId: fullProject.languageId,
-      totalPagesLang: fullProject.totalPagesLang,
-      totalProjectPages: fullProject.totalProjectPages,
-      receiveDate: fullProject.receiveDate,
-      serverPath: fullProject.serverPath,
-      notes: fullProject.notes,
-      estimatedHours: fullProject.estimatedHours,
-      hourlyRate: fullProject.hourlyRate,
-      perPageRate: fullProject.perPageRate,
-      currency: fullProject.currency,
-      totalCost: fullProject.totalCost,
-      deadline: fullProject.deadline,
-
-      // Updated fields
-      readyQCDeadline: readyForQcDueInput,
-      qcHrs: parseFloat(qcAllocatedHours),
-      qcDueDate: qcDueCalculated,
-      status: projectStatus, // Update status based on file assignments
-    };
-
-    const projectUpdateResponse = await axios.patch(
-      `${BASE_URL}project/updateProject/${selectedProject.id}`,
-      projectUpdateData,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      // Update the projects state with the new data
+      const updatedProjects = projects.map(project => {
+        if (project.id === selectedProject.id) {
+          return {
+            ...project,
+            readyQCDeadline: readyForQcDueInput,
+            qcHrs: qcAllocatedHours,
+            qcDueDate: qcDueCalculated,
+            status: projectStatus,
+            progress: getProgressPercentage(projectStatus), // Update progress based on status
+          };
         }
-      }
-    );
+        return project;
+      });
 
-    if (projectUpdateResponse.status !== 200) {
-      throw new Error('Failed to update main project');
+      setProjects(updatedProjects);
+
+      // Update the selected project state
+      setSelectedProject(prev => ({
+        ...prev,
+        readyQCDeadline: readyForQcDueInput,
+        qcHrs: qcAllocatedHours,
+        qcDueDate: qcDueCalculated,
+        status: projectStatus,
+        progress: getProgressPercentage(projectStatus),
+      }));
+
+      setHasUnsavedChanges(false);
+      alert("Project and project files updated successfully!");
+    } catch (error) {
+      console.error("Error updating project or file:", error);
+      alert(`Failed to update: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setIsUpdating(false);
     }
-
-    // Update the projects state with the new data
-    const updatedProjects = projects.map(project => {
-      if (project.id === selectedProject.id) {
-        return {
-          ...project,
-          readyQCDeadline: readyForQcDueInput,
-          qcHrs: qcAllocatedHours,
-          qcDueDate: qcDueCalculated,
-          status: projectStatus,
-          progress: getProgressPercentage(projectStatus), // Update progress based on status
-        };
-      }
-      return project;
-    });
-
-    setProjects(updatedProjects);
-
-    // Update the selected project state
-    setSelectedProject(prev => ({
-      ...prev,
-      readyQCDeadline: readyForQcDueInput,
-      qcHrs: qcAllocatedHours,
-      qcDueDate: qcDueCalculated,
-      status: projectStatus,
-      progress: getProgressPercentage(projectStatus),
-    }));
-
-    setHasUnsavedChanges(false);
-    alert("Project and project files updated successfully!");
-  } catch (error) {
-    console.error("Error updating project or file:", error);
-    alert(`Failed to update: ${error.response?.data?.message || error.message}`);
-  } finally {
-    setIsUpdating(false);
-  }
-};
+  };
 
 
 
@@ -657,32 +673,32 @@ const handleUpdateProjectFiles = async () => {
 
   function calculateQCDue(startDate, hours) {
     if (!startDate || !hours) return "--";
-    
+
     let remaining = parseFloat(hours);
     let current = new Date(startDate);
-    
+
     // If start date is a holiday or Sunday, move to next working day
     if (!isWorkingDay(current) || isHoliday(current)) {
       current = getNextWorkingStart(current);
     }
-    
+
     // If start time is before 11:30 AM, move to 11:30 AM
     if (current.getHours() < 11 || (current.getHours() === 11 && current.getMinutes() < 30)) {
       current.setHours(11, 30, 0, 0);
     }
-    
+
     // If start time is after 11:30 PM, move to next day 11:30 AM
     if (current.getHours() > 23 || (current.getHours() === 23 && current.getMinutes() > 30)) {
       current.setDate(current.getDate() + 1);
       current.setHours(11, 30, 0, 0);
-      
+
       // Skip holidays and Sundays
       while (!isWorkingDay(current) || isHoliday(current)) {
         current.setDate(current.getDate() + 1);
         current.setHours(11, 30, 0, 0);
       }
     }
-    
+
     while (remaining > 0) {
       // Check if current day is a working day
       if (!isWorkingDay(current) || isHoliday(current)) {
@@ -691,23 +707,23 @@ const handleUpdateProjectFiles = async () => {
         current.setHours(11, 30, 0, 0);
         continue;
       }
-      
+
       // End of today's working hours
       let endOfDay = new Date(current);
       endOfDay.setHours(23, 30, 0, 0);
-      
+
       let minutesLeftToday = (endOfDay - current) / (1000 * 60); // minutes
-      
+
       let allocMinutes = Math.min(remaining * 60, minutesLeftToday);
-      
+
       current.setMinutes(current.getMinutes() + allocMinutes);
       remaining -= allocMinutes / 60;
-      
+
       // If still time left, move to next working day
       if (remaining > 0) {
         current.setDate(current.getDate() + 1);
         current.setHours(11, 30, 0, 0);
-        
+
         // Skip holidays and Sundays
         while (!isWorkingDay(current) || isHoliday(current)) {
           current.setDate(current.getDate() + 1);
@@ -715,7 +731,7 @@ const handleUpdateProjectFiles = async () => {
         }
       }
     }
-    
+
     return current.toLocaleString("en-GB", {
       hour: "2-digit",
       minute: "2-digit",
@@ -759,6 +775,10 @@ const handleUpdateProjectFiles = async () => {
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
 
+  const projectPermission = permissions.find(p => p.featureName === "Active Projects"); // moduleName ya jo bhi aapke backend me key ho
+const CreateProjectPermission = Number(projectPermission?.canAdd);
+const UpdateProjectPermission = Number(projectPermission?.canEdit);
+const DeleteProjectPermission = Number(projectPermission?.canDelete);
   return (
     <div className="container-fluid py-4">
       {/* Edit Project Modal */}
@@ -839,11 +859,12 @@ const handleUpdateProjectFiles = async () => {
               </div>
             </div>
           </div>
+
         </div>
       )}
 
       {/* Header with action buttons */}
-      <div className="row mb-4">
+      {CreateProjectPermission === 1 && <div className="row mb-4">
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
           <h2 className="gradient-heading">Active Projects</h2>
           <div className="d-flex flex-column flex-sm-row gap-2">
@@ -855,7 +876,7 @@ const handleUpdateProjectFiles = async () => {
             </Button>
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* Filters */}
       <div className="row mb-4 gy-3">
@@ -1092,12 +1113,12 @@ const handleUpdateProjectFiles = async () => {
                                   }`}
                               ></i>
                             </button>
-                            <button
+                            {UpdateProjectPermission === 1 && <button
                               className="btn btn-sm btn-secondary"
                               onClick={() => handleEditProject(project)}
                             >
                               <i className="fas fa-edit"></i>
-                            </button>
+                            </button>}
                             {project.progress === 100 && (
                               <button
                                 className="btn btn-sm btn-success"
@@ -1106,12 +1127,12 @@ const handleUpdateProjectFiles = async () => {
                                 <i className="fas fa-check"></i>
                               </button>
                             )}
-                            <button
+                            {DeleteProjectPermission ===1  && <button
                               className="btn btn-sm btn-danger"
                               onClick={() => handleDeleteProject(project.id)}
                             >
                               <i className="fas fa-trash"></i>
-                            </button>
+                            </button>}
                           </div>
                         </td>
                       </tr>

@@ -3,6 +3,7 @@ import { Form, Button } from "react-bootstrap";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
+import BASE_URL from "../../../config";
 
 function CreateProject() {
   const [selectedDateTime, setSelectedDateTime] = useState(null);
@@ -63,7 +64,7 @@ function CreateProject() {
     totalPagesLang: "",
     projectManagerId: managerId || "", // Initialize with managerId from localStorage
     receiveDate: "",
-     serverPath: ""
+    serverPath: ""
   });
 
   useEffect(() => {
@@ -181,6 +182,26 @@ function CreateProject() {
       }
     }
   };
+
+  const [permissions, setPermissions] = useState([]);
+  const roleId = localStorage.getItem("roleId");
+
+  // 🔹 Fetch permissions from API
+  useEffect(() => {
+    axios
+      .get(`${BASE_URL}roles/permission/${roleId}`)
+      .then((res) => {
+        if (res.data.status) {
+          setPermissions(res.data.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching permissions", err);
+      });
+  }, [roleId])
+
+  const projectPermission = permissions.find(p => p.featureName === "Create Project");
+  const CreateProjectPermission = Number(projectPermission?.canAdd);
 
   return (
     <div>
@@ -485,14 +506,16 @@ function CreateProject() {
           </Form.Group>
 
           <div className="d-flex gap-3">
-            <Button
-              variant="primary"
-              type="submit"
-              className="w-100 gradient-button"
-              disabled={isLoading}
-            >
-              {isLoading ? "Creating..." : "Create Project"}
-            </Button>
+            {CreateProjectPermission === 1 &&
+              <Button
+                variant="primary"
+                type="submit"
+                className="w-100 gradient-button"
+                disabled={isLoading}
+              >
+                {isLoading ? "Creating..." : "Create Project"}
+              </Button>
+            }
           </div>
         </Form>
       </div>
