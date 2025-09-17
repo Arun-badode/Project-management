@@ -3,29 +3,27 @@ import "./Setting.css";
 import axios from "axios";
 import BASE_URL from "../../../config";
 
-const currencyOptions = ["USD", "EUR", "INR", "GBP", "CAD", "AUD"];
-
 const initialClients = [
   {
-    alias: "Client Alpha",
-    actual: "Actual Client Alpha Inc.",
-    country: "USA",
+    id: 1,
+    clientName: "Client Alpha Inc.",
+    country: "US",
     currency: "USD",
     hourlyRate: "50.00",
     managers: "Jane Doe, John Smith",
   },
   {
-    alias: "Company Beta",
-    actual: "Actual Company Beta Ltd.",
-    country: "UK",
+    id: 2,
+    clientName: "Company Beta Ltd.",
+    country: "GB",
     currency: "GBP",
     hourlyRate: "60.00",
     managers: "Peter Jones",
   },
   {
-    alias: "Service Gamma",
-    actual: "Actual Service Gamma LLC",
-    country: "Canada",
+    id: 3,
+    clientName: "Service Gamma LLC",
+    country: "CA",
     currency: "CAD",
     hourlyRate: "70.00",
     managers: "Alice Brown, Bob White",
@@ -33,31 +31,31 @@ const initialClients = [
 ];
 
 export default function SettingsPage() {
-
   const token = localStorage.getItem("authToken");
   const [applications, setApplications] = useState([]);
   const [newapplication, setNewapplication] = useState("");
   const [projects, setProjects] = useState([]);
   const [clients, setClients] = useState(initialClients);
-  const [showAllClients, setShowAllClients] = useState(true); // default to showing all
-   const [currencyOptions, setCurrencyOptions] = useState([]); // storing currency option
+  const [currencyOptions, setCurrencyOptions] = useState([]);
+  const [countries, setCountries] = useState([]);
+  const [exchangeRates, setExchangeRates] = useState({});
 
   const [clientForm, setClientForm] = useState({
-    alias: "",
-    actual: "",
+    id: "",
+    clientName: "",
     country: "",
     currency: "",
     hourlyRate: "",
     managers: "",
   });
 
-  const [countries, setCountries] = useState([]);
-useEffect(() => {
+  useEffect(() => {
     const fetchCurrencies = async () => {
       try {
         const res = await axios.get("https://open.er-api.com/v6/latest/USD");
         const currencyCodes = Object.keys(res.data.rates);
         setCurrencyOptions(currencyCodes);
+        setExchangeRates(res.data.rates);
       } catch (error) {
         console.error("Error fetching currencies:", error);
       }
@@ -66,7 +64,7 @@ useEffect(() => {
     fetchCurrencies();
   }, []);
 
-  // fetch project detaisl form the api 
+  // fetch project details from the api 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -87,17 +85,20 @@ useEffect(() => {
     fetchProjects();
   }, []);
 
-
   useEffect(() => {
     const fetchCountries = async () => {
       try {
-        const res = await fetch("https://restcountries.com/v3.1/all?fields=name");
+        const res = await fetch("https://restcountries.com/v3.1/all?fields=cca2,currencies");
         const data = await res.json();
 
-        // Extract only common names
+        // Extract country codes and their currencies
         const countryList = data
-          .map((c) => c.name.common)
-          .sort((a, b) => a.localeCompare(b));
+          .map((c) => ({
+            code: c.cca2,
+            currency: c.currencies ? Object.keys(c.currencies)[0] : null
+          }))
+          .filter(c => c.currency) // Only include countries with currencies
+          .sort((a, b) => a.code.localeCompare(b.code));
 
         setCountries(countryList);
       } catch (err) {
@@ -120,7 +121,11 @@ useEffect(() => {
         );
 
         if (res.data.status) {
-          setApplications(res.data.application); // from API response
+          // Sort applications alphabetically
+          const sortedApplications = [...res.data.application].sort((a, b) => 
+            a.applicationName.localeCompare(b.applicationName)
+          );
+          setApplications(sortedApplications);
         }
       } catch (err) {
         console.error("Failed to fetch applications:", err);
@@ -129,7 +134,6 @@ useEffect(() => {
 
     fetchApplications();
   }, []);
-
 
   // useeffect to fetch the clients from api 
   useEffect(() => {
@@ -145,7 +149,7 @@ useEffect(() => {
           }
         );
         if (response.data.status) {
-          setClients(response.data.clients); // only dynamic data
+          setClients(response.data.clients);
         }
       } catch (error) {
         console.error("Failed to fetch clients:", error);
@@ -154,35 +158,45 @@ useEffect(() => {
 
     fetchClients();
   }, []);
- const handleClientChange = (e) => {
-  const { name, value } = e.target;
 
-  if (name === "clientId") {
-    const selectedClient = clients.find(client => client.id.toString() === value);
+  const handleClientChange = (e) => {
+    const { name, value } = e.target;
 
-    setClientForm((prev) => ({
-      ...prev,
-      [name]: value,
-      country: selectedClient?.country || "",
-      currency: selectedClient?.currency || "",
-      hourlyRate: selectedClient?.hourlyRate || "",
-    }));
+    if (name === "id") {
+      const selectedClient = clients.find(client => client.id.toString() === value);
 
-    // If you have a state to hold selected client (optional)
-    // setSelectedClient(selectedClient ? [selectedClient] : []);
-  } else {
-    setClientForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  }
-};
-
+      setClientForm((prev) => ({
+        ...prev,
+        [name]: value,
+        clientName: selectedClient?.clientName || "",
+        country: selectedClient?.country || "",
+        currency: selectedClient?.currency || "",
+        hourlyRate: selectedClient?.hourlyRate || "",
+        managers: selectedClient?.managers || "",
+      }));
+    } else if (name === "country") {
+      // Auto-select currency based on country
+      const selectedCountry = countries.find(c => c.code === value);
+      const currencyForCountry = selectedCountry ? selectedCountry.currency : "";
+      
+      setClientForm((prev) => ({
+        ...prev,
+        [name]: value,
+        currency: currencyForCountry
+      }));
+    } else {
+      setClientForm((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
 
   const [editClientIdx, setEditClientIdx] = useState(null);
 
   const [managers, setManagers] = useState([]);
   const [loadingManagers, setLoadingManagers] = useState(true);
+  
   // this is for getting managers form the api 
   useEffect(() => {
     const fetchManagers = async () => {
@@ -221,17 +235,9 @@ useEffect(() => {
     fetchManagers();
   }, []);
 
-
-
-  // const handleClientChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setClientForm((prev) => ({ ...prev, [name]: value }));
-  // };
-
-  const handleAddOrEditClient = () => {
+  const handleAddOrEditClient = async () => {
     if (
-      !clientForm.alias.trim() ||
-      !clientForm.actual.trim() ||
+      !clientForm.clientName.trim() ||
       !clientForm.country.trim() ||
       !clientForm.currency.trim() ||
       !clientForm.hourlyRate.trim()
@@ -245,23 +251,53 @@ useEffect(() => {
       hourlyRate: formattedRate,
     };
 
-    if (editClientIdx !== null) {
-      const updated = [...clients];
-      updated[editClientIdx] = updatedClient;
-      setClients(updated);
-      setEditClientIdx(null);
-    } else {
-      setClients([...clients, updatedClient]);
-    }
+    try {
+      if (editClientIdx !== null) {
+        // Update existing client
+        const response = await axios.put(
+          `${BASE_URL}client/updateClient/${clientForm.id}`,
+          updatedClient,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-    setClientForm({
-      alias: "",
-      actual: "",
-      country: "",
-      currency: "",
-      hourlyRate: "",
-      managers: "",
-    });
+        if (response.data.status) {
+          const updated = [...clients];
+          updated[editClientIdx] = updatedClient;
+          setClients(updated);
+          setEditClientIdx(null);
+        }
+      } else {
+        // Add new client
+        const response = await axios.post(
+          `${BASE_URL}client/addClients`,
+          updatedClient,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.data.status) {
+          setClients([...clients, response.data.client]);
+        }
+      }
+
+      setClientForm({
+        id: "",
+        clientName: "",
+        country: "",
+        currency: "",
+        hourlyRate: "",
+        managers: "",
+      });
+    } catch (error) {
+      console.error("Failed to save client:", error);
+    }
   };
 
   const handleEditClient = (idx) => {
@@ -269,24 +305,46 @@ useEffect(() => {
     setClientForm(clients[idx]);
   };
 
-  const handleDeleteClient = (idx) => {
-    setClients(clients.filter((_, i) => i !== idx));
-    if (editClientIdx === idx) setEditClientIdx(null);
-  };
+  const handleDeleteClient = async (idx) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this client?");
+    if (!confirmDelete) return;
 
+    try {
+      const clientId = clients[idx].id;
+      // Make sure the URL matches your API endpoint exactly
+      const response = await axios.delete(
+        `${BASE_URL}client/deleteClient/${clientId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-  const [newLanguage, setNewLanguage] = useState("");
-
-  const [newCurrency, setNewCurrency] = useState({ name: "", rate: "" });
-
-  const handleAddClient = () => {
-    if (newClient.alias && newClient.actualName && newClient.country) {
-      setClients([...clients, newClient]);
-      setNewClient({ alias: "", actualName: "", country: "", managers: "" });
+      if (response.data.status) {
+        setClients(clients.filter((_, i) => i !== idx));
+        if (editClientIdx === idx) setEditClientIdx(null);
+      } else {
+        alert("Failed to delete client: " + (response.data.message || "Unknown error"));
+      }
+    } catch (error) {
+      console.error("Failed to delete client:", error);
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        alert(`Error: ${error.response.status} - ${error.response.data.message || "Server error"}`);
+      } else if (error.request) {
+        // The request was made but no response was received
+        alert("No response received from server. Please check your network connection.");
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        alert("Error: " + error.message);
+      }
     }
   };
 
-  // this part of code is for set the task and disply the tasks dynamically 
+  const [newLanguage, setNewLanguage] = useState("");
+  const [newCurrency, setNewCurrency] = useState({ name: "", rate: "" });
   const [newTask, setNewTask] = useState("");
   const [tasks, setTasks] = useState([]);
 
@@ -300,7 +358,11 @@ useEffect(() => {
         }
       );
       if (res.data.status) {
-        setTasks(res.data.tasks);
+        // Sort tasks alphabetically
+        const sortedTasks = [...res.data.tasks].sort((a, b) => 
+          a.taskName.localeCompare(b.taskName)
+        );
+        setTasks(sortedTasks);
       }
     } catch (err) {
       console.error("Failed to fetch tasks", err);
@@ -320,8 +382,12 @@ useEffect(() => {
 
       if (res.data.status) {
         const newAddedTask = res.data.club; // from the response
-
-        setTasks((prevTasks) => [...prevTasks, newAddedTask]); // append to existing list
+        
+        // Add new task and sort alphabetically
+        const updatedTasks = [...tasks, newAddedTask].sort((a, b) => 
+          a.taskName.localeCompare(b.taskName)
+        );
+        setTasks(updatedTasks);
         setNewTask(""); // clear input
       }
     } catch (err) {
@@ -347,11 +413,12 @@ useEffect(() => {
       if (res.data.status) {
         const updatedTask = res.data.task;
 
-        setTasks((prevTasks) =>
-          prevTasks.map((task) =>
-            task.id === id ? updatedTask : task
-          )
-        );
+        // Update task and maintain alphabetical order
+        const updatedTasks = tasks
+          .map((task) => task.id === id ? updatedTask : task)
+          .sort((a, b) => a.taskName.localeCompare(b.taskName));
+        
+        setTasks(updatedTasks);
       }
     } catch (err) {
       console.error("Failed to update task", err);
@@ -359,7 +426,6 @@ useEffect(() => {
   };
 
   // handle delete task api 
-
   const handleDeleteTask = async (id) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this task?");
     if (!confirmDelete) return;
@@ -382,7 +448,6 @@ useEffect(() => {
       alert("An error occurred while deleting the task.");
     }
   };
-
 
   useEffect(() => {
     fetchTasks();
@@ -407,8 +472,11 @@ useEffect(() => {
       console.log("Add language response:", res.data);
 
       if (res.data.status) {
-        // Append the new language object to the current list
-        setLanguages([...languages, res.data.language]);
+        // Add new language and sort alphabetically
+        const updatedLanguages = [...languages, res.data.language].sort((a, b) => 
+          a.languageName.localeCompare(b.languageName)
+        );
+        setLanguages(updatedLanguages);
         setNewLanguage(""); // Clear the input
       } else {
         console.error("Failed to add language");
@@ -417,7 +485,6 @@ useEffect(() => {
       console.error("Error adding language:", error);
     }
   };
-
 
   // function to add the application 
   const handleAddapplication = async () => {
@@ -434,8 +501,12 @@ useEffect(() => {
 
       if (res.data.status) {
         const addedApp = res.data.application;
-
-        setApplications((prev) => [...prev, addedApp]);
+        
+        // Add new application and sort alphabetically
+        const updatedApplications = [...applications, addedApp].sort((a, b) => 
+          a.applicationName.localeCompare(b.applicationName)
+        );
+        setApplications(updatedApplications);
         setNewapplication("");
       } else {
         alert("Failed to add application.");
@@ -466,9 +537,12 @@ useEffect(() => {
       if (res.data.status) {
         const updatedLang = res.data.language;
 
-        setLanguages((prev) =>
-          prev.map((lang) => (lang.id === id ? updatedLang : lang))
-        );
+        // Update language and maintain alphabetical order
+        const updatedLanguages = languages
+          .map((lang) => (lang.id === id ? updatedLang : lang))
+          .sort((a, b) => a.languageName.localeCompare(b.languageName));
+        
+        setLanguages(updatedLanguages);
       } else {
         alert("Failed to update language.");
       }
@@ -477,7 +551,6 @@ useEffect(() => {
       alert("Something went wrong while updating.");
     }
   };
-
 
   // this is for edit application function from api 
   const handleEditApplication = async (id, currentName) => {
@@ -497,9 +570,12 @@ useEffect(() => {
       if (res.data.status) {
         const updatedApp = res.data.application;
 
-        setApplications((prev) =>
-          prev.map((app) => (app.id === id ? updatedApp : app))
-        );
+        // Update application and maintain alphabetical order
+        const updatedApplications = applications
+          .map((app) => (app.id === id ? updatedApp : app))
+          .sort((a, b) => a.applicationName.localeCompare(b.applicationName));
+        
+        setApplications(updatedApplications);
       } else {
         alert("Failed to update application.");
       }
@@ -534,7 +610,30 @@ useEffect(() => {
     }
   };
 
+  const handleDeleteApplication = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this application?");
+    if (!confirmDelete) return;
 
+    try {
+      const token = localStorage.getItem("authToken");
+      const res = await axios.delete(
+        `${BASE_URL}application/deleteApplicationById/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data.status) {
+        // Remove the deleted application from the UI
+        setApplications((prev) => prev.filter((app) => app.id !== id));
+      } else {
+        alert("Failed to delete the application.");
+      }
+    } catch (err) {
+      console.error("Error deleting application:", err);
+      alert("Something went wrong while deleting.");
+    }
+  };
 
   const handleAddCurrency = () => {
     if (newCurrency.name && newCurrency.rate) {
@@ -542,13 +641,6 @@ useEffect(() => {
       setNewCurrency({ name: "", rate: "" });
     }
   };
-
-  // const [tasks, setTasks] = useState([
-  //   "Backend Dev",
-  //   "API Integration",
-  //   "Frontend Dev",
-  //   "QA Testing",
-  // ]);
 
   const [languages, setLanguages] = useState([]); // this is language state 
   useEffect(() => {
@@ -567,7 +659,11 @@ useEffect(() => {
         console.log("Fetched languages:", res.data.languages);
 
         if (res.data.status && Array.isArray(res.data.languages)) {
-          setLanguages(res.data.languages); // store full objects: id, languageName, createdAt
+          // Sort languages alphabetically
+          const sortedLanguages = [...res.data.languages].sort((a, b) => 
+            a.languageName.localeCompare(b.languageName)
+          );
+          setLanguages(sortedLanguages);
         }
       } catch (err) {
         console.error("Failed to fetch languages:", err);
@@ -579,31 +675,29 @@ useEffect(() => {
     fetchLanguages();
   }, []);
 
-
-  // const [languages, setLanguages] = useState([
-  //   "English",
-  //   "Spanish",
-  //   "French",
-  //   "German",
-  // ]);
-
-  // const [applications, setapplications] = useState([
-  //   "Web",
-  //   "Mobile Responsive",
-  //   "iOS",
-  //   "Android",
-  // ]);
-
   const [currencies, setCurrencies] = useState([
     { name: "USD", rate: "83" },
     { name: "EUR", rate: "90" },
     { name: "GBP", rate: "90" },
   ]);
 
-  const selectedClientData = showAllClients
-    ? clients
-    : clients.filter((client) => client.id === parseInt(clientForm.actual));
+  const handleDeleteItem = (list, setList, index) => {
+    const newList = [...list];
+    newList.splice(index, 1);
+    setList(newList);
+  };
 
+  const handleCurrencyChange = (e) => {
+    const currency = e.target.value;
+    if (currency && exchangeRates[currency]) {
+      // Convert to INR (assuming USD is base)
+      const rateToINR = (1 / exchangeRates[currency]).toFixed(2);
+      setNewCurrency({
+        name: currency,
+        rate: rateToINR
+      });
+    }
+  };
 
   return (
     <div className="p-4 settings-main-unique py-4">
@@ -623,52 +717,16 @@ useEffect(() => {
           {/* First row */}
           <div className="row mb-2">
             <div className="col-md-6 mb-2">
-              <select
-                name="actual"
-                value={clientForm.actual}
-                onChange={(e) => {
-                  const selectedClientId = parseInt(e.target.value);
-                  const relatedProjects = projects.filter(
-                    (project) => project.clientId === selectedClientId
-                  );
-
-                  const latestProject = relatedProjects[0]; // pick the first or latest
-
-                  setClientForm((prevForm) => ({
-                    ...prevForm,
-                    actual: selectedClientId,
-                    country: latestProject?.country || "",
-                    currency: latestProject?.currency || "",
-                    hourlyRate: latestProject?.hourlyRate || "",
-                    projectManager: latestProject?.full_name || "",
-                  }));
-                }}
-                className="form-control"
-              >
-                <option value="">-- Select Client --</option>
-                {clients.map((client) => (
-                  <option key={client.id} value={client.id}>
-                    {client.clientName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="col-md-6 mb-2">
               <input
                 className="form-control"
                 style={{ background: "#181f3a", color: "#fff" }}
-                placeholder="Actual Client Name*"
-                name="actual"
-                value={clientForm.actual}
+                placeholder="Client Name*"
+                name="clientName"
+                value={clientForm.clientName}
                 onChange={handleClientChange}
               />
             </div>
-          </div>
-
-          {/* Second row */}
-          <div className="row mb-3">
-            <div className="col-md-4 mb-2">
+            <div className="col-md-6 mb-2">
               <select
                 className="form-control"
                 name="country"
@@ -678,73 +736,58 @@ useEffect(() => {
               >
                 <option value="">-- Select Country --</option>
                 {countries.map((country, idx) => (
-                  <option key={idx} value={country}>
-                    {country}
+                  <option key={idx} value={country.code}>
+                    {country.code}
                   </option>
                 ))}
               </select>
+            </div>
+          </div>
 
-
+          {/* Second row */}
+          <div className="row mb-3">
+            <div className="col-md-6 mb-2">
+              <select
+                className="form-control"
+                style={{ background: "#181f3a", color: "#fff" }}
+                name="currency"
+                value={clientForm.currency}
+                onChange={handleClientChange}
+              >
+                <option value="">Currency*</option>
+                {currencyOptions.map((cur) => (
+                  <option key={cur} value={cur}>
+                    {cur}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            <div className="col-md-8 mb-2">
-              <div className="row">
-                <div className="col-md-3">
-                  <select
-                    className="form-control"
-                    style={{ background: "#181f3a", color: "#fff" }}
-                    name="currency"
-                    value={clientForm.currency}
-                    onChange={handleClientChange}
-                  >
-                    <option value="">Currency*</option>
-                    {currencyOptions.map((cur) => (
-                      <option key={cur} value={cur}>
-                        {cur}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="col-md-5 d-flex align-items-end">
-                  <input
-                    type="number"
-                    step="0.01"
-                    className="form-control"
-                    placeholder="Hourly Rate*"
-                    name="hourlyRate"
-                    value={clientForm.hourlyRate}
-                    onChange={handleClientChange}
-                    style={{ background: "#181f3a", color: "#fff" }}
-                  />
-                </div>
-              </div>
+            <div className="col-md-6 mb-2">
+              <input
+                type="number"
+                step="0.01"
+                className="form-control"
+                placeholder="Hourly Rate*"
+                name="hourlyRate"
+                value={clientForm.hourlyRate}
+                onChange={handleClientChange}
+                style={{ background: "#181f3a", color: "#fff" }}
+              />
             </div>
           </div>
 
           {/* Third row */}
           <div className="d-flex gap-2 mb-2 flex-wrap">
-            <select
+            <input
+              type="text"
               className="form-control"
+              placeholder="Project Managers (comma-separated)"
               name="managers"
               value={clientForm.managers}
-              onChange={(e) => {
-                const selectedId = e.target.value;
-
-                setClientForm((prevForm) => ({
-                  ...prevForm,
-                  managers: selectedId, // ✅ only manager ID stored here
-                }));
-              }}
+              onChange={handleClientChange}
               style={{ background: "#181f3a", color: "#fff" }}
-            >
-              <option value="">-- Select Project Manager --</option>
-              {managers.map((manager) => (
-                <option key={manager.value} value={manager.value}>
-                  {manager.label}
-                </option>
-              ))}
-            </select>
+            />
 
             <button
               className="btn btn-gradient"
@@ -771,50 +814,47 @@ useEffect(() => {
               padding: "10px",
             }}
           >
-            {!clientForm.actual ? (
+            {clients.length === 0 ? (
               <p className="text-white" style={{ opacity: 0.6 }}>
-                No client selected.
+                No clients available.
               </p>
             ) : (
-              <div className="client-item d-flex justify-content-between align-items-start mb-3">
-                <div>
-                  <b className="text-white">{clientForm.alias} (Alias)</b>{" "}
-                  <span className="text-white" style={{ opacity: 0.7 }}>
-                    ({clientForm.actual})
-                  </span>
-                  <div style={{ fontSize: "0.95em" }}>
-                    <span className="text-white" style={{ opacity: 0.7 }}>
-                      Country: {clientForm.country}
-                    </span>
-                    <br />
-                    <span className="text-white" style={{ opacity: 0.7 }}>
-                      Currency: {clientForm.currency} | Hourly: {clientForm.hourlyRate}
-                    </span>
-                    <br />
-                    <span className="text-white" style={{ opacity: 0.7 }}>
-                      PMs: {clientForm.managers}
-                    </span>
+              clients.map((client, index) => (
+                <div key={client.id} className="client-item d-flex justify-content-between align-items-start mb-3">
+                  <div>
+                    <b className="text-white">{client?.clientName}</b>
+                    <div style={{ fontSize: "0.95em" }}>
+                      <span className="text-white" style={{ opacity: 0.7 }}>
+                        Country: {client?.country}
+                      </span>
+                      <br />
+                      <span className="text-white" style={{ opacity: 0.7 }}>
+                        Currency: {client?.currency} | Hourly: {client?.hourlyRate}
+                      </span>
+                      <br />
+                      <span className="text-white" style={{ opacity: 0.7 }}>
+                        PMs: {client?.managers}
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    <button
+                      className="btn btn-sm btn-link text-light"
+                      onClick={() => handleEditClient(index)}
+                    >
+                      <i className="bi bi-pencil"></i>
+                    </button>
+                    <button
+                      className="btn btn-sm btn-link text-danger"
+                      onClick={() => handleDeleteClient(index)}
+                    >
+                      <i className="bi bi-trash"></i>
+                    </button>
                   </div>
                 </div>
-                <div>
-                  <button
-                    className="btn btn-sm btn-link text-light"
-                    onClick={() => handleEditClient(0)}
-                  >
-                    <i className="bi bi-pencil"></i>
-                  </button>
-                  <button
-                    className="btn btn-sm btn-link text-danger"
-                    onClick={() => handleDeleteClient(0)}
-                  >
-                    <i className="bi bi-trash"></i>
-                  </button>
-                </div>
-              </div>
+              ))
             )}
-
           </div>
-
 
           {/* Manage Tasks List */}
           <div className="mb-4">
@@ -841,8 +881,8 @@ useEffect(() => {
                 border: "2px solid #7b2ff2",
                 borderRadius: 10,
                 background: "rgba(20,30,70,0.7)",
-                maxHeight: "400px", // Added fixed height
-                overflowY: "auto", // Added scroll for overflow
+                maxHeight: "400px",
+                overflowY: "auto",
                 padding: "10px",
               }}>
               {tasks.map((task) => (
@@ -852,7 +892,6 @@ useEffect(() => {
                 >
                   <span className="text-white">{task.taskName}</span>
                   <div className="btn-group btn-group-sm">
-                    {/* Placeholder for future edit functionality */}
                     <button
                       className="btn btn-sm btn-link text-light"
                       onClick={() => handleEditTask(task.id, task.taskName)}
@@ -882,7 +921,6 @@ useEffect(() => {
                 value={newapplication}
                 onChange={(e) => setNewapplication(e.target.value)}
               />
-
               <button
                 className="btn btn-primary"
                 onClick={handleAddapplication}
@@ -890,15 +928,14 @@ useEffect(() => {
               >
                 +
               </button>
-
             </div>
             <div className="border rounded p-2 mb-2 border-secondary"
               style={{
                 border: "2px solid #7b2ff2",
                 borderRadius: 10,
                 background: "rgba(20,30,70,0.7)",
-                maxHeight: "400px", // Added fixed height
-                overflowY: "auto", // Added scroll for overflow
+                maxHeight: "400px",
+                overflowY: "auto",
                 padding: "10px",
               }}>
               {applications.map((application) => (
@@ -925,15 +962,7 @@ useEffect(() => {
                   </div>
                 </div>
               ))}
-
             </div>
-            {/* <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddapplication}
-                    disabled={!newapplication}
-                  >
-                    <i className="fas fa-plus me-1"></i> Add application
-                  </button> */}
           </div>
 
           {/* Manage Languages List */}
@@ -955,11 +984,11 @@ useEffect(() => {
                 border: "2px solid #7b2ff2",
                 borderRadius: 10,
                 background: "rgba(20,30,70,0.7)",
-                maxHeight: "400px", // Added fixed height
-                overflowY: "auto", // Added scroll for overflow
+                maxHeight: "400px",
+                overflowY: "auto",
                 padding: "10px",
               }}>
-              {languages.map((language, index) => (
+              {languages.map((language) => (
                 <div
                   key={language.id}
                   className="d-flex justify-content-between align-items-center py-2 px-2 bg-card mb-1 rounded"
@@ -972,27 +1001,16 @@ useEffect(() => {
                     >
                       <i className="bi bi-pencil"></i>
                     </button>
-
                     <button
                       className="btn btn-outline-danger"
                       onClick={() => handleDeleteLanguage(language.id)}
                     >
                       <i className="fas fa-trash-alt"></i>
                     </button>
-
                   </div>
                 </div>
               ))}
-
-
             </div>
-            {/* <button
-                    className="btn btn-sm btn-primary"
-                    onClick={handleAddLanguage}
-                    disabled={!newLanguage}
-                  >
-                    <i className="fas fa-plus me-1"></i> Add Language
-                  </button> */}
           </div>
 
           {/* Currency Conversion Rates */}
@@ -1000,18 +1018,19 @@ useEffect(() => {
             <h6 className="mb-3 text-white">Currency Conversion Rates</h6>
             <div className="row g-2 mb-2">
               <div className="col-md-6">
-                <input
-                  type="text"
+                <select
                   className="form-control bg-card text-white border-secondary"
-                  placeholder="Currency (e.g. USD)"
                   value={newCurrency.name}
-                  onChange={(e) =>
-                    setNewCurrency({
-                      ...newCurrency,
-                      name: e.target.value,
-                    })
-                  }
-                />
+                  onChange={handleCurrencyChange}
+                  style={{ background: "#181f3a", color: "#fff" }}
+                >
+                  <option value="">-- Select Currency --</option>
+                  {currencyOptions.map((currency) => (
+                    <option key={currency} value={currency}>
+                      {currency}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="col-md-6">
                 <input
@@ -1019,12 +1038,8 @@ useEffect(() => {
                   className="form-control bg-card text-white border-secondary"
                   placeholder="Rate to INR"
                   value={newCurrency.rate}
-                  onChange={(e) =>
-                    setNewCurrency({
-                      ...newCurrency,
-                      rate: e.target.value,
-                    })
-                  }
+                  readOnly
+                  style={{ background: "#181f3a", color: "#fff" }}
                 />
               </div>
             </div>
@@ -1033,8 +1048,8 @@ useEffect(() => {
                 border: "2px solid #7b2ff2",
                 borderRadius: 10,
                 background: "rgba(20,30,70,0.7)",
-                maxHeight: "400px", // Added fixed height
-                overflowY: "auto", // Added scroll for overflow
+                maxHeight: "400px",
+                overflowY: "auto",
                 padding: "10px",
               }}>
               <table className="table table-dark table-sm mb-0">
@@ -1054,7 +1069,7 @@ useEffect(() => {
                         <div className="btn-group btn-group-sm">
                           <button
                             className="btn btn-sm btn-link text-light"
-                            onClick={() => handleEditClient(idx)}
+                            onClick={() => handleEditClient(index)}
                           >
                             <i className="bi bi-pencil"></i>
                           </button>
@@ -1085,7 +1100,6 @@ useEffect(() => {
               <i className="fas fa-plus me-1"></i> Add Currency
             </button>
           </div>
-
         </div>
       </div>
     </div>

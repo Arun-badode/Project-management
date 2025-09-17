@@ -220,10 +220,65 @@ const MainDashboard = () => {
     <div className="admin-dashboard text-white p-3 p-md-4 bg-main">
       <style>
         {`
-          .active-tab {
+          .tab-card {
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+            border-radius: 8px;
+            overflow: hidden;
+          }
+          
+          .tab-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+          }
+          
+          .tab-card:hover::before {
+            opacity: 0.2;
+          }
+          
+          .tab-card.active-tab {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
             border: 3px solid white !important;
+            position: relative;
+            z-index: 2;
+          }
+          
+          .tab-card.active-tab::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: white;
+            border-radius: 0 0 4px 4px;
+            animation: bubbleUp 0.5s ease forwards;
+          }
+          
+          @keyframes bubbleUp {
+            0% {
+              transform: scaleX(0);
+              opacity: 0;
+            }
+            50% {
+              transform: scaleX(1.2);
+              opacity: 1;
+            }
+            100% {
+              transform: scaleX(1);
+              opacity: 1;
+            }
           }
           
           .primary-active {
@@ -265,16 +320,20 @@ const MainDashboard = () => {
       <Row className="mb-4 g-3">
         {cardData.map((card) => (
           <Col xs={12} sm={6} md={2} key={card.key}>
-            <ProjectCard
-              key={card.key}
-              title={card.title}
-              icon={card.icon}
-              color={card.color}
-              activeColor={card.activeColor}
-              activeTab={activeTab}
-              // count={getCardCount(card.key)}
+            <div 
+              className={`tab-card ${activeTab === card.key ? 'active-tab' : ''}`}
               onClick={() => card.link ? (window.location.href = card.link) : handleCardFilter(card.key)}
-            />
+            >
+              <ProjectCard
+                key={card.key}
+                title={card.title}
+                icon={card.icon}
+                color={card.color}
+                activeColor={card.activeColor}
+                activeTab={activeTab}
+                count={getCardCount(card.key)}
+              />
+            </div>
           </Col>
         ))}
       </Row>

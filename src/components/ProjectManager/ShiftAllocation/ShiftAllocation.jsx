@@ -5,7 +5,7 @@ import BASE_URL from "../../../config";
 import ShiftLegend from "./ShiftLegend";
 const ShiftAllocation = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
+  const [selectedDepartment, setSelectedDepartment] = useState("All Team"); // Changed from "All Departments"
   const [showAddShiftModal, setShowAddShiftModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [showEmployeePanel, setShowEmployeePanel] = useState(false);
@@ -14,6 +14,11 @@ const ShiftAllocation = () => {
   const [selectedDayIndex, setSelectedDayIndex] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [currentShiftId, setCurrentShiftId] = useState(null);
+  const [showOthersOptions, setShowOthersOptions] = useState(false);
+  const [selectedOthersOption, setSelectedOthersOption] = useState("");
+  const [permissionDuration, setPermissionDuration] = useState("");
+  const [permissionTiming, setPermissionTiming] = useState("");
+  const [leaveType, setLeaveType] = useState("");
 
   const [formData, setFormData] = useState({
     memberId: "",
@@ -42,6 +47,9 @@ const ShiftAllocation = () => {
       "6:30 PM - 3:30 AM": { symbol: "δ", bg: "#f7d4b5" },
       "WO": { symbol: "WO", bg: "#ffd966" },
       "Holiday": { symbol: "Holiday", bg: "#93c47d" },
+      "Permission": { symbol: "Permission", bg: "#cfe2f3" },
+      "Leave": { symbol: "Leave", bg: "#f9cb9c" },
+      "Absent": { symbol: "Absent", bg: "#ea9999" },
     };
 
     const formattedTime = `${start} - ${end}`;
@@ -55,7 +63,7 @@ const ShiftAllocation = () => {
           padding: "2px 8px",
           borderRadius: "4px",
           display: "inline-block",
-          color: "black", // ✅ Make the text color black
+          color: "black",
         }}
       >
         {label.symbol}
@@ -89,14 +97,34 @@ const ShiftAllocation = () => {
       return;
     }
 
-    const payload = {
+    let payload = {
       memberId: parseInt(formData.memberId),
       shiftDate: formData.shiftDate,
-      startTime: formatTime12Hour(formData.startTime),
-      endTime: formatTime12Hour(formData.endTime),
-      shiftType: formData.shiftType,
-      notes: formData.notes,
     };
+
+    // Handle regular shift options
+    if (!showOthersOptions) {
+      payload.startTime = formatTime12Hour(formData.startTime);
+      payload.endTime = formatTime12Hour(formData.endTime);
+      payload.shiftType = formData.shiftType;
+      payload.notes = formData.notes;
+    } 
+    // Handle Others options
+    else {
+      payload.shiftType = "Others";
+      payload.otherType = selectedOthersOption;
+      
+      if (selectedOthersOption === "Permission") {
+        payload.duration = permissionDuration;
+        payload.permissionApply = permissionTiming;
+        payload.notes = formData.notes || `Permission: ${permissionDuration} at ${permissionTiming}`;
+      } else if (selectedOthersOption === "Leave") {
+        payload.duration = leaveType;
+        payload.notes = formData.notes || `Leave Type: ${leaveType}`;
+      } else if (selectedOthersOption === "Absent") {
+        payload.notes = formData.notes || "Unapproved/Uninformed Leave";
+      }
+    }
 
     try {
       let response;
@@ -126,6 +154,8 @@ const ShiftAllocation = () => {
         fetchShifts(); // Refresh shift data
         setShowAddShiftModal(false);
         resetForm();
+        setShowOthersOptions(false);
+        setSelectedOthersOption("");
       } else {
         alert(response.data.message || "Error processing shift");
       }
@@ -152,6 +182,11 @@ const ShiftAllocation = () => {
     });
     setIsEditMode(false);
     setCurrentShiftId(null);
+    setShowOthersOptions(false);
+    setSelectedOthersOption("");
+    setPermissionDuration("");
+    setPermissionTiming("");
+    setLeaveType("");
   };
 
   // Get week dates based on current date
@@ -172,7 +207,6 @@ const ShiftAllocation = () => {
     return dates;
   };
 
-
   const weekDates = getWeekDates();
 
   // Format date for display
@@ -185,13 +219,12 @@ const ShiftAllocation = () => {
     return date.toLocaleDateString("en-US", { weekday: "short" });
   };
 
-  // Department options
+  // Department options - Updated to match requirements
   const departments = [
-    "All Departments",
-    "Customer Service",
-    "Sales",
-    "IT Support",
-    "HR",
+    "All Team",
+    "Adobe",
+    "MS Office",
+    "QA",
   ];
 
   // Navigate to previous week
@@ -223,6 +256,12 @@ const ShiftAllocation = () => {
         return "bg-purple bg-opacity-10 border-purple";
       case "night":
         return "bg-dark bg-opacity-10 border-dark";
+      case "Permission":
+        return "bg-info bg-opacity-10 border-info";
+      case "Leave":
+        return "bg-warning bg-opacity-10 border-warning";
+      case "Absent":
+        return "bg-danger bg-opacity-10 border-danger";
       default:
         return "bg-secondary bg-opacity-10 border-secondary";
     }
@@ -273,8 +312,6 @@ const ShiftAllocation = () => {
   };
 
   // Update filtered employees based on current week
-  // Update filtered employees based on current week
-  // Pass members as second argument
   const updateFilteredEmployees = (shiftData, members) => {
     const weekStart = new Date(weekDates[0]);
     const weekEnd = new Date(weekDates[6]);
@@ -285,13 +322,35 @@ const ShiftAllocation = () => {
       return shiftDate >= weekStart && shiftDate <= weekEnd;
     });
 
-    // ✅ Build a Map for faster member lookups
+    // Build a Map for faster member lookups
     const memberMap = new Map(members.map(m => [m.id, m]));
 
     const employeesMap = {};
 
+    // First, add all team members and interim managers
+    if (members) {
+      members.forEach(member => {
+        // Exclude managers
+        if (member.role === "Manager") return;
+        
+        const key = `${member.id}-${member.fullName}`;
+        employeesMap[key] = {
+          memberId: member.id,
+          empId: member.empId || "N/A",
+          team: member.team || "N/A",
+          fullName: member.fullName || "Unknown",
+          designation: member.designation || "N/A",
+          shifts: [],
+        };
+      });
+    }
+
+    // Then add shifts for those employees
     shiftsForWeek.forEach((shift) => {
       const memberInfo = memberMap.get(shift.memberId);
+      
+      // Skip if member is a manager
+      if (memberInfo && memberInfo.role === "Manager") return;
 
       const shiftDate = new Date(shift.shiftDate);
       const shiftDayIndex = shiftDate.getDay();
@@ -304,6 +363,7 @@ const ShiftAllocation = () => {
           empId: memberInfo?.empId || "N/A",
           team: memberInfo?.team || "N/A",
           fullName: shift.fullName || memberInfo?.fullName || "Unknown",
+          designation: memberInfo?.designation || "N/A",
           shifts: [],
         };
       }
@@ -323,14 +383,9 @@ const ShiftAllocation = () => {
     console.log("Filtered employees:", Object.values(employeesMap));
   };
 
-
-
-
   useEffect(() => {
     fetchShifts();
   }, []);
-
-
 
   useEffect(() => {
     fetchMember();
@@ -354,7 +409,6 @@ const ShiftAllocation = () => {
     }
   };
 
-
   const handleAddShift = (memberId, dayIndex) => {
     const selectedEmployee = filteredEmployees.find(emp => emp.memberId === memberId);
     if (!selectedEmployee) return;
@@ -370,8 +424,11 @@ const ShiftAllocation = () => {
       notes: "",
     });
 
+    setSelectedDayIndex(dayIndex);
     setIsEditMode(false);
     setShowAddShiftModal(true);
+    setShowOthersOptions(false);
+    setSelectedOthersOption("");
   };
 
   const handleEditShift = (shift) => {
@@ -391,26 +448,61 @@ const ShiftAllocation = () => {
       return `${hours}:${minutes}`;
     };
 
+    // Check if this is an "Others" type shift
+    const isOthersType = shift.type === "Others" || 
+                        shift.type === "Permission" || 
+                        shift.type === "Leave" || 
+                        shift.type === "Absent";
+
     setFormData({
       memberId: shift.memberId.toString(),
       shiftDate: shift.date,
-      startTime: convertTo24Hour(shift.start),
-      endTime: convertTo24Hour(shift.end),
-      shiftType: shift.type,
+      startTime: isOthersType ? "" : convertTo24Hour(shift.start),
+      endTime: isOthersType ? "" : convertTo24Hour(shift.end),
+      shiftType: isOthersType ? "Others" : shift.type,
       notes: shift.notes || "",
     });
 
     setCurrentShiftId(shift.id);
     setIsEditMode(true);
     setShowAddShiftModal(true);
+    
+    // Set Others options if applicable
+    if (isOthersType) {
+      setShowOthersOptions(true);
+      if (shift.type === "Permission") {
+        setSelectedOthersOption("Permission");
+        // Try to extract permission details from notes
+        if (shift.notes && shift.notes.includes("Permission:")) {
+          const noteParts = shift.notes.split("Permission: ")[1];
+          if (noteParts) {
+            const [duration, timing] = noteParts.split(" at ");
+            if (duration) setPermissionDuration(duration);
+            if (timing) setPermissionTiming(timing);
+          }
+        }
+      } else if (shift.type === "Leave") {
+        setSelectedOthersOption("Leave");
+        // Try to extract leave type from notes
+        if (shift.notes && shift.notes.includes("Leave Type:")) {
+          const leaveTypeFromNotes = shift.notes.split("Leave Type: ")[1];
+          if (leaveTypeFromNotes) setLeaveType(leaveTypeFromNotes);
+        }
+      } else if (shift.type === "Absent") {
+        setSelectedOthersOption("Absent");
+      }
+    } else {
+      setShowOthersOptions(false);
+      setSelectedOthersOption("");
+    }
   };
 
   useEffect(() => {
-    if (allShifts.length > 0 && member.length > 0) {
-      updateFilteredEmployees(allShifts, member); // ✅ pass members here
+    if (allShifts.length > 0 && member && member.length > 0) {
+      updateFilteredEmployees(allShifts, member);
     }
   }, [currentDate, allShifts, member]);
-  
+
   const handleRemoveShift = async (shiftId) => {
     if (!window.confirm("Are you sure you want to delete this shift?")) return;
 
@@ -441,6 +533,17 @@ const ShiftAllocation = () => {
     }
   };
 
+  const handleOthersOptionChange = (option) => {
+    setSelectedOthersOption(option);
+    if (option) {
+      // Clear shift data when Others option is selected
+      setFormData(prev => ({
+        ...prev,
+        startTime: "",
+        endTime: "",
+      }));
+    }
+  };
 
   return (
     <div>
@@ -535,15 +638,15 @@ const ShiftAllocation = () => {
                       position: "sticky",
                       top: 0,
                       zIndex: 0,
-                      backgroundColor: "#fff",
+                      backgroundColor: "#0b1a3c", // Changed to match background
                     }}
                   >
                     <tr className="text-center">
-                      <th scope="col" className="w-25 sticky-start bg-white">
+                      <th scope="col" className="w-25 sticky-start" style={{ backgroundColor: "#0b1a3c" }}>
                         Employee
                       </th>
                       {weekDates.map((date, index) => (
-                        <th key={index} className="text-center min-w-150">
+                        <th key={index} className="text-center min-w-150" style={{ backgroundColor: "#0b1a3c" }}>
                           <div className="fw-bold">{formatDay(date)}</div>
                           <div>{formatDate(date)}</div>
                         </th>
@@ -600,8 +703,8 @@ const ShiftAllocation = () => {
                         {/* Loop through days of week (0 = Sunday to 6 = Saturday) */}
                         {weekDates.map((_, dayIndex) => (
                           <td key={dayIndex} className="position-relative align-top" style={{ minHeight: "80px" }}>
-                            {dayIndex ===  6 ? (
-                              // ✅ Sunday → Always Holiday
+                            {dayIndex === 6 ? (
+                              // Sunday → Always Holiday
                               <div className="text-center">
                                 {getShiftLabel("", "", "Holiday")}
                               </div>
@@ -857,86 +960,293 @@ const ShiftAllocation = () => {
                     />
                   </div>
 
-                  {/* // Time Inputs accroding to shift mapping */}
                   <div className="mb-3">
-                    <label htmlFor="shiftSymbol" className="form-label">
-                      Shift Type
-                    </label>
-                    <select
-                      id="shiftSymbol"
-                      name="shiftSymbol"
-                      className="form-select"
-                      value={formData.shiftSymbol || ""}
-                      onChange={(e) => {
-                        const selected = e.target.value;
-                        setFormData((prev) => ({
-                          ...prev,
-                          shiftSymbol: selected,
-                          startTime: shiftMappings[selected]?.start || "",
-                          endTime: shiftMappings[selected]?.end || "",
-                        }));
-                      }}
-                      required
-                    >
-                      <option value="">Select Shift</option>
-                      <option value="α">α (11:30 AM – 8:30 PM)</option>
-                      <option value="β">β (1:00 PM – 10:00 PM)</option>
-                      <option value="γ">γ (2:30 PM – 11:30 PM)</option>
-                      <option value="δ">δ (6:30 PM – 3:30 AM)</option>
-                      <option value="WO">Week Off</option>
-                      <option value="Holiday">Holiday</option>
-                    </select>
-                  </div>
+                    <label className="form-label">Shift Type</label>
+                    <div className="d-flex flex-column gap-2">
+                      {/* Regular shift options */}
+                      <div className="d-flex gap-2">
+                        <div className="form-check">
+                          <input
+                            className="form-check-input"
+                            type="radio"
+                            name="shiftOption"
+                            id="shiftRegular"
+                            checked={!showOthersOptions}
+                            onChange={() => setShowOthersOptions(false)}
+                          />
+                          <label className="form-check-label" htmlFor="shiftRegular">
+                            Regular Shift
+                          </label>
+                        </div>
+                        <div className="form-check">
+                          <input
+                            className="form-check-input"
+                            type="radio"
+                            name="shiftOption"
+                            id="shiftOthers"
+                            checked={showOthersOptions}
+                            onChange={() => setShowOthersOptions(true)}
+                          />
+                          <label className="form-check-label" htmlFor="shiftOthers">
+                            Others
+                          </label>
+                        </div>
+                      </div>
 
+                      {/* Regular shift selection */}
+                      {!showOthersOptions && (
+                        <select
+                          id="shiftSymbol"
+                          name="shiftSymbol"
+                          className="form-select"
+                          value={formData.shiftSymbol || ""}
+                          onChange={(e) => {
+                            const selected = e.target.value;
+                            setFormData((prev) => ({
+                              ...prev,
+                              shiftSymbol: selected,
+                              startTime: shiftMappings[selected]?.start || "",
+                              endTime: shiftMappings[selected]?.end || "",
+                            }));
+                          }}
+                          required
+                        >
+                          <option value="" >Select Shift</option>
+                          <option value="α">α (11:30 AM – 8:30 PM)</option>
+                          <option value="β">β (1:00 PM – 10:00 PM)</option>
+                          <option value="γ">γ (2:30 PM – 11:30 PM)</option>
+                          <option value="δ">δ (6:30 PM – 3:30 AM)</option>
+                          <option value="WO">Week Off</option>
+                          <option value="Holiday">Holiday</option>
+                        </select>
+                      )}
 
-                  <div className="row mb-3">
-                    <div className="col">
-                      <label htmlFor="startTime" className="form-label">
-                        Start Time
-                      </label>
-                      <input
-                        type="time"
-                        id="startTime"
-                        name="startTime"
-                        className="form-control"
-                        value={formData.startTime}
-                        onChange={handleChange}
-                        required
-                      />
+                      {/* Others options */}
+                      {showOthersOptions && (
+                        <div className="border rounded p-3 ">
+                          <div className="d-flex flex-column gap-2">
+                            <div className="form-check">
+                              <input
+                                className="form-check-input"
+                                type="radio"
+                                name="othersOption"
+                                id="permission"
+                                checked={selectedOthersOption === "Permission"}
+                                onChange={() => handleOthersOptionChange("Permission")}
+                              />
+                              <label className="form-check-label" htmlFor="permission">
+                                Permission
+                              </label>
+                            </div>
+                            <div className="form-check">
+                              <input
+                                className="form-check-input"
+                                type="radio"
+                                name="othersOption"
+                                id="leave"
+                                checked={selectedOthersOption === "Leave"}
+                                onChange={() => handleOthersOptionChange("Leave")}
+                              />
+                              <label className="form-check-label" htmlFor="leave">
+                                Leave
+                              </label>
+                            </div>
+                            <div className="form-check">
+                              <input
+                                className="form-check-input"
+                                type="radio"
+                                name="othersOption"
+                                id="absent"
+                                checked={selectedOthersOption === "Absent"}
+                                onChange={() => handleOthersOptionChange("Absent")}
+                              />
+                              <label className="form-check-label" htmlFor="absent">
+                                Absent
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Permission options */}
+                          {selectedOthersOption === "Permission" && (
+                            <div className="mt-3">
+                              <div className="mb-3">
+                                <label className="form-label">Duration</label>
+                                <div className="d-flex gap-2">
+                                  <div className="form-check">
+                                    <input
+                                      className="form-check-input"
+                                      type="radio"
+                                      name="permissionDuration"
+                                      id="duration30"
+                                      checked={permissionDuration === "30 minutes"}
+                                      onChange={() => setPermissionDuration("30 minutes")}
+                                    />
+                                    <label className="form-check-label" htmlFor="duration30">
+                                      30 minutes
+                                    </label>
+                                  </div>
+                                  <div className="form-check">
+                                    <input
+                                      className="form-check-input"
+                                      type="radio"
+                                      name="permissionDuration"
+                                      id="duration60"
+                                      checked={permissionDuration === "60 minutes"}
+                                      onChange={() => setPermissionDuration("60 minutes")}
+                                    />
+                                    <label className="form-check-label" htmlFor="duration60">
+                                      60 minutes
+                                    </label>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="mb-3">
+                                <label className="form-label">When will the permission apply?</label>
+                                <div className="d-flex gap-2">
+                                  <div className="form-check">
+                                    <input
+                                      className="form-check-input"
+                                      type="radio"
+                                      name="permissionTiming"
+                                      id="beginning"
+                                      checked={permissionTiming === "Beginning of shift"}
+                                      onChange={() => setPermissionTiming("Beginning of shift")}
+                                    />
+                                    <label className="form-check-label" htmlFor="beginning">
+                                      Beginning of shift
+                                    </label>
+                                  </div>
+                                  <div className="form-check">
+                                    <input
+                                      className="form-check-input"
+                                      type="radio"
+                                      name="permissionTiming"
+                                      id="end"
+                                      checked={permissionTiming === "End of shift"}
+                                      onChange={() => setPermissionTiming("End of shift")}
+                                    />
+                                    <label className="form-check-label" htmlFor="end">
+                                      End of shift
+                                    </label>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Leave options */}
+                          {selectedOthersOption === "Leave" && (
+                            <div className="mt-3">
+                              <div className="mb-3">
+                                <label className="form-label">Leave Type</label>
+                                <div className="d-flex flex-column gap-2">
+                                  <div className="form-check">
+                                    <input
+                                      className="form-check-input"
+                                      type="radio"
+                                      name="leaveType"
+                                      id="firstHalf"
+                                      checked={leaveType === "1st Half Leave"}
+                                      onChange={() => setLeaveType("1st Half Leave")}
+                                    />
+                                    <label className="form-check-label" htmlFor="firstHalf">
+                                      1st Half Leave
+                                    </label>
+                                  </div>
+                                  <div className="form-check">
+                                    <input
+                                      className="form-check-input"
+                                      type="radio"
+                                      name="leaveType"
+                                      id="secondHalf"
+                                      checked={leaveType === "2nd Half Leave"}
+                                      onChange={() => setLeaveType("2nd Half Leave")}
+                                    />
+                                    <label className="form-check-label" htmlFor="secondHalf">
+                                      2nd Half Leave
+                                    </label>
+                                  </div>
+                                  <div className="form-check">
+                                    <input
+                                      className="form-check-input"
+                                      type="radio"
+                                      name="leaveType"
+                                      id="fullDay"
+                                      checked={leaveType === "Full Day Leave"}
+                                      onChange={() => setLeaveType("Full Day Leave")}
+                                    />
+                                    <label className="form-check-label" htmlFor="fullDay">
+                                      Full Day Leave
+                                    </label>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Absent option */}
+                          {selectedOthersOption === "Absent" && (
+                            <div className="mt-3">
+                              <p className="text-muted">This indicates an unapproved/uninformed leave.</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-
-                    <div className="col">
-                      <label htmlFor="endTime" className="form-label">
-                        End Time
-                      </label>
-                      <input
-                        type="time"
-                        id="endTime"
-                        name="endTime"
-                        className="form-control"
-                        value={formData.endTime}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
                   </div>
 
-                  <div className="mb-3">
-                    <label htmlFor="shiftType" className="form-label">
-                      Shift Type
-                    </label>
-                    <select
-                      id="shiftType"
-                      name="shiftType"
-                      className="form-select"
-                      value={formData.shiftType}
-                      onChange={handleChange}
-                    >
-                      <option value="Full Day">Full Day</option>
-                      <option value="Half Day">Half Day</option>
-                      <option value="Night">Night</option>
-                    </select>
-                  </div>
+                  {!showOthersOptions && (
+                    <>
+                      <div className="row mb-3">
+                        <div className="col">
+                          <label htmlFor="startTime" className="form-label">
+                            Start Time
+                          </label>
+                          <input
+                            type="time"
+                            id="startTime"
+                            name="startTime"
+                            className="form-control"
+                            value={formData.startTime}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+
+                        <div className="col">
+                          <label htmlFor="endTime" className="form-label">
+                            End Time
+                          </label>
+                          <input
+                            type="time"
+                            id="endTime"
+                            name="endTime"
+                            className="form-control"
+                            value={formData.endTime}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mb-3">
+                        <label htmlFor="shiftType" className="form-label">
+                          Shift Type
+                        </label>
+                        <select
+                          id="shiftType"
+                          name="shiftType"
+                          className="form-select"
+                          value={formData.shiftType}
+                          onChange={handleChange}
+                        >
+                          <option value="Full Day">Full Day</option>
+                          <option value="Half Day">Half Day</option>
+                          <option value="Night">Night</option>
+                        </select>
+                      </div>
+                    </>
+                  )}
 
                   <div className="mb-3">
                     <label htmlFor="notes" className="form-label">

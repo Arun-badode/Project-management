@@ -151,7 +151,7 @@ const LoginPage = () => {
               src="https://ik.imagekit.io/43o9qlnbg/Eminoids%20-%20Logo_W.png"
               alt="Logo"
               className="login-logo"
-              style={{ width: "220px", height: "auto", marginBottom: "24px" }}
+              style={{ width: "250px", height: "auto", marginBottom: "24px" }}
             />
             <h1 className="text-white">Welcome Back!</h1>
             <p className="fw-bold text-strong">

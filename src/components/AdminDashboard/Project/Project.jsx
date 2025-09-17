@@ -481,7 +481,7 @@ const Project = () => {
 
             {/* Filters */}
             <div className="row g-3 mb-3">
-              {/* Client Filter - Single Select */}
+             
               <div className="col-md-3">
                 <label className="form-label text-white">Client</label>
                 <select
@@ -498,7 +498,6 @@ const Project = () => {
                 </select>
               </div>
 
-              {/* Task Filter - Single Select */}
               <div className="col-md-3">
                 <label className="form-label text-white">Task</label>
                 <select
@@ -515,7 +514,6 @@ const Project = () => {
                 </select>
               </div>
 
-              {/* Applications Filter - Multi Select */}
 
               <div className="col-md-3">
                 <label className="form-label text-white">Applications</label>
@@ -539,7 +537,7 @@ const Project = () => {
                 </select>
               </div>
 
-              {/* Month/Year Filter */}
+            
               <div className="col-md-3">
                 <label className="form-label text-white">Month/Year</label>
                 <input

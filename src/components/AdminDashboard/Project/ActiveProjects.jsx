@@ -34,6 +34,13 @@ const ActiveProjects = () => {
   const [priorityAll, setPriorityAll] = useState("Mid");
   const [qcDueDelay, setQcDueDelay] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
+  
+  // New states for the requested features
+  const [showHoldConfirmation, setShowHoldConfirmation] = useState(false);
+  const [showEditDeadlineModal, setShowEditDeadlineModal] = useState(false);
+  const [currentDeadline, setCurrentDeadline] = useState("");
+  const [showFilesDropdown, setShowFilesDropdown] = useState(null);
+  const [projectFiles, setProjectFiles] = useState([]);
 
   const [allFiles, setAllFiles] = useState([]);
   useEffect(() => {
@@ -221,6 +228,7 @@ const ActiveProjects = () => {
     setPriorityAll("Mid");
     setQcDueDelay("");
     setFileHandlers({});
+    setShowFilesDropdown(null);
   };
 
   useEffect(() => {
@@ -314,6 +322,143 @@ const ActiveProjects = () => {
 
     return matchesTab && matchesSearch;
   });
+  
+  // Hold project function - Updated with the new API
+  const handleHoldProject = async (projectId) => {
+    try {
+      // Use the new API endpoint to update project status
+      const response = await axios.put(
+        `https://eminoids-backend-production.up.railway.app/api/project/updateProjectStatus/${projectId}`,
+        { status: "On hold" },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.status) {
+        alert("Project status updated to On Hold successfully!");
+        setShowHoldConfirmation(false);
+        // Update the project status in the local state
+        setProjects(prevProjects =>
+          prevProjects.map(project =>
+            project.id === projectId ? { ...project, status: "On hold" } : project
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Failed to hold project:", error);
+      alert("Error holding project");
+    }
+  };
+
+  // Edit deadline function
+  const handleEditDeadline = async (projectId) => {
+    try {
+      const response = await axios.patch(
+        `${BASE_URL}project/updateProject/${projectId}`,
+        { deadline: currentDeadline },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.status === 200) {
+        alert("Deadline updated successfully!");
+        setShowEditDeadlineModal(false);
+        // Update the project deadline in the local state
+        setProjects(prevProjects =>
+          prevProjects.map(project =>
+            project.id === projectId ? { ...project, deadline: currentDeadline } : project
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Failed to update deadline:", error);
+      alert("Error updating deadline");
+    }
+  };
+
+  // Copy server path function
+  const handleCopyServerPath = (serverPath) => {
+    if (serverPath) {
+      navigator.clipboard.writeText(serverPath)
+        .then(() => {
+          alert("Server path copied to clipboard!");
+        })
+        .catch(err => {
+          console.error("Failed to copy server path: ", err);
+          alert("Failed to copy server path");
+        });
+    } else {
+      alert("No server path available");
+    }
+  };
+
+  // Enhanced delete project function
+  const handleDeleteProject = async (projectId) => {
+    if (window.confirm("Are you sure you want to delete this project?")) {
+      try {
+        // Get project details to check file statuses
+        const project = projects.find(p => p.id === projectId);
+        
+        if (!project) {
+          alert("Project not found");
+          return;
+        }
+
+        // Determine new status based on file statuses
+        let newStatus = "Created"; // Default status
+        
+        // Check if any files have amendment statuses
+        const hasAmendmentStatuses = project.files?.some(file => 
+          file.status === "V1 YTS" || file.status === "V2 YTS" || 
+          file.status.includes("V") && file.status.includes("YTS")
+        );
+
+        if (hasAmendmentStatuses) {
+          newStatus = "Completed";
+        }
+
+        // Update project status
+        const response = await axios.patch(
+          `${BASE_URL}project/updateProject/${projectId}`,
+          { status: newStatus },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (response.status === 200) {
+          // Clear file statuses if they are YTS
+          if (newStatus === "Created") {
+            await axios.patch(
+              `${BASE_URL}projectFiles/clearFileStatuses/${projectId}`,
+              {},
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+          }
+
+          alert(`Project moved to ${newStatus} Projects successfully!`);
+          fetchProjects();
+        }
+      } catch (error) {
+        console.error("Failed to delete project:", error);
+        alert("Error deleting project");
+      }
+    }
+  };
+
+  // Fetch project files for dropdown
+  const fetchProjectFiles = async (projectId) => {
+    try {
+      const response = await axios.get(
+        `${BASE_URL}projectFiles/getFilesByProject/${projectId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (response.data.status) {
+        setProjectFiles(response.data.data);
+        setShowFilesDropdown(showFilesDropdown === projectId ? null : projectId);
+      }
+    } catch (error) {
+      console.error("Error fetching project files:", error);
+    }
+  };
+
   const markAsCompleted = async (projectId) => {
     try {
 
@@ -343,21 +488,6 @@ const ActiveProjects = () => {
     console.log("Editing project:", projectId);
   };
 
-  const handleDeleteProject = (projectId) => {
-    if (window.confirm("Are you sure you want to delete this project?")) {
-      axios
-        .delete(`${BASE_URL}project/deleteProject/${projectId}`, {
-          headers: { authorization: `Bearer ${token}` },
-        })
-        .then((res) => {
-          if (res.data.status) {
-            fetchProjects();
-          }
-        })
-        .catch((err) => console.error(err));
-    }
-  };
-
   const handleViewProject = (project) => {
     setSelectedProject(project);
     setSelectedFiles(project.files ? project.files.map(f => ({ id: f.id })) : []);
@@ -367,6 +497,7 @@ const ActiveProjects = () => {
       application: "",
       handler: "",
       qaReviewer: "",
+      qaStatus: "",
       qcDue: "",
       qcAllocatedHours: "",
       priority: "",
@@ -379,6 +510,7 @@ const ActiveProjects = () => {
     setQcDueDelay("");
 
     setExpandedRow(expandedRow === project.id ? null : project.id);
+    setShowFilesDropdown(null);
   };
 
   const toggleFileSelection = (file) => {
@@ -472,6 +604,7 @@ const ActiveProjects = () => {
     setExpandedRow(null);
     setSelectedFiles([]);
     setHasUnsavedChanges(false);
+    setShowFilesDropdown(null);
   };
 
   // Count files for each project
@@ -587,7 +720,9 @@ const getFileCount = (projectId) => {
                       <span
                         className={`badge ${project.status === "Completed"
                           ? "bg-success text-white"
-                          : "bg-warning text-dark"
+                          : project.status === "On hold" || project.status === "On Hold"
+                            ? "bg-warning text-dark"
+                            : "bg-info text-white"
                           }`}
                       >
                         {project.status || "-"}
@@ -613,12 +748,57 @@ const getFileCount = (projectId) => {
                       </div>
                     </td>
                     <td>
-                      <span className="badge bg-info">
-                        {getFileCount(project.id)} Files
-                      </span>
+                      <div className="position-relative">
+                        <button 
+                          className="badge bg-info d-flex align-items-center"
+                          onClick={() => fetchProjectFiles(project.id)}
+                        >
+                          {getFileCount(project.id)} Files
+                          <i className={`fas ms-1 ${showFilesDropdown === project.id ? 'fa-chevron-up' : 'fa-chevron-down'}`}></i>
+                        </button>
+                        
+                        {showFilesDropdown === project.id && (
+                          <div className="position-absolute end-0 mt-1 bg-white border rounded shadow p-2 z-3" style={{ minWidth: '300px' }}>
+                            <h6 className="mb-2">Project Files</h6>
+                            <div className="max-h-40 overflow-y-auto">
+                              {projectFiles.length > 0 ? (
+                                projectFiles.map(file => (
+                                  <div key={file.id} className="border-bottom py-2">
+                                    <div className="d-flex justify-content-between">
+                                      <span className="fw-bold">{file.fileName}</span>
+                                      <span className="badge bg-secondary">{file.status || "Pending"}</span>
+                                    </div>
+                                    <div className="small text-muted">
+                                      Pages: {file.pages || 0} | 
+                                      Ready for QC: {file.readyForQcDue ? new Date(file.readyForQcDue).toLocaleDateString() : '-'} | 
+                                      QC Hours: {file.qcAllocatedHours || 0}
+                                    </div>
+                                  </div>
+                                ))
+                              ) : (
+                                <p className="text-muted small mb-0">No files found</p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </td>
                     <td className="text-end">
                       <div className="d-flex justify-content-end gap-2">
+                        {/* Hold Button - Only show if not in RFD final stage */}
+                        {project.status !== "RFD Final" && project.status !== "Completed" && project.status !== "On hold" && project.status !== "On Hold" && (
+                          <button 
+                            onClick={() => {
+                              setSelectedProject(project);
+                              setShowHoldConfirmation(true);
+                            }} 
+                            className="btn btn-sm btn-warning"
+                          >
+                            <i className="fas fa-pause me-1"></i>
+                            Hold
+                          </button>
+                        )}
+                        
                         {project.status === "Completed" ? (
                           <span className="text-success">✔️ Completed</span>
                         ) : (
@@ -638,12 +818,34 @@ const getFileCount = (projectId) => {
                               }`}
                           ></i>
                         </button>
+                        
+                        {/* Edit Deadline Button */}
                         <button
+                          className="btn btn-sm btn-info"
+                          onClick={() => {
+                            setSelectedProject(project);
+                            setCurrentDeadline(project.deadline ? new Date(project.deadline).toISOString().slice(0, 16) : "");
+                            setShowEditDeadlineModal(true);
+                          }}
+                        >
+                           <i className="fas fa-edit"></i>
+                        </button>
+                        
+                        {/* Copy Server Path Button */}
+                        <button
+                          className="btn btn-sm btn-secondary"
+                          onClick={() => handleCopyServerPath(project.serverPath)}
+                          title="Copy Server Path"
+                        >
+                          <i className="fas fa-copy"></i>
+                        </button>
+                        
+                        {/* <button
                           onClick={() => handleEditProject(project.id)}
                           className="btn btn-sm btn-success"
                         >
                           <i className="fas fa-edit"></i>
-                        </button>
+                        </button> */}
                         <button
                           onClick={() => handleDeleteProject(project.id)}
                           className="btn btn-sm btn-danger"
@@ -872,6 +1074,65 @@ const getFileCount = (projectId) => {
               ))}
           </tbody>
         </table>
+      )}
+
+      {/* Hold Confirmation Modal */}
+      {showHoldConfirmation && selectedProject && (
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title text-dark">Hold Project</h5>
+                <button type="button" className="btn-close" onClick={() => setShowHoldConfirmation(false)}></button>
+              </div>
+              <div className="modal-body text-dark">
+                <p>Are you sure you want to change the status of this project to "On hold"?</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowHoldConfirmation(false)}>
+                  Cancel
+                </button>
+                <button type="button" className="btn btn-warning" onClick={() => handleHoldProject(selectedProject.id)}>
+                  Hold Project
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Deadline Modal */}
+      {showEditDeadlineModal && selectedProject && (
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title text-dark">Edit Project Deadline</h5>
+                <button type="button" className="btn-close" onClick={() => setShowEditDeadlineModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">
+                  <label htmlFor="deadlineInput" className="form-label">Project Deadline</label>
+                  <input
+                    type="datetime-local"
+                    className="form-control"
+                    id="deadlineInput"
+                    value={currentDeadline}
+                    onChange={(e) => setCurrentDeadline(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowEditDeadlineModal(false)}>
+                  Cancel
+                </button>
+                <button type="button" className="btn btn-primary" onClick={() => handleEditDeadline(selectedProject.id)}>
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

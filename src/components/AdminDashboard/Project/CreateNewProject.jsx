@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import Select from "react-select";
 import axios from "axios";
 import BASE_URL from "../../../config";
-// import * as XLSX from "xlsx";
+import * as XLSX from "xlsx";
 
 // Helper functions moved outside the component
 const getDaysInMonth = (month, year) => {
@@ -14,7 +20,7 @@ const getFirstDayOfMonth = (month, year) => {
   return new Date(year, month, 1).getDay();
 };
 
-const generateCalendarDays = (selectedMonth, selectedYear) => {
+const generateCalendarDays = (selectedMonth, selectedYear, today) => {
   const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
   const firstDay = getFirstDayOfMonth(selectedMonth, selectedYear);
   const days = [];
@@ -25,19 +31,42 @@ const generateCalendarDays = (selectedMonth, selectedYear) => {
   const daysInPrevMonth = getDaysInMonth(prevMonth, prevYear);
 
   for (let i = firstDay - 1; i >= 0; i--) {
+    const day = daysInPrevMonth - i;
+    const isPast =
+      prevYear < today.getFullYear() ||
+      (prevYear === today.getFullYear() && prevMonth < today.getMonth()) ||
+      (prevYear === today.getFullYear() &&
+        prevMonth === today.getMonth() &&
+        day < today.getDate());
+
     days.push({
-      day: daysInPrevMonth - i,
+      day,
       isCurrentMonth: false,
       isNextMonth: false,
+      isPast,
     });
   }
 
   // Current month days
   for (let day = 1; day <= daysInMonth; day++) {
+    const isToday =
+      selectedYear === today.getFullYear() &&
+      selectedMonth === today.getMonth() &&
+      day === today.getDate();
+    const isPast =
+      selectedYear < today.getFullYear() ||
+      (selectedYear === today.getFullYear() &&
+        selectedMonth < today.getMonth()) ||
+      (selectedYear === today.getFullYear() &&
+        selectedMonth === today.getMonth() &&
+        day < today.getDate());
+
     days.push({
       day,
       isCurrentMonth: true,
       isNextMonth: false,
+      isToday,
+      isPast,
     });
   }
 
@@ -48,6 +77,7 @@ const generateCalendarDays = (selectedMonth, selectedYear) => {
       day,
       isCurrentMonth: false,
       isNextMonth: true,
+      isPast: false,
     });
   }
 
@@ -66,6 +96,7 @@ const CreateNewProject = () => {
   const [loading, setLoading] = useState(true);
   const [managers, setManagers] = useState([]);
   const [loadingManagers, setLoadingManagers] = useState(true);
+  const today = new Date();
 
   // State for showing/hiding input fields
   const [showClientInput, setShowClientInput] = useState(false);
@@ -79,7 +110,10 @@ const CreateNewProject = () => {
   const [newApplicationName, setNewApplicationName] = useState("");
   const [newLanguageName, setNewLanguageName] = useState("");
 
-  const calendarDays = generateCalendarDays(selectedMonth, selectedYear);
+  // State for form validation errors
+  const [errors, setErrors] = useState({});
+
+  const calendarDays = generateCalendarDays(selectedMonth, selectedYear, today);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -89,7 +123,7 @@ const CreateNewProject = () => {
     tasks: [],
     languages: [],
     application: [],
-    files: [{ name: "", pageCount: 0 }],
+    files: [{ fileName: "", pageCount: 0, applicationId: "", selected: false }],
     totalPages: 0,
     receivedDate: new Date().toISOString().split("T")[0],
     serverPath: "",
@@ -98,20 +132,21 @@ const CreateNewProject = () => {
     currency: "USD",
     cost: 0,
     inrCost: 0,
-    billingMode: "estimated", // Added default billing mode
-    estimatedHrs: 0, // Added estimatedHrs to initial state
+    billingMode: "estimated",
+    estimatedHrs: 0,
+    hourlyRate: 0,
+    exchangeRate: 1, // Added for INR conversion
   });
 
-  // this state is for storing the file data form the ui 
+  // this state is for storing the file data form the ui
   const [fileList, setFileList] = useState([
-    { fileName: "", pages: "", application: "" }
+    { fileName: "", pages: "", application: "" },
   ]);
 
   // Fetch managers from the API
   useEffect(() => {
     const fetchManagers = async () => {
       try {
-
         const res = await axios.get(`${BASE_URL}member/getAllMembers`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -142,15 +177,131 @@ const CreateNewProject = () => {
     fetchManagers();
   }, []);
 
+  // Validate form before submission
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Validate required fields
+    if (!formData.title.trim()) {
+      newErrors.title = "Project title is required";
+    }
+
+    if (!formData.client) {
+      newErrors.client = "Client is required";
+    }
+
+    if (!formData.tasks.length) {
+      newErrors.tasks = "At least one task is required";
+    }
+
+    if (!formData.application.length) {
+      newErrors.application = "At least one application is required";
+    }
+
+    if (!formData.languages.length) {
+      newErrors.languages = "At least one language is required";
+    }
+
+    // Validate files
+    const fileErrors = [];
+    formData.files.forEach((file, index) => {
+      if (!file.fileName.trim()) {
+        fileErrors[index] = {
+          ...fileErrors[index],
+          fileName: "File name is required",
+        };
+      }
+      if (!file.pageCount || file.pageCount <= 0) {
+        fileErrors[index] = {
+          ...fileErrors[index],
+          pageCount: "Valid page count is required",
+        };
+      }
+      if (!file.applicationId) {
+        fileErrors[index] = {
+          ...fileErrors[index],
+          applicationId: "Application is required",
+        };
+      }
+    });
+
+    if (fileErrors.length > 0) {
+      newErrors.files = fileErrors;
+    }
+
+    if (!formData.receivedDate) {
+      newErrors.receivedDate = "Received date is required";
+    }
+
+    if (!formData.serverPath.trim()) {
+      newErrors.serverPath = "Server path is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Delete file function
+  const handleDeleteFile = async (fileId, index) => {
+    try {
+      // If file has an ID, delete from backend
+      if (fileId) {
+        await axios.delete(
+          `${BASE_URL}projectFiles/deleteProjectFile/${fileId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log("File deleted from backend");
+      }
+
+      // Remove from frontend state
+      const newFiles = [...formData.files];
+      newFiles.splice(index, 1);
+      setFormData((prev) => ({
+        ...prev,
+        files: newFiles.length
+          ? newFiles
+          : [
+              {
+                fileName: "",
+                pageCount: 0,
+                applicationId: "",
+                selected: false,
+              },
+            ],
+      }));
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      alert("An error occurred while deleting the file.");
+    }
+  };
+
   // Post API
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate form first
+    if (!validateForm()) {
+      // Scroll to the first error
+      const firstErrorElement = document.querySelector(".is-invalid");
+      if (firstErrorElement) {
+        firstErrorElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+      return;
+    }
+
     const deadline =
-  selectedYear && selectedMonth !== null && selectedDate !== null
-    ? `${selectedYear}-${(selectedMonth + 1)
-        .toString()
-        .padStart(2, "0")}-${selectedDate.toString().padStart(2, "0")}`
-    : "0000-00-00";
+      selectedYear && selectedMonth !== null && selectedDate !== null
+        ? `${selectedYear}-${(selectedMonth + 1)
+            .toString()
+            .padStart(2, "0")}-${selectedDate.toString().padStart(2, "0")}`
+        : "0000-00-00";
 
     // Step 1: Prepare project data
     const formDataForApi = {
@@ -181,13 +332,13 @@ const CreateNewProject = () => {
       qcHrs: 0,
       qcDueDate: "",
       priority: "Medium",
-       status: deadline === "0000-00-00" ? "In Progress" : "Active"
+      status: deadline === "0000-00-00" ? "In Progress" : "Active",
     };
 
     try {
       // Step 2: Create project
       const response = await axios.post(
-       `${BASE_URL}project/addProject`,
+        `${BASE_URL}project/addProject`,
         formDataForApi,
         {
           headers: {
@@ -200,34 +351,41 @@ const CreateNewProject = () => {
 
       console.log("✅ Project created:", response?.data);
 
-      // Step 3: Loop and add each project file
-      const languageId = formData.languages[0];
-      const applicationId = formData.application[0];
-      const deadline = formDataForApi.deadline;
-      const status = "Completed"; // Default status
+      // Get language names for sorting
+      const selectedLanguages = languageOptions
+        .filter((lang) => formData.languages.includes(lang.value))
+        .sort((a, b) => a.label.localeCompare(b.label));
 
-      for (const file of formData.files) {
-        const filePayload = {
-          projectId,
-          fileName: file.fileName,
-          pages: file.pageCount?.toString() || "0",
-          languageId,
-          applicationId,
-          status,
-          deadline,
-        };
+      // Step 3: Create files for each language
+      for (const lang of selectedLanguages) {
+        for (const file of formData.files) {
+          const filePayload = {
+            projectId,
+            fileName: file.fileName,
+            pages: file.pageCount?.toString() || "0",
+            languageId: lang.value,
+            applicationId: file.applicationId,
+            status: "Completed", // Default status
+            deadline,
+          };
 
-        await axios.post(
-          `${BASE_URL}projectFiles/addProjectFile`,
-          filePayload,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+          await axios.post(
+            `${BASE_URL}projectFiles/addProjectFile`,
+            filePayload,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
 
-        console.log("📁 File added:", filePayload);
+          console.log(
+            "📁 File added for language",
+            lang.label,
+            ":",
+            filePayload
+          );
+        }
       }
 
       alert("Project and all files created successfully!");
@@ -280,6 +438,7 @@ const CreateNewProject = () => {
       borderColor: state.isFocused ? "#ffffff66" : "#ffffff33",
       boxShadow: state.isFocused ? "0 0 0 1px #ffffff66" : "none",
       minHeight: "38px",
+      ...(errors.client && !formData.client ? { borderColor: "#dc3545" } : {}),
     }),
     singleValue: (provided) => ({
       ...provided,
@@ -318,138 +477,103 @@ const CreateNewProject = () => {
   const [languageOptions, setLanguageOptions] = useState([]);
   const [clientOptions, setClientOptions] = useState([]);
 
-
-
-  // Fetch tasks
+  // Fetch tasks, applications, languages, and clients
   useEffect(() => {
+    // Fetch tasks
     axios
       .get(`${BASE_URL}tasks/getAllTasks`, {
         headers: { authorization: `Bearer ${token}` },
       })
       .then((res) => {
         if (res.data.status) {
-          const options = res.data.tasks.map((task) => ({
-            value: task.id,
-            label: task.taskName,
-          }));
-          setTaskOptions(options);
+          setTaskOptions(
+            res.data.tasks.map((task) => ({
+              value: task.id,
+              label: task.taskName,
+            }))
+          );
         }
       })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  }, []);
+      .catch((err) => console.error("Error fetching tasks:", err));
 
-  // Fetch applications
-  useEffect(() => {
+    // Fetch applications
     axios
       .get(`${BASE_URL}application/getAllApplication`, {
         headers: { authorization: `Bearer ${token}` },
       })
       .then((res) => {
         if (res.data.status) {
-          const options = res.data.application.map((app) => ({
-            value: app.id,
-            label: app.applicationName,
-          }));
-          setApplicationOptions(options);
-        }
-      })
-      .catch((err) => console.error(err));
-  }, []);
-
-  // Fetch languages
-  useEffect(() => {
-    // Fetch tasks
-    axios.get(`${BASE_URL}tasks/getAllTasks`, {
-      headers: { authorization: `Bearer ${token}` },
-    })
-      .then((res) => {
-        if (res.data.status) {
-          setTaskOptions(res.data.tasks.map((task) => ({
-            value: task.id,
-            label: task.taskName,
-          })));
-        }
-      })
-      .catch((err) => console.error("Error fetching tasks:", err));
-
-    // Fetch applications
-    axios.get(`${BASE_URL}application/getAllApplication`, {
-      headers: { authorization: `Bearer ${token}` },
-    })
-      .then((res) => {
-        if (res.data.status) {
-          setApplicationOptions(res.data.application.map((app) => ({
-            value: app.id,
-            label: app.applicationName,
-          })));
+          setApplicationOptions(
+            res.data.application.map((app) => ({
+              value: app.id,
+              label: app.applicationName,
+            }))
+          );
         }
       })
       .catch((err) => console.error("Error fetching applications:", err));
 
     // Fetch languages
-    axios.get(`${BASE_URL}language/getAlllanguage`, {
-      headers: { authorization: `Bearer ${token}` },
-    })
+    axios
+      .get(`${BASE_URL}language/getAlllanguage`, {
+        headers: { authorization: `Bearer ${token}` },
+      })
       .then((res) => {
         if (res.data.status) {
-          setLanguageOptions(res.data.languages.map((lang) => ({
-            value: lang.id,
-            label: lang.languageName,
-          })));
+          setLanguageOptions(
+            res.data.languages.map((lang) => ({
+              value: lang.id,
+              label: lang.languageName,
+            }))
+          );
         }
       })
       .catch((err) => console.error("Error fetching languages:", err));
 
     // Fetch clients
-    axios.get(`${BASE_URL}client/getAllClients`, {
-      headers: { authorization: `Bearer ${token}` },
-    })
+    axios
+      .get(`${BASE_URL}client/getAllClients`, {
+        headers: { authorization: `Bearer ${token}` },
+      })
       .then((res) => {
         if (res.data.status) {
-          setClientOptions(res.data.clients.map((client) => ({
-            value: client.id, // Changed from client.clientName to client.id to match API expectation
-            label: client.clientName,
-          })));
+          setClientOptions(
+            res.data.clients.map((client) => ({
+              value: client.id,
+              label: client.clientName,
+            }))
+          );
         }
       })
       .catch((err) => console.error("Error fetching clients:", err))
       .finally(() => setLoading(false));
   }, [token]);
 
-  // Fetch clients
-  useEffect(() => {
-    axios
-      .get(
-       ` ${BASE_URL}client/getAllClients`,
-        {
-          headers: { authorization: `Bearer ${token}` },
-        }
-      )
-      .then((res) => {
-        console.log("Fetching client options...", res.data.clients);
-        const options = res.data.clients.map((client) => ({
-          value: client.id,
-          label: client.clientName,
-        }));
-        setClientOptions(options);
-      })
-      .catch((err) => {
-        console.error("Error fetching client options", err);
-      });
-  }, []);
-
+  // Updated formatDateTime function to show Time first, then Date
   const formatDateTime = () => {
     if (selectedDate === null) {
-      return "00/00/00 00:00 AM";
+      return "00:00 AM 00-00-00";
     }
-    const date = `${selectedDate.toString().padStart(2, "0")}/${(selectedMonth + 1)
-      .toString()
-      .padStart(2, "0")}/${selectedYear.toString().slice(-2)}`;
-    const time = `${selectedHour.toString().padStart(2, "0")}:${selectedMinute
+
+    // Format time: HH:MM tt
+    const hour =
+      selectedHour === 0
+        ? 12
+        : selectedHour > 12
+        ? selectedHour - 12
+        : selectedHour;
+    const time = `${hour.toString().padStart(2, "0")}:${selectedMinute
       .toString()
       .padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
-    return `${date} ${time}`;
+
+    // Format date: DD-MM-YY
+    const date = `${selectedDate.toString().padStart(2, "0")}-${(
+      selectedMonth + 1
+    )
+      .toString()
+      .padStart(2, "0")}-${selectedYear.toString().slice(-2)}`;
+
+    return `${time} ${date}`;
   };
 
   const handleInputChange = (e) => {
@@ -458,6 +582,15 @@ const CreateNewProject = () => {
       ...prev,
       [name]: value,
     }));
+
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   // Client functions
@@ -488,7 +621,7 @@ const CreateNewProject = () => {
 
       if (data.status && data.club) {
         const newOption = {
-          value: data.club.clientName,
+          value: data.club.id,
           label: data.club.clientName,
         };
 
@@ -496,11 +629,20 @@ const CreateNewProject = () => {
 
         setFormData((prev) => ({
           ...prev,
-          client: data.club.clientName,
+          client: data.club.id,
         }));
 
         setNewClientName("");
         setShowClientInput(false);
+
+        // Clear error when client is added
+        if (errors.client) {
+          setErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors.client;
+            return newErrors;
+          });
+        }
       } else {
         alert("Failed to add client. Please try again.");
       }
@@ -551,6 +693,15 @@ const CreateNewProject = () => {
 
         setNewTaskName("");
         setShowTaskInput(false);
+
+        // Clear error when task is added
+        if (errors.tasks) {
+          setErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors.tasks;
+            return newErrors;
+          });
+        }
       } else {
         alert("Task added successfully!");
       }
@@ -601,6 +752,15 @@ const CreateNewProject = () => {
 
         setNewApplicationName("");
         setShowApplicationInput(false);
+
+        // Clear error when application is added
+        if (errors.application) {
+          setErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors.application;
+            return newErrors;
+          });
+        }
       } else {
         alert("Failed to add application. Please try again.");
       }
@@ -651,6 +811,15 @@ const CreateNewProject = () => {
 
         setNewLanguageName("");
         setShowLanguageInput(false);
+
+        // Clear error when language is added
+        if (errors.languages) {
+          setErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors.languages;
+            return newErrors;
+          });
+        }
       } else {
         alert("Failed to add language. Please try again.");
       }
@@ -660,31 +829,119 @@ const CreateNewProject = () => {
     }
   };
 
+  // Updated Excel upload function
   const handleExcelUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     const reader = new FileReader();
     reader.onload = (evt) => {
-      const data = evt.target.result;
-      const workbook = XLSX.read(data, { type: "binary" });
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-      const rows = XLSX.utils.sheet_to_json(sheet);
+      try {
+        const data = evt.target.result;
+        const workbook = XLSX.read(data, { type: "binary" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(sheet);
 
-      // Expecting columns: fileName, pageCount, applicationId
-      const files = rows.map((row) => ({
-        fileName: row.fileName || "",
-        pageCount: Number(row.pageCount) || 0,
-        applicationId: row.applicationId || "",
-        selected: false,
-      }));
+        // Expecting columns: fileName, pageCount, applicationId
+        const files = rows.map((row) => ({
+          fileName: row.fileName || "",
+          pageCount: Number(row.pageCount) || 0,
+          applicationId: row.applicationId || "",
+          selected: false,
+        }));
 
-      setFormData((prev) => ({
-        ...prev,
-        files: files.length ? files : prev.files,
-      }));
+        setFormData((prev) => ({
+          ...prev,
+          files: files.length ? files : prev.files,
+        }));
+
+        // Clear file errors when new files are uploaded
+        if (errors.files) {
+          setErrors((prev) => {
+            const newErrors = { ...prev };
+            delete newErrors.files;
+            return newErrors;
+          });
+        }
+
+        alert("Excel file uploaded successfully!");
+      } catch (error) {
+        console.error("Error processing Excel file:", error);
+        alert("Error processing Excel file. Please check the format.");
+      }
     };
     reader.readAsBinaryString(file);
+  };
+
+  // Filter application options based on selected applications in formData
+  const filteredApplicationOptions = applicationOptions.filter((app) =>
+    formData.application.includes(app.value)
+  );
+
+  // Function to check if a date is in the past
+  const isDateInPast = (day, month, year) => {
+    const selectedDate = new Date(year, month, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return selectedDate < today;
+  };
+
+  // Function to check if time is in the past for today
+  const isTimeInPast = (hour, minute, isAM, date) => {
+    if (
+      !date ||
+      date !== today.getDate() ||
+      selectedMonth !== today.getMonth() ||
+      selectedYear !== today.getFullYear()
+    ) {
+      return false;
+    }
+
+    const selectedHour24 = isAM
+      ? hour === 12
+        ? 0
+        : hour
+      : hour === 12
+      ? 12
+      : hour + 12;
+    const selectedTime = new Date(
+      selectedYear,
+      selectedMonth,
+      date,
+      selectedHour24,
+      minute
+    );
+    const now = new Date();
+
+    return selectedTime < now;
+  };
+
+  // Handle file input changes with validation
+  const handleFileInputChange = (index, field, value) => {
+    const newFiles = [...formData.files];
+    newFiles[index] = { ...newFiles[index], [field]: value };
+
+    setFormData((prev) => ({
+      ...prev,
+      files: newFiles,
+    }));
+
+    // Clear error for this field if it exists
+    if (errors.files && errors.files[index] && errors.files[index][field]) {
+      const newFileErrors = [...errors.files];
+      delete newFileErrors[index][field];
+
+      // If no errors left for this file, remove the file error entry
+      if (Object.keys(newFileErrors[index]).length === 0) {
+        newFileErrors.splice(index, 1);
+      }
+
+      setErrors((prev) => ({
+        ...prev,
+        files: newFileErrors.length ? newFileErrors : undefined,
+      }));
+    }
   };
 
   return (
@@ -697,19 +954,40 @@ const CreateNewProject = () => {
           </label>
           <input
             type="text"
-            className="form-control"
+            className={`form-control ${errors.title ? "is-invalid" : ""}`}
             id="title"
             name="title"
             maxLength={80}
             required
             value={formData.title}
-            onChange={handleInputChange}
+            onChange={(e) => {
+              // Get the input value
+              let inputValue = e.target.value;
+
+              // Remove forbidden characters: \ / : * ? " < > |
+              inputValue = inputValue.replace(/[\\/:*?"<>|]/g, "");
+
+              // Trim trailing spaces and periods
+              inputValue = inputValue.replace(/[. ]+$/, "");
+
+              // Limit to 80 characters
+              if (inputValue.length > 80) {
+                inputValue = inputValue.substring(0, 80);
+              }
+
+              // Update form data
+              handleInputChange({
+                target: {
+                  name: "title",
+                  value: inputValue,
+                },
+              });
+            }}
             placeholder="Enter project title (max 80 chars)"
           />
-          <div className="form-text text-white">
-            Max allowed Character length – 80, (ignore or remove any special
-            character by itself)
-          </div>
+          {errors.title && (
+            <div className="invalid-feedback">{errors.title}</div>
+          )}
         </div>
 
         {/* Client, Country, Project Manager */}
@@ -737,19 +1015,41 @@ const CreateNewProject = () => {
                   options={clientOptions}
                   value={
                     formData.client
-                      ? { value: formData.client, label: formData.client }
+                      ? clientOptions.find(
+                          (opt) => opt.value === formData.client
+                        )
                       : null
                   }
-                  onChange={(opt) =>
+                  onChange={(opt) => {
                     setFormData((prev) => ({
                       ...prev,
                       client: opt ? opt.value : "",
-                    }))
-                  }
+                    }));
+
+                    // Clear error when client is selected
+                    if (errors.client) {
+                      setErrors((prev) => {
+                        const newErrors = { ...prev };
+                        delete newErrors.client;
+                        return newErrors;
+                      });
+                    }
+                  }}
                   isSearchable
                   placeholder="Select Client"
-                  styles={gradientSelectStyles}
+                  styles={{
+                    ...gradientSelectStyles,
+                    control: (provided, state) => ({
+                      ...gradientSelectStyles.control(provided, state),
+                      ...(errors.client && !formData.client
+                        ? { borderColor: "#dc3545" }
+                        : {}),
+                    }),
+                  }}
                 />
+                {errors.client && (
+                  <div className="text-danger">{errors.client}</div>
+                )}
 
                 {showClientInput && (
                   <div className="d-flex mt-2 gap-2">
@@ -840,24 +1140,46 @@ const CreateNewProject = () => {
               value={
                 taskOptions?.length && formData?.tasks?.length
                   ? taskOptions.filter((opt) =>
-                    formData.tasks.includes(opt.value)
-                  )
+                      formData.tasks.includes(opt.value)
+                    )
                   : []
               }
-              onChange={(selectedOptions) =>
+              onChange={(selectedOptions) => {
                 setFormData((prev) => ({
                   ...prev,
                   tasks: selectedOptions
                     ? selectedOptions.map((opt) => opt.value)
                     : [],
-                }))
-              }
+                }));
+
+                // Clear error when task is selected
+                if (
+                  errors.tasks &&
+                  selectedOptions &&
+                  selectedOptions.length > 0
+                ) {
+                  setErrors((prev) => {
+                    const newErrors = { ...prev };
+                    delete newErrors.tasks;
+                    return newErrors;
+                  });
+                }
+              }}
               isMulti
               isSearchable
               placeholder={loading ? "Loading..." : "Select Task(s)"}
-              styles={gradientSelectStyles}
+              styles={{
+                ...gradientSelectStyles,
+                control: (provided, state) => ({
+                  ...gradientSelectStyles.control(provided, state),
+                  ...(errors.tasks && !formData.tasks.length
+                    ? { borderColor: "#dc3545" }
+                    : {}),
+                }),
+              }}
               required
             />
+            {errors.tasks && <div className="text-danger">{errors.tasks}</div>}
             <div className="form-text text-white">
               {formData.tasks.length} selected
             </div>
@@ -901,23 +1223,47 @@ const CreateNewProject = () => {
               id="application"
               name="application"
               options={applicationOptions}
-              value={
-                applicationOptions?.filter(opt => formData.application.includes(opt.value))
-              }
-              onChange={(selectedOptions) =>
+              value={applicationOptions?.filter((opt) =>
+                formData.application.includes(opt.value)
+              )}
+              onChange={(selectedOptions) => {
                 setFormData((prev) => ({
                   ...prev,
                   application: selectedOptions
                     ? selectedOptions.map((opt) => opt.value)
                     : [],
-                }))
-              }
+                }));
+
+                // Clear error when application is selected
+                if (
+                  errors.application &&
+                  selectedOptions &&
+                  selectedOptions.length > 0
+                ) {
+                  setErrors((prev) => {
+                    const newErrors = { ...prev };
+                    delete newErrors.application;
+                    return newErrors;
+                  });
+                }
+              }}
               isMulti
               isSearchable
               placeholder={loading ? "Loading..." : "Select Application(s)"}
-              styles={gradientSelectStyles}
+              styles={{
+                ...gradientSelectStyles,
+                control: (provided, state) => ({
+                  ...gradientSelectStyles.control(provided, state),
+                  ...(errors.application && !formData.application.length
+                    ? { borderColor: "#dc3545" }
+                    : {}),
+                }),
+              }}
               required
             />
+            {errors.application && (
+              <div className="text-danger">{errors.application}</div>
+            )}
 
             {showApplicationInput && (
               <div className="d-flex mt-2 gap-2">
@@ -958,23 +1304,47 @@ const CreateNewProject = () => {
 
           <Select
             options={languageOptions}
-            value={
-              languageOptions?.filter(opt => formData.languages.includes(opt.value))
-            }
-            onChange={(selectedOptions) =>
+            value={languageOptions?.filter((opt) =>
+              formData.languages.includes(opt.value)
+            )}
+            onChange={(selectedOptions) => {
               setFormData((prev) => ({
                 ...prev,
                 languages: selectedOptions
                   ? selectedOptions.map((opt) => opt.value)
                   : [],
-              }))
-            }
+              }));
+
+              // Clear error when language is selected
+              if (
+                errors.languages &&
+                selectedOptions &&
+                selectedOptions.length > 0
+              ) {
+                setErrors((prev) => {
+                  const newErrors = { ...prev };
+                  delete newErrors.languages;
+                  return newErrors;
+                });
+              }
+            }}
             isMulti
             isSearchable
             placeholder={loading ? "Loading..." : "Select Languages"}
-            styles={gradientSelectStyles}
+            styles={{
+              ...gradientSelectStyles,
+              control: (provided, state) => ({
+                ...gradientSelectStyles.control(provided, state),
+                ...(errors.languages && !formData.languages.length
+                  ? { borderColor: "#dc3545" }
+                  : {}),
+              }),
+            }}
             required
           />
+          {errors.languages && (
+            <div className="text-danger">{errors.languages}</div>
+          )}
           <div className="form-text text-white">
             {formData.languages.length} selected
           </div>
@@ -1021,7 +1391,7 @@ const CreateNewProject = () => {
                         fileName: "",
                         pageCount: 0,
                         applicationId: "",
-                        selected: false
+                        selected: false,
                       }
                   ),
                 }));
@@ -1037,10 +1407,10 @@ const CreateNewProject = () => {
             />
             <button
               type="button"
-              className="btn btn-success btn-sm"
+              className="btn btn-success btn-sm d-flex align-items-center gap-1"
               onClick={() => document.getElementById("excel-upload").click()}
             >
-              Upload Excel
+              <Upload size={16} /> Upload Excel
             </button>
           </div>
           <div className="table-responsive">
@@ -1072,6 +1442,7 @@ const CreateNewProject = () => {
                   <th>File Name</th>
                   <th>Pages</th>
                   <th>Application</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -1098,37 +1469,69 @@ const CreateNewProject = () => {
                     <td>
                       <input
                         type="text"
-                        className="form-control"
+                        className={`form-control ${
+                          errors.files &&
+                          errors.files[idx] &&
+                          errors.files[idx].fileName
+                            ? "is-invalid"
+                            : ""
+                        }`}
                         value={file.fileName || ""}
-                        onChange={(e) => {
-                          const files = [...formData.files];
-                          files[idx].fileName = e.target.value;
-                          setFormData((prev) => ({ ...prev, files }));
-                        }}
+                        onChange={(e) =>
+                          handleFileInputChange(idx, "fileName", e.target.value)
+                        }
                         placeholder="File Name"
                         required
                       />
+                      {errors.files &&
+                        errors.files[idx] &&
+                        errors.files[idx].fileName && (
+                          <div className="invalid-feedback">
+                            {errors.files[idx].fileName}
+                          </div>
+                        )}
                     </td>
 
                     <td>
                       <input
                         type="number"
                         min={1}
-                        className="form-control"
+                        className={`form-control ${
+                          errors.files &&
+                          errors.files[idx] &&
+                          errors.files[idx].pageCount
+                            ? "is-invalid"
+                            : ""
+                        }`}
                         value={file.pageCount || ""}
-                        onChange={(e) => {
-                          const files = [...formData.files];
-                          files[idx].pageCount = Number(e.target.value);
-                          setFormData((prev) => ({ ...prev, files }));
-                        }}
+                        onChange={(e) =>
+                          handleFileInputChange(
+                            idx,
+                            "pageCount",
+                            Number(e.target.value)
+                          )
+                        }
                         placeholder="Pages"
                         required
                       />
+                      {errors.files &&
+                        errors.files[idx] &&
+                        errors.files[idx].pageCount && (
+                          <div className="invalid-feedback">
+                            {errors.files[idx].pageCount}
+                          </div>
+                        )}
                     </td>
 
                     <td>
                       <select
-                        className="form-select"
+                        className={`form-select ${
+                          errors.files &&
+                          errors.files[idx] &&
+                          errors.files[idx].applicationId
+                            ? "is-invalid"
+                            : ""
+                        }`}
                         value={file.applicationId || ""}
                         onChange={(e) => {
                           const newAppId = Number(e.target.value);
@@ -1143,20 +1546,59 @@ const CreateNewProject = () => {
                           }
 
                           setFormData((prev) => ({ ...prev, files }));
+
+                          // Clear error when application is selected
+                          if (
+                            errors.files &&
+                            errors.files[idx] &&
+                            errors.files[idx].applicationId
+                          ) {
+                            const newFileErrors = [...errors.files];
+                            delete newFileErrors[idx].applicationId;
+
+                            // If no errors left for this file, remove the file error entry
+                            if (Object.keys(newFileErrors[idx]).length === 0) {
+                              newFileErrors.splice(idx, 1);
+                            }
+
+                            setErrors((prev) => ({
+                              ...prev,
+                              files: newFileErrors.length
+                                ? newFileErrors
+                                : undefined,
+                            }));
+                          }
                         }}
                         required
                       >
                         <option value="">Select</option>
-                        {applicationOptions.map((app) => (
+                        {/* Use filtered application options here */}
+                        {filteredApplicationOptions.map((app) => (
                           <option key={app.value} value={app.value}>
                             {app.label}
                           </option>
                         ))}
                       </select>
+                      {errors.files &&
+                        errors.files[idx] &&
+                        errors.files[idx].applicationId && (
+                          <div className="invalid-feedback">
+                            {errors.files[idx].applicationId}
+                          </div>
+                        )}
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleDeleteFile(file.id, idx)}
+                        title="Delete file"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </td>
                   </tr>
                 ))}
-
               </tbody>
             </table>
           </div>
@@ -1205,12 +1647,19 @@ const CreateNewProject = () => {
             </label>
             <input
               type="date"
-              className="form-control"
+              className={`form-control ${
+                errors.receivedDate ? "is-invalid" : ""
+              }`}
               name="receivedDate"
               value={formData.receivedDate}
-              onChange={handleInputChange}
+              onChange={(e) => {
+                handleInputChange(e);
+              }}
               required
             />
+            {errors.receivedDate && (
+              <div className="invalid-feedback">{errors.receivedDate}</div>
+            )}
           </div>
           <div className="col-md-8">
             <label className="form-label">
@@ -1218,13 +1667,18 @@ const CreateNewProject = () => {
             </label>
             <input
               type="text"
-              className="form-control"
+              className={`form-control ${
+                errors.serverPath ? "is-invalid" : ""
+              }`}
               name="serverPath"
               value={formData.serverPath}
               onChange={handleInputChange}
               required
               placeholder="/projects/client/project-name"
             />
+            {errors.serverPath && (
+              <div className="invalid-feedback">{errors.serverPath}</div>
+            )}
           </div>
           <div className="col-12">
             <label className="form-label">Notes</label>
@@ -1301,7 +1755,7 @@ const CreateNewProject = () => {
                   inrCost: prev.estimatedHrs * rate * (prev.exchangeRate || 1),
                 }));
               }}
-              placeholder="Auto from Client"
+              placeholder=""
             />
           </div>
 
@@ -1405,7 +1859,7 @@ const CreateNewProject = () => {
                   readOnly
                   onClick={() => setIsOpen(!isOpen)}
                   className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
-                  placeholder="00/00/00 00:00 AM"
+                  placeholder="00:00 AM 00-00-00"
                 />
               </div>
 
@@ -1413,17 +1867,24 @@ const CreateNewProject = () => {
                 <div className="calendar-dropdown">
                   <div className="time-display">
                     <div className="time">
-                      {selectedHour.toString().padStart(2, "0")}:
-                      {selectedMinute.toString().padStart(2, "0")}
+                      {selectedHour === 0
+                        ? "12"
+                        : selectedHour > 12
+                        ? selectedHour - 12
+                        : selectedHour.toString().padStart(2, "0")}
+                      :{selectedMinute.toString().padStart(2, "0")}
                     </div>
                     <div className="period">{isAM ? "AM" : "PM"}</div>
                     <div className="date">
                       {selectedDate !== null
-                        ? `${months[selectedMonth].substring(
-                          0,
-                          3
-                        )}, ${selectedYear}`
-                        : "00/00/00"}
+                        ? `${selectedDate.toString().padStart(2, "0")}-${(
+                            selectedMonth + 1
+                          )
+                            .toString()
+                            .padStart(2, "0")}-${selectedYear
+                            .toString()
+                            .slice(-2)}`
+                        : "00-00-00"}
                     </div>
                   </div>
 
@@ -1434,16 +1895,28 @@ const CreateNewProject = () => {
                         <div className="time-scroll">
                           <div className="time-options">
                             {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(
-                              (hour) => (
-                                <button
-                                  key={hour}
-                                  onClick={() => setSelectedHour(hour)}
-                                  className={`time-option ${selectedHour === hour ? "selected-hour" : ""
-                                    }`}
-                                >
-                                  {hour.toString().padStart(2, "0")}
-                                </button>
-                              )
+                              (hour) => {
+                                const isPast = isTimeInPast(
+                                  hour,
+                                  selectedMinute,
+                                  isAM,
+                                  selectedDate
+                                );
+                                return (
+                                  <button
+                                    key={hour}
+                                    onClick={() => setSelectedHour(hour)}
+                                    className={`time-option ${
+                                      selectedHour === hour
+                                        ? "selected-hour"
+                                        : ""
+                                    } ${isPast ? "past-time" : ""}`}
+                                    disabled={isPast}
+                                  >
+                                    {hour.toString().padStart(2, "0")}
+                                  </button>
+                                );
+                              }
                             )}
                           </div>
                         </div>
@@ -1453,18 +1926,28 @@ const CreateNewProject = () => {
                         <div className="time-column-label">Min</div>
                         <div className="time-scroll">
                           <div className="time-options">
-                            {[0, 15, 30, 45].map((minute) => (
-                              <button
-                                key={minute}
-                                onClick={() => setSelectedMinute(minute)}
-                                className={`time-option ${selectedMinute === minute
-                                  ? "selected-minute"
-                                  : ""
-                                  }`}
-                              >
-                                {minute.toString().padStart(2, "0")}
-                              </button>
-                            ))}
+                            {[0, 15, 30, 45].map((minute) => {
+                              const isPast = isTimeInPast(
+                                selectedHour,
+                                minute,
+                                isAM,
+                                selectedDate
+                              );
+                              return (
+                                <button
+                                  key={minute}
+                                  onClick={() => setSelectedMinute(minute)}
+                                  className={`time-option ${
+                                    selectedMinute === minute
+                                      ? "selected-minute"
+                                      : ""
+                                  } ${isPast ? "past-time" : ""}`}
+                                  disabled={isPast}
+                                >
+                                  {minute.toString().padStart(2, "0")}
+                                </button>
+                              );
+                            })}
                           </div>
                         </div>
                       </div>
@@ -1474,15 +1957,17 @@ const CreateNewProject = () => {
                         <div className="period-options">
                           <button
                             onClick={() => setIsAM(true)}
-                            className={`period-option ${isAM ? "selected" : ""
-                              }`}
+                            className={`period-option ${
+                              isAM ? "selected" : ""
+                            }`}
                           >
                             AM
                           </button>
                           <button
                             onClick={() => setIsAM(false)}
-                            className={`period-option ${!isAM ? "selected" : ""
-                              }`}
+                            className={`period-option ${
+                              !isAM ? "selected" : ""
+                            }`}
                           >
                             PM
                           </button>
@@ -1492,7 +1977,14 @@ const CreateNewProject = () => {
 
                     <div className="calendar-section">
                       <div className="month-nav">
-                        <button type="button" onClick={handlePrevMonth}>
+                        <button
+                          type="button"
+                          onClick={handlePrevMonth}
+                          disabled={
+                            selectedMonth === today.getMonth() &&
+                            selectedYear === today.getFullYear()
+                          }
+                        >
                           <ChevronLeft size={20} />
                         </button>
                         <h3>
@@ -1518,14 +2010,19 @@ const CreateNewProject = () => {
                             type="button"
                             onClick={() =>
                               dayObj.isCurrentMonth &&
+                              !dayObj.isPast &&
                               setSelectedDate(dayObj.day)
                             }
-                            className={`calendar-day ${dayObj.isCurrentMonth
-                              ? selectedDate === dayObj.day
-                                ? "current-month selected"
-                                : "current-month"
-                              : "other-month"
-                              }`}
+                            className={`calendar-day ${
+                              dayObj.isCurrentMonth
+                                ? selectedDate === dayObj.day
+                                  ? "current-month selected"
+                                  : dayObj.isToday
+                                  ? "current-month today"
+                                  : "current-month"
+                                : "other-month"
+                            } ${dayObj.isPast ? "past-date" : ""}`}
+                            disabled={dayObj.isPast}
                           >
                             {dayObj.day}
                           </button>
@@ -1548,7 +2045,6 @@ const CreateNewProject = () => {
                         <button
                           type="button"
                           onClick={() => {
-                            const today = new Date();
                             setSelectedDate(today.getDate());
                             setSelectedMonth(today.getMonth());
                             setSelectedYear(today.getFullYear());

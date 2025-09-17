@@ -18,6 +18,24 @@ const Created = () => {
   const [fileStatuses, setFileStatuses] = useState({});
   const [selectedFiles, setSelectedFiles] = useState([]);
 
+  // Edit form states
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingProject, setEditingProject] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    projectTitle: "",  // Changed from projectTitle to match database
+    clientId: "", // Changed from clientName to match database
+    country: "",
+    projectManagerId: "",
+    taskId: "",
+    languageId: "",
+    applicationId: "",
+    totalProjectPages: "",
+    receiveDate: "",
+    estimatedHours: "",
+    currency: "",
+    totalCost: "",
+  });
+
   // THIS API IS FOR fetching files from the api 
   // ✅ Fetch all project files on mount
   useEffect(() => {
@@ -40,21 +58,6 @@ const Created = () => {
 
     fetchFiles();
   }, []);
-
-
-
-
-
-  // // Filter files for the given projectId
-  // const filteredFiles = allFiles.filter((file) => file.projectId === projectId);
-
-
-  const dummyFiles = [
-    { id: 1, name: "File_1_1.docx", pages: 15, language: "az", application: "Visio" },
-    { id: 2, name: "File_1_2.docx", pages: 6, language: "az", application: "FM" },
-    { id: 3, name: "File_1_3.docx", pages: 5, language: "yo", application: "Visio" },
-    { id: 4, name: "File_1_4.docx", pages: 2, language: "am", application: "Word" },
-  ];
 
   useEffect(() => {
     axios
@@ -87,69 +90,210 @@ const Created = () => {
     return matchesTab && matchesSearch;
   });
 
-
-
-
-const markAsCompleted = async (projectId) => {
-  try {
-    const token = localStorage.getItem("authToken");
-
-    // Prompt user to enter deadline
-    const deadline = prompt("Enter new deadline date (YYYY-MM-DD):");
-
-    if (!deadline || !/^\d{4}-\d{2}-\d{2}$/.test(deadline)) {
-      alert("Invalid or empty date. Please use YYYY-MM-DD format.");
-      return;
-    }
-
-    const res = await axios.patch(
-      `${BASE_URL}project/updateProject/${projectId}`,
-      {
-        status: "Active",       // ✅ Set status to Active
-        deadline: deadline,     // ✅ Set deadline as user input
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+  // Function to mark project as Active/YTS
+  const markAsActiveOrYTS = async (projectId) => {
+    try {
+      // Prompt user to enter deadline with date and time
+      const deadline = prompt("Enter deadline date and time (YYYY-MM-DD HH:MM):");
+      
+      if (!deadline || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(deadline)) {
+        alert("Invalid or empty datetime. Please use YYYY-MM-DD HH:MM format.");
+        return;
       }
-    );
 
-    if (res.status === 200) {
-      alert("Project status updated and deadline set successfully!");
+      // Update project status to Active and set deadline
+      const res = await axios.patch(
+        `${BASE_URL}project/updateProject/${projectId}`,
+        {
+          status: "Active",
+          deadline: deadline,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-      // Refresh project list
-      const refreshed = await axios.get(`${BASE_URL}project/getAllProjects`, {
+      if (res.status === 200) {
+        // Update all files in the project to YTS status
+        const projectFiles = allFiles.filter(file => file.projectId === projectId);
+        
+        for (const file of projectFiles) {
+          await axios.patch(
+            `${BASE_URL}projectFiles/updateFileStatus/${file.id}`,
+            {
+              status: "YTS",
+              deadline: deadline
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+        }
+
+        alert("Project status updated to Active and all files marked as YTS!");
+        
+        // Refresh project list
+        const refreshed = await axios.get(`${BASE_URL}project/getAllProjects`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (refreshed.data.status) {
+          setProjects(refreshed.data.projects);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to update project status:", error);
+      alert("Error updating project status");
+    }
+  };
+
+  // Function to open edit modal with project data
+  const handleEditProject = (project) => {
+    setEditingProject(project);
+    setEditFormData({
+      projectTitle: project.projectTitle || "",  // Changed from projectTitle to match database
+      clientId: project.clientId || "", // Changed from clientName to match database
+      country: project.country || "",
+      projectManagerId: project.projectManagerId || "",
+      taskId: project.taskId || "",
+      languageId: project.languageId || "",
+      applicationId: project.applicationId || "",
+      totalProjectPages: project.totalProjectPages || "",
+      receiveDate: project.receiveDate ? new Date(project.receiveDate).toISOString().slice(0, 16) : "",
+      estimatedHours: project.estimatedHours || "",
+      currency: project.currency || "",
+      totalCost: project.totalCost || "",
+    });
+    setShowEditModal(true);
+  };
+
+  // Function to handle form input changes
+  const handleEditFormChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Function to save edited project
+  const saveEditedProject = async () => {
+    try {
+      const response = await axios.patch(
+        `${BASE_URL}project/updateProject/${editingProject.id}`,
+        editFormData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.status) {
+        alert("Project updated successfully!");
+        
+        // Refresh project list
+        const refreshed = await axios.get(`${BASE_URL}project/getAllProjects`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (refreshed.data.status) {
+          setProjects(refreshed.data.projects);
+        }
+        
+        setShowEditModal(false);
+      } else {
+        alert("Failed to update project");
+      }
+    } catch (error) {
+      console.error("Error updating project:", error);
+      alert("Error updating project");
+    }
+  };
+
+  // Function to copy server path to clipboard
+  const copyServerPath = (project) => {
+    const serverPath = `\\\\server\\projects\\${project.id}`; // Adjust path format as needed
+    navigator.clipboard.writeText(serverPath)
+      .then(() => {
+        alert("Server path copied to clipboard!");
+      })
+      .catch(err => {
+        console.error("Failed to copy: ", err);
+        alert("Failed to copy server path");
+      });
+  };
+
+  // Function to handle delete project with confirmation
+  const handleDeleteProject = (id) => {
+    if (window.confirm("Are you sure you want to delete this project? This action cannot be undone.")) {
+      axios.delete(`${BASE_URL}project/deleteProject/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then(res => {
+        if (res.data.status) {
+          alert("Project deleted successfully!");
+          setProjects(projects.filter(project => project.id !== id));
+        } else {
+          alert("Failed to delete project");
+        }
+      })
+      .catch(err => {
+        console.error("Error deleting project:", err);
+        alert("Error deleting project");
+      });
+    }
+  };
+
+  // Function to save file status updates
+  const saveFileStatusUpdates = async (projectId) => {
+    try {
+      const deadline = fileDeadlines[projectId];
+      
+      if (!deadline) {
+        alert("Please set a deadline before saving.");
+        return;
+      }
+
+      // Update selected files with new status and deadline
+      for (const fileId of selectedFiles) {
+        await axios.patch(
+          `${BASE_URL}projectFiles/updateFileStatus/${fileId}`,
+          {
+            status: fileStatuses[fileId] || "YTS",
+            deadline: deadline
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
+
+      alert("File statuses updated successfully!");
+      
+      // Refresh files list
+      const filesResponse = await axios.get(`${BASE_URL}projectFiles/getAllProjectFiles`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (refreshed.data.status) {
-        setProjects(refreshed.data.projects);
+      if (filesResponse.data.status) {
+        setAllFiles(filesResponse.data.data);
       }
+      
+      // Clear selections
+      setSelectedFiles([]);
+      setFileDeadlines(prev => ({ ...prev, [projectId]: "" }));
+    } catch (error) {
+      console.error("Failed to update file statuses:", error);
+      alert("Error updating file statuses");
     }
-  } catch (error) {
-    console.error("Failed to update project status:", error);
-    alert("Error updating project status");
-  }
-};
-
-
-
-
-  const filteredFiles = (allFiles || []).filter(file => file.projectId === projects);
-
-
-  const handleEditProject = (id) => {
-    // Implement edit project functionality
-    console.log("Edit project:", id);
   };
-
-  const handleDeleteProject = (id) => {
-    // Implement delete project functionality
-    console.log("Delete project:", id);
-  };
-
-
 
   return (
     <div>
@@ -169,8 +313,7 @@ const markAsCompleted = async (projectId) => {
             <tr className="text-center">
               <th>S.No.</th>
               <th>Project Title</th>
-              <th>Client Alise Name</th>
-              <th>Client</th>
+              <th>Client Name</th>
               <th>Country</th>
               <th>Project Manager</th>
               <th>Task</th>
@@ -186,22 +329,20 @@ const markAsCompleted = async (projectId) => {
           </thead>
           <tbody>
             {projects
-              // .filter((project) => project.status != "Completed")
-              .filter((project) => project.status == "In Progress")
+              .filter((project) => project.status === "In Progress")
               .map((project, index) => (
                 <React.Fragment key={project.id}>
                   <tr className="text-center">
                     <td>{index + 1}</td>
                     <td>
-                      {project.projectTitle}
+                      {project.title}
                       <span className="badge bg-warning bg-opacity-10 text-warning ms-2">
                         {project.status}
                       </span>
                     </td>
-                    <td>{project.full_name || "-"}</td>
-                    <td>{project.clientName}</td>
+                    <td>{project.clientName || "-"}</td>
                     <td>{project.country}</td>
-                    <td>{project.projectManagerId}</td>
+                    <td>{project.full_name}</td>
                     <td>
                       <span className="badge bg-primary bg-opacity-10 text-primary">
                         {project.task_name}
@@ -226,7 +367,7 @@ const markAsCompleted = async (projectId) => {
                     <td>{project.estimatedHours || "-"}</td>
                     <td>
                       {project.currency
-                        ? `${project.currency || "USD"} ${project.currency}`
+                        ? `${project.currency || "USD"} ${project.totalCost}`
                         : "-"}
                     </td>
                     <td>{project.totalCost ? `₹${project.totalCost}` : "-"}</td>
@@ -240,22 +381,30 @@ const markAsCompleted = async (projectId) => {
                           }
                           aria-label="Show Files"
                           className="btn btn-sm btn-secondary"
+                          title="Project Files"
                         >
-                          <i className={`fa-solid fa-angle-down ${expandedProjectId === project.id ? "rotate-180" : ""}`}></i>
+                          <i className="fas fa-folder-open"></i>
                         </button>
                         <button
-                          onClick={() => markAsCompleted(project.id)}
+                          onClick={() => markAsActiveOrYTS(project.id)}
                           className="btn btn-sm btn-success"
-                          title="Mark as Completed"
+                          title="Mark as Active/YTS"
                         >
-                          <i className="fas fa-check"></i> Mark as YTS
+                          <i className="fas fa-check"></i>
                         </button>
                         <button
-                          onClick={() => handleEditProject(project.id)}
+                          onClick={() => handleEditProject(project)}
                           className="btn btn-sm btn-primary"
                           title="Edit"
                         >
                           <i className="fas fa-edit"></i>
+                        </button>
+                        <button
+                          onClick={() => copyServerPath(project)}
+                          className="btn btn-sm btn-info"
+                          title="Copy Server Path"
+                        >
+                          <i className="fas fa-copy"></i>
                         </button>
                         <button
                           onClick={() => handleDeleteProject(project.id)}
@@ -341,7 +490,12 @@ const markAsCompleted = async (projectId) => {
                                         >
                                           <option value="Pending">Pending</option>
                                           <option value="YTS">YTS</option>
-                                          <option value="Approved">Approved</option>
+                                          <option value="WIP">WIP</option>
+                                          <option value="QC YTS">QC YTS</option>
+                                          <option value="QC WIP">QC WIP</option>
+                                          <option value="Corr YTS">Corr YTS</option>
+                                          <option value="Corr WIP">Corr WIP</option>
+                                          <option value="RFD">RFD</option>
                                         </select>
                                       </td>
                                     </tr>
@@ -366,12 +520,11 @@ const markAsCompleted = async (projectId) => {
                                   }));
                                 }}
                               />
-
                             </div>
                             <div>
                               <button
                                 className="btn btn-primary mt-2"
-                                onClick={() => markAsCompleted(project.id)}
+                                onClick={() => saveFileStatusUpdates(project.id)}
                               >
                                 Save
                               </button>
@@ -392,6 +545,166 @@ const markAsCompleted = async (projectId) => {
               ))}
           </tbody>
         </table>
+      )}
+
+      {/* Edit Project Modal */}
+      {showEditModal && editingProject && (
+        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-lg">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title " style={{color:"black"}} >Edit Project</h5>
+                <button type="button" className="btn-close" onClick={() => setShowEditModal(false)}></button>
+              </div>
+              <div className="modal-body">
+                <form>
+                  <div className="row mb-3">
+                    <div className="col-md-6">
+                      <label className="form-label text-dark">Project Title</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="title"  // Changed from projectTitle to match database
+                        value={editFormData.projectTitle}
+                        onChange={handleEditFormChange}
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label text-dark">Client Name</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="client"  // Changed from clientName to match database
+                        value={editFormData.clientId}
+                        onChange={handleEditFormChange}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="row mb-3">
+                    <div className="col-md-6">
+                      <label className="form-label text-dark">Country</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="country"
+                        value={editFormData.country}
+                        onChange={handleEditFormChange}
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label text-dark">Project Manager</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="projectManagerId"
+                        value={editFormData.projectManagerId}
+                        onChange={handleEditFormChange}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="row mb-3">
+                    <div className="col-md-4">
+                      <label className="form-label text-dark">Task</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="task_name"
+                        value={editFormData.taskId}
+                        onChange={handleEditFormChange}
+                      />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label text-dark">Language</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="language_name"
+                        value={editFormData.languageId}
+                        onChange={handleEditFormChange}
+                      />
+                    </div>
+                    <div className="col-md-4"> 
+                      <label className="form-label text-dark">Application</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="application_name"
+                        value={editFormData.applicationId}
+                        onChange={handleEditFormChange}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="row mb-3">
+                    <div className="col-md-4">
+                      <label className="form-label text-dark">Total Pages</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        name="totalProjectPages"
+                        value={editFormData.totalProjectPages}
+                        onChange={handleEditFormChange}
+                      />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label text-dark">Received Date</label>
+                      <input
+                        type="datetime-local"
+                        className="form-control"
+                        name="receiveDate"
+                        value={editFormData.receiveDate}
+                        onChange={handleEditFormChange}
+                      />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label text-dark">Estimated Hours</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        name="estimatedHours"
+                        value={editFormData.estimatedHours}
+                        onChange={handleEditFormChange}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="row mb-3">
+                    <div className="col-md-6">
+                      <label className="form-label text-dark">Currency</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        name="currency"
+                        value={editFormData.currency}
+                        onChange={handleEditFormChange}
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label text-dark">Total Cost</label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        name="totalCost"
+                        value={editFormData.totalCost}
+                        onChange={handleEditFormChange}
+                      />
+                    </div>
+                  </div>
+                </form>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowEditModal(false)}>
+                  Cancel
+                </button>
+                <button type="button" className="btn btn-primary" onClick={saveEditedProject}>
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
