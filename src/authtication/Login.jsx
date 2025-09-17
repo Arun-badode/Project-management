@@ -104,25 +104,25 @@ const LoginPage = () => {
   };
 
 
-  // if (showVideo) {
-  //   return (
-  //     <div className={`video-splash-screen ${fadeOut ? "" : ""}`}>
-  //       <video 
-  //         autoPlay 
-  //         muted 
-  //         playsInline 
-  //         className="splash-video"
-  //         style={{ height: isMobile ? "100%" : "100%" }}
-  //       >
-  //         <source 
-  //           src={isMobile ? "Video/mob.mp4" : "/Video/web.mp4"} 
-  //           type="video/mp4" 
-  //         />
-  //         Your browser does not support the video tag.
-  //       </video>
-  //     </div>
-  //   );
-  // }
+  if (showVideo) {
+    return (
+      <div className={`video-splash-screen ${fadeOut ? "" : ""}`}>
+        <video 
+          autoPlay 
+          muted 
+          playsInline 
+          className="splash-video"
+          style={{ height: isMobile ? "100%" : "100%" }}
+        >
+          <source 
+            src={isMobile ? "Video/mob.mp4" : "/Video/web.mp4"} 
+            type="video/mp4" 
+          />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    );
+  }
 
   return (
     <div className="login-page">

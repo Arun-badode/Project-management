@@ -114,8 +114,8 @@ const Assigned = () => {
               item.status === "Completed"
                 ? 100
                 : item.status === "In Progress"
-                ? 50
-                : 0,
+                  ? 50
+                  : 0,
             description: item.description || "",
             memberId: item.memberId || "",
           }));
@@ -254,6 +254,26 @@ const Assigned = () => {
     }
   };
 
+  const [permissions, setPermissions] = useState([]);
+  const roleId = localStorage.getItem("roleId");
+
+  // 🔹 Fetch permissions from API
+  useEffect(() => {
+    axios
+      .get(`${BASE_URL}roles/permission/${roleId}`)
+      .then((res) => {
+        if (res.data.status) {
+          setPermissions(res.data.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching permissions", err);
+      });
+  }, [roleId])
+
+  const projectPermission = permissions.find(p => p.featureName === "Assigned Projects");
+  const AssignProjectPermission = Number(projectPermission?.canAdd);
+
   return (
     <div className="container-fluid bg-main p-3 ">
       <div className="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between py-3 gap-2">
@@ -282,13 +302,15 @@ const Assigned = () => {
               <Filter className="me-2" />
               Filters
             </Button>
-            <Button
-              onClick={() => setShowAddModal(true)}
-              className="d-flex align-items-center gradient-button"
-            >
-              <Plus className="me-2" />
-              Assigned Project
-            </Button>
+            {AssignProjectPermission === 1 &&
+              (<Button
+                onClick={() => setShowAddModal(true)}
+                className="d-flex align-items-center gradient-button"
+              >
+                <Plus className="me-2" />
+                Assigned Project
+              </Button>)
+            }
           </div>
         </div>
       </div>
@@ -427,13 +449,17 @@ const Assigned = () => {
                 <p className="text-muted mb-4">
                   Try adjusting your search or filter criteria.
                 </p>
-                <Button
+              {AssignProjectPermission==1 &&
+                (
+                    <Button
                   className="gradient-button"
                   onClick={() => setShowAddModal(true)}
                 >
                   <Plus className="me-2" />
                   Assigned Project
                 </Button>
+                )
+              }
               </Card.Body>
             </Card>
           )}
@@ -454,37 +480,37 @@ const Assigned = () => {
           {selectedProject && (
             <div>
               <h4 className="mb-4">{selectedProject.name}</h4>
-              
+
               <div className="mb-3">
                 <h6 className="">Status</h6>
                 <Badge bg={getStatusColor(selectedProject.status)}>
                   {selectedProject.status}
                 </Badge>
               </div>
-              
+
               <div className="mb-3">
                 <h6 className="">Due Date</h6>
                 <p>{formatDate(selectedProject.dueDate)}</p>
               </div>
-              
+
               <div className="mb-3">
                 <h6 className="">Priority</h6>
                 <Badge bg={getPriorityColor(selectedProject.priority)}>
                   {selectedProject.priority}
                 </Badge>
               </div>
-              
+
               <div className="mb-3">
                 <h6 className="">Team Members</h6>
                 <p>{selectedProject.teamMembers}</p>
               </div>
-              
+
               <div className="mb-3">
                 <h6 className="">Progress</h6>
                 <ProgressBar now={selectedProject.progress} variant="primary" />
                 <small className="">{selectedProject.progress}% complete</small>
               </div>
-              
+
               {selectedProject.description && (
                 <div className="mb-3">
                   <h6 className="">Description</h6>
@@ -545,7 +571,7 @@ const Assigned = () => {
                   </Form.Group>
                 </Col>
               </Row>
-              
+
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3">
@@ -575,7 +601,7 @@ const Assigned = () => {
                   </Form.Group>
                 </Col>
               </Row>
-              
+
               <Form.Group className="mb-3">
                 <Form.Label>Team Member</Form.Label>
                 <Form.Select
@@ -592,7 +618,7 @@ const Assigned = () => {
                   ))}
                 </Form.Select>
               </Form.Group>
-              
+
               <Form.Group className="mb-3">
                 <Form.Label>Description</Form.Label>
                 <Form.Control
@@ -664,7 +690,7 @@ const Assigned = () => {
                 </Form.Group>
               </Col>
             </Row>
-            
+
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
@@ -694,7 +720,7 @@ const Assigned = () => {
                 </Form.Group>
               </Col>
             </Row>
-            
+
             <Form.Group className="mb-3">
               <Form.Label>Team Member *</Form.Label>
               <Form.Select
@@ -711,7 +737,7 @@ const Assigned = () => {
                 ))}
               </Form.Select>
             </Form.Group>
-            
+
             <Form.Group className="mb-3">
               <Form.Label>Description</Form.Label>
               <Form.Control

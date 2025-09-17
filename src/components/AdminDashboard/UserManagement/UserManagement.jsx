@@ -43,6 +43,7 @@ function UserManagement({ isViewMode, isEditMode }) {
 
     fetchTeamMembers();
   }, []);
+
   useEffect(() => {
     const fetchRoles = async () => {
       try {
@@ -429,6 +430,28 @@ function UserManagement({ isViewMode, isEditMode }) {
     fetchApplications();
   }, []);
 
+  const [permissions, setPermissions] = useState([]);
+  const roleId = localStorage.getItem("roleId");
+
+  // 🔹 Fetch permissions from API
+  useEffect(() => {
+    axios
+      .get(`${BASE_URL}roles/permission/${roleId}`)
+      .then((res) => {
+        if (res.data.status) {
+          setPermissions(res.data.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching permissions", err);
+      });
+  }, [roleId])
+
+  const projectPermission = permissions.find(p => p.featureName === "User");
+  const CreateUserPermission = Number(projectPermission?.canAdd);
+  const EditUserPermission = Number(projectPermission?.canEdit);
+  const DeleteUserPermission = Number(projectPermission?.canDelete);
+
   // Render the members table
   const renderTable = () => (
     <div className="table-container">
@@ -514,13 +537,16 @@ function UserManagement({ isViewMode, isEditMode }) {
                       >
                         <i className="fas fa-eye"></i>
                       </button>
-                      <button
-                        className="btn btn-sm btn-info me-2"
-                        onClick={() => openMemberModal("edit", member)}
-                        title="Edit Member"
-                      >
-                        <i className="fas fa-edit"></i>
-                      </button>
+                      {
+                        EditUserPermission === 1 &&
+                        (<button
+                          className="btn btn-sm btn-info me-2"
+                          onClick={() => openMemberModal("edit", member)}
+                          title="Edit Member"
+                        >
+                          <i className="fas fa-edit"></i>
+                        </button>)
+                      }
                       <button
                         className="btn btn-sm btn-warning me-2"
                         onClick={() => toggleFreezeMember(member.id)}
@@ -528,13 +554,15 @@ function UserManagement({ isViewMode, isEditMode }) {
                       >
                         <i className="fas fa-snowflake"></i>
                       </button>
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => deleteMember(member.id)}
-                        title="Delete Member"
-                      >
-                        <i className="fas fa-trash"></i>
-                      </button>
+                      {DeleteUserPermission === 1 &&
+                        (<button
+                          className="btn btn-sm btn-danger"
+                          onClick={() => deleteMember(member.id)}
+                          title="Delete Member"
+                        >
+                          <i className="fas fa-trash"></i>
+                        </button>)
+                      }
                     </td>
                   </tr>
                 ))
@@ -803,12 +831,15 @@ function UserManagement({ isViewMode, isEditMode }) {
       <div className="d-flex justify-content-between">
         <h2 className="gradient-heading mt-2">User Management</h2>
         <div className="text-end mb-3">
-          <button
-            className="btn gradient-button"
-            onClick={() => openMemberModal("add", null)}
-          >
-            + Add Member
-          </button>
+          {
+            CreateUserPermission === 1 &&
+            (<button
+              className="btn gradient-button"
+              onClick={() => openMemberModal("add", null)}
+            >
+              + Add Member
+            </button>)
+          }
         </div>
       </div>
 

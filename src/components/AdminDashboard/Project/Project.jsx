@@ -254,7 +254,6 @@ const Project = () => {
   }, [roleId])
 
   const projectPermission = permissions.find(p => p.featureName === "Projects");
-  console.log("projectPermissiocedfen",Number(projectPermission?.canEdit));
   const CreateProjectPermission = Number(projectPermission?.canAdd);
   const UpdateProjectPermission = Number(projectPermission?.canEdit);
   const DeleteProjectPermission = Number(projectPermission?.canDelete);
@@ -436,7 +435,7 @@ const Project = () => {
                     msOverflowStyle: "none", // IE/Edge
                   }}
                 >
-<Created data={{UpdateProjectPermission,DeleteProjectPermission}} />
+                  <Created data={{ UpdateProjectPermission, DeleteProjectPermission }} />
                 </div>
               </div>
             )}
@@ -608,7 +607,7 @@ const Project = () => {
                       msOverflowStyle: "none",
                     }}
                   >
-                    <CompletedProjects  />
+                    <CompletedProjects />
                   </div>
                 </div>
               </>

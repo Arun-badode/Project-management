@@ -108,12 +108,12 @@ const ShiftAllocation = () => {
       payload.endTime = formatTime12Hour(formData.endTime);
       payload.shiftType = formData.shiftType;
       payload.notes = formData.notes;
-    } 
+    }
     // Handle Others options
     else {
       payload.shiftType = "Others";
       payload.otherType = selectedOthersOption;
-      
+
       if (selectedOthersOption === "Permission") {
         payload.duration = permissionDuration;
         payload.permissionApply = permissionTiming;
@@ -332,7 +332,7 @@ const ShiftAllocation = () => {
       members.forEach(member => {
         // Exclude managers
         if (member.role === "Manager") return;
-        
+
         const key = `${member.id}-${member.fullName}`;
         employeesMap[key] = {
           memberId: member.id,
@@ -348,7 +348,7 @@ const ShiftAllocation = () => {
     // Then add shifts for those employees
     shiftsForWeek.forEach((shift) => {
       const memberInfo = memberMap.get(shift.memberId);
-      
+
       // Skip if member is a manager
       if (memberInfo && memberInfo.role === "Manager") return;
 
@@ -449,10 +449,10 @@ const ShiftAllocation = () => {
     };
 
     // Check if this is an "Others" type shift
-    const isOthersType = shift.type === "Others" || 
-                        shift.type === "Permission" || 
-                        shift.type === "Leave" || 
-                        shift.type === "Absent";
+    const isOthersType = shift.type === "Others" ||
+      shift.type === "Permission" ||
+      shift.type === "Leave" ||
+      shift.type === "Absent";
 
     setFormData({
       memberId: shift.memberId.toString(),
@@ -466,7 +466,7 @@ const ShiftAllocation = () => {
     setCurrentShiftId(shift.id);
     setIsEditMode(true);
     setShowAddShiftModal(true);
-    
+
     // Set Others options if applicable
     if (isOthersType) {
       setShowOthersOptions(true);
@@ -545,6 +545,27 @@ const ShiftAllocation = () => {
     }
   };
 
+  const [permissions, setPermissions] = useState([]);
+  const roleId = localStorage.getItem("roleId");
+
+  // 🔹 Fetch permissions from API
+  useEffect(() => {
+    axios
+      .get(`${BASE_URL}roles/permission/${roleId}`)
+      .then((res) => {
+        if (res.data.status) {
+          setPermissions(res.data.data);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching permissions", err);
+      });
+  }, [roleId])
+
+  const projectPermission = permissions.find(p => p.featureName === "Shift Allocation");
+  console.log("projectPermissiocedfen", projectPermission);
+  const CreateShiftPermission = Number(projectPermission?.canAdd);
+console.log("CreateShiftPermission",CreateShiftPermission);
   return (
     <div>
       <div className="container-fluid bg-main">
@@ -554,15 +575,17 @@ const ShiftAllocation = () => {
             <div className="d-flex justify-content-between align-items-center">
               <h1 className="h3 mb-0">Shift Allocation</h1>
               <div className="d-flex gap-3">
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    resetForm();
-                    setShowAddShiftModal(true);
-                  }}
-                >
-                  <i className="fas fa-plus me-2"></i> Add New Shift
-                </button>
+                {CreateShiftPermission === 1 &&
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => {
+                      resetForm();
+                      setShowAddShiftModal(true);
+                    }}
+                  >
+                    <i className="fas fa-plus me-2"></i> Add New Shift
+                  </button>
+                }
               </div>
             </div>
           </div>
