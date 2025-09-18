@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Card, Col, Row, Spinner } from 'react-bootstrap';
+import { Button, Card, Col, Row, Spinner, Form } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import axiosInstance from "../../Utilities/axiosInstance";
 import jsPDF from 'jspdf';
@@ -22,14 +22,36 @@ const App = () => {
     dateFrom: "",
     dateTo: "",
     sortOrder: "latest",
+    shiftType: "Others" // Changed default to "Others" to match API data
   });
 
   // Data states
   const [pendingRequests, setPendingRequests] = useState([]);
   const [actionHistory, setActionHistory] = useState([]);
+  const [shifts, setShifts] = useState([]); // Added for shift data
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const id = localStorage.getItem("userId");
+
+  // Fetch shifts from API
+  const fetchShifts = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get("shift/getAllShifts");
+      
+      // Filter shifts based on shiftType filter
+      const filteredShifts = response.data.data?.filter(shift => 
+        shift.shiftType === filters.shiftType
+      ) || [];
+      
+      setShifts(filteredShifts);
+      setLoading(false);
+    } catch (error) {
+      console.error("Failed to fetch shifts:", error);
+      setError('Failed to fetch shifts');
+      setLoading(false);
+    }
+  };
 
   // Fetch pending requests from API
   const fetchPendingRequests = async () => {
@@ -74,11 +96,11 @@ const App = () => {
 
   useEffect(() => {
     if (activeTab === "pending") {
-      fetchPendingRequests();
+      fetchShifts(); // Changed to fetch shifts instead of pending requests
     } else {
       fetchActionHistory();
     }
-  }, [activeTab]);
+  }, [activeTab, filters.shiftType]); // Added filters.shiftType as dependency
 
   // Handle filter changes
   const handleFilterChange = (e) => {
@@ -97,10 +119,48 @@ const App = () => {
       dateFrom: "",
       dateTo: "",
       sortOrder: "latest",
+      shiftType: "Others" // Reset to default
     });
   };
 
-  // Handle approval/rejection
+  // Handle approval/rejection for shifts
+  const handleShiftAction = async (id, action) => {
+    try {
+      setLoading(true);
+      const status = action === "approve" ? "approved" : "rejected";
+
+      // Call the shift approval/rejection API
+      await axiosInstance.put(
+        `shift/updateShiftStatus/${id}`,
+        { status: status }
+      );
+
+      // Refresh shifts list
+      await fetchShifts();
+
+      Swal.fire({
+        icon: 'success',
+        title: `Shift ${status}`,
+        text: `The shift has been ${status} successfully.`,
+        timer: 3000,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error(
+        `Error ${action === "approve" ? "approving" : "rejecting"} shift:`,
+        error
+      );
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: `Failed to ${action === "approve" ? "approve" : "reject"} the shift. Please try again.`,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle approval/rejection for regular requests
   const handleAction = async (id, action) => {
     try {
       setLoading(true);
@@ -141,29 +201,49 @@ const App = () => {
   const exportToCSV = (data) => {
     let csvContent = "data:text/csv;charset=utf-8,";
     
-    // Add headers
-    csvContent += "Request Type,Requested By,From Role,To Role,Date,Message,Status,Action Taken By\n";
-    
-    // Add data rows
-    data.forEach(item => {
-      const row = [
-        `"${item.requestType || ''}"`,
-        `"${item.requesterName || ''}"`,
-        `"${item.fromRole || ''}"`,
-        `"${item.toRole || ''}"`,
-        `"${formatDate(item.createdAt)}"`,
-        `"${item.message || ''}"`,
-        `"${item.actionType || (activeTab === 'pending' ? 'Pending' : '')}"`,
-        `"${item.actionTakenBy || ''}"`
-      ];
-      csvContent += row.join(",") + "\n";
-    });
+    // Add headers based on active tab
+    if (activeTab === "pending") {
+      csvContent += "Shift Type,Employee Name,Date,Start Time,End Time,Notes,Other Type,Duration,Permission Apply\n";
+      
+      // Add data rows for shifts
+      data.forEach(item => {
+        const row = [
+          `"${item.shiftType || ''}"`,
+          `"${item.fullName || ''}"`,
+          `"${formatDate(item.shiftDate)}"`,
+          `"${item.startTime || ''}"`,
+          `"${item.endTime || ''}"`,
+          `"${item.notes || ''}"`,
+          `"${item.otherType || ''}"`,
+          `"${item.duration || ''}"`,
+          `"${item.permissionApply || ''}"`
+        ];
+        csvContent += row.join(",") + "\n";
+      });
+    } else {
+      csvContent += "Request Type,Requested By,From Role,To Role,Date,Message,Status,Action Taken By\n";
+      
+      // Add data rows for action history
+      data.forEach(item => {
+        const row = [
+          `"${item.requestType || ''}"`,
+          `"${item.requesterName || ''}"`,
+          `"${item.fromRole || ''}"`,
+          `"${item.toRole || ''}"`,
+          `"${formatDate(item.createdAt)}"`,
+          `"${item.message || ''}"`,
+          `"${item.actionType || ''}"`,
+          `"${item.actionTakenBy || ''}"`
+        ];
+        csvContent += row.join(",") + "\n";
+      });
+    }
     
     // Create download link
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${activeTab === 'pending' ? 'pending_requests' : 'action_history'}_${new Date().toISOString().slice(0,10)}.csv`);
+    link.setAttribute("download", `${activeTab === 'pending' ? 'shifts' : 'action_history'}_${new Date().toISOString().slice(0,10)}.csv`);
     document.body.appendChild(link);
     
     // Trigger download
@@ -173,7 +253,7 @@ const App = () => {
     document.body.removeChild(link);
   };
 
-  // FIXED: Handle export to PDF — Using the imported autoTable function directly
+  // Handle export to PDF
   const exportToPDF = (data) => {
     try {
       // SAFETY CHECK: Ensure data is a valid array
@@ -192,7 +272,7 @@ const App = () => {
       // Add Title
       doc.setFontSize(18);
       doc.text(
-        activeTab === 'pending' ? 'Pending Requests' : 'Action History',
+        activeTab === 'pending' ? 'Shifts' : 'Action History',
         105,
         15,
         { align: 'center' }
@@ -207,24 +287,39 @@ const App = () => {
         { align: 'center' }
       );
 
-      // Prepare headers
-      const headers = [
-        ['Request Type', 'Requested By', 'From Role', 'To Role', 'Date', 'Message', 'Status', 'Action Taken By']
-      ];
+      // Prepare headers and body based on active tab
+      let headers, tableData;
+      
+      if (activeTab === "pending") {
+        headers = [['Shift Type', 'Employee Name', 'Date', 'Start Time', 'End Time', 'Notes', 'Other Type', 'Duration', 'Permission Apply']];
+        
+        tableData = data.map(item => [
+          item.shiftType || 'N/A',
+          item.fullName || 'N/A',
+          item.shiftDate ? formatDate(item.shiftDate) : 'N/A',
+          item.startTime || 'N/A',
+          item.endTime || 'N/A',
+          (item.notes || 'N/A').substring(0, 50),
+          item.otherType || 'N/A',
+          item.duration || 'N/A',
+          item.permissionApply || 'N/A'
+        ]);
+      } else {
+        headers = [['Request Type', 'Requested By', 'From Role', 'To Role', 'Date', 'Message', 'Status', 'Action Taken By']];
+        
+        tableData = data.map(item => [
+          item.requestType || 'N/A',
+          item.requesterName || 'N/A',
+          item.fromRole || 'N/A',
+          item.toRole || 'N/A',
+          item.createdAt ? formatDate(item.createdAt) : 'N/A',
+          (item.message || 'N/A').substring(0, 100),
+          item.actionType || 'N/A',
+          item.actionTakenBy || 'N/A'
+        ]);
+      }
 
-      // Prepare body - with fallbacks for missing/undefined fields
-      const tableData = data.map(item => [
-        item.requestType || 'N/A',
-        item.requesterName || 'N/A',
-        item.fromRole || 'N/A',
-        item.toRole || 'N/A',
-        item.createdAt ? formatDate(item.createdAt) : 'N/A',
-        (item.message || 'N/A').substring(0, 100), // Truncate long messages to avoid layout issues
-        item.actionType || (activeTab === 'pending' ? 'Pending' : 'N/A'),
-        item.actionTakenBy || 'N/A'
-      ]);
-
-      // FIXED: Use the imported autoTable function directly instead of calling it on the doc instance
+      // Use the imported autoTable function directly
       autoTable(doc, {
         head: headers,
         body: tableData,
@@ -245,23 +340,30 @@ const App = () => {
         alternateRowStyles: {
           fillColor: [245, 245, 245]
         },
-        columnStyles: {
+        columnStyles: activeTab === "pending" ? {
+          0: { cellWidth: 20 },
+          1: { cellWidth: 25 },
+          2: { cellWidth: 25 },
+          3: { cellWidth: 20 },
+          4: { cellWidth: 20 },
+          5: { cellWidth: 30 },
+          6: { cellWidth: 20 },
+          7: { cellWidth: 15 },
+          8: { cellWidth: 20 }
+        } : {
           0: { cellWidth: 25 },
           1: { cellWidth: 25 },
           2: { cellWidth: 20 },
           3: { cellWidth: 20 },
           4: { cellWidth: 25 },
-          5: { cellWidth: 40, fontStyle: 'normal' },
+          5: { cellWidth: 40 },
           6: { cellWidth: 20 },
           7: { cellWidth: 25 }
-        },
-        didDrawPage: (data) => {
-          // Optional: Add footer or watermark if needed
         }
       });
 
       // Save PDF
-      const fileName = `${activeTab === 'pending' ? 'pending_requests' : 'action_history'}_${new Date().toISOString().slice(0,10)}.pdf`;
+      const fileName = `${activeTab === 'pending' ? 'shifts' : 'action_history'}_${new Date().toISOString().slice(0,10)}.pdf`;
       doc.save(fileName);
 
       return true; // Success
@@ -283,12 +385,12 @@ const App = () => {
     let dataToExport = [];
     
     if (activeTab === "pending") {
-      dataToExport = pendingRequests.filter(request => {
+      dataToExport = shifts.filter(shift => {
         // Apply filters
-        if (filters.requestType && request.requestType !== filters.requestType) return false;
-        if (filters.requestedBy && !request.requesterName.toLowerCase().includes(filters.requestedBy.toLowerCase())) return false;
-        if (filters.dateFrom && new Date(request.createdAt) < new Date(filters.dateFrom)) return false;
-        if (filters.dateTo && new Date(request.createdAt) > new Date(filters.dateTo)) return false;
+        if (filters.shiftType && shift.shiftType !== filters.shiftType) return false;
+        if (filters.requestedBy && !shift.fullName.toLowerCase().includes(filters.requestedBy.toLowerCase())) return false;
+        if (filters.dateFrom && new Date(shift.shiftDate) < new Date(filters.dateFrom)) return false;
+        if (filters.dateTo && new Date(shift.shiftDate) > new Date(filters.dateTo)) return false;
         return true;
       });
     } else {
@@ -306,9 +408,9 @@ const App = () => {
     
     // Sort data
     if (filters.sortOrder === "oldest") {
-      dataToExport.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      dataToExport.sort((a, b) => new Date(a.shiftDate || a.createdAt) - new Date(b.shiftDate || b.createdAt));
     } else {
-      dataToExport.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      dataToExport.sort((a, b) => new Date(b.shiftDate || b.createdAt) - new Date(a.shiftDate || a.createdAt));
     }
     
     if (dataToExport.length === 0) {
@@ -405,7 +507,7 @@ const App = () => {
                 className={`nav-link ${activeTab === "pending" ? "active" : ""}`}
                 onClick={() => setActiveTab("pending")}
               >
-                Pending Approval
+                Shift Approvals
               </button>
             </li>
             <li className="nav-item">
@@ -435,7 +537,7 @@ const App = () => {
             </button>
             <div className="text-white small">
               {activeTab === "pending"
-                ? `${pendingRequests.length} pending requests`
+                ? `${shifts.length} shifts pending approval`
                 : `${actionHistory.length} history records`}
             </div>
           </div>
@@ -444,44 +546,70 @@ const App = () => {
             <div className="card mb-4 bg-card">
               <div className="card-body">
                 <div className="row g-3">
-                  <div className="col-md-6 col-lg-4">
-                    <label htmlFor="actionType" className="form-label">
-                      Action Type
-                    </label>
-                    <select
-                      id="actionType"
-                      name="actionType"
-                      value={filters.actionType}
-                      onChange={handleFilterChange}
-                      className="form-select"
-                    >
-                      <option value="">All Actions</option>
-                      <option value="Approved">Approved</option>
-                      <option value="Rejected">Rejected</option>
-                    </select>
-                  </div>
+                  {activeTab === "pending" ? (
+                    // Shift-specific filters
+                    <div className="col-md-6 col-lg-4">
+                      <label htmlFor="shiftType" className="form-label">
+                        Shift Type
+                      </label>
+                      <select
+                        id="shiftType"
+                        name="shiftType"
+                        value={filters.shiftType}
+                        onChange={handleFilterChange}
+                        className="form-select"
+                      >
+                        <option value="Others">Others</option>
+                        <option value="Morning Shift">Morning Shift</option>
+                        <option value="Night Shift">Night Shift</option>
+                        <option value="Full Day">Full Day</option>
+                        <option value="Half Day">Half Day</option>
+                        <option value="Night">Night</option>
+                      </select>
+                    </div>
+                  ) : (
+                    // Action history filters
+                    <>
+                      <div className="col-md-6 col-lg-4">
+                        <label htmlFor="actionType" className="form-label">
+                          Action Type
+                        </label>
+                        <select
+                          id="actionType"
+                          name="actionType"
+                          value={filters.actionType}
+                          onChange={handleFilterChange}
+                          className="form-select"
+                        >
+                          <option value="">All Actions</option>
+                          <option value="Approved">Approved</option>
+                          <option value="Rejected">Rejected</option>
+                        </select>
+                      </div>
 
-                  <div className="col-md-6 col-lg-4">
-                    <label htmlFor="requestType" className="form-label">
-                      Request Type
-                    </label>
-                    <select
-                      id="requestType"
-                      name="requestType"
-                      value={filters.requestType}
-                      onChange={handleFilterChange}
-                      className="form-select"
-                    >
-                      <option value="">All Requests</option>
-                      <option value="work-from-home">Work From Home</option>
-                      <option value="leave">Leave Request</option>
-                      <option value="reassignment">Reassignment</option>
-                    </select>
-                  </div>
+                      <div className="col-md-6 col-lg-4">
+                        <label htmlFor="requestType" className="form-label">
+                          Request Type
+                        </label>
+                        <select
+                          id="requestType"
+                          name="requestType"
+                          value={filters.requestType}
+                          onChange={handleFilterChange}
+                          className="form-select"
+                        >
+                          <option value="">All Requests</option>
+                          <option value="work-from-home">Work From Home</option>
+                          <option value="leave">Leave Request</option>
+                          <option value="reassignment">Reassignment</option>
+                        </select>
+                      </div>
+                    </>
+                  )}
 
                   <div className="col-md-6 col-lg-4">
                     <label htmlFor="requestedBy" className="form-label">
-                      Requested By
+                      {activeTab === "pending" ? "Employee Name" : "Requested By"}
                     </label>
                     <div className="input-group">
                       <input
@@ -499,43 +627,47 @@ const App = () => {
                     </div>
                   </div>
 
-                  <div className="col-md-6 col-lg-4">
-                    <label htmlFor="actionTakenBy" className="form-label">
-                      Action Taken By
-                    </label>
-                    <div className="input-group">
-                      <input
-                        type="text"
-                        id="actionTakenBy"
-                        name="actionTakenBy"
-                        value={filters.actionTakenBy}
-                        onChange={handleFilterChange}
-                        className="form-control"
-                        placeholder="Search by name..."
-                      />
-                      <span className="input-group-text">
-                        <i className="fas fa-search"></i>
-                      </span>
+                  {activeTab === "history" && (
+                    <div className="col-md-6 col-lg-4">
+                      <label htmlFor="actionTakenBy" className="form-label">
+                        Action Taken By
+                      </label>
+                      <div className="input-group">
+                        <input
+                          type="text"
+                          id="actionTakenBy"
+                          name="actionTakenBy"
+                          value={filters.actionTakenBy}
+                          onChange={handleFilterChange}
+                          className="form-control"
+                          placeholder="Search by name..."
+                        />
+                        <span className="input-group-text">
+                          <i className="fas fa-search"></i>
+                        </span>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
-                  <div className="col-md-6 col-lg-4">
-                    <label htmlFor="status" className="form-label">
-                      Status
-                    </label>
-                    <select
-                      id="status"
-                      name="status"
-                      value={filters.status}
-                      onChange={handleFilterChange}
-                      className="form-select"
-                    >
-                      <option value="">All Statuses</option>
-                      <option value="pending">Pending</option>
-                      <option value="approved">Approved</option>
-                      <option value="rejected">Rejected</option>
-                    </select>
-                  </div>
+                  {activeTab === "history" && (
+                    <div className="col-md-6 col-lg-4">
+                      <label htmlFor="status" className="form-label">
+                        Status
+                      </label>
+                      <select
+                        id="status"
+                        name="status"
+                        value={filters.status}
+                        onChange={handleFilterChange}
+                        className="form-select"
+                      >
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                      </select>
+                    </div>
+                  )}
 
                   <div className="col-md-6 col-lg-4">
                     <div className="row g-2">
@@ -591,7 +723,11 @@ const App = () => {
                     >
                       Clear Filters
                     </button>
-                    <button type="button" className="btn btn-primary">
+                    <button 
+                      type="button" 
+                      className="btn btn-primary"
+                      onClick={activeTab === "pending" ? fetchShifts : fetchActionHistory}
+                    >
                       Apply Filters
                     </button>
                   </div>
@@ -625,50 +761,58 @@ const App = () => {
         {/* Content based on active tab */}
         {activeTab === "pending" ? (
           <div>
-            {/* Pending Requests */}
+            {/* Shifts */}
             <div className="mb-5">
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2 className="h5 fw-medium text-white">
-                  Pending Approval Requests
+                  Shift Approvals
                 </h2>
-               
               </div>
               
-              {pendingRequests.length > 0 ? (
+              {shifts.length > 0 ? (
                 <Row xs={1} md={2} lg={3} className="g-3">
-                  {pendingRequests.map((request) => (
-                    <Col key={request.id}>
+                  {shifts.map((shift) => (
+                    <Col key={shift.id}>
                       <Card className="h-100 bg-card" style={{ borderLeft: '4px solid #ffc107' }}>
                         <Card.Body>
                           <div className="d-flex justify-content-between align-items-start mb-2">
                             <div>
                               <Card.Title className="h6 mb-1">
-                                {request.requesterName}
+                                {shift.fullName}
                               </Card.Title>
                               <div className="small text-muted mb-2">
-                                {formatDate(request.createdAt)}
+                                {formatDate(shift.shiftDate)}
                               </div>
                             </div>
                             <span className="badge bg-warning text-dark">
-                              {request.requestType}
+                              {shift.shiftType}
                             </span>
                           </div>
                           
                           <div className="mb-3">
-                            <p className="mb-0">{request.message}</p>
+                            <p className="mb-1"><strong>Time:</strong> {shift.startTime || 'N/A'} - {shift.endTime || 'N/A'}</p>
+                            {shift.notes && <p className="mb-0">{shift.notes}</p>}
+                            {shift.otherType && (
+                              <p className="mb-0"><strong>Type:</strong> {shift.otherType}</p>
+                            )}
+                            {shift.duration && (
+                              <p className="mb-0"><strong>Duration:</strong> {shift.duration}</p>
+                            )}
+                            {shift.permissionApply && (
+                              <p className="mb-0"><strong>Permission:</strong> {shift.permissionApply}</p>
+                            )}
                           </div>
                           
                           <div className="d-flex justify-content-between align-items-center">
                             <div className="small">
-                              <span className="text-muted">From:</span> {request.fromRole} <br />
-                              <span className="text-muted">To:</span> {request.toRole}
+                              <span className="text-muted">Status:</span> Pending
                             </div>
                             
                             <div className="d-flex gap-1">
                               <Button
                                 variant="outline-danger"
                                 size="sm"
-                                onClick={() => handleAction(request.id, "reject")}
+                                onClick={() => handleShiftAction(shift.id, "reject")}
                                 disabled={loading}
                                 style={{ borderRadius: '4px', padding: '6px 10px' }}
                               >
@@ -677,7 +821,7 @@ const App = () => {
                               <Button
                                 variant="success"
                                 size="sm"
-                                onClick={() => handleAction(request.id, "approve")}
+                                onClick={() => handleShiftAction(shift.id, "approve")}
                                 disabled={loading}
                                 style={{ borderRadius: '4px', padding: '6px 10px' }}
                               >
@@ -693,7 +837,7 @@ const App = () => {
               ) : (
                 <div className="card bg-card">
                   <div className="card-body text-center py-4">
-                    <p className="text-muted">No pending requests found</p>
+                    <p className="text-muted">No shifts found for the selected type</p>
                   </div>
                 </div>
               )}
@@ -706,7 +850,6 @@ const App = () => {
               <h2 className="h5 fw-medium text-white">
                 Action History
               </h2>
-             
             </div>
             
             {actionHistory.length > 0 ? (
