@@ -1234,7 +1234,7 @@ const ReportingAnalytics = () => {
               <tr key={feedback.id} className="text-white analytics-feedback-row">
                 <td>{feedback.id}</td>
                 <td>{feedback.project || "-"}</td>
-                <td>{feedback.client || "-"}</td>
+                <td>{feedback.clientName || "-"}</td>
                 <td>{feedback.date}</td>
                 <td className="analytics-feedback-text">{feedback.feedback || "-"}</td>
                 <td>{feedback.accountable || "-"}</td>

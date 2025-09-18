@@ -180,12 +180,20 @@ const RoleManagementSystem = () => {
                   <tbody>
                     {roles.map((role) => (
                       <tr key={role.id}>
-                        <td>{role.roleName}</td>
-                        <td>{role.description}</td>
+                        <td style={{textAlign:"left"}}>{role.roleName}</td>
+                        <td style={{textAlign:"left"}}>{role.description}</td>
                         <td>
-                          <button className="btn btn-sm btn-outline-success" onClick={() => handleEditRole(role)}>
+                          <button className="btn btn-sm btn-outline-success me-2" onClick={() => handleEditRole(role)}>
                             <Edit size={14} />
+                            
                           </button>
+                           <button
+                        className="btn btn-sm btn-outline-danger"
+                      
+                        title="Delete Member"
+                      >
+                        <i className="fas fa-trash"></i>
+                      </button>
                         </td>
                       </tr>
                     ))}
