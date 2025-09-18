@@ -525,7 +525,7 @@ function UserManagement({ isViewMode, isEditMode }) {
                 <th className="text-center">Team</th>
                 <th className="text-center">Role</th>
                 <th className="text-start">App Skills</th>
-                <th className="text-center">Current Salary</th>
+                {/* <th className="text-center">Current Salary</th> */}
                 <th className="text-center">Username</th>
                 <th className="text-center">Status</th>
                 <th className="text-center">Actions</th>
@@ -552,7 +552,7 @@ function UserManagement({ isViewMode, isEditMode }) {
                         ? member.appSkills.join(", ")
                         : member.appSkills || "N/A"}
                     </td>
-                    <td className="text-center">
+                    {/* <td className="text-center">
                       {member.currentSalary 
                         ? Number(member.currentSalary).toLocaleString('en-IN', {
                             style: 'currency',
@@ -560,7 +560,7 @@ function UserManagement({ isViewMode, isEditMode }) {
                             maximumFractionDigits: 0,
                           })
                         : "N/A"}
-                    </td>
+                    </td> */}
                     <td className="text-center">{member.username}</td>
                     <td className="text-center">
                       <span className="badge bg-success">Active</span>
