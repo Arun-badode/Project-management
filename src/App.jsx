@@ -130,7 +130,7 @@ function App() {
 
         {/* productivity */}
 
-        <Route path="/productivity" element={<Productivity />} /> 
+        <Route path="/productivity" element={<Productivity />} />
       </Route>
 
       {/* Fallback Route */}

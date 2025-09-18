@@ -22,10 +22,10 @@ const LoginPage = () => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
+
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
-    
+
     return () => {
       window.removeEventListener('resize', checkIfMobile);
     };
@@ -59,18 +59,18 @@ const LoginPage = () => {
         }
       });
 
-      const { id , token, role , roleId} = response.data.data;
+      const { id, token, role, roleId } = response.data.data;
       console.log('Login response:', response.data); // Debug log
 
-   
+
       // Store authentication data
       localStorage.setItem('authToken', token);
       localStorage.setItem('userRole', role);
       localStorage.setItem('userEmail', email);
       localStorage.setItem('roleId', roleId);
       localStorage.setItem('userData', JSON.stringify(response.data.data));
-//       // after successful login
-// localStorage.setItem("username", response.data.user.username); // or use email
+      //       // after successful login
+      // localStorage.setItem("username", response.data.user.username); // or use email
 
 
       // Store managerId based on different possible response structures
@@ -107,16 +107,16 @@ const LoginPage = () => {
   if (showVideo) {
     return (
       <div className={`video-splash-screen ${fadeOut ? "" : ""}`}>
-        <video 
-          autoPlay 
-          muted 
-          playsInline 
+        <video
+          autoPlay
+          muted
+          playsInline
           className="splash-video"
           style={{ height: isMobile ? "100%" : "100%" }}
         >
-          <source 
-            src={isMobile ? "Video/mob.mp4" : "/Video/web.mp4"} 
-            type="video/mp4" 
+          <source
+            src={isMobile ? "Video/mob.mp4" : "/Video/web.mp4"}
+            type="video/mp4"
           />
           Your browser does not support the video tag.
         </video>
@@ -138,7 +138,7 @@ const LoginPage = () => {
             />
             <h1 className="text-white">Welcome Back!</h1>
             <p className="fw-bold text-strong">
-              Let's turn tasks into triumphs! 
+              Let's turn tasks into triumphs!
             </p>
           </div>
         </div>
@@ -194,10 +194,10 @@ const LoginPage = () => {
               </div>
 
               {/* Role Selection Buttons */}
-          
 
-              <button 
-                type="submit" 
+
+              <button
+                type="submit"
                 className="btn login-submit-btn mt-3"
                 disabled={isLoading}
               >
@@ -205,7 +205,7 @@ const LoginPage = () => {
               </button>
               <div className="text-center mt-3">
                 <p className="text-muted">
-                 Version Build 1.0 
+                  Version Build 1.0
                 </p>
               </div>
             </form>
