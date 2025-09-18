@@ -517,7 +517,7 @@
 //     remarks: ""
 //   });
 
-  
+
 // useEffect(() => {
 //   const modalElement = document.getElementById("attendanceModal");
 
@@ -1257,6 +1257,552 @@
 
 
 
+// import React, { useState, useEffect, useCallback } from "react";
+// import axios from "axios";
+// import {
+//   Search,
+//   Download,
+//   Eye,
+//   Users,
+//   Activity,
+//   FileText,
+//   Calendar,
+//   Filter,
+//   ChevronLeft,
+//   ChevronRight,
+// } from "lucide-react";
+// import useSyncScroll from "../../AdminDashboard/Hooks/useSyncScroll";
+// import BASE_URL from "../../../config";
+
+// const Attendance = () => {
+//   // --- STATE DECLARATIONS ---
+//   const [attendanceData, setAttendanceData] = useState([]);
+//   const [summaryData, setSummaryData] = useState([]);
+//   const [members, setMembers] = useState([]);
+//   const [loading, setLoading] = useState(false);
+//   const token = localStorage.getItem("authToken");
+
+//   // Filter and UI states
+//   const [searchTerm, setSearchTerm] = useState("");
+//   const [departmentFilter, setDepartmentFilter] = useState("All");
+//   const [dateRange, setDateRange] = useState({
+//     start: "2025-04-28", // Default Payroll Cycle Start
+//     end: "2025-05-27",   // Default Payroll Cycle End
+//   });
+//   const [selectedEmployee, setSelectedEmployee] = useState(null);
+//   const [viewMode, setViewMode] = useState("summary"); // Default to summary view
+//   const [selectedDate, setSelectedDate] = useState(
+//     new Date().toISOString().split("T")[0]
+//   );
+
+//   // --- HELPER FUNCTIONS ---
+
+//   // Calculate net working hours from inTime and outTime
+//   const calculateNetHours = (inTime, outTime) => {
+//     if (!inTime || !outTime) return "-";
+//     const [inH, inM] = inTime.split(":").map(Number);
+//     const [outH, outM] = outTime.split(":").map(Number);
+//     let start = inH * 60 + inM;
+//     let end = outH * 60 + outM;
+//     if (end < start) end += 24 * 60; // Handle overnight shifts
+//     const diff = end - start;
+//     const hours = Math.floor(diff / 60);
+//     const mins = diff % 60;
+//     return `${hours}h ${mins}m`;
+//   };
+
+//   // Calculate attendance status based on shift details
+//   const calculateAttendanceBasedOnShift = (attendance, shiftDetails) => {
+//     if (!shiftDetails) return attendance;
+
+//     const { shiftStartTime, shiftEndTime, isWeekOff, isHoliday } = shiftDetails;
+
+//     // Priority: Holiday > Week Off > Actual Attendance
+//     if (isHoliday) {
+//       return { ...attendance, status: "Holiday", anomalies: "-" };
+//     }
+//     if (isWeekOff) {
+//       return { ...attendance, status: "Week Off", anomalies: "-" };
+//     }
+
+//     // Check for late arrival and early departure
+//     let anomalies = attendance.anomalies === "-" ? "" : attendance.anomalies;
+//     if (attendance.loginTime !== "-" && shiftStartTime) {
+//       const loginTime = new Date(`1970-01-01T${attendance.loginTime}:00`);
+//       const startTime = new Date(`1970-01-01T${shiftStartTime}:00`);
+//       const diffMinutes = (loginTime - startTime) / (1000 * 60);
+//       if (diffMinutes > 15) { // 15 minutes grace period
+//         anomalies += (anomalies ? ", " : "") + "Late Login";
+//       }
+//     }
+//     if (attendance.logoutTime !== "-" && shiftEndTime) {
+//       const logoutTime = new Date(`1970-01-01T${attendance.logoutTime}:00`);
+//       const endTime = new Date(`1970-01-01T${shiftEndTime}:00`);
+//       const diffMinutes = (endTime - logoutTime) / (1000 * 60);
+//       if (diffMinutes > 15) { // 15 minutes grace period
+//         anomalies += (anomalies ? ", " : "") + "Early Departure";
+//       }
+//     }
+//     return { ...attendance, anomalies: anomalies || "-" };
+//   };
+
+//   // Calculate salary details based on attendance and user data
+//   const calculateSalaryDetails = useCallback(async (userId, userAttendance, userSalary, userDOJ, openingBalance) => {
+//     // Calculate experience in years
+//     const joiningDate = new Date(userDOJ);
+//     const currentDate = new Date();
+//     const experienceYears = (currentDate - joiningDate) / (1000 * 60 * 60 * 24 * 365);
+
+//     // Calculate leave allocation based on experience
+//     let leaveAllocationPerMonth = 0;
+//     if (experienceYears >= 2) leaveAllocationPerMonth = 2;
+//     else if (experienceYears >= 1) leaveAllocationPerMonth = 1.5;
+//     else if (experienceYears >= 4 / 12) leaveAllocationPerMonth = 1;
+//     else leaveAllocationPerMonth = 0;
+
+//     // Get payroll cycle details (total days, holidays, week-offs)
+//     // NOTE: This is a mock implementation. Replace with actual API call.
+//     const totalDaysInCycle = 30; // Mock: Total days in payroll cycle
+//     const holidays = 2;          // Mock: Number of holidays in cycle
+//     const weekOffs = 8;          // Mock: Number of week-offs in cycle
+
+//     // Calculate attendance summary
+//     let presentDays = 0;
+//     let absentDays = 0;
+//     let leaveDays = 0;
+//     let halfDayLeaves = 0;
+
+//     userAttendance.forEach(record => {
+//       if (record.status === "Present") presentDays++;
+//       else if (record.status === "Absent") absentDays++;
+//       else if (record.status === "Leave") leaveDays++;
+//       else if (record.status === "Half Day") halfDayLeaves += 0.5;
+//     });
+
+//     // Calculate leave balance and LOP (Loss of Pay)
+//     const totalEligibleLeave = openingBalance + leaveAllocationPerMonth;
+//     let leaveBalance = 0;
+//     let lopDays = 0;
+
+//     if (leaveDays <= totalEligibleLeave) {
+//       leaveBalance = totalEligibleLeave - leaveDays;
+//     } else {
+//       leaveBalance = 0;
+//       lopDays = leaveDays - totalEligibleLeave;
+//     }
+
+//     // Calculate paid days (LOP for Absent is 2 days)
+//     const paidDays = presentDays + holidays + weekOffs + leaveDays - lopDays - (absentDays * 2) - halfDayLeaves;
+
+//     // Calculate salary components
+//     const perDaySalary = userSalary / totalDaysInCycle;
+//     const calculatedSalary = perDaySalary * paidDays;
+
+//     // Mock incentives and deductions (replace with actual data from API)
+//     const incentives = 1000;
+//     const deductions = 500;
+
+//     const finalPayableAmount = calculatedSalary + incentives - deductions;
+
+//     return {
+//       salary: userSalary,
+//       perDaySalary,
+//       paidDays,
+//       totalDays: totalDaysInCycle,
+//       leaveBalance,
+//       lopDays,
+//       incentives,
+//       deductions,
+//       finalPayableAmount,
+//       experienceYears
+//     };
+//   }, []);
+
+
+//   // --- API EFFECTS ---
+
+//   // Effect to fetch and process attendance data
+//   useEffect(() => {
+//     const fetchAttendanceAndCalculate = async () => {
+//       setLoading(true);
+//       try {
+//         // Fetch attendance data with member details
+//         const attendanceResponse = await axios.get(`${BASE_URL}attendance/getAllAttendanceWithMembers`);
+//         const membersData = attendanceResponse.data.data || [];
+
+//         // Process each member's attendance
+//         const allProcessedAttendance = [];
+//         const allSummaryData = [];
+
+//         for (const member of membersData) {
+//           const attendanceRecords = member.attendance || [];
+//           const processedRecords = [];
+
+//           for (const att of attendanceRecords) {
+//             // Mock shift details - Replace with actual API call
+//             // const shiftResponse = await axios.get(`${BASE_URL}shift/getShiftDetails?userId=${member.id}&date=${att.attendanceDate}`);
+//             // const shiftDetails = shiftResponse.data;
+//             const shiftDetails = { shiftStartTime: "09:00", shiftEndTime: "18:00", isWeekOff: false, isHoliday: false }; // MOCK
+
+//             // Calculate attendance based on shift
+//             const attendance = calculateAttendanceBasedOnShift({
+//               id: att.id,
+//               user: member.fullName,
+//               employeeId: member.employeeId || "-",
+//               department: member.department || "-",
+//               position: member.position || "-",
+//               date: att.attendanceDate,
+//               loginTime: att.inTime || "-",
+//               logoutTime: att.outTime || "-",
+//               netWorkingHours: calculateNetHours(att.inTime, att.outTime),
+//               taskActiveTime: att.taskActiveTime || "-",
+//               status: att.status,
+//               anomalies: att.remarks || "-",
+//             }, shiftDetails);
+
+//             processedRecords.push(attendance);
+//           }
+
+//           allProcessedAttendance.push(...processedRecords);
+
+//           // Prepare summary data for this member
+//           const empSummary = {
+//             id: member.id,
+//             employeeName: member.fullName,
+//             employeeId: member.employeeId || "-",
+//             department: member.department || "-",
+//             position: member.position || "-",
+//             attendanceRecords: processedRecords,
+//             // Mock user details for salary calculation - Replace with actual API call
+//             salary: 50000, // MOCK
+//             dateOfJoining: "2022-01-15", // MOCK
+//             leaveOpeningBalance: 2, // MOCK
+//           };
+//           allSummaryData.push(empSummary);
+//         }
+
+//         setAttendanceData(allProcessedAttendance);
+
+//         // Calculate summary data with salary details
+//         const summaryWithSalary = await Promise.all(allSummaryData.map(async (emp) => {
+//           const salaryDetails = await calculateSalaryDetails(
+//             emp.id,
+//             emp.attendanceRecords,
+//             emp.salary,
+//             emp.dateOfJoining,
+//             emp.leaveOpeningBalance
+//           );
+//           return { ...emp, salaryDetails };
+//         }));
+
+//         setSummaryData(summaryWithSalary);
+
+//       } catch (err) {
+//         console.error("Error fetching attendance data", err);
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchAttendanceAndCalculate();
+//   }, [dateRange, calculateSalaryDetails]); // Re-fetch when date range changes
+
+//   // --- FILTERS AND DERIVED DATA ---
+
+//   // Get unique departments for filter dropdown
+//   const departments = ["All", ...new Set(summaryData.map((emp) => emp.department))];
+
+//   // Apply filters to summary data
+//   const filteredSummaryData = summaryData.filter((employee) => {
+//     const matchesSearch =
+//       employee.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//       employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
+//     const matchesDepartment =
+//       departmentFilter === "All" || employee.department === departmentFilter;
+//     return matchesSearch && matchesDepartment;
+//   });
+
+//   // Get selected employee data for detailed view
+//   const selectedEmployeeData =
+//     selectedEmployee !== null
+//       ? summaryData.find((emp) => emp.id === selectedEmployee)
+//       : null;
+
+//   // --- EVENT HANDLERS ---
+
+//   const handleEmployeeSelect = (id) => {
+//     setSelectedEmployee(id);
+//     setViewMode("detailed");
+//   };
+
+//   const closeEmployeeDetail = () => {
+//     setSelectedEmployee(null);
+//     setViewMode("summary");
+//   };
+
+//   const getStatusColor = (status) => {
+//     switch (status) {
+//       case "Present": return "success";
+//       case "Absent": return "danger";
+//       case "Late": return "warning";
+//       case "Early Departure": return "warning";
+//       case "Leave": return "info";
+//       case "Week Off": return "secondary";
+//       case "Holiday": return "primary";
+//       default: return "secondary";
+//     }
+//   };
+
+//   const { scrollContainerRef, fakeScrollbarRef } = useSyncScroll(true);
+
+//   // --- JSX RENDER ---
+//   return (
+//     <div className="container-fluid py-4">
+//       <div className="row mb-4">
+//         <div className="col-12">
+//           <h2 className="h2 gradient-heading">Attendance Management</h2>
+//           <p className="text-white">Cycle: {dateRange.start} - {dateRange.end}</p>
+//         </div>
+//       </div>
+
+//       {/* Filters and Search */}
+//       <div className="card mb-4 table-gradient-bg">
+//         <div className="card-body">
+//           <div className="row">
+//             <div className="col-md-8">
+//               <div className="row">
+//                 <div className="col-md-4 mt-4">
+//                   <div className="input-group">
+//                     <span className="input-group-text"><Search size={16} /></span>
+//                     <input type="text" className="form-control" placeholder="Search by name or ID..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+//                   </div>
+//                 </div>
+//                 <div className="col-md-4 mt-4">
+//                   <select className="form-select" value={departmentFilter} onChange={(e) => setDepartmentFilter(e.target.value)}>
+//                     {departments.map((dept, index) => (<option key={index} value={dept}>{dept}</option>))}
+//                   </select>
+//                 </div>
+//                 <div className="col-md-4">
+//                   <div className="row g-2">
+//                     <div className="col-6"><label className="form-label small">Start Date</label><input type="date" className="form-control" value={dateRange.start} onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} /></div>
+//                     <div className="col-6"><label className="form-label small">End Date</label><input type="date" className="form-control" value={dateRange.end} onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} /></div>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//             <div className="col-md-4 text-md-end mt-3 mt-md-0">
+//               <button className="btn btn-primary"><Download size={16} className="me-2" />Export Report</button>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* View Mode Tabs */}
+//       <ul className="nav nav-tabs mb-4">
+//         <li className="nav-item"><button className={`nav-link ${viewMode === "today" ? "active" : ""}`} onClick={() => setViewMode("today")}><Calendar size={16} className="me-2" />Today</button></li>
+//         <li className="nav-item"><button className={`nav-link ${viewMode === "summary" ? "active" : ""}`} onClick={() => setViewMode("summary")}><Activity size={16} className="me-2" />Summary View</button></li>
+//         <li className="nav-item"><button className={`nav-link ${viewMode === "detailed" ? "active" : ""}`} onClick={() => setViewMode("detailed")}><FileText size={16} className="me-2" />Details View</button></li>
+//         {/* "Mark Attendance" button removed as per requirements */}
+//       </ul>
+
+//       {loading && <div className="text-center my-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
+
+//       {/* Today View */}
+//       {viewMode === "today" && !loading && (
+//         <div className="card table-gradient-bg">
+//           <div className="card-body">
+//             <div className="d-flex justify-content-between align-items-center mb-4">
+//               <h3 className="h5 mb-0">Today's Attendance</h3>
+//               <div className="d-flex align-items-center">
+//                 <label htmlFor="datePicker" className="me-2 mb-0">Select Date:</label>
+//                 <input type="date" id="datePicker" className="form-control" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} style={{ width: "auto" }} />
+//               </div>
+//             </div>
+//             <div className="table-responsive">
+//               <table className="table table-bordered table-hover">
+//                 <thead className="table-gradient-bg" style={{ position: "sticky", top: 0, zIndex: 1, backgroundColor: "#fff" }}>
+//                   <tr className="text-center"><th>User</th><th>Date</th><th>Login Time</th><th>Logout Time</th><th>Net Working Hours</th><th>Status</th><th>Remark</th></tr>
+//                 </thead>
+//                 <tbody>
+//                   {attendanceData.filter(r => r.date === selectedDate).map((record) => (
+//                     <tr key={record.id} className="text-center">
+//                       <td>{record.user}</td><td>{record.date}</td><td>{record.loginTime}</td><td>{record.logoutTime}</td><td>{record.netWorkingHours}</td>
+//                       <td><span className={`badge bg-${getStatusColor(record.status)}-subtle text-${getStatusColor(record.status)}`}>{record.status}</span></td>
+//                       <td>{record.anomalies}</td>
+//                     </tr>
+//                   ))}
+//                 </tbody>
+//               </table>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+
+//       {/* Summary View */}
+//       {viewMode === "summary" && !loading && (
+//         <div className="card bg-card">
+//           <div className="card-body p-0 table-gradient-bg">
+//             <div ref={fakeScrollbarRef} style={{ overflowX: "auto", overflowY: "hidden", height: 16, position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1050 }}><div style={{ width: "1200px", height: 1 }} /></div>
+//             <div className="table-responsive" style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }} ref={scrollContainerRef}>
+//               <table className="table table-hover mb-0">
+//                 <thead className="table-gradient-bg table" style={{ position: "sticky", top: 0, zIndex: 0, backgroundColor: "#fff" }}>
+//                   <tr className="text-center">
+//                     <th>Employee</th><th>Present Days</th><th>Absent Days</th><th>Late Arrivals</th><th>Early Departures</th><th>Leaves</th><th>Net Working Hours</th><th>Break Time</th><th>Task Active Time</th><th>Payout</th><th className="text-end">Actions</th>
+//                   </tr>
+//                 </thead>
+//                 <tbody>
+//                   {filteredSummaryData.map((employee) => {
+//                     const initials = employee.employeeName?.split(" ").map((n) => n[0]).join("");
+//                     const salary = employee.salaryDetails;
+//                     return (
+//                       <tr key={employee.id} className="text-center">
+//                         <td><div className="d-flex align-items-center"><div className="avatar avatar-sm rounded me-3"><span className="avatar-text">{initials}</span></div><div><div className="fw-semibold">{employee.employeeName}</div><div className="small">{employee.employeeId}</div></div></div></td>
+//                         <td><span className="badge bg-success-subtle text-success">{salary?.paidDays || 0}</span></td>
+//                         <td><span className="badge bg-danger-subtle text-danger">{employee.attendanceRecords.filter(r => r.status === 'Absent').length}</span></td>
+//                         <td><span className="badge bg-warning-subtle text-warning">{employee.attendanceRecords.filter(r => r.anomalies?.includes('Late Login')).length}</span></td>
+//                         <td><span className="badge bg-warning-subtle text-warning">{employee.attendanceRecords.filter(r => r.anomalies?.includes('Early Departure')).length}</span></td>
+//                         <td><span className="badge bg-info-subtle text-info">{employee.attendanceRecords.filter(r => r.status === 'Leave').length}</span></td>
+//                         <td>{(employee.attendanceRecords.reduce((sum, r) => sum + (r.netWorkingHours !== '-' ? parseInt(r.netWorkingHours) : 0), 0) / 60).toFixed(1)} hrs</td>
+//                         <td>30 mins avg</td>
+//                         <td>{(employee.attendanceRecords.reduce((sum, r) => sum + (r.taskActiveTime !== '-' ? parseFloat(r.taskActiveTime) : 0), 0)).toFixed(1)} hrs</td>
+//                         <td><span className="fw-bold">₹{salary?.finalPayableAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0 }) || 'N/A'}</span></td>
+//                         <td className="text-center mt-2"><button onClick={() => handleEmployeeSelect(employee.id)} className="btn btn-sm btn-info"><Eye size={16} className="me-1" />View</button></td>
+//                       </tr>
+//                     );
+//                   })}
+//                 </tbody>
+//               </table>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+
+//       {/* Detailed View - Employee Selection */}
+//       {viewMode === "detailed" && !selectedEmployee && !loading && (
+//         <div className="card bg-card">
+//           <div className="card-body text-center py-5">
+//             <div className="mb-4"><Users size={48} /></div>
+//             <h3 className="h4 mb-3">Select an Employee</h3>
+//             <p>Please select an employee to view their detailed attendance records.</p>
+//             <div className="row mt-4">
+//               {filteredSummaryData.length > 0 ? filteredSummaryData.map((employee) => {
+//                 const initials = employee.employeeName?.split(" ").map((n) => n[0]).join("");
+//                 return (
+//                   <div key={employee.id} className="col-md-4 mb-3">
+//                     <div className="card border h-100 bg-card">
+//                       <div className="card-body">
+//                         <div className="d-flex justify-content-between align-items-center">
+//                           <div className="d-flex align-items-center">
+//                             <div className="avatar avatar-sm rounded me-3"><span className="avatar-text">{initials}</span></div>
+//                             <div><div className="fw-semibold">{employee.employeeName}</div><div className="small">{employee.employeeId}</div></div>
+//                           </div>
+//                           <button onClick={() => handleEmployeeSelect(employee.id)} className="btn btn-sm btn-outline-primary">Select</button>
+//                         </div>
+//                         <div className="row mt-3 small"><div className="col-6"><span className="fw-semibold">Department:</span> {employee.department}</div><div className="col-6"><span className="fw-semibold">Position:</span> {employee.position}</div></div>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 );
+//               }) : <div className="text-muted">No employees found</div>}
+//             </div>
+//           </div>
+//         </div>
+//       )}
+
+//       {/* Detailed View - Employee Details */}
+//       {viewMode === "detailed" && selectedEmployeeData && !loading && (
+//         <div className="card bg-card">
+//           <div className="card-body">
+//             {/* Header */}
+//             <div className="d-flex justify-content-between align-items-center mb-4">
+//               <div className="d-flex align-items-center">
+//                 <div className="avatar avatar-lg rounded me-3"><span className="avatar-text fs-4">{selectedEmployeeData.employeeName?.split(" ").map((n) => n[0]).join("")}</span></div>
+//                 <div><h2 className="h4 mb-0">{selectedEmployeeData.employeeName}</h2><div className="text-white">{selectedEmployeeData.employeeId} • {selectedEmployeeData.department} • {selectedEmployeeData.position}</div></div>
+//               </div>
+//               <button onClick={closeEmployeeDetail} className="btn btn-sm btn-outline-secondary"><ChevronLeft size={16} /> Back</button>
+//             </div>
+
+//             {/* Salary Details */}
+//             <div className="mb-4">
+//               <h3 className="h5 mb-3">Salary Details</h3>
+//               <div className="card bg-card">
+//                 <div className="card-body">
+//                   <div className="row">
+//                     <div className="col-md-3 mb-3"><div className="small text-white">Monthly Salary</div><div className="h5">₹{selectedEmployeeData.salaryDetails?.salary?.toLocaleString('en-IN') || 0}</div></div>
+//                     <div className="col-md-3 mb-3"><div className="small text-white">Paid Days</div><div className="h5">{selectedEmployeeData.salaryDetails?.paidDays || 0} / {selectedEmployeeData.salaryDetails?.totalDays || 0}</div></div>
+//                     <div className="col-md-3 mb-3"><div className="small text-white">Leave Balance</div><div className="h5">{selectedEmployeeData.salaryDetails?.leaveBalance || 0} days</div></div>
+//                     <div className="col-md-3 mb-3"><div className="small text-white">LOP Days</div><div className="h5">{selectedEmployeeData.salaryDetails?.lopDays || 0} days</div></div>
+//                     <div className="col-md-3 mb-3"><div className="small text-white">Incentives</div><div className="h5 text-success">+₹{selectedEmployeeData.salaryDetails?.incentives?.toLocaleString('en-IN') || 0}</div></div>
+//                     <div className="col-md-3 mb-3"><div className="small text-white">Deductions</div><div className="h5 text-danger">-₹{selectedEmployeeData.salaryDetails?.deductions?.toLocaleString('en-IN') || 0}</div></div>
+//                     <div className="col-md-3 mb-3"><div className="small text-white">Experience</div><div className="h5">{selectedEmployeeData.salaryDetails?.experienceYears?.toFixed(1) || 0} Years</div></div>
+//                     <div className="col-md-3 mb-3"><div className="small text-white">Final Payout</div><div className="h5">₹{selectedEmployeeData.salaryDetails?.finalPayableAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0 }) || 0}</div></div>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+
+//             {/* Attendance Summary */}
+//             <div className="row mb-4">
+//               {[
+//                 { label: "Present Days", value: selectedEmployeeData.attendanceRecords.filter(r => r.status === 'Present').length, color: "success" },
+//                 { label: "Absent Days", value: selectedEmployeeData.attendanceRecords.filter(r => r.status === 'Absent').length, color: "danger" },
+//                 { label: "Late Arrivals", value: selectedEmployeeData.attendanceRecords.filter(r => r.anomalies?.includes('Late Login')).length, color: "warning" },
+//                 { label: "Early Departures", value: selectedEmployeeData.attendanceRecords.filter(r => r.anomalies?.includes('Early Departure')).length, color: "warning" },
+//                 { label: "Leaves Taken", value: selectedEmployeeData.attendanceRecords.filter(r => r.status === 'Leave').length, color: "info" },
+//               ].map((item, idx) => (
+//                 <div className="col-md" key={idx}>
+//                   <div className={`card bg-card border-${item.color}-subtle mb-3 mb-md-0`}>
+//                     <div className="card-body"><div className={`small text-${item.color}`}>{item.label}</div><div className={`h3 text-${item.color}`}>{item.value}</div></div>
+//                   </div>
+//                 </div>
+//               ))}
+//             </div>
+
+//             {/* Daily Attendance Records */}
+//             <div className="mb-4">
+//               <h3 className="h5 mb-3">Daily Attendance Records</h3>
+//               <div className="card"><div className="card-body p-0">
+//                 <div className="table-responsive table-gradient-bg">
+//                   <table className="table table-sm mb-0">
+//                     <thead className="table-gradient-bg" style={{ position: "sticky", top: 0, zIndex: 0, backgroundColor: "#fff" }}>
+//                       <tr className="text-center"><th>Date</th><th>Day</th><th>Status</th><th>Check In</th><th>Check Out</th><th>Work Hours</th><th>Break Time</th><th>Task Active Time</th><th>Remarks</th></tr>
+//                     </thead>
+//                     <tbody>
+//                       {selectedEmployeeData.attendanceRecords.map((record, index) => {
+//                         const dateObj = new Date(record.date);
+//                         const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+//                         return (
+//                           <tr key={index} className="text-center">
+//                             <td>{record.date}</td><td>{dayName}</td>
+//                             <td><span className={`badge bg-${getStatusColor(record.status)}-subtle text-${getStatusColor(record.status)}`}>{record.status}</span></td>
+//                             <td>{record.loginTime}</td><td>{record.logoutTime}</td>
+//                             <td>{record.netWorkingHours}</td>
+//                             <td>{record.status === 'Present' ? '30 mins' : '-'}</td>
+//                             <td>{record.taskActiveTime}</td>
+//                             <td>{record.anomalies}</td>
+//                           </tr>
+//                         );
+//                       })}
+//                     </tbody>
+//                   </table>
+//                 </div>
+//               </div></div>
+//             </div>
+
+//             {/* Actions */}
+//             <div className="d-flex justify-content-end gap-2">
+//               <button className="btn btn-outline-secondary"><FileText size={16} className="me-2" />Print Report</button>
+//               <button className="btn btn-primary"><Download size={16} className="me-2" />Export Data</button>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default Attendance;
+
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
@@ -1297,17 +1843,59 @@ const Attendance = () => {
 
   // --- HELPER FUNCTIONS ---
 
+  // Convert time string to 24-hour format
+  const convertTo24HourFormat = (timeString) => {
+    if (!timeString) return null;
+
+    // Check if it's already in 24-hour format (HH:MM)
+    if (/^\d{1,2}:\d{2}$/.test(timeString)) {
+      return timeString;
+    }
+
+    // Check if it's in 12-hour format (HH:MM AM/PM)
+    const match = timeString.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    if (match) {
+      let hours = parseInt(match[1]);
+      const minutes = match[2];
+      const period = match[3].toUpperCase();
+
+      if (period === "PM" && hours < 12) {
+        hours += 12;
+      } else if (period === "AM" && hours === 12) {
+        hours = 0;
+      }
+
+      return `${hours.toString().padStart(2, '0')}:${minutes}`;
+    }
+
+    return null; // Invalid format
+  };
+
   // Calculate net working hours from inTime and outTime
   const calculateNetHours = (inTime, outTime) => {
     if (!inTime || !outTime) return "-";
-    const [inH, inM] = inTime.split(":").map(Number);
-    const [outH, outM] = outTime.split(":").map(Number);
+
+    // Convert times to 24-hour format
+    const inTime24 = convertTo24HourFormat(inTime);
+    const outTime24 = convertTo24HourFormat(outTime);
+
+    if (!inTime24 || !outTime24) return "-";
+
+    const [inH, inM] = inTime24.split(":").map(Number);
+    const [outH, outM] = outTime24.split(":").map(Number);
+
     let start = inH * 60 + inM;
     let end = outH * 60 + outM;
-    if (end < start) end += 24 * 60; // Handle overnight shifts
+
+    // Handle overnight shifts (when end time is earlier than start time)
+    if (end < start) {
+      end += 24 * 60; // Add 24 hours in minutes
+    }
+
     const diff = end - start;
     const hours = Math.floor(diff / 60);
     const mins = diff % 60;
+
     return `${hours}h ${mins}m`;
   };
 
@@ -1397,11 +1985,11 @@ const Attendance = () => {
     // Calculate salary components
     const perDaySalary = userSalary / totalDaysInCycle;
     const calculatedSalary = perDaySalary * paidDays;
-    
+
     // Mock incentives and deductions (replace with actual data from API)
-    const incentives = 1000; 
+    const incentives = 1000;
     const deductions = 500;
-    
+
     const finalPayableAmount = calculatedSalary + incentives - deductions;
 
     return {
@@ -1437,7 +2025,7 @@ const Attendance = () => {
         for (const member of membersData) {
           const attendanceRecords = member.attendance || [];
           const processedRecords = [];
-          
+
           for (const att of attendanceRecords) {
             // Mock shift details - Replace with actual API call
             // const shiftResponse = await axios.get(`${BASE_URL}shift/getShiftDetails?userId=${member.id}&date=${att.attendanceDate}`);
@@ -1448,34 +2036,34 @@ const Attendance = () => {
             const attendance = calculateAttendanceBasedOnShift({
               id: att.id,
               user: member.fullName,
-              employeeId: member.employeeId || "-",
-              department: member.department || "-",
-              position: member.position || "-",
+              employeeId: member.empId || "-",
+              department: member.team || "-",
+              position: member.role || "-",
               date: att.attendanceDate,
               loginTime: att.inTime || "-",
               logoutTime: att.outTime || "-",
               netWorkingHours: calculateNetHours(att.inTime, att.outTime),
-              taskActiveTime: att.taskActiveTime || "-",
+              taskActiveTime: "-", // Not provided in the API response
               status: att.status,
               anomalies: att.remarks || "-",
             }, shiftDetails);
 
             processedRecords.push(attendance);
           }
-          
+
           allProcessedAttendance.push(...processedRecords);
 
           // Prepare summary data for this member
           const empSummary = {
             id: member.id,
             employeeName: member.fullName,
-            employeeId: member.employeeId || "-",
-            department: member.department || "-",
-            position: member.position || "-",
+            employeeId: member.empId || "-",
+            department: member.team || "-",
+            position: member.role || "-",
             attendanceRecords: processedRecords,
             // Mock user details for salary calculation - Replace with actual API call
-            salary: 50000, // MOCK
-            dateOfJoining: "2022-01-15", // MOCK
+            salary: member.currentSalary || 50000, // Use actual salary if available
+            dateOfJoining: member.doj || "2022-01-15", // Use actual DOJ if available
             leaveOpeningBalance: 2, // MOCK
           };
           allSummaryData.push(empSummary);
@@ -1654,6 +2242,14 @@ const Attendance = () => {
                   {filteredSummaryData.map((employee) => {
                     const initials = employee.employeeName?.split(" ").map((n) => n[0]).join("");
                     const salary = employee.salaryDetails;
+
+                    // Calculate total net working hours
+                    const totalNetHours = employee.attendanceRecords.reduce((sum, record) => {
+                      if (record.netWorkingHours === "-") return sum;
+                      const [hours, minutes] = record.netWorkingHours.replace(/[hm]/g, "").split(" ").map(Number);
+                      return sum + (hours || 0) + (minutes || 0) / 60;
+                    }, 0);
+
                     return (
                       <tr key={employee.id} className="text-center">
                         <td><div className="d-flex align-items-center"><div className="avatar avatar-sm rounded me-3"><span className="avatar-text">{initials}</span></div><div><div className="fw-semibold">{employee.employeeName}</div><div className="small">{employee.employeeId}</div></div></div></td>
@@ -1662,9 +2258,9 @@ const Attendance = () => {
                         <td><span className="badge bg-warning-subtle text-warning">{employee.attendanceRecords.filter(r => r.anomalies?.includes('Late Login')).length}</span></td>
                         <td><span className="badge bg-warning-subtle text-warning">{employee.attendanceRecords.filter(r => r.anomalies?.includes('Early Departure')).length}</span></td>
                         <td><span className="badge bg-info-subtle text-info">{employee.attendanceRecords.filter(r => r.status === 'Leave').length}</span></td>
-                        <td>{(employee.attendanceRecords.reduce((sum, r) => sum + (r.netWorkingHours !== '-' ? parseInt(r.netWorkingHours) : 0), 0) / 60).toFixed(1)} hrs</td>
+                        <td>{totalNetHours.toFixed(1)} hrs</td>
                         <td>30 mins avg</td>
-                        <td>{(employee.attendanceRecords.reduce((sum, r) => sum + (r.taskActiveTime !== '-' ? parseFloat(r.taskActiveTime) : 0), 0)).toFixed(1)} hrs</td>
+                        <td>-</td>
                         <td><span className="fw-bold">₹{salary?.finalPayableAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0 }) || 'N/A'}</span></td>
                         <td className="text-center mt-2"><button onClick={() => handleEmployeeSelect(employee.id)} className="btn btn-sm btn-info"><Eye size={16} className="me-1" />View</button></td>
                       </tr>
