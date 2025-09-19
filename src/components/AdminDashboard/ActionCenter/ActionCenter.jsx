@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Card, Col, Row, Spinner, Form } from 'react-bootstrap';
+import { Button, Card, Col, Row, Spinner, Form, Table } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import axiosInstance from "../../Utilities/axiosInstance";
 import jsPDF from 'jspdf';
@@ -29,6 +29,7 @@ const App = () => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [actionHistory, setActionHistory] = useState([]);
   const [shifts, setShifts] = useState([]); // Added for shift data
+  const [projects, setProjects] = useState([]); // Added for project data
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const id = localStorage.getItem("userId");
@@ -49,6 +50,20 @@ const App = () => {
     } catch (error) {
       console.error("Failed to fetch shifts:", error);
       setError('Failed to fetch shifts');
+      setLoading(false);
+    }
+  };
+
+  // Fetch projects from API
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      const response = await axiosInstance.get("project/getAllProjects");
+      setProjects(response.data.projects || []);
+      setLoading(false);
+    } catch (error) {
+      console.error("Failed to fetch projects:", error);
+      setError('Failed to fetch projects');
       setLoading(false);
     }
   };
@@ -97,8 +112,10 @@ const App = () => {
   useEffect(() => {
     if (activeTab === "pending") {
       fetchShifts(); // Changed to fetch shifts instead of pending requests
-    } else {
+    } else if (activeTab === "history") {
       fetchActionHistory();
+    } else if (activeTab === "projects") {
+      fetchProjects();
     }
   }, [activeTab, filters.shiftType]); // Added filters.shiftType as dependency
 
@@ -197,6 +214,39 @@ const App = () => {
     }
   };
 
+  // Handle project reassignment
+  const handleReassignProject = async (projectId) => {
+    try {
+      setLoading(true);
+      
+      // Call the project update API with reassign status
+      await axiosInstance.put(
+        `project/updateProject/${projectId}`,
+        { status: "reassign" }
+      );
+
+      // Refresh projects list
+      await fetchProjects();
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Project Reassigned',
+        text: 'The project has been reassigned successfully.',
+        timer: 3000,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error("Error reassigning project:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to reassign the project. Please try again.',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Handle export to CSV
   const exportToCSV = (data) => {
     let csvContent = "data:text/csv;charset=utf-8,";
@@ -220,7 +270,7 @@ const App = () => {
         ];
         csvContent += row.join(",") + "\n";
       });
-    } else {
+    } else if (activeTab === "history") {
       csvContent += "Request Type,Requested By,From Role,To Role,Date,Message,Status,Action Taken By\n";
       
       // Add data rows for action history
@@ -237,13 +287,30 @@ const App = () => {
         ];
         csvContent += row.join(",") + "\n";
       });
+    } else if (activeTab === "projects") {
+      csvContent += "Project Title,Client,Country,Project Manager,Status,Deadline,Priority,Cost\n";
+      
+      // Add data rows for projects
+      data.forEach(item => {
+        const row = [
+          `"${item.projectTitle || ''}"`,
+          `"${item.clientId || ''}"`,
+          `"${item.country || ''}"`,
+          `"${item.projectManagerId || ''}"`,
+          `"${item.status || ''}"`,
+          `"${formatDate(item.deadline)}"`,
+          `"${item.priority || ''}"`,
+          `"${item.totalCost || ''}"`
+        ];
+        csvContent += row.join(",") + "\n";
+      });
     }
     
     // Create download link
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${activeTab === 'pending' ? 'shifts' : 'action_history'}_${new Date().toISOString().slice(0,10)}.csv`);
+    link.setAttribute("download", `${activeTab === 'pending' ? 'shifts' : activeTab === 'history' ? 'action_history' : 'projects'}_${new Date().toISOString().slice(0,10)}.csv`);
     document.body.appendChild(link);
     
     // Trigger download
@@ -272,7 +339,7 @@ const App = () => {
       // Add Title
       doc.setFontSize(18);
       doc.text(
-        activeTab === 'pending' ? 'Shifts' : 'Action History',
+        activeTab === 'pending' ? 'Shifts' : activeTab === 'history' ? 'Action History' : 'Projects',
         105,
         15,
         { align: 'center' }
@@ -304,7 +371,7 @@ const App = () => {
           item.duration || 'N/A',
           item.permissionApply || 'N/A'
         ]);
-      } else {
+      } else if (activeTab === "history") {
         headers = [['Request Type', 'Requested By', 'From Role', 'To Role', 'Date', 'Message', 'Status', 'Action Taken By']];
         
         tableData = data.map(item => [
@@ -316,6 +383,19 @@ const App = () => {
           (item.message || 'N/A').substring(0, 100),
           item.actionType || 'N/A',
           item.actionTakenBy || 'N/A'
+        ]);
+      } else if (activeTab === "projects") {
+        headers = [['Project Title', 'Client', 'Country', 'Project Manager', 'Status', 'Deadline', 'Priority', 'Cost']];
+        
+        tableData = data.map(item => [
+          item.projectTitle || 'N/A',
+          item.clientId || 'N/A',
+          item.country || 'N/A',
+          item.projectManagerId || 'N/A',
+          item.status || 'N/A',
+          item.deadline ? formatDate(item.deadline) : 'N/A',
+          item.priority || 'N/A',
+          item.totalCost || 'N/A'
         ]);
       }
 
@@ -350,7 +430,7 @@ const App = () => {
           6: { cellWidth: 20 },
           7: { cellWidth: 15 },
           8: { cellWidth: 20 }
-        } : {
+        } : activeTab === "history" ? {
           0: { cellWidth: 25 },
           1: { cellWidth: 25 },
           2: { cellWidth: 20 },
@@ -359,11 +439,20 @@ const App = () => {
           5: { cellWidth: 40 },
           6: { cellWidth: 20 },
           7: { cellWidth: 25 }
+        } : {
+          0: { cellWidth: 30 },
+          1: { cellWidth: 15 },
+          2: { cellWidth: 15 },
+          3: { cellWidth: 25 },
+          4: { cellWidth: 20 },
+          5: { cellWidth: 20 },
+          6: { cellWidth: 15 },
+          7: { cellWidth: 15 }
         }
       });
 
       // Save PDF
-      const fileName = `${activeTab === 'pending' ? 'shifts' : 'action_history'}_${new Date().toISOString().slice(0,10)}.pdf`;
+      const fileName = `${activeTab === 'pending' ? 'shifts' : activeTab === 'history' ? 'action_history' : 'projects'}_${new Date().toISOString().slice(0,10)}.pdf`;
       doc.save(fileName);
 
       return true; // Success
@@ -393,7 +482,7 @@ const App = () => {
         if (filters.dateTo && new Date(shift.shiftDate) > new Date(filters.dateTo)) return false;
         return true;
       });
-    } else {
+    } else if (activeTab === "history") {
       dataToExport = actionHistory.filter(action => {
         // Apply filters
         if (filters.actionType && action.actionType !== filters.actionType) return false;
@@ -404,13 +493,22 @@ const App = () => {
         if (filters.dateTo && new Date(action.createdAt) > new Date(filters.dateTo)) return false;
         return true;
       });
+    } else if (activeTab === "projects") {
+      dataToExport = projects.filter(project => {
+        // Apply filters
+        if (filters.status && project.status !== filters.status) return false;
+        if (filters.requestedBy && !project.projectTitle.toLowerCase().includes(filters.requestedBy.toLowerCase())) return false;
+        if (filters.dateFrom && new Date(project.deadline) < new Date(filters.dateFrom)) return false;
+        if (filters.dateTo && new Date(project.deadline) > new Date(filters.dateTo)) return false;
+        return true;
+      });
     }
     
     // Sort data
     if (filters.sortOrder === "oldest") {
-      dataToExport.sort((a, b) => new Date(a.shiftDate || a.createdAt) - new Date(b.shiftDate || b.createdAt));
+      dataToExport.sort((a, b) => new Date(a.shiftDate || a.createdAt || a.deadline) - new Date(b.shiftDate || b.createdAt || b.deadline));
     } else {
-      dataToExport.sort((a, b) => new Date(b.shiftDate || b.createdAt) - new Date(a.shiftDate || a.createdAt));
+      dataToExport.sort((a, b) => new Date(b.shiftDate || b.createdAt || b.deadline) - new Date(a.shiftDate || a.createdAt || a.deadline));
     }
     
     if (dataToExport.length === 0) {
@@ -518,6 +616,14 @@ const App = () => {
                 Action History
               </button>
             </li>
+            <li className="nav-item">
+              <button
+                className={`nav-link ${activeTab === "projects" ? "active" : ""}`}
+                onClick={() => setActiveTab("projects")}
+              >
+                Projects
+              </button>
+            </li>
           </ul>
         </div>
       </header>
@@ -538,7 +644,9 @@ const App = () => {
             <div className="text-white small">
               {activeTab === "pending"
                 ? `${shifts.length} shifts pending approval`
-                : `${actionHistory.length} history records`}
+                : activeTab === "history"
+                ? `${actionHistory.length} history records`
+                : `${projects.length} projects`}
             </div>
           </div>
 
@@ -567,7 +675,7 @@ const App = () => {
                         <option value="Night">Night</option>
                       </select>
                     </div>
-                  ) : (
+                  ) : activeTab === "history" ? (
                     // Action history filters
                     <>
                       <div className="col-md-6 col-lg-4">
@@ -605,11 +713,31 @@ const App = () => {
                         </select>
                       </div>
                     </>
+                  ) : (
+                    // Project filters
+                    <div className="col-md-6 col-lg-4">
+                      <label htmlFor="status" className="form-label">
+                        Status
+                      </label>
+                      <select
+                        id="status"
+                        name="status"
+                        value={filters.status}
+                        onChange={handleFilterChange}
+                        className="form-select"
+                      >
+                        <option value="">All Statuses</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Completed">Completed</option>
+                        <option value="On Hold">On Hold</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                    </div>
                   )}
 
                   <div className="col-md-6 col-lg-4">
                     <label htmlFor="requestedBy" className="form-label">
-                      {activeTab === "pending" ? "Employee Name" : "Requested By"}
+                      {activeTab === "pending" ? "Employee Name" : activeTab === "history" ? "Requested By" : "Project Title"}
                     </label>
                     <div className="input-group">
                       <input
@@ -646,26 +774,6 @@ const App = () => {
                           <i className="fas fa-search"></i>
                         </span>
                       </div>
-                    </div>
-                  )}
-
-                  {activeTab === "history" && (
-                    <div className="col-md-6 col-lg-4">
-                      <label htmlFor="status" className="form-label">
-                        Status
-                      </label>
-                      <select
-                        id="status"
-                        name="status"
-                        value={filters.status}
-                        onChange={handleFilterChange}
-                        className="form-select"
-                      >
-                        <option value="">All Statuses</option>
-                        <option value="pending">Pending</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                      </select>
                     </div>
                   )}
 
@@ -726,7 +834,7 @@ const App = () => {
                     <button 
                       type="button" 
                       className="btn btn-primary"
-                      onClick={activeTab === "pending" ? fetchShifts : fetchActionHistory}
+                      onClick={activeTab === "pending" ? fetchShifts : activeTab === "history" ? fetchActionHistory : fetchProjects}
                     >
                       Apply Filters
                     </button>
@@ -770,70 +878,72 @@ const App = () => {
               </div>
               
               {shifts.length > 0 ? (
-                <Row xs={1} md={2} lg={3} className="g-3">
-                  {shifts.map((shift) => (
-                    <Col key={shift.id}>
-                      <Card className="h-100 bg-card" style={{ borderLeft: '4px solid #ffc107' }}>
-                        <Card.Body>
-                          <div className="d-flex justify-content-between align-items-start mb-2">
-                            <div>
-                              <Card.Title className="h6 mb-1">
-                                {shift.fullName}
-                              </Card.Title>
-                              <div className="small text-muted mb-2">
-                                {formatDate(shift.shiftDate)}
+                <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                  <Row xs={1} md={2} lg={3} className="g-3">
+                    {shifts.map((shift) => (
+                      <Col key={shift.id}>
+                        <Card className="h-100 bg-card" style={{ borderLeft: '4px solid #ffc107' }}>
+                          <Card.Body>
+                            <div className="d-flex justify-content-between align-items-start mb-2">
+                              <div>
+                                <Card.Title className="h6 mb-1">
+                                  {shift.fullName}
+                                </Card.Title>
+                                <div className="small text-muted mb-2">
+                                  {formatDate(shift.shiftDate)}
+                                </div>
                               </div>
-                            </div>
-                            <span className="badge bg-warning text-dark">
-                              {shift.shiftType}
-                            </span>
-                          </div>
-                          
-                          <div className="mb-3">
-                            <p className="mb-1"><strong>Time:</strong> {shift.startTime || 'N/A'} - {shift.endTime || 'N/A'}</p>
-                            {shift.notes && <p className="mb-0">{shift.notes}</p>}
-                            {shift.otherType && (
-                              <p className="mb-0"><strong>Type:</strong> {shift.otherType}</p>
-                            )}
-                            {shift.duration && (
-                              <p className="mb-0"><strong>Duration:</strong> {shift.duration}</p>
-                            )}
-                            {shift.permissionApply && (
-                              <p className="mb-0"><strong>Permission:</strong> {shift.permissionApply}</p>
-                            )}
-                          </div>
-                          
-                          <div className="d-flex justify-content-between align-items-center">
-                            <div className="small">
-                              <span className="text-muted">Status:</span> Pending
+                              <span className="badge bg-warning text-dark">
+                                {shift.shiftType}
+                              </span>
                             </div>
                             
-                            <div className="d-flex gap-1">
-                              <Button
-                                variant="outline-danger"
-                                size="sm"
-                                onClick={() => handleShiftAction(shift.id, "reject")}
-                                disabled={loading}
-                                style={{ borderRadius: '4px', padding: '6px 10px' }}
-                              >
-                                Reject
-                              </Button>
-                              <Button
-                                variant="success"
-                                size="sm"
-                                onClick={() => handleShiftAction(shift.id, "approve")}
-                                disabled={loading}
-                                style={{ borderRadius: '4px', padding: '6px 10px' }}
-                              >
-                                Approve
-                              </Button>
+                            <div className="mb-3">
+                              <p className="mb-1"><strong>Time:</strong> {shift.startTime || 'N/A'} - {shift.endTime || 'N/A'}</p>
+                              {shift.notes && <p className="mb-0">{shift.notes}</p>}
+                              {shift.otherType && (
+                                <p className="mb-0"><strong>Type:</strong> {shift.otherType}</p>
+                              )}
+                              {shift.duration && (
+                                <p className="mb-0"><strong>Duration:</strong> {shift.duration}</p>
+                              )}
+                              {shift.permissionApply && (
+                                <p className="mb-0"><strong>Permission:</strong> {shift.permissionApply}</p>
+                              )}
                             </div>
-                          </div>
-                        </Card.Body>
-                      </Card>
-                    </Col>
-                  ))}
-                </Row>
+                            
+                            <div className="d-flex justify-content-between align-items-center">
+                              <div className="small">
+                                <span className="text-muted">Status:</span> Pending
+                              </div>
+                              
+                              <div className="d-flex gap-1">
+                                <Button
+                                  variant="outline-danger"
+                                  size="sm"
+                                  onClick={() => handleShiftAction(shift.id, "reject")}
+                                  disabled={loading}
+                                  style={{ borderRadius: '4px', padding: '6px 10px' }}
+                                >
+                                  Reject
+                                </Button>
+                                <Button
+                                  variant="success"
+                                  size="sm"
+                                  onClick={() => handleShiftAction(shift.id, "approve")}
+                                  disabled={loading}
+                                  style={{ borderRadius: '4px', padding: '6px 10px' }}
+                                >
+                                  Approve
+                                </Button>
+                              </div>
+                            </div>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+                </div>
               ) : (
                 <div className="card bg-card">
                   <div className="card-body text-center py-4">
@@ -843,7 +953,7 @@ const App = () => {
               )}
             </div>
           </div>
-        ) : (
+        ) : activeTab === "history" ? (
           <div>
             {/* Action History */}
             <div className="d-flex justify-content-between align-items-center mb-3">
@@ -853,52 +963,122 @@ const App = () => {
             </div>
             
             {actionHistory.length > 0 ? (
-              <Row xs={1} md={2} lg={3} className="g-3">
-                {actionHistory.map((action) => (
-                  <Col key={action.id}>
-                    <Card className="h-100 bg-card" style={{ 
-                      borderLeft: action.actionType === "Approved" ? '4px solid #28a745' : '4px solid #dc3545' 
-                    }}>
-                      <Card.Body>
-                        <div className="d-flex justify-content-between align-items-start mb-2">
-                          <div>
-                            <Card.Title className="h6 mb-1">
-                              {action.requestType}
-                            </Card.Title>
-                            <div className="small  mb-2">
-                              {formatDate(action.createdAt)}
-                            </div>
-                          </div>
-                          {action.actionType === "Approved" ? (
-                            <span className="badge bg-success">Approved</span>
-                          ) : (
-                            <span className="badge bg-danger">Rejected</span>
-                          )}
-                        </div>
-                        
-                        <div className="mb-3">
-                          <p className="mb-0">{action.message}</p>
-                        </div>
-                        
-                        <div className="small">
-                          <div className="mb-1">
-                            <span className="">Requested by:</span> {action.requesterName} ({action.fromRole})
-                          </div>
-                          {action.actionTakenBy && (
+              <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                <Row xs={1} md={2} lg={3} className="g-3">
+                  {actionHistory.map((action) => (
+                    <Col key={action.id}>
+                      <Card className="h-100 bg-card" style={{ 
+                        borderLeft: action.actionType === "Approved" ? '4px solid #28a745' : '4px solid #dc3545' 
+                      }}>
+                        <Card.Body>
+                          <div className="d-flex justify-content-between align-items-start mb-2">
                             <div>
-                              <span className="">Action by:</span> {action.actionTakenBy}
+                              <Card.Title className="h6 mb-1">
+                                {action.requestType}
+                              </Card.Title>
+                              <div className="small text-muted mb-2">
+                                {formatDate(action.createdAt)}
+                              </div>
                             </div>
-                          )}
-                        </div>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                ))}
-              </Row>
+                            {action.actionType === "Approved" ? (
+                              <span className="badge bg-success">Approved</span>
+                            ) : (
+                              <span className="badge bg-danger">Rejected</span>
+                            )}
+                          </div>
+                          
+                          <div className="mb-3">
+                            <p className="mb-0">{action.message}</p>
+                          </div>
+                          
+                          <div className="small">
+                            <div className="mb-1">
+                              <span className="text-muted">Requested by:</span> {action.requesterName} ({action.fromRole})
+                            </div>
+                            {action.actionTakenBy && (
+                              <div>
+                                <span className="text-muted">Action by:</span> {action.actionTakenBy}
+                              </div>
+                            )}
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  ))}
+                </Row>
+              </div>
             ) : (
               <div className="card bg-card">
                 <div className="card-body text-center py-4">
                   <p className="text-muted">No action history found</p>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
+            {/* Projects */}
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h2 className="h5 fw-medium text-white">
+                Projects
+              </h2>
+            </div>
+            
+            {projects.length > 0 ? (
+              <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                <Table striped bordered hover responsive className="bg-card text-white">
+                  <thead>
+                    <tr>
+                      <th>Project Title</th>
+                      <th>Client</th>
+                      <th>Country</th>
+                      <th>Project Manager</th>
+                      <th>Status</th>
+                      <th>Deadline</th>
+                      <th>Priority</th>
+                      <th>Cost</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {projects.map((project) => (
+                      <tr key={project.id}>
+                        <td>{project.projectTitle}</td>
+                        <td>{project.clientId}</td>
+                        <td>{project.country}</td>
+                        <td>{project.projectManagerId}</td>
+                        <td>
+                          <span className={`badge ${
+                            project.status === 'In Progress' ? 'bg-warning' :
+                            project.status === 'Completed' ? 'bg-success' :
+                            project.status === 'On Hold' ? 'bg-info' :
+                            'bg-danger'
+                          }`}>
+                            {project.status}
+                          </span>
+                        </td>
+                        <td>{formatDate(project.deadline)}</td>
+                        <td>{project.priority}</td>
+                        <td>{project.totalCost} {project.currency}</td>
+                        <td>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => handleReassignProject(project.id)}
+                            disabled={loading}
+                          >
+                            Reassign
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            ) : (
+              <div className="card bg-card">
+                <div className="card-body text-center py-4">
+                  <p className="text-muted">No projects found</p>
                 </div>
               </div>
             )}
