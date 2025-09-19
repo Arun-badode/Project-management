@@ -181,14 +181,16 @@ const CreateNewProject = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-      
 
         console.log("Fetched members:", res.data.data);
 
         if (res.data.status && Array.isArray(res.data.data)) {
+          // Fixed the filtering logic to correctly identify managers
           const onlyManagers = res.data.data.filter(
-            (member) => member.role?.toLowerCase() === "2"
+            (member) => member.roleName && member.roleName === "Manager"
           );
+
+          console.log("Filtered managers:", onlyManagers);
 
           const formatted = onlyManagers.map((manager) => ({
             value: manager.id,
@@ -205,7 +207,7 @@ const CreateNewProject = () => {
     };
 
     fetchManagers();
-  }, []);
+  }, [token]);
 
   // Validate form before submission
   const validateForm = () => {

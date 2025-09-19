@@ -62,22 +62,28 @@ const ActiveProject = () => {
   // this is for fetching members to show in filed handler option
   const [members, setMembers] = useState([]);
 
-  useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}member/getAllMembers`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.data.status) {
-          setMembers(response.data.data);
-        }
-      } catch (error) {
-        console.error("Error fetching members:", error);
+ useEffect(() => {
+  const fetchMembers = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}member/getAllMembers`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("API Response:", response.data); // Add this for debugging
+      
+      if (response.data && response.data.status) {
+        setMembers(response.data.data);
+        console.log("Members set:", response.data.data); // Add this for debugging
+      } else {
+        console.error("Invalid response format:", response.data);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching members:", error);
+      // You might want to add error state handling here
+    }
+  };
 
-    fetchMembers();
-  }, []);
+  fetchMembers();
+}, [token]); // Add token as a dependency if it's not already defined inside the component
 
   const assignees = [
     { label: "Not Assigned", value: "" },
@@ -86,11 +92,38 @@ const ActiveProject = () => {
     { label: "Mike Johnson", value: "Mike Johnson" },
   ];
 
-  const handleHandlerChange = (fileId, newHandler) => {
-    const updatedHandlers = { ...fileHandlers };
-    updatedHandlers[fileId] = newHandler;
-    setFileHandlers(updatedHandlers);
-    setHasUnsavedChanges(true);
+  // Updated handler change function to call API
+  const handleHandlerChange = async (fileId, newHandler) => {
+    try {
+      // Call API to assign handler to file
+      const response = await axios.patch(
+        `${BASE_URL}projectFiles/assignHandler/${fileId}`,
+        { handler: newHandler },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data.status) {
+        // Update local state only if API call was successful
+        const updatedHandlers = { ...fileHandlers };
+        updatedHandlers[fileId] = newHandler;
+        setFileHandlers(updatedHandlers);
+        setHasUnsavedChanges(true);
+        
+        // Show success message
+        alert("Handler assigned successfully!");
+      } else {
+        // Revert the change if API call failed
+        alert("Failed to assign handler: " + response.data.message);
+      }
+    } catch (error) {
+      console.error("Error assigning handler:", error);
+      alert("Error assigning handler: " + (error.response?.data?.message || error.message));
+    }
   };
 
   const initialFormData = {
@@ -1255,19 +1288,16 @@ const ActiveProject = () => {
                                                 onChange={(e) => handleHandlerChange(file.id, e.target.value)}
                                               >
                                                 <option value="">Not Assigned</option>
-                                                {members
-                                                  .filter((member) =>
-                                                    member.appSkills
-                                                      ?.toLowerCase()
-                                                      .includes(file.applicationName?.toLowerCase())
-                                                  )
-                                                  .map((filteredMember) => (
-                                                    <option key={filteredMember.id} value={filteredMember.fullName}>
-                                                      {filteredMember.fullName}
+                                                {members && members.length > 0 ? (
+                                                  members.map((member) => (
+                                                    <option key={member.id} value={member.fullName}>
+                                                      {member.fullName}
                                                     </option>
-                                                  ))}
+                                                  ))
+                                                ) : (
+                                                  <option disabled>Loading members...</option>
+                                                )}
                                               </select>
-
                                             </td>
                                             <td>
                                               <select className="form-select form-select-sm">

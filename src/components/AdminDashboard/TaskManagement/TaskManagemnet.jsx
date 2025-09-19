@@ -378,6 +378,8 @@ const TaskManagement = () => {
               onMarkComplete={handleMarkComplete}
               onDeleteProject={handleDeleteProject}
               expandedRow={expandedRow}
+              onReassign={(id) => console.log("Reassign project", id)}
+              onViewDetails={(id) => console.log("View details", id)}
             />
             {selectedProject && expandedRow === selectedProject.id && (
               <ProjectDetails
@@ -400,6 +402,8 @@ const TaskManagement = () => {
               onMarkComplete={handleMarkComplete}
               onDeleteProject={handleDeleteProject}
               expandedRow={expandedRow}
+              onReassign={(id) => console.log("Reassign project", id)}
+              onViewDetails={(id) => console.log("View details", id)}
             />
             {selectedProject && expandedRow === selectedProject.id && (
               <ProjectDetails
