@@ -499,7 +499,7 @@ const Project = () => {
             </div>
 
             {/* Filters */}
-            <div className="row g-3 mb-3">
+            {/* <div className="row g-3 mb-3">
 
               <div className="col-md-3">
                 <label className="form-label text-white">Client</label>
@@ -566,7 +566,7 @@ const Project = () => {
                   onChange={(e) => setSelectedMonth(e.target.value)}
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Project Table or Empty State */}
             {filteredProjects.length === 0 ? (

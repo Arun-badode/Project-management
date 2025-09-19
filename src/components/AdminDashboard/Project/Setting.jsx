@@ -1017,7 +1017,7 @@ export default function SettingsPage() {
           <div className="mb-4">
             <h6 className="mb-3 text-white">Currency Conversion Rates</h6>
             <div className="row g-2 mb-2">
-              <div className="col-md-6">
+              <div className="col-md-5">
                 <select
                   className="form-control bg-card text-white border-secondary"
                   value={newCurrency.name}
@@ -1032,7 +1032,7 @@ export default function SettingsPage() {
                   ))}
                 </select>
               </div>
-              <div className="col-md-6">
+              <div className="col-md-5">
                 <input
                   type="text"
                   className="form-control bg-card text-white border-secondary"
@@ -1042,6 +1042,15 @@ export default function SettingsPage() {
                   style={{ background: "#181f3a", color: "#fff" }}
                 />
               </div>
+              <div className="col-md-2">
+               <button
+              className="btn  btn-gradient"
+              onClick={handleAddCurrency}
+              disabled={!newCurrency.name || !newCurrency.rate}
+            >
+              <i className="fas fa-plus me-1"></i> 
+            </button>
+            </div>
             </div>
             <div className="border rounded p-2 mb-2 border-secondary table-gradient-bg"
               style={{
@@ -1092,13 +1101,7 @@ export default function SettingsPage() {
                 </tbody>
               </table>
             </div>
-            <button
-              className="btn btn-sm btn-primary"
-              onClick={handleAddCurrency}
-              disabled={!newCurrency.name || !newCurrency.rate}
-            >
-              <i className="fas fa-plus me-1"></i> Add Currency
-            </button>
+           
           </div>
         </div>
       </div>

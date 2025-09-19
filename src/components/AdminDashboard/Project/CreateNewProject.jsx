@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -97,6 +97,7 @@ const CreateNewProject = () => {
   const [managers, setManagers] = useState([]);
   const [loadingManagers, setLoadingManagers] = useState(true);
   const today = new Date();
+  const calendarRef = useRef(null);
 
   // State for showing/hiding input fields
   const [showClientInput, setShowClientInput] = useState(false);
@@ -143,6 +144,34 @@ const CreateNewProject = () => {
     { fileName: "", pages: "", application: "" },
   ]);
 
+  // Handle ESC key to close calendar
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === "Escape" && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscKey);
+    return () => {
+      document.removeEventListener("keydown", handleEscKey);
+    };
+  }, [isOpen]);
+
+  // Close calendar when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (calendarRef.current && !calendarRef.current.contains(event.target) && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
   // Fetch managers from the API
   useEffect(() => {
     const fetchManagers = async () => {
@@ -152,12 +181,13 @@ const CreateNewProject = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+      
 
         console.log("Fetched members:", res.data.data);
 
         if (res.data.status && Array.isArray(res.data.data)) {
           const onlyManagers = res.data.data.filter(
-            (member) => member.role?.toLowerCase() === "manager"
+            (member) => member.role?.toLowerCase() === "2"
           );
 
           const formatted = onlyManagers.map((manager) => ({
@@ -476,6 +506,7 @@ const CreateNewProject = () => {
   const [applicationOptions, setApplicationOptions] = useState([]);
   const [languageOptions, setLanguageOptions] = useState([]);
   const [clientOptions, setClientOptions] = useState([]);
+  const [clientDetails, setClientDetails] = useState({}); // Store client details including currency
 
   // Fetch tasks, applications, languages, and clients
   useEffect(() => {
@@ -537,19 +568,29 @@ const CreateNewProject = () => {
       })
       .then((res) => {
         if (res.data.status) {
+          const clients = res.data.clients;
           setClientOptions(
-            res.data.clients.map((client) => ({
+            clients.map((client) => ({
               value: client.id,
               label: client.clientName,
             }))
           );
+          
+          // Store client details including currency
+          const details = {};
+          clients.forEach(client => {
+            details[client.id] = {
+              currency: client.currency || "USD" // Default to USD if not specified
+            };
+          });
+          setClientDetails(details);
         }
       })
       .catch((err) => console.error("Error fetching clients:", err))
       .finally(() => setLoading(false));
   }, [token]);
 
-  // Updated formatDateTime function to show Time first, then Date
+  // Updated formatDateTime function to show Time first, then Date in HH:MM tt DD-MM-YY format
   const formatDateTime = () => {
     if (selectedDate === null) {
       return "00:00 AM 00-00-00";
@@ -627,9 +668,18 @@ const CreateNewProject = () => {
 
         setClientOptions((prev) => [...prev, newOption]);
 
+        // Update client details with default currency
+        setClientDetails(prev => ({
+          ...prev,
+          [data.club.id]: {
+            currency: "USD" // Default currency
+          }
+        }));
+
         setFormData((prev) => ({
           ...prev,
           client: data.club.id,
+          currency: "USD" // Set default currency
         }));
 
         setNewClientName("");
@@ -843,10 +893,10 @@ const CreateNewProject = () => {
         const sheet = workbook.Sheets[sheetName];
         const rows = XLSX.utils.sheet_to_json(sheet);
 
-        // Expecting columns: fileName, pageCount, applicationId
+        // Expecting columns: fileName, pages, applicationId
         const files = rows.map((row) => ({
           fileName: row.fileName || "",
-          pageCount: Number(row.pageCount) || 0,
+          pageCount: Number(row.pages) || 0,  // Changed from pageCount to pages
           applicationId: row.applicationId || "",
           selected: false,
         }));
@@ -944,6 +994,16 @@ const CreateNewProject = () => {
     }
   };
 
+  // Generate year options for dropdown
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = currentYear; i <= currentYear + 10; i++) {
+      years.push(i);
+    }
+    return years;
+  };
+
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -997,14 +1057,14 @@ const CreateNewProject = () => {
               <label htmlFor="client" className="form-label mb-0">
                 Client <span className="text-danger">*</span>
               </label>
-              <button
+              {/* <button
                 type="button"
                 className="btn btn-outline-primary"
                 onClick={handleAddClient}
                 title="Add Client"
               >
                 {showClientInput ? "×" : "+"}
-              </button>
+              </button> */}
             </div>
 
             <div className="d-flex align-items-center gap-2 mt-2">
@@ -1021,9 +1081,14 @@ const CreateNewProject = () => {
                       : null
                   }
                   onChange={(opt) => {
+                    const clientId = opt ? opt.value : "";
                     setFormData((prev) => ({
                       ...prev,
-                      client: opt ? opt.value : "",
+                      client: clientId,
+                      // Update currency based on selected client
+                      currency: clientId && clientDetails[clientId] 
+                        ? clientDetails[clientId].currency 
+                        : "USD"
                     }));
 
                     // Clear error when client is selected
@@ -1073,7 +1138,7 @@ const CreateNewProject = () => {
             </div>
           </div>
 
-          <div className="col-md-4 mt-4">
+          <div className="col-md-4 ">
             <label htmlFor="country" className="form-label">
               Country
             </label>
@@ -1088,7 +1153,7 @@ const CreateNewProject = () => {
               placeholder=""
             />
           </div>
-          <div className="col-md-4 mt-4">
+          <div className="col-md-4 ">
             <label htmlFor="projectManager" className="form-label">
               Project Manager
             </label>
@@ -1123,14 +1188,14 @@ const CreateNewProject = () => {
               <label htmlFor="task" className="form-label mb-0">
                 Task <span className="text-danger">*</span>
               </label>
-              <button
+              {/* <button
                 type="button"
                 className="btn btn-outline-primary"
                 onClick={handleAddTask}
                 title="Add Task"
               >
                 {showTaskInput ? "×" : "+"}
-              </button>
+              </button> */}
             </div>
 
             <Select
@@ -1209,14 +1274,14 @@ const CreateNewProject = () => {
               <label htmlFor="application" className="form-label mb-0">
                 Applications <span className="text-danger">*</span>
               </label>
-              <button
+              {/* <button
                 type="button"
                 className="btn btn-outline-primary"
                 onClick={handleAddApplication}
                 title="Add Application"
               >
                 {showApplicationInput ? "×" : "+"}
-              </button>
+              </button> */}
             </div>
 
             <Select
@@ -1292,14 +1357,14 @@ const CreateNewProject = () => {
             <label className="form-label mb-0">
               Languages <span className="text-danger">*</span>
             </label>
-            <button
+            {/* <button
               type="button"
               className="btn btn-outline-primary"
               onClick={handleAddLanguage}
               title="Add Language"
             >
               {showLanguageInput ? "×" : "+"}
-            </button>
+            </button> */}
           </div>
 
           <Select
@@ -1817,6 +1882,7 @@ const CreateNewProject = () => {
                 }))
               }
               placeholder="Auto from Client"
+              readOnly // Made this read-only since it's auto-updated when client is selected
             />
           </div>
 
@@ -1851,7 +1917,7 @@ const CreateNewProject = () => {
             <label className="text-white" style={{ fontWeight: "bold" }}>
               Deadline
             </label>
-            <div className="max-w-md mx-auto">
+            <div className="max-w-md mx-auto" ref={calendarRef}>
               <div className="relative">
                 <input
                   type="text"
@@ -1977,22 +2043,45 @@ const CreateNewProject = () => {
 
                     <div className="calendar-section">
                       <div className="month-nav">
-                        <button
-                          type="button"
-                          onClick={handlePrevMonth}
-                          disabled={
-                            selectedMonth === today.getMonth() &&
-                            selectedYear === today.getFullYear()
-                          }
-                        >
-                          <ChevronLeft size={20} />
-                        </button>
-                        <h3>
-                          {months[selectedMonth]}, {selectedYear}
-                        </h3>
-                        <button type="button" onClick={handleNextMonth}>
-                          <ChevronRight size={20} />
-                        </button>
+                        <div className="month-year-dropdowns">
+                          <select
+                            value={selectedMonth}
+                            onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                            className="form-select form-select-sm"
+                          >
+                            {months.map((month, index) => (
+                              <option key={index} value={index}>
+                                {month}
+                              </option>
+                            ))}
+                          </select>
+                          <select
+                            value={selectedYear}
+                            onChange={(e) => setSelectedYear(Number(e.target.value))}
+                            className="form-select form-select-sm"
+                          >
+                            {generateYearOptions().map((year) => (
+                              <option key={year} value={year}>
+                                {year}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="nav-buttons">
+                          <button
+                            type="button"
+                            onClick={handlePrevMonth}
+                            disabled={
+                              selectedMonth === today.getMonth() &&
+                              selectedYear === today.getFullYear()
+                            }
+                          >
+                            <ChevronLeft size={20} />
+                          </button>
+                          <button type="button" onClick={handleNextMonth}>
+                            <ChevronRight size={20} />
+                          </button>
+                        </div>
                       </div>
 
                       <div className="weekdays">
