@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axiosInstance from "../components/Utilities/axiosInstance";
 
 const Navbar = ({ toggleSidebar }) => {
   const [isLoggedOut, setIsLoggedOut] = useState(false);
@@ -44,6 +45,57 @@ const Navbar = ({ toggleSidebar }) => {
     const userRole = localStorage.getItem("userRole");
     setRole(userRole);
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      const attendance = JSON.parse(localStorage.getItem("attendance"));
+      const memberId = localStorage.getItem("managerId"); // or user id key you use
+      const token = localStorage.getItem("authToken");
+      if (attendance?.id && memberId && token) {
+        // Prepare outTime as current time in "HH:MM AM/PM" format
+        const now = new Date();
+        const outTime = now.toLocaleTimeString("en-US", {
+          hour12: true,
+          hour: "numeric",
+          minute: "2-digit",
+        });
+        // Prepare attendanceDate in YYYY-MM-DD format
+        const attendanceDate = now.toISOString().split("T")[0];
+        // Call updateAttendance API
+        await axiosInstance.patch(
+          `attendance/updateAttendance/${attendance?.id}`,
+          {
+            memberId: parseInt(memberId, 10),
+            attendanceDate: attendanceDate,
+            status: "Present",
+            inTime: attendance?.inTime, // no change to inTime
+            outTime: outTime,
+            remarks: "Logged out",
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        console.log("✅ Attendance updated with outTime on logout.");
+      }
+    } catch (error) {
+      console.error("⚠️ Failed to update attendance on logout:", error);
+    } finally {
+      // Clear localStorage
+      localStorage.clear();
+      // Reset states if needed
+      setUserStatus("Available");
+      setShowOverlay(false);
+      setIsLoggedOut(false);
+      setShowProfileDropdown(false);
+      // Navigate to login page
+      window.location.href = "/"; // or use react-router navigate if available
+    }
+  };
+
 
   return (
     <>
@@ -229,10 +281,17 @@ const Navbar = ({ toggleSidebar }) => {
                     <hr className="dropdown-divider" />
                   </li>
                   <li>
-                    <Link className="dropdown-item py-2 text-danger" to="/">
+                    {/* <Link className="dropdown-item py-2 text-danger" to="/">
                       <i className="fa fa-sign-out-alt me-2"></i>
                       Logout
-                    </Link>
+                    </Link> */}
+                    <button
+                      className="dropdown-item py-2 text-danger"
+                      onClick={handleLogout}
+                    >
+                      <i className="fa fa-sign-out-alt me-2"></i>
+                      Logout
+                    </button>
                   </li>
                 </ul>
               )}
