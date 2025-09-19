@@ -1,5 +1,6 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { ChevronLeft, ChevronRight, Calendar, Trash2, Upload } from "lucide-react";
 import BASE_URL from "../../../config";
 
 const CompletedProjects = ({projectPermission}) => {
@@ -32,6 +33,276 @@ const CompletedProjects = ({projectPermission}) => {
   const [showTimestampModal, setShowTimestampModal] = useState(false);
   const [timestampData, setTimestampData] = useState(null);
 
+  // Calendar state for file deadline
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedMonthCalendar, setSelectedMonthCalendar] = useState(new Date().getMonth());
+  const [selectedYearCalendar, setSelectedYearCalendar] = useState(new Date().getFullYear());
+  const [selectedHour, setSelectedHour] = useState(0);
+  const [selectedMinute, setSelectedMinute] = useState(0);
+  const [isAM, setIsAM] = useState(true);
+  const calendarRef = useRef(null);
+  const today = new Date();
+
+  // State for all files
+  const [allFiles, setAllFiles] = useState([]);
+
+  // Helper functions for calendar
+  const getDaysInMonth = (month, year) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (month, year) => {
+    return new Date(year, month, 1).getDay();
+  };
+
+  const generateCalendarDays = (selectedMonth, selectedYear, today) => {
+    const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
+    const firstDay = getFirstDayOfMonth(selectedMonth, selectedYear);
+    const days = [];
+
+    // Previous month's trailing days
+    const prevMonth = selectedMonth === 0 ? 11 : selectedMonth - 1;
+    const prevYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear;
+    const daysInPrevMonth = getDaysInMonth(prevMonth, prevYear);
+
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const day = daysInPrevMonth - i;
+      const isPast =
+        prevYear < today.getFullYear() ||
+        (prevYear === today.getFullYear() && prevMonth < today.getMonth()) ||
+        (prevYear === today.getFullYear() &&
+          prevMonth === today.getMonth() &&
+          day < today.getDate());
+
+      days.push({
+        day,
+        isCurrentMonth: false,
+        isNextMonth: false,
+        isPast,
+      });
+    }
+
+    // Current month days
+    for (let day = 1; day <= daysInMonth; day++) {
+      const isToday =
+        selectedYear === today.getFullYear() &&
+        selectedMonth === today.getMonth() &&
+        day === today.getDate();
+      const isPast =
+        selectedYear < today.getFullYear() ||
+        (selectedYear === today.getFullYear() &&
+          selectedMonth < today.getMonth()) ||
+        (selectedYear === today.getFullYear() &&
+          selectedMonth === today.getMonth() &&
+          day < today.getDate());
+
+      days.push({
+        day,
+        isCurrentMonth: true,
+        isNextMonth: false,
+        isToday,
+        isPast,
+      });
+    }
+
+    // Next month's leading days
+    const remainingDays = 42 - days.length;
+    for (let day = 1; day <= remainingDays; day++) {
+      days.push({
+        day,
+        isCurrentMonth: false,
+        isNextMonth: true,
+        isPast: false,
+      });
+    }
+
+    return days;
+  };
+
+  const calendarDays = generateCalendarDays(selectedMonthCalendar, selectedYearCalendar, today);
+
+  const weekDays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  // Handle ESC key to close calendar
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === "Escape" && calendarOpen) {
+        setCalendarOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscKey);
+    return () => {
+      document.removeEventListener("keydown", handleEscKey);
+    };
+  }, [calendarOpen]);
+
+  // Close calendar when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (calendarRef.current && !calendarRef.current.contains(event.target) && calendarOpen) {
+        setCalendarOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [calendarOpen]);
+
+  // Format date time for display
+  const formatDateTime = () => {
+    if (selectedDate === null) {
+      return "00:00 AM 00-00-00";
+    }
+
+    // Format time: HH:MM tt
+    const hour =
+      selectedHour === 0
+        ? 12
+        : selectedHour > 12
+        ? selectedHour - 12
+        : selectedHour;
+    const time = `${hour.toString().padStart(2, "0")}:${selectedMinute
+      .toString()
+      .padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
+
+    // Format date: DD-MM-YY
+    const date = `${selectedDate.toString().padStart(2, "0")}-${(
+      selectedMonthCalendar + 1
+    )
+      .toString()
+      .padStart(2, "0")}-${selectedYearCalendar.toString().slice(-2)}`;
+
+    return `${time} ${date}`;
+  };
+
+  // Handle calendar navigation
+  const handleNextMonth = () => {
+    if (selectedMonthCalendar === 11) {
+      setSelectedMonthCalendar(0);
+      setSelectedYearCalendar(selectedYearCalendar + 1);
+    } else {
+      setSelectedMonthCalendar(selectedMonthCalendar + 1);
+    }
+  };
+
+  const handlePrevMonth = () => {
+    if (selectedMonthCalendar === 0) {
+      setSelectedMonthCalendar(11);
+      setSelectedYearCalendar(selectedYearCalendar - 1);
+    } else {
+      setSelectedMonthCalendar(selectedMonthCalendar - 1);
+    }
+  };
+
+  // Function to check if a date is in the past
+  const isDateInPast = (day, month, year) => {
+    const selectedDate = new Date(year, month, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return selectedDate < today;
+  };
+
+  // Function to check if time is in the past for today
+  const isTimeInPast = (hour, minute, isAM, date) => {
+    if (
+      !date ||
+      date !== today.getDate() ||
+      selectedMonthCalendar !== today.getMonth() ||
+      selectedYearCalendar !== today.getFullYear()
+    ) {
+      return false;
+    }
+
+    const selectedHour24 = isAM
+      ? hour === 12
+        ? 0
+        : hour
+      : hour === 12
+      ? 12
+      : hour + 12;
+    const selectedTime = new Date(
+      selectedYearCalendar,
+      selectedMonthCalendar,
+      date,
+      selectedHour24,
+      minute
+    );
+    const now = new Date();
+
+    return selectedTime < now;
+  };
+
+  // Generate year options for dropdown
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = currentYear; i <= currentYear + 10; i++) {
+      years.push(i);
+    }
+    return years;
+  };
+
+  // Set deadline from calendar
+  const setDeadlineFromCalendar = () => {
+    if (selectedDate === null) return;
+
+    const deadline = `${selectedYearCalendar}-${(selectedMonthCalendar + 1)
+      .toString()
+      .padStart(2, "0")}-${selectedDate.toString().padStart(2, "0")}T${(isAM
+      ? selectedHour === 12
+        ? 0
+        : selectedHour
+      : selectedHour === 12
+      ? 12
+      : selectedHour + 12
+    )
+      .toString()
+      .padStart(2, "0")}:${selectedMinute.toString().padStart(2, "0")}:00`;
+
+    setNewDeadline(deadline);
+    setCalendarOpen(false);
+  };
+
+  // Fetch all project files
+  useEffect(() => {
+    const fetchFiles = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}projectFiles/getAllProjectFiles`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.data.status) {
+          setAllFiles(response.data.data);
+          console.log("Fetched Files:", response.data.data);
+        } else {
+          console.error("Error in response:", response.data.message);
+        }
+      } catch (err) {
+        console.error("Error fetching files:", err);
+      }
+    };
+
+    fetchFiles();
+  }, [token]);
+
   useEffect(() => {
     axios
       .get(`${BASE_URL}project/getAllProjects`, {
@@ -56,7 +327,7 @@ const CompletedProjects = ({projectPermission}) => {
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
-  }, []);
+  }, [token]);
 
   // Function to handle edit project
   const handleEditProject = (projectId) => {
@@ -110,18 +381,28 @@ const CompletedProjects = ({projectPermission}) => {
       setShowFilesDropdown(null);
     } else {
       try {
-        // For demonstration, creating mock files data
-        // Replace this with actual API call
-        const mockFiles = [
-          { id: 1, name: "file1.docx", language: "English", application: "Word", status: "Completed", lastUpdated: new Date() },
-          { id: 2, name: "file2.xlsx", language: "French", application: "Excel", status: "In Progress", lastUpdated: new Date() },
-          { id: 3, name: "file3.pptx", language: "German", application: "PowerPoint", status: "Pending", lastUpdated: new Date() }
-        ];
+        // Filter files for the selected project
+        const projectFiles = allFiles.filter(file => file.projectId === projectId);
         
-        setSelectedFiles(mockFiles.map(file => ({
-          ...file,
-          selected: false
-        })));
+        if (projectFiles.length === 0) {
+          // If no files found, create mock data for demonstration
+          const mockFiles = [
+            { id: 1, fileName: "file1.docx", languageName: "English", applicationName: "Word", status: "Completed", lastUpdated: new Date() },
+            { id: 2, fileName: "file2.xlsx", languageName: "French", applicationName: "Excel", status: "In Progress", lastUpdated: new Date() },
+            { id: 3, fileName: "file3.pptx", languageName: "German", applicationName: "PowerPoint", status: "Pending", lastUpdated: new Date() }
+          ];
+          
+          setSelectedFiles(mockFiles.map(file => ({
+            ...file,
+            selected: false
+          })));
+        } else {
+          setSelectedFiles(projectFiles.map(file => ({
+            ...file,
+            selected: false
+          })));
+        }
+        
         setShowFilesDropdown(projectId);
       } catch (err) {
         console.error("Error fetching project files:", err);
@@ -139,7 +420,7 @@ const CompletedProjects = ({projectPermission}) => {
   };
 
   // Function to update file status
-  const handleUpdateFileStatus = () => {
+  const handleUpdateFileStatus = async () => {
     const selectedFileIds = selectedFiles
       .filter(file => file.selected)
       .map(file => file.id);
@@ -149,14 +430,49 @@ const CompletedProjects = ({projectPermission}) => {
       return;
     }
     
-    // Implement API call to update file status
-    console.log("Updating files:", selectedFileIds, "to Amends, Round:", amendsRound, "Deadline:", newDeadline);
+    if (!newDeadline) {
+      alert("Please set a deadline");
+      return;
+    }
     
-    // Reset selections
-    setSelectedFiles([]);
-    setAmendsRound(1);
-    setNewDeadline("");
-    setShowFilesDropdown(null);
+    try {
+      // Update selected files with new status and deadline
+      for (const fileId of selectedFileIds) {
+        await axios.patch(
+          `${BASE_URL}projectFiles/updateFileStatus/${fileId}`,
+          {
+            status: "Amends",
+            deadline: newDeadline,
+            amendsRound: amendsRound
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
+
+      alert("File statuses updated successfully!");
+
+      // Refresh files list
+      const filesResponse = await axios.get(`${BASE_URL}projectFiles/getAllProjectFiles`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (filesResponse.data.status) {
+        setAllFiles(filesResponse.data.data);
+      }
+      
+      // Reset selections
+      setSelectedFiles([]);
+      setAmendsRound(1);
+      setNewDeadline("");
+      setShowFilesDropdown(null);
+    } catch (error) {
+      console.error("Failed to update file statuses:", error);
+      alert("Error updating file statuses");
+    }
   };
 
   // Apply filters to projects
@@ -418,8 +734,8 @@ const CompletedProjects = ({projectPermission}) => {
                     <tr>
                       <td colSpan="16" className="p-0">
                         <div className="card">
-                          <div className="card-header d-flex justify-content-between align-items-center bg-light">
-                            <h5 className="mb-0 text-dark">Project Files</h5>
+                          <div className="card-header d-flex justify-content-between align-items-center table-gradient-bg">
+                            <h5 className="mb-0 ">Project Files</h5>
                             <button 
                               className="btn btn-sm btn-secondary" 
                               onClick={() => setShowFilesDropdown(null)}
@@ -427,9 +743,9 @@ const CompletedProjects = ({projectPermission}) => {
                               <i className="fas fa-times"></i>
                             </button>
                           </div>
-                          <div className="card-body bg-white">
+                          <div className="card-body table-gradient-bg">
                             <div className="table-responsive">
-                              <table className="table table-sm">
+                              <table className="table table-sm ">
                                 <thead>
                                   <tr>
                                     <th>
@@ -463,9 +779,9 @@ const CompletedProjects = ({projectPermission}) => {
                                           onChange={() => handleFileSelection(file.id)}
                                         />
                                       </td>
-                                      <td className="text-dark">{file.name}</td>
-                                      <td className="text-dark">{file.language}</td>
-                                      <td className="text-dark">{file.application}</td>
+                                      <td className="text-dark">{file.fileName || file.name}</td>
+                                      <td className="text-dark">{file.languageName || file.language}</td>
+                                      <td className="text-dark">{file.applicationName || file.application}</td>
                                       <td className="text-dark">
                                         <span className={`badge ${file.status === 'Completed' ? 'bg-success' : file.status === 'In Progress' ? 'bg-warning' : 'bg-secondary'}`}>
                                           {file.status}
@@ -480,7 +796,7 @@ const CompletedProjects = ({projectPermission}) => {
                             
                             <div className="row mt-3">
                               <div className="col-md-4">
-                                <label className="form-label text-dark">Amends Round</label>
+                                <label className="form-label ">Amends Round</label>
                                 <select 
                                   className="form-select"
                                   value={amendsRound}
@@ -492,13 +808,265 @@ const CompletedProjects = ({projectPermission}) => {
                                 </select>
                               </div>
                               <div className="col-md-4">
-                                <label className="form-label text-dark">New Deadline</label>
-                                <input 
-                                  type="date" 
-                                  className="form-control"
-                                  value={newDeadline}
-                                  onChange={(e) => setNewDeadline(e.target.value)}
-                                />
+                                <label className="form-label ">New Deadline</label>
+                                <div className="max-w-md mx-auto" ref={calendarRef}>
+                                  <div className="relative">
+                                    <input
+                                      type="text"
+                                      value={newDeadline 
+                                        ? new Date(newDeadline).toLocaleString() 
+                                        : formatDateTime()}
+                                      readOnly
+                                      onClick={() => {
+                                        setCalendarOpen(!calendarOpen);
+                                        // Initialize calendar with current deadline if exists
+                                        if (newDeadline) {
+                                          const deadline = new Date(newDeadline);
+                                          setSelectedDate(deadline.getDate());
+                                          setSelectedMonthCalendar(deadline.getMonth());
+                                          setSelectedYearCalendar(deadline.getFullYear());
+                                          setSelectedHour(deadline.getHours() % 12 || 12);
+                                          setSelectedMinute(deadline.getMinutes());
+                                          setIsAM(deadline.getHours() < 12);
+                                        }
+                                      }}
+                                      className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                                      placeholder="00:00 AM 00-00-00"
+                                    />
+                                  </div>
+
+                                  {calendarOpen && (
+                                    <div className="calendar-dropdown">
+                                      <div className="time-display">
+                                        <div className="time">
+                                          {selectedHour === 0
+                                            ? "12"
+                                            : selectedHour > 12
+                                            ? selectedHour - 12
+                                            : selectedHour.toString().padStart(2, "0")}
+                                          :{selectedMinute.toString().padStart(2, "0")}
+                                        </div>
+                                        <div className="period">{isAM ? "AM" : "PM"}</div>
+                                        <div className="date">
+                                          {selectedDate !== null
+                                            ? `${selectedDate.toString().padStart(2, "0")}-${(
+                                                selectedMonthCalendar + 1
+                                              )
+                                                .toString()
+                                                .padStart(2, "0")}-${selectedYearCalendar
+                                                .toString()
+                                                .slice(-2)}`
+                                            : "00-00-00"}
+                                        </div>
+                                      </div>
+
+                                      <div className="time-calendar-container">
+                                        <div className="time-selector">
+                                          <div className="time-column">
+                                            <div className="time-column-label">Hour</div>
+                                            <div className="time-scroll">
+                                              <div className="time-options">
+                                                {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(
+                                                  (hour) => {
+                                                    const isPast = isTimeInPast(
+                                                      hour,
+                                                      selectedMinute,
+                                                      isAM,
+                                                      selectedDate
+                                                    );
+                                                    return (
+                                                      <button
+                                                        key={hour}
+                                                        onClick={() => setSelectedHour(hour)}
+                                                        className={`time-option ${
+                                                          selectedHour === hour
+                                                            ? "selected-hour"
+                                                            : ""
+                                                        } ${isPast ? "past-time" : ""}`}
+                                                        disabled={isPast}
+                                                      >
+                                                        {hour.toString().padStart(2, "0")}
+                                                      </button>
+                                                    );
+                                                  }
+                                                )}
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          <div className="time-column">
+                                            <div className="time-column-label">Min</div>
+                                            <div className="time-scroll">
+                                              <div className="time-options">
+                                                {[0, 15, 30, 45].map((minute) => {
+                                                  const isPast = isTimeInPast(
+                                                    selectedHour,
+                                                    minute,
+                                                    isAM,
+                                                    selectedDate
+                                                  );
+                                                  return (
+                                                    <button
+                                                      key={minute}
+                                                      onClick={() => setSelectedMinute(minute)}
+                                                      className={`time-option ${
+                                                        selectedMinute === minute
+                                                          ? "selected-minute"
+                                                          : ""
+                                                      } ${isPast ? "past-time" : ""}`}
+                                                      disabled={isPast}
+                                                    >
+                                                      {minute.toString().padStart(2, "0")}
+                                                    </button>
+                                                  );
+                                                })}
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          <div className="time-column">
+                                            <div className="time-column-label">Period</div>
+                                            <div className="period-options">
+                                              <button
+                                                onClick={() => setIsAM(true)}
+                                                className={`period-option ${
+                                                  isAM ? "selected" : ""
+                                                }`}
+                                              >
+                                                AM
+                                              </button>
+                                              <button
+                                                onClick={() => setIsAM(false)}
+                                                className={`period-option ${
+                                                  !isAM ? "selected" : ""
+                                                }`}
+                                              >
+                                                PM
+                                              </button>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <div className="calendar-section">
+                                          <div className="month-nav">
+                                            <div className="month-year-dropdowns">
+                                              <select
+                                                value={selectedMonthCalendar}
+                                                onChange={(e) => setSelectedMonthCalendar(Number(e.target.value))}
+                                                className="form-select form-select-sm"
+                                              >
+                                                {months.map((month, index) => (
+                                                  <option key={index} value={index}>
+                                                    {month}
+                                                  </option>
+                                                ))}
+                                              </select>
+                                              <select
+                                                value={selectedYearCalendar}
+                                                onChange={(e) => setSelectedYearCalendar(Number(e.target.value))}
+                                                className="form-select form-select-sm"
+                                              >
+                                                {generateYearOptions().map((year) => (
+                                                  <option key={year} value={year}>
+                                                    {year}
+                                                  </option>
+                                                ))}
+                                              </select>
+                                            </div>
+                                            <div className="nav-buttons">
+                                              <button
+                                                type="button"
+                                                onClick={handlePrevMonth}
+                                                disabled={
+                                                  selectedMonthCalendar === today.getMonth() &&
+                                                  selectedYearCalendar === today.getFullYear()
+                                                }
+                                              >
+                                                <ChevronLeft size={20} />
+                                              </button>
+                                              <button type="button" onClick={handleNextMonth}>
+                                                <ChevronRight size={20} />
+                                              </button>
+                                            </div>
+                                          </div>
+
+                                          <div className="weekdays">
+                                            {weekDays.map((day) => (
+                                              <div key={day} className="weekday">
+                                                {day}
+                                              </div>
+                                            ))}
+                                          </div>
+
+                                          <div className="calendar-grid">
+                                            {calendarDays.map((dayObj, index) => (
+                                              <button
+                                                key={index}
+                                                type="button"
+                                                onClick={() =>
+                                                  dayObj.isCurrentMonth &&
+                                                  !dayObj.isPast &&
+                                                  setSelectedDate(dayObj.day)
+                                                }
+                                                className={`calendar-day ${
+                                                  dayObj.isCurrentMonth
+                                                    ? selectedDate === dayObj.day
+                                                      ? "current-month selected"
+                                                      : dayObj.isToday
+                                                      ? "current-month today"
+                                                      : "current-month"
+                                                    : "other-month"
+                                                } ${dayObj.isPast ? "past-date" : ""}`}
+                                                disabled={dayObj.isPast}
+                                              >
+                                                {dayObj.day}
+                                              </button>
+                                            ))}
+                                          </div>
+
+                                          <div className="action-buttons">
+                                            <button
+                                              type="button"
+                                              onClick={() => {
+                                                setSelectedDate(null);
+                                                setSelectedHour(0);
+                                                setSelectedMinute(0);
+                                                setIsAM(true);
+                                              }}
+                                              className="action-button"
+                                            >
+                                              Clear
+                                            </button>
+                                            <button
+                                              type="button"
+                                              onClick={() => {
+                                                setSelectedDate(today.getDate());
+                                                setSelectedMonthCalendar(today.getMonth());
+                                                setSelectedYearCalendar(today.getFullYear());
+                                                setSelectedHour(today.getHours() % 12 || 12);
+                                                setSelectedMinute(today.getMinutes());
+                                                setIsAM(today.getHours() < 12);
+                                              }}
+                                              className="action-button"
+                                            >
+                                              Today
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <div className="done-section">
+                                        <button
+                                          type="button"
+                                          onClick={setDeadlineFromCalendar}
+                                          className="done-button"
+                                        >
+                                          Done
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                               <div className="col-md-4 d-flex align-items-end">
                                 <button 

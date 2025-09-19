@@ -573,8 +573,6 @@ const ActiveProject = () => {
     }
   };
 
-
-
   const handleCloseProjectView = () => {
     setExpandedRow(null);
     setSelectedProject(null);
@@ -635,7 +633,7 @@ const ActiveProject = () => {
   const {
     scrollContainerRef: scrollContainerRef1,
     fakeScrollbarRef: fakeScrollbarRef1,
-  } = useSyncScroll(null);
+  } = useSyncScroll(true);
 
   // Add your office holidays here (format: 'YYYY-MM-DD')
   const officeHolidays = [
@@ -776,9 +774,48 @@ const ActiveProject = () => {
   if (error) return <div>Error: {error}</div>;
 
   const projectPermission = permissions.find(p => p.featureName === "Active Projects"); // moduleName ya jo bhi aapke backend me key ho
-const CreateProjectPermission = Number(projectPermission?.canAdd);
-const UpdateProjectPermission = Number(projectPermission?.canEdit);
-const DeleteProjectPermission = Number(projectPermission?.canDelete);
+  const CreateProjectPermission = Number(projectPermission?.canAdd);
+  const UpdateProjectPermission = Number(projectPermission?.canEdit);
+  const DeleteProjectPermission = Number(projectPermission?.canDelete);
+  
+  // Function to truncate text to a specific length
+  const truncateText = (text, maxLength) => {
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
+
+  // Function to format date
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit'
+    });
+  };
+
+  // Function to format date with time
+  const formatDateTime = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-GB', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit'
+    });
+  };
+
+  // Function to format cost
+  const formatCost = (cost, currency) => {
+    if (!cost && cost !== 0) return '';
+    const numCost = parseFloat(cost);
+    return numCost.toFixed(2) + ' ' + (currency || 'USD');
+  };
+
   return (
     <div className="container-fluid py-4">
       {/* Edit Project Modal */}
@@ -995,62 +1032,70 @@ const DeleteProjectPermission = Number(projectPermission?.canDelete);
       </ul>
 
       <div className="card">
-        <div
-          ref={fakeScrollbarRef1}
-          style={{
-            overflowX: "auto",
-            overflowY: "hidden",
-            height: 16,
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: 1050,
-          }}
-        >
-          <div style={{ width: "2000px", height: 1 }} />
-        </div>
-
         {/* Projects Table */}
         <div className="table-gradient-bg">
           <div
+            ref={fakeScrollbarRef1}
+            style={{
+              overflowX: "auto",
+              overflowY: "hidden",
+              height: 16,
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              zIndex: 1050,
+            }}
+          >
+            <div style={{ width: "2500px", height: 1 }} />
+          </div>
+
+          <div
             className="table-responsive"
-            ref={scrollContainerRef1}
             style={{
               maxHeight: "500px",
               overflowX: "auto",
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
+              scrollbarWidth: "none", // Firefox
+              msOverflowStyle: "none", // IE/Edge
             }}
+            ref={scrollContainerRef1}
           >
             <table
               className="table-gradient-bg align-middle mt-0 table table-bordered table-hover"
-              style={{ minWidth: 1000 }}
+              style={{ minWidth: "1500px" }}
             >
               <thead
                 className="table-gradient-bg table"
                 style={{
                   position: "sticky",
                   top: 0,
-                  zIndex: 0,
+                  zIndex: 10,
                   backgroundColor: "#fff",
                 }}
               >
                 <tr className="text-center">
-                  <th>S. No.</th>
-                  <th>Project Title</th>
-                  <th>Client</th>
-                  <th>Task</th>
-                  <th>Language</th>
-                  <th>Application</th>
-                  <th>Total Pages</th>
-                  <th>Deadline</th>
-                  <th>Ready For Qc Deadline</th>
-                  <th>Qc Hrs</th>
-                  <th>Qc Due Date</th>
-                  <th>Status</th>
-                  <th>Progress</th>
-                  <th>Actions</th>
+                  <th style={{ width: "60px" }}>S. No.</th>
+                  <th style={{ width: "240px" }}>Project Title</th>
+                  <th style={{ width: "120px" }}>Client</th>
+                  <th style={{ width: "80px" }}>Country</th>
+                  <th style={{ width: "160px" }}>Project Manager</th>
+                  <th style={{ width: "160px" }}>Task</th>
+                  <th style={{ width: "160px" }}>Languages</th>
+                  <th style={{ width: "160px" }}>Application</th>
+                  <th style={{ width: "80px" }}>Total Pages</th>
+                  <th style={{ width: "120px" }}>Received Date</th>
+                  <th style={{ width: "100px" }}>Estimated Hrs</th>
+                  <th style={{ width: "100px" }}>Actual Hrs</th>
+                  <th style={{ width: "100px" }}>Efficiency</th>
+                  <th style={{ width: "200px" }}>Deadline</th>
+                  <th style={{ width: "200px" }}>Ready For QC Deadline</th>
+                  <th style={{ width: "80px" }}>QC Hrs</th>
+                  <th style={{ width: "200px" }}>QC Due Date</th>
+                  <th style={{ width: "120px" }}>Status</th>
+                  <th style={{ width: "100px" }}>Progress</th>
+                  <th style={{ width: "130px" }}>Cost</th>
+                  <th style={{ width: "130px" }}>Cost in INR</th>
+                  <th style={{ width: "150px" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -1065,17 +1110,23 @@ const DeleteProjectPermission = Number(projectPermission?.canDelete);
                         }
                       >
                         <td>{index + 1}</td>
-                        <td>{project.projectTitle}</td>
-                        <td>{project.clientName}</td>
-                        <td>{project.task_name}</td>
-                        <td>{project.language_name}</td>
-                        <td>{project.application_name}</td>
+                        <td title={project.projectTitle}>{truncateText(project.projectTitle, 80)}</td>
+                        <td title={project.clientName}>{truncateText(project.clientName, 12)}</td>
+                        <td title={project.country}>{truncateText(project.country, 3)}</td>
+                        <td title={project.projectManagerName}>{truncateText(project.projectManagerName, 16)}</td>
+                        <td title={project.task_name}>{truncateText(project.task_name, 16)}</td>
+                        <td title={project.language_name}>{truncateText(project.language_name, 16)}</td>
+                        <td title={project.application_name}>{truncateText(project.application_name, 16)}</td>
                         <td>{project.totalPagesLang}</td>
-                        <td>{project.deadline}</td>
-                        <td>{project.readyQCDeadline}</td>
+                        <td>{formatDate(project.receiveDate)}</td>
+                        <td>{project.estimatedHours}</td>
+                        <td>{project.actualHours}</td>
+                        <td>{project.efficiency}</td>
+                        <td>{formatDateTime(project.deadline)}</td>
+                        <td>{formatDateTime(project.readyQCDeadline)}</td>
                         <td>{project.qcHrs}</td>
-                        <td>{project.qcDueDate}</td>
-                        <td>{project.status}</td>
+                        <td>{formatDateTime(project.qcDueDate)}</td>
+                        <td>{truncateText(project.status, 15)}</td>
                         <td>
                           <div
                             className="progress cursor-pointer"
@@ -1100,6 +1151,8 @@ const DeleteProjectPermission = Number(projectPermission?.canDelete);
                             </div>
                           </div>
                         </td>
+                        <td>{formatCost(project.totalCost, project.currency)}</td>
+                        <td>{formatCost(project.inrCost, "INR")}</td>
                         <td>
                           <div className="d-flex gap-2">
                             <button
@@ -1139,7 +1192,7 @@ const DeleteProjectPermission = Number(projectPermission?.canDelete);
 
                       {expandedRow === project.id && (
                         <tr>
-                          <td colSpan={14} className="p-0 border-top-0">
+                          <td colSpan={21} className="p-0 border-top-0">
                             <div className="p-4">
                               {/* Unsaved Changes Warning */}
                               {hasUnsavedChanges && (
@@ -1375,7 +1428,7 @@ const DeleteProjectPermission = Number(projectPermission?.canDelete);
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={14} className="text-center py-4">
+                    <td colSpan={21} className="text-center py-4">
                       No projects found matching your criteria
                     </td>
                   </tr>
