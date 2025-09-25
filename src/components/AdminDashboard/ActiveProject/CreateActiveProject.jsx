@@ -1,4 +1,5 @@
 import React from 'react'
+import BASE_URL from '../../../config';
 
 const CreateActiveProject = () => {
       const [showCreateModal, setShowCreateModal] = useState(false);
@@ -20,7 +21,7 @@ const CreateActiveProject = () => {
 
     const addLanguageAPI = async (languageName) => {
         try {
-            const response = await fetch("https://hrb5wx2v-8800.inc1.devtunnels.ms/api/language/addlanguage", {
+            const response = await fetch(`${BASE_URL}language/addlanguage`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

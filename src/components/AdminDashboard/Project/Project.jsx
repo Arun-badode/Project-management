@@ -220,8 +220,8 @@ const Project = () => {
     }));
   }, [formData.rate, formData.totalPages, formData.currency]);
 
-  const {
-    scrollContainerRef: scrollContainerRef1,
+ const {
+     scrollContainerRef: scrollContainerRef1,
     fakeScrollbarRef: fakeScrollbarRef1,
   } = useSyncScroll(activeTab === "created");
 

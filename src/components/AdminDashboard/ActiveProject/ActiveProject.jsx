@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "react-bootstrap";
 import Select from "react-select";
-import useSyncScroll from "../Hooks/useSyncScroll";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
 import CreateNewProject from "../Project/CreateNewProject";
 import EditModal from "./EditModal";
 import BASE_URL from "../../../config";
+import useSyncScroll from "../Hooks/useSyncScroll";
 
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
@@ -25,9 +25,20 @@ const ActiveProject = () => {
   // File handlers state - tracks assigned handlers for each file
   const [fileHandlers, setFileHandlers] = useState({});
 
+  const {
+    scrollContainerRef: scrollContainerRef1,
+    fakeScrollbarRef: fakeScrollbarRef1,
+  } = useSyncScroll(activeTab === "created");
+
   // this state variables is for storing the files details and storing them in database using api 
   const [allFiles, setAllFiles] = useState([]);
   const [fileStatuses, setFileStatuses] = useState({});
+
+  // Refs for scroll synchronization
+  const mainTableContainerRef = useRef(null);
+  const filesTableContainerRef = useRef(null);
+  const fakeScrollbarRef = useRef(null);
+  const isSyncingScroll = useRef(false); // Add this ref at the top with other refs
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -58,32 +69,31 @@ const ActiveProject = () => {
     fetchFiles();
   }, []);
 
-
   // this is for fetching members to show in filed handler option
   const [members, setMembers] = useState([]);
 
- useEffect(() => {
-  const fetchMembers = async () => {
-    try {
-      const response = await axios.get(`${BASE_URL}member/getAllMembers`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("API Response:", response.data); // Add this for debugging
-      
-      if (response.data && response.data.status) {
-        setMembers(response.data.data);
-        console.log("Members set:", response.data.data); // Add this for debugging
-      } else {
-        console.error("Invalid response format:", response.data);
-      }
-    } catch (error) {
-      console.error("Error fetching members:", error);
-      // You might want to add error state handling here
-    }
-  };
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}member/getAllMembers`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log("API Response:", response.data); // Add this for debugging
 
-  fetchMembers();
-}, [token]); // Add token as a dependency if it's not already defined inside the component
+        if (response.data && response.data.status) {
+          setMembers(response.data.data);
+          console.log("Members set:", response.data.data); // Add this for debugging
+        } else {
+          console.error("Invalid response format:", response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching members:", error);
+        // You might want to add error state handling here
+      }
+    };
+
+    fetchMembers();
+  }, [token]); // Add token as a dependency if it's not already defined inside the component
 
   const assignees = [
     { label: "Not Assigned", value: "" },
@@ -113,7 +123,7 @@ const ActiveProject = () => {
         updatedHandlers[fileId] = newHandler;
         setFileHandlers(updatedHandlers);
         setHasUnsavedChanges(true);
-        
+
         // Show success message
         alert("Handler assigned successfully!");
       } else {
@@ -350,6 +360,108 @@ const ActiveProject = () => {
     result.sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
     setFilteredProjects(result);
   }, [projects, activeTab, activeButton, clientFilter, taskFilter, languageFilter, selectedApplications, allFiles, fileHandlers]);
+
+  // Setup scroll synchronization
+  useEffect(() => {
+    const mainTableContainer = mainTableContainerRef.current;
+    const filesTableContainer = filesTableContainerRef.current;
+    const fakeScrollbar = fakeScrollbarRef.current;
+
+    if (!fakeScrollbar) return;
+
+    // Function to handle table scroll
+    const handleTableScroll = (e) => {
+      if (isSyncingScroll.current) return;
+      isSyncingScroll.current = true;
+      const activeContainer = expandedRow && filesTableContainer ? filesTableContainer : mainTableContainer;
+      if (activeContainer && fakeScrollbar) {
+        fakeScrollbar.scrollLeft = activeContainer.scrollLeft;
+      }
+      isSyncingScroll.current = false;
+    };
+
+    // Function to handle fake scrollbar scroll
+    const handleFakeScroll = (e) => {
+      if (isSyncingScroll.current) return;
+      isSyncingScroll.current = true;
+      const activeContainer = expandedRow && filesTableContainer ? filesTableContainer : mainTableContainer;
+      if (activeContainer && fakeScrollbar) {
+        activeContainer.scrollLeft = fakeScrollbar.scrollLeft;
+      }
+      isSyncingScroll.current = false;
+    };
+
+    // Add event listeners to both tables
+    if (mainTableContainer) {
+      mainTableContainer.addEventListener('scroll', handleTableScroll);
+    }
+    if (filesTableContainer) {
+      filesTableContainer.addEventListener('scroll', handleTableScroll);
+    }
+    fakeScrollbar.addEventListener('scroll', handleFakeScroll);
+
+    // Set initial scroll position
+    const activeContainer = expandedRow && filesTableContainer ? filesTableContainer : mainTableContainer;
+    if (activeContainer) {
+      fakeScrollbar.scrollLeft = activeContainer.scrollLeft;
+    }
+
+    return () => {
+      if (mainTableContainer) {
+        mainTableContainer.removeEventListener('scroll', handleTableScroll);
+      }
+      if (filesTableContainer) {
+        filesTableContainer.removeEventListener('scroll', handleTableScroll);
+      }
+      fakeScrollbar.removeEventListener('scroll', handleFakeScroll);
+    };
+  }, [expandedRow]);
+
+  // Update fake scrollbar width when tables change
+  useEffect(() => {
+    const updateFakeScrollbarWidth = () => {
+      const fakeScrollbar = fakeScrollbarRef.current;
+      const mainTableContainer = mainTableContainerRef.current;
+      const filesTableContainer = filesTableContainerRef.current;
+
+      if (fakeScrollbar) {
+        // Find the actual table element
+        const mainTable = mainTableContainer?.querySelector("table");
+        const filesTable = filesTableContainer?.querySelector("table");
+        const activeTable = expandedRow && filesTable ? filesTable : mainTable;
+
+        if (activeTable) {
+          const scrollWidth = activeTable.scrollWidth;
+          const innerDiv = fakeScrollbar.querySelector('div');
+          if (innerDiv) {
+            innerDiv.style.width = `${scrollWidth}px`;
+          }
+        }
+      }
+    };
+
+    // Initial update
+    updateFakeScrollbarWidth();
+
+    // Update on window resize
+    window.addEventListener('resize', updateFakeScrollbarWidth);
+
+    // Update when filtered projects change
+    const observer = new MutationObserver(updateFakeScrollbarWidth);
+    if (mainTableContainerRef.current) {
+      observer.observe(mainTableContainerRef.current, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        characterData: true
+      });
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateFakeScrollbarWidth);
+      observer.disconnect();
+    };
+  }, [expandedRow, filteredProjects]);
 
   const handleDeleteProject = async (id) => {
     const project = projects.find((p) => p.id === id);
@@ -663,11 +775,6 @@ const ActiveProject = () => {
     alert(`Deadline ${formData.deadline} applied to selected files.`);
   };
 
-  const {
-    scrollContainerRef: scrollContainerRef1,
-    fakeScrollbarRef: fakeScrollbarRef1,
-  } = useSyncScroll(true);
-
   // Add your office holidays here (format: 'YYYY-MM-DD')
   const officeHolidays = [
     "2025-08-15", // Example: Independence Day
@@ -810,7 +917,7 @@ const ActiveProject = () => {
   const CreateProjectPermission = Number(projectPermission?.canAdd);
   const UpdateProjectPermission = Number(projectPermission?.canEdit);
   const DeleteProjectPermission = Number(projectPermission?.canDelete);
-  
+
   // Function to truncate text to a specific length
   const truncateText = (text, maxLength) => {
     if (!text) return '';
@@ -1066,7 +1173,6 @@ const ActiveProject = () => {
 
       <div className="card">
         {/* Projects Table */}
-        <div className="table-gradient-bg">
           <div
             ref={fakeScrollbarRef1}
             style={{
@@ -1082,56 +1188,53 @@ const ActiveProject = () => {
           >
             <div style={{ width: "2500px", height: 1 }} />
           </div>
-
-          <div
-            className="table-responsive"
+          <div className="table-responsive"
+            ref={scrollContainerRef1}
             style={{
               maxHeight: "500px",
               overflowX: "auto",
               scrollbarWidth: "none", // Firefox
               msOverflowStyle: "none", // IE/Edge
-            }}
-            ref={scrollContainerRef1}
-          >
+            }}>
             <table
               className="table-gradient-bg align-middle mt-0 table table-bordered table-hover"
-              style={{ minWidth: "1500px" }}
+              style={{ minWidth: "900px" }} // <-- Increase this value as per total columns width
             >
               <thead
                 className="table-gradient-bg table"
                 style={{
                   position: "sticky",
-                  top: 0,
-                  zIndex: 10,
+                  top: "0",
+                  zIndex: "10",
                   backgroundColor: "#fff",
                 }}
               >
                 <tr className="text-center">
-                  <th style={{ width: "60px" }}>S. No.</th>
-                  <th style={{ width: "240px" }}>Project Title</th>
-                  <th style={{ width: "120px" }}>Client</th>
-                  <th style={{ width: "80px" }}>Country</th>
-                  <th style={{ width: "160px" }}>Project Manager</th>
-                  <th style={{ width: "160px" }}>Task</th>
-                  <th style={{ width: "160px" }}>Languages</th>
-                  <th style={{ width: "160px" }}>Application</th>
-                  <th style={{ width: "80px" }}>Total Pages</th>
-                  <th style={{ width: "120px" }}>Received Date</th>
-                  <th style={{ width: "100px" }}>Estimated Hrs</th>
-                  <th style={{ width: "100px" }}>Actual Hrs</th>
-                  <th style={{ width: "100px" }}>Efficiency</th>
-                  <th style={{ width: "200px" }}>Deadline</th>
-                  <th style={{ width: "200px" }}>Ready For QC Deadline</th>
-                  <th style={{ width: "80px" }}>QC Hrs</th>
-                  <th style={{ width: "200px" }}>QC Due Date</th>
-                  <th style={{ width: "120px" }}>Status</th>
-                  <th style={{ width: "100px" }}>Progress</th>
-                  <th style={{ width: "130px" }}>Cost</th>
-                  <th style={{ width: "130px" }}>Cost in INR</th>
-                  <th style={{ width: "150px" }}>Actions</th>
+                  <th>S. No.</th>
+                  <th>Project Title</th>
+                  <th >Client</th>
+                  <th>Country</th>
+                  <th>Project Manager</th>
+                  <th >Task</th>
+                  <th >Languages</th>
+                  <th >Application</th>
+                  <th >Total Pages</th>
+                  <th >Received Date</th>
+                  <th >Estimated Hrs</th>
+                  <th >Actual Hrs</th>
+                  <th>Efficiency</th>
+                  <th >Deadline</th>
+                  <th >Ready For QC Deadline</th>
+                  <th >QC Hrs</th>
+                  <th >QC Due Date</th>
+                  <th >Status</th>
+                  <th>Progress</th>
+                  <th>Cost</th>
+                  <th >Cost in INR</th>
+                  <th >Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody   >
                 {filteredProjects.length > 0 ? (
                   filteredProjects.map((project, index) => (
                     <React.Fragment key={project.id}>
@@ -1213,7 +1316,7 @@ const ActiveProject = () => {
                                 <i className="fas fa-check"></i>
                               </button>
                             )}
-                            {DeleteProjectPermission ===1  && <button
+                            {DeleteProjectPermission === 1 && <button
                               className="btn btn-sm btn-danger"
                               onClick={() => handleDeleteProject(project.id)}
                             >
@@ -1247,8 +1350,17 @@ const ActiveProject = () => {
                                 </div>
 
                                 {/* Files Table */}
-                                <div className="table-responsive">
-                                  <table className="table table-sm table-striped table-hover">
+                                <div
+                                  className="table-responsive"
+                                  style={{
+                                    maxHeight: "300px",
+                                    overflowX: "auto",
+                                    scrollbarWidth: "none",
+                                    msOverflowStyle: "none",
+                                  }}
+                                  ref={filesTableContainerRef}
+                                >
+                                  <table className="table table-sm table-striped table-hover" style={{ minWidth: "1300px" }}>
                                     <thead>
                                       <tr className="text-center">
                                         <th>
@@ -1326,7 +1438,6 @@ const ActiveProject = () => {
                                           </tr>
                                         ))}
                                     </tbody>
-
                                   </table>
                                 </div>
                               </div>
@@ -1466,8 +1577,10 @@ const ActiveProject = () => {
               </tbody>
             </table>
           </div>
-        </div>
       </div>
+
+      {/* Fake scrollbar - positioned at the bottom of the webpage */}
+
     </div>
   );
 };

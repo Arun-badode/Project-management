@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const TeamOnDutyTable = () => {
+const TeamOnDutyTable = ({ scrollContainerRef }) => {
   const [teamData, setTeamData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,14 +39,14 @@ const TeamOnDutyTable = () => {
           employeeName: member.fullName,
           position: member.role,
           department: member.team,
-          checkInTime: "09:00 AM", // Default value - API doesn't provide this
-          checkOutTime: "06:00 PM", // Default value - API doesn't provide this
-          status: "Present", // Default value - API doesn't provide this
-          isLate: false, // Default value - API doesn't provide this
-          lateMinutes: 0, // Default value - API doesn't provide this
-          isEarlyDeparture: false, // Default value - API doesn't provide this
-          earlyMinutes: 0, // Default value - API doesn't provide this
-          remarks: "On duty" // Default value - API doesn't provide this
+          checkInTime: "09:00 AM",
+          checkOutTime: "06:00 PM",
+          status: "Present",
+          isLate: false,
+          lateMinutes: 0,
+          isEarlyDeparture: false,
+          earlyMinutes: 0,
+          remarks: "On duty"
         }));
 
         setTeamData(formattedData);
@@ -79,7 +79,16 @@ const TeamOnDutyTable = () => {
   }
 
   return (
-    <div className="table-responsive">
+    <div
+      ref={scrollContainerRef}
+      style={{
+        maxHeight: "500px",
+        overflowX: "auto",
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
+      }}
+      className="hide-scrollbar"
+    >
       <table className="table table-hover mb-0">
         <thead
           className="table-gradient-bg table"

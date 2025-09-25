@@ -3,7 +3,7 @@ import { Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-const EventsTodayTable = ({ scrollContainerRef, fakeScrollbarRef }) => {
+const EventsTodayTable = ({ scrollContainerRef }) => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,7 +27,7 @@ const EventsTodayTable = ({ scrollContainerRef, fakeScrollbarRef }) => {
           title: event.eventType,
           description: event.details,
           deadline: new Date(event.eventDate).toLocaleDateString(),
-          assignedTo: "Team", // Default value - API doesn't provide this
+          assignedTo: "Team",
           createdAt: new Date(event.createdAt).toLocaleString()
         }));
 
@@ -62,21 +62,6 @@ const EventsTodayTable = ({ scrollContainerRef, fakeScrollbarRef }) => {
 
   return (
     <div className="text-white p-3 mb-4 table-gradient-bg">
-      <div
-        ref={fakeScrollbarRef}
-        style={{
-          overflowX: "auto",
-          overflowY: "hidden",
-          height: 16,
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1050,
-        }}
-      >
-        <div style={{ width: "2000px", height: 1 }} />
-      </div>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4 className="mb-0">Today's Events</h4>
         <Link to="/calendar" className="text-decoration-none">
@@ -84,7 +69,6 @@ const EventsTodayTable = ({ scrollContainerRef, fakeScrollbarRef }) => {
         </Link>
       </div>
       <div
-        className="table-responsive"
         ref={scrollContainerRef}
         style={{
           maxHeight: "500px",
@@ -92,6 +76,7 @@ const EventsTodayTable = ({ scrollContainerRef, fakeScrollbarRef }) => {
           scrollbarWidth: "none",
           msOverflowStyle: "none",
         }}
+        className="hide-scrollbar"
       >
         <table className="table table-hover mb-0">
           <thead

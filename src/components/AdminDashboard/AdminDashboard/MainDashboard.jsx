@@ -47,29 +47,10 @@ const MainDashboard = () => {
   const [projects, setProjects] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
 
+  // Only one instance for all tables
   const {
-    scrollContainerRef: scrollContainerRef1,
-    fakeScrollbarRef: fakeScrollbarRef1,
-  } = useSyncScroll();
-
-  const {
-    scrollContainerRef: scrollContainerRef2,
-    fakeScrollbarRef: fakeScrollbarRef2,
-  } = useSyncScroll();
-
-  const {
-    scrollContainerRef: scrollContainerRef3,
-    fakeScrollbarRef: fakeScrollbarRef3,
-  } = useSyncScroll();
-
-  const {
-    scrollContainerRef: scrollContainerRef4,
-    fakeScrollbarRef: fakeScrollbarRef4,
-  } = useSyncScroll();
-
-  const {
-    scrollContainerRef: scrollContainerRef5,
-    fakeScrollbarRef: fakeScrollbarRef5,
+    scrollContainerRef,
+    fakeScrollbarRef,
   } = useSyncScroll();
 
   useEffect(() => {
@@ -309,6 +290,16 @@ const MainDashboard = () => {
           .active-tab .text-white {
             color: white !important;
           }
+          
+          /* Hide default scrollbar */
+          .hide-scrollbar {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+          
+          .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
         `}
       </style>
 
@@ -338,13 +329,30 @@ const MainDashboard = () => {
         ))}
       </Row>
 
+      {/* Fake scrollbar - only render once */}
+      <div
+        ref={fakeScrollbarRef}
+        style={{
+          overflowX: "auto",
+          overflowY: "hidden",
+          height: 16,
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1050,
+          display: activeFilter ? "block" : "none", // Only show when a table is visible
+        }}
+      >
+        <div style={{ width: "2000px", height: 1 }} />
+      </div>
+
       {activeFilter === "active" && (
         <ProjectTables
           filteredProjects={filteredProjects}
           handleView={handleView}
           title="Active Projects"
-          scrollContainerRef={scrollContainerRef1}
-          fakeScrollbarRef={fakeScrollbarRef1}
+          scrollContainerRef={scrollContainerRef}
         />
       )}
 
@@ -353,8 +361,7 @@ const MainDashboard = () => {
           filteredProjects={filteredProjects}
           handleView={handleView}
           title="Near Due Projects (Next 30 Minutes)"
-          scrollContainerRef={scrollContainerRef2}
-          fakeScrollbarRef={fakeScrollbarRef2}
+          scrollContainerRef={scrollContainerRef}
         />
       )}
 
@@ -363,14 +370,13 @@ const MainDashboard = () => {
           filteredProjects={filteredProjects}
           handleView={handleView}
           title="Overdue Projects"
-          scrollContainerRef={scrollContainerRef3}
-          fakeScrollbarRef={fakeScrollbarRef3}
+          scrollContainerRef={scrollContainerRef}
         />
       )}
 
       {activeFilter === "teamOnDuty" && (
         <Card className="text-white p-3 mb-4 table-gradient-bg">
-          <TeamOnDutyTable todayAttendanceData={todayAttendanceData} />
+          <TeamOnDutyTable scrollContainerRef={scrollContainerRef} />
         </Card>
       )}
 
@@ -378,8 +384,7 @@ const MainDashboard = () => {
         <EventsTodayTable
           tasksToday={tasksToday}
           title="Events Today"
-          scrollContainerRef={scrollContainerRef5}
-          fakeScrollbarRef={fakeScrollbarRef5}
+          scrollContainerRef={scrollContainerRef}
         />
       )}
 

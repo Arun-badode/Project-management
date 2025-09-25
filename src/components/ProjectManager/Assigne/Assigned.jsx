@@ -12,6 +12,7 @@ import {
   Badge,
   ProgressBar,
   Pagination,
+  Table,
 } from "react-bootstrap";
 import {
   Calendar,
@@ -28,31 +29,107 @@ import {
   ChevronRight,
   Clipboard,
   Trash,
+  PersonCheck,
 } from "react-bootstrap-icons";
 import BASE_URL from "../../../config";
 
 const Assigned = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("dueDate");
+  const [sortBy, setSortBy] = useState("deadline");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterPriority, setFilterPriority] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const token = localStorage.getItem("authToken");
+  
+  // Try to get user ID from different possible keys in localStorage
+  const userId = localStorage.getItem("roleId") || 
+                 localStorage.getItem("userId") || 
+                 localStorage.getItem("id") || 
+                 "";
 
-  const [editProject, setEditProject] = useState(null);
-
-  const [newProject, setNewProject] = useState({
-    name: "",
-    status: "Planning",
-    dueDate: "",
+  const [projects, setProjects] = useState([]);
+  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [teamMembersList, setTeamMembersList] = useState([]);
+  const [assignProjectData, setAssignProjectData] = useState({
+    projectId: "",
     memberId: "",
-    priority: "Medium",
-    description: "",
+    notes: "",
+    deadline: "",
+    estimatedHours: "",
   });
+
+  useEffect(() => {
+    // Only fetch projects if we have a valid userId
+    if (!userId) {
+      console.error("No user ID found in localStorage");
+      return;
+    }
+
+    // Fetch projects by manager ID
+    axios
+      .get(`${BASE_URL}project/getProjectsByManagerId/${userId}`, {
+        headers: { authorization: `Bearer ${token}` },
+      })
+      .then((response) => {
+        if (response.data.status) {
+          setProjects(response.data.data.projects || []);
+          setFilteredProjects(response.data.data.projects || []);
+        }
+      })
+      .catch((error) => {
+        console.error("API Error:", error);
+      });
+
+    // Fetch team members
+    axios
+      .get(`${BASE_URL}member/getAllMembers`, {
+        headers: { authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        if (res.data.status) {
+          // Filter only team members
+          const teamMembers = res.data.data.filter(
+            (member) => member.roleName === "Team-Member"
+          );
+          setTeamMembersList(teamMembers);
+        }
+      })
+      .catch((err) => console.error("Failed to fetch team members:", err));
+  }, [userId, token]);
+
+  useEffect(() => {
+    // Apply filters and search
+    let result = [...projects];
+    
+    if (searchTerm) {
+      result = result.filter(project => 
+        project.projectTitle.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    if (filterStatus !== "All") {
+      result = result.filter(project => project.status === filterStatus);
+    }
+    
+    if (filterPriority !== "All") {
+      result = result.filter(project => project.priority === filterPriority);
+    }
+    
+    // Apply sorting
+    result.sort((a, b) => {
+      if (sortBy === "deadline") {
+        return new Date(a.deadline) - new Date(b.deadline);
+      } else if (sortBy === "priority") {
+        const priorityOrder = { "High": 1, "Medium": 2, "Low": 3 };
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+      }
+      return 0;
+    });
+    
+    setFilteredProjects(result);
+  }, [searchTerm, filterStatus, filterPriority, sortBy, projects]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -87,80 +164,30 @@ const Assigned = () => {
   };
 
   const formatDate = (dateString) => {
+    if (!dateString || dateString === "0000-00-00") return "N/A";
     const options = { year: "numeric", month: "short", day: "numeric" };
     return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
-  const [projects, setProjects] = useState([]);
-  const [filteredProjects, setFilteredProjects] = useState([]);
-  const [teamMembersList, setTeamMembersList] = useState([]);
-
-  useEffect(() => {
-    // Fetch projects
-    axios
-      .get(`${BASE_URL}assignedProjects/getAllAssignedProjects`, {
-        headers: { authorization: `Bearer ${token}` },
-      })
-      .then((response) => {
-        if (response.data.status) {
-          const transformed = response.data.data.map((item) => ({
-            id: item.id,
-            name: item.projectName,
-            status: item.status,
-            dueDate: item.dueDate,
-            priority: item.priority,
-            teamMembers: 1,
-            progress:
-              item.status === "Completed"
-                ? 100
-                : item.status === "In Progress"
-                  ? 50
-                  : 0,
-            description: item.description || "",
-            memberId: item.memberId || "",
-          }));
-          setProjects(transformed);
-          setFilteredProjects(transformed);
-        }
-      })
-      .catch((error) => {
-        console.error("API Error:", error);
-      });
-
-    // Fetch team members
-    axios
-      .get(`${BASE_URL}member/getAllMembers`, {
-        headers: { authorization: `Bearer ${token}` },
-      })
-      .then((res) => {
-        if (res.data.status) {
-          setTeamMembersList(res.data.data);
-        }
-      })
-      .catch((err) => console.error("Failed to fetch team members:", err));
-  }, []);
-
-  const handleView = (project) => {
+  const handleAssignProject = (project) => {
     setSelectedProject(project);
-    setShowViewModal(true);
+    setAssignProjectData({
+      projectId: project.id,
+      memberId: "",
+      notes: "",
+      deadline: project.deadline || "",
+      estimatedHours: project.estimatedHours || "",
+    });
+    setShowAssignModal(true);
   };
 
-  const handleEdit = (project) => {
-    setEditProject(project);
-    setShowEditModal(true);
-  };
-
-  const handleAddProject = async () => {
+  const handleAssignSubmit = async () => {
     try {
-      const response = await axios.post(
-        `${BASE_URL}assignedProjects/addAssignedProject`,
+      const response = await axios.put(
+        `${BASE_URL}project/projects/manager/${userId}`,
         {
-          projectName: newProject.name,
-          status: newProject.status,
-          dueDate: newProject.dueDate,
-          priority: newProject.priority,
-          description: newProject.description,
-          memberId: parseInt(newProject.memberId),
+         
+          projectManagerId: parseInt(userId) // Added projectManagerId to payload
         },
         {
           headers: { authorization: `Bearer ${token}` },
@@ -168,114 +195,31 @@ const Assigned = () => {
       );
 
       if (response.data.status) {
-        const newProjectData = {
-          id: response.data.data.id,
-          name: newProject.name,
-          status: newProject.status,
-          dueDate: newProject.dueDate,
-          priority: newProject.priority,
-          teamMembers: 1,
-          progress: newProject.status === "Completed" ? 100 : newProject.status === "In Progress" ? 50 : 0,
-          description: newProject.description,
-          memberId: newProject.memberId,
-        };
-
-        setProjects([...projects, newProjectData]);
-        setFilteredProjects([...filteredProjects, newProjectData]);
-        setNewProject({
-          name: "",
-          status: "Planning",
-          dueDate: "",
-          memberId: "",
-          priority: "Medium",
-          description: "",
-        });
-        setShowAddModal(false);
-        alert("Project created successfully!");
-      }
-    } catch (error) {
-      console.error("Error creating project:", error);
-      alert("Error while creating project");
-    }
-  };
-
-  const handleUpdateProject = async () => {
-    try {
-      const response = await axios.patch(
-        `${BASE_URL}assignedProjects/updateAssignedProject/${editProject.id}`,
-        {
-          projectName: editProject.name,
-          status: editProject.status,
-          dueDate: editProject.dueDate,
-          priority: editProject.priority,
-          description: editProject.description,
-          memberId: parseInt(editProject.memberId),
-        },
-        {
-          headers: { authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (response.data.status) {
-        const updatedProjects = projects.map((p) =>
-          p.id === editProject.id ? editProject : p
-        );
-        setProjects(updatedProjects);
-        setFilteredProjects(updatedProjects);
-        setShowEditModal(false);
-        alert("Project updated successfully!");
-      }
-    } catch (error) {
-      console.error("Error updating project:", error);
-      alert("Error while updating project");
-    }
-  };
-
-  const handleDeleteProject = async (projectId) => {
-    if (window.confirm("Are you sure you want to delete this project?")) {
-      try {
-        const response = await axios.delete(
-          `${BASE_URL}assignedProjects/deleteAssignedProject/${projectId}`,
-          {
+        alert("Project assigned successfully!");
+        setShowAssignModal(false);
+        // Refresh the projects list after assignment
+        axios
+          .get(`${BASE_URL}project/getProjectsByManagerId/${userId}`, {
             headers: { authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (response.data.status) {
-          const updatedProjects = projects.filter((p) => p.id !== projectId);
-          setProjects(updatedProjects);
-          setFilteredProjects(updatedProjects);
-          alert("Project deleted successfully!");
-        }
-      } catch (error) {
-        console.error("Error deleting project:", error);
-        alert("Error while deleting project");
+          })
+          .then((response) => {
+            if (response.data.status) {
+              setProjects(response.data.data.projects || []);
+              setFilteredProjects(response.data.data.projects || []);
+            }
+          })
+          .catch((error) => {
+            console.error("API Error:", error);
+          });
       }
+    } catch (error) {
+      console.error("Error assigning project:", error);
+      alert("Error while assigning project");
     }
   };
-
-  const [permissions, setPermissions] = useState([]);
-  const roleId = localStorage.getItem("roleId");
-
-  // 🔹 Fetch permissions from API
-  useEffect(() => {
-    axios
-      .get(`${BASE_URL}roles/permission/${roleId}`)
-      .then((res) => {
-        if (res.data.status) {
-          setPermissions(res.data.data);
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching permissions", err);
-      });
-  }, [roleId])
-
-  const projectPermission = permissions.find(p => p.featureName === "Assigned Projects");
-  const AssignProjectPermission = Number(projectPermission?.canAdd);
 
   return (
-    <div className="container-fluid bg-main p-3 ">
+    <div className="container-fluid bg-main p-3">
       <div className="d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between py-3 gap-2">
         <h2 className="gradient-heading ms-0 ms-md-3 mb-2 mb-md-0 text-center text-md-start">
           Assigned Projects
@@ -302,15 +246,6 @@ const Assigned = () => {
               <Filter className="me-2" />
               Filters
             </Button>
-            {AssignProjectPermission === 1 &&
-              (<Button
-                onClick={() => setShowAddModal(true)}
-                className="d-flex align-items-center gradient-button"
-              >
-                <Plus className="me-2" />
-                Assigned Project
-              </Button>)
-            }
           </div>
         </div>
       </div>
@@ -324,9 +259,8 @@ const Assigned = () => {
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
               >
-                <option value="dueDate">Due Date</option>
+                <option value="deadline">Due Date</option>
                 <option value="priority">Priority</option>
-                <option value="progress">Progress</option>
               </Form.Select>
             </Form.Group>
           </Col>
@@ -364,83 +298,67 @@ const Assigned = () => {
 
       <div className="py-4">
         <Container fluid>
-          {filteredProjects.length > 0 ? (
-            <Row xs={1} sm={2} md={3} className="g-4">
-              {filteredProjects.map((project) => (
-                <Col key={project.id}>
-                  <Card className="h-100 shadow-sm bg-card">
-                    <Card.Body>
-                      <div className="d-flex justify-content-between align-items-start mb-3">
-                        <Card.Title className="mb-0">{project.name}</Card.Title>
-                        <Badge bg={getStatusColor(project.status)}>
-                          {project.status}
-                        </Badge>
-                      </div>
-
-                      <div className="d-flex align-items-center mb-2">
-                        <Calendar className="me-2" />
-                        <small>Due: {formatDate(project.dueDate)}</small>
-                      </div>
-
-                      <div className="d-flex align-items-center mb-2">
-                        <People className="me-2" />
-                        <small>{project.teamMembers} team member</small>
-                      </div>
-
-                      <div className="d-flex align-items-center mb-3">
-                        <Flag className="me-2" />
-                        <small className="d-flex align-items-center">
-                          Priority:
-                          <span
-                            className={`bg-${getPriorityColor(
-                              project.priority
-                            )} rounded-circle p-1 ms-2 me-1`}
-                          ></span>
-                          {project.priority}
-                        </small>
-                      </div>
-
-                      <div className="mb-3">
-                        <div className="d-flex justify-content-between small mb-1">
-                          <span>Progress</span>
-                          <span>{project.progress}%</span>
-                        </div>
-                        <ProgressBar now={project.progress} variant="primary" />
-                      </div>
-                    </Card.Body>
-
-                    <Card.Footer className="bg-card border-top">
-                      <div className="d-flex justify-content-start">
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className="text-decoration-none p-0 me-2"
-                          onClick={() => handleView(project)}
-                        >
-                          <Eye className="me-1" /> View
-                        </Button>
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className="text-decoration-none p-0 me-2"
-                          onClick={() => handleEdit(project)}
-                        >
-                          <Pencil className="me-1" /> Edit
-                        </Button>
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className="text-decoration-none p-0"
-                          onClick={() => handleDeleteProject(project.id)}
-                        >
-                          <Trash className="me-1" /> Delete
-                        </Button>
-                      </div>
-                    </Card.Footer>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+          {!userId ? (
+            <Card className="text-center py-5">
+              <Card.Body>
+                <Clipboard size={48} className="text-muted mb-3" />
+                <h3 className="h5 mb-2">User Authentication Error</h3>
+                <p className="text-muted mb-4">
+                  Unable to identify user. Please log in again.
+                </p>
+              </Card.Body>
+            </Card>
+          ) : filteredProjects.length > 0 ? (
+            <Card className="bg-card">
+              <Card.Body>
+                <Table responsive hover className="text-white">
+                  <thead>
+                    <tr>
+                      <th>Project Title</th>
+                      <th>Client ID</th>
+                      <th>Country</th>
+                      <th>Deadline</th>
+                      <th>Priority</th>
+                      <th>Status</th>
+                      <th>Estimated Hours</th>
+                      <th>Total Cost</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredProjects.map((project) => (
+                      <tr key={project.id}>
+                        <td>{project.projectTitle}</td>
+                        <td>{project.clientId}</td>
+                        <td>{project.country}</td>
+                        <td>{formatDate(project.deadline)}</td>
+                        <td>
+                          <Badge bg={getPriorityColor(project.priority)}>
+                            {project.priority}
+                          </Badge>
+                        </td>
+                        <td>
+                          <Badge bg={getStatusColor(project.status)}>
+                            {project.status}
+                          </Badge>
+                        </td>
+                        <td>{project.estimatedHours}</td>
+                        <td>{project.totalCost} {project.currency}</td>
+                        <td>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => handleAssignProject(project)}
+                          >
+                            <PersonCheck className="me-1" /> Assign
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </Card.Body>
+            </Card>
           ) : (
             <Card className="text-center py-5">
               <Card.Body>
@@ -449,124 +367,56 @@ const Assigned = () => {
                 <p className="text-muted mb-4">
                   Try adjusting your search or filter criteria.
                 </p>
-              {AssignProjectPermission==1 &&
-                (
-                    <Button
-                  className="gradient-button"
-                  onClick={() => setShowAddModal(true)}
-                >
-                  <Plus className="me-2" />
-                  Assigned Project
-                </Button>
-                )
-              }
               </Card.Body>
             </Card>
           )}
         </Container>
       </div>
 
-      {/* View Project Modal */}
+      {/* Assign Project Modal */}
       <Modal
-        show={showViewModal}
-        onHide={() => setShowViewModal(false)}
-        centered
-        className="custom-modal-dark"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Project Details</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="bg-card">
-          {selectedProject && (
-            <div>
-              <h4 className="mb-4">{selectedProject.name}</h4>
-
-              <div className="mb-3">
-                <h6 className="">Status</h6>
-                <Badge bg={getStatusColor(selectedProject.status)}>
-                  {selectedProject.status}
-                </Badge>
-              </div>
-
-              <div className="mb-3">
-                <h6 className="">Due Date</h6>
-                <p>{formatDate(selectedProject.dueDate)}</p>
-              </div>
-
-              <div className="mb-3">
-                <h6 className="">Priority</h6>
-                <Badge bg={getPriorityColor(selectedProject.priority)}>
-                  {selectedProject.priority}
-                </Badge>
-              </div>
-
-              <div className="mb-3">
-                <h6 className="">Team Members</h6>
-                <p>{selectedProject.teamMembers}</p>
-              </div>
-
-              <div className="mb-3">
-                <h6 className="">Progress</h6>
-                <ProgressBar now={selectedProject.progress} variant="primary" />
-                <small className="">{selectedProject.progress}% complete</small>
-              </div>
-
-              {selectedProject.description && (
-                <div className="mb-3">
-                  <h6 className="">Description</h6>
-                  <p>{selectedProject.description}</p>
-                </div>
-              )}
-            </div>
-          )}
-        </Modal.Body>
-        <Modal.Footer className="bg-card">
-          <Button variant="secondary" onClick={() => setShowViewModal(false)}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Edit Project Modal */}
-      <Modal
-        show={showEditModal}
-        onHide={() => setShowEditModal(false)}
+        show={showAssignModal}
+        onHide={() => setShowAssignModal(false)}
         centered
         className="custom-modal-dark"
         size="lg"
       >
         <Modal.Header closeButton>
-          <Modal.Title>Edit Project</Modal.Title>
+          <Modal.Title>Assign Project to Team Member</Modal.Title>
         </Modal.Header>
         <Modal.Body className="bg-card">
-          {editProject && (
+          {selectedProject && (
             <Form>
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Project Name *</Form.Label>
+                    <Form.Label>Project Title</Form.Label>
                     <Form.Control
                       type="text"
-                      value={editProject.name}
-                      onChange={(e) =>
-                        setEditProject({ ...editProject, name: e.target.value })
-                      }
+                      value={selectedProject.projectTitle}
+                      readOnly
                     />
                   </Form.Group>
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Status</Form.Label>
+                    <Form.Label>Team Member *</Form.Label>
                     <Form.Select
-                      value={editProject.status}
+                      value={assignProjectData.memberId}
                       onChange={(e) =>
-                        setEditProject({ ...editProject, status: e.target.value })
+                        setAssignProjectData({
+                          ...assignProjectData,
+                          memberId: e.target.value,
+                        })
                       }
+                      required
                     >
-                      <option value="Planning">Planning</option>
-                      <option value="In Progress">In Progress</option>
-                      <option value="On Hold">On Hold</option>
-                      <option value="Completed">Completed</option>
+                      <option value="">Select Member</option>
+                      {teamMembersList.map((member) => (
+                        <option key={member.id} value={member.id}>
+                          {member.fullName} ({member.empId})
+                        </option>
+                      ))}
                     </Form.Select>
                   </Form.Group>
                 </Col>
@@ -575,196 +425,67 @@ const Assigned = () => {
               <Row>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Due Date *</Form.Label>
+                    <Form.Label>Deadline</Form.Label>
                     <Form.Control
                       type="date"
-                      value={editProject.dueDate}
+                      value={assignProjectData.deadline}
                       onChange={(e) =>
-                        setEditProject({ ...editProject, dueDate: e.target.value })
+                        setAssignProjectData({
+                          ...assignProjectData,
+                          deadline: e.target.value,
+                        })
                       }
                     />
                   </Form.Group>
                 </Col>
                 <Col md={6}>
                   <Form.Group className="mb-3">
-                    <Form.Label>Priority</Form.Label>
-                    <Form.Select
-                      value={editProject.priority}
+                    <Form.Label>Estimated Hours</Form.Label>
+                    <Form.Control
+                      type="number"
+                      value={assignProjectData.estimatedHours}
                       onChange={(e) =>
-                        setEditProject({ ...editProject, priority: e.target.value })
+                        setAssignProjectData({
+                          ...assignProjectData,
+                          estimatedHours: e.target.value,
+                        })
                       }
-                    >
-                      <option value="High">High</option>
-                      <option value="Medium">Medium</option>
-                      <option value="Low">Low</option>
-                    </Form.Select>
+                    />
                   </Form.Group>
                 </Col>
               </Row>
 
               <Form.Group className="mb-3">
-                <Form.Label>Team Member</Form.Label>
-                <Form.Select
-                  value={editProject.memberId}
-                  onChange={(e) =>
-                    setEditProject({ ...editProject, memberId: e.target.value })
-                  }
-                >
-                  <option value="">Select Member</option>
-                  {teamMembersList.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.fullName}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Description</Form.Label>
+                <Form.Label>Notes</Form.Label>
                 <Form.Control
                   as="textarea"
                   rows={3}
-                  value={editProject.description}
+                  value={assignProjectData.notes}
                   onChange={(e) =>
-                    setEditProject({
-                      ...editProject,
-                      description: e.target.value,
+                    setAssignProjectData({
+                      ...assignProjectData,
+                      notes: e.target.value,
                     })
                   }
+                  placeholder="Enter any notes for the assignment"
                 />
               </Form.Group>
             </Form>
           )}
         </Modal.Body>
         <Modal.Footer className="bg-card">
-          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleUpdateProject}>
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Add Project Modal */}
-      <Modal
-        show={showAddModal}
-        onHide={() => setShowAddModal(false)}
-        centered
-        className="custom-modal-dark"
-        size="lg"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Assign New Project</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="bg-card">
-          <Form>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Project Name *</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={newProject.name}
-                    onChange={(e) =>
-                      setNewProject({ ...newProject, name: e.target.value })
-                    }
-                    placeholder="Enter project name"
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Status</Form.Label>
-                  <Form.Select
-                    value={newProject.status}
-                    onChange={(e) =>
-                      setNewProject({ ...newProject, status: e.target.value })
-                    }
-                  >
-                    <option value="Planning">Planning</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="On Hold">On Hold</option>
-                    <option value="Completed">Completed</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Due Date *</Form.Label>
-                  <Form.Control
-                    type="date"
-                    value={newProject.dueDate}
-                    onChange={(e) =>
-                      setNewProject({ ...newProject, dueDate: e.target.value })
-                    }
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Priority</Form.Label>
-                  <Form.Select
-                    value={newProject.priority}
-                    onChange={(e) =>
-                      setNewProject({ ...newProject, priority: e.target.value })
-                    }
-                  >
-                    <option value="High">High</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Low">Low</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Team Member *</Form.Label>
-              <Form.Select
-                value={newProject.memberId}
-                onChange={(e) =>
-                  setNewProject({ ...newProject, memberId: e.target.value })
-                }
-              >
-                <option value="">Select Member</option>
-                {teamMembersList.map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {member.fullName}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={newProject.description}
-                onChange={(e) =>
-                  setNewProject({
-                    ...newProject,
-                    description: e.target.value,
-                  })
-                }
-                placeholder="Enter project description"
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer className="bg-card">
           <Button
             variant="secondary"
-            className="rounded-5"
-            onClick={() => setShowAddModal(false)}
+            onClick={() => setShowAssignModal(false)}
           >
             Cancel
           </Button>
-          <Button className="gradient-button" onClick={handleAddProject}>
-            Create Project
+          <Button 
+            variant="primary" 
+            onClick={handleAssignSubmit}
+            disabled={!assignProjectData.memberId}
+          >
+            Assign Project
           </Button>
         </Modal.Footer>
       </Modal>

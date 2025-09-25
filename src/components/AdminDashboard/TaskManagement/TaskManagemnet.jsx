@@ -2,57 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import ProjectsTable from "./ProjectsTable";
 import ProjectDetails from "./ProjectDetails";
-
-// Dummy data generator function
-const generateDummyProjects = (count) => {
-  const platforms = ["MS Office", "Adobe", "Web", "Mobile", "Desktop"];
-  const statuses = ["In Progress", "Ready for QA", "QA Review", "Completed"];
-  const clients = [
-    "Stark Industries",
-    "Wayne Enterprises",
-    "Oscorp",
-    "LexCorp",
-    "Queen Consolidated",
-  ];
-  const languages = ["English", "Spanish", "French", "German", "Chinese"];
-
-  return Array.from({ length: count }, (_, i) => ({
-    id: i + 1,
-    title: `Project ${i + 1}`,
-    client: clients[Math.floor(Math.random() * clients.length)],
-    task: `Task ${i + 1}`,
-    language: languages[Math.floor(Math.random() * languages.length)],
-    platform: platforms[Math.floor(Math.random() * platforms.length)],
-    totalPages: Math.floor(Math.random() * 50) + 5,
-    dueDate: new Date(
-      Date.now() + Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000
-    ).toLocaleString(),
-    progress: Math.floor(Math.random() * 100),
-    status: statuses[Math.floor(Math.random() * statuses.length)],
-    handlers: Math.floor(Math.random() * 3) + 1,
-    qaReviewers: Math.floor(Math.random() * 2) + 1,
-    fileCount: Math.floor(Math.random() * 5) + 1,
-    handlerNote: `Handler note for project ${i + 1}`,
-    qaNote: `QA note for project ${i + 1}`,
-    files: Array.from(
-      { length: Math.floor(Math.random() * 3) + 1 },
-      (_, j) => ({
-        id: j + 1,
-        name: `file${j + 1}.${["docx", "pdf", "xlsx", "psd"][j % 4]}`,
-        pages: Math.floor(Math.random() * 20) + 1,
-        language: languages[Math.floor(Math.random() * languages.length)],
-        platform: platforms[Math.floor(Math.random() * platforms.length)],
-        stage: ["Not Started", "In Progress", "QC YTS", "Completed"][j % 4],
-        assigned: new Date(
-          Date.now() - Math.floor(Math.random() * 10) * 24 * 60 * 60 * 1000
-        ).toLocaleDateString(),
-        handler: `Handler ${j + 1}`,
-        qaReviewer: `QA ${j + 1}`,
-        qaStatus: ["Pending", "Approved", "Rejected"][j % 3],
-      })
-    ),
-  }));
-};
+import BASE_URL from "../../../config";
 
 const TaskManagement = () => {
   const [projects, setProjects] = useState([]);
@@ -69,14 +19,37 @@ const TaskManagement = () => {
   const [employeeData, setEmployeeData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [authToken, setAuthToken] = useState(""); // टोकन स्टोर करने के लिए स्टेट
+  const [authToken, setAuthToken] = useState("");
+  const [showEmployeeProjects, setShowEmployeeProjects] = useState(false);
 
-  // Generate dummy data on component mount
+  // Handler functions - defined before useEffect
+  const handleViewProject = (project) => {
+    setSelectedProject(project);
+    setExpandedRow(expandedRow === project.id ? null : project.id);
+  };
+
+  const handleMarkComplete = (id) => {
+    if (
+      window.confirm("Are you sure you want to mark this project as complete?")
+    ) {
+      setProjects(projects.filter((project) => project.id !== id));
+    }
+  };
+
+  const handleDeleteProject = (id) => {
+    if (window.confirm("Are you sure you want to delete this project?")) {
+      setProjects(projects.filter((project) => project.id !== id));
+    }
+  };
+
+  // Handle employee selection
+  const handleEmployeeSelect = (employeeId) => {
+    setEmployeeFilter(employeeId);
+    setShowEmployeeProjects(!!employeeId);
+  };
+
+  // Fetch projects and employee data on component mount
   useEffect(() => {
-    const dummyProjects = generateDummyProjects(15);
-    setProjects(dummyProjects);
-    setFilteredProjects(dummyProjects);
-    
     // लोकल स्टोरेज से टोकन प्राप्त करें
     const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
     if (token) {
@@ -96,7 +69,7 @@ const TaskManagement = () => {
         };
         
         const response = await axios.get(
-          'https://eminoids-backend-production.up.railway.app/api/member/getAllMembers', 
+          `${BASE_URL}member/getAllMembers`, 
           config
         );
         
@@ -131,12 +104,44 @@ const TaskManagement = () => {
       }
     };
     
+    // Fetch projects data from API
+    const fetchProjectsData = async () => {
+      try {
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        
+        const response = await axios.get(
+          `${BASE_URL}project/getAllProjects`, 
+          config
+        );
+        
+        if (response.data.status) {
+          setProjects(response.data.data);
+          setFilteredProjects(response.data.data);
+        } else {
+          setError(response.data.message || "Failed to fetch projects data");
+        }
+      } catch (err) {
+        if (err.response) {
+          setError(`Server error: ${err.response.status} - ${err.response.data.message || 'Unknown error'}`);
+        } else if (err.request) {
+          setError("Network error: No response received from server");
+        } else {
+          setError("Error fetching projects data: " + err.message);
+        }
+      }
+    };
+    
     fetchEmployeeData();
+    fetchProjectsData();
   }, []);
 
   // Filter projects based on search term, status filter, team filter, client filter and employee filter
   useEffect(() => {
-    let filtered = projects.filter((project) => {
+    let filtered = projects?.filter((project) => {
       // Search filter - check if search term matches project title, client, or task
       const matchesSearch = searchTerm === "" || 
         project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -154,9 +159,9 @@ const TaskManagement = () => {
     
     // Apply team-based filtering logic
     if (teamFilter === "Adobe" || teamFilter === "MS Office") {
-      // For Adobe and MS Office teams, only show projects assigned by the Manager
-      filtered = filtered.filter(project => 
-        project.platform === teamFilter && 
+      // For Adobe and MS Office teams, filter projects by platform
+      filtered = filtered?.filter(project => 
+        project?.platform === teamFilter && 
         (isManager || project.assignedByManager)
       );
     } else if (teamFilter === "QA") {
@@ -168,71 +173,34 @@ const TaskManagement = () => {
     
     // Apply employee filter if selected
     if (employeeFilter) {
-      filtered = filtered.filter(project => 
-        project.assignedEmployee && 
-        project.assignedEmployee.id === employeeFilter
+      filtered = filtered?.filter(project => 
+        project?.assignedEmployee && 
+        project?.assignedEmployee === parseInt(employeeFilter)
       );
     }
     
     setFilteredProjects(filtered);
   }, [projects, searchTerm, statusFilter, teamFilter, clientFilter, employeeFilter, isManager]);
 
-  // Mock data for "My Tasks" (for manager view)
-  const myTasks = [
-    {
-      id: 4,
-      title: "Marketing Strategy",
-      client: "Stark Industries",
-      task: "Formatting",
-      language: "English",
-      platform: "MS Office",
-      totalPages: 15,
-      dueDate: "11:00 AM 27-06-25",
-      progress: 40,
-      status: "In Progress",
-      handlers: 1,
-      qaReviewers: 1,
-      fileCount: 3,
-      handlerNote: "Developing Q3 marketing plan. Need budget approval.",
-      qaNote: "Awaiting initial draft for review.",
-      files: [
-        {
-          id: 1,
-          name: "strategy.docx",
-          pages: 15,
-          language: "English",
-          platform: "MS Office",
-          stage: "In Progress",
-          assigned: "21-06-25",
-          handler: "You",
-          qaReviewer: "Sophia Miller",
-          qaStatus: "Pending",
-        },
-      ],
-    },
-  ];
-
-  const handleViewProject = (project) => {
-    setSelectedProject(project);
-    setExpandedRow(expandedRow === project.id ? null : project.id);
-  };
-
-  const handleMarkComplete = (id) => {
-    if (
-      window.confirm("Are you sure you want to mark this project as complete?")
-    ) {
-      setProjects(projects.filter((project) => project.id !== id));
-    }
-  };
-
-  const handleDeleteProject = (id) => {
-    if (window.confirm("Are you sure you want to delete this project?")) {
-      setProjects(projects.filter((project) => project.id !== id));
-    }
-  };
-
   // Get unique clients for the client filter dropdown
-  const uniqueClients = [...new Set(projects.map(project => project.client))];
+  const uniqueClients = [...new Set(projects?.map(project => project.client))];
+
+  // Get employee name by ID
+  const getEmployeeNameById = (id) => {
+    const employee = employeeData.find(emp => emp.id === parseInt(id));
+    return employee ? employee.name : "Unknown";
+  };
+
+  // Get employee details by ID
+  const getEmployeeDetailsById = (id) => {
+    return employeeData.find(emp => emp.id === parseInt(id));
+  };
+
+  // Get employees by team
+  const getEmployeesByTeam = (team) => {
+    if (team === "All") return employeeData;
+    return employeeData.filter(emp => emp.team === team);
+  };
 
   return (
     <div className="min-vh-100 bg-main">
@@ -290,15 +258,14 @@ const TaskManagement = () => {
                       <select
                         className="form-select"
                         value={employeeFilter}
-                        onChange={(e) => setEmployeeFilter(e.target.value)}
+                        onChange={(e) => handleEmployeeSelect(e.target.value)}
                       >
                         <option value="">All Employees</option>
-                        {employeeData
-                          .filter(emp => teamFilter === "All" || emp.team === teamFilter)
-                          .sort((a, b) => a.name.localeCompare(b.name)) // नाम के अनुसार सॉर्ट करें
+                        {getEmployeesByTeam(teamFilter)
+                          .sort((a, b) => a.name.localeCompare(b.name)) 
                           .map(emp => (
                             <option key={emp.id} value={emp.id}>
-                              {emp.name} {/* केवल कर्मचारी का नाम दिखाएं */}
+                              {emp.name} 
                             </option>
                           ))}
                       </select>
@@ -370,58 +337,92 @@ const TaskManagement = () => {
         {/* Show content based on active tab */}
         {activeProjectTab === "all" && (
           <>
-            <ProjectsTable
-              projects={filteredProjects}
-              teamFilter={teamFilter}
-              isManager={isManager}
-              onViewProject={handleViewProject}
-              onMarkComplete={handleMarkComplete}
-              onDeleteProject={handleDeleteProject}
-              expandedRow={expandedRow}
-              onReassign={(id) => console.log("Reassign project", id)}
-              onViewDetails={(id) => console.log("View details", id)}
-            />
+            {showEmployeeProjects ? (
+              // Show selected employee and their projects
+              <div className="card bg-card mb-4">
+                <div className="card-body">
+                  <div className="d-flex align-items-center mb-4">
+                    <div className="me-3">
+                      <div className="avatar-circle">
+                        {getEmployeeDetailsById(employeeFilter)?.name?.charAt(0) || "U"}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-light mb-1">
+                        {getEmployeeDetailsById(employeeFilter)?.name || "Unknown Employee"}
+                      </h4>
+                      <p className="text-light mb-0">
+                        {getEmployeeDetailsById(employeeFilter)?.role || "No role specified"} • 
+                        {getEmployeeDetailsById(employeeFilter)?.team || "No team specified"}
+                      </p>
+                    </div>
+                    <button 
+                      className="btn btn-sm btn-outline-light ms-auto"
+                      onClick={() => {
+                        setEmployeeFilter("");
+                        setShowEmployeeProjects(false);
+                      }}
+                    >
+                      Back to All Employees
+                    </button>
+                  </div>
+                  
+                  <ProjectsTable
+                    projects={filteredProjects}
+                    teamFilter={teamFilter}
+                    isManager={isManager}
+                    employeeData={employeeData}
+                    getEmployeeNameById={getEmployeeNameById}
+                    onViewProject={handleViewProject}
+                    onMarkComplete={handleMarkComplete}
+                    onDeleteProject={handleDeleteProject}
+                    expandedRow={expandedRow}
+                    onReassign={(id) => console.log("Reassign project", id)}
+                    onViewDetails={(id) => console.log("View details", id)}
+                  />
+                </div>
+              </div>
+            ) : (
+              // Show all projects table when no employee is selected
+              <div className="card bg-card">
+                <div className="card-body">
+                  <ProjectsTable
+                    projects={filteredProjects}
+                    teamFilter={teamFilter}
+                    isManager={isManager}
+                    employeeData={employeeData}
+                    getEmployeeNameById={getEmployeeNameById}
+                    onViewProject={handleViewProject}
+                    onMarkComplete={handleMarkComplete}
+                    onDeleteProject={handleDeleteProject}
+                    expandedRow={expandedRow}
+                    onReassign={(id) => console.log("Reassign project", id)}
+                    onViewDetails={(id) => console.log("View details", id)}
+                  />
+                </div>
+              </div>
+            )}
+            
             {selectedProject && expandedRow === selectedProject.id && (
               <ProjectDetails
                 project={selectedProject}
                 teamFilter={teamFilter}
+                employeeData={employeeData}
+                getEmployeeNameById={getEmployeeNameById}
                 onClose={() => setExpandedRow(null)}
               />
             )}
           </>
         )}
 
-        {/* Show My Tasks content based on active tab */}
+        {/* Show My Tasks content based on active tab - now empty */}
         {activeProjectTab === "my" && (
-          <>
-            <ProjectsTable
-              projects={myTasks}
-              teamFilter={teamFilter}
-              isManager={isManager}
-              onViewProject={handleViewProject}
-              onMarkComplete={handleMarkComplete}
-              onDeleteProject={handleDeleteProject}
-              expandedRow={expandedRow}
-              onReassign={(id) => console.log("Reassign project", id)}
-              onViewDetails={(id) => console.log("View details", id)}
-            />
-            {selectedProject && expandedRow === selectedProject.id && (
-              <ProjectDetails
-                project={selectedProject}
-                teamFilter={teamFilter}
-                onClose={() => setExpandedRow(null)}
-              />
-            )}
-          </>
-        )}
-
-        {/* Project Details */}
-        {selectedProject && expandedRow === selectedProject.id && (
-          <ProjectDetails
-            project={selectedProject}
-            teamFilter={teamFilter}
-            onClose={() => setExpandedRow(null)}
-          />
+          <div className="card bg-card">
+            <div className="card-body text-center py-5">
+              <h4 className="text-light">No tasks assigned to you</h4>
+              <p className="text-light">Your assigned tasks will appear here.</p>
+            </div>
+          </div>
         )}
       </div>
     </div>

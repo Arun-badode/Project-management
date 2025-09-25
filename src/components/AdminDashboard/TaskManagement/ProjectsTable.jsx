@@ -15,6 +15,9 @@ const ProjectsTable = ({
   const fakeScrollbarRef = useRef(null);
   const tableWrapperRef = useRef(null);
   const token = localStorage.getItem("authToken");
+  
+  // Try multiple possible keys for user ID
+  const [userId, setUserId] = useState(null);
 
   const [Employeeprojects, setEmployeeProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -71,6 +74,65 @@ const ProjectsTable = ({
         return 10; // small default for unknown or not started
     }
   };
+
+  // Try to get user ID from various sources
+  useEffect(() => {
+    const getUserId = () => {
+      // Try multiple possible keys
+      const possibleKeys = [
+        "userId", 
+        "id", 
+        "user_id", 
+        "managerId", 
+        "manager_id",
+        "employeeId",
+        "employee_id"
+      ];
+      
+      for (const key of possibleKeys) {
+        const value = localStorage.getItem(key);
+        if (value) {
+          console.log(`Found user ID with key "${key}": ${value}`);
+          return value;
+        }
+      }
+      
+      // Try to parse user info from token if it's a JWT
+      if (token) {
+        try {
+          const tokenParts = token.split('.');
+          if (tokenParts.length === 3) {
+            const payload = JSON.parse(atob(tokenParts[1]));
+            console.log("Token payload:", payload);
+            
+            // Check various possible ID fields in the token
+            const idFields = ["userId", "id", "user_id", "sub", "managerId", "employeeId"];
+            for (const field of idFields) {
+              if (payload[field]) {
+                console.log(`Found user ID in token field "${field}": ${payload[field]}`);
+                return payload[field];
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Error parsing token:", err);
+        }
+      }
+      
+      console.log("User ID not found in localStorage or token");
+      return null;
+    };
+    
+    const id = getUserId();
+    setUserId(id);
+    
+    // If no user ID is found, show an alert
+    if (!id) {
+      console.error("User ID not found. Please check localStorage keys or token format.");
+      // We don't show an alert here because it might be annoying for the user
+      // Instead, we'll handle it when they try to reassign
+    }
+  }, [token]);
 
   // Fetch project files for a specific project
   const fetchProjectFiles = async (projectId) => {
@@ -187,7 +249,7 @@ const ProjectsTable = ({
   };
 
   // Handle project reassignment
-  const handleReassignSubmit = async () => {
+const handleReassignSubmit = async () => {
     if (!selectedEmployee) {
       alert("Please select an employee to reassign the project");
       return;
@@ -195,12 +257,19 @@ const ProjectsTable = ({
 
     setReassignLoading(true);
     try {
-      const response = await axios.post(
-        `${BASE_URL}project/reassignProject`,
+      // Get the selected employee details
+      const employee = availableEmployees.find(emp => emp.id === parseInt(selectedEmployee));
+      if (!employee) {
+        alert("Invalid employee selected");
+        return;
+      }
+
+      // Make the API call to reassign the project
+      // Using project ID in the URL instead of user ID
+      const response = await axios.put(
+        `${BASE_URL}project/projects/manager/${selectedProject.id}`, // Using project ID in the URL
         {
-          projectId: selectedProject.id,
-          currentEmployeeId: selectedProject.assignedEmployee?.id,
-          newEmployeeId: selectedEmployee
+          projectManagerId: parseInt(selectedEmployee) // Send the selected employee ID as projectManagerId
         },
         {
           headers: {
@@ -215,18 +284,82 @@ const ProjectsTable = ({
         setShowReassignModal(false);
         setSelectedEmployee('');
         
-        // Refresh the projects list
-        // This would ideally be handled by the parent component
-        // For now, we'll just close the modal and expect the parent to refresh
+        // Update the project in the state to move it to the new employee
+        setEmployeeProjects(prev => {
+          const newProjects = [...prev];
+          
+          // Find the project and remove it from its current employee
+          let projectToMove = null;
+          let sourceEmployeeIndex = -1;
+          let projectIndex = -1;
+          
+          for (let i = 0; i < newProjects.length; i++) {
+            const emp = newProjects[i];
+            const projIndex = emp.projects.findIndex(p => p.id === selectedProject.id);
+            
+            if (projIndex !== -1) {
+              projectToMove = {...emp.projects[projIndex]};
+              projectToMove.assignedEmployee = {
+                id: employee.id,
+                fullName: employee.fullName,
+                empId: employee.empId
+              };
+              
+              // Remove the project from its current employee
+              newProjects[i].projects.splice(projIndex, 1);
+              
+              // If the employee has no more projects, remove them from the list
+              if (newProjects[i].projects.length === 0) {
+                newProjects.splice(i, 1);
+              }
+              
+              break;
+            }
+          }
+          
+          // If we found the project, add it to the new employee
+          if (projectToMove) {
+            // Check if the new employee already exists in our list
+            let targetEmployeeIndex = newProjects.findIndex(emp => emp.empId === employee.empId);
+            
+            if (targetEmployeeIndex !== -1) {
+              // Add the project to the existing employee
+              newProjects[targetEmployeeIndex].projects.push(projectToMove);
+            } else {
+              // Create a new employee entry
+              const team = employee.designation?.toLowerCase().includes("qa") ? "QA" :
+                          employee.designation?.toLowerCase().includes("adobe") ? "Adobe" :
+                          employee.designation?.toLowerCase().includes("ms office") ? "MS Office" : "Other";
+              
+              newProjects.push({
+                empId: employee.empId,
+                fullName: employee.fullName,
+                designation: employee.designation,
+                projects: [projectToMove]
+              });
+              
+              // Sort employees by Employee ID in ascending order
+              newProjects.sort((a, b) => a.empId.localeCompare(b.empId));
+            }
+          }
+          
+          return newProjects;
+        });
+        
+        // Notify parent component if needed
         if (onReassign) {
-          onReassign(selectedProject.id);
+          onReassign(selectedProject.id, selectedEmployee);
         }
       } else {
         alert(`Failed to reassign project: Server returned status ${response.status}`);
       }
     } catch (err) {
       console.error("Error reassigning project", err);
-      alert(`Error reassigning project: ${err.response?.data?.message || err.message}`);
+      if (err.response && err.response.status === 404) {
+        alert("API endpoint not found. Please check the API URL.");
+      } else {
+        alert(`Error reassigning project: ${err.response?.data?.message || err.message}`);
+      }
     } finally {
       setReassignLoading(false);
     }
@@ -438,7 +571,6 @@ const ProjectsTable = ({
           const updatedHandlers = { ...fileHandlers };
           updatedHandlers[fileId] = newHandler;
           setFileHandlers(updatedHandlers);
-          setHasUnsavedChanges(true);
           
           // Show success message
           alert("Handler assigned successfully!");
@@ -1008,7 +1140,7 @@ const ProjectsTable = ({
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Reassign Project</h5>
+                <h5 className="modal-title" style={{color:"black"}}>Reassign Project</h5>
                 <button type="button" className="btn-close" onClick={() => setShowReassignModal(false)}></button>
               </div>
               <div className="modal-body">
@@ -1016,10 +1148,7 @@ const ProjectsTable = ({
                   <label className="form-label">Project Title</label>
                   <input type="text" className="form-control" value={selectedProject?.projectTitle || ''} readOnly />
                 </div>
-                <div className="mb-3">
-                  <label className="form-label">Current Assigned Employee</label>
-                  <input type="text" className="form-control" value={selectedProject?.assignedEmployee?.name || 'Not assigned'} readOnly />
-                </div>
+               
                 <div className="mb-3">
                   <label className="form-label">Select New Employee</label>
                   <select 
@@ -1108,7 +1237,7 @@ const ProjectsTable = ({
                           <tbody>
                             <tr>
                               <td><strong>Assigned Employee:</strong></td>
-                              <td>{projectFullDetails.assignedEmployee?.name || 'Not assigned'}</td>
+                              <td>{projectFullDetails.assignedEmployee?.fullName || 'Not assigned'}</td>
                             </tr>
                             <tr>
                               <td><strong>Employee ID:</strong></td>

@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Table, Badge, Button, Spinner } from "react-bootstrap";
 import { FaEye } from "react-icons/fa";
 import axios from "axios";
+import axiosInstance from "../../Utilities/axiosInstance";
 
 const ProjectTables = ({
   title,
   scrollContainerRef,
-  fakeScrollbarRef,
   handleView
 }) => {
   const [projects, setProjects] = useState([]);
@@ -14,16 +14,12 @@ const ProjectTables = ({
   const [error, setError] = useState(null);
   const token = localStorage.getItem("authToken");
 
-  console.log(title);
-  
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "https://eminoids-backend-production.up.railway.app/api/adminDashboard/getAdminDashboardData"
-
-          , {
+        const response = await axiosInstance.get(
+          "adminDashboard/getAdminDashboardData",
+          {
             headers: {
               "Authorization": `Bearer ${token}`
             }
@@ -40,24 +36,23 @@ const ProjectTables = ({
           projectData = response.data.data.overdue.list;
         }
 
-
         // Transform the data to match the table format
         const formattedProjects = projectData.map(project => ({
           id: project.id,
           title: project.projectTitle,
-          client: project.clientId, // You might want to fetch client names separately
-          tasks: project.taskId,    // You might want to fetch task names separately
-          languages: project.languageId, // You might want to fetch language names separately
-          application: project.applicationId, // You might want to fetch application names separately
+          client: project.clientId,
+          tasks: project.taskId,
+          languages: project.languageId,
+          application: project.applicationId,
           pages: project.totalProjectPages,
           dueDate: new Date(project.deadline).toLocaleDateString(),
           qcDeadline: new Date(project.readyQCDeadline).toLocaleDateString(),
           qcHours: project.qcHrs,
           qcDueDate: new Date(project.qcDueDate).toLocaleDateString(),
           status: project.status,
-          handler: project.projectManagerId, // You might want to fetch manager names separately
-          qaReviewer: "", // This data isn't in the API response
-          qaStatus: "" // This data isn't in the API response
+          handler: project.projectManagerId,
+          qaReviewer: "",
+          qaStatus: ""
         }));
 
         setProjects(formattedProjects);
@@ -69,7 +64,7 @@ const ProjectTables = ({
     };
 
     fetchData();
-  }, [title]);
+  }, [title, token]);
 
   if (loading) {
     return (
@@ -89,24 +84,8 @@ const ProjectTables = ({
 
   return (
     <div className="text-white p-3 mb-4 table-gradient-bg">
-      <div
-        ref={fakeScrollbarRef}
-        style={{
-          overflowX: "auto",
-          overflowY: "hidden",
-          height: 16,
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1050,
-        }}
-      >
-        <div style={{ width: "2000px", height: 1 }} />
-      </div>
       <h4 className="mb-3">{title}</h4>
       <div
-        className=""
         ref={scrollContainerRef}
         style={{
           maxHeight: "500px",
@@ -114,6 +93,7 @@ const ProjectTables = ({
           scrollbarWidth: "none",
           msOverflowStyle: "none",
         }}
+        className="hide-scrollbar"
       >
         <Table className="table-gradient-bg align-middle table table-bordered table-hover">
           <thead
@@ -139,7 +119,6 @@ const ProjectTables = ({
               <th>QC Due Date</th>
               <th>Status</th>
               <th>Handler</th>
-              {/* <th>QA Reviewer</th> */}
               <th>QA Status</th>
               <th>Action</th>
             </tr>
@@ -181,7 +160,6 @@ const ProjectTables = ({
                     </Badge>
                   </td>
                   <td>{project.handler}</td>
-                  {/* <td>{project.qaReviewer}</td> */}
                   <td>
                     <Badge
                       bg={

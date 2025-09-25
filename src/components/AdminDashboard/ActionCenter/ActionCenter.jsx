@@ -22,14 +22,15 @@ const App = () => {
     dateFrom: "",
     dateTo: "",
     sortOrder: "latest",
-    shiftType: "Others" // Changed default to "Others" to match API data
+    shiftType: "Others", // Changed default to "Others" to match API data
+    reassignStatus: "pending" // Added for reassign status filter
   });
 
   // Data states
   const [pendingRequests, setPendingRequests] = useState([]);
   const [actionHistory, setActionHistory] = useState([]);
   const [shifts, setShifts] = useState([]); // Added for shift data
-  const [projects, setProjects] = useState([]); // Added for project data
+  const [reassignRequests, setReassignRequests] = useState([]); // Added for reassign data
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const id = localStorage.getItem("userId");
@@ -40,10 +41,25 @@ const App = () => {
       setLoading(true);
       const response = await axiosInstance.get("shift/getAllShifts");
       
-      // Filter shifts based on shiftType filter
-      const filteredShifts = response.data.data?.filter(shift => 
-        shift.shiftType === filters.shiftType
+      // Filter shifts based on shiftType filter and only show pending requests
+      let filteredShifts = response.data.data?.filter(shift => 
+        shift.status === "pending"
       ) || [];
+      
+      // Apply shift type filter if not "All"
+      if (filters.shiftType !== "All") {
+        if (filters.shiftType === "Others") {
+          // For "Others", show shifts that don't match the standard types
+          filteredShifts = filteredShifts.filter(shift => 
+            !["Morning Shift", "Night Shift", "Full Day", "Half Day", "Night"].includes(shift.shiftType)
+          );
+        } else {
+          // For specific types, show only that type
+          filteredShifts = filteredShifts.filter(shift => 
+            shift.shiftType === filters.shiftType
+          );
+        }
+      }
       
       setShifts(filteredShifts);
       setLoading(false);
@@ -54,16 +70,22 @@ const App = () => {
     }
   };
 
-  // Fetch projects from API
-  const fetchProjects = async () => {
+  // Fetch reassign requests from API
+  const fetchReassignRequests = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get("project/getAllProjects");
-      setProjects(response.data.projects || []);
+      const response = await axiosInstance.get("reassign");
+      
+      // Filter reassign requests based on status filter
+      const filteredReassignRequests = response.data.data?.filter(request => 
+        request.status === filters.reassignStatus
+      ) || [];
+      
+      setReassignRequests(filteredReassignRequests);
       setLoading(false);
     } catch (error) {
-      console.error("Failed to fetch projects:", error);
-      setError('Failed to fetch projects');
+      console.error("Failed to fetch reassign requests:", error);
+      setError('Failed to fetch reassign requests');
       setLoading(false);
     }
   };
@@ -82,23 +104,50 @@ const App = () => {
     }
   };
 
-  // Fetch action history from API
+  // Fetch action history from API - now fetches approved/rejected shifts and reassign requests
   const fetchActionHistory = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get("requestActivity/getAllReviewedRequests");
       
-      // Combine approved and rejected requests into a single array
-      const combinedHistory = [
-        ...(response.data.data?.approvedRequests?.map(request => ({
-          ...request,
-          actionType: "Approved"
-        })) || []),
-        ...(response.data.data?.rejectedRequests?.map(request => ({
-          ...request,
-          actionType: "Rejected"
-        })) || [])
-      ];
+      // Fetch approved/rejected shifts
+      const shiftsResponse = await axiosInstance.get("shift/getAllShifts");
+      const approvedRejectedShifts = shiftsResponse.data.data?.filter(shift => 
+        shift.status === "approved" || shift.status === "rejected"
+      ).map(shift => ({
+        id: shift.id,
+        requestType: "Shift Request",
+        requesterName: shift.fullName,
+        fromRole: "Employee",
+        toRole: "Manager",
+        createdAt: shift.createdAt || shift.shiftDate,
+        message: `${shift.shiftType} shift on ${formatDate(shift.shiftDate)} from ${shift.startTime} to ${shift.endTime}`,
+        actionType: shift.status === "approved" ? "Approved" : "Rejected",
+        actionTakenBy: shift.actionTakenBy || "Current User"
+      })) || [];
+      
+      // Fetch approved/rejected reassign requests
+      const reassignResponse = await axiosInstance.get("reassign");
+      const approvedRejectedReassigns = reassignResponse.data.data?.filter(request => 
+        request.status === "approved" || request.status === "rejected"
+      ).map(request => ({
+        id: request.id,
+        requestType: "Reassign Request",
+        requesterName: `Admin ${request.admin_id}`,
+        fromRole: "Admin",
+        toRole: "Manager",
+        createdAt: request.created_date,
+        message: request.reason,
+        actionType: request.status === "approved" ? "Approved" : "Rejected",
+        actionTakenBy: `Manager ${request.projectManagerId}`,
+        projectId: request.project_id,
+        taskId: request.task_id
+      })) || [];
+      
+      // Combine both arrays
+      const combinedHistory = [...approvedRejectedShifts, ...approvedRejectedReassigns];
+      
+      // Sort by date (newest first)
+      combinedHistory.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       
       setActionHistory(combinedHistory);
       setLoading(false);
@@ -111,13 +160,12 @@ const App = () => {
 
   useEffect(() => {
     if (activeTab === "pending") {
-      fetchShifts(); // Changed to fetch shifts instead of pending requests
+      fetchShifts();
+      fetchReassignRequests(); // Added to fetch reassign requests
     } else if (activeTab === "history") {
       fetchActionHistory();
-    } else if (activeTab === "projects") {
-      fetchProjects();
     }
-  }, [activeTab, filters.shiftType]); // Added filters.shiftType as dependency
+  }, [activeTab, filters.shiftType, filters.reassignStatus]); // Added filters.reassignStatus as dependency
 
   // Handle filter changes
   const handleFilterChange = (e) => {
@@ -136,7 +184,8 @@ const App = () => {
       dateFrom: "",
       dateTo: "",
       sortOrder: "latest",
-      shiftType: "Others" // Reset to default
+      shiftType: "Others", // Reset to default
+      reassignStatus: "pending" // Reset to default
     });
   };
 
@@ -152,8 +201,11 @@ const App = () => {
         { status: status }
       );
 
-      // Refresh shifts list
-      await fetchShifts();
+      // Remove the shift from the shifts list (pending approvals)
+      setShifts(prevShifts => prevShifts.filter(shift => shift.id !== id));
+
+      // Refresh action history to include the new action
+      await fetchActionHistory();
 
       Swal.fire({
         icon: 'success',
@@ -171,6 +223,49 @@ const App = () => {
         icon: 'error',
         title: 'Error',
         text: `Failed to ${action === "approve" ? "approve" : "reject"} the shift. Please try again.`,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle approval/rejection for reassign requests
+  const handleReassignAction = async (id, action) => {
+    try {
+      setLoading(true);
+      const status = action === "approve" ? "approved" : "rejected";
+
+      // Call the reassign approval/rejection API with correct endpoint and body
+      await axiosInstance.put(
+        `reassign/update/${id}`,
+        { 
+   
+          status: status 
+        }
+      );
+
+      // Remove the reassign request from the reassignRequests list (pending approvals)
+      setReassignRequests(prevRequests => prevRequests.filter(request => request.id !== id));
+
+      // Refresh action history to include the new action
+      await fetchActionHistory();
+
+      Swal.fire({
+        icon: 'success',
+        title: `Reassign Request ${status}`,
+        text: `The reassign request has been ${status} successfully.`,
+        timer: 3000,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error(
+        `Error ${action === "approve" ? "approving" : "rejecting"} reassign request:`,
+        error
+      );
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: `Failed to ${action === "approve" ? "approve" : "reject"} the reassign request. Please try again.`,
       });
     } finally {
       setLoading(false);
@@ -214,62 +309,49 @@ const App = () => {
     }
   };
 
-  // Handle project reassignment
-  const handleReassignProject = async (projectId) => {
-    try {
-      setLoading(true);
-      
-      // Call the project update API with reassign status
-      await axiosInstance.put(
-        `project/updateProject/${projectId}`,
-        { status: "reassign" }
-      );
-
-      // Refresh projects list
-      await fetchProjects();
-
-      Swal.fire({
-        icon: 'success',
-        title: 'Project Reassigned',
-        text: 'The project has been reassigned successfully.',
-        timer: 3000,
-        showConfirmButton: false,
-      });
-    } catch (error) {
-      console.error("Error reassigning project:", error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to reassign the project. Please try again.',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Handle export to CSV
   const exportToCSV = (data) => {
     let csvContent = "data:text/csv;charset=utf-8,";
     
     // Add headers based on active tab
     if (activeTab === "pending") {
-      csvContent += "Shift Type,Employee Name,Date,Start Time,End Time,Notes,Other Type,Duration,Permission Apply\n";
+      // Determine if we're exporting shifts or reassign requests
+      const isShiftData = data.length > 0 && data[0].shiftType !== undefined;
       
-      // Add data rows for shifts
-      data.forEach(item => {
-        const row = [
-          `"${item.shiftType || ''}"`,
-          `"${item.fullName || ''}"`,
-          `"${formatDate(item.shiftDate)}"`,
-          `"${item.startTime || ''}"`,
-          `"${item.endTime || ''}"`,
-          `"${item.notes || ''}"`,
-          `"${item.otherType || ''}"`,
-          `"${item.duration || ''}"`,
-          `"${item.permissionApply || ''}"`
-        ];
-        csvContent += row.join(",") + "\n";
-      });
+      if (isShiftData) {
+        csvContent += "Shift Type,Employee Name,Date,Start Time,End Time,Notes,Other Type,Duration,Permission Apply\n";
+        
+        // Add data rows for shifts
+        data.forEach(item => {
+          const row = [
+            `"${item.shiftType || ''}"`,
+            `"${item.fullName || ''}"`,
+            `"${formatDate(item.shiftDate)}"`,
+            `"${item.startTime || ''}"`,
+            `"${item.endTime || ''}"`,
+            `"${item.notes || ''}"`,
+            `"${item.otherType || ''}"`,
+            `"${item.duration || ''}"`,
+            `"${item.permissionApply || ''}"`
+          ];
+          csvContent += row.join(",") + "\n";
+        });
+      } else {
+        csvContent += "Project ID,Task ID,Admin ID,Reason,Status,Created Date\n";
+        
+        // Add data rows for reassign requests
+        data.forEach(item => {
+          const row = [
+            `"${item.project_id || ''}"`,
+            `"${item.task_id || ''}"`,
+            `"${item.admin_id || ''}"`,
+            `"${item.reason || ''}"`,
+            `"${item.status || ''}"`,
+            `"${formatDate(item.created_date)}"`
+          ];
+          csvContent += row.join(",") + "\n";
+        });
+      }
     } else if (activeTab === "history") {
       csvContent += "Request Type,Requested By,From Role,To Role,Date,Message,Status,Action Taken By\n";
       
@@ -287,30 +369,13 @@ const App = () => {
         ];
         csvContent += row.join(",") + "\n";
       });
-    } else if (activeTab === "projects") {
-      csvContent += "Project Title,Client,Country,Project Manager,Status,Deadline,Priority,Cost\n";
-      
-      // Add data rows for projects
-      data.forEach(item => {
-        const row = [
-          `"${item.projectTitle || ''}"`,
-          `"${item.clientId || ''}"`,
-          `"${item.country || ''}"`,
-          `"${item.projectManagerId || ''}"`,
-          `"${item.status || ''}"`,
-          `"${formatDate(item.deadline)}"`,
-          `"${item.priority || ''}"`,
-          `"${item.totalCost || ''}"`
-        ];
-        csvContent += row.join(",") + "\n";
-      });
     }
     
     // Create download link
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${activeTab === 'pending' ? 'shifts' : activeTab === 'history' ? 'action_history' : 'projects'}_${new Date().toISOString().slice(0,10)}.csv`);
+    link.setAttribute("download", `${activeTab === 'pending' ? 'pending_requests' : 'action_history'}_${new Date().toISOString().slice(0,10)}.csv`);
     document.body.appendChild(link);
     
     // Trigger download
@@ -339,7 +404,7 @@ const App = () => {
       // Add Title
       doc.setFontSize(18);
       doc.text(
-        activeTab === 'pending' ? 'Shifts' : activeTab === 'history' ? 'Action History' : 'Projects',
+        activeTab === 'pending' ? 'Pending Requests' : 'Action History',
         105,
         15,
         { align: 'center' }
@@ -358,19 +423,35 @@ const App = () => {
       let headers, tableData;
       
       if (activeTab === "pending") {
-        headers = [['Shift Type', 'Employee Name', 'Date', 'Start Time', 'End Time', 'Notes', 'Other Type', 'Duration', 'Permission Apply']];
+        // Determine if we're exporting shifts or reassign requests
+        const isShiftData = data.length > 0 && data[0].shiftType !== undefined;
         
-        tableData = data.map(item => [
-          item.shiftType || 'N/A',
-          item.fullName || 'N/A',
-          item.shiftDate ? formatDate(item.shiftDate) : 'N/A',
-          item.startTime || 'N/A',
-          item.endTime || 'N/A',
-          (item.notes || 'N/A').substring(0, 50),
-          item.otherType || 'N/A',
-          item.duration || 'N/A',
-          item.permissionApply || 'N/A'
-        ]);
+        if (isShiftData) {
+          headers = [['Shift Type', 'Employee Name', 'Date', 'Start Time', 'End Time', 'Notes', 'Other Type', 'Duration', 'Permission Apply']];
+          
+          tableData = data.map(item => [
+            item.shiftType || 'N/A',
+            item.fullName || 'N/A',
+            item.shiftDate ? formatDate(item.shiftDate) : 'N/A',
+            item.startTime || 'N/A',
+            item.endTime || 'N/A',
+            (item.notes || 'N/A').substring(0, 50),
+            item.otherType || 'N/A',
+            item.duration || 'N/A',
+            item.permissionApply || 'N/A'
+          ]);
+        } else {
+          headers = [['Project ID', 'Task ID', 'Admin ID', 'Reason', 'Status', 'Created Date']];
+          
+          tableData = data.map(item => [
+            item.project_id || 'N/A',
+            item.task_id || 'N/A',
+            item.admin_id || 'N/A',
+            (item.reason || 'N/A').substring(0, 100),
+            item.status || 'N/A',
+            item.created_date ? formatDate(item.created_date) : 'N/A'
+          ]);
+        }
       } else if (activeTab === "history") {
         headers = [['Request Type', 'Requested By', 'From Role', 'To Role', 'Date', 'Message', 'Status', 'Action Taken By']];
         
@@ -383,19 +464,6 @@ const App = () => {
           (item.message || 'N/A').substring(0, 100),
           item.actionType || 'N/A',
           item.actionTakenBy || 'N/A'
-        ]);
-      } else if (activeTab === "projects") {
-        headers = [['Project Title', 'Client', 'Country', 'Project Manager', 'Status', 'Deadline', 'Priority', 'Cost']];
-        
-        tableData = data.map(item => [
-          item.projectTitle || 'N/A',
-          item.clientId || 'N/A',
-          item.country || 'N/A',
-          item.projectManagerId || 'N/A',
-          item.status || 'N/A',
-          item.deadline ? formatDate(item.deadline) : 'N/A',
-          item.priority || 'N/A',
-          item.totalCost || 'N/A'
         ]);
       }
 
@@ -420,17 +488,25 @@ const App = () => {
         alternateRowStyles: {
           fillColor: [245, 245, 245]
         },
-        columnStyles: activeTab === "pending" ? {
-          0: { cellWidth: 20 },
-          1: { cellWidth: 25 },
-          2: { cellWidth: 25 },
-          3: { cellWidth: 20 },
-          4: { cellWidth: 20 },
-          5: { cellWidth: 30 },
-          6: { cellWidth: 20 },
-          7: { cellWidth: 15 },
-          8: { cellWidth: 20 }
-        } : activeTab === "history" ? {
+        columnStyles: activeTab === "pending" ? 
+          (data.length > 0 && data[0].shiftType !== undefined ? {
+            0: { cellWidth: 20 },
+            1: { cellWidth: 25 },
+            2: { cellWidth: 25 },
+            3: { cellWidth: 20 },
+            4: { cellWidth: 20 },
+            5: { cellWidth: 30 },
+            6: { cellWidth: 20 },
+            7: { cellWidth: 15 },
+            8: { cellWidth: 20 }
+          } : {
+            0: { cellWidth: 20 },
+            1: { cellWidth: 20 },
+            2: { cellWidth: 20 },
+            3: { cellWidth: 60 },
+            4: { cellWidth: 20 },
+            5: { cellWidth: 30 }
+          }) : {
           0: { cellWidth: 25 },
           1: { cellWidth: 25 },
           2: { cellWidth: 20 },
@@ -439,20 +515,11 @@ const App = () => {
           5: { cellWidth: 40 },
           6: { cellWidth: 20 },
           7: { cellWidth: 25 }
-        } : {
-          0: { cellWidth: 30 },
-          1: { cellWidth: 15 },
-          2: { cellWidth: 15 },
-          3: { cellWidth: 25 },
-          4: { cellWidth: 20 },
-          5: { cellWidth: 20 },
-          6: { cellWidth: 15 },
-          7: { cellWidth: 15 }
         }
       });
 
       // Save PDF
-      const fileName = `${activeTab === 'pending' ? 'shifts' : activeTab === 'history' ? 'action_history' : 'projects'}_${new Date().toISOString().slice(0,10)}.pdf`;
+      const fileName = `${activeTab === 'pending' ? 'pending_requests' : 'action_history'}_${new Date().toISOString().slice(0,10)}.pdf`;
       doc.save(fileName);
 
       return true; // Success
@@ -474,14 +541,29 @@ const App = () => {
     let dataToExport = [];
     
     if (activeTab === "pending") {
-      dataToExport = shifts.filter(shift => {
+      // Export shifts
+      const filteredShifts = shifts.filter(shift => {
         // Apply filters
-        if (filters.shiftType && shift.shiftType !== filters.shiftType) return false;
+        if (filters.shiftType && filters.shiftType !== "All" && filters.shiftType !== "Others" && shift.shiftType !== filters.shiftType) return false;
+        if (filters.shiftType === "Others" && (shift.shiftType === "Morning Shift" || shift.shiftType === "Night Shift" || shift.shiftType === "Full Day" || shift.shiftType === "Half Day" || shift.shiftType === "Night")) return false;
         if (filters.requestedBy && !shift.fullName.toLowerCase().includes(filters.requestedBy.toLowerCase())) return false;
         if (filters.dateFrom && new Date(shift.shiftDate) < new Date(filters.dateFrom)) return false;
         if (filters.dateTo && new Date(shift.shiftDate) > new Date(filters.dateTo)) return false;
         return true;
       });
+      
+      // Export reassign requests
+      const filteredReassigns = reassignRequests.filter(request => {
+        // Apply filters
+        if (filters.reassignStatus && request.status !== filters.reassignStatus) return false;
+        if (filters.requestedBy && !request.admin_id.toString().includes(filters.requestedBy)) return false;
+        if (filters.dateFrom && new Date(request.created_date) < new Date(filters.dateFrom)) return false;
+        if (filters.dateTo && new Date(request.created_date) > new Date(filters.dateTo)) return false;
+        return true;
+      });
+      
+      // Combine both arrays
+      dataToExport = [...filteredShifts, ...filteredReassigns];
     } else if (activeTab === "history") {
       dataToExport = actionHistory.filter(action => {
         // Apply filters
@@ -493,22 +575,13 @@ const App = () => {
         if (filters.dateTo && new Date(action.createdAt) > new Date(filters.dateTo)) return false;
         return true;
       });
-    } else if (activeTab === "projects") {
-      dataToExport = projects.filter(project => {
-        // Apply filters
-        if (filters.status && project.status !== filters.status) return false;
-        if (filters.requestedBy && !project.projectTitle.toLowerCase().includes(filters.requestedBy.toLowerCase())) return false;
-        if (filters.dateFrom && new Date(project.deadline) < new Date(filters.dateFrom)) return false;
-        if (filters.dateTo && new Date(project.deadline) > new Date(filters.dateTo)) return false;
-        return true;
-      });
     }
     
     // Sort data
     if (filters.sortOrder === "oldest") {
-      dataToExport.sort((a, b) => new Date(a.shiftDate || a.createdAt || a.deadline) - new Date(b.shiftDate || b.createdAt || b.deadline));
+      dataToExport.sort((a, b) => new Date(a.shiftDate || a.createdAt || a.created_date) - new Date(b.shiftDate || b.createdAt || b.created_date));
     } else {
-      dataToExport.sort((a, b) => new Date(b.shiftDate || b.createdAt || b.deadline) - new Date(a.shiftDate || a.createdAt || a.deadline));
+      dataToExport.sort((a, b) => new Date(b.shiftDate || b.createdAt || b.created_date) - new Date(a.shiftDate || a.createdAt || b.created_date));
     }
     
     if (dataToExport.length === 0) {
@@ -605,7 +678,7 @@ const App = () => {
                 className={`nav-link ${activeTab === "pending" ? "active" : ""}`}
                 onClick={() => setActiveTab("pending")}
               >
-                Shift Approvals
+                Pending Approvals
               </button>
             </li>
             <li className="nav-item">
@@ -614,14 +687,6 @@ const App = () => {
                 onClick={() => setActiveTab("history")}
               >
                 Action History
-              </button>
-            </li>
-            <li className="nav-item">
-              <button
-                className={`nav-link ${activeTab === "projects" ? "active" : ""}`}
-                onClick={() => setActiveTab("projects")}
-              >
-                Projects
               </button>
             </li>
           </ul>
@@ -643,10 +708,8 @@ const App = () => {
             </button>
             <div className="text-white small">
               {activeTab === "pending"
-                ? `${shifts.length} shifts pending approval`
-                : activeTab === "history"
-                ? `${actionHistory.length} history records`
-                : `${projects.length} projects`}
+                ? `${shifts.length + reassignRequests.length} requests pending approval`
+                : `${actionHistory.length} history records`}
             </div>
           </div>
 
@@ -655,27 +718,47 @@ const App = () => {
               <div className="card-body">
                 <div className="row g-3">
                   {activeTab === "pending" ? (
-                    // Shift-specific filters
-                    <div className="col-md-6 col-lg-4">
-                      <label htmlFor="shiftType" className="form-label">
-                        Shift Type
-                      </label>
-                      <select
-                        id="shiftType"
-                        name="shiftType"
-                        value={filters.shiftType}
-                        onChange={handleFilterChange}
-                        className="form-select"
-                      >
-                        <option value="Others">Others</option>
-                        <option value="Morning Shift">Morning Shift</option>
-                        <option value="Night Shift">Night Shift</option>
-                        <option value="Full Day">Full Day</option>
-                        <option value="Half Day">Half Day</option>
-                        <option value="Night">Night</option>
-                      </select>
-                    </div>
-                  ) : activeTab === "history" ? (
+                    // Pending tab filters
+                    <>
+                      <div className="col-md-6 col-lg-4">
+                        <label htmlFor="shiftType" className="form-label">
+                          Shift Type
+                        </label>
+                        <select
+                          id="shiftType"
+                          name="shiftType"
+                          value={filters.shiftType}
+                          onChange={handleFilterChange}
+                          className="form-select"
+                        >
+                          <option value="All">All Shifts</option>
+                          <option value="Others">Others</option>
+                          <option value="Morning Shift">Morning Shift</option>
+                          <option value="Night Shift">Night Shift</option>
+                          <option value="Full Day">Full Day</option>
+                          <option value="Half Day">Half Day</option>
+                          <option value="Night">Night</option>
+                        </select>
+                      </div>
+                      
+                      <div className="col-md-6 col-lg-4">
+                        <label htmlFor="reassignStatus" className="form-label">
+                          Reassign Status
+                        </label>
+                        <select
+                          id="reassignStatus"
+                          name="reassignStatus"
+                          value={filters.reassignStatus}
+                          onChange={handleFilterChange}
+                          className="form-select"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="approved">Approved</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                      </div>
+                    </>
+                  ) : (
                     // Action history filters
                     <>
                       <div className="col-md-6 col-lg-4">
@@ -707,37 +790,16 @@ const App = () => {
                           className="form-select"
                         >
                           <option value="">All Requests</option>
-                          <option value="work-from-home">Work From Home</option>
-                          <option value="leave">Leave Request</option>
-                          <option value="reassignment">Reassignment</option>
+                          <option value="Shift Request">Shift Request</option>
+                          <option value="Reassign Request">Reassign Request</option>
                         </select>
                       </div>
                     </>
-                  ) : (
-                    // Project filters
-                    <div className="col-md-6 col-lg-4">
-                      <label htmlFor="status" className="form-label">
-                        Status
-                      </label>
-                      <select
-                        id="status"
-                        name="status"
-                        value={filters.status}
-                        onChange={handleFilterChange}
-                        className="form-select"
-                      >
-                        <option value="">All Statuses</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Completed">Completed</option>
-                        <option value="On Hold">On Hold</option>
-                        <option value="Cancelled">Cancelled</option>
-                      </select>
-                    </div>
                   )}
 
                   <div className="col-md-6 col-lg-4">
                     <label htmlFor="requestedBy" className="form-label">
-                      {activeTab === "pending" ? "Employee Name" : activeTab === "history" ? "Requested By" : "Project Title"}
+                      {activeTab === "pending" ? "Requested By" : "Requested By"}
                     </label>
                     <div className="input-group">
                       <input
@@ -747,7 +809,7 @@ const App = () => {
                         value={filters.requestedBy}
                         onChange={handleFilterChange}
                         className="form-control"
-                        placeholder="Search by name..."
+                        placeholder="Search by name or ID..."
                       />
                       <span className="input-group-text">
                         <i className="fas fa-search"></i>
@@ -834,7 +896,14 @@ const App = () => {
                     <button 
                       type="button" 
                       className="btn btn-primary"
-                      onClick={activeTab === "pending" ? fetchShifts : activeTab === "history" ? fetchActionHistory : fetchProjects}
+                      onClick={() => {
+                        if (activeTab === "pending") {
+                          fetchShifts();
+                          fetchReassignRequests();
+                        } else {
+                          fetchActionHistory();
+                        }
+                      }}
                     >
                       Apply Filters
                     </button>
@@ -873,7 +942,7 @@ const App = () => {
             <div className="mb-5">
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h2 className="h5 fw-medium text-white">
-                  Shift Approvals
+                  Shift Requests
                 </h2>
               </div>
               
@@ -894,7 +963,7 @@ const App = () => {
                                 </div>
                               </div>
                               <span className="badge bg-warning text-dark">
-                                {shift.shiftType}
+                                {shift.shiftType || "Other"}
                               </span>
                             </div>
                             
@@ -947,13 +1016,88 @@ const App = () => {
               ) : (
                 <div className="card bg-card">
                   <div className="card-body text-center py-4">
-                    <p className="text-muted">No shifts found for the selected type</p>
+                    <p className="text-muted">No shift requests found for the selected type</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Reassign Requests */}
+            <div className="mb-5">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h2 className="h5 fw-medium text-white">
+                  Reassign Requests
+                </h2>
+              </div>
+              
+              {reassignRequests.length > 0 ? (
+                <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                  <Row xs={1} md={2} lg={3} className="g-3">
+                    {reassignRequests.map((request) => (
+                      <Col key={request.id}>
+                        <Card className="h-100 bg-card" style={{ borderLeft: '4px solid #17a2b8' }}>
+                          <Card.Body>
+                            <div className="d-flex justify-content-between align-items-start mb-2">
+                              <div>
+                                <Card.Title className="h6 mb-1">
+                                  Project #{request.project_id}
+                                </Card.Title>
+                                <div className="small  mb-2">
+                                  Task #{request.task_id} • {formatDate(request.created_date)}
+                                </div>
+                              </div>
+                              <span className="badge bg-info">
+                                Reassign
+                              </span>
+                            </div>
+                            
+                            <div className="mb-3">
+                              <p className="mb-1"><strong>Admin ID:</strong> {request.admin_id}</p>
+                              <p className="mb-0">{request.reason}</p>
+                            </div>
+                            
+                            <div className="d-flex justify-content-between align-items-center">
+                              <div className="small">
+                                <span className="">Status:</span> {request.status}
+                              </div>
+                              
+                              <div className="d-flex gap-1">
+                                <Button
+                                  variant="outline-danger"
+                                  size="sm"
+                                  onClick={() => handleReassignAction(request.id, "reject")}
+                                  disabled={loading}
+                                  style={{ borderRadius: '4px', padding: '6px 10px' }}
+                                >
+                                  Reject
+                                </Button>
+                                <Button
+                                  variant="success"
+                                  size="sm"
+                                  onClick={() => handleReassignAction(request.id, "approve")}
+                                  disabled={loading}
+                                  style={{ borderRadius: '4px', padding: '6px 10px' }}
+                                >
+                                  Approve
+                                </Button>
+                              </div>
+                            </div>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+                </div>
+              ) : (
+                <div className="card bg-card">
+                  <div className="card-body text-center py-4">
+                    <p className="">No reassign requests found</p>
                   </div>
                 </div>
               )}
             </div>
           </div>
-        ) : activeTab === "history" ? (
+        ) : (
           <div>
             {/* Action History */}
             <div className="d-flex justify-content-between align-items-center mb-3">
@@ -965,8 +1109,8 @@ const App = () => {
             {actionHistory.length > 0 ? (
               <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
                 <Row xs={1} md={2} lg={3} className="g-3">
-                  {actionHistory.map((action) => (
-                    <Col key={action.id}>
+                  {actionHistory.map((action, index) => (
+                    <Col key={`${action.id}-${index}`}>
                       <Card className="h-100 bg-card" style={{ 
                         borderLeft: action.actionType === "Approved" ? '4px solid #28a745' : '4px solid #dc3545' 
                       }}>
@@ -975,8 +1119,9 @@ const App = () => {
                             <div>
                               <Card.Title className="h6 mb-1">
                                 {action.requestType}
+                                {action.projectId && ` (Project #${action.projectId})`}
                               </Card.Title>
-                              <div className="small text-muted mb-2">
+                              <div className="small  mb-2">
                                 {formatDate(action.createdAt)}
                               </div>
                             </div>
@@ -993,11 +1138,11 @@ const App = () => {
                           
                           <div className="small">
                             <div className="mb-1">
-                              <span className="text-muted">Requested by:</span> {action.requesterName} ({action.fromRole})
+                              <span className="">Requested by:</span> {action.requesterName} ({action.fromRole})
                             </div>
                             {action.actionTakenBy && (
                               <div>
-                                <span className="text-muted">Action by:</span> {action.actionTakenBy}
+                                <span className="">Action by:</span> {action.actionTakenBy}
                               </div>
                             )}
                           </div>
@@ -1011,74 +1156,6 @@ const App = () => {
               <div className="card bg-card">
                 <div className="card-body text-center py-4">
                   <p className="text-muted">No action history found</p>
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div>
-            {/* Projects */}
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h2 className="h5 fw-medium text-white">
-                Projects
-              </h2>
-            </div>
-            
-            {projects.length > 0 ? (
-              <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
-                <Table striped bordered hover responsive className="bg-card text-white">
-                  <thead>
-                    <tr>
-                      <th>Project Title</th>
-                      <th>Client</th>
-                      <th>Country</th>
-                      <th>Project Manager</th>
-                      <th>Status</th>
-                      <th>Deadline</th>
-                      <th>Priority</th>
-                      <th>Cost</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {projects.map((project) => (
-                      <tr key={project.id}>
-                        <td>{project.projectTitle}</td>
-                        <td>{project.clientId}</td>
-                        <td>{project.country}</td>
-                        <td>{project.projectManagerId}</td>
-                        <td>
-                          <span className={`badge ${
-                            project.status === 'In Progress' ? 'bg-warning' :
-                            project.status === 'Completed' ? 'bg-success' :
-                            project.status === 'On Hold' ? 'bg-info' :
-                            'bg-danger'
-                          }`}>
-                            {project.status}
-                          </span>
-                        </td>
-                        <td>{formatDate(project.deadline)}</td>
-                        <td>{project.priority}</td>
-                        <td>{project.totalCost} {project.currency}</td>
-                        <td>
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            onClick={() => handleReassignProject(project.id)}
-                            disabled={loading}
-                          >
-                            Reassign
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </div>
-            ) : (
-              <div className="card bg-card">
-                <div className="card-body text-center py-4">
-                  <p className="text-muted">No projects found</p>
                 </div>
               </div>
             )}
