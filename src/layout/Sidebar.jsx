@@ -56,7 +56,7 @@ const Sidebar = ({ collapsed }) => {
 
   return (
     <div className={`sidebar-container ${collapsed ? "collapsed" : ""}`}>
-      <div className="sidebar bg-card " style={{ height: "105vh" }}>
+      <div className="sidebar bg-card" style={{ height: "105vh" }}>
         <ul className="menu">
           {permissions
             .filter((p) => p.canView === "1") // ✅ only visible items

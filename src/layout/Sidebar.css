@@ -19,25 +19,12 @@
   .sidebar-container.collapsed {
     width: 0px;
   }
-
-  .sidebar-container.collapsed {
-    width: 0px;
-  }
 }
 
 @media (min-width: 375px) and (max-width: 768px) {
   .sidebar-container.collapsed {
     width: 0px;
   }
-
-  .sidebar-container.collapsed {
-    width: 0px;
-  }
-}
-
-.sidebar-container.collapsed .menu .menu-text {
-  opacity: 0;
-  visibility: hidden;
 }
 
 .sidebar {
@@ -53,7 +40,7 @@
 .menu-item {
   margin-bottom: 10px;
   border-radius: 12px;
-  font-size: 15px; /* Changed from 19px to 15px */
+  font-size: 15px;
   font-weight: 700;
 }
 
@@ -61,17 +48,48 @@
   display: flex;
   align-items: center;
   padding: 10px;
-  gap: 8px;
   text-decoration: none;
   color: white;
   cursor: pointer;
   transition: background 0.3s ease;
-  font-size: 15px; /* Added font-size */
+  font-size: 15px;
+}
+
+/* आइकन के लिए निश्चित चौड़ाई और संरेखण */
+.menu-link i {
+  width: 24px; /* आइकन के लिए निश्चित चौड़ाई */
+  text-align: center;
+  margin-right: 8px;
+  transition: margin 0.3s ease;
 }
 
 .menu-text {
   margin-left: 10px;
-  font-size: 15px; /* Added font-size */
+  font-size: 15px;
+  white-space: nowrap;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* साइडबार कोलैप्स होने पर टेक्स्ट छिपाएं */
+.sidebar-container.collapsed .menu-text {
+  opacity: 0;
+  visibility: hidden;
+  width: 0;
+  margin-left: 0;
+}
+
+/* साइडबार कोलैप्स होने पर आइकन को केंद्रित करें */
+.sidebar-container.collapsed .menu-link {
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.sidebar-container.collapsed .menu-link i {
+  margin-right: 0;
+  /* आइकन की स्थिति को स्थिर रखने के लिए */
+  position: relative;
+  left: 0;
+  transform: none;
 }
 
 .submenu {
@@ -90,7 +108,7 @@
 .submenu.expanded {
   max-height: 410px;
   visibility: visible;
-  font-size: 15px; /* Changed from 17px to 15px */
+  font-size: 15px;
   background-color: #fff9f1;
   font-weight: 700;
   padding-left: 10px;
@@ -98,23 +116,20 @@
 
 .submenu-item i {
   padding: 0 5px;
-  font-size: 15px; /* Added font-size */
+  font-size: 15px;
 }
 
 .submenu-item {
   padding: 10px 0;
   cursor: pointer;
-  font-size: 15px; /* Added font-size */
-}
-
-.submenu-item {
+  font-size: 15px;
   color: #578E7E;
 }
 
 .submenu-arrow {
   margin-left: auto;
   transition: transform 0.3s ease;
-  font-size: 15px; /* Added font-size */
+  font-size: 15px;
 }
 
 .submenu-arrow.rotated {
@@ -144,5 +159,10 @@
   color: white;
   border-radius: 12px;
   padding-left: 20px;
-  font-size: 15px; /* Added font-size */
+  font-size: 15px;
+}
+
+/* साइडबार कोलैप्स होने पर सबमेन्यू छिपाएं */
+.sidebar-container.collapsed .submenu {
+  display: none;
 }

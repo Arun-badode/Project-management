@@ -991,7 +991,7 @@ const handleReassignSubmit = async () => {
                                     </table>
 
                                     {/* Input area with Save and Clear buttons - matching the screenshot */}
-                                    <div className="container mt-4">
+                                    <div className=" mt-4">
                                       <div className="card" style={{ backgroundColor: '#1a365d', color: 'white' }}>
                                         <div className="card-body">
                                           <h5 className="card-title mb-4">QC Details</h5>

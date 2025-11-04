@@ -8,6 +8,10 @@ import CreateNewProject from "../Project/CreateNewProject";
 import EditModal from "./EditModal";
 import BASE_URL from "../../../config";
 import useSyncScroll from "../Hooks/useSyncScroll";
+import { FiChevronLeft as ChevronLeft, FiChevronRight as ChevronRight } from "react-icons/fi";
+import ReactDOM from "react-dom";
+
+
 
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
@@ -38,7 +42,9 @@ const ActiveProject = () => {
   const mainTableContainerRef = useRef(null);
   const filesTableContainerRef = useRef(null);
   const fakeScrollbarRef = useRef(null);
-  const isSyncingScroll = useRef(false); // Add this ref at the top with other refs
+  const isSyncingScroll = useRef(false);
+  const datePickerInputRef = useRef(null);
+  const [dropdownPos, setDropdownPos] = useState(null); // Add this ref at the top with other refs
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -200,6 +206,113 @@ const ActiveProject = () => {
 
   // Store project files data
   const [projectFiles, setProjectFiles] = useState({});
+  // State variables for the custom date time picker
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date().getDate());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedHour, setSelectedHour] = useState(new Date().getHours() % 12 || 12);
+  const [selectedMinute, setSelectedMinute] = useState(new Date().getMinutes());
+  const [isAM, setIsAM] = useState(new Date().getHours() < 12);
+
+  // Month names
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  // Weekday names
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  // Function to format the selected date and time for display
+  const formatDateTime = () => {
+    if (!readyForQcDueInput) return "";
+
+    const date = new Date(readyForQcDueInput);
+    return date.toLocaleString();
+  };
+
+  // Function to format the selected date and time for the input value
+  const formatSelectedDateTime = () => {
+    // Convert 12-hour format to 24-hour format
+    const hour24 = isAM ? (selectedHour === 12 ? 0 : selectedHour) : (selectedHour === 12 ? 12 : selectedHour + 12);
+
+    // Create a new Date object with the selected values
+    const date = new Date(selectedYear, selectedMonth, selectedDate, hour24, selectedMinute);
+
+    // Format as datetime-local string (YYYY-MM-DDTHH:mm)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  // Function to handle previous month navigation
+  const handlePrevMonth = () => {
+    if (selectedMonth === 0) {
+      setSelectedMonth(11);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  };
+
+  // Function to handle next month navigation
+  const handleNextMonth = () => {
+    if (selectedMonth === 11) {
+      setSelectedMonth(0);
+      setSelectedYear(selectedYear + 1);
+    } else {
+      setSelectedMonth(selectedMonth + 1);
+    }
+  };
+
+  // Function to generate calendar days
+  const generateCalendarDays = () => {
+    const days = [];
+
+    // Get the first day of the month
+    const firstDay = new Date(selectedYear, selectedMonth, 1).getDay();
+
+    // Get the number of days in the month
+    const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+
+    // Get the number of days in the previous month
+    const daysInPrevMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+
+    // Add days from the previous month
+    for (let i = firstDay - 1; i >= 0; i--) {
+      days.push({
+        day: daysInPrevMonth - i,
+        isCurrentMonth: false
+      });
+    }
+
+    // Add days from the current month
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push({
+        day: i,
+        isCurrentMonth: true
+      });
+    }
+
+    // Add days from the next month to fill the grid
+    const totalCells = 42; // 6 rows x 7 days
+    const remainingCells = totalCells - days.length;
+    for (let i = 1; i <= remainingCells; i++) {
+      days.push({
+        day: i,
+        isCurrentMonth: false
+      });
+    }
+
+    return days;
+  };
+
+  const calendarDays = generateCalendarDays();
 
   const statuses = [
     { key: "allstatus", label: "All Status" },
@@ -936,18 +1049,18 @@ const ActiveProject = () => {
   };
 
   // Function to format date with time
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-      day: '2-digit',
-      month: '2-digit',
-      year: '2-digit'
-    });
-  };
+  // const formatDateTime = (dateString) => {
+  //   if (!dateString) return '';
+  //   const date = new Date(dateString);
+  //   return date.toLocaleString('en-GB', {
+  //     hour: '2-digit',
+  //     minute: '2-digit',
+  //     hour12: true,
+  //     day: '2-digit',
+  //     month: '2-digit',
+  //     year: '2-digit'
+  //   });
+  // };
 
   // Function to format cost
   const formatCost = (cost, currency) => {
@@ -1173,410 +1286,575 @@ const ActiveProject = () => {
 
       <div className="card">
         {/* Projects Table */}
-          <div
-            ref={fakeScrollbarRef1}
-            style={{
-              overflowX: "auto",
-              overflowY: "hidden",
-              height: 16,
-              position: "fixed",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              zIndex: 1050,
-            }}
+        <div
+          ref={fakeScrollbarRef1}
+          style={{
+            overflowX: "auto",
+            overflowY: "hidden",
+            height: 16,
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1050,
+          }}
+        >
+          <div style={{ width: "2500px", height: 1 }} />
+        </div>
+        <div className="table-responsive"
+          ref={scrollContainerRef1}
+          style={{
+            maxHeight: "500px",
+            overflowX: "auto",
+            scrollbarWidth: "none", // Firefox
+            msOverflowStyle: "none", // IE/Edge
+          }}>
+          <table
+            className="table-gradient-bg align-middle mt-0 table table-bordered table-hover"
+            style={{ minWidth: "900px" }} // <-- Increase this value as per total columns width
           >
-            <div style={{ width: "2500px", height: 1 }} />
-          </div>
-          <div className="table-responsive"
-            ref={scrollContainerRef1}
-            style={{
-              maxHeight: "500px",
-              overflowX: "auto",
-              scrollbarWidth: "none", // Firefox
-              msOverflowStyle: "none", // IE/Edge
-            }}>
-            <table
-              className="table-gradient-bg align-middle mt-0 table table-bordered table-hover"
-              style={{ minWidth: "900px" }} // <-- Increase this value as per total columns width
+            <thead
+              className="table-gradient-bg table"
+              style={{
+                position: "sticky",
+                top: "0",
+                zIndex: "10",
+                backgroundColor: "#fff",
+              }}
             >
-              <thead
-                className="table-gradient-bg table"
-                style={{
-                  position: "sticky",
-                  top: "0",
-                  zIndex: "10",
-                  backgroundColor: "#fff",
-                }}
-              >
-                <tr className="text-center">
-                  <th>S. No.</th>
-                  <th>Project Title</th>
-                  <th >Client</th>
-                  <th>Country</th>
-                  <th>Project Manager</th>
-                  <th >Task</th>
-                  <th >Languages</th>
-                  <th >Application</th>
-                  <th >Total Pages</th>
-                  <th >Received Date</th>
-                  <th >Estimated Hrs</th>
-                  <th >Actual Hrs</th>
-                  <th>Efficiency</th>
-                  <th >Deadline</th>
-                  <th >Ready For QC Deadline</th>
-                  <th >QC Hrs</th>
-                  <th >QC Due Date</th>
-                  <th >Status</th>
-                  <th>Progress</th>
-                  <th>Cost</th>
-                  <th >Cost in INR</th>
-                  <th >Actions</th>
-                </tr>
-              </thead>
-              <tbody   >
-                {filteredProjects.length > 0 ? (
-                  filteredProjects.map((project, index) => (
-                    <React.Fragment key={project.id}>
-                      <tr
-                        className={
-                          expandedRow === project.id
-                            ? "table-active text-center"
-                            : ""
-                        }
-                      >
-                        <td>{index + 1}</td>
-                        <td title={project.projectTitle}>{truncateText(project.projectTitle, 80)}</td>
-                        <td title={project.clientName}>{truncateText(project.clientName, 12)}</td>
-                        <td title={project.country}>{truncateText(project.country, 3)}</td>
-                        <td title={project.projectManagerName}>{truncateText(project.projectManagerName, 16)}</td>
-                        <td title={project.task_name}>{truncateText(project.task_name, 16)}</td>
-                        <td title={project.language_name}>{truncateText(project.language_name, 16)}</td>
-                        <td title={project.application_name}>{truncateText(project.application_name, 16)}</td>
-                        <td>{project.totalPagesLang}</td>
-                        <td>{formatDate(project.receiveDate)}</td>
-                        <td>{project.estimatedHours}</td>
-                        <td>{project.actualHours}</td>
-                        <td>{project.efficiency}</td>
-                        <td>{formatDateTime(project.deadline)}</td>
-                        <td>{formatDateTime(project.readyQCDeadline)}</td>
-                        <td>{project.qcHrs}</td>
-                        <td>{formatDateTime(project.qcDueDate)}</td>
-                        <td>{truncateText(project.status, 15)}</td>
-                        <td>
+              <tr className="text-center">
+                <th>S. No.</th>
+                <th>Project Title</th>
+                <th >Client</th>
+                <th>Country</th>
+                <th>Project Manager</th>
+                <th >Task</th>
+                <th >Languages</th>
+                <th >Application</th>
+                <th >Total Pages</th>
+                <th >Received Date</th>
+                <th >Estimated Hrs</th>
+                <th >Actual Hrs</th>
+                <th>Efficiency</th>
+                <th >Deadline</th>
+                <th >Ready For QC Deadline</th>
+                <th >QC Hrs</th>
+                <th >QC Due Date</th>
+                <th >Status</th>
+                <th>Progress</th>
+                <th>Cost</th>
+                <th >Cost in INR</th>
+                <th >Actions</th>
+              </tr>
+            </thead>
+            <tbody   >
+              {filteredProjects.length > 0 ? (
+                filteredProjects.map((project, index) => (
+                  <React.Fragment key={project.id}>
+                    <tr
+                      className={
+                        expandedRow === project.id
+                          ? "table-active text-center"
+                          : ""
+                      }
+                    >
+                      <td>{index + 1}</td>
+                      <td title={project.projectTitle}>{truncateText(project.projectTitle, 80)}</td>
+                      <td title={project.clientName}>{truncateText(project.clientName, 12)}</td>
+                      <td title={project.country}>{truncateText(project.country, 3)}</td>
+                      <td title={project.projectManagerName}>{truncateText(project.projectManagerName, 16)}</td>
+                      <td title={project.task_name}>{truncateText(project.task_name, 16)}</td>
+                      <td title={project.language_name}>{truncateText(project.language_name, 16)}</td>
+                      <td title={project.application_name}>{truncateText(project.application_name, 16)}</td>
+                      <td>{project.totalPagesLang}</td>
+                      <td>{formatDate(project.receiveDate)}</td>
+                      <td>{project.estimatedHours}</td>
+                      <td>{project.actualHours}</td>
+                      <td>{project.efficiency}</td>
+                      <td>{formatDateTime(project.deadline)}</td>
+                      <td>{formatDateTime(project.readyQCDeadline)}</td>
+                      <td>{project.qcHrs}</td>
+                      <td>{formatDateTime(project.qcDueDate)}</td>
+                      <td>{truncateText(project.status, 15)}</td>
+                      <td>
+                        <div
+                          className="progress cursor-pointer"
+                          style={{ height: "24px" }}
+                          onClick={() => handleViewProject(project)}
+                        >
                           <div
-                            className="progress cursor-pointer"
-                            style={{ height: "24px" }}
+                            className={`progress-bar 
+                            ${project.progress < 30
+                                ? "bg-danger"
+                                : project.progress < 70
+                                  ? "bg-warning"
+                                  : "bg-success"
+                              }`}
+                            role="progressbar"
+                            style={{ width: `${project.progress}%` }}
+                            aria-valuenow={project.progress}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                          >
+                            {project.progress}%
+                          </div>
+                        </div>
+                      </td>
+                      <td>{formatCost(project.totalCost, project.currency)}</td>
+                      <td>{formatCost(project.inrCost, "INR")}</td>
+                      <td>
+                        <div className="d-flex gap-2">
+                          <button
+                            className="btn btn-sm btn-primary"
                             onClick={() => handleViewProject(project)}
                           >
-                            <div
-                              className={`progress-bar 
-                            ${project.progress < 30
-                                  ? "bg-danger"
-                                  : project.progress < 70
-                                    ? "bg-warning"
-                                    : "bg-success"
+                            <i
+                              className={`fas ${expandedRow === project.id
+                                ? "fa-chevron-up"
+                                : "fa-eye"
                                 }`}
-                              role="progressbar"
-                              style={{ width: `${project.progress}%` }}
-                              aria-valuenow={project.progress}
-                              aria-valuemin={0}
-                              aria-valuemax={100}
-                            >
-                              {project.progress}%
-                            </div>
-                          </div>
-                        </td>
-                        <td>{formatCost(project.totalCost, project.currency)}</td>
-                        <td>{formatCost(project.inrCost, "INR")}</td>
-                        <td>
-                          <div className="d-flex gap-2">
+                            ></i>
+                          </button>
+                          {UpdateProjectPermission === 1 && <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => handleEditProject(project)}
+                          >
+                            <i className="fas fa-edit"></i>
+                          </button>}
+                          {project.progress === 100 && (
                             <button
-                              className="btn btn-sm btn-primary"
-                              onClick={() => handleViewProject(project)}
+                              className="btn btn-sm btn-success"
+                              onClick={() => handleMarkComplete(project.id)}
                             >
-                              <i
-                                className={`fas ${expandedRow === project.id
-                                  ? "fa-chevron-up"
-                                  : "fa-eye"
-                                  }`}
-                              ></i>
+                              <i className="fas fa-check"></i>
                             </button>
-                            {UpdateProjectPermission === 1 && <button
-                              className="btn btn-sm btn-secondary"
-                              onClick={() => handleEditProject(project)}
-                            >
-                              <i className="fas fa-edit"></i>
-                            </button>}
-                            {project.progress === 100 && (
-                              <button
-                                className="btn btn-sm btn-success"
-                                onClick={() => handleMarkComplete(project.id)}
-                              >
-                                <i className="fas fa-check"></i>
-                              </button>
+                          )}
+                          {DeleteProjectPermission === 1 && <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleDeleteProject(project.id)}
+                          >
+                            <i className="fas fa-trash"></i>
+                          </button>}
+                        </div>
+                      </td>
+                    </tr>
+
+                    {expandedRow === project.id && (
+                      <tr>
+                        <td colSpan={21} className="p-0 border-top-0">
+                          <div className="p-4">
+                            {/* Unsaved Changes Warning */}
+                            {hasUnsavedChanges && (
+                              <div className="alert alert-warning mb-3">
+                                <i className="fas fa-exclamation-triangle me-2"></i>
+                                You have unsaved changes. Please save or discard them.
+                              </div>
                             )}
-                            {DeleteProjectPermission === 1 && <button
-                              className="btn btn-sm btn-danger"
-                              onClick={() => handleDeleteProject(project.id)}
-                            >
-                              <i className="fas fa-trash"></i>
-                            </button>}
+
+                            {/* Project Files Header */}
+                            <div className="mb-4">
+                              <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h5 className="mb-0">Project Files</h5>
+                                {selectedFiles.length > 0 && (
+                                  <span className="badge bg-primary">
+                                    {selectedFiles.length} files selected
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Files Table */}
+                              <div
+                                className="table-responsive"
+                                style={{
+                                  maxHeight: "300px",
+                                  overflowX: "auto",
+                                  scrollbarWidth: "none",
+                                  msOverflowStyle: "none",
+                                }}
+                                ref={filesTableContainerRef}
+                              >
+                                <table className="table table-sm table-striped table-hover" style={{ minWidth: "1300px" }}>
+                                  <thead>
+                                    <tr className="text-center">
+                                      <th>
+                                        <input type="checkbox" />
+                                      </th>
+                                      <th>File Name</th>
+                                      <th>Pages</th>
+                                      <th>Language</th>
+                                      <th>Application</th>
+                                      <th>Handler</th>
+                                      <th>QA Reviewer</th>
+                                      <th>Status</th>
+                                      <th>Preview</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {allFiles
+                                      .filter((file) => file.projectId === project.id)
+                                      .map((file) => (
+                                        <tr key={file.id}>
+                                          <td>
+                                            <input
+                                              type="checkbox"
+                                              className="form-check-input"
+                                              checked={selectedFiles.some((f) => f.id === file.id)}
+                                              onChange={() => toggleFileSelection(file)}
+                                            />
+                                          </td>
+                                          <td>{file.fileName}</td>
+                                          <td>{file.pages}</td>
+                                          <td>{file.languageName}</td>
+                                          <td>{file.applicationName}</td>
+                                          <td>
+                                            <select
+                                              className="form-select form-select-sm"
+                                              value={fileHandlers[file.id] || ""}
+                                              onChange={(e) => handleHandlerChange(file.id, e.target.value)}
+                                            >
+                                              <option value="">Not Assigned</option>
+                                              {members && members.length > 0 ? (
+                                                members.map((member) => (
+                                                  <option key={member.id} value={member.fullName}>
+                                                    {member.fullName}
+                                                  </option>
+                                                ))
+                                              ) : (
+                                                <option disabled>Loading members...</option>
+                                              )}
+                                            </select>
+                                          </td>
+                                          <td>
+                                            <select className="form-select form-select-sm">
+                                              <option value="">Not Assigned</option>
+                                              <option value="Sarah Williams">Sarah Williams</option>
+                                              <option value="David Brown">David Brown</option>
+                                              <option value="Emily Davis">Emily Davis</option>
+                                            </select>
+                                          </td>
+                                          <td>{file.status || "Pending"}</td>
+                                          <td>
+                                            {file.imageUrl ? (
+                                              <img
+                                                src={file.imageUrl}
+                                                alt={file.fileName}
+                                                style={{
+                                                  width: "60px",
+                                                  height: "40px",
+                                                  objectFit: "cover",
+                                                }}
+                                              />
+                                            ) : (
+                                              <span>No Preview</span>
+                                            )}
+                                          </td>
+                                        </tr>
+                                      ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+
+                            {/* Footer Row Controls */}
+                            <div className="row g-3 align-items-start mb-3">
+                              {/* Ready for QC Due */}
+                              <div className="col-12 col-sm-6 col-md-3">
+                                <label className="form-label">
+                                  Ready for QC Due <span className="text-danger">*</span>
+                                </label>
+
+                                {/* Custom Date Time Picker */}
+                                <div className="max-w-md mx-auto">
+                                  <div className="relative">
+                                    <input
+                                      ref={datePickerInputRef}
+                                      type="text"
+                                      value={formatDateTime()}
+                                      readOnly
+                                      onClick={() => {
+                                        if (!isOpen && datePickerInputRef.current) {
+                                          const rect = datePickerInputRef.current.getBoundingClientRect();
+                                          setDropdownPos({
+                                            top: rect.bottom + window.scrollY,
+                                            left: rect.left + window.scrollX,
+                                            width: rect.width,
+                                          });
+                                        }
+                                        setIsOpen((prev) => !prev);
+                                      }}
+                                      className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer form-control"
+                                      placeholder="Select date and time"
+                                    />
+                                  </div>
+
+                                  {isOpen && dropdownPos &&
+                                    ReactDOM.createPortal(
+                                      <div
+                                        className="calendar-dropdown"
+                                        style={{
+                                          position: "absolute",
+                                          top: dropdownPos.top,
+                                          left: dropdownPos.left,
+                                          zIndex: 2000,
+                                          width: dropdownPos.width,
+                                        }}
+                                      >
+                                        <div className="time-display">
+                                          <div className="time">
+                                            {selectedHour.toString().padStart(2, "0")}:
+                                            {selectedMinute.toString().padStart(2, "0")}
+                                          </div>
+                                          <div className="period">{isAM ? "AM" : "PM"}</div>
+                                          <div className="date">
+                                            {months[selectedMonth].substring(0, 3)}, {selectedYear}
+                                          </div>
+                                        </div>
+
+                                        <div className="time-calendar-container">
+                                          <div className="time-selector">
+                                            <div className="time-column">
+                                              <div className="time-column-label">Hour</div>
+                                              <div className="time-scroll">
+                                                <div className="time-options">
+                                                  {[
+                                                    12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+                                                  ].map((hour) => (
+                                                    <button
+                                                      key={hour}
+                                                      onClick={() => setSelectedHour(hour)}
+                                                      className={`time-option ${selectedHour === hour ? "selected-hour" : ""}`}
+                                                    >
+                                                      {hour.toString().padStart(2, "0")}
+                                                    </button>
+                                                  ))}
+                                                </div>
+                                              </div>
+                                            </div>
+
+                                            <div className="time-column">
+                                              <div className="time-column-label">Min</div>
+                                              <div className="time-scroll">
+                                                <div className="time-options">
+                                                  {[0, 15, 30, 45].map((minute) => (
+                                                    <button
+                                                      key={minute}
+                                                      onClick={() => setSelectedMinute(minute)}
+                                                      className={`time-option ${selectedMinute === minute ? "selected-minute" : ""}`}
+                                                    >
+                                                      {minute.toString().padStart(2, "0")}
+                                                    </button>
+                                                  ))}
+                                                </div>
+                                              </div>
+                                            </div>
+
+                                            <div className="time-column">
+                                              <div className="time-column-label">Period</div>
+                                              <div className="period-options">
+                                                <button onClick={() => setIsAM(true)} className={`period-option ${isAM ? "selected" : ""}`}>
+                                                  AM
+                                                </button>
+                                                <button onClick={() => setIsAM(false)} className={`period-option ${!isAM ? "selected" : ""}`}>
+                                                  PM
+                                                </button>
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          <div className="calendar-section">
+                                            <div className="month-nav">
+                                              <button onClick={handlePrevMonth}>
+                                                <ChevronLeft size={20} />
+                                              </button>
+                                              <h3>
+                                                {months[selectedMonth]}, {selectedYear}
+                                              </h3>
+                                              <button onClick={handleNextMonth}>
+                                                <ChevronRight size={20} />
+                                              </button>
+                                            </div>
+
+                                            <div className="weekdays">
+                                              {weekDays.map((day) => (
+                                                <div key={day} className="weekday">
+                                                  {day}
+                                                </div>
+                                              ))}
+                                            </div>
+
+                                            <div className="calendar-grid">
+                                              {calendarDays.map((dayObj, index) => (
+                                                <button
+                                                  key={index}
+                                                  onClick={() => dayObj.isCurrentMonth && setSelectedDate(dayObj.day)}
+                                                  className={`calendar-day ${dayObj.isCurrentMonth ? (selectedDate === dayObj.day ? "current-month selected" : "current-month") : "other-month"}`}
+                                                >
+                                                  {dayObj.day}
+                                                </button>
+                                              ))}
+                                            </div>
+
+                                            <div className="action-buttons">
+                                              <button
+                                                onClick={() => {
+                                                  setSelectedDate(new Date().getDate());
+                                                  setSelectedMonth(new Date().getMonth());
+                                                  setSelectedYear(new Date().getFullYear());
+                                                }}
+                                                className="action-button"
+                                              >
+                                                Clear
+                                              </button>
+                                              <button
+                                                onClick={() => {
+                                                  const today = new Date();
+                                                  setSelectedDate(today.getDate());
+                                                  setSelectedMonth(today.getMonth());
+                                                  setSelectedYear(today.getFullYear());
+                                                }}
+                                                className="action-button"
+                                              >
+                                                Today
+                                              </button>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <div className="done-section">
+                                          <button
+                                            onClick={() => {
+                                              const formattedDateTime = formatSelectedDateTime();
+                                              setReadyForQcDueInput(formattedDateTime);
+                                              setHasUnsavedChanges(true);
+                                              setIsOpen(false);
+                                            }}
+                                            className="done-button"
+                                          >
+                                            Done
+                                          </button>
+                                        </div>
+                                      </div>,
+                                      document.body
+                                    )}
+                                </div>
+
+                                {qcDueDelay && (
+                                  <small
+                                    className={`text-${qcDueDelay.includes("Delayed") ? "danger" : "success"}`}
+                                  >
+                                    {qcDueDelay}
+                                  </small>
+                                )}
+                              </div>
+
+                              {/* QC Allocated Hours */}
+                              <div className="col-12 col-sm-6 col-md-2">
+                                <label className="form-label">
+                                  QC Allocated Hours <span className="text-danger">*</span>
+                                </label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="0.25"
+                                  className="form-control"
+                                  placeholder="0"
+                                  value={qcAllocatedHours}
+                                  onChange={(e) => {
+                                    setQcAllocatedHours(e.target.value);
+                                    setHasUnsavedChanges(true);
+                                  }}
+                                  required
+                                />
+                                <div className="form-text">(in multiple of 0.25 only)</div>
+                              </div>
+
+                              {/* QC Due */}
+                              <div className="col-12 col-sm-6 col-md-2">
+                                <label className="form-label">QC Due</label>
+                                <input
+                                  type="text"
+                                  className="form-control"
+                                  placeholder="--"
+                                  value={calculateQCDue(readyForQcDueInput, qcAllocatedHours)}
+                                  disabled
+                                />
+                              </div>
+
+                              {/* Priority */}
+                              <div className="col-12 col-sm-6 col-md-2">
+                                <label className="form-label">Priority</label>
+                                <select
+                                  className="form-select"
+                                  value={priorityAll}
+                                  onChange={(e) => {
+                                    setPriorityAll(e.target.value);
+                                    setHasUnsavedChanges(true);
+                                  }}
+                                >
+                                  <option value="Low">Low</option>
+                                  <option value="Mid">Mid</option>
+                                  <option value="High">High</option>
+                                </select>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="col-12 col-md-3 d-flex flex-column flex-md-row justify-content-md-end align-items-stretch gap-2">
+                                <button
+                                  className="btn btn-success w-100"
+                                  onClick={handleUpdateProjectFiles}
+                                  disabled={isUpdating || !readyForQcDueInput || !qcAllocatedHours}
+                                >
+                                  {isUpdating ? (
+                                    <>
+                                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                      Saving...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <i className="fas fa-save me-2"></i>
+                                      Save
+                                    </>
+                                  )}
+                                </button>
+                                <button
+                                  className="btn btn-secondary w-100"
+                                  onClick={handleCloseProjectView}
+                                  disabled={isUpdating}
+                                >
+                                  <i className="fas fa-times me-2"></i>
+                                  Close
+                                </button>
+                              </div>
+                            </div>
+
+
+                            {/* Additional Info Section */}
+                            {hasUnsavedChanges && (
+                              <div className="row">
+                                <div className="col-12">
+                                  <div className="alert alert-info">
+                                    <i className="fas fa-info-circle me-2"></i>
+                                    <strong>Note:</strong> Make sure to save your changes before closing or switching to another project.
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </td>
                       </tr>
-
-                      {expandedRow === project.id && (
-                        <tr>
-                          <td colSpan={21} className="p-0 border-top-0">
-                            <div className="p-4">
-                              {/* Unsaved Changes Warning */}
-                              {hasUnsavedChanges && (
-                                <div className="alert alert-warning mb-3">
-                                  <i className="fas fa-exclamation-triangle me-2"></i>
-                                  You have unsaved changes. Please save or discard them.
-                                </div>
-                              )}
-
-                              {/* Project Files Header */}
-                              <div className="mb-4">
-                                <div className="d-flex justify-content-between align-items-center mb-3">
-                                  <h5 className="mb-0">Project Files</h5>
-                                  {selectedFiles.length > 0 && (
-                                    <span className="badge bg-primary">
-                                      {selectedFiles.length} files selected
-                                    </span>
-                                  )}
-                                </div>
-
-                                {/* Files Table */}
-                                <div
-                                  className="table-responsive"
-                                  style={{
-                                    maxHeight: "300px",
-                                    overflowX: "auto",
-                                    scrollbarWidth: "none",
-                                    msOverflowStyle: "none",
-                                  }}
-                                  ref={filesTableContainerRef}
-                                >
-                                  <table className="table table-sm table-striped table-hover" style={{ minWidth: "1300px" }}>
-                                    <thead>
-                                      <tr className="text-center">
-                                        <th>
-                                          <input type="checkbox" />
-                                        </th>
-                                        <th>File Name</th>
-                                        <th>Pages</th>
-                                        <th>Language</th>
-                                        <th>Application</th>
-                                        <th>Handler</th>
-                                        <th>QA Reviewer</th>
-                                        <th>Status</th>
-                                        <th>Preview</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {allFiles
-                                        .filter((file) => file.projectId === project.id)
-                                        .map((file) => (
-                                          <tr key={file.id}>
-                                            <td>
-                                              <input
-                                                type="checkbox"
-                                                className="form-check-input"
-                                                checked={selectedFiles.some((f) => f.id === file.id)}
-                                                onChange={() => toggleFileSelection(file)}
-                                              />
-                                            </td>
-                                            <td>{file.fileName}</td>
-                                            <td>{file.pages}</td>
-                                            <td>{file.languageName}</td>
-                                            <td>{file.applicationName}</td>
-                                            <td>
-                                              <select
-                                                className="form-select form-select-sm"
-                                                value={fileHandlers[file.id] || ""}
-                                                onChange={(e) => handleHandlerChange(file.id, e.target.value)}
-                                              >
-                                                <option value="">Not Assigned</option>
-                                                {members && members.length > 0 ? (
-                                                  members.map((member) => (
-                                                    <option key={member.id} value={member.fullName}>
-                                                      {member.fullName}
-                                                    </option>
-                                                  ))
-                                                ) : (
-                                                  <option disabled>Loading members...</option>
-                                                )}
-                                              </select>
-                                            </td>
-                                            <td>
-                                              <select className="form-select form-select-sm">
-                                                <option value="">Not Assigned</option>
-                                                <option value="Sarah Williams">Sarah Williams</option>
-                                                <option value="David Brown">David Brown</option>
-                                                <option value="Emily Davis">Emily Davis</option>
-                                              </select>
-                                            </td>
-                                            <td>{file.status || "Pending"}</td>
-                                            <td>
-                                              {file.imageUrl ? (
-                                                <img
-                                                  src={file.imageUrl}
-                                                  alt={file.fileName}
-                                                  style={{
-                                                    width: "60px",
-                                                    height: "40px",
-                                                    objectFit: "cover",
-                                                  }}
-                                                />
-                                              ) : (
-                                                <span>No Preview</span>
-                                              )}
-                                            </td>
-                                          </tr>
-                                        ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </div>
-
-                              {/* Footer Row Controls */}
-                              <div className="row g-3 align-items-start mb-3">
-                                {/* Ready for QC Due */}
-                                <div className="col-12 col-sm-6 col-md-3">
-                                  <label className="form-label">
-                                    Ready for QC Due <span className="text-danger">*</span>
-                                  </label>
-                                  <input
-                                    type="datetime-local"
-                                    className="form-control"
-                                    value={readyForQcDueInput}
-                                    onChange={(e) => {
-                                      setReadyForQcDueInput(e.target.value);
-                                      setHasUnsavedChanges(true);
-                                    }}
-                                    required
-                                  />
-                                  {qcDueDelay && (
-                                    <small
-                                      className={`text-${qcDueDelay.includes("Delayed") ? "danger" : "success"
-                                        }`}
-                                    >
-                                      {qcDueDelay}
-                                    </small>
-                                  )}
-                                </div>
-
-                                {/* QC Allocated Hours */}
-                                <div className="col-12 col-sm-6 col-md-2">
-                                  <label className="form-label">
-                                    QC Allocated Hours <span className="text-danger">*</span>
-                                  </label>
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    step="0.25"
-                                    className="form-control"
-                                    placeholder="0"
-                                    value={qcAllocatedHours}
-                                    onChange={(e) => {
-                                      setQcAllocatedHours(e.target.value);
-                                      setHasUnsavedChanges(true);
-                                    }}
-                                    required
-                                  />
-                                  <div className="form-text">(in multiple of 0.25 only)</div>
-                                </div>
-
-                                {/* QC Due */}
-                                <div className="col-12 col-sm-6 col-md-2">
-                                  <label className="form-label">QC Due</label>
-                                  <input
-                                    type="text"
-                                    className="form-control"
-                                    placeholder="--"
-                                    value={calculateQCDue(readyForQcDueInput, qcAllocatedHours)}
-                                    disabled
-                                  />
-                                </div>
-
-                                {/* Priority */}
-                                <div className="col-12 col-sm-6 col-md-2">
-                                  <label className="form-label">Priority</label>
-                                  <select
-                                    className="form-select"
-                                    value={priorityAll}
-                                    onChange={(e) => {
-                                      setPriorityAll(e.target.value);
-                                      setHasUnsavedChanges(true);
-                                    }}
-                                  >
-                                    <option value="Low">Low</option>
-                                    <option value="Mid">Mid</option>
-                                    <option value="High">High</option>
-                                  </select>
-                                </div>
-
-                                {/* Action Buttons */}
-                                <div className="col-12 col-md-3 d-flex flex-column flex-md-row justify-content-md-end align-items-stretch gap-2">
-                                  <button
-                                    className="btn btn-success w-100"
-                                    onClick={handleUpdateProjectFiles}
-                                    disabled={isUpdating || !readyForQcDueInput || !qcAllocatedHours}
-                                  >
-                                    {isUpdating ? (
-                                      <>
-                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                        Saving...
-                                      </>
-                                    ) : (
-                                      <>
-                                        <i className="fas fa-save me-2"></i>
-                                        Save
-                                      </>
-                                    )}
-                                  </button>
-                                  <button
-                                    className="btn btn-secondary w-100"
-                                    onClick={handleCloseProjectView}
-                                    disabled={isUpdating}
-                                  >
-                                    <i className="fas fa-times me-2"></i>
-                                    Close
-                                  </button>
-                                </div>
-                              </div>
-
-
-                              {/* Additional Info Section */}
-                              {hasUnsavedChanges && (
-                                <div className="row">
-                                  <div className="col-12">
-                                    <div className="alert alert-info">
-                                      <i className="fas fa-info-circle me-2"></i>
-                                      <strong>Note:</strong> Make sure to save your changes before closing or switching to another project.
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={21} className="text-center py-4">
-                      No projects found matching your criteria
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                    )}
+                  </React.Fragment>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={21} className="text-center py-4">
+                    No projects found matching your criteria
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Fake scrollbar - positioned at the bottom of the webpage */}
