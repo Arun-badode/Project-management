@@ -3,39 +3,13 @@ import "./Setting.css";
 import axios from "axios";
 import BASE_URL from "../../../config";
 
-const initialClients = [
-  {
-    id: 1,
-    clientName: "Client Alpha Inc.",
-    country: "US",
-    currency: "USD",
-    hourlyRate: "50.00",
-    managers: "Jane Doe, John Smith",
-  },
-  {
-    id: 2,
-    clientName: "Company Beta Ltd.",
-    country: "GB",
-    currency: "GBP",
-    hourlyRate: "60.00",
-    managers: "Peter Jones",
-  },
-  {
-    id: 3,
-    clientName: "Service Gamma LLC",
-    country: "CA",
-    currency: "CAD",
-    hourlyRate: "70.00",
-    managers: "Alice Brown, Bob White",
-  },
-];
-
 export default function SettingsPage() {
   const token = localStorage.getItem("authToken");
   const [applications, setApplications] = useState([]);
   const [newapplication, setNewapplication] = useState("");
   const [projects, setProjects] = useState([]);
-  const [clients, setClients] = useState(initialClients);
+  // Initialize clients as an empty array. Data will come from the API.
+  const [clients, setClients] = useState([]);
   const [currencyOptions, setCurrencyOptions] = useState([]);
   const [countries, setCountries] = useState([]);
   const [exchangeRates, setExchangeRates] = useState({});
@@ -46,7 +20,7 @@ export default function SettingsPage() {
     country: "",
     currency: "",
     hourlyRate: "",
-    managers: "",
+    projectManagers: "",
   });
 
   useEffect(() => {
@@ -83,7 +57,7 @@ export default function SettingsPage() {
     };
 
     fetchProjects();
-  }, []);
+  }, [token]); // Added token dependency
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -109,55 +83,57 @@ export default function SettingsPage() {
     fetchCountries();
   }, []);
 
+  // Function to fetch applications
+  const fetchApplications = async () => {
+    try {
+      const res = await axios.get(
+        `${BASE_URL}application/getAllApplication`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (res.data.status) {
+        // Sort applications alphabetically
+        const sortedApplications = [...res.data.application].sort((a, b) => 
+          a.applicationName.localeCompare(b.applicationName)
+        );
+        setApplications(sortedApplications);
+      }
+    } catch (err) {
+      console.error("Failed to fetch applications:", err);
+    }
+  };
+
   // this is use effect for the fetch application list 
   useEffect(() => {
-    const fetchApplications = async () => {
-      try {
-        const res = await axios.get(
-          `${BASE_URL}application/getAllApplication`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (res.data.status) {
-          // Sort applications alphabetically
-          const sortedApplications = [...res.data.application].sort((a, b) => 
-            a.applicationName.localeCompare(b.applicationName)
-          );
-          setApplications(sortedApplications);
-        }
-      } catch (err) {
-        console.error("Failed to fetch applications:", err);
-      }
-    };
-
     fetchApplications();
-  }, []);
+  }, [token]); // Added token dependency
+
+  // Function to fetch clients
+  const fetchClients = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(
+        `${BASE_URL}client/getAllClients`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.data.data) {
+        setClients(response.data.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch clients:", error);
+    }
+  };
 
   // useeffect to fetch the clients from api 
   useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const token = localStorage.getItem("authToken");
-        const response = await axios.get(
-          `${BASE_URL}client/getAllClients`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (response.data.status) {
-          setClients(response.data.clients);
-        }
-      } catch (error) {
-        console.error("Failed to fetch clients:", error);
-      }
-    };
-
     fetchClients();
-  }, []);
+  }, []); // Empty dependency array is fine here as it reads token from inside
 
   const handleClientChange = (e) => {
     const { name, value } = e.target;
@@ -172,7 +148,7 @@ export default function SettingsPage() {
         country: selectedClient?.country || "",
         currency: selectedClient?.currency || "",
         hourlyRate: selectedClient?.hourlyRate || "",
-        managers: selectedClient?.managers || "",
+        projectManagers: selectedClient?.projectManagers || "",
       }));
     } else if (name === "country") {
       // Auto-select currency based on country
@@ -214,8 +190,9 @@ export default function SettingsPage() {
         console.log("Fetched members:", res.data.data);
 
         if (res.data.status && Array.isArray(res.data.data)) {
+          // Filter members where roleName is "Manager" or role is "2"
           const onlyManagers = res.data.data.filter(
-            (member) => member.role?.toLowerCase() === "manager"
+            (member) => member.roleName?.toLowerCase() === "manager" || member.role === "2"
           );
 
           const formatted = onlyManagers.map((manager) => ({
@@ -255,7 +232,7 @@ export default function SettingsPage() {
       if (editClientIdx !== null) {
         // Update existing client
         const response = await axios.put(
-          `${BASE_URL}client/updateClient/${clientForm.id}`,
+          `${BASE_URL}client/update/${clientForm.id}`,
           updatedClient,
           {
             headers: {
@@ -265,9 +242,8 @@ export default function SettingsPage() {
         );
 
         if (response.data.status) {
-          const updated = [...clients];
-          updated[editClientIdx] = updatedClient;
-          setClients(updated);
+          // Fetch updated clients list to ensure UI is updated
+          await fetchClients();
           setEditClientIdx(null);
         }
       } else {
@@ -283,7 +259,8 @@ export default function SettingsPage() {
         );
 
         if (response.data.status) {
-          setClients([...clients, response.data.client]);
+          // Fetch updated clients list to ensure UI is updated
+          await fetchClients();
         }
       }
 
@@ -293,7 +270,7 @@ export default function SettingsPage() {
         country: "",
         currency: "",
         hourlyRate: "",
-        managers: "",
+        projectManagers: "",
       });
     } catch (error) {
       console.error("Failed to save client:", error);
@@ -322,7 +299,9 @@ export default function SettingsPage() {
       );
 
       if (response.data.status) {
-        setClients(clients.filter((_, i) => i !== idx));
+        // Fetch updated clients list to ensure UI is updated
+        await fetchClients();
+        
         if (editClientIdx === idx) setEditClientIdx(null);
       } else {
         alert("Failed to delete client: " + (response.data.message || "Unknown error"));
@@ -348,7 +327,7 @@ export default function SettingsPage() {
   const [newTask, setNewTask] = useState("");
   const [tasks, setTasks] = useState([]);
 
-  // Fetch all tasks
+  // Function to fetch all tasks
   const fetchTasks = async () => {
     try {
       const res = await axios.get(
@@ -371,6 +350,8 @@ export default function SettingsPage() {
 
   // add task api
   const handleAddTask = async () => {
+    if (!newTask.trim()) return;
+    
     try {
       const res = await axios.post(
         `${BASE_URL}tasks/addTasks`,
@@ -381,13 +362,8 @@ export default function SettingsPage() {
       );
 
       if (res.data.status) {
-        const newAddedTask = res.data.club; // from the response
-        
-        // Add new task and sort alphabetically
-        const updatedTasks = [...tasks, newAddedTask].sort((a, b) => 
-          a.taskName.localeCompare(b.taskName)
-        );
-        setTasks(updatedTasks);
+        // Fetch updated tasks list
+        await fetchTasks();
         setNewTask(""); // clear input
       }
     } catch (err) {
@@ -397,7 +373,7 @@ export default function SettingsPage() {
 
   // handle edit task api 
   const handleEditTask = async (id, oldName) => {
-    const newTaskName = prompt("Enter new task name:", oldName);
+    const newTaskName = prompt("Edit Task Name:", oldName);
 
     if (!newTaskName || newTaskName.trim() === "" || newTaskName === oldName) return;
 
@@ -411,14 +387,8 @@ export default function SettingsPage() {
       );
 
       if (res.data.status) {
-        const updatedTask = res.data.task;
-
-        // Update task and maintain alphabetical order
-        const updatedTasks = tasks
-          .map((task) => task.id === id ? updatedTask : task)
-          .sort((a, b) => a.taskName.localeCompare(b.taskName));
-        
-        setTasks(updatedTasks);
+        // Fetch updated tasks list
+        await fetchTasks();
       }
     } catch (err) {
       console.error("Failed to update task", err);
@@ -439,7 +409,8 @@ export default function SettingsPage() {
       );
 
       if (res.data.status) {
-        setTasks((prev) => prev.filter((task) => task.id !== id));
+        // Fetch updated tasks list
+        await fetchTasks();
       } else {
         alert("Failed to delete task.");
       }
@@ -451,7 +422,34 @@ export default function SettingsPage() {
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [token]); // Added token dependency
+
+  // Function to fetch languages
+  const fetchLanguages = async () => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const res = await axios.get(
+        `${BASE_URL}language/getAlllanguage`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log("Fetched languages:", res.data.languages);
+
+      if (res.data.status && Array.isArray(res.data.languages)) {
+        // Sort languages alphabetically
+        const sortedLanguages = [...res.data.languages].sort((a, b) => 
+          a.languageName.localeCompare(b.languageName)
+        );
+        setLanguages(sortedLanguages);
+      }
+    } catch (err) {
+      console.error("Failed to fetch languages:", err);
+    }
+  };
 
   const handleAddLanguage = async () => {
     if (!newLanguage) return;
@@ -472,11 +470,8 @@ export default function SettingsPage() {
       console.log("Add language response:", res.data);
 
       if (res.data.status) {
-        // Add new language and sort alphabetically
-        const updatedLanguages = [...languages, res.data.language].sort((a, b) => 
-          a.languageName.localeCompare(b.languageName)
-        );
-        setLanguages(updatedLanguages);
+        // Fetch updated languages list
+        await fetchLanguages();
         setNewLanguage(""); // Clear the input
       } else {
         console.error("Failed to add language");
@@ -500,13 +495,8 @@ export default function SettingsPage() {
       );
 
       if (res.data.status) {
-        const addedApp = res.data.application;
-        
-        // Add new application and sort alphabetically
-        const updatedApplications = [...applications, addedApp].sort((a, b) => 
-          a.applicationName.localeCompare(b.applicationName)
-        );
-        setApplications(updatedApplications);
+        // Fetch updated applications list
+        await fetchApplications();
         setNewapplication("");
       } else {
         alert("Failed to add application.");
@@ -535,14 +525,8 @@ export default function SettingsPage() {
       );
 
       if (res.data.status) {
-        const updatedLang = res.data.language;
-
-        // Update language and maintain alphabetical order
-        const updatedLanguages = languages
-          .map((lang) => (lang.id === id ? updatedLang : lang))
-          .sort((a, b) => a.languageName.localeCompare(b.languageName));
-        
-        setLanguages(updatedLanguages);
+        // Fetch updated languages list
+        await fetchLanguages();
       } else {
         alert("Failed to update language.");
       }
@@ -568,14 +552,8 @@ export default function SettingsPage() {
       );
 
       if (res.data.status) {
-        const updatedApp = res.data.application;
-
-        // Update application and maintain alphabetical order
-        const updatedApplications = applications
-          .map((app) => (app.id === id ? updatedApp : app))
-          .sort((a, b) => a.applicationName.localeCompare(b.applicationName));
-        
-        setApplications(updatedApplications);
+        // Fetch updated applications list
+        await fetchApplications();
       } else {
         alert("Failed to update application.");
       }
@@ -594,13 +572,15 @@ export default function SettingsPage() {
       const res = await axios.delete(
         `${BASE_URL}language/deleteLanguageById/${id}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
       if (res.data.status) {
-        // Remove the deleted language from the UI
-        setLanguages((prev) => prev.filter((lang) => lang.id !== id));
+        // Fetch updated languages list
+        await fetchLanguages();
       } else {
         alert("Failed to delete the language.");
       }
@@ -619,13 +599,15 @@ export default function SettingsPage() {
       const res = await axios.delete(
         `${BASE_URL}application/deleteApplicationById/${id}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
       if (res.data.status) {
-        // Remove the deleted application from the UI
-        setApplications((prev) => prev.filter((app) => app.id !== id));
+        // Fetch updated applications list
+        await fetchApplications();
       } else {
         alert("Failed to delete the application.");
       }
@@ -644,36 +626,8 @@ export default function SettingsPage() {
 
   const [languages, setLanguages] = useState([]); // this is language state 
   useEffect(() => {
-    const fetchLanguages = async () => {
-      try {
-        const token = localStorage.getItem("authToken");
-        const res = await axios.get(
-          `${BASE_URL}language/getAlllanguage`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        console.log("Fetched languages:", res.data.languages);
-
-        if (res.data.status && Array.isArray(res.data.languages)) {
-          // Sort languages alphabetically
-          const sortedLanguages = [...res.data.languages].sort((a, b) => 
-            a.languageName.localeCompare(b.languageName)
-          );
-          setLanguages(sortedLanguages);
-        }
-      } catch (err) {
-        console.error("Failed to fetch languages:", err);
-      } finally {
-        // Optional: setLoadingLanguages(false); if you're handling loading state
-      }
-    };
-
     fetchLanguages();
-  }, []);
+  }, []); // Empty dependency array is fine here as it reads token from inside
 
   const [currencies, setCurrencies] = useState([
     { name: "USD", rate: "83" },
@@ -698,6 +652,38 @@ export default function SettingsPage() {
       });
     }
   };
+
+  // Function to handle currency editing
+  const handleEditCurrency = (index) => {
+    const currency = currencies[index];
+    setNewCurrency({
+      name: currency.name,
+      rate: currency.rate
+    });
+    handleDeleteItem(currencies, setCurrencies, index);
+  };
+
+
+  useEffect(() => {
+  const fetchConversionRates = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}settings/getConversionRates`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data.status) {
+        // Convert array to object: { "USD": "83", "EUR": "90", ... }
+        const rateMap = {};
+        res.data.rates.forEach(rate => {
+          rateMap[rate.name] = parseFloat(rate.rate);
+        });
+        setInrConversionRates(rateMap);
+      }
+    } catch (err) {
+      console.error("Failed to fetch conversion rates:", err);
+    }
+  };
+  fetchConversionRates();
+}, [token]);
 
   return (
     <div className="p-4 settings-main-unique py-4">
@@ -777,18 +763,29 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Third row */}
-          <div className="d-flex gap-2 mb-2 flex-wrap">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Project Managers (comma-separated)"
-              name="managers"
-              value={clientForm.managers}
-              onChange={handleClientChange}
-              style={{ background: "#181f3a", color: "#fff" }}
-            />
+          {/* Third row - Project Managers */}
+          <div className="row mb-3">
+            <div className="col-md-12">
+              <label className="text-white mb-2">Project Managers</label>
+              <select
+                className="form-control"
+                style={{ background: "#181f3a", color: "#fff" }}
+                name="projectManagers"
+                value={clientForm.projectManagers}
+                onChange={handleClientChange}
+              >
+                <option value="">-- Select Manager --</option>
+                {managers.map((manager) => (
+                  <option key={manager.value} value={manager.value}>
+                    {manager.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
+          {/* Fourth row - Action buttons */}
+          <div className="d-flex gap-2 mb-4">
             <button
               className="btn btn-gradient"
               onClick={handleAddOrEditClient}
@@ -800,6 +797,24 @@ export default function SettingsPage() {
                 <i className="bi bi-plus-lg"></i>
               )}
             </button>
+            {editClientIdx !== null && (
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  setEditClientIdx(null);
+                  setClientForm({
+                    id: "",
+                    clientName: "",
+                    country: "",
+                    currency: "",
+                    hourlyRate: "",
+                    managers: "",
+                  });
+                }}
+              >
+                <i className="bi bi-x-lg"></i>
+              </button>
+            )}
           </div>
 
           {/* Client List */}
@@ -833,7 +848,7 @@ export default function SettingsPage() {
                       </span>
                       <br />
                       <span className="text-white" style={{ opacity: 0.7 }}>
-                        PMs: {client?.managers}
+                        PMs: {client?.projectManagerName}
                       </span>
                     </div>
                   </div>
@@ -857,7 +872,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Manage Tasks List */}
-          <div className="mb-4">
+          <div className="mb-4 mt-4">
             <h6 className="mb-3 text-white">Manage Tasks List</h6>
             <div className="input-group mb-2">
               <input
@@ -1014,95 +1029,98 @@ export default function SettingsPage() {
           </div>
 
           {/* Currency Conversion Rates */}
-          <div className="mb-4">
-            <h6 className="mb-3 text-white">Currency Conversion Rates</h6>
-            <div className="row g-2 mb-2">
-              <div className="col-md-5">
-                <select
-                  className="form-control bg-card text-white border-secondary"
-                  value={newCurrency.name}
-                  onChange={handleCurrencyChange}
-                  style={{ background: "#181f3a", color: "#fff" }}
+         <div className="mb-4">
+  <h6 className="mb-3 text-white">Currency Conversion Rates</h6>
+  <div className="alert alert-info mb-3" style={{ background: "rgba(20,30,70,0.7)", border: "1px solid #7b2ff2" }}>
+   
+  </div>
+  <div className="row g-2 mb-2">
+    <div className="col-md-5">
+      <select
+        className="form-control bg-card text-white border-secondary"
+        value={newCurrency.name}
+        onChange={handleCurrencyChange}
+        style={{ background: "#181f3a", color: "#fff" }}
+      >
+        <option value="">-- Select Currency --</option>
+        {currencyOptions.map((currency) => (
+          <option key={currency} value={currency}>
+            {currency}
+          </option>
+        ))}
+      </select>
+    </div>
+    <div className="col-md-5">
+      <input
+        type="number"
+        step="0.01"
+        className="form-control bg-card text-white border-secondary"
+        placeholder="Rate (INR)"
+        value={newCurrency.rate}
+        onChange={(e) => setNewCurrency({...newCurrency, rate: e.target.value})}
+        style={{ background: "#181f3a", color: "#fff" }}
+      />
+    </div>
+    <div className="col-md-2">
+      <button
+        className="btn btn-gradient"
+        onClick={handleAddCurrency}
+        disabled={!newCurrency.name || !newCurrency.rate}
+      >
+        <i className="fas fa-plus me-1"></i> Add
+      </button>
+    </div>
+  </div>
+  <div className="border rounded p-2 mb-2 border-secondary table-gradient-bg"
+    style={{
+      border: "2px solid #7b2ff2",
+      borderRadius: 10,
+      background: "rgba(20,30,70,0.7)",
+      maxHeight: "400px",
+      overflowY: "auto",
+      padding: "10px",
+    }}>
+    <table className="table table-dark table-sm mb-0">
+      <thead>
+        <tr>
+          <th>Currency</th>
+          <th>Rate (INR)</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {currencies.map((currency, index) => (
+          <tr key={index}>
+            <td>{currency.name}</td>
+            <td>{currency.rate}</td>
+            <td>
+              <div className="btn-group btn-group-sm">
+                <button
+                  className="btn btn-sm btn-link text-light"
+                  onClick={() => handleEditCurrency(index)}
                 >
-                  <option value="">-- Select Currency --</option>
-                  {currencyOptions.map((currency) => (
-                    <option key={currency} value={currency}>
-                      {currency}
-                    </option>
-                  ))}
-                </select>
+                  <i className="bi bi-pencil"></i>
+                </button>
+                <button
+                  className="btn btn-outline-danger"
+                  onClick={() =>
+                    handleDeleteItem(
+                      currencies,
+                      setCurrencies,
+                      index
+                    )
+                  }
+                >
+                  <i className="fas fa-trash-alt"></i>
+                </button>
               </div>
-              <div className="col-md-5">
-                <input
-                  type="text"
-                  className="form-control bg-card text-white border-secondary"
-                  placeholder="Rate to INR"
-                  value={newCurrency.rate}
-                  readOnly
-                  style={{ background: "#181f3a", color: "#fff" }}
-                />
-              </div>
-              <div className="col-md-2">
-               <button
-              className="btn  btn-gradient"
-              onClick={handleAddCurrency}
-              disabled={!newCurrency.name || !newCurrency.rate}
-            >
-              <i className="fas fa-plus me-1"></i> 
-            </button>
-            </div>
-            </div>
-            <div className="border rounded p-2 mb-2 border-secondary table-gradient-bg"
-              style={{
-                border: "2px solid #7b2ff2",
-                borderRadius: 10,
-                background: "rgba(20,30,70,0.7)",
-                maxHeight: "400px",
-                overflowY: "auto",
-                padding: "10px",
-              }}>
-              <table className="table table-dark table-sm mb-0">
-                <thead>
-                  <tr>
-                    <th>Currency</th>
-                    <th>Rate to INR</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currencies.map((currency, index) => (
-                    <tr key={index}>
-                      <td>{currency.name}</td>
-                      <td>{currency.rate}</td>
-                      <td>
-                        <div className="btn-group btn-group-sm">
-                          <button
-                            className="btn btn-sm btn-link text-light"
-                            onClick={() => handleEditClient(index)}
-                          >
-                            <i className="bi bi-pencil"></i>
-                          </button>
-                          <button
-                            className="btn btn-outline-danger"
-                            onClick={() =>
-                              handleDeleteItem(
-                                currencies,
-                                setCurrencies,
-                                index
-                              )
-                            }
-                          >
-                            <i className="fas fa-trash-alt"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-           
-          </div>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
         </div>
       </div>
     </div>

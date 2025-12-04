@@ -1077,12 +1077,7 @@ const ShiftAllocation = () => {
           <button className="btn btn-outline-secondary">
             <i className="fas fa-file-export me-2"></i> Export
           </button>
-          <button className="btn btn-primary">
-            <i className="fas fa-save me-2"></i> Save Changes
-          </button>
-          <button className="btn btn-success">
-            <i className="fas fa-paper-plane me-2"></i> Publish Schedule
-          </button>
+        
         </div>
       </div>
 
@@ -1413,7 +1408,7 @@ const ShiftAllocation = () => {
                         />
                       </div>
                     </div>
-                    <div className="mb-3">
+                    {/* <div className="mb-3">
                       <label htmlFor="shiftType" className="form-label">
                         Shift Type
                       </label>
@@ -1428,11 +1423,11 @@ const ShiftAllocation = () => {
                         <option value="Half Day">Half Day</option>
                         <option value="Night">Night</option>
                       </select>
-                    </div>
+                    </div> */}
                   </>
                 )}
 
-                <div className="mb-3">
+                {/* <div className="mb-3">
                   <label htmlFor="notes" className="form-label">
                     Notes
                   </label>
@@ -1445,7 +1440,7 @@ const ShiftAllocation = () => {
                     value={formData.notes}
                     onChange={handleChange}
                   ></textarea>
-                </div>
+                </div> */}
               </div>
               <div className="modal-footer">
                 <button

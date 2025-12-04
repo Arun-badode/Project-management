@@ -525,7 +525,7 @@ function UserManagement({ isViewMode, isEditMode }) {
                 <th className="text-center">Team</th>
                 <th className="text-center">Role</th>
                 <th className="text-start">App Skills</th>
-                {/* <th className="text-center">Current Salary</th> */}
+                <th className="text-center">Current Salary</th>
                 <th className="text-center">Username</th>
                 <th className="text-center">Status</th>
                 <th className="text-center">Actions</th>
@@ -546,13 +546,13 @@ function UserManagement({ isViewMode, isEditMode }) {
                     <td className="text-center">{formatDate(member.doj)}</td>
                     <td className="text-center">{formatDate(member.dob)}</td>
                     <td className="text-center">{member.team}</td>
-                    <td className="text-center">{member.role}</td>
+                    <td className="text-center">{member.roleName}</td>
                     <td className="text-start">
                       {Array.isArray(member.appSkills)
                         ? member.appSkills.join(", ")
                         : member.appSkills || "N/A"}
                     </td>
-                    {/* <td className="text-center">
+                    <td className="text-center">
                       {member.currentSalary 
                         ? Number(member.currentSalary).toLocaleString('en-IN', {
                             style: 'currency',
@@ -560,7 +560,7 @@ function UserManagement({ isViewMode, isEditMode }) {
                             maximumFractionDigits: 0,
                           })
                         : "N/A"}
-                    </td> */}
+                    </td>
                     <td className="text-center">{member.username}</td>
                     <td className="text-center">
                       <span className="badge bg-success">Active</span>
@@ -779,9 +779,9 @@ function UserManagement({ isViewMode, isEditMode }) {
               disabled={isViewMode}
             >
               <option value="">Select Team</option>
-              <option value="Dev">Adobe</option>
-              <option value="QA">MS Office</option>
-              <option value="Design">QA</option>
+              <option value="Adobe">Adobe</option>
+              <option value="MS Office">MS Office</option>
+              <option value="QA">QA</option>
               
             </select>
           </div>

@@ -1048,19 +1048,7 @@ const ActiveProject = () => {
     });
   };
 
-  // Function to format date with time
-  // const formatDateTime = (dateString) => {
-  //   if (!dateString) return '';
-  //   const date = new Date(dateString);
-  //   return date.toLocaleString('en-GB', {
-  //     hour: '2-digit',
-  //     minute: '2-digit',
-  //     hour12: true,
-  //     day: '2-digit',
-  //     month: '2-digit',
-  //     year: '2-digit'
-  //   });
-  // };
+ 
 
   // Function to format cost
   const formatCost = (cost, currency) => {
@@ -1301,7 +1289,7 @@ const ActiveProject = () => {
         >
           <div style={{ width: "2500px", height: 1 }} />
         </div>
-        <div className="table-responsive"
+      <div className="table-responsive"
           ref={scrollContainerRef1}
           style={{
             maxHeight: "500px",
@@ -1323,31 +1311,31 @@ const ActiveProject = () => {
               }}
             >
               <tr className="text-center">
-                <th>S. No.</th>
-                <th>Project Title</th>
-                <th >Client</th>
-                <th>Country</th>
-                <th>Project Manager</th>
-                <th >Task</th>
-                <th >Languages</th>
-                <th >Application</th>
-                <th >Total Pages</th>
-                <th >Received Date</th>
-                <th >Estimated Hrs</th>
-                <th >Actual Hrs</th>
-                <th>Efficiency</th>
-                <th >Deadline</th>
-                <th >Ready For QC Deadline</th>
-                <th >QC Hrs</th>
-                <th >QC Due Date</th>
-                <th >Status</th>
-                <th>Progress</th>
-                <th>Cost</th>
-                <th >Cost in INR</th>
-                <th >Actions</th>
+                <th style={{ width: "4%" }}>S. No.</th>
+                <th style={{ width: "8%" }}>Project Title</th>
+                <th style={{ width: "5%" }}>Client</th>
+                <th style={{ width: "3%" }}>Country</th>
+                <th style={{ width: "8%" }}>Project Manager</th>
+                <th style={{ width: "6%" }}>Task</th>
+                <th style={{ width: "6%" }}>Languages</th>
+                <th style={{ width: "6%" }}>Application</th>
+                <th style={{ width: "4%" }}>Total Pages</th>
+                <th style={{ width: "6%" }}>Received Date</th>
+                <th style={{ width: "5%" }}>Estimated Hrs</th>
+                {/* <th style={{ width: "5%" }}>Actual Hrs</th> */}
+                {/* <th style={{ width: "5%" }}>Efficiency</th> */}
+                <th style={{ width: "7%" }}>Deadline</th>
+                <th style={{ width: "7%" }}>Ready For QC Deadline</th>
+                <th style={{ width: "3%" }}>QC Hrs</th>
+                <th style={{ width: "7%" }}>QC Due Date</th>
+                <th style={{ width: "5%" }}>Status</th>
+                <th style={{ width: "5%" }}>Progress</th>
+                <th style={{ width: "5%" }}>Cost</th>
+                {/* <th style={{ width: "6%" }}>Cost in INR</th> */}
+                <th style={{ width: "5%" }}>Actions</th>
               </tr>
             </thead>
-            <tbody   >
+            <tbody>
               {filteredProjects.length > 0 ? (
                 filteredProjects.map((project, index) => (
                   <React.Fragment key={project.id}>
@@ -1358,25 +1346,25 @@ const ActiveProject = () => {
                           : ""
                       }
                     >
-                      <td>{index + 1}</td>
-                      <td title={project.projectTitle}>{truncateText(project.projectTitle, 80)}</td>
-                      <td title={project.clientName}>{truncateText(project.clientName, 12)}</td>
-                      <td title={project.country}>{truncateText(project.country, 3)}</td>
-                      <td title={project.projectManagerName}>{truncateText(project.projectManagerName, 16)}</td>
-                      <td title={project.task_name}>{truncateText(project.task_name, 16)}</td>
-                      <td title={project.language_name}>{truncateText(project.language_name, 16)}</td>
-                      <td title={project.application_name}>{truncateText(project.application_name, 16)}</td>
-                      <td>{project.totalPagesLang}</td>
-                      <td>{formatDate(project.receiveDate)}</td>
-                      <td>{project.estimatedHours}</td>
-                      <td>{project.actualHours}</td>
-                      <td>{project.efficiency}</td>
-                      <td>{formatDateTime(project.deadline)}</td>
-                      <td>{formatDateTime(project.readyQCDeadline)}</td>
-                      <td>{project.qcHrs}</td>
-                      <td>{formatDateTime(project.qcDueDate)}</td>
-                      <td>{truncateText(project.status, 15)}</td>
-                      <td>
+                      <td style={{ width: "4%" }}>{index + 1}</td>
+                      <td style={{ width: "8%" }} title={project.projectTitle}>{truncateText(project.projectTitle, 80)}</td>
+                      <td style={{ width: "5%" }} title={project.clientName}>{truncateText(project.clientName, 12)}</td>
+                      <td style={{ width: "3%" }} title={project.country}>{truncateText(project.country, 3)}</td>
+                      <td style={{ width: "8%" }} title={project.full_name}>{truncateText(project.full_name, 16)}</td>
+                      <td style={{ width: "6%" }} title={project.task_name}>{truncateText(project.task_name, 16)}</td>
+                      <td style={{ width: "6%" }} title={project.language_name}>{truncateText(project.language_name, 16)}</td>
+                      <td style={{ width: "6%" }} title={project.application_name}>{truncateText(project.application_name, 16)}</td>
+                      <td style={{ width: "4%" }}>{project.totalProjectPages ? Math.round(project.totalProjectPages) : 0}</td>
+                      <td style={{ width: "6%" }}>{formatDate(project.receiveDate)}</td>
+                      <td style={{ width: "5%" }}>{project.estimatedHours}</td>
+                      {/* <td style={{ width: "5%" }}>{project.actualHours}</td> */}
+                      {/* <td style={{ width: "5%" }}>{project.efficiency}</td> */}
+                      <td style={{ width: "7%" }}>{formatDateTime(project.deadline)}</td>
+                      <td style={{ width: "7%" }}>{formatDateTime(project.readyQCDeadline)}</td>
+                      <td style={{ width: "3%" }}>{project.qcHrs}</td>
+                      {/* <td style={{ width: "7%" }}>{formatDateTime(project.qcDueDate)}</td> */}
+                      <td style={{ width: "5%" }}>{truncateText(project.status, 15)}</td>
+                      <td style={{ width: "5%" }}>
                         <div
                           className="progress cursor-pointer"
                           style={{ height: "24px" }}
@@ -1400,9 +1388,9 @@ const ActiveProject = () => {
                           </div>
                         </div>
                       </td>
-                      <td>{formatCost(project.totalCost, project.currency)}</td>
-                      <td>{formatCost(project.inrCost, "INR")}</td>
-                      <td>
+                      <td style={{ width: "5%" }}>{formatCost(project.totalCost, project.currency)}</td>
+                      <td style={{ width: "6%" }}>{formatCost(project.inrCost, "INR")}</td>
+                      <td style={{ width: "5%" }}>
                         <div className="d-flex gap-2">
                           <button
                             className="btn btn-sm btn-primary"
@@ -1441,7 +1429,7 @@ const ActiveProject = () => {
 
                     {expandedRow === project.id && (
                       <tr>
-                        <td colSpan={21} className="p-0 border-top-0">
+                        <td colSpan={22} className="p-0 border-top-0">
                           <div className="p-4">
                             {/* Unsaved Changes Warning */}
                             {hasUnsavedChanges && (
@@ -1847,7 +1835,7 @@ const ActiveProject = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={21} className="text-center py-4">
+                  <td colSpan={22} className="text-center py-4">
                     No projects found matching your criteria
                   </td>
                 </tr>

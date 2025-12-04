@@ -9,24 +9,16 @@ import axios from "axios";
 
 const Calendar = ({ userRole }) => {
   // State for calendar data and UI
-  const [selectedFilters, setSelectedFilters] = useState({
-    dob: true,
-    doj: true,
-    companyHoliday: true,
-    clientHoliday: userRole === "admin" || userRole === "manager",
-    notes: true,
-  });
+  const [selectedFilters, setSelectedFilters] = useState("all"); // "all", "dob", "doj", "companyHoliday", "clientHoliday", "note"
   const [viewMode, setViewMode] = useState("month");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [events, setEvents] = useState([]);
-  
   // State for company holidays management
   const [showHolidayModal, setShowHolidayModal] = useState(false);
   const [holidayDate, setHolidayDate] = useState("");
   const [holidayTitle, setHolidayTitle] = useState("");
   const [editingHolidayId, setEditingHolidayId] = useState(null);
   const [companyHolidaysList, setCompanyHolidaysList] = useState([]);
-  
   // State for adding events
   const [showAddEventModal, setShowAddEventModal] = useState(false);
   const [addEventDate, setAddEventDate] = useState("");
@@ -47,7 +39,6 @@ const Calendar = ({ userRole }) => {
   const [allMonths, setAllMonths] = useState(false);
   const [members, setMembers] = useState([]);
   const [allEvents, setAllEvents] = useState([]);
-
   const token = localStorage.getItem("authToken");
 
   // Fetch members data
@@ -75,7 +66,6 @@ const Calendar = ({ userRole }) => {
         },
       });
       console.log("All Events Response:", response.data);
-      
       if (response.data && response.data.status && response.data.events) {
         setAllEvents(response.data.events);
       }
@@ -87,11 +77,8 @@ const Calendar = ({ userRole }) => {
   // Process members data to create events
   const processMembersData = () => {
     const memberEvents = [];
-    
-    // Check if members is an array before using forEach
     if (Array.isArray(members)) {
       members.forEach(member => {
-        // Process Date of Birth
         if (member.dob) {
           const dob = new Date(member.dob);
           memberEvents.push({
@@ -104,8 +91,6 @@ const Calendar = ({ userRole }) => {
             name: member.fullName
           });
         }
-        
-        // Process Date of Joining (Work Anniversary)
         if (member.doj) {
           const doj = new Date(member.doj);
           memberEvents.push({
@@ -120,76 +105,69 @@ const Calendar = ({ userRole }) => {
         }
       });
     }
-    
     return memberEvents;
   };
 
   // Process events data
- const processEventsData = () => {
-  const processedEvents = [];
+  const processEventsData = () => {
+    const processedEvents = [];
+    if (Array.isArray(allEvents)) {
+      allEvents.forEach(event => {
+        let eventDate = event.eventDate
+          ? new Date(event.eventDate)
+          : event.date
+          ? new Date(event.date)
+          : null;
+        if (!eventDate || isNaN(eventDate.getTime())) return;
 
-  if (Array.isArray(allEvents)) {
-    allEvents.forEach(event => {
-      // Safe date conversion
-      let eventDate = event.eventDate
-        ? new Date(event.eventDate)
-        : event.date
-        ? new Date(event.date)
-        : null;
+        let eventType = event.eventType ? event.eventType.toLowerCase() : "unknown";
+        let eventColor = "";
+        let eventTitle = event.details;
 
-      // If date is invalid, skip this event
-      if (!eventDate || isNaN(eventDate.getTime())) return;
+        switch(eventType) {
+          case "companyholiday":
+          case "company holiday":
+            eventType = "companyHoliday";
+            eventColor = "bg-danger"; // Red
+            break;
+          case "clientholiday":
+          case "client holiday":
+            eventType = "clientHoliday";
+            eventColor = "bg-warning"; // Orange
+            break;
+          case "note":
+            eventColor = "bg-secondary"; // Light Grey
+            break;
+          case "birthday":
+            eventType = "dob";
+            eventColor = "bg-info"; // Light Blue
+            break;
+          case "joining date":
+          case "joiningdate":
+            eventType = "doj";
+            eventColor = "bg-success"; // Light Green
+            break;
+          case "approvedleave":
+          case "approved leave":
+            eventType = "approvedLeave";
+            eventColor = "bg-primary";
+            break;
+          default:
+            eventColor = "bg-primary";
+        }
 
-      // Normalize event type to lowercase for consistency
-      let eventType = event.eventType ? event.eventType.toLowerCase() : "unknown";
-      let eventColor = "";
-      let eventTitle = event.details;
-
-      switch(eventType) {
-        case "companyholiday":
-        case "company holiday":
-          eventType = "companyHoliday";
-          eventColor = "bg-danger";
-          break;
-        case "clientholiday":
-        case "client holiday":
-          eventType = "clientHoliday";
-          eventColor = "bg-warning";
-          break;
-        case "note":
-          eventColor = "bg-secondary";
-          break;
-        case "birthday":
-          eventType = "dob";
-          eventColor = "bg-info";
-          break;
-        case "joining date":
-        case "joiningdate":
-          eventType = "doj";
-          eventColor = "bg-success";
-          break;
-        case "approvedleave":
-        case "approved leave":
-          eventType = "approvedLeave";
-          eventColor = "bg-primary";
-          break;
-        default:
-          eventColor = "bg-primary";
-      }
-
-      processedEvents.push({
-        id: `event-${event.id}`,
-        date: eventDate,
-        type: eventType,
-        title: eventTitle,
-        color: eventColor,
-        eventId: event.id
+        processedEvents.push({
+          id: `event-${event.id}`,
+          date: eventDate,
+          type: eventType,
+          title: eventTitle,
+          color: eventColor,
+          eventId: event.id
+        });
       });
-    });
-  }
-
-  return processedEvents;
-};
+    }
+    return processedEvents;
+  };
 
   // Combine all events
   const combineAllEvents = () => {
@@ -205,7 +183,6 @@ const Calendar = ({ userRole }) => {
       await fetchAllEvents();
       setLoading(false);
     };
-    
     loadData();
   }, []);
 
@@ -213,8 +190,6 @@ const Calendar = ({ userRole }) => {
     if (members.length > 0 || allEvents.length > 0) {
       const allCombinedEvents = combineAllEvents();
       setEvents(allCombinedEvents);
-      
-      // Extract company holidays for the list
       const holidays = allCombinedEvents.filter((e) => e.type === "companyHoliday");
       setCompanyHolidaysList(holidays);
     }
@@ -226,41 +201,31 @@ const Calendar = ({ userRole }) => {
 
   const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+  // Get filtered events for a specific date
   const getFilteredEvents = (date) => {
     return events.filter((event) => {
-      if (!selectedFilters[event.type]) return false;
-
-      // Check if the event matches the date
+      if (selectedFilters !== "all" && event.type !== selectedFilters) return false;
       const eventDate = new Date(event.date);
-      if (
-        eventDate.getDate() !== date.getDate() ||
-        eventDate.getMonth() !== date.getMonth() ||
-        eventDate.getFullYear() !== date.getFullYear()
-      ) {
-        return false;
-      }
-
-      // Apply role-based visibility
-      switch (event.type) {
-        case "doj":
-          return true; // All can see work anniversaries
-        case "clientHoliday":
-          return userRole === "admin" || userRole === "manager";
-        case "note":
-          return userRole === "admin";
-        default:
-          return true;
-      }
+      return (
+        eventDate.getDate() === date.getDate() &&
+        eventDate.getMonth() === date.getMonth() &&
+        eventDate.getFullYear() === date.getFullYear()
+      );
     });
   };
 
-  const toggleFilter = (filter) => {
-    setSelectedFilters({
-      ...selectedFilters,
-      [filter]: !selectedFilters[filter],
+  // Group events by type for a given date
+  const getEventsByType = (date) => {
+    const filteredEvents = getFilteredEvents(date);
+    const grouped = {};
+    filteredEvents.forEach(event => {
+      if (!grouped[event.type]) grouped[event.type] = [];
+      grouped[event.type].push(event);
     });
+    return grouped;
   };
 
+  // Check if date is today
   const isToday = (date) => {
     const today = new Date();
     return (
@@ -270,8 +235,9 @@ const Calendar = ({ userRole }) => {
     );
   };
 
+  // Handle Today click
   const handleTodayClick = (e) => {
-    e.preventDefault(); // Prevent form submission
+    e.preventDefault();
     const today = new Date();
     setSelectedDate(today);
     setCurrentMonth(today.getMonth() + 1);
@@ -279,100 +245,28 @@ const Calendar = ({ userRole }) => {
     setAllMonths(false);
   };
 
-  const handlePrevClick = (e) => {
-    e.preventDefault(); // Prevent form submission
-    if (allMonths) {
-      setCurrentYear(currentYear - 1);
-    } else {
-      const newDate = new Date(selectedDate);
-      newDate.setMonth(selectedDate.getMonth() - 1);
-      setSelectedDate(newDate);
-      setCurrentMonth(newDate.getMonth() + 1);
-      setCurrentYear(newDate.getFullYear());
-    }
-  };
+  // Handle Prev/Next click
+ 
 
-  const handleNextClick = (e) => {
-    e.preventDefault(); // Prevent form submission
-    if (allMonths) {
-      setCurrentYear(currentYear + 1);
-    } else {
-      const newDate = new Date(selectedDate);
-      newDate.setMonth(selectedDate.getMonth() + 1);
-      setSelectedDate(newDate);
-      setCurrentMonth(newDate.getMonth() + 1);
-      setCurrentYear(newDate.getFullYear());
-    }
-  };
+ 
 
-  const generateCalendarGrid = () => {
-    if (allMonths) {
-      // Generate a year view grid
-      const yearGrid = [];
-      
-      for (let month = 0; month < 12; month++) {
-        const monthDate = new Date(currentYear, month, 1);
-        
-        // Get the day of the week for the 1st (0 = Sun, 1 = Mon, ...)
-        let firstDay = monthDate.getDay();
-        // Adjust so Monday = 0, Sunday = 6
-        firstDay = (firstDay + 6) % 7;
-        
-        const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
-        
-        const days = [];
-        // Empty slots before the 1st day
-        for (let i = 0; i < firstDay; i++) days.push(null);
-        
-        // Fill days of the month
-        for (let i = 1; i <= daysInMonth; i++) {
-          days.push(new Date(currentYear, month, i));
-        }
-        
-        // Break into weeks (Mon → Sun)
-        const weeks = [];
-        let week = [];
-        
-        days.forEach((day, index) => {
-          week.push(day);
-          if (week.length === 7 || index === days.length - 1) {
-            weeks.push(week);
-            week = [];
-          }
-        });
-        
-        yearGrid.push({
-          monthName: monthDate.toLocaleDateString("en-US", { month: "long" }),
-          weeks: weeks
-        });
-      }
-      
-      return yearGrid;
-    } else {
-      // Generate a single month grid
-      const year = selectedDate.getFullYear();
-      const month = selectedDate.getMonth();
-      
-      // Get the day of the week for the 1st (0 = Sun, 1 = Mon, ...)
-      let firstDay = new Date(year, month, 1).getDay();
-      // Adjust so Monday = 0, Sunday = 6
+  // Generate calendar grid
+ const generateCalendarGrid = () => {
+  if (allMonths) {
+    // Generate a year view grid
+    const yearGrid = [];
+    for (let month = 0; month < 12; month++) {
+      const monthDate = new Date(currentYear, month, 1);
+      let firstDay = monthDate.getDay();
       firstDay = (firstDay + 6) % 7;
-      
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
-      
+      const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
       const days = [];
-      // Empty slots before the 1st day
       for (let i = 0; i < firstDay; i++) days.push(null);
-      
-      // Fill days of the month
       for (let i = 1; i <= daysInMonth; i++) {
-        days.push(new Date(year, month, i));
+        days.push(new Date(currentYear, month, i));
       }
-      
-      // Break into weeks (Mon → Sun)
       const weeks = [];
       let week = [];
-      
       days.forEach((day, index) => {
         week.push(day);
         if (week.length === 7 || index === days.length - 1) {
@@ -380,10 +274,36 @@ const Calendar = ({ userRole }) => {
           week = [];
         }
       });
-      
-      return weeks;
+      yearGrid.push({
+        monthName: monthDate.toLocaleDateString("en-US", { month: "long" }),
+        weeks: weeks
+      });
     }
-  };
+    return yearGrid;
+  } else {
+    // Generate a single month grid
+    const year = selectedDate.getFullYear();
+    const month = selectedDate.getMonth();
+    let firstDay = new Date(year, month, 1).getDay();
+    firstDay = (firstDay + 6) % 7;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const days = [];
+    for (let i = 0; i < firstDay; i++) days.push(null);
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(new Date(year, month, i));
+    }
+    const weeks = [];
+    let week = [];
+    days.forEach((day, index) => {
+      week.push(day);
+      if (week.length === 7 || index === days.length - 1) {
+        weeks.push(week);
+        week = [];
+      }
+    });
+    return weeks;
+  }
+};
 
   const calendarGrid = generateCalendarGrid();
 
@@ -413,12 +333,10 @@ const Calendar = ({ userRole }) => {
   };
 
   const saveHoliday = async (e) => {
-    e.preventDefault(); // Prevent form submission
+    e.preventDefault();
     if (!holidayDate || !holidayTitle) return;
-
     setIsLoading(true);
     setError(null);
-
     try {
       const dateParts = holidayDate.split("-");
       const holidayDateObj = new Date(
@@ -426,9 +344,7 @@ const Calendar = ({ userRole }) => {
         dateParts[1] - 1,
         dateParts[2]
       );
-
       if (editingHolidayId) {
-        // Update existing holiday
         const response = await axios.put(
           `${BASE_URL}event/updateEvent/${editingHolidayId}`,
           {
@@ -443,16 +359,13 @@ const Calendar = ({ userRole }) => {
             },
           }
         );
-
         if (response.data && response.data.success) {
-          // Refresh events
           await fetchAllEvents();
           setShowHolidayModal(false);
         } else {
           setError(response.data.message || "Failed to update holiday");
         }
       } else {
-        // Add new holiday
         const response = await axios.post(
           `${BASE_URL}event/addEvent`,
           {
@@ -467,9 +380,7 @@ const Calendar = ({ userRole }) => {
             },
           }
         );
-
         if (response.data && response.data.success) {
-          // Refresh events
           await fetchAllEvents();
           setShowHolidayModal(false);
         } else {
@@ -496,9 +407,7 @@ const Calendar = ({ userRole }) => {
           },
         }
       );
-
       if (response.data && response.data.success) {
-        // Refresh events
         await fetchAllEvents();
       }
     } catch (err) {
@@ -506,44 +415,30 @@ const Calendar = ({ userRole }) => {
     }
   };
 
-  // Get events for today
-  const today = new Date();
-  const todayEvents = events.filter(event => {
-    const eventDate = new Date(event.date);
-    return (
-      eventDate.getDate() === today.getDate() &&
-      eventDate.getMonth() === today.getMonth() &&
-      eventDate.getFullYear() === today.getFullYear() &&
-      selectedFilters[event.type]
-    );
-  });
-
   // Format date for display
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  // Modal open handler
+  // Open Add Event Modal
   const openAddEventModal = (e) => {
-    e.preventDefault(); // Prevent form submission
+    e.preventDefault();
     setAddEventDate("");
     setAddEventType("");
     setAddEventDetails("");
     setShowAddEventModal(true);
   };
 
-  // Modal save handler
+  // Save New Event
   const handleAddEventSave = async (e) => {
-    e.preventDefault(); // Prevent form submission
+    e.preventDefault();
     if (!addEventDate || !addEventType || !addEventDetails) {
       setError("Please fill all fields");
       return;
     }
-
     setIsLoading(true);
     setError(null);
-
     try {
       const response = await axios.post(
         `${BASE_URL}event/addEvent`,
@@ -559,14 +454,11 @@ const Calendar = ({ userRole }) => {
           },
         }
       );
-
       if (response.data && response.data.success) {
         setShowAddEventModal(false);
-        // Reset form
         setAddEventDate("");
         setAddEventType("");
         setAddEventDetails("");
-        // Refresh events
         await fetchAllEvents();
       } else {
         setError(response.data.message || "Failed to add event");
@@ -581,35 +473,26 @@ const Calendar = ({ userRole }) => {
     }
   };
 
+  // Fetch Events Summary
   const fetchEventsSummary = async () => {
     try {
       setLoading(true);
       let url;
-      
       if (allMonths) {
-        // Get all events for the year
         url = `${BASE_URL}event/getAllEvents`;
       } else {
-        // Get events for the selected month
         url = `${BASE_URL}event/getEventSummary?month=${currentMonth}&year=${currentYear}`;
       }
-      
       const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
       if (response.data) {
         if (allMonths) {
-          // Process all events for the year
           const allEvents = response.data.events || [];
           const year = currentYear;
-          
-          // Group by month
           const monthlySummary = {};
-          
-          // Initialize all months
           for (let i = 1; i <= 12; i++) {
             monthlySummary[i] = {
               birthdays: [],
@@ -619,8 +502,6 @@ const Calendar = ({ userRole }) => {
               notes: [],
             };
           }
-          
-          // Process member events (birthdays and work anniversaries)
           if (Array.isArray(members)) {
             members.forEach(member => {
               if (member.dob) {
@@ -633,7 +514,6 @@ const Calendar = ({ userRole }) => {
                   });
                 }
               }
-              
               if (member.doj) {
                 const doj = new Date(member.doj);
                 if (doj.getFullYear() === year) {
@@ -646,15 +526,12 @@ const Calendar = ({ userRole }) => {
               }
             });
           }
-          
-          // Process other events
           if (Array.isArray(allEvents)) {
             allEvents.forEach(event => {
               const eventDate = new Date(event.eventDate);
               if (eventDate.getFullYear() === year) {
                 const month = eventDate.getMonth() + 1;
                 const eventType = event.eventType ? event.eventType.toLowerCase() : "";
-                
                 if (eventType === "companyholiday" || eventType === "company holiday") {
                   monthlySummary[month].companyHolidays.push({
                     name: event.details,
@@ -669,10 +546,8 @@ const Calendar = ({ userRole }) => {
               }
             });
           }
-          
           setEventsData(monthlySummary);
         } else {
-          // Single month summary
           setEventsData({
             birthdays: response.data.summary?.birthdays || [],
             companyHolidays: response.data.summary?.companyHolidays || [],
@@ -689,12 +564,63 @@ const Calendar = ({ userRole }) => {
     }
   };
 
-  // Get events for today's display
-  const todayBirthdays = todayEvents.filter(e => e.type === "dob");
-  const todayHolidays = todayEvents.filter(e => e.type === "companyHoliday");
-  const todayWorkAnniversaries = todayEvents.filter(e => e.type === "doj");
-  const todayClientHolidays = todayEvents.filter(e => e.type === "clientHoliday");
-  const todayNotes = todayEvents.filter(e => e.type === "note");
+  // Get events for today
+  const today = new Date();
+  const todayEvents = events.filter(event => {
+    const eventDate = new Date(event.date);
+    return (
+      eventDate.getDate() === today.getDate() &&
+      eventDate.getMonth() === today.getMonth() &&
+      eventDate.getFullYear() === today.getFullYear()
+    );
+  });
+
+  // Sort events by date within each category
+  const sortEventsByDate = (events) => {
+    return events.sort((a, b) => new Date(a.date) - new Date(b.date));
+  };
+
+  // Format date for tooltip
+  const formatTooltipDate = (date) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+  };
+
+  // State for date tooltip
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [tooltipContent, setTooltipContent] = useState([]);
+
+  // Show tooltip on hover
+  const handleCellMouseEnter = (date, events) => {
+    if (events.length > 0) {
+      setTooltipContent(events);
+      setTooltipVisible(true);
+    }
+  };
+
+  // Hide tooltip on mouse leave
+  const handleCellMouseLeave = () => {
+    setTooltipVisible(false);
+  };
+
+  // Show events for a specific date
+  const [showDateEventsModal, setShowDateEventsModal] = useState(false);
+  const [selectedDateEvents, setSelectedDateEvents] = useState([]);
+
+  const handleDateClick = (date) => {
+    const eventsForDate = getFilteredEvents(date);
+    if (eventsForDate.length > 0) {
+      setSelectedDateEvents(eventsForDate);
+      setShowDateEventsModal(true);
+    } else {
+      setSelectedDateEvents([]);
+      setShowDateEventsModal(true);
+    }
+  };
 
   if (loading) {
     return <div>Loading calendar...</div>;
@@ -714,171 +640,100 @@ const Calendar = ({ userRole }) => {
               >
                 + Add Event
               </button>
-
-              <button
-                className={`btn btn-xs me-1 mb-1 ${
-                  selectedFilters.dob ? "btn-info" : "btn-outline-info"
-                }`}
-                onClick={() => toggleFilter("dob")}
-              >
-                Birthday
-              </button>
-
-              <button
-                className={`btn btn-xs me-1 mb-1 ${
-                  selectedFilters.doj ? "btn-success" : "btn-outline-success"
-                }`}
-                onClick={() => toggleFilter("doj")}
-              >
-                Work Anniversary
-              </button>
-
-              <button
-                className={`btn btn-xs me-1 mb-1 ${
-                  selectedFilters.companyHoliday
-                    ? "btn-danger"
-                    : "btn-outline-danger"
-                }`}
-                onClick={() => toggleFilter("companyHoliday")}
-              >
-                Holiday
-              </button>
-
-              {(userRole === "admin" || userRole === "manager") && (
-                <button
-                  className={`btn btn-xs me-1 mb-1 ${
-                    selectedFilters.clientHoliday
-                      ? "btn-warning"
-                      : "btn-outline-warning"
-                  }`}
-                  onClick={() => toggleFilter("clientHoliday")}
-                >
-                  Client Holiday
-                </button>
-              )}
-
-              {userRole === "admin" && (
-                <button
-                  className={`btn btn-xs mb-1 ${
-                    selectedFilters.note ? "btn-secondary" : "btn-outline-secondary"
-                  }`}
-                  onClick={() => toggleFilter("note")}
-                >
-                  Notes
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-            <div className="d-flex align-items-center mb-2">
-              <h5 className="mb-0 me-2">
-                {allMonths 
-                  ? currentYear 
-                  : selectedDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-              </h5>
-              <div className="d-flex">
-                <button
-                  className="btn btn-sm btn-secondary me-2"
-                  onClick={handlePrevClick}
-                >
-                  &lt;
-                </button>
-                <button
-                  className="btn btn-sm btn-secondary me-2"
-                  onClick={handleTodayClick}
-                >
-                  Today
-                </button>
-                <button
-                  className="btn btn-sm btn-secondary"
-                  onClick={handleNextClick}
-                >
-                  &gt;
-                </button>
-              </div>
-            </div>
-            <div className="d-flex gap-1 align-items-center mb-2">
+              {/* Filter Dropdown */}
               <select
                 className="form-select form-select-sm"
-                value={allMonths ? "all" : "month"}
-                onChange={(e) => {
-                  if (e.target.value === "all") {
-                    setAllMonths(true);
-                  } else {
-                    setAllMonths(false);
-                  }
-                }}
-                style={{ width: "120px" }}
+                value={selectedFilters}
+                onChange={(e) => setSelectedFilters(e.target.value)}
+                style={{ width: "150px" }}
               >
-                <option value="month">Month</option>
-                <option value="all">All Months</option>
+                <option value="all">All Events (Default)</option>
+                <option value="dob">Birthday</option>
+                <option value="doj">Work Anniversary</option>
+                <option value="companyHoliday">Holiday</option>
+                <option value="clientHoliday">Client Holiday</option>
+                <option value="note">Notes</option>
               </select>
-              {!allMonths && (
-                <>
-                  <select
-                    className="form-select form-select-sm"
-                    value={selectedDate.getMonth()}
-                    onChange={(e) => {
-                      const newDate = new Date(selectedDate);
-                      newDate.setMonth(parseInt(e.target.value));
-                      setSelectedDate(newDate);
-                      setCurrentMonth(newDate.getMonth() + 1);
-                    }}
-                    style={{ width: "120px" }}
-                  >
-                    {Array.from({ length: 12 }, (_, i) =>
-                      new Date(0, i).toLocaleString("default", { month: "long" })
-                    ).map((month, i) => (
-                      <option key={month} value={i}>
-                        {month}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    className="form-select form-select-sm"
-                    value={selectedDate.getFullYear()}
-                    onChange={(e) => {
-                      const newDate = new Date(selectedDate);
-                      newDate.setFullYear(parseInt(e.target.value));
-                      setSelectedDate(newDate);
-                      setCurrentYear(newDate.getFullYear());
-                    }}
-                    style={{ width: "100px" }}
-                  >
-                    {Array.from({ length: 10 }, (_, i) => 2020 + i).map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                </>
-              )}
             </div>
           </div>
-
+        <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+  <div className="d-flex align-items-center mb-2">
+    {/* Always show today's date here */}
+      <div className="d-flex">
+    
+      <button
+        className="btn btn-sm btn-secondary me-2"
+        onClick={handleTodayClick}
+      >
+        Today
+      </button>
+     
+    </div>
+    <h5 className="mb-0 me-2">
+      {new Date().toLocaleDateString("en-US", { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })}
+    </h5>
+  
+  </div>
+  <div className="d-flex gap-1 align-items-center mb-2">
+  
+    {!allMonths && (
+      <>
+        <select
+          className="form-select form-select-sm"
+          value={selectedDate.getMonth()}
+          onChange={(e) => {
+            const newDate = new Date(selectedDate);
+            newDate.setMonth(parseInt(e.target.value));
+            setSelectedDate(newDate);
+            setCurrentMonth(newDate.getMonth() + 1);
+          }}
+          style={{ width: "120px" }}
+        >
+          {Array.from({ length: 12 }, (_, i) =>
+            new Date(0, i).toLocaleString("default", { month: "long" })
+          ).map((month, i) => (
+            <option key={month} value={i}>
+              {month}
+            </option>
+          ))}
+        </select>
+        <select
+          className="form-select form-select-sm"
+          value={selectedDate.getFullYear()}
+          onChange={(e) => {
+            const newDate = new Date(selectedDate);
+            newDate.setFullYear(parseInt(e.target.value));
+            setSelectedDate(newDate);
+            setCurrentYear(newDate.getFullYear());
+          }}
+          style={{ width: "100px" }}
+        >
+          {Array.from({ length: 10 }, (_, i) => 2020 + i).map((year) => (
+            <option key={year} value={year}>
+              {year}
+            </option>
+          ))}
+        </select>
+      </>
+    )}
+  </div>
+</div>
           {/* Legend */}
           <div className="mb-3 d-flex flex-wrap gap-1 table-gradient-bg">
-            {selectedFilters.dob && (
-              <span className="badge bg-info me-1">Birthday</span>
-            )}
-            {selectedFilters.doj && (
-              <span className="badge bg-success me-1">Work Anniversary</span>
-            )}
-            {selectedFilters.companyHoliday && (
-              <span className="badge bg-danger me-1">Holiday</span>
-            )}
-            {selectedFilters.clientHoliday && (
-              <span className="badge bg-warning me-1">Client Holiday</span>
-            )}
-            {selectedFilters.note && (
-              <span className="badge bg-secondary me-1">Notes</span>
-            )}
+            <span className="badge bg-info me-1">Birthday</span>
+            <span className="badge bg-success me-1">Work Anniversary</span>
+            <span className="badge bg-danger me-1">Holiday</span>
+            <span className="badge bg-warning me-1">Client Holiday</span>
+            <span className="badge bg-secondary me-1">Notes</span>
           </div>
-
           <div className="table-responsive table-gradient-bg">
             {allMonths ? (
-              // Year view - 12 months grid
+              // Year view
               <div className="year-view">
                 <div className="row">
                   {calendarGrid.map((monthData, monthIndex) => (
@@ -902,7 +757,9 @@ const Calendar = ({ userRole }) => {
                                     day && isToday(day) ? "today-cell" : ""
                                   }`}
                                   style={{ height: "40px" }}
-                                  onClick={() => day && openHolidayModal(day)}
+                                  onClick={() => day && handleDateClick(day)}
+                                  onMouseEnter={() => day && handleCellMouseEnter(day, getFilteredEvents(day))}
+                                  onMouseLeave={handleCellMouseLeave}
                                 >
                                   {day ? (
                                     <div className="d-flex flex-column h-100">
@@ -914,10 +771,10 @@ const Calendar = ({ userRole }) => {
                                         {day.getDate()}
                                       </div>
                                       <div className="d-flex flex-wrap justify-content-center gap-1 mt-auto">
-                                        {getFilteredEvents(day).map((event, idx) => (
+                                        {/* Display single indicator per event type */}
+                                        {getEventsByType(day).dob && (
                                           <span
-                                            key={idx}
-                                            className={`badge ${event.color} text-white`}
+                                            className="badge bg-info text-white"
                                             style={{ 
                                               fontSize: "0.6rem", 
                                               padding: "2px 4px",
@@ -925,11 +782,61 @@ const Calendar = ({ userRole }) => {
                                               height: "8px",
                                               borderRadius: "50%"
                                             }}
-                                            title={
-                                              event.title
-                                            }
+                                            title="Birthday"
                                           ></span>
-                                        ))}
+                                        )}
+                                        {getEventsByType(day).doj && (
+                                          <span
+                                            className="badge bg-success text-white"
+                                            style={{ 
+                                              fontSize: "0.6rem", 
+                                              padding: "2px 4px",
+                                              width: "8px",
+                                              height: "8px",
+                                              borderRadius: "50%"
+                                            }}
+                                            title="Work Anniversary"
+                                          ></span>
+                                        )}
+                                        {getEventsByType(day).companyHoliday && (
+                                          <span
+                                            className="badge bg-danger text-white"
+                                            style={{ 
+                                              fontSize: "0.6rem", 
+                                              padding: "2px 4px",
+                                              width: "8px",
+                                              height: "8px",
+                                              borderRadius: "50%"
+                                            }}
+                                            title="Holiday"
+                                          ></span>
+                                        )}
+                                        {getEventsByType(day).clientHoliday && (
+                                          <span
+                                            className="badge bg-warning text-white"
+                                            style={{ 
+                                              fontSize: "0.6rem", 
+                                              padding: "2px 4px",
+                                              width: "8px",
+                                              height: "8px",
+                                              borderRadius: "50%"
+                                            }}
+                                            title="Client Holiday"
+                                          ></span>
+                                        )}
+                                        {getEventsByType(day).note && (
+                                          <span
+                                            className="badge bg-secondary text-white"
+                                            style={{ 
+                                              fontSize: "0.6rem", 
+                                              padding: "2px 4px",
+                                              width: "8px",
+                                              height: "8px",
+                                              borderRadius: "50%"
+                                            }}
+                                            title="Note"
+                                          ></span>
+                                        )}
                                       </div>
                                     </div>
                                   ) : (
@@ -964,48 +871,84 @@ const Calendar = ({ userRole }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {calendarGrid.map((week, weekIndex) => (
-                    <tr key={weekIndex}>
-                      {week.map((day, dayIndex) => (
-                        <td
-                          key={dayIndex}
-                          className={`p-1 ${day ? "" : ""} ${
-                            day && isToday(day) ? "today-cell" : ""
-                          }`}
-                          style={{ height: "100px", width: "14.28%" }}
-                          onClick={() => day && openHolidayModal(day)}
-                        >
-                          {day ? (
-                            <div className="d-flex flex-column h-100">
-                              <div
-                                className={`fw-bold ${
-                                  isToday(day) ? "text-white" : ""
-                                }`}
-                              >
-                                {day.getDate()}
-                              </div>
-                              <div className="d-flex flex-column gap-1 mt-auto">
-                                {getFilteredEvents(day).map((event, idx) => (
-                                  <span
-                                    key={idx}
-                                    className={`badge ${event.color} text-white text-truncate`}
-                                    style={{ fontSize: "0.7rem" }}
-                                    title={
-                                      event.title
-                                    }
-                                  >
-                                    {event.title}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
-                          ) : (
-                            ""
-                          )}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
+                 {calendarGrid.map((week, weekIndex) => (
+  <tr key={weekIndex}>
+    {week.map((day, dayIndex) => (
+      <td
+        key={dayIndex}
+        className={`p-1 ${day ? "" : ""} ${
+          day && isToday(day) ? "today-cell" : ""
+        }`}
+        style={{ height: "100px", width: "14.28%" }}
+        onClick={() => day && handleDateClick(day)}
+        onMouseEnter={() => day && handleCellMouseEnter(day, getFilteredEvents(day))}
+        onMouseLeave={handleCellMouseLeave}
+      >
+        {day ? (
+          <div className="d-flex flex-column h-100">
+            <div
+              className={`fw-bold ${
+                isToday(day) ? "text-white" : ""
+              }`}
+            >
+              {day.getDate()}
+            </div>
+            <div className="d-flex flex-column gap-1 mt-auto">
+              {/* Display single indicator per event type */}
+              {getEventsByType(day).dob && (
+                <span
+                  className="badge bg-info text-white text-truncate"
+                  style={{ fontSize: "0.7rem" }}
+                  title="Birthday"
+                >
+                  Birthday
+                </span>
+              )}
+              {getEventsByType(day).doj && (
+                <span
+                  className="badge bg-success text-white text-truncate"
+                  style={{ fontSize: "0.7rem" }}
+                  title="Work Anniversary"
+                >
+                  Work Anniversary
+                </span>
+              )}
+              {getEventsByType(day).companyHoliday && (
+                <span
+                  className="badge bg-danger text-white text-truncate"
+                  style={{ fontSize: "0.7rem" }}
+                  title="Holiday"
+                >
+                  Holiday
+                </span>
+              )}
+              {getEventsByType(day).clientHoliday && (
+                <span
+                  className="badge bg-warning text-white text-truncate"
+                  style={{ fontSize: "0.7rem" }}
+                  title="Client Holiday"
+                >
+                  Client Holiday
+                </span>
+              )}
+              {getEventsByType(day).note && (
+                <span
+                  className="badge bg-secondary text-white text-truncate"
+                  style={{ fontSize: "0.7rem" }}
+                  title="Note"
+                >
+                  Note
+                </span>
+              )}
+            </div>
+          </div>
+        ) : (
+          ""
+        )}
+      </td>
+    ))}
+  </tr>
+))}
                 </tbody>
               </table>
             )}
@@ -1017,9 +960,8 @@ const Calendar = ({ userRole }) => {
             style={{ maxWidth: "400px" }}
           >
             <h5 className="mb-3 fw-bold">Events Today</h5>
-
             {/* Birthdays */}
-            {todayBirthdays.length > 0 && (
+            {todayEvents.filter(e => e.type === "dob").length > 0 && (
               <>
                 <h6 className="text-info fw-bold">Birthdays</h6>
                 <div className="table-responsive">
@@ -1039,9 +981,9 @@ const Calendar = ({ userRole }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {todayBirthdays.map((event, idx) => (
+                      {sortEventsByDate(todayEvents.filter(e => e.type === "dob")).map((event, idx) => (
                         <tr key={idx}>
-                          <td>{event.details}</td>
+                          <td>{event.name}</td>
                           <td>{moment(event.date).format("MMM D, YYYY")}</td>
                         </tr>
                       ))}
@@ -1050,9 +992,8 @@ const Calendar = ({ userRole }) => {
                 </div>
               </>
             )}
-
             {/* Work Anniversaries */}
-            {todayWorkAnniversaries.length > 0 && (
+            {todayEvents.filter(e => e.type === "doj").length > 0 && (
               <>
                 <h6 className="text-success fw-bold">Work Anniversaries</h6>
                 <div className="table-responsive">
@@ -1072,7 +1013,7 @@ const Calendar = ({ userRole }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {todayWorkAnniversaries.map((event, idx) => (
+                      {sortEventsByDate(todayEvents.filter(e => e.type === "doj")).map((event, idx) => (
                         <tr key={idx}>
                           <td>{event.name}</td>
                           <td>{moment(event.date).format("MMM D, YYYY")}</td>
@@ -1083,9 +1024,8 @@ const Calendar = ({ userRole }) => {
                 </div>
               </>
             )}
-
             {/* Company Holidays */}
-            {todayHolidays.length > 0 && (
+            {todayEvents.filter(e => e.type === "companyHoliday").length > 0 && (
               <>
                 <h6 className="text-danger fw-bold">Holidays</h6>
                 <div className="table-responsive">
@@ -1105,7 +1045,7 @@ const Calendar = ({ userRole }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {todayHolidays.map((event, idx) => (
+                      {sortEventsByDate(todayEvents.filter(e => e.type === "companyHoliday")).map((event, idx) => (
                         <tr key={idx}>
                           <td>{event.title}</td>
                           <td>{moment(event.date).format("MMM D, YYYY")}</td>
@@ -1116,9 +1056,8 @@ const Calendar = ({ userRole }) => {
                 </div>
               </>
             )}
-
             {/* Client Holidays */}
-            {todayClientHolidays.length > 0 && (
+            {todayEvents.filter(e => e.type === "clientHoliday").length > 0 && (
               <>
                 <h6 className="text-warning fw-bold">Client Holidays</h6>
                 <div className="table-responsive">
@@ -1138,7 +1077,7 @@ const Calendar = ({ userRole }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {todayClientHolidays.map((event, idx) => (
+                      {sortEventsByDate(todayEvents.filter(e => e.type === "clientHoliday")).map((event, idx) => (
                         <tr key={idx}>
                           <td>{event.title}</td>
                           <td>{moment(event.date).format("MMM D, YYYY")}</td>
@@ -1149,9 +1088,8 @@ const Calendar = ({ userRole }) => {
                 </div>
               </>
             )}
-
             {/* Notes */}
-            {todayNotes.length > 0 && (
+            {todayEvents.filter(e => e.type === "note").length > 0 && (
               <>
                 <h6 className="text-secondary fw-bold">Notes</h6>
                 <div className="table-responsive">
@@ -1171,7 +1109,7 @@ const Calendar = ({ userRole }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {todayNotes.map((event, idx) => (
+                      {sortEventsByDate(todayEvents.filter(e => e.type === "note")).map((event, idx) => (
                         <tr key={idx}>
                           <td>{event.title}</td>
                           <td>{moment(event.date).format("MMM D, YYYY")}</td>
@@ -1182,12 +1120,7 @@ const Calendar = ({ userRole }) => {
                 </div>
               </>
             )}
-
-            {todayBirthdays.length === 0 && 
-             todayWorkAnniversaries.length === 0 && 
-             todayHolidays.length === 0 && 
-             todayClientHolidays.length === 0 && 
-             todayNotes.length === 0 && (
+            {todayEvents.length === 0 && (
               <p className="text-muted">No events for today.</p>
             )}
           </div>
@@ -1199,18 +1132,16 @@ const Calendar = ({ userRole }) => {
         <h4 className="gradient-heading mb-3">
           Events Summary for {allMonths ? currentYear : selectedDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
         </h4>
-
         {allMonths ? (
-          // Yearly summary - show all months
+          // Yearly summary
           <div>
             {Object.entries(eventsData).map(([month, data]) => (
               <div key={month} className="mb-4">
                 <h5 className="text-primary">
                   {new Date(currentYear, month - 1).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
                 </h5>
-                
                 {/* Birthdays Table */}
-                {selectedFilters.dob && data.birthdays.length > 0 && (
+                {data.birthdays.length > 0 && (
                   <div className="mb-3">
                     <h6 className="text-info">Birthdays</h6>
                     <Table striped bordered hover responsive size="sm">
@@ -1221,7 +1152,7 @@ const Calendar = ({ userRole }) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.birthdays.map((event, index) => (
+                        {sortEventsByDate(data.birthdays).map((event, index) => (
                           <tr key={`dob-${month}-${index}`}>
                             <td style={{ textAlign: "left" }}>{event.name}</td>
                             <td style={{ textAlign: "left" }}>
@@ -1233,9 +1164,8 @@ const Calendar = ({ userRole }) => {
                     </Table>
                   </div>
                 )}
-
                 {/* Work Anniversaries Table */}
-                {selectedFilters.doj && data?.joiningDates?.length > 0 && (
+                {data.joiningDates.length > 0 && (
                   <div className="mb-3">
                     <h6 className="text-success">Work Anniversaries</h6>
                     <Table striped bordered hover responsive size="sm">
@@ -1246,7 +1176,7 @@ const Calendar = ({ userRole }) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.joiningDates.map((event, index) => (
+                        {sortEventsByDate(data.joiningDates).map((event, index) => (
                           <tr key={`doj-${month}-${index}`}>
                             <td style={{ textAlign: "left" }}>{event.name}</td>
                             <td style={{ textAlign: "left" }}>
@@ -1258,9 +1188,8 @@ const Calendar = ({ userRole }) => {
                     </Table>
                   </div>
                 )}
-
                 {/* Company Holidays Table */}
-                {selectedFilters.companyHoliday && data.companyHolidays.length > 0 && (
+                {data.companyHolidays.length > 0 && (
                   <div className="mb-3">
                     <h6 className="text-danger">Holidays</h6>
                     <Table striped bordered hover responsive size="sm">
@@ -1271,7 +1200,7 @@ const Calendar = ({ userRole }) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.companyHolidays.map((event, index) => (
+                        {sortEventsByDate(data.companyHolidays).map((event, index) => (
                           <tr key={`holiday-${month}-${index}`}>
                             <td style={{ textAlign: "left" }}>{event.name}</td>
                             <td style={{ textAlign: "left" }}>
@@ -1281,11 +1210,19 @@ const Calendar = ({ userRole }) => {
                         ))}
                       </tbody>
                     </Table>
+                    {(userRole === "admin" || userRole === "manager") && (
+                      <Button
+                        variant="danger"
+                        onClick={() => openHolidayModal()}
+                        className="mt-2"
+                      >
+                        Add Holiday
+                      </Button>
+                    )}
                   </div>
                 )}
-
                 {/* Notes Table */}
-                {selectedFilters.note && data.notes.length > 0 && (
+                {data.notes.length > 0 && (
                   <div className="mb-3">
                     <h6 className="text-secondary">Notes</h6>
                     <Table striped bordered hover responsive size="sm">
@@ -1296,7 +1233,7 @@ const Calendar = ({ userRole }) => {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.notes.map((event, index) => (
+                        {sortEventsByDate(data.notes).map((event, index) => (
                           <tr key={`note-${month}-${index}`}>
                             <td style={{ textAlign: "left" }}>{event.name}</td>
                             <td style={{ textAlign: "left" }}>
@@ -1308,7 +1245,6 @@ const Calendar = ({ userRole }) => {
                     </Table>
                   </div>
                 )}
-
                 {data.birthdays.length === 0 && 
                  data.joiningDates.length === 0 && 
                  data.companyHolidays.length === 0 && 
@@ -1322,95 +1258,99 @@ const Calendar = ({ userRole }) => {
           // Monthly summary
           <>
             {/* Birthdays Table */}
-            {selectedFilters.dob && (
-              <div className="mb-4">
-                <h5 className="text-info">Birthdays</h5>
-                <Table striped bordered hover responsive>
-                  <thead
-                    className="table-gradient-bg table"
-                    style={{
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 0,
-                      backgroundColor: "#fff",
-                    }}
-                  >
-                    <tr className="text-center">
-                      <th style={{ width: "60%", textAlign: "left" }}>Employee</th>
-                      <th style={{ width: "40%", textAlign: "left" }}>Date</th>
+            <div className="mb-4">
+              <h5 className="text-info">Birthdays</h5>
+              <Table striped bordered hover responsive>
+                <thead
+                  className="table-gradient-bg table"
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 0,
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  <tr className="text-center">
+                    <th style={{ width: "60%", textAlign: "left" }}>Employee</th>
+                    <th style={{ width: "40%", textAlign: "left" }}>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortEventsByDate(eventsData.birthdays).map((event, index) => (
+                    <tr key={`dob-${index}`}>
+                      <td style={{ textAlign: "left" }}>{event.name}</td>
+                      <td style={{ textAlign: "left" }}>
+                        {formatDate(event.date)}
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {eventsData.birthdays.map((event, index) => (
-                      <tr key={`dob-${index}`}>
-                        <td style={{ textAlign: "left" }}>{event.name}</td>
-                        <td style={{ textAlign: "left" }}>
-                          {formatDate(event.date)}
-                        </td>
-                      </tr>
-                    ))}
-                    {eventsData.birthdays.length === 0 && (
-                      <tr>
-                        <td colSpan="2" className="text-muted text-center">
-                          No birthdays found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </Table>
-              </div>
-            )}
-
+                  ))}
+                  {eventsData.birthdays.length === 0 && (
+                    <tr>
+                      <td colSpan="2" className="text-muted text-center">
+                        No birthdays found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            </div>
             {/* Company Holidays Table */}
-            {selectedFilters.companyHoliday && (
-              <div className="mb-4">
-                <h5 className="text-danger">Holidays</h5>
-                <Table striped bordered hover responsive>
-                  <thead
-                    className="table-gradient-bg table"
-                    style={{
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 0,
-                      backgroundColor: "#fff",
-                    }}
-                  >
-                    <tr className="text-center">
-                      <th style={{ width: "60%", textAlign: "left" }}>Title</th>
-                      <th style={{ width: "40%", textAlign: "left" }}>Date</th>
+            <div className="mb-4">
+              <h5 className="text-danger">Holidays</h5>
+              <Table striped bordered hover responsive>
+                <thead
+                  className="table-gradient-bg table"
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 0,
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  <tr className="text-center">
+                    <th style={{ width: "60%", textAlign: "left" }}>Title</th>
+                    <th style={{ width: "40%", textAlign: "left" }}>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortEventsByDate(eventsData.companyHolidays).map((event, index) => (
+                    <tr key={`holiday-${index}`}>
+                      <td style={{ textAlign: "left" }}>{event.name}</td>
+                      <td style={{ textAlign: "left" }}>
+                        {formatDate(event.date)}
+                      </td>
+                      <td>
+                        {(userRole === "admin" || userRole === "manager") && (
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => deleteHoliday(event.eventId)}
+                          >
+                            Delete
+                          </Button>
+                        )}
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {eventsData.companyHolidays.map((event, index) => (
-                      <tr key={`holiday-${index}`}>
-                        <td style={{ textAlign: "left" }}>{event.name}</td>
-                        <td style={{ textAlign: "left" }}>
-                          {formatDate(event.date)}
-                        </td>
-                      </tr>
-                    ))}
-                    {eventsData.companyHolidays.length === 0 && (
-                      <tr>
-                        <td colSpan="2" className="text-muted text-center">
-                          No holidays found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </Table>
-
-                {(userRole === "admin" || userRole === "manager") && (
-                  <Button
-                    variant="danger"
-                    onClick={() => openHolidayModal()}
-                    className="mt-2"
-                  >
-                    Add Holiday
-                  </Button>
-                )}
-              </div>
-            )}
-
+                  ))}
+                  {eventsData.companyHolidays.length === 0 && (
+                    <tr>
+                      <td colSpan="2" className="text-muted text-center">
+                        No holidays found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+              {(userRole === "admin" || userRole === "manager") && (
+                <Button
+                  variant="danger"
+                  onClick={() => openHolidayModal()}
+                  className="mt-2"
+                >
+                  Add Holiday
+                </Button>
+              )}
+            </div>
             {/* Work Anniversaries Table */}
             <div className="mb-4">
               <h5 className="text-success">Work Anniversaries</h5>
@@ -1432,7 +1372,7 @@ const Calendar = ({ userRole }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {eventsData.joiningDates.map((event, index) => (
+                  {sortEventsByDate(eventsData.joiningDates).map((event, index) => (
                     <tr key={`doj-${index}`}>
                       <td style={{ textAlign: "left" }}>{event.name}</td>
                       <td style={{ textAlign: "left" }}>
@@ -1450,47 +1390,111 @@ const Calendar = ({ userRole }) => {
                 </tbody>
               </Table>
             </div>
-
             {/* Notes Table */}
-            {selectedFilters.note && (
-              <div className="mb-4">
-                <h5 className="text-secondary">Notes</h5>
-                <Table striped bordered hover responsive>
-                  <thead
-                    className="table-gradient-bg table"
-                    style={{
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 0,
-                      backgroundColor: "#fff",
-                    }}
-                  >
-                    <tr className="text-center">
-                      <th>Title</th>
-                      <th>Date</th>
+            <div className="mb-4">
+              <h5 className="text-secondary">Notes</h5>
+              <Table striped bordered hover responsive>
+                <thead
+                  className="table-gradient-bg table"
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 0,
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  <tr className="text-center">
+                    <th>Title</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortEventsByDate(eventsData.notes).map((event, index) => (
+                    <tr key={`note-${index}`}>
+                      <td>{event.name}</td>
+                      <td>{formatDate(event.date)}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {eventsData.notes.map((event, index) => (
-                      <tr key={`note-${index}`}>
-                        <td>{event.name}</td>
-                        <td>{formatDate(event.date)}</td>
-                      </tr>
-                    ))}
-                    {eventsData.notes.length === 0 && (
-                      <tr>
-                        <td colSpan="2" className="text-muted">
-                          No notes found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </Table>
-              </div>
-            )}
+                  ))}
+                  {eventsData.notes.length === 0 && (
+                    <tr>
+                      <td colSpan="2" className="text-muted">
+                        No notes found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </Table>
+            </div>
           </>
         )}
       </div>
+
+      {/* Date Events Modal */}
+      <Modal
+        show={showDateEventsModal}
+        onHide={() => setShowDateEventsModal(false)}
+        className="custom-modal-dark"
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            Events for {selectedDateEvents.length > 0 ? new Date(selectedDateEvents[0].date).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "No Events"}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedDateEvents.length > 0 ? (
+            Object.entries(getEventsByType(new Date(selectedDateEvents[0].date))).map(([type, events], index) => (
+              <div key={index} className="mb-4">
+                <h5 className={`text-${type === 'dob' ? 'info' : type === 'doj' ? 'success' : type === 'companyHoliday' ? 'danger' : type === 'clientHoliday' ? 'warning' : 'secondary'}`}>
+                  {type === 'dob' && 'Birthdays'}
+                  {type === 'doj' && 'Work Anniversaries'}
+                  {type === 'companyHoliday' && 'Holidays'}
+                  {type === 'clientHoliday' && 'Client Holidays'}
+                  {type === 'note' && 'Notes'}
+                </h5>
+                <Table striped bordered hover responsive>
+                  <thead>
+                    <tr>
+                      <th>Event</th>
+                      <th>Date</th>
+                      {(userRole === "admin" || userRole === "manager") && type === 'companyHoliday' && <th>Action</th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortEventsByDate(events).map((event, idx) => (
+                      <tr key={idx}>
+                        <td>{event.title}</td>
+                        <td>{moment(event.date).format("MMM D, YYYY")}</td>
+                        {(userRole === "admin" || userRole === "manager") && type === 'companyHoliday' && (
+                          <td>
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => deleteHoliday(event.eventId)}
+                            >
+                              Delete
+                            </Button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            ))
+          ) : (
+            <p className="text-muted">No events found for this date.</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowDateEventsModal(false)}
+          >
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       {/* Company Holiday Modal */}
       <Modal
@@ -1611,9 +1615,33 @@ const Calendar = ({ userRole }) => {
         </Modal.Footer>
       </Modal>
 
+      {/* Tooltip */}
+      {tooltipVisible && tooltipContent.length > 0 && (
+        <div
+          className="position-fixed bg-white border rounded p-3 shadow"
+          style={{
+            zIndex: 1000,
+            left: tooltipPosition.x,
+            top: tooltipPosition.y,
+            pointerEvents: "none",
+          }}
+        >
+          <strong>Events for this day:</strong>
+          <ul className="mb-0">
+            {tooltipContent.map((event, idx) => (
+              <li key={idx} className="small">
+                <span className={`badge ${event.color} me-1`}></span>
+                {event.title} ({formatTooltipDate(event.date)})
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <style jsx>{`
         .today-cell {
           background-color: rgba(23, 162, 184, 0.3) !important;
+          border: 2px solid #17a2b8 !important;
         }
         .bg-card {
           background-color: #ffffff;
@@ -1647,6 +1675,13 @@ const Calendar = ({ userRole }) => {
           line-height: 1.5;
           height: calc(1.5em + 0.5rem + 2px);
           border-radius: 0.2rem;
+        }
+        .tooltip-indicator {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          display: inline-block;
+          margin-right: 2px;
         }
       `}</style>
     </div>

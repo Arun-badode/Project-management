@@ -126,8 +126,8 @@ export default function SettingsPage() {
             },
           }
         );
-        if (response.data.status) {
-          setClients(response.data.clients); // only dynamic data
+        if (response.data.data) {
+          setClients(response.data.data); // only dynamic data
         }
       } catch (error) {
         console.error("Failed to fetch clients:", error);
@@ -628,7 +628,7 @@ export default function SettingsPage() {
                 className="form-control"
               >
                 <option value="">-- Select Client --</option>
-                {clients.map((client) => (
+                {clients?.map((client) => (
                   <option key={client.id} value={client.id}>
                     {client.clientName}
                   </option>

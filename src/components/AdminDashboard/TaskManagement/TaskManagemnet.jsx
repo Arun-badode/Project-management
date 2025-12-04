@@ -18,10 +18,11 @@ const TaskManagement = () => {
   const [activeProjectTab, setActiveProjectTab] = useState("all");
   const [employeeData, setEmployeeData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isTeamMember, setIsTeamMember] = useState(false);
   const [error, setError] = useState(null);
   const [authToken, setAuthToken] = useState("");
   const [showEmployeeProjects, setShowEmployeeProjects] = useState(false);
-
+ const [myTasks, setMyTasks] = useState([]);
   // Handler functions - defined before useEffect
   const handleViewProject = (project) => {
     setSelectedProject(project);
@@ -50,7 +51,7 @@ const TaskManagement = () => {
 
   // Fetch projects and employee data on component mount
   useEffect(() => {
-    // लोकल स्टोरेज से टोकन प्राप्त करें
+   
     const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
     if (token) {
       setAuthToken(token);
@@ -60,8 +61,7 @@ const TaskManagement = () => {
     const fetchEmployeeData = async () => {
       try {
         setLoading(true);
-        
-        // हेडर में टोकन के साथ API कॉल करें
+
         const config = {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -332,6 +332,17 @@ const TaskManagement = () => {
               </button>
             </li>
           )}
+            {/* Team Member's "My Task" tab (singular) */}
+          {isTeamMember && (
+            <li className="nav-item">
+              <button
+                className={`nav-link ${activeProjectTab === "my" ? "active" : ""}`}
+                onClick={() => setActiveProjectTab("my")}
+              >
+                My Task
+              </button>
+            </li>
+          )}
         </ul>
 
         {/* Show content based on active tab */}
@@ -415,15 +426,44 @@ const TaskManagement = () => {
           </>
         )}
 
+
+        
         {/* Show My Tasks content based on active tab - now empty */}
-        {activeProjectTab === "my" && (
-          <div className="card bg-card">
-            <div className="card-body text-center py-5">
-              <h4 className="text-light">No tasks assigned to you</h4>
-              <p className="text-light">Your assigned tasks will appear here.</p>
-            </div>
-          </div>
-        )}
+     {activeProjectTab === "my" && (
+  <>
+    {/* Manager's My Tasks tab - show empty content for admin */}
+    {isManager && (
+      <div className="card bg-card">
+        <div className="card-body text-center py-5">
+          <h4 className="text-light">No tasks assigned to you</h4>
+          <p className="text-light">Your assigned tasks will appear here.</p>
+        </div>
+      </div>
+    )}
+
+    {/* Team Member's My Task tab - show their assigned tasks */}
+    {isTeamMember && (
+      <div className="card bg-card">
+        <div className="card-body">
+          <h4 className="text-light mb-4">My Task</h4>
+          <ProjectsTable
+            projects={myTasks}
+            teamFilter={teamFilter}
+            isManager={isManager}
+            employeeData={employeeData}
+            getEmployeeNameById={getEmployeeNameById}
+            onViewProject={handleViewProject}
+            onMarkComplete={handleMarkComplete}
+            onDeleteProject={handleDeleteProject}
+            expandedRow={expandedRow}
+            onReassign={(id) => console.log("Reassign project", id)}
+            onViewDetails={(id) => console.log("View details", id)}
+          />
+        </div>
+      </div>
+    )}
+  </>
+)}
       </div>
     </div>
   );

@@ -42,7 +42,7 @@ const Sidebar = ({ collapsed }) => {
     "Reporting & Analytics": { path: "/reportinganalytics", label: "Reporting & Analytics", icon: "fa-chart-line" },
     "Audit Logs": { path: "/auditlog", label: "Audit Logs", icon: "fa-shield" },
     "User": { path: "/usermanage", label: "User", icon: "fa-users-gear" },
-    "Role & Permission": { path: "/role-permission", label: "Role & Permission", icon: "fa-critical-role" },
+    "Role & Permission": { path: "/role-permission", label: "Role & Permission", icon: "fa-key" },
     "Chat Room": { path: "/collaboration", label: "Chat Room", icon: "fa-comments" },
     "Assigned Projects": { path: "/assigned", label: "Assigned Projects", icon: "fa-address-card" },
     "Create Project": { path: "/createproject", label: "Create Project", icon: "fa-circle-plus" },

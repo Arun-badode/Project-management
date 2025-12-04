@@ -2,33 +2,40 @@ import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 import { ChevronLeft, ChevronRight, Calendar, Trash2, Upload } from "lucide-react";
 import BASE_URL from "../../../config";
+import CreateNewProject from "./CreateNewProject";
 
-const CompletedProjects = ({projectPermission}) => {
-  console.log("projectPermission",projectPermission);
+const CompletedProjects = (data) => {
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  console.log("data in completed projects:", data);
+
+  // 从props中获取searchQuery，如果没有则使用空字符串
+  const searchQuery = data?.searchQuery || "";
+  console.log("searchQuery in completed projects:", searchQuery);
+
   const [activeTab, setActiveTab] = useState("completed");
-  const [searchQuery, setSearchQuery] = useState("");
   const token = localStorage.getItem("authToken");
 
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Filter states
   const [selectedClient, setSelectedClient] = useState("");
   const [selectedTask, setSelectedTask] = useState("");
   const [selectedApplications, setSelectedApplications] = useState("");
   const [selectedMonth, setSelectedMonth] = useState("");
-  
+
   // Lists for filter dropdowns
   const [clientList, setClientList] = useState([]);
   const [taskList, setTaskList] = useState([]);
   const [applicationList, setApplicationList] = useState([]);
-  
+
   // State for project files dropdown
   const [showFilesDropdown, setShowFilesDropdown] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [amendsRound, setAmendsRound] = useState(1);
   const [newDeadline, setNewDeadline] = useState("");
-  
+
   // State for timestamp modal
   const [showTimestampModal, setShowTimestampModal] = useState(false);
   const [timestampData, setTimestampData] = useState(null);
@@ -124,18 +131,8 @@ const CompletedProjects = ({projectPermission}) => {
 
   const weekDays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
   const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
   ];
 
   // Handle ESC key to close calendar
@@ -172,18 +169,11 @@ const CompletedProjects = ({projectPermission}) => {
       return "00:00 AM 00-00-00";
     }
 
-    // Format time: HH:MM tt
-    const hour =
-      selectedHour === 0
-        ? 12
-        : selectedHour > 12
-        ? selectedHour - 12
-        : selectedHour;
+    const hour = selectedHour === 0 ? 12 : selectedHour > 12 ? selectedHour - 12 : selectedHour;
     const time = `${hour.toString().padStart(2, "0")}:${selectedMinute
       .toString()
       .padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
 
-    // Format date: DD-MM-YY
     const date = `${selectedDate.toString().padStart(2, "0")}-${(
       selectedMonthCalendar + 1
     )
@@ -212,7 +202,7 @@ const CompletedProjects = ({projectPermission}) => {
     }
   };
 
-  // Function to check if a date is in the past
+  // Function to check if a date is in past
   const isDateInPast = (day, month, year) => {
     const selectedDate = new Date(year, month, day);
     const today = new Date();
@@ -220,31 +210,14 @@ const CompletedProjects = ({projectPermission}) => {
     return selectedDate < today;
   };
 
-  // Function to check if time is in the past for today
+  // Function to check if time is in past for today
   const isTimeInPast = (hour, minute, isAM, date) => {
-    if (
-      !date ||
-      date !== today.getDate() ||
-      selectedMonthCalendar !== today.getMonth() ||
-      selectedYearCalendar !== today.getFullYear()
-    ) {
+    if (!date || date !== today.getDate() || selectedMonthCalendar !== today.getMonth() || selectedYearCalendar !== today.getFullYear()) {
       return false;
     }
 
-    const selectedHour24 = isAM
-      ? hour === 12
-        ? 0
-        : hour
-      : hour === 12
-      ? 12
-      : hour + 12;
-    const selectedTime = new Date(
-      selectedYearCalendar,
-      selectedMonthCalendar,
-      date,
-      selectedHour24,
-      minute
-    );
+    const selectedHour24 = isAM ? (hour === 12 ? 0 : hour) : (hour === 12 ? 12 : hour + 12);
+    const selectedTime = new Date(selectedYearCalendar, selectedMonthCalendar, date, selectedHour24, minute);
     const now = new Date();
 
     return selectedTime < now;
@@ -267,15 +240,15 @@ const CompletedProjects = ({projectPermission}) => {
     const deadline = `${selectedYearCalendar}-${(selectedMonthCalendar + 1)
       .toString()
       .padStart(2, "0")}-${selectedDate.toString().padStart(2, "0")}T${(isAM
-      ? selectedHour === 12
-        ? 0
-        : selectedHour
-      : selectedHour === 12
-      ? 12
-      : selectedHour + 12
-    )
-      .toString()
-      .padStart(2, "0")}:${selectedMinute.toString().padStart(2, "0")}:00`;
+        ? selectedHour === 12
+          ? 0
+          : selectedHour
+        : selectedHour === 12
+          ? 12
+          : selectedHour + 12
+      )
+        .toString()
+        .padStart(2, "0")}:${selectedMinute.toString().padStart(2, "0")}:00`;
 
     setNewDeadline(deadline);
     setCalendarOpen(false);
@@ -290,8 +263,18 @@ const CompletedProjects = ({projectPermission}) => {
         });
 
         if (response.data.status) {
-          setAllFiles(response.data.data);
-          console.log("Fetched Files:", response.data.data);
+          // 确保每个文件都有一个唯一的ID字段
+          const filesWithId = response.data.data.map(file => {
+            // 如果文件已经有id字段，使用它；否则使用_id或创建一个临时ID
+            const fileId = file.id || file._id || `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            return {
+              ...file,
+              id: fileId // 确保id字段存在
+            };
+          });
+          
+          setAllFiles(filesWithId);
+          console.log("Fetched Files with IDs:", filesWithId);
         } else {
           console.error("Error in response:", response.data.message);
         }
@@ -314,12 +297,12 @@ const CompletedProjects = ({projectPermission}) => {
             (project) => project.status?.toLowerCase() === "completed"
           );
           setProjects(completedProjects);
-          
+
           // Extract unique values for filter dropdowns
           const clients = [...new Set(completedProjects.map(p => p.clientName || p.client))];
           const tasks = [...new Set(completedProjects.map(p => p.task_name || p.task))];
           const applications = [...new Set(completedProjects.map(p => p.application_name || p.application))];
-          
+
           setClientList(clients);
           setTaskList(tasks);
           setApplicationList(applications);
@@ -331,9 +314,7 @@ const CompletedProjects = ({projectPermission}) => {
 
   // Function to handle edit project
   const handleEditProject = (projectId) => {
-    // Implement navigation to project form with pre-filled data
     console.log("Edit project with ID:", projectId);
-    // Example: navigate(`/project/edit/${projectId}`);
   };
 
   // Function to copy server path to clipboard
@@ -383,26 +364,36 @@ const CompletedProjects = ({projectPermission}) => {
       try {
         // Filter files for the selected project
         const projectFiles = allFiles.filter(file => file.projectId === projectId);
-        
+
         if (projectFiles.length === 0) {
           // If no files found, create mock data for demonstration
           const mockFiles = [
-            { id: 1, fileName: "file1.docx", languageName: "English", applicationName: "Word", status: "Completed", lastUpdated: new Date() },
-            { id: 2, fileName: "file2.xlsx", languageName: "French", applicationName: "Excel", status: "In Progress", lastUpdated: new Date() },
-            { id: 3, fileName: "file3.pptx", languageName: "German", applicationName: "PowerPoint", status: "Pending", lastUpdated: new Date() }
+            { id: `mock-${Date.now()}-1`, fileName: "file1.docx", languageName: "English", applicationName: "Word", status: "Completed", lastUpdated: new Date() },
+            { id: `mock-${Date.now()}-2`, fileName: "file2.xlsx", languageName: "French", applicationName: "Excel", status: "In Progress", lastUpdated: new Date() },
+            { id: `mock-${Date.now()}-3`, fileName: "file3.pptx", languageName: "German", applicationName: "PowerPoint", status: "Pending", lastUpdated: new Date() }
           ];
-          
+
           setSelectedFiles(mockFiles.map(file => ({
             ...file,
             selected: false
           })));
         } else {
-          setSelectedFiles(projectFiles.map(file => ({
+          // 确保每个文件都有一个唯一的ID字段
+          const filesWithId = projectFiles.map(file => {
+            // 如果文件已经有id字段，使用它；否则使用_id或创建一个临时ID
+            const fileId = file.id || file._id || `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            return {
+              ...file,
+              id: fileId // 确保id字段存在
+            };
+          });
+          
+          setSelectedFiles(filesWithId.map(file => ({
             ...file,
             selected: false
           })));
         }
-        
+
         setShowFilesDropdown(projectId);
       } catch (err) {
         console.error("Error fetching project files:", err);
@@ -412,8 +403,8 @@ const CompletedProjects = ({projectPermission}) => {
 
   // Function to handle file selection
   const handleFileSelection = (fileId) => {
-    setSelectedFiles(prevFiles => 
-      prevFiles.map(file => 
+    setSelectedFiles(prevFiles =>
+      prevFiles.map(file =>
         file.id === fileId ? { ...file, selected: !file.selected } : file
       )
     );
@@ -424,20 +415,22 @@ const CompletedProjects = ({projectPermission}) => {
     const selectedFileIds = selectedFiles
       .filter(file => file.selected)
       .map(file => file.id);
-    
+
     if (selectedFileIds.length === 0) {
       alert("Please select at least one file");
       return;
     }
-    
+
     if (!newDeadline) {
       alert("Please set a deadline");
       return;
     }
-    
+
     try {
       // Update selected files with new status and deadline
       for (const fileId of selectedFileIds) {
+        console.log("Updating file with ID:", fileId); // 添加日志以检查ID
+        
         await axios.patch(
           `${BASE_URL}projectFiles/updateFileStatus/${fileId}`,
           {
@@ -452,6 +445,7 @@ const CompletedProjects = ({projectPermission}) => {
           }
         );
       }
+      
 
       alert("File statuses updated successfully!");
 
@@ -461,9 +455,19 @@ const CompletedProjects = ({projectPermission}) => {
       });
 
       if (filesResponse.data.status) {
-        setAllFiles(filesResponse.data.data);
+        // 确保每个文件都有一个唯一的ID字段
+        const filesWithId = filesResponse.data.data.map(file => {
+          // 如果文件已经有id字段，使用它；否则使用_id或创建一个临时ID
+          const fileId = file.id || file._id || `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          return {
+            ...file,
+            id: fileId // 确保id字段存在
+          };
+        });
+        
+        setAllFiles(filesWithId);
       }
-      
+
       // Reset selections
       setSelectedFiles([]);
       setAmendsRound(1);
@@ -474,51 +478,6 @@ const CompletedProjects = ({projectPermission}) => {
       alert("Error updating file statuses");
     }
   };
-
-  // Apply filters to projects
-  const filteredProjects = projects.filter((project) => {
-    // Check if project matches active tab
-    const matchesTab = project.status?.toLowerCase() === activeTab.toLowerCase();
-    
-    // Check if project matches search query
-    const matchesSearch =
-      searchQuery === "" ||
-      (project.title && project.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (project.client && project.client.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (project.clientName && project.clientName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (project.country && project.country.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (project.projectManager && project.projectManager.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (project.projectManagerId && project.projectManagerId.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (project.files && project.files.some((file) =>
-        file.name && file.name.toLowerCase().includes(searchQuery.toLowerCase())
-      ));
-    
-    // Check if project matches selected client
-    const matchesClient = selectedClient === "" || 
-                         project.clientName === selectedClient || 
-                         project.client === selectedClient;
-    
-    // Check if project matches selected task
-    const matchesTask = selectedTask === "" || 
-                       project.task_name === selectedTask || 
-                       project.task === selectedTask;
-    
-    // Check if project matches selected application
-    const matchesApplication = selectedApplications === "" || 
-                              project.application_name === selectedApplications || 
-                              project.application === selectedApplications;
-    
-    // Check if project matches selected month/year
-    let matchesMonth = true;
-    if (selectedMonth) {
-      const projectDate = new Date(project.receiveDate || project.createdAt);
-      const [year, month] = selectedMonth.split('-');
-      matchesMonth = projectDate.getFullYear() === parseInt(year) && 
-                    projectDate.getMonth() === parseInt(month) - 1;
-    }
-    
-    return matchesTab && matchesSearch && matchesClient && matchesTask && matchesApplication && matchesMonth;
-  });
 
   const calculateEfficiency = (expectedHours, actualHours) => {
     if (!expectedHours || !actualHours) return "-";
@@ -535,6 +494,45 @@ const CompletedProjects = ({projectPermission}) => {
     }
     return defaultValue;
   };
+
+  // Apply filters to projects
+  const filteredProjects = projects.filter((project) => {
+    // Apply search filter - This is the main fix
+    const query = searchQuery.toLowerCase();
+
+    const matchesSearch =
+      searchQuery === "" ||
+      project.projectTitle?.toLowerCase().includes(query) ||
+      project.clientName?.toLowerCase().includes(query) ||
+      project.country?.toLowerCase().includes(query) ||
+      project.full_name?.toLowerCase().includes(query) ||
+      project.application_name?.toLowerCase().includes(query) ||
+      project.task_name?.toLowerCase().includes(query) ||
+      project.language_name?.toLowerCase().includes(query);
+
+    // Apply other filters
+    const matchesClient = selectedClient === "" ||
+      project.clientName === selectedClient ||
+      project.client === selectedClient;
+
+    const matchesTask = selectedTask === "" ||
+      project.task_name === selectedTask ||
+      project.task === selectedTask;
+
+    const matchesApplication = selectedApplications === "" ||
+      project.application_name === selectedApplications ||
+      project.application === selectedApplications;
+
+    let matchesMonth = true;
+    if (selectedMonth) {
+      const projectDate = new Date(project.receiveDate || project.createdAt);
+      const [year, month] = selectedMonth.split('-');
+      matchesMonth = projectDate.getFullYear() === parseInt(year) &&
+        projectDate.getMonth() === parseInt(month) - 1;
+    }
+
+    return matchesSearch && matchesClient && matchesTask && matchesApplication && matchesMonth;
+  });
 
   return (
     <div>
@@ -617,21 +615,21 @@ const CompletedProjects = ({projectPermission}) => {
             }}
           >
             <tr className="text-center">
-              <th className="text-dark">S. No.</th>
-              <th className="text-dark">Project Title</th>
-              <th className="text-dark">Client Alise Name</th>
-              <th className="text-dark">Country</th>
-              <th className="text-dark">Project Manager</th>
-              <th className="text-dark">Task</th>
-              <th className="text-dark">Languages</th>
-              <th className="text-dark">Application</th>
-              <th className="text-dark">Total Pages</th>
-              <th className="text-dark">Received Date</th>
-              <th className="text-dark">Estimated Hrs</th>
-              <th className="text-dark">Actual Hrs</th>
-              <th className="text-dark">Cost with Currency</th>
-              <th className="text-dark">Cost in INR</th>
-              <th className="text-end text-dark">Actions</th>
+              <th className="text-dark" style={{ width: "4%" }}>S. No.</th>
+              <th className="text-dark" style={{ width: "10%" }}>Project Title</th>
+              <th className="text-dark" style={{ width: "8%" }}>Client Alias Name</th>
+              <th className="text-dark" style={{ width: "4%" }}>Country</th>
+              <th className="text-dark" style={{ width: "10%" }}>Project Manager</th>
+              <th className="text-dark" style={{ width: "8%" }}>Task</th>
+              <th className="text-dark" style={{ width: "8%" }}>Languages</th>
+              <th className="text-dark" style={{ width: "8%" }}>Application</th>
+              <th className="text-dark" style={{ width: "4%" }}>Total Pages</th>
+              <th className="text-dark" style={{ width: "6%" }}>Received Date</th>
+              <th className="text-dark" style={{ width: "6%" }}>Estimated Hrs</th>
+              <th className="text-dark" style={{ width: "6%" }}>Actual Hrs</th>
+              <th className="text-dark" style={{ width: "6%" }}>Cost with Currency</th>
+              <th className="text-dark" style={{ width: "7%" }}>Cost in INR</th>
+              <th className="text-end text-dark" style={{ width: "8%" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -639,64 +637,65 @@ const CompletedProjects = ({projectPermission}) => {
               filteredProjects.map((project, index) => (
                 <React.Fragment key={project.id}>
                   <tr className="text-center">
-                    <td className="text-dark">{index + 1}</td>
-                    <td className="text-dark">
+                    <td className="text-dark" style={{ maxWidth: "4ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{index + 1}</td>
+                    <td className="text-dark" style={{ maxWidth: "80ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {getProjectProperty(project, ['projectTitle', 'title', 'name'])}
                       <span className="badge bg-warning bg-opacity-10 text-warning ms-2">
                         {getProjectProperty(project, ['status'])}
                       </span>
                     </td>
-                    <td className="text-dark">{getProjectProperty(project, ['clientName', 'client'])}</td>
-                    <td className="text-dark">{getProjectProperty(project, ['country'])}</td>
-                    <td className="text-dark">{getProjectProperty(project, ['projectManagerId', 'projectManager'])}</td>
-                    <td className="text-dark">
+                    <td className="text-dark" style={{ maxWidth: "12ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{getProjectProperty(project, ['clientName', 'client'])}</td>
+                    <td className="text-dark" style={{ maxWidth: "3ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{getProjectProperty(project, ['country'])}</td>
+                    <td className="text-dark" style={{ maxWidth: "16ch", wordWrap: "break-word" }}>{getProjectProperty(project, ['projectManagerId', 'projectManager'])}</td>
+                    <td className="text-dark" style={{ maxWidth: "16ch", wordWrap: "break-word" }}>
                       <span className="badge bg-primary bg-opacity-10 text-primary">
                         {getProjectProperty(project, ['task_name', 'task'])}
                       </span>
                     </td>
-                    <td className="text-dark">
+                    <td className="text-dark" style={{ maxWidth: "16ch", wordWrap: "break-word" }}>
                       <span className="badge bg-success bg-opacity-10 text-success">
                         {getProjectProperty(project, ['language_name', 'language'])}
                       </span>
                     </td>
-                    <td className="text-dark">
+                    <td className="text-dark" style={{ maxWidth: "16ch", wordWrap: "break-word" }}>
                       <span className="badge bg-purple bg-opacity-10 text-purple">
                         {getProjectProperty(project, ['application_name', 'application'])}
                       </span>
                     </td>
-                    <td className="text-dark">{getProjectProperty(project, ['totalProjectPages', 'totalPages'])}</td>
-                    <td className="text-dark">
+                    <td className="text-dark" style={{ maxWidth: "4ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {getProjectProperty(project, ['totalProjectPages', 'totalPages']) ?
+                        Math.floor(getProjectProperty(project, ['totalProjectPages', 'totalPages'])) : "-"}
+                    </td>
+                    <td className="text-dark" style={{ maxWidth: "8ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {project.receiveDate
-                        ? new Date(project.receiveDate).toLocaleDateString()
+                        ? new Date(project.receiveDate).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })
                         : project.createdAt
-                        ? new Date(project.createdAt).toLocaleDateString()
+                          ? new Date(project.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' })
+                          : "-"}
+                    </td>
+                    <td className="text-dark" style={{ maxWidth: "6ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{getProjectProperty(project, ['estimatedHours', 'expectedHours'])}</td>
+                    <td className="text-dark" style={{ maxWidth: "6ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{getProjectProperty(project, ['hourlyRate', 'actualHours'])}</td>
+                    <td className="text-dark" style={{ maxWidth: "10ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {project.currency
+                        ? `${project.currency} ${parseFloat(getProjectProperty(project, ['cost', 'projectCost']) || 0).toFixed(2)}`
                         : "-"}
                     </td>
-                    <td className="text-dark">{getProjectProperty(project, ['estimatedHours', 'expectedHours'])}</td>
-                    <td className="text-dark">{getProjectProperty(project, ['hourlyRate', 'actualHours'])}</td>
-                    {/* <td className="text-dark">
-                      {calculateEfficiency(
-                        getProjectProperty(project, ['expectedHours', 'estimatedHours'], null),
-                        getProjectProperty(project, ['actualHours', 'hourlyRate'], null)
-                      )}
-                    </td> */}
-                    <td className="text-dark">
-                      {project.currency 
-                        ? `${project.currency} ${getProjectProperty(project, ['cost', 'projectCost'])}`
-                        : "-"}
+                    <td className="text-dark" style={{ maxWidth: "11ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {project.totalCost ? `₹${parseFloat(project.totalCost).toFixed(2)}` : "-"}
                     </td>
-                    <td className="text-dark">{project.totalCost ? `₹${project.totalCost}` : "-"}</td>
                     <td className="text-end">
                       <div className="d-flex justify-content-end gap-2">
                         {/* Edit Button */}
                         <button
-                          onClick={() => handleEditProject(project.id)}
-                          className="btn btn-sm btn-success"
+                          onClick={() => {
+                            setShowEditModal(project.id); // प्रोजेक्ट ID के साथ एडिट मोड सेट करें
+                          }}
+                          className="gradient-button w-100"
                           title="Edit Project"
                         >
                           <i className="fas fa-edit"></i>
                         </button>
-                        
+
                         {/* Server Path Copy Button */}
                         <button
                           onClick={() => handleCopyServerPath(project)}
@@ -705,7 +704,7 @@ const CompletedProjects = ({projectPermission}) => {
                         >
                           <i className="fas fa-copy"></i>
                         </button>
-                        
+
                         {/* Time Stamp Button */}
                         <button
                           onClick={() => handleShowTimestamp(project.id)}
@@ -714,7 +713,7 @@ const CompletedProjects = ({projectPermission}) => {
                         >
                           <i className="fas fa-clock"></i>
                         </button>
-                        
+
                         {/* Project Files Dropdown Button */}
                         <div className="dropdown">
                           <button
@@ -728,16 +727,52 @@ const CompletedProjects = ({projectPermission}) => {
                       </div>
                     </td>
                   </tr>
-                  
+
+                  {showEditModal !== false && (
+                    <div
+                      className="modal fade show d-block custom-modal-dark"
+                      tabIndex="-1"
+                      aria-modal="true"
+                      role="dialog"
+                    >
+                      <div className="modal-dialog modal-lg">
+                        <div className="modal-content">
+                          <div className="modal-header d-flex justify-content-between">
+                            <div>
+                              <h5 className="modal-title">Edit Project</h5>
+                            </div>
+
+                            <div>
+                              <button
+                                type="button"
+                                className="btn-close"
+                                onClick={() => {
+                                  setShowEditModal(false);
+                                }}
+                              ></button>
+                            </div>
+                          </div>
+                          <div className="modal-body">
+                            <CreateNewProject
+                              isEditMode={true}
+                              projectId={showEditModal}
+                              projectData={projects.find(p => p.id === showEditModal)}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Project Files Dropdown - FIXED TEXT VISIBILITY */}
                   {showFilesDropdown === project.id && (
                     <tr>
-                      <td colSpan="16" className="p-0">
+                      <td colSpan="15" className="p-0">
                         <div className="card">
                           <div className="card-header d-flex justify-content-between align-items-center table-gradient-bg">
                             <h5 className="mb-0 ">Project Files</h5>
-                            <button 
-                              className="btn btn-sm btn-secondary" 
+                            <button
+                              className="btn btn-sm btn-secondary"
                               onClick={() => setShowFilesDropdown(null)}
                             >
                               <i className="fas fa-times"></i>
@@ -748,62 +783,68 @@ const CompletedProjects = ({projectPermission}) => {
                               <table className="table table-sm ">
                                 <thead>
                                   <tr>
-                                    <th>
-                                      <input 
-                                        type="checkbox" 
+                                    <th style={{ width: "5%" }}>
+                                      <input
+                                        type="checkbox"
                                         className="form-check-input"
                                         onChange={(e) => {
                                           const allSelected = e.target.checked;
-                                          setSelectedFiles(prevFiles => 
+                                          setSelectedFiles(prevFiles =>
                                             prevFiles.map(file => ({ ...file, selected: allSelected }))
                                           );
                                         }}
                                         checked={selectedFiles.length > 0 && selectedFiles.every(file => file.selected)}
                                       />
                                     </th>
-                                    <th className="text-dark">File Name</th>
-                                    <th className="text-dark">Language</th>
-                                    <th className="text-dark">Application</th>
-                                    <th className="text-dark">Status</th>
-                                    <th className="text-dark">Last Updated</th>
+                                    <th className="text-dark" style={{ width: "20%" }}>File Name</th>
+                                    <th className="text-dark" style={{ width: "10%" }}>Language</th>
+                                    <th className="text-dark" style={{ width: "10%" }}>Application</th>
+                                    <th className="text-dark" style={{ width: "10%" }}>Status</th>
+                                    <th className="text-dark" style={{ width: "10%" }}>Last Updated</th>
+                                    <th className="text-dark" style={{ width: "10%" }}>File ID</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {selectedFiles.map((file) => (
                                     <tr key={file.id}>
                                       <td>
-                                        <input 
-                                          type="checkbox" 
+                                        <input
+                                          type="checkbox"
                                           className="form-check-input"
                                           checked={file.selected || false}
                                           onChange={() => handleFileSelection(file.id)}
                                         />
                                       </td>
-                                      <td className="text-dark">{file.fileName || file.name}</td>
-                                      <td className="text-dark">{file.languageName || file.language}</td>
-                                      <td className="text-dark">{file.applicationName || file.application}</td>
-                                      <td className="text-dark">
+                                      <td className="text-dark" style={{ maxWidth: "20ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.fileName || file.name}</td>
+                                      <td className="text-dark" style={{ maxWidth: "10ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.languageName || file.language}</td>
+                                      <td className="text-dark" style={{ maxWidth: "10ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.applicationName || file.application}</td>
+                                      <td className="text-dark" style={{ maxWidth: "10ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                         <span className={`badge ${file.status === 'Completed' ? 'bg-success' : file.status === 'In Progress' ? 'bg-warning' : 'bg-secondary'}`}>
                                           {file.status}
                                         </span>
                                       </td>
-                                      <td className="text-dark">{new Date(file.lastUpdated).toLocaleDateString()}</td>
+                                      <td className="text-dark" style={{ maxWidth: "10ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                        {file.lastUpdated ? new Date(file.lastUpdated).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : "-"}
+                                      </td>
+                                      <td className="text-dark" style={{ maxWidth: "10ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                        {file.id}
+                                      </td>
                                     </tr>
                                   ))}
                                 </tbody>
                               </table>
                             </div>
-                            
+
                             <div className="row mt-3">
                               <div className="col-md-4">
                                 <label className="form-label ">Amends Round</label>
-                                <select 
+                                <select
                                   className="form-select"
                                   value={amendsRound}
                                   onChange={(e) => setAmendsRound(parseInt(e.target.value))}
                                 >
                                   {[...Array(10)].map((_, i) => (
-                                    <option key={i+1} value={i+1}>{i+1}</option>
+                                    <option key={i + 1} value={i + 1}>{i + 1}</option>
                                   ))}
                                 </select>
                               </div>
@@ -813,8 +854,15 @@ const CompletedProjects = ({projectPermission}) => {
                                   <div className="relative">
                                     <input
                                       type="text"
-                                      value={newDeadline 
-                                        ? new Date(newDeadline).toLocaleString() 
+                                      value={newDeadline
+                                        ? new Date(newDeadline).toLocaleString('en-GB', {
+                                          hour: '2-digit',
+                                          minute: '2-digit',
+                                          hour12: true,
+                                          day: '2-digit',
+                                          month: '2-digit',
+                                          year: '2-digit'
+                                        })
                                         : formatDateTime()}
                                       readOnly
                                       onClick={() => {
@@ -842,18 +890,18 @@ const CompletedProjects = ({projectPermission}) => {
                                           {selectedHour === 0
                                             ? "12"
                                             : selectedHour > 12
-                                            ? selectedHour - 12
-                                            : selectedHour.toString().padStart(2, "0")}
+                                              ? selectedHour - 12
+                                              : selectedHour.toString().padStart(2, "0")}
                                           :{selectedMinute.toString().padStart(2, "0")}
                                         </div>
                                         <div className="period">{isAM ? "AM" : "PM"}</div>
                                         <div className="date">
                                           {selectedDate !== null
                                             ? `${selectedDate.toString().padStart(2, "0")}-${(
-                                                selectedMonthCalendar + 1
-                                              )
-                                                .toString()
-                                                .padStart(2, "0")}-${selectedYearCalendar
+                                              selectedMonthCalendar + 1
+                                            )
+                                              .toString()
+                                              .padStart(2, "0")}-${selectedYearCalendar
                                                 .toString()
                                                 .slice(-2)}`
                                             : "00-00-00"}
@@ -878,11 +926,10 @@ const CompletedProjects = ({projectPermission}) => {
                                                       <button
                                                         key={hour}
                                                         onClick={() => setSelectedHour(hour)}
-                                                        className={`time-option ${
-                                                          selectedHour === hour
+                                                        className={`time-option ${selectedHour === hour
                                                             ? "selected-hour"
                                                             : ""
-                                                        } ${isPast ? "past-time" : ""}`}
+                                                          } ${isPast ? "past-time" : ""}`}
                                                         disabled={isPast}
                                                       >
                                                         {hour.toString().padStart(2, "0")}
@@ -909,11 +956,10 @@ const CompletedProjects = ({projectPermission}) => {
                                                     <button
                                                       key={minute}
                                                       onClick={() => setSelectedMinute(minute)}
-                                                      className={`time-option ${
-                                                        selectedMinute === minute
+                                                      className={`time-option ${selectedMinute === minute
                                                           ? "selected-minute"
                                                           : ""
-                                                      } ${isPast ? "past-time" : ""}`}
+                                                        } ${isPast ? "past-time" : ""}`}
                                                       disabled={isPast}
                                                     >
                                                       {minute.toString().padStart(2, "0")}
@@ -929,17 +975,15 @@ const CompletedProjects = ({projectPermission}) => {
                                             <div className="period-options">
                                               <button
                                                 onClick={() => setIsAM(true)}
-                                                className={`period-option ${
-                                                  isAM ? "selected" : ""
-                                                }`}
+                                                className={`period-option ${isAM ? "selected" : ""
+                                                  }`}
                                               >
                                                 AM
                                               </button>
                                               <button
                                                 onClick={() => setIsAM(false)}
-                                                className={`period-option ${
-                                                  !isAM ? "selected" : ""
-                                                }`}
+                                                className={`period-option ${!isAM ? "selected" : ""
+                                                  }`}
                                               >
                                                 PM
                                               </button>
@@ -1008,15 +1052,14 @@ const CompletedProjects = ({projectPermission}) => {
                                                   !dayObj.isPast &&
                                                   setSelectedDate(dayObj.day)
                                                 }
-                                                className={`calendar-day ${
-                                                  dayObj.isCurrentMonth
+                                                className={`calendar-day ${dayObj.isCurrentMonth
                                                     ? selectedDate === dayObj.day
                                                       ? "current-month selected"
                                                       : dayObj.isToday
-                                                      ? "current-month today"
-                                                      : "current-month"
+                                                        ? "current-month today"
+                                                        : "current-month"
                                                     : "other-month"
-                                                } ${dayObj.isPast ? "past-date" : ""}`}
+                                                  } ${dayObj.isPast ? "past-date" : ""}`}
                                                 disabled={dayObj.isPast}
                                               >
                                                 {dayObj.day}
@@ -1069,7 +1112,7 @@ const CompletedProjects = ({projectPermission}) => {
                                 </div>
                               </div>
                               <div className="col-md-4 d-flex align-items-end">
-                                <button 
+                                <button
                                   className="btn btn-primary w-100"
                                   onClick={handleUpdateFileStatus}
                                 >
@@ -1086,7 +1129,7 @@ const CompletedProjects = ({projectPermission}) => {
               ))
             ) : (
               <tr>
-                <td colSpan="16" className="text-center text-dark">
+                <td colSpan="15" className="text-center text-dark">
                   No projects found
                 </td>
               </tr>
@@ -1094,7 +1137,7 @@ const CompletedProjects = ({projectPermission}) => {
           </tbody>
         </table>
       )}
-      
+
       {/* Timestamp Modal - FIXED TEXT VISIBILITY */}
       {showTimestampModal && timestampData && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -1102,9 +1145,9 @@ const CompletedProjects = ({projectPermission}) => {
             <div className="modal-content">
               <div className="modal-header bg-light">
                 <h5 className="modal-title text-dark">Project Timeline Details</h5>
-                <button 
-                  type="button" 
-                  className="btn-close" 
+                <button
+                  type="button"
+                  className="btn-close"
                   onClick={() => setShowTimestampModal(false)}
                 ></button>
               </div>
@@ -1135,7 +1178,7 @@ const CompletedProjects = ({projectPermission}) => {
                     </tbody>
                   </table>
                 </div>
-                
+
                 <div className="mt-4">
                   <h6 className="text-dark">Expected vs Actual Timeline</h6>
                   <div className="table-responsive">
@@ -1169,9 +1212,9 @@ const CompletedProjects = ({projectPermission}) => {
                 </div>
               </div>
               <div className="modal-footer bg-light">
-                <button 
-                  type="button" 
-                  className="btn btn-secondary" 
+                <button
+                  type="button"
+                  className="btn btn-secondary"
                   onClick={() => setShowTimestampModal(false)}
                 >
                   Close

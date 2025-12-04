@@ -84,7 +84,7 @@ const generateCalendarDays = (selectedMonth, selectedYear, today) => {
   return days;
 };
 
-const CreateNewProject = () => {
+const CreateNewProject = ({ isEditMode = false, projectId = null, projectData = null }) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -133,16 +133,82 @@ const CreateNewProject = () => {
     currency: "USD",
     cost: 0,
     inrCost: 0,
+    totalPagespers: 0,  
+    totalPages: 0,
     billingMode: "estimated",
     estimatedHrs: 0,
     hourlyRate: 0,
     exchangeRate: 1, // Added for INR conversion
   });
 
+
+  // Add this state near the top of the component
+const [inrConversionRates, setInrConversionRates] = useState({
+  USD: 83, // Default conversion rate for USD to INR
+  EUR: 90, // Default conversion rate for EUR to INR
+  GBP: 105, // Default conversion rate for GBP to INR
+  INR: 1, // No conversion needed for INR
+  JPY: 0.60, // Default conversion rate for JPY to INR
+  CNY: 12, // Default conversion rate for CNY to INR
+});
   // this state is for storing the file data form the ui
   const [fileList, setFileList] = useState([
     { fileName: "", pages: "", application: "" },
   ]);
+
+  // NEW: Populate form data when in edit mode
+  useEffect(() => {
+    if (isEditMode && projectData) {
+      // Parse deadline if available
+      let deadlineDate = null;
+      let deadlineMonth = new Date().getMonth();
+      let deadlineYear = new Date().getFullYear();
+      let deadlineHour = 0;
+      let deadlineMinute = 0;
+      let deadlineIsAM = true;
+
+      if (projectData.deadline && projectData.deadline !== "0000-00-00") {
+        const deadline = new Date(projectData.deadline);
+        deadlineDate = deadline.getDate();
+        deadlineMonth = deadline.getMonth();
+        deadlineYear = deadline.getFullYear();
+        deadlineHour = deadline.getHours() % 12 || 12;
+        deadlineMinute = deadline.getMinutes();
+        deadlineIsAM = deadline.getHours() < 12;
+      }
+
+      setSelectedDate(deadlineDate);
+      setSelectedMonth(deadlineMonth);
+      setSelectedYear(deadlineYear);
+      setSelectedHour(deadlineHour);
+      setSelectedMinute(deadlineMinute);
+      setIsAM(deadlineIsAM);
+
+      // Update form data with project data
+      setFormData({
+        title: projectData.projectTitle || "",
+        client: projectData.clientId || "",
+        country: projectData.country || "",
+        projectManager: projectData.projectManagerId || "",
+        tasks: projectData.taskId ? [projectData.taskId] : [],
+        languages: projectData.languageId ? [projectData.languageId] : [],
+        application: projectData.applicationId ? [projectData.applicationId] : [],
+        files: projectData.files || [{ fileName: "", pageCount: 0, applicationId: "", selected: false }],
+        totalPages: projectData.totalProjectPages || 0,
+        receivedDate: projectData.receiveDate ? projectData.receiveDate.split("T")[0] : new Date().toISOString().split("T")[0],
+        serverPath: projectData.serverPath || "",
+        notes: projectData.notes || "",
+        rate: projectData.perPageRate || 0,
+        currency: projectData.currency || "USD",
+        cost: projectData.totalCost || 0,
+        inrCost: projectData.totalCost || 0, // Assuming this is already in INR or needs conversion
+        billingMode: projectData.perPageRate > 0 ? "perPage" : "estimated",
+        estimatedHrs: projectData.estimatedHours || 0,
+        hourlyRate: projectData.hourlyRate || 0,
+        exchangeRate: 1, // Default value
+      });
+    }
+  }, [isEditMode, projectData]);
 
   // Handle ESC key to close calendar
   useEffect(() => {
@@ -297,13 +363,13 @@ const CreateNewProject = () => {
         files: newFiles.length
           ? newFiles
           : [
-              {
-                fileName: "",
-                pageCount: 0,
-                applicationId: "",
-                selected: false,
-              },
-            ],
+            {
+              fileName: "",
+              pageCount: 0,
+              applicationId: "",
+              selected: false,
+            },
+          ],
       }));
     } catch (error) {
       console.error("Error deleting file:", error);
@@ -311,7 +377,7 @@ const CreateNewProject = () => {
     }
   };
 
-  // Post API
+  // UPDATED: Handle both create and update
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -331,8 +397,8 @@ const CreateNewProject = () => {
     const deadline =
       selectedYear && selectedMonth !== null && selectedDate !== null
         ? `${selectedYear}-${(selectedMonth + 1)
-            .toString()
-            .padStart(2, "0")}-${selectedDate.toString().padStart(2, "0")}`
+          .toString()
+          .padStart(2, "0")}-${selectedDate.toString().padStart(2, "0")}`
         : "0000-00-00";
 
     // Step 1: Prepare project data
@@ -368,27 +434,44 @@ const CreateNewProject = () => {
     };
 
     try {
-      // Step 2: Create project
-      const response = await axios.post(
-        `${BASE_URL}project/addProject`,
-        formDataForApi,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      let response;
+      let projectId;
 
-      const projectId = response?.data?.project?.id;
-
-      console.log("✅ Project created:", response?.data);
+      // Step 2: Create or Update project based on mode
+      if (isEditMode) {
+        // Update existing project
+        response = await axios.patch(
+          `${BASE_URL}project/updateProject/${projectId}`,
+          formDataForApi,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        projectId = projectId; // Use the existing project ID
+        console.log("✅ Project updated:", response?.data);
+      } else {
+        // Create new project
+        response = await axios.post(
+          `${BASE_URL}project/addProject`,
+          formDataForApi,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        projectId = response?.data?.project?.id;
+        console.log("✅ Project created:", response?.data);
+      }
 
       // Get language names for sorting
       const selectedLanguages = languageOptions
         .filter((lang) => formData.languages.includes(lang.value))
         .sort((a, b) => a.label.localeCompare(b.label));
 
-      // Step 3: Create files for each language
+      // Step 3: Create or update files for each language
       for (const lang of selectedLanguages) {
         for (const file of formData.files) {
           const filePayload = {
@@ -401,29 +484,49 @@ const CreateNewProject = () => {
             deadline,
           };
 
-          await axios.post(
-            `${BASE_URL}projectFiles/addProjectFile`,
-            filePayload,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          console.log(
-            "📁 File added for language",
-            lang.label,
-            ":",
-            filePayload
-          );
+          // In edit mode, we might need to update existing files instead of creating new ones
+          if (isEditMode && file.id) {
+            // Update existing file
+            await axios.patch(
+              `${BASE_URL}projectFiles/updateProjectFile/${file.id}`,
+              filePayload,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            console.log(
+              "📁 File updated for language",
+              lang.label,
+              ":",
+              filePayload
+            );
+          } else {
+            // Create new file
+            await axios.post(
+              `${BASE_URL}projectFiles/addProjectFile`,
+              filePayload,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+            console.log(
+              "📁 File added for language",
+              lang.label,
+              ":",
+              filePayload
+            );
+          }
         }
       }
 
-      alert("Project and all files created successfully!");
+      alert(isEditMode ? "Project updated successfully!" : "Project and all files created successfully!");
     } catch (error) {
       console.error("❌ Error:", error);
-      alert("Error creating project or adding files. Please try again.");
+      alert(isEditMode ? "Error updating project. Please try again." : "Error creating project or adding files. Please try again.");
     }
   };
 
@@ -508,7 +611,7 @@ const CreateNewProject = () => {
   const [applicationOptions, setApplicationOptions] = useState([]);
   const [languageOptions, setLanguageOptions] = useState([]);
   const [clientOptions, setClientOptions] = useState([]);
-  const [clientDetails, setClientDetails] = useState({}); // Store client details including currency
+  const [clientDetails, setClientDetails] = useState({}); // Store client details including currency, country, project manager, hourly rate
 
   // Fetch tasks, applications, languages, and clients
   useEffect(() => {
@@ -519,12 +622,15 @@ const CreateNewProject = () => {
       })
       .then((res) => {
         if (res.data.status) {
-          setTaskOptions(
-            res.data.tasks.map((task) => ({
+          // Sort tasks alphabetically by taskName
+          const sortedTasks = res.data.tasks
+            .map((task) => ({
               value: task.id,
               label: task.taskName,
             }))
-          );
+            .sort((a, b) => a.label.localeCompare(b.label));
+
+          setTaskOptions(sortedTasks);
         }
       })
       .catch((err) => console.error("Error fetching tasks:", err));
@@ -536,12 +642,15 @@ const CreateNewProject = () => {
       })
       .then((res) => {
         if (res.data.status) {
-          setApplicationOptions(
-            res.data.application.map((app) => ({
+          // Sort applications alphabetically by applicationName
+          const sortedApplications = res.data.application
+            .map((app) => ({
               value: app.id,
               label: app.applicationName,
             }))
-          );
+            .sort((a, b) => a.label.localeCompare(b.label));
+
+          setApplicationOptions(sortedApplications);
         }
       })
       .catch((err) => console.error("Error fetching applications:", err));
@@ -553,12 +662,15 @@ const CreateNewProject = () => {
       })
       .then((res) => {
         if (res.data.status) {
-          setLanguageOptions(
-            res.data.languages.map((lang) => ({
+          // Sort languages alphabetically by languageName
+          const sortedLanguages = res.data.languages
+            .map((lang) => ({
               value: lang.id,
               label: lang.languageName,
             }))
-          );
+            .sort((a, b) => a.label.localeCompare(b.label));
+
+          setLanguageOptions(sortedLanguages);
         }
       })
       .catch((err) => console.error("Error fetching languages:", err));
@@ -569,20 +681,27 @@ const CreateNewProject = () => {
         headers: { authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        if (res.data.status) {
-          const clients = res.data.clients;
-          setClientOptions(
-            clients.map((client) => ({
+        if (res.data.data) {
+          const clients = res.data.data;
+          // Sort clients alphabetically by clientName
+          const sortedClients = clients
+            .map((client) => ({
               value: client.id,
               label: client.clientName,
             }))
-          );
-          
-          // Store client details including currency
+            .sort((a, b) => a.label.localeCompare(b.label));
+
+          setClientOptions(sortedClients);
+
+          // Store client details including currency, country, project manager, hourly rate
           const details = {};
           clients.forEach(client => {
             details[client.id] = {
-              currency: client.currency || "USD" // Default to USD if not specified
+              currency: client.currency || "USD", // Default to USD if not specified
+              country: client.country || "", // Country from client data
+              projectManagerName: client.projectManagerName || "", // Project manager ID from client data
+              hourlyRate: client.hourlyRate || 0, // Hourly rate from client data
+              // Add any other client-specific fields you need
             };
           });
           setClientDetails(details);
@@ -603,8 +722,8 @@ const CreateNewProject = () => {
       selectedHour === 0
         ? 12
         : selectedHour > 12
-        ? selectedHour - 12
-        : selectedHour;
+          ? selectedHour - 12
+          : selectedHour;
     const time = `${hour.toString().padStart(2, "0")}:${selectedMinute
       .toString()
       .padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
@@ -668,20 +787,30 @@ const CreateNewProject = () => {
           label: data.club.clientName,
         };
 
-        setClientOptions((prev) => [...prev, newOption]);
+        // Insert in sorted position
+        setClientOptions((prev) => {
+          const newOptions = [...prev, newOption];
+          return newOptions.sort((a, b) => a.label.localeCompare(b.label));
+        });
 
-        // Update client details with default currency
+        // Update client details with default values
         setClientDetails(prev => ({
           ...prev,
           [data.club.id]: {
-            currency: "USD" // Default currency
+            currency: "USD", // Default currency
+            country: "", // Default country
+            projectManagerName: "", // Default project manager
+            hourlyRate: 0, // Default hourly rate
           }
         }));
 
         setFormData((prev) => ({
           ...prev,
           client: data.club.id,
-          currency: "USD" // Set default currency
+          currency: "USD", // Set default currency
+          country: "", // Set default country
+          projectManager: "", // Set default project manager
+          hourlyRate: 0, // Set default hourly rate
         }));
 
         setNewClientName("");
@@ -736,7 +865,11 @@ const CreateNewProject = () => {
           label: data.task.taskName,
         };
 
-        setTaskOptions((prev) => [...prev, newOption]);
+        // Insert in sorted position
+        setTaskOptions((prev) => {
+          const newOptions = [...prev, newOption];
+          return newOptions.sort((a, b) => a.label.localeCompare(b.label));
+        });
 
         setFormData((prev) => ({
           ...prev,
@@ -763,6 +896,22 @@ const CreateNewProject = () => {
     }
   };
 
+
+ useEffect(() => {
+  const savedRates = localStorage.getItem("customConversionRates");
+  if (savedRates) {
+    const rates = JSON.parse(savedRates);
+    const rateMap = { ...inrConversionRates }; // Start with default rates
+    
+    // Update with any custom rates from localStorage
+    rates.forEach(rate => {
+      if (rateMap.hasOwnProperty(rate.name)) {
+        rateMap[rate.name] = parseFloat(rate.rate);
+      }
+    });
+    setInrConversionRates(rateMap);
+  }
+}, []);
   // Application functions
   const handleAddApplication = () => {
     setShowApplicationInput((prev) => {
@@ -795,7 +944,11 @@ const CreateNewProject = () => {
           label: data.application.applicationName,
         };
 
-        setApplicationOptions((prev) => [...prev, newOption]);
+        // Insert in sorted position
+        setApplicationOptions((prev) => {
+          const newOptions = [...prev, newOption];
+          return newOptions.sort((a, b) => a.label.localeCompare(b.label));
+        });
 
         setFormData((prev) => ({
           ...prev,
@@ -854,7 +1007,11 @@ const CreateNewProject = () => {
           label: data.language.languageName,
         };
 
-        setLanguageOptions((prev) => [...prev, newOption]);
+        // Insert in sorted position
+        setLanguageOptions((prev) => {
+          const newOptions = [...prev, newOption];
+          return newOptions.sort((a, b) => a.label.localeCompare(b.label));
+        });
 
         setFormData((prev) => ({
           ...prev,
@@ -893,22 +1050,74 @@ const CreateNewProject = () => {
         const workbook = XLSX.read(data, { type: "binary" });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const rows = XLSX.utils.sheet_to_json(sheet);
 
-        // Expecting columns: fileName, pages, applicationId
-        const files = rows.map((row) => ({
-          fileName: row.fileName || "",
-          pageCount: Number(row.pages) || 0,  // Changed from pageCount to pages
-          applicationId: row.applicationId || "",
-          selected: false,
-        }));
+        // ⚠️ CRITICAL: Use header: 1 to preserve original headers as strings
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+        if (!Array.isArray(rows) || rows.length < 2) {
+          alert("Excel file must contain at least one header row and one data row.");
+          return;
+        }
+
+        // Extract headers (first row) and normalize them
+        const rawHeaders = rows[0].map(h => String(h).trim());
+        const normalizedHeaders = rawHeaders.map(h =>
+          h.toLowerCase()
+            .replace(/\s+/g, '')      // remove spaces
+            .replace(/[^a-z0-9]/g, '') // remove special chars
+        );
+
+        // Map of normalized header → original index
+        const headerMap = {};
+        normalizedHeaders.forEach((norm, idx) => {
+          // Map common variations to standard keys
+          if (norm.includes('filename') || norm.includes('file') || norm === 'name') {
+            headerMap['fileName'] = idx;
+          } else if (norm.includes('page') && (norm.includes('count') || norm.includes('total') || norm === 'pages')) {
+            headerMap['pages'] = idx;
+          } else if (norm.includes('application') || norm.includes('app')) {
+            headerMap['applicationId'] = idx;
+          }
+        });
+
+        // Process data rows (skip header row)
+        const files = [];
+        for (let i = 1; i < rows.length; i++) {
+          const row = rows[i];
+          if (!row || row.length === 0) continue;
+
+          // Extract values using mapped indices
+          const fileNameCell = headerMap['fileName'] !== undefined ? row[headerMap['fileName']] : "";
+          const pagesCell = headerMap['pages'] !== undefined ? row[headerMap['pages']] : 0;
+          const applicationCell = headerMap['applicationId'] !== undefined ? row[headerMap['applicationId']] : "";
+
+          // Clean and convert values
+          const fileName = String(fileNameCell || "").trim();
+          const pageCount = Number(pagesCell) || 0;
+          const applicationId = String(applicationCell || "").trim();
+
+          // Skip empty file names
+          if (!fileName) continue;
+
+          files.push({
+            fileName,
+            pageCount,
+            applicationId,
+            selected: false,
+          });
+        }
+
+        if (files.length === 0) {
+          alert("No valid file records found in the Excel sheet.");
+          return;
+        }
 
         setFormData((prev) => ({
           ...prev,
-          files: files.length ? files : prev.files,
+          files,
         }));
 
-        // Clear file errors when new files are uploaded
+        // Clear file errors
         if (errors.files) {
           setErrors((prev) => {
             const newErrors = { ...prev };
@@ -917,10 +1126,10 @@ const CreateNewProject = () => {
           });
         }
 
-        alert("Excel file uploaded successfully!");
+        alert(`Excel file uploaded successfully! ${files.length} file(s) processed.`);
       } catch (error) {
         console.error("Error processing Excel file:", error);
-        alert("Error processing Excel file. Please check the format.");
+        alert("Error processing Excel file. Please ensure it has columns like 'File Name' and 'Pages'.");
       }
     };
     reader.readAsBinaryString(file);
@@ -955,8 +1164,8 @@ const CreateNewProject = () => {
         ? 0
         : hour
       : hour === 12
-      ? 12
-      : hour + 12;
+        ? 12
+        : hour + 12;
     const selectedTime = new Date(
       selectedYear,
       selectedMonth,
@@ -1006,13 +1215,52 @@ const CreateNewProject = () => {
     return years;
   };
 
+
+  // Add this useEffect after the existing ones to calculate and update total pages
+useEffect(() => {
+  // Calculate total pages per language
+  const totalPagesPerLanguage = formData.files.reduce(
+    (sum, file) => sum + (file.pageCount || 0),
+    0
+  );
+  
+  // Calculate total project pages (per language × number of languages)
+  const totalProjectPages = totalPagesPerLanguage * (formData.languages.length || 1);
+  
+  // Update the form data with calculated values
+  setFormData(prev => {
+    const updatedData = {
+      ...prev,
+      totalPagespers: totalPagesPerLanguage,
+      totalPages: totalProjectPages,
+    };
+    
+    // If per page rate is selected, recalculate the cost
+    if (prev.billingMode === "perPage") {
+      const exchangeRate = inrConversionRates[prev.currency] || 1;
+      const cost = prev.rate * totalProjectPages;
+      
+      let inrCost;
+      if (prev.currency === "INR") {
+        inrCost = cost;
+      } else {
+        inrCost = cost * exchangeRate;
+      }
+      
+      updatedData.cost = cost;
+      updatedData.inrCost = inrCost;
+    }
+    
+    return updatedData;
+  });
+}, [formData.files, formData.languages, formData.billingMode, formData.rate, formData.currency, inrConversionRates]);
   return (
     <div>
       <form onSubmit={handleSubmit}>
         {/* Project Title */}
         <div className="row mb-3 col-md-12">
           <label htmlFor="title" className="form-label">
-            Project Title <span className="text-danger">*</span>
+            {isEditMode ? "Edit Project Title" : "Project Title"} <span className="text-danger">*</span>
           </label>
           <input
             type="text"
@@ -1060,13 +1308,13 @@ const CreateNewProject = () => {
                 Client <span className="text-danger">*</span>
               </label>
               {/* <button
-                type="button"
-                className="btn btn-outline-primary"
-                onClick={handleAddClient}
-                title="Add Client"
-              >
-                {showClientInput ? "×" : "+"}
-              </button> */}
+                  type="button"
+                  className="btn btn-outline-primary"
+                  onClick={handleAddClient}
+                  title="Add Client"
+                >
+                  {showClientInput ? "×" : "+"}
+                </button> */}
             </div>
 
             <div className="d-flex align-items-center gap-2 mt-2">
@@ -1078,19 +1326,33 @@ const CreateNewProject = () => {
                   value={
                     formData.client
                       ? clientOptions.find(
-                          (opt) => opt.value === formData.client
-                        )
+                        (opt) => opt.value === formData.client
+                      )
                       : null
                   }
                   onChange={(opt) => {
                     const clientId = opt ? opt.value : "";
+
+                    // Update all client-related fields when a client is selected
                     setFormData((prev) => ({
                       ...prev,
                       client: clientId,
                       // Update currency based on selected client
-                      currency: clientId && clientDetails[clientId] 
-                        ? clientDetails[clientId].currency 
-                        : "USD"
+                      currency: clientId && clientDetails[clientId]
+                        ? clientDetails[clientId].currency
+                        : "USD",
+                      // Update country based on selected client
+                      country: clientId && clientDetails[clientId]
+                        ? clientDetails[clientId].country
+                        : "",
+                      // Update project manager based on selected client
+                      projectManager: clientId && clientDetails[clientId]
+                        ? clientDetails[clientId].projectManager
+                        : "",
+                      // Update hourly rate based on selected client
+                      hourlyRate: clientId && clientDetails[clientId]
+                        ? clientDetails[clientId].hourlyRate
+                        : 0,
                     }));
 
                     // Clear error when client is selected
@@ -1191,13 +1453,13 @@ const CreateNewProject = () => {
                 Task <span className="text-danger">*</span>
               </label>
               {/* <button
-                type="button"
-                className="btn btn-outline-primary"
-                onClick={handleAddTask}
-                title="Add Task"
-              >
-                {showTaskInput ? "×" : "+"}
-              </button> */}
+                  type="button"
+                  className="btn btn-outline-primary"
+                  onClick={handleAddTask}
+                  title="Add Task"
+                >
+                  {showTaskInput ? "×" : "+"}
+                </button> */}
             </div>
 
             <Select
@@ -1207,8 +1469,8 @@ const CreateNewProject = () => {
               value={
                 taskOptions?.length && formData?.tasks?.length
                   ? taskOptions.filter((opt) =>
-                      formData.tasks.includes(opt.value)
-                    )
+                    formData.tasks.includes(opt.value)
+                  )
                   : []
               }
               onChange={(selectedOptions) => {
@@ -1277,13 +1539,13 @@ const CreateNewProject = () => {
                 Applications <span className="text-danger">*</span>
               </label>
               {/* <button
-                type="button"
-                className="btn btn-outline-primary"
-                onClick={handleAddApplication}
-                title="Add Application"
-              >
-                {showApplicationInput ? "×" : "+"}
-              </button> */}
+                  type="button"
+                  className="btn btn-outline-primary"
+                  onClick={handleAddApplication}
+                  title="Add Application"
+                >
+                  {showApplicationInput ? "×" : "+"}
+                </button> */}
             </div>
 
             <Select
@@ -1360,13 +1622,13 @@ const CreateNewProject = () => {
               Languages <span className="text-danger">*</span>
             </label>
             {/* <button
-              type="button"
-              className="btn btn-outline-primary"
-              onClick={handleAddLanguage}
-              title="Add Language"
-            >
-              {showLanguageInput ? "×" : "+"}
-            </button> */}
+                type="button"
+                className="btn btn-outline-primary"
+                onClick={handleAddLanguage}
+                title="Add Language"
+              >
+                {showLanguageInput ? "×" : "+"}
+              </button> */}
           </div>
 
           <Select
@@ -1493,7 +1755,7 @@ const CreateNewProject = () => {
               >
                 <tr className="text-center">
                   <th>
-                    S.No.
+
                     <input
                       type="checkbox"
                       checked={formData.files.every((file) => file.selected)}
@@ -1536,13 +1798,12 @@ const CreateNewProject = () => {
                     <td>
                       <input
                         type="text"
-                        className={`form-control ${
-                          errors.files &&
+                        className={`form-control ${errors.files &&
                           errors.files[idx] &&
                           errors.files[idx].fileName
-                            ? "is-invalid"
-                            : ""
-                        }`}
+                          ? "is-invalid"
+                          : ""
+                          }`}
                         value={file.fileName || ""}
                         onChange={(e) =>
                           handleFileInputChange(idx, "fileName", e.target.value)
@@ -1563,13 +1824,12 @@ const CreateNewProject = () => {
                       <input
                         type="number"
                         min={1}
-                        className={`form-control ${
-                          errors.files &&
+                        className={`form-control ${errors.files &&
                           errors.files[idx] &&
                           errors.files[idx].pageCount
-                            ? "is-invalid"
-                            : ""
-                        }`}
+                          ? "is-invalid"
+                          : ""
+                          }`}
                         value={file.pageCount || ""}
                         onChange={(e) =>
                           handleFileInputChange(
@@ -1592,13 +1852,12 @@ const CreateNewProject = () => {
 
                     <td>
                       <select
-                        className={`form-select ${
-                          errors.files &&
+                        className={`form-select ${errors.files &&
                           errors.files[idx] &&
                           errors.files[idx].applicationId
-                            ? "is-invalid"
-                            : ""
-                        }`}
+                          ? "is-invalid"
+                          : ""
+                          }`}
                         value={file.applicationId || ""}
                         onChange={(e) => {
                           const newAppId = Number(e.target.value);
@@ -1674,32 +1933,82 @@ const CreateNewProject = () => {
         {/* Total Pages */}
         <div className="mb-3">
           <div className="row g-3">
-            <div className="col-md-4">
-              <label className="form-label">Total Pages Per Lang</label>
-              <input
-                type="number"
-                className="form-control"
-                value={formData.files.reduce(
-                  (sum, file) => sum + (file.pageCount || 0),
-                  0
-                )}
-                readOnly
-              />
-            </div>
-            <div className="col-md-4">
-              <label className="form-label">Total Project Pages</label>
-              <input
-                type="number"
-                className="form-control"
-                value={
-                  formData.files.reduce(
-                    (sum, file) => sum + (file.pageCount || 0),
-                    0
-                  ) * (formData.languages.length || 1)
-                }
-                readOnly
-              />
-            </div>
+          <div className="col-md-4">
+  <label className="form-label">Total Pages Per Lang</label>
+  <input
+    type="number"
+    className="form-control"
+    value={formData.totalPagespers}
+    onChange={(e) => {
+      const totalPagesPerLang = Number(e.target.value) || 0;
+      const totalProjectPages = totalPagesPerLang * (formData.languages.length || 1);
+      
+      setFormData((prev) => {
+        const updatedData = {
+          ...prev,
+          totalPagespers: totalPagesPerLang,
+          totalPages: totalProjectPages,
+        };
+        
+        // If per page rate is selected, recalculate the cost
+        if (prev.billingMode === "perPage") {
+          const exchangeRate = inrConversionRates[prev.currency] || 1;
+          const cost = prev.rate * totalProjectPages;
+          
+          let inrCost;
+          if (prev.currency === "INR") {
+            inrCost = cost;
+          } else {
+            inrCost = cost * exchangeRate;
+          }
+          
+          updatedData.cost = cost;
+          updatedData.inrCost = inrCost;
+        }
+        
+        return updatedData;
+      });
+    }}
+  />
+</div>
+           <div className="col-md-4">
+  <label className="form-label">Total Project Pages</label>
+  <input
+    type="number"
+    className="form-control"
+    value={formData.totalPages}
+    onChange={(e) => {
+      const totalProjectPages = Number(e.target.value) || 0;
+      const totalPagesPerLang = totalProjectPages / (formData.languages.length || 1);
+      
+      setFormData((prev) => {
+        const updatedData = {
+          ...prev,
+          totalPages: totalProjectPages,
+          totalPagespers: totalPagesPerLang,
+        };
+        
+        // If per page rate is selected, recalculate the cost
+        if (prev.billingMode === "perPage") {
+          const exchangeRate = inrConversionRates[prev.currency] || 1;
+          const cost = prev.rate * totalProjectPages;
+          
+          let inrCost;
+          if (prev.currency === "INR") {
+            inrCost = cost;
+          } else {
+            inrCost = cost * exchangeRate;
+          }
+          
+          updatedData.cost = cost;
+          updatedData.inrCost = inrCost;
+        }
+        
+        return updatedData;
+      });
+    }}
+  />
+</div>
           </div>
           <div className="form-text text-white">
             Total Project Pages = Total Pages × Language Count
@@ -1714,9 +2023,8 @@ const CreateNewProject = () => {
             </label>
             <input
               type="date"
-              className={`form-control ${
-                errors.receivedDate ? "is-invalid" : ""
-              }`}
+              className={`form-control ${errors.receivedDate ? "is-invalid" : ""
+                }`}
               name="receivedDate"
               value={formData.receivedDate}
               onChange={(e) => {
@@ -1734,14 +2042,13 @@ const CreateNewProject = () => {
             </label>
             <input
               type="text"
-              className={`form-control ${
-                errors.serverPath ? "is-invalid" : ""
-              }`}
+              className={`form-control ${errors.serverPath ? "is-invalid" : ""
+                }`}
               name="serverPath"
               value={formData.serverPath}
               onChange={handleInputChange}
               required
-              placeholder="/projects/client/project-name"
+              s
             />
             {errors.serverPath && (
               <div className="invalid-feedback">{errors.serverPath}</div>
@@ -1815,11 +2122,12 @@ const CreateNewProject = () => {
               value={formData.hourlyRate || ""}
               onChange={(e) => {
                 const rate = parseFloat(e.target.value) || 0;
+                const exchangeRate = inrConversionRates[formData.currency] || 1;
                 setFormData((prev) => ({
                   ...prev,
                   hourlyRate: rate,
                   cost: prev.estimatedHrs * rate,
-                  inrCost: prev.estimatedHrs * rate * (prev.exchangeRate || 1),
+                  inrCost: prev.estimatedHrs * rate * exchangeRate,
                 }));
               }}
               placeholder=""
@@ -1857,56 +2165,77 @@ const CreateNewProject = () => {
                   (sum, file) => sum + (file.pageCount || 0),
                   0
                 );
+                const exchangeRate = inrConversionRates[formData.currency] || 1;
                 setFormData((prev) => ({
                   ...prev,
                   rate: rate,
                   cost: rate * totalPages,
-                  inrCost: rate * totalPages * (prev.exchangeRate || 1),
+                  inrCost: rate * totalPages * exchangeRate,
                 }));
               }}
+
               placeholder="00.00"
               disabled={formData.billingMode !== "perPage"}
             />
             <div className="form-text text-white">(with only 2 decimals)</div>
           </div>
 
-          {/* Currency */}
+          {/* Currency - Fixed to update when client is selected */}
           <div className="col-md-2">
             <label className="form-label">Currency</label>
-            <input
-              type="text"
+            <select
               className="form-control"
               value={formData.currency || "USD"}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  currency: e.target.value,
-                }))
-              }
-              placeholder="Auto from Client"
-              readOnly // Made this read-only since it's auto-updated when client is selected
-            />
+              onChange={(e) => {
+                const newCurrency = e.target.value;
+                setFormData((prev) => {
+                  // If switching TO INR, set Cost = Cost in INR
+                  if (newCurrency === "INR") {
+                    return {
+                      ...prev,
+                      currency: newCurrency,
+                      inrCost: prev.cost,
+                    };
+                  } else {
+                    // For foreign currencies, apply conversion
+                    const exchangeRate = inrConversionRates[newCurrency] || 1;
+                    return {
+                      ...prev,
+                      currency: newCurrency,
+                      inrCost: prev.cost * exchangeRate,
+                    };
+                  }
+                });
+              }}
+            >
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+              <option value="INR">INR</option>
+              <option value="JPY">JPY</option>
+              <option value="CNY">CNY</option>
+            </select>
           </div>
 
           {/* Total Cost */}
+
           <div className="col-md-2">
             <label className="form-label">Total Cost</label>
             <input
               type="text"
               className="form-control"
-              value={formData.cost?.toFixed(2) || "0.00"}
+              value={typeof formData.cost === 'number' ? formData.cost.toFixed(2) : parseFloat(formData.cost || 0).toFixed(2)}
               readOnly
               placeholder="Auto Calculated"
             />
           </div>
 
-          {/* Cost in INR */}
           <div className="col-md-2">
             <label className="form-label">Cost in INR</label>
             <input
               type="text"
               className="form-control"
-              value={formData.inrCost?.toFixed(2) || "0.00"}
+              value={typeof formData.inrCost === 'number' ? formData.inrCost.toFixed(2) : parseFloat(formData.inrCost || 0).toFixed(2)}
               readOnly
               placeholder="Auto Calculated"
             />
@@ -1938,18 +2267,18 @@ const CreateNewProject = () => {
                       {selectedHour === 0
                         ? "12"
                         : selectedHour > 12
-                        ? selectedHour - 12
-                        : selectedHour.toString().padStart(2, "0")}
+                          ? selectedHour - 12
+                          : selectedHour.toString().padStart(2, "0")}
                       :{selectedMinute.toString().padStart(2, "0")}
                     </div>
                     <div className="period">{isAM ? "AM" : "PM"}</div>
                     <div className="date">
                       {selectedDate !== null
                         ? `${selectedDate.toString().padStart(2, "0")}-${(
-                            selectedMonth + 1
-                          )
-                            .toString()
-                            .padStart(2, "0")}-${selectedYear
+                          selectedMonth + 1
+                        )
+                          .toString()
+                          .padStart(2, "0")}-${selectedYear
                             .toString()
                             .slice(-2)}`
                         : "00-00-00"}
@@ -1974,11 +2303,10 @@ const CreateNewProject = () => {
                                   <button
                                     key={hour}
                                     onClick={() => setSelectedHour(hour)}
-                                    className={`time-option ${
-                                      selectedHour === hour
-                                        ? "selected-hour"
-                                        : ""
-                                    } ${isPast ? "past-time" : ""}`}
+                                    className={`time-option ${selectedHour === hour
+                                      ? "selected-hour"
+                                      : ""
+                                      } ${isPast ? "past-time" : ""}`}
                                     disabled={isPast}
                                   >
                                     {hour.toString().padStart(2, "0")}
@@ -2005,11 +2333,10 @@ const CreateNewProject = () => {
                                 <button
                                   key={minute}
                                   onClick={() => setSelectedMinute(minute)}
-                                  className={`time-option ${
-                                    selectedMinute === minute
-                                      ? "selected-minute"
-                                      : ""
-                                  } ${isPast ? "past-time" : ""}`}
+                                  className={`time-option ${selectedMinute === minute
+                                    ? "selected-minute"
+                                    : ""
+                                    } ${isPast ? "past-time" : ""}`}
                                   disabled={isPast}
                                 >
                                   {minute.toString().padStart(2, "0")}
@@ -2025,17 +2352,15 @@ const CreateNewProject = () => {
                         <div className="period-options">
                           <button
                             onClick={() => setIsAM(true)}
-                            className={`period-option ${
-                              isAM ? "selected" : ""
-                            }`}
+                            className={`period-option ${isAM ? "selected" : ""
+                              }`}
                           >
                             AM
                           </button>
                           <button
                             onClick={() => setIsAM(false)}
-                            className={`period-option ${
-                              !isAM ? "selected" : ""
-                            }`}
+                            className={`period-option ${!isAM ? "selected" : ""
+                              }`}
                           >
                             PM
                           </button>
@@ -2104,15 +2429,14 @@ const CreateNewProject = () => {
                               !dayObj.isPast &&
                               setSelectedDate(dayObj.day)
                             }
-                            className={`calendar-day ${
-                              dayObj.isCurrentMonth
-                                ? selectedDate === dayObj.day
-                                  ? "current-month selected"
-                                  : dayObj.isToday
+                            className={`calendar-day ${dayObj.isCurrentMonth
+                              ? selectedDate === dayObj.day
+                                ? "current-month selected"
+                                : dayObj.isToday
                                   ? "current-month today"
                                   : "current-month"
-                                : "other-month"
-                            } ${dayObj.isPast ? "past-date" : ""}`}
+                              : "other-month"
+                              } ${dayObj.isPast ? "past-date" : ""}`}
                             disabled={dayObj.isPast}
                           >
                             {dayObj.day}
@@ -2165,7 +2489,7 @@ const CreateNewProject = () => {
             </div>
           </div>
           <button type="submit" className="btn btn-warning fw-bold">
-            Save changes
+            {isEditMode ? "Update Project" : "Save changes"}
           </button>
         </div>
       </form>

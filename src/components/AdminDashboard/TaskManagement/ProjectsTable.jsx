@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useRef, useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Calendar, Trash2, Upload } from "lucide-react";
 import BASE_URL from "../../../config";
 
 const ProjectsTable = ({
@@ -10,27 +11,29 @@ const ProjectsTable = ({
   onDeleteProject,
   onReassign,
   onViewDetails,
+  currentUserId,
+  userRole,
 }) => {
   const scrollContainerRef = useRef(null);
   const fakeScrollbarRef = useRef(null);
   const tableWrapperRef = useRef(null);
   const token = localStorage.getItem("authToken");
+  const calendarRef = useRef(null);
   
-  // Try multiple possible keys for user ID
   const [userId, setUserId] = useState(null);
-
   const [Employeeprojects, setEmployeeProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [expandedRow, setExpandedRow] = useState(null); // tracks which project row is expanded
-  const [projectFiles, setProjectFiles] = useState({}); // stores files for each project
+  const [expandedRow, setExpandedRow] = useState(null);
+  const [projectFiles, setProjectFiles] = useState({});
   const [filesLoading, setFilesLoading] = useState(false);
-  const [projectDetails, setProjectDetails] = useState({}); // stores detailed project info
-  const [inputValue, setInputValue] = useState(""); // for the input field at the bottom
+  const [projectDetails, setProjectDetails] = useState({});
+  const [inputValue, setInputValue] = useState("");
   const [readyForOCDue, setReadyForOCDue] = useState('');
   const [ocAllocatedHours, setOCAllocatedHours] = useState(0);
   const [ocDue, setOCDue] = useState('-');
   const [priority, setPriority] = useState('Mid');
-  const [currentProjectId, setCurrentProjectId] = useState(null); // Track the current project being edited
+  const [currentProjectId, setCurrentProjectId] = useState(null);
+  const [fileDeadlines, setFileDeadlines] = useState({});
   
   // Reassign modal state
   const [showReassignModal, setShowReassignModal] = useState(false);
@@ -38,12 +41,21 @@ const ProjectsTable = ({
   const [availableEmployees, setAvailableEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [reassignLoading, setReassignLoading] = useState(false);
-  
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [selectedHour, setSelectedHour] = useState(0);
+  const [selectedMinute, setSelectedMinute] = useState(0);
+  const [isAM, setIsAM] = useState(true);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const today = new Date();
+
   // Details modal state
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [projectFullDetails, setProjectFullDetails] = useState({});
   const [detailsLoading, setDetailsLoading] = useState(false);
-   const [fileHandlers, setFileHandlers] = useState({});
+  const [fileHandlers, setFileHandlers] = useState({});
+  
   const getStatusColor = (status) => {
     switch (status) {
       case "In Progress":
@@ -59,7 +71,6 @@ const ProjectsTable = ({
     }
   };
 
-  // Map status to a default progress percentage
   const getStatusProgress = (status) => {
     switch (status) {
       case "In Progress":
@@ -71,14 +82,18 @@ const ProjectsTable = ({
       case "Completed":
         return 100;
       default:
-        return 10; // small default for unknown or not started
+        return 10;
     }
   };
 
   // Try to get user ID from various sources
   useEffect(() => {
+    if (currentUserId) {
+      setUserId(currentUserId);
+      return;
+    }
+    
     const getUserId = () => {
-      // Try multiple possible keys
       const possibleKeys = [
         "userId", 
         "id", 
@@ -97,7 +112,6 @@ const ProjectsTable = ({
         }
       }
       
-      // Try to parse user info from token if it's a JWT
       if (token) {
         try {
           const tokenParts = token.split('.');
@@ -105,7 +119,6 @@ const ProjectsTable = ({
             const payload = JSON.parse(atob(tokenParts[1]));
             console.log("Token payload:", payload);
             
-            // Check various possible ID fields in the token
             const idFields = ["userId", "id", "user_id", "sub", "managerId", "employeeId"];
             for (const field of idFields) {
               if (payload[field]) {
@@ -125,22 +138,11 @@ const ProjectsTable = ({
     
     const id = getUserId();
     setUserId(id);
-    
-    // If no user ID is found, show an alert
-    if (!id) {
-      console.error("User ID not found. Please check localStorage keys or token format.");
-      // We don't show an alert here because it might be annoying for the user
-      // Instead, we'll handle it when they try to reassign
-    }
-  }, [token]);
+  }, [token, currentUserId]);
 
   // Fetch project files for a specific project
   const fetchProjectFiles = async (projectId) => {
-    // If we already have the files for this project, don't fetch again
-    if (projectFiles[projectId]) {
-      return;
-    }
-
+    // Always fetch files when expanding a row
     setFilesLoading(true);
     try {
       const response = await axios.get(`${BASE_URL}projectFiles/getAllProjectFiles`, {
@@ -153,11 +155,20 @@ const ProjectsTable = ({
         }
       });
 
-      // Store files for this project
+      console.log("Files response:", response.data);
+
+      let filteredFiles = response.data.data.filter(file => file.projectId === projectId);
+      
+      if (userRole !== 'admin' && userRole !== 'manager' && userId) {
+        filteredFiles = filteredFiles.filter(file => file.assignedTo === userId);
+      }
+      
       setProjectFiles(prev => ({
         ...prev,
-        [projectId]: response.data.data.filter(file => file.projectId === projectId)
+        [projectId]: filteredFiles
       }));
+      
+      console.log("Filtered files:", filteredFiles);
     } catch (err) {
       console.error("Error fetching project files", err);
     } finally {
@@ -167,7 +178,6 @@ const ProjectsTable = ({
 
   // Fetch detailed project information
   const fetchProjectDetails = async (projectId) => {
-    // If we already have the details for this project, don't fetch again
     if (projectDetails[projectId]) {
       return;
     }
@@ -183,7 +193,6 @@ const ProjectsTable = ({
         }
       });
 
-      // Store project details
       setProjectDetails(prev => ({
         ...prev,
         [projectId]: response.data.data
@@ -231,7 +240,6 @@ const ProjectsTable = ({
       });
       console.log("api response", response.data.data);
       
-      
       setAvailableEmployees(response.data.data);
     } catch (err) {
       console.error("Error fetching available employees", err);
@@ -242,14 +250,13 @@ const ProjectsTable = ({
   // Handle Reassign button click
   const handleReassignClick = (project) => {
     setSelectedProject(project);
-    // Fetch employees from the same team as the project
     fetchAvailableEmployees(project.applicationName === "Adobe" ? "Adobe" : 
                           project.applicationName === "MS Office" ? "MS Office" : "QA");
     setShowReassignModal(true);
   };
 
   // Handle project reassignment
-const handleReassignSubmit = async () => {
+  const handleReassignSubmit = async () => {
     if (!selectedEmployee) {
       alert("Please select an employee to reassign the project");
       return;
@@ -257,19 +264,16 @@ const handleReassignSubmit = async () => {
 
     setReassignLoading(true);
     try {
-      // Get the selected employee details
       const employee = availableEmployees.find(emp => emp.id === parseInt(selectedEmployee));
       if (!employee) {
         alert("Invalid employee selected");
         return;
       }
 
-      // Make the API call to reassign the project
-      // Using project ID in the URL instead of user ID
       const response = await axios.put(
-        `${BASE_URL}project/projects/manager/${selectedProject.id}`, // Using project ID in the URL
+        `${BASE_URL}project/projects/manager/${selectedProject.id}`,
         {
-          projectManagerId: parseInt(selectedEmployee) // Send the selected employee ID as projectManagerId
+          projectManagerId: parseInt(selectedEmployee)
         },
         {
           headers: {
@@ -284,11 +288,9 @@ const handleReassignSubmit = async () => {
         setShowReassignModal(false);
         setSelectedEmployee('');
         
-        // Update the project in the state to move it to the new employee
         setEmployeeProjects(prev => {
           const newProjects = [...prev];
           
-          // Find the project and remove it from its current employee
           let projectToMove = null;
           let sourceEmployeeIndex = -1;
           let projectIndex = -1;
@@ -305,10 +307,8 @@ const handleReassignSubmit = async () => {
                 empId: employee.empId
               };
               
-              // Remove the project from its current employee
               newProjects[i].projects.splice(projIndex, 1);
               
-              // If the employee has no more projects, remove them from the list
               if (newProjects[i].projects.length === 0) {
                 newProjects.splice(i, 1);
               }
@@ -317,16 +317,12 @@ const handleReassignSubmit = async () => {
             }
           }
           
-          // If we found the project, add it to the new employee
           if (projectToMove) {
-            // Check if the new employee already exists in our list
             let targetEmployeeIndex = newProjects.findIndex(emp => emp.empId === employee.empId);
             
             if (targetEmployeeIndex !== -1) {
-              // Add the project to the existing employee
               newProjects[targetEmployeeIndex].projects.push(projectToMove);
             } else {
-              // Create a new employee entry
               const team = employee.designation?.toLowerCase().includes("qa") ? "QA" :
                           employee.designation?.toLowerCase().includes("adobe") ? "Adobe" :
                           employee.designation?.toLowerCase().includes("ms office") ? "MS Office" : "Other";
@@ -338,7 +334,6 @@ const handleReassignSubmit = async () => {
                 projects: [projectToMove]
               });
               
-              // Sort employees by Employee ID in ascending order
               newProjects.sort((a, b) => a.empId.localeCompare(b.empId));
             }
           }
@@ -346,7 +341,6 @@ const handleReassignSubmit = async () => {
           return newProjects;
         });
         
-        // Notify parent component if needed
         if (onReassign) {
           onReassign(selectedProject.id, selectedEmployee);
         }
@@ -365,15 +359,156 @@ const handleReassignSubmit = async () => {
     }
   };
 
-  // Handle Details button click
+  const getDaysInMonth = (month, year) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (month, year) => {
+    return new Date(year, month, 1).getDay();
+  };
+
+  const generateCalendarDays = (selectedMonth, selectedYear, today) => {
+    const daysInMonth = getDaysInMonth(selectedMonth, selectedYear);
+    const firstDay = getFirstDayOfMonth(selectedMonth, selectedYear);
+    const days = [];
+
+    const prevMonth = selectedMonth === 0 ? 11 : selectedMonth - 1;
+    const prevYear = selectedMonth === 0 ? selectedYear - 1 : selectedYear;
+    const daysInPrevMonth = getDaysInMonth(prevMonth, prevYear);
+
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const day = daysInPrevMonth - i;
+      const isPast =
+        prevYear < today.getFullYear() ||
+        (prevYear === today.getFullYear() && prevMonth < today.getMonth()) ||
+        (prevYear === today.getFullYear() &&
+          prevMonth === today.getMonth() &&
+          day < today.getDate());
+
+      days.push({
+        day,
+        isCurrentMonth: false,
+        isNextMonth: false,
+        isPast,
+      });
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const isToday =
+        selectedYear === today.getFullYear() &&
+        selectedMonth === today.getMonth() &&
+        day === today.getDate();
+      const isPast =
+        selectedYear < today.getFullYear() ||
+        (selectedYear === today.getFullYear() &&
+          selectedMonth < today.getMonth()) ||
+        (selectedYear === today.getFullYear() &&
+          selectedMonth === today.getMonth() &&
+          day < today.getDate());
+
+      days.push({
+        day,
+        isCurrentMonth: true,
+        isNextMonth: false,
+        isToday,
+        isPast,
+      });
+    }
+
+    const remainingDays = 42 - days.length;
+    for (let day = 1; day <= remainingDays; day++) {
+      days.push({
+        day,
+        isCurrentMonth: false,
+        isNextMonth: true,
+        isPast: false,
+      });
+    }
+
+    return days;
+  };
+
+  const calendarDays = generateCalendarDays(selectedMonth, selectedYear, today);
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  
+  const weekDays = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+  
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = currentYear; i <= currentYear + 10; i++) {
+      years.push(i);
+    }
+    return years;
+  };
+
+  const handlePrevMonth = () => {
+    if (selectedMonth === 0) {
+      setSelectedMonth(11);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (selectedMonth === 11) {
+      setSelectedMonth(0);
+      setSelectedYear(selectedYear + 1);
+    } else {
+      setSelectedMonth(selectedMonth + 1);
+    }
+  };
+
+  const isTimeInPast = (hour, minute, isAM, date) => {
+    if (
+      !date ||
+      date !== today.getDate() ||
+      selectedMonth !== today.getMonth() ||
+      selectedYear !== today.getFullYear()
+    ) {
+      return false;
+    }
+
+    const selectedHour24 = isAM
+      ? hour === 12
+        ? 0
+        : hour
+      : hour === 12
+      ? 12
+      : hour + 12;
+    const selectedTime = new Date(
+      selectedYear,
+      selectedMonth,
+      date,
+      selectedHour24,
+      minute
+    );
+    const now = new Date();
+
+    return selectedTime < now;
+  };
+
   const handleDetailsClick = (projectId) => {
     fetchFullProjectDetails(projectId);
   };
 
-  // Handle save button click
   useEffect(() => {
     if (ocAllocatedHours > 0 && readyForOCDue) {
-      // This is a simple calculation - you might need to adjust based on your business logic
       try {
         const dueDate = new Date(readyForOCDue);
         dueDate.setHours(dueDate.getHours() + ocAllocatedHours);
@@ -387,93 +522,80 @@ const handleReassignSubmit = async () => {
     }
   }, [ocAllocatedHours, readyForOCDue]);
 
- const handleSave = async () => {
-  if (!currentProjectId) {
-    alert('No project selected');
-    return;
-  }
-
-  try {
-    // Calculate the QC due date properly
-    let qcDueDateValue = null;
-    if (readyForOCDue && ocAllocatedHours > 0) {
-      try {
-        const dueDate = new Date(readyForOCDue);
-        dueDate.setHours(dueDate.getHours() + ocAllocatedHours);
-        qcDueDateValue = dueDate.toISOString().slice(0, 16);
-      } catch (err) {
-        console.error("Error calculating due date", err);
-      }
+  const handleSave = async () => {
+    if (!currentProjectId) {
+      alert('No project selected');
+      return;
     }
 
-    // Prepare the data for the API call
-    const updateData = {
-      readyQCDeadline: readyForOCDue,
-      qcHrs: ocAllocatedHours,
-      qcDueDate: qcDueDateValue,
-      status: priority === 'High' ? 'In Progress' : 'Ready for QA'
-    };
-
-    // Make the API call to update the project
-    const response = await axios.patch(
-      `${BASE_URL}project/updateProject/${currentProjectId}`,
-      updateData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    // Check if the response status is in the 2xx range (success)
-    if (response.status >= 200 && response.status < 300) {
-      alert('Data saved successfully!');
-      
-      // Update the project details in the state
-      setProjectDetails(prev => ({
-        ...prev,
-        [currentProjectId]: {
-          ...prev[currentProjectId],
-          ...updateData
+    try {
+      let qcDueDateValue = null;
+      if (readyForOCDue && ocAllocatedHours > 0) {
+        try {
+          const dueDate = new Date(readyForOCDue);
+          dueDate.setHours(dueDate.getHours() + ocAllocatedHours);
+          qcDueDateValue = dueDate.toISOString().slice(0, 16);
+        } catch (err) {
+          console.error("Error calculating due date", err);
         }
-      }));
-      
-      // Reset form
-      setReadyForOCDue('');
-      setOCAllocatedHours(0);
-      setOCDue('-');
-      setPriority('Mid');
-      setInputValue('');
-    } else {
-      // Handle non-success status codes
-      alert(`Failed to save data: Server returned status ${response.status}`);
+      }
+
+      const updateData = {
+        readyQCDeadline: readyForOCDue,
+        qcHrs: ocAllocatedHours,
+        qcDueDate: qcDueDateValue,
+        status: priority === 'High' ? 'In Progress' : 'Ready for QA'
+      };
+
+      const response = await axios.patch(
+        `${BASE_URL}project/updateProject/${currentProjectId}`,
+        updateData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status >= 200 && response.status < 300) {
+        alert('Data saved successfully!');
+        
+        setProjectDetails(prev => ({
+          ...prev,
+          [currentProjectId]: {
+            ...prev[currentProjectId],
+            ...updateData
+          }
+        }));
+        
+        setReadyForOCDue('');
+        setOCAllocatedHours(0);
+        setOCDue('-');
+        setPriority('Mid');
+        setInputValue('');
+      } else {
+        alert(`Failed to save data: Server returned status ${response.status}`);
+      }
+    } catch (err) {
+      console.error("Error updating project", err);
+      if (err.response) {
+        console.error("Error response data:", err.response.data);
+        console.error("Error response status:", err.response.status);
+        console.error("Error response headers:", err.response.headers);
+        alert(`Error saving data: ${err.response.status} - ${err.response.data?.message || err.message}`);
+      } else if (err.request) {
+        console.error("Error request:", err.request);
+        alert('Error saving data: No response from server');
+      } else {
+        console.error('Error message:', err.message);
+        alert('Error saving data: ' + err.message);
+      }
     }
-  } catch (err) {
-    console.error("Error updating project", err);
-    if (err.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      console.error("Error response data:", err.response.data);
-      console.error("Error response status:", err.response.status);
-      console.error("Error response headers:", err.response.headers);
-      alert(`Error saving data: ${err.response.status} - ${err.response.data?.message || err.message}`);
-    } else if (err.request) {
-      // The request was made but no response was received
-      console.error("Error request:", err.request);
-      alert('Error saving data: No response from server');
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      console.error('Error message:', err.message);
-      alert('Error saving data: ' + err.message);
-    }
-  }
-};
+  };
 
   const handleClose = () => {
-    // Implement close functionality
     if (window.confirm('Are you sure you want to close without saving?')) {
-      // Reset form or navigate away
       setReadyForOCDue('');
       setOCAllocatedHours(0);
       setOCDue('-');
@@ -482,7 +604,6 @@ const handleReassignSubmit = async () => {
     }
   };
 
-  // Handle clear button click
   const handleClear = () => {
     setInputValue("");
   };
@@ -518,7 +639,6 @@ const handleReassignSubmit = async () => {
     fakeScrollbar.addEventListener("scroll", handleFakeScroll);
     window.addEventListener("resize", updateScrollbar);
 
-
     return () => {
       scrollContainer.removeEventListener("scroll", handleScroll);
       fakeScrollbar.removeEventListener("scroll", handleFakeScroll);
@@ -526,67 +646,142 @@ const handleReassignSubmit = async () => {
     };
   }, [Employeeprojects]);
 
-   const [members, setMembers] = useState([]);
+  const [members, setMembers] = useState([]);
   
-   useEffect(() => {
+  useEffect(() => {
     const fetchMembers = async () => {
       try {
         const response = await axios.get(`${BASE_URL}member/getAllMembers`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log("API Response:", response.data); // Add this for debugging
+        console.log("API Response:", response.data);
         
         if (response.data && response.data.status) {
           setMembers(response.data.data);
-          console.log("Members set:", response.data.data); // Add this for debugging
+          console.log("Members set:", response.data.data);
         } else {
           console.error("Invalid response format:", response.data);
         }
       } catch (error) {
         console.error("Error fetching members:", error);
-        // You might want to add error state handling here
       }
     };
   
     fetchMembers();
-  }, [token]); // Add token as a dependency if it's not already defined inside the component
-  
+  }, [token]);
 
-   const handleHandlerChange = async (fileId, newHandler) => {
-      try {
-        // Call API to assign handler to file
-        const response = await axios.patch(
-          `${BASE_URL}projectFiles/assignHandler/${fileId}`,
-          { handler: newHandler },
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            }
+  const handleHandlerChange = async (fileId, newHandler) => {
+    try {
+      const response = await axios.patch(
+        `${BASE_URL}projectFiles/assignHandler/${fileId}`,
+        { handler: newHandler },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
-        );
-  
-        if (response.data.status) {
-          // Update local state only if API call was successful
-          const updatedHandlers = { ...fileHandlers };
-          updatedHandlers[fileId] = newHandler;
-          setFileHandlers(updatedHandlers);
-          
-          // Show success message
-          alert("Handler assigned successfully!");
-        } else {
-          // Revert the change if API call failed
-          alert("Failed to assign handler: " + response.data.message);
         }
-      } catch (error) {
-        console.error("Error assigning handler:", error);
-        alert("Error assigning handler: " + (error.response?.data?.message || error.message));
-      }
-    };
+      );
 
+      if (response.data.status) {
+        const updatedHandlers = { ...fileHandlers };
+        updatedHandlers[fileId] = newHandler;
+        setFileHandlers(updatedHandlers);
+        
+        alert("Handler assigned successfully!");
+      } else {
+        alert("Failed to assign handler: " + response.data.message);
+      }
+    } catch (error) {
+      console.error("Error assigning handler:", error);
+      alert("Error assigning handler: " + (error.response?.data?.message || error.message));
+    }
+  };
+
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "-";
     
+    const date = new Date(dateString);
+    
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    hours = hours.toString().padStart(2, '0');
+    
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear().toString().slice(-2);
+    
+    return `${hours}:${minutes} ${ampm} ${day}-${month}-${year}`;
+  };
+
+  const setDeadlineFromCalendar = (projectId) => {
+    if (selectedDate === null) {
+      alert("Please select a date");
+      return;
+    }
+
+    const newDeadline = new Date(selectedYear, selectedMonth, selectedDate);
+    const hour24 = isAM
+      ? selectedHour === 12
+        ? 0
+        : selectedHour
+      : selectedHour === 12
+      ? 12
+      : selectedHour + 12;
+    
+    newDeadline.setHours(hour24, selectedMinute, 0, 0);
+    const formattedDate = newDeadline.toISOString().slice(0, 16);
+    
+    setFileDeadlines(prev => ({
+      ...prev,
+      [projectId]: formattedDate
+    }));
+    
+    setReadyForOCDue(formattedDate);
+    setCalendarOpen(false);
+  };
+
+  const saveFileStatusUpdates = async (projectId) => {
+    try {
+      const files = projectFiles[projectId];
+      
+      if (!files || files.length === 0) {
+        alert("No files to update");
+        return;
+      }
+      
+      const updateData = {
+        projectId: projectId,
+        deadline: fileDeadlines[projectId] || null,
+      };
+
+      const response = await axios.patch(
+        `${BASE_URL}project/updateProjectFiles/${projectId}`,
+        updateData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      
+      if (response.status >= 200 && response.status < 300) {
+        alert('Files updated successfully!');
+      } else {
+        alert(`Failed to update files: Server returned status ${response.status}`);
+      }
+    } catch (err) {
+      console.error("Error updating files", err);
+      alert(`Error updating files: ${err.response?.data?.message || err.message}`);
+    }
+  };
+
+  // Main useEffect to process projects data
   useEffect(() => {
-    // If we're using filtered projects from props, transform them to match the expected structure
     if (projects && projects.length > 0) {
       // Group projects by employee for display
       const groupedByEmployee = {};
@@ -634,7 +829,30 @@ const handleReassignSubmit = async () => {
       });
 
       // Convert to array and sort by employee ID
-      const employeeArray = Object.values(groupedByEmployee);
+      let employeeArray = Object.values(groupedByEmployee);
+      
+      // Team Filter Logic
+      if (teamFilter !== "All") {
+        if (teamFilter === "QA") {
+          // QA team can see all projects
+          // No filtering needed
+        } else {
+          // Adobe and MS Office teams can only see projects assigned by their manager
+          employeeArray = employeeArray.map(employee => {
+            const filteredProjects = employee.projects.filter(project => 
+              project.applicationName === teamFilter && 
+              (isManager || project.assignedByManager)
+            );
+            
+            return {
+              ...employee,
+              projects: filteredProjects
+            };
+          }).filter(employee => employee.projects.length > 0);
+        }
+      }
+      
+      // Sort employees by Employee ID in ascending order
       employeeArray.sort((a, b) => a.empId.localeCompare(b.empId));
 
       setEmployeeProjects(employeeArray);
@@ -653,14 +871,23 @@ const handleReassignSubmit = async () => {
           let filteredData = res.data.data;
 
           if (teamFilter !== "All") {
-            filteredData = res.data.data.filter(employee => {
-              // Determine employee team based on their projects or designation
-              const employeeTeam = employee.designation?.toLowerCase().includes("qa") ? "QA" :
-                employee.projects?.some(p => p.applicationName === "Adobe") ? "Adobe" :
-                  employee.projects?.some(p => p.applicationName === "MS Office") ? "MS Office" : "Other";
-
-              return employeeTeam === teamFilter;
-            });
+            if (teamFilter === "QA") {
+              // QA team can see all projects
+              // No filtering needed
+            } else {
+              // Adobe and MS Office teams can only see projects assigned by their manager
+              filteredData = res.data.data.map(employee => {
+                const filteredProjects = employee.projects.filter(project => 
+                  project.applicationName === teamFilter && 
+                  (isManager || project.assignedByManager)
+                );
+                
+                return {
+                  ...employee,
+                  projects: filteredProjects
+                };
+              }).filter(employee => employee.projects.length > 0);
+            }
           }
 
           // Sort employees by Employee ID in ascending order
@@ -674,7 +901,7 @@ const handleReassignSubmit = async () => {
           setLoading(false);
         });
     }
-  }, [projects, teamFilter, token]);
+  }, [projects, teamFilter, token, isManager]);
 
   const toggleRow = (projId) => {
     setExpandedRow((prev) => {
@@ -684,7 +911,7 @@ const handleReassignSubmit = async () => {
       if (newExpandedRow === projId) {
         fetchProjectFiles(projId);
         fetchProjectDetails(projId);
-        setCurrentProjectId(projId); // Set the current project ID when expanding
+        setCurrentProjectId(projId);
         
         // Pre-populate form with existing data if available
         if (projectDetails[projId]) {
@@ -693,7 +920,6 @@ const handleReassignSubmit = async () => {
           setOCAllocatedHours(details.qcHrs || 0);
           setPriority(details.priority || 'Mid');
           
-          // Calculate OC Due if we have both values
           if (details.readyQCDeadline && details.qcHrs) {
             try {
               const dueDate = new Date(details.readyQCDeadline);
@@ -825,7 +1051,6 @@ const handleReassignSubmit = async () => {
                       <th>Language</th>
                       <th>Application</th>
                       <th>Total Pages</th>
-                      <th>Assigned Pages</th>
                       <th>Deadline</th>
                       <th>Ready For Qc Deadline</th>
                       <th>QC Due</th>
@@ -846,14 +1071,12 @@ const handleReassignSubmit = async () => {
                           <td>{proj.languageName}</td>
                           <td>{proj.applicationName}</td>
                           <td>{proj.totalProjectPages}</td>
-                          <td>54</td>
-                          <td>{proj.qcDueDate}</td>
+                          <td>{formatDateTime(proj.deadline)}</td>
+                          <td>{formatDateTime(proj.readyQCDeadline)}</td>
                           <td>{proj.qcHrs}</td>
-                          <td>{proj.receiveDate}</td>
                           <td>{proj.status}</td>
                           <td>
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                              {/* Progress Bar */}
                               <div className="progress w-100" style={{ height: "24px" }}>
                                 <div
                                   className={`progress-bar ${getStatusColor(proj.status)}`}
@@ -874,7 +1097,6 @@ const handleReassignSubmit = async () => {
                                 />
                               </div>
 
-                              {/* Status & Percentage Below */}
                               <div style={{ marginTop: "4px", fontSize: "12px", textAlign: "center" }}>
                                 <strong>
                                   {proj?.progress && proj.progress > 0
@@ -939,7 +1161,7 @@ const handleReassignSubmit = async () => {
                               >
                                 <h5 style={{ marginBottom: "15px" }}>Project Files</h5>
 
-                                {/* Project Files Section - Matching the screenshot exactly */}
+                                {/* Project Files Section - Fixed to show files correctly */}
                                 {filesLoading ? (
                                   <p>Loading files...</p>
                                 ) : projectFiles[proj.id] && projectFiles[proj.id].length > 0 ? (
@@ -956,21 +1178,34 @@ const handleReassignSubmit = async () => {
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        {projectFiles[proj.id].map((file) => (
-                                          <tr key={file.projectFileId}>
-                                            <td>{file.fileName}</td>
-                                            <td>{file.pages}</td>
+                                        {employee[proj.id].map((file) => (
+                                          <tr key={file.projectFileId || file.id}>
+                                            <td>
+                                              {file.fileName ? (
+                                                <a 
+                                                  href={file.fileUrl || '#'} 
+                                                  target="_blank" 
+                                                  rel="noopener noreferrer"
+                                                  style={{ color: '#4dabf7' }}
+                                                >
+                                                  {file.fileName}
+                                                </a>
+                                              ) : (
+                                                "No file name"
+                                              )}
+                                            </td>
+                                            <td>{file.pages || 0}</td>
                                             <td>
                                               <span className={`badge ${file.fileStatus === "Completed" ? "bg-success" : "bg-warning"}`}>
-                                                {file.languageName}
+                                                {file.languageName || "N/A"}
                                               </span>
                                             </td>
-                                            <td>{file.applicationName}</td>
+                                            <td>{file.applicationName || "N/A"}</td>
                                             <td>
                                               <select
-                                                className="form-select form-select-sm"
-                                                value={fileHandlers[file.id] || ""}
-                                                onChange={(e) => handleHandlerChange(file.id, e.target.value)}
+                                                className="form-select form-select-sm bg-card"
+                                                value={fileHandlers[file.projectFileId || file.id] || file.handler || ""}
+                                                onChange={(e) => handleHandlerChange(file.projectFileId || file.id, e.target.value)}
                                               >
                                                 <option value="">Not Assigned</option>
                                                 {members && members.length > 0 ? (
@@ -984,34 +1219,286 @@ const handleReassignSubmit = async () => {
                                                 )}
                                               </select>
                                             </td>
-                                            <td>{file.fileStatus}</td>
+                                            <td>{file.fileStatus || "N/A"}</td>
                                           </tr>
                                         ))}
                                       </tbody>
                                     </table>
 
-                                    {/* Input area with Save and Clear buttons - matching the screenshot */}
-                                    <div className=" mt-4">
+                                    {/* Input area with Save and Clear buttons */}
+                                    <div className="mt-4">
                                       <div className="card" style={{ backgroundColor: '#1a365d', color: 'white' }}>
                                         <div className="card-body">
                                           <h5 className="card-title mb-4">QC Details</h5>
                                           <div className="row">
-                                            <div className="mb-3 col-md-3">
-                                              <label className="form-label">Ready for OC Due *</label>
-                                              <input
-                                                type="datetime-local"
-                                                className="form-control"
-                                                value={readyForOCDue}
-                                                onChange={(e) => setReadyForOCDue(e.target.value)}
-                                                required
-                                              />
+                                            <div className="d-flex justify-content-between align-items-center mb-3 col-md-3">
+                                              <div className="d-flex align-items-center gap-3">
+                                                <label className="form-label mb-0">Ready for OC Due *</label>
+                                                <div className="max-w-md mx-auto" ref={calendarRef}>
+                                                  <div className="relative">
+                                                    <input
+                                                      type="text"
+                                                      value={fileDeadlines[proj.id] 
+                                                        ? new Date(fileDeadlines[proj.id]).toLocaleString() 
+                                                        : formatDateTime()}
+                                                      readOnly
+                                                      onClick={() => {
+                                                        setCalendarOpen(!calendarOpen);
+                                                        if (fileDeadlines[proj.id]) {
+                                                          const deadline = new Date(fileDeadlines[proj.id]);
+                                                          setSelectedDate(deadline.getDate());
+                                                          setSelectedMonth(deadline.getMonth());
+                                                          setSelectedYear(deadline.getFullYear());
+                                                          setSelectedHour(deadline.getHours() % 12 || 12);
+                                                          setSelectedMinute(deadline.getMinutes());
+                                                          setIsAM(deadline.getHours() < 12);
+                                                        }
+                                                      }}
+                                                      className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                                                      placeholder="00:00 AM 00-00-00"
+                                                    />
+                                                  </div>
+
+                                                  {calendarOpen && (
+                                                    <div className="calendar-dropdown">
+                                                      <div className="time-display">
+                                                        <div className="time">
+                                                          {selectedHour === 0
+                                                            ? "12"
+                                                            : selectedHour > 12
+                                                            ? selectedHour - 12
+                                                            : selectedHour.toString().padStart(2, "0")}
+                                                          :{selectedMinute.toString().padStart(2, "0")}
+                                                        </div>
+                                                        <div className="period">{isAM ? "AM" : "PM"}</div>
+                                                        <div className="date">
+                                                          {selectedDate !== null
+                                                            ? `${selectedDate.toString().padStart(2, "0")}-${(
+                                                                selectedMonth + 1
+                                                              )
+                                                                .toString()
+                                                                .padStart(2, "0")}-${selectedYear
+                                                                .toString()
+                                                                .slice(-2)}`
+                                                            : "00-00-00"}
+                                                        </div>
+                                                      </div>
+
+                                                      <div className="time-calendar-container">
+                                                        <div className="time-selector">
+                                                          <div className="time-column">
+                                                            <div className="time-column-label">Hour</div>
+                                                            <div className="time-scroll">
+                                                              <div className="time-options">
+                                                                {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(
+                                                                  (hour) => {
+                                                                    const isPast = isTimeInPast(
+                                                                      hour,
+                                                                      selectedMinute,
+                                                                      isAM,
+                                                                      selectedDate
+                                                                    );
+                                                                    return (
+                                                                      <button
+                                                                        key={hour}
+                                                                        onClick={() => setSelectedHour(hour)}
+                                                                        className={`time-option ${
+                                                                          selectedHour === hour
+                                                                            ? "selected-hour"
+                                                                            : ""
+                                                                        } ${isPast ? "past-time" : ""}`}
+                                                                        disabled={isPast}
+                                                                      >
+                                                                        {hour.toString().padStart(2, "0")}
+                                                                      </button>
+                                                                    );
+                                                                  }
+                                                                )}
+                                                              </div>
+                                                            </div>
+                                                          </div>
+
+                                                          <div className="time-column">
+                                                            <div className="time-column-label">Min</div>
+                                                            <div className="time-scroll">
+                                                              <div className="time-options">
+                                                                {[0, 15, 30, 45].map((minute) => {
+                                                                  const isPast = isTimeInPast(
+                                                                    selectedHour,
+                                                                    minute,
+                                                                    isAM,
+                                                                    selectedDate
+                                                                  );
+                                                                  return (
+                                                                    <button
+                                                                      key={minute}
+                                                                      onClick={() => setSelectedMinute(minute)}
+                                                                      className={`time-option ${
+                                                                        selectedMinute === minute
+                                                                          ? "selected-minute"
+                                                                          : ""
+                                                                      } ${isPast ? "past-time" : ""}`}
+                                                                      disabled={isPast}
+                                                                    >
+                                                                      {minute.toString().padStart(2, "0")}
+                                                                    </button>
+                                                                  );
+                                                                })}
+                                                              </div>
+                                                            </div>
+                                                          </div>
+
+                                                          <div className="time-column">
+                                                            <div className="time-column-label">Period</div>
+                                                            <div className="period-options">
+                                                              <button
+                                                                onClick={() => setIsAM(true)}
+                                                                className={`period-option ${
+                                                                  isAM ? "selected" : ""
+                                                                }`}
+                                                              >
+                                                                AM
+                                                              </button>
+                                                              <button
+                                                                onClick={() => setIsAM(false)}
+                                                                className={`period-option ${
+                                                                  !isAM ? "selected" : ""
+                                                                }`}
+                                                              >
+                                                                PM
+                                                              </button>
+                                                            </div>
+                                                          </div>
+                                                        </div>
+
+                                                        <div className="calendar-section">
+                                                          <div className="month-nav">
+                                                            <div className="month-year-dropdowns">
+                                                              <select
+                                                                value={selectedMonth}
+                                                                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                                                                className="form-select form-select-sm"
+                                                              >
+                                                                {months.map((month, index) => (
+                                                                  <option key={index} value={index}>
+                                                                    {month}
+                                                                  </option>
+                                                                ))}
+                                                              </select>
+                                                              <select
+                                                                value={selectedYear}
+                                                                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                                                className="form-select form-select-sm"
+                                                              >
+                                                                {generateYearOptions().map((year) => (
+                                                                  <option key={year} value={year}>
+                                                                    {year}
+                                                                  </option>
+                                                                ))}
+                                                              </select>
+                                                            </div>
+                                                            <div className="nav-buttons">
+                                                              <button
+                                                                type="button"
+                                                                onClick={handlePrevMonth}
+                                                                disabled={
+                                                                  selectedMonth === today.getMonth() &&
+                                                                  selectedYear === today.getFullYear()
+                                                                }
+                                                              >
+                                                                <ChevronLeft size={20} />
+                                                              </button>
+                                                              <button type="button" onClick={handleNextMonth}>
+                                                                <ChevronRight size={20} />
+                                                              </button>
+                                                            </div>
+                                                          </div>
+
+                                                          <div className="weekdays">
+                                                            {weekDays.map((day) => (
+                                                              <div key={day} className="weekday">
+                                                                {day}
+                                                              </div>
+                                                            ))}
+                                                          </div>
+
+                                                          <div className="calendar-grid">
+                                                            {calendarDays.map((dayObj, index) => (
+                                                              <button
+                                                                key={index}
+                                                                type="button"
+                                                                onClick={() =>
+                                                                  dayObj.isCurrentMonth &&
+                                                                  !dayObj.isPast &&
+                                                                  setSelectedDate(dayObj.day)
+                                                                }
+                                                                className={`calendar-day ${
+                                                                  dayObj.isCurrentMonth
+                                                                    ? selectedDate === dayObj.day
+                                                                      ? "current-month selected"
+                                                                      : dayObj.isToday
+                                                                      ? "current-month today"
+                                                                      : "current-month"
+                                                                    : "other-month"
+                                                                } ${dayObj.isPast ? "past-date" : ""}`}
+                                                                disabled={dayObj.isPast}
+                                                              >
+                                                                {dayObj.day}
+                                                              </button>
+                                                            ))}
+                                                          </div>
+
+                                                          <div className="action-buttons">
+                                                            <button
+                                                              type="button"
+                                                              onClick={() => {
+                                                                setSelectedDate(null);
+                                                                setSelectedHour(0);
+                                                                setSelectedMinute(0);
+                                                                setIsAM(true);
+                                                              }}
+                                                              className="action-button"
+                                                            >
+                                                              Clear
+                                                            </button>
+                                                            <button
+                                                              type="button"
+                                                              onClick={() => {
+                                                                setSelectedDate(today.getDate());
+                                                                setSelectedMonth(today.getMonth());
+                                                                setSelectedYear(today.getFullYear());
+                                                                setSelectedHour(today.getHours() % 12 || 12);
+                                                                setSelectedMinute(today.getMinutes());
+                                                                setIsAM(today.getHours() < 12);
+                                                              }}
+                                                              className="action-button"
+                                                            >
+                                                              Today
+                                                            </button>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+
+                                                      <div className="done-section">
+                                                        <button
+                                                          type="button"
+                                                          onClick={() => setDeadlineFromCalendar(proj.id)}
+                                                          className="done-button"
+                                                        >
+                                                          Done
+                                                        </button>
+                                                      </div>
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </div>
                                             </div>
 
                                             <div className="mb-3 col-md-3">
                                               <label className="form-label">QC Allocated Hours *</label>
                                               <input
                                                 type="number"
-                                                className="form-control"
+                                                className="form-control bg-card"
                                                 value={ocAllocatedHours}
                                                 onChange={(e) => setOCAllocatedHours(Number(e.target.value))}
                                                 min="0.25"
@@ -1024,7 +1511,7 @@ const handleReassignSubmit = async () => {
                                               <label className="form-label">OC Due</label>
                                               <input
                                                 type="text"
-                                                className="form-control"
+                                                className="form-control bg-card"
                                                 value={ocDue}
                                                 readOnly
                                               />
@@ -1033,7 +1520,7 @@ const handleReassignSubmit = async () => {
                                             <div className="mb-4 col-md-3">
                                               <label className="form-label">Priority</label>
                                               <select
-                                                className="form-select"
+                                                className="form-select bg-card"
                                                 value={priority}
                                                 onChange={(e) => setPriority(e.target.value)}
                                               >

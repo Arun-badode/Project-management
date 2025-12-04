@@ -1,383 +1,364 @@
-import React, { useState, useEffect } from "react";
-import { Modal, Button, Badge, Dropdown, Form, Spinner, Alert } from "react-bootstrap";
+import React, { useState, useEffect, useMemo } from "react";
+import { Button, Badge, Form, Spinner, Alert } from "react-bootstrap";
 import moment from "moment";
+import BASE_URL from "../../../config";
 
 const ResourceTimeline = ({ userRole, userId }) => {
-  // State for API data
   const [timelineData, setTimelineData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // Filter states
-  const [userFilter, setUserFilter] = useState("All");
-  const [teamFilter, setTeamFilter] = useState("All");
+
+  // Filters & View
+  const [userFilter, setUserFilter] = useState("all");
+  const [teamFilter, setTeamFilter] = useState("all");
   const [sortBy, setSortBy] = useState("id");
   const [sortOrder, setSortOrder] = useState("asc");
-  const [timelineScale, setTimelineScale] = useState(1); // 1 = normal, 2 = expanded, 0.5 = shrunk
-  const [currentDate, setCurrentDate] = useState(moment());
+  const [scale, setScale] = useState(1); // 0.75 (S), 1 (M), 1.5 (L)
+  const [centerDate, setCenterDate] = useState(moment()); // center of timeline
 
-  // Stage colors
+  // Stage colors as per new spec
   const stageColors = {
-    "Completed": "#006400", // Dark Green
-    "Active": "#00008b", // Dark Blue
-    "In Progress": "#90ee90", // Light Green
-    "Pending": "#d3d3d3", // Light Grey
-    "On Hold": "#ffa500", // Orange
-    "Cancelled": "#ff0000" // Red
+    "YTS": "#6c757d",        // Light Grey — Task Assigned
+    "WIP": "#00008b",        // Dark Blue — Work in Progress
+    "QC YTS": "#20B2AA",    // Turquoise Blue — QA Assigned
+    "QC WIP": "#90ee90",     // Light Green — QA WIP
+    "Corr YTS": "#87CEFA",   // Light Blue — Correction Assigned
+    "Corr WIP": "#800080",   // Purple — Correction WIP
+    "RFD": "#006400",        // Dark Green — Ready for Delivery
+    "Break": "#ffa500"       // Orange — Break/Pause
   };
 
-  // Fetch timeline data
+  // Fetch data
   const fetchTimelineData = async () => {
     setLoading(true);
     setError(null);
-    
     try {
-      let url = "https://ssknf82q-8800.inc1.devtunnels.ms/api/project/getTimelineData";
-      
-      // If user is a manager, add managerId parameter
+      let url = `${BASE_URL}project/getTimelineData`;
       if (userRole === "manager" && userId) {
         url += `?managerId=${userId}`;
       }
-      
-      const response = await fetch(url);
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       const result = await response.json();
-      
       if (result.status === "true") {
         setTimelineData(result.data);
       } else {
-        setError(result.message || "Failed to fetch timeline data");
+        setError(result.message || "Failed to load timeline");
       }
     } catch (err) {
-      setError("Error fetching timeline data: " + err.message);
+      setError("Network error: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch data on component mount
   useEffect(() => {
     fetchTimelineData();
   }, [userRole, userId]);
 
-  // Process timeline data to group by user
-  const processedData = React.useMemo(() => {
-    const usersMap = {};
-    
+  // Process raw timeline data → users with tasks and stages
+  const processedData = useMemo(() => {
+    const users = {};
     timelineData.forEach(task => {
-      const userId = task.assigned_to.id;
-      const userName = task.assigned_to.name || `User ${userId}`;
+      const uId = task.assigned_to.id;
+      const uName = task.assigned_to.name || `User ${uId}`;
+      const uTeam = task.assigned_to.team || "General";
       
-      if (!usersMap[userId]) {
-        usersMap[userId] = {
-          id: userId,
-          name: userName,
-          role: userId === 2 ? "Manager" : "Team Member", // Assuming ID 2 is a manager
-          team: "Team", // Default team, adjust as needed
+      if (!users[uId]) {
+        users[uId] = {
+          id: uId,
+          name: uName,
+          role: task.assigned_to.role || "Team Member",
+          team: uTeam,
           tasks: []
         };
       }
-      
-      // Create a task object with stages
-      const taskObj = {
+
+      // Build stage segments based on status logs (if available), or fallback to current status
+      let stages = [];
+
+      // Fallback: single stage (current status)
+      const currentStatus = task.status || "YTS";
+      const startDate = task.start_date || moment().subtract(3, 'days').toISOString();
+      const endDate = task.end_date || null;
+
+      stages.push({
+        stage: currentStatus,
+        start: startDate,
+        end: endDate,
+        color: stageColors[currentStatus] || "#6c757d"
+      });
+
+      users[uId].tasks.push({
         id: task.task_id,
         name: task.task_name || `Task ${task.task_id}`,
-        stages: [
-          {
-            stage: task.status,
-            startTime: task.start_date,
-            endTime: task.end_date,
-            status: task.status === "Completed" ? "completed" : 
-                   task.status === "Active" || task.status === "In Progress" ? "active" : "pending"
-          }
-        ]
-      };
-      
-      usersMap[userId].tasks.push(taskObj);
+        projectId: task.project_id,
+        stages: stages
+      });
     });
-    
-    return Object.values(usersMap);
+    return Object.values(users);
   }, [timelineData]);
 
-  // Apply filters and sorting
+  // Filter & sort
   const filteredUsers = processedData
-    .filter(user => {
-      if (userFilter !== "All" && user.id !== parseInt(userFilter)) return false;
-      if (teamFilter !== "All" && user.team !== teamFilter) return false;
+    .filter(u => {
+      if (userFilter !== "all" && u.id.toString() !== userFilter) return false;
+      if (teamFilter !== "all" && u.team !== teamFilter) return false;
       return true;
     })
     .sort((a, b) => {
       if (sortBy === "id") {
-        return sortOrder === "asc" 
-          ? a.id - b.id 
-          : b.id - a.id;
-      } else if (sortBy === "tasks") {
-        const aTasks = a.tasks.length;
-        const bTasks = b.tasks.length;
-        return sortOrder === "asc" ? aTasks - bTasks : bTasks - aTasks;
+        return sortOrder === "asc" ? a.id - b.id : b.id - a.id;
+      }
+      if (sortBy === "tasks") {
+        const aCount = a.tasks.length;
+        const bCount = b.tasks.length;
+        return sortOrder === "asc" ? aCount - bCount : bCount - aCount;
       }
       return 0;
     });
 
-  // Calculate timeline position and width
-  const calculateTimelineStyle = (startTime, endTime) => {
-    // For simplicity, we'll use a fixed timeline duration of 30 days
-    const timelineStart = moment().subtract(15, 'days');
-    const timelineEnd = moment().add(15, 'days');
-    const totalDuration = timelineEnd.diff(timelineStart, 'minutes');
-    
-    const start = moment(startTime);
-    const end = endTime ? moment(endTime) : moment();
-    
-    const leftPosition = ((start.diff(timelineStart, 'minutes') / totalDuration) * 100) * timelineScale;
-    const width = ((end.diff(start, 'minutes') / totalDuration) * 100) * timelineScale;
-    
-    return {
-      left: `${Math.max(0, leftPosition)}%`,
-      width: `${width}%`,
-      minWidth: '5px' // Ensure very small tasks are still visible
-    };
+  // Timeline view helpers
+  const today = moment().startOf("day");
+  const viewStart = moment(centerDate).subtract(15, "days");
+  const viewEnd = moment(centerDate).add(15, "days");
+  const totalMinutes = viewEnd.diff(viewStart, "minutes");
+
+  const getPct = (dateStr) => {
+    if (!dateStr) return 0;
+    const d = moment(dateStr);
+    const pct = (d.diff(viewStart, "minutes") / totalMinutes) * 100;
+    return Math.max(0, Math.min(100, pct)) * scale;
   };
 
-  // Navigate timeline
-  const navigateTimeline = (direction) => {
-    const days = direction === 'back' ? -1 : 1;
-    setCurrentDate(moment(currentDate).add(days, 'days'));
+  const getWidthPct = (startStr, endStr) => {
+    const s = moment(startStr);
+    const e = endStr ? moment(endStr) : moment();
+    const w = ((e.diff(s, "minutes") / totalMinutes) * 100) * scale;
+    return Math.max(1, w);
   };
 
-  // Get all unique users for filter dropdown
-  const allUsers = ["All", ...processedData.map(user => `${user.id} - ${user.name}`)];
-  
-  // Get all unique teams for filter dropdown
-  const allTeams = ["All", ...new Set(processedData.map(user => user.team))];
+  // Navigation
+  const handleToday = () => setCenterDate(moment());
+  const handlePrev = () => setCenterDate(moment(centerDate).subtract(7, "days"));
+  const handleNext = () => setCenterDate(moment(centerDate).add(7, "days"));
 
-  if (loading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: '300px' }}>
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-      </div>
-    );
-  }
+  // Filter options
+  const userOptions = useMemo(() => {
+    const opts = [{ value: "all", label: "All Users" }];
+    processedData.forEach(u => opts.push({
+      value: u.id.toString(),
+      label: `${u.name} (${u.role})`
+    }));
+    return opts;
+  }, [processedData]);
 
-  if (error) {
-    return (
-      <Alert variant="danger">
-        {error}
-        <Button variant="outline-danger" size="sm" className="ms-2" onClick={fetchTimelineData}>
-          Retry
-        </Button>
-      </Alert>
-    );
-  }
+  const teamOptions = [
+    { value: "all", label: "All Teams" },
+    { value: "Adobe", label: "Adobe" },
+    { value: "MS Office", label: "MS Office" },
+    { value: "QA", label: "QA" }
+  ];
+
+  if (loading) return (
+    <div className="d-flex justify-content-center align-items-center py-5">
+      <Spinner animation="border" />
+    </div>
+  );
+  if (error) return (
+    <Alert variant="danger" className="m-3">{error}</Alert>
+  );
 
   return (
-    <div className="container-fluid p-4">
-      <div className="card">
-        <div className="card-header d-flex justify-content-between align-items-center">
-          <h5 className="card-title mb-0">
-            Resource Timeline {userRole === "manager" ? "(Manager View)" : "(Admin Dashboard)"}
-          </h5>
+    <div className="container-fluid py-4">
+      <div className="card shadow-sm border-0 bg-card">
+        <div className="card-header border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <h2 className="gradient-heading mb-0">Resource Timeline</h2>
           
-          <div className="d-flex gap-2">
-            {/* Filters */}
-            <Dropdown>
-              <Dropdown.Toggle variant="outline-secondary" size="sm">
-                User Filter
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {allUsers.map(user => (
-                  <Dropdown.Item 
-                    key={user} 
-                    onClick={() => setUserFilter(user === "All" ? "All" : user.split(' - ')[0])}
-                  >
-                    {user}
-                  </Dropdown.Item>
-                ))}
-              </Dropdown.Menu>
-            </Dropdown>
-            
-            <Dropdown>
-              <Dropdown.Toggle variant="outline-secondary" size="sm">
-                Team Filter
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                {allTeams.map(team => (
-                  <Dropdown.Item 
-                    key={team} 
-                    onClick={() => setTeamFilter(team)}
-                  >
-                    {team}
-                  </Dropdown.Item>
-                ))}
-              </Dropdown.Menu>
-            </Dropdown>
-            
-            <Dropdown>
-              <Dropdown.Toggle variant="outline-secondary" size="sm">
-                Sort By
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                <Dropdown.Item onClick={() => setSortBy("id")}>
-                  Employee ID {sortBy === "id" && (sortOrder === "asc" ? "↑" : "↓")}
-                </Dropdown.Item>
-                <Dropdown.Item onClick={() => setSortBy("tasks")}>
-                  Number of Tasks {sortBy === "tasks" && (sortOrder === "asc" ? "↑" : "↓")}
-                </Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Item onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
-                  Toggle Sort Order ({sortOrder === "asc" ? "Ascending" : "Descending"})
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-            
-            {/* Timeline controls */}
-            <Button 
-              variant="outline-secondary" 
-              size="sm"
-              onClick={() => setTimelineScale(Math.max(0.5, timelineScale - 0.5))}
+          <div className="d-flex gap-2 flex-wrap">
+            <select
+              className="form-select form-select-sm"
+              value={userFilter}
+              onChange={e => setUserFilter(e.target.value)}
+              style={{ width: "180px" }}
             >
-              -
-            </Button>
-            <Button 
-              variant="outline-secondary" 
-              size="sm"
-              onClick={() => setTimelineScale(1)}
+              {userOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+
+            <select
+              className="form-select form-select-sm"
+              value={teamFilter}
+              onChange={e => setTeamFilter(e.target.value)}
+              style={{ width: "140px" }}
             >
-              Reset
-            </Button>
-            <Button 
-              variant="outline-secondary" 
-              size="sm"
-              onClick={() => setTimelineScale(Math.min(2, timelineScale + 0.5))}
+              {teamOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+
+            <select
+              className="form-select form-select-sm"
+              value={`${sortBy}-${sortOrder}`}
+              onChange={e => {
+                const [sBy, sOrd] = e.target.value.split("-");
+                setSortBy(sBy);
+                setSortOrder(sOrd);
+              }}
+              style={{ width: "180px" }}
             >
-              +
-            </Button>
-            
-            <Button 
-              variant="outline-secondary" 
-              size="sm"
-              onClick={() => navigateTimeline('back')}
-            >
-              &lt; Back
-            </Button>
-            <Button 
-              variant="outline-secondary" 
-              size="sm"
-              onClick={() => navigateTimeline('forward')}
-            >
-              Forward &gt;
-            </Button>
-            
-            <Button 
-              variant="outline-primary" 
-              size="sm"
-              onClick={fetchTimelineData}
-            >
+              <option value="id-asc">ID (Ascending)</option>
+              <option value="id-desc">ID (Descending)</option>
+              <option value="tasks-asc">Tasks (Low → High)</option>
+              <option value="tasks-desc">Tasks (High → Low)</option>
+            </select>
+
+            <div className="d-flex gap-1">
+              <button className="btn btn-sm btn-secondary" onClick={handlePrev}>&lt;</button>
+              <button className="btn btn-sm btn-primary" onClick={handleToday}>Today</button>
+              <button className="btn btn-sm btn-secondary" onClick={handleNext}>&gt;</button>
+            </div>
+
+            <div className="d-flex gap-1">
+              <button className="btn btn-sm btn-outline-secondary" onClick={() => setScale(0.75)}>S</button>
+              <button className="btn btn-sm btn-outline-secondary" onClick={() => setScale(1)}>M</button>
+              <button className="btn btn-sm btn-outline-secondary" onClick={() => setScale(1.5)}>L</button>
+            </div>
+
+            <Button variant="outline-primary" size="sm" onClick={fetchTimelineData}>
               <i className="fas fa-sync-alt me-1"></i> Refresh
             </Button>
           </div>
         </div>
-        
-        <div className="card-body">
-          {/* Timeline header with dates */}
-          <div className="timeline-header d-flex mb-3">
-            <div style={{ width: "200px", fontWeight: "bold" }}>Employee</div>
-            <div className="flex-grow-1 position-relative">
-              <div className="d-flex justify-content-between">
-                <span>{moment().subtract(15, 'days').format('MMM DD')}</span>
-                <span>{moment().subtract(10, 'days').format('MMM DD')}</span>
-                <span>{moment().subtract(5, 'days').format('MMM DD')}</span>
-                <span>{moment().format('MMM DD')}</span>
-                <span>{moment().add(5, 'days').format('MMM DD')}</span>
-                <span>{moment().add(10, 'days').format('MMM DD')}</span>
-                <span>{moment().add(15, 'days').format('MMM DD')}</span>
+
+        {/* Main Timeline Body with Vertical Scroll */}
+        <div className="card-body p-0" style={{ maxHeight: "60vh", overflowY: "auto" }}>
+          {/* Timeline Header */}
+          <div className="d-flex border-bottom" style={{ height: "40px" }}>
+            <div className="px-3 py-2 fw-bold" style={{ width: "200px", backgroundColor: "#f8f9fa" }}>
+              Employee
+            </div>
+            <div className="flex-grow-1 position-relative overflow-hidden" style={{ backgroundColor: "#f8f9fa" }}>
+              {/* Date labels (every 5 days) */}
+              {[0, 5, 10, 15, 20, 25, 30].map((offset, i) => {
+                const d = moment(viewStart).add(offset, "days");
+                return (
+                  <div
+                    key={i}
+                    className="position-absolute top-0 bottom-0 d-flex align-items-center justify-content-center text-muted small"
+                    style={{
+                      left: `${getPct(d)}%`,
+                      transform: "translateX(-50%)",
+                      zIndex: 2
+                    }}
+                  >
+                    {d.format("DD MMM")}
+                  </div>
+                );
+              })}
+
+              {/* Today Indicator */}
+              <div
+                className="position-absolute top-0 bottom-0"
+                style={{
+                  left: `${getPct(today)}%`,
+                  width: "2px",
+                  backgroundColor: "#e74c3c",
+                  zIndex: 10,
+                  boxShadow: "0 0 0 2px rgba(231, 76, 60, 0.3)"
+                }}
+              >
+                <div className="position-absolute top-100 start-50 translate-middle bg-danger text-white px-1 small">
+                  Today
+                </div>
               </div>
             </div>
           </div>
-          
-          {/* Timeline for each user */}
+
+          {/* User Rows - Now scrollable */}
           {filteredUsers.length > 0 ? (
             filteredUsers.map(user => (
-              <div key={user.id} className="timeline-row mb-4">
-                <div className="d-flex">
-                  {/* User info */}
-                  <div style={{ width: "200px" }}>
-                    <div className="fw-bold">{user.name}</div>
-                    <div className="text-muted small">{user.id} | {user.role} | {user.team}</div>
-                    <Badge bg="secondary" className="mt-1">{user.tasks.length} Tasks</Badge>
+              <div key={user.id} className="d-flex border-bottom py-2 px-3" style={{ minHeight: "60px" }}>
+                <div className="fw-bold" style={{ width: "200px" }}>
+                  <div>{user.name}</div>
+                  <div className="text-muted small">
+                    ID: {user.id} | {user.role} | {user.team}
                   </div>
-                  
-                  {/* Timeline */}
-                  <div className="flex-grow-1 position-relative" style={{ height: "50px", backgroundColor: "#f8f9fa" }}>
-                    {/* Current time indicator */}
-                    <div 
-                      className="position-absolute top-0 bottom-0" 
-                      style={{ 
-                        left: "50%", 
-                        width: "2px", 
-                        backgroundColor: "red", 
-                        zIndex: 10 
-                      }}
-                    ></div>
-                    
-                    {/* Task stages */}
-                    {user.tasks.map(task => (
-                      <div key={task.id}>
-                        {task.stages.map((stage, index) => (
-                          <div
-                            key={`${task.id}-${index}`}
-                            className="position-absolute top-0 bottom-0 rounded"
-                            style={{
-                              ...calculateTimelineStyle(stage.startTime, stage.endTime),
-                              backgroundColor: stageColors[stage.stage],
-                              height: "20px",
-                              top: "15px",
-                              zIndex: 1
-                            }}
-                            title={`${task.name} - ${stage.stage}: ${moment(stage.startTime).format('MMM DD, YYYY')} - ${stage.endTime ? moment(stage.endTime).format('MMM DD, YYYY') : 'Ongoing'}`}
-                          >
-                            <span 
-                              className="d-inline-block text-truncate px-1" 
-                              style={{ fontSize: "10px", color: "white", width: "100%" }}
-                            >
-                              {stage.stage}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
+                  <Badge bg="secondary" className="mt-1">
+                    {user.tasks.length} Tasks
+                  </Badge>
+                </div>
+
+                <div className="flex-grow-1 position-relative" style={{ minHeight: "30px" }}>
+                  {user.tasks.flatMap(task =>
+                    task.stages.map((stage, idx) => {
+                      const left = getPct(stage.start);
+                      const width = getWidthPct(stage.start, stage.end);
+                      const color = stageColors[stage.stage] || "#6c757d";
+                      return (
+                        <div
+                          key={`${task.id}-${idx}`}
+                          className="position-absolute top-0 bottom-0 rounded px-1 d-flex align-items-center"
+                          style={{
+                            left: `${left}%`,
+                            width: `${width}%`,
+                            backgroundColor: color,
+                            height: "24px",
+                            fontSize: "0.75rem",
+                            color: "white",
+                            overflow: "hidden",
+                            zIndex: 1
+                          }}
+                          title={`${task.name} — ${stage.stage}\n${moment(stage.start).format('DD MMM YYYY')} → ${stage.end ? moment(stage.end).format('DD MMM YYYY') : 'Ongoing'}`}
+                        >
+                          <span className="text-truncate">{stage.stage}</span>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </div>
             ))
           ) : (
-            <div className="text-center py-4">
-              <p>No timeline data available for the selected filters.</p>
-            </div>
+            <div className="text-center py-4 text-muted">No matching resources.</div>
           )}
-          
-          {/* Legend */}
-          <div className="mt-4">
-            <h6>Legend:</h6>
-            <div className="d-flex flex-wrap gap-2">
-              {Object.entries(stageColors).map(([stage, color]) => (
-                <div key={stage} className="d-flex align-items-center">
-                  <div 
-                    className="me-1" 
-                    style={{ 
-                      width: "20px", 
-                      height: "10px", 
-                      backgroundColor: color 
-                    }}
-                  ></div>
-                  <span className="small">{stage}</span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
+
+      {/* Legend */}
+      <div className="mt-4 p-3 bg-card rounded shadow-sm">
+        <h5 className="mb-3 gradient-heading">Stage Legend</h5>
+        <div className="d-flex flex-wrap gap-4">
+          {Object.entries(stageColors).map(([stage, color]) => (
+            <div key={stage} className="d-flex align-items-center">
+              <div
+                style={{
+                  width: "20px",
+                  height: "20px",
+                  borderRadius: "4px",
+                  backgroundColor: color,
+                  marginRight: "8px"
+                }}
+              />
+              <span>{stage}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <style jsx>{`
+        .gradient-heading {
+          background: linear-gradient(45deg, #3f51b5, #2196f3);
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          display: inline-block;
+        }
+        .bg-card { background-color: #fff; }
+      `}</style>
     </div>
   );
 };

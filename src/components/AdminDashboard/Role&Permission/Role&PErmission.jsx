@@ -151,6 +151,42 @@ const RoleManagementSystem = () => {
   if (loading) return <div className="text-center py-5">Loading...</div>;
   if (error) return <div className="text-center py-5 text-danger">{error}</div>;
 
+
+const handleDeleteRole = async (roleId) => {
+  try {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
+      await axios.delete(`${BASE_URL}roles/deleteRole/${roleId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      Swal.fire({
+        icon: "success",
+        title: "Role deleted successfully!",
+        timer: 1500,
+        showConfirmButton: false
+      });
+      fetchRoles();
+    }
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      title: "Failed to delete role",
+      text: err.response?.data?.message || err.message
+    });
+  }
+};
+
+
   return (
     <div className="min-vh-100 bg-light p-2 p-md-3 bg-main">
       <div className="mb-4 border-0 mybg text-white bg-card" style={{ borderRadius: "12px", padding: "1.2rem", height: "80px" }}>
@@ -187,13 +223,13 @@ const RoleManagementSystem = () => {
                             <Edit size={14} />
                             
                           </button>
-                           <button
-                        className="btn btn-sm btn-outline-danger"
-                      
-                        title="Delete Member"
-                      >
-                        <i className="fas fa-trash"></i>
-                      </button>
+                          <button
+  className="btn btn-sm btn-outline-danger"
+  onClick={() => handleDeleteRole(role.id)}
+  title="Delete Role"
+>
+  <i className="fas fa-trash"></i>
+</button>
                         </td>
                       </tr>
                     ))}

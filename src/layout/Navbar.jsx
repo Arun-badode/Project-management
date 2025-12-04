@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../components/Utilities/axiosInstance";
 
 const Navbar = ({ toggleSidebar }) => {
@@ -7,70 +7,57 @@ const Navbar = ({ toggleSidebar }) => {
   const userFullName = "John Naveen Prince";
   const userRole = "Team Member";
   const totalBreakLimit = 60;
-  const [userStatus, setUserStatus] = useState("Available");
-  const [showStatusModal, setShowStatusModal] = useState(false);
-  const [showBreakConfirmation, setShowBreakConfirmation] = useState(false);
-  const [showOverlay, setShowOverlay] = useState(false);
-  const [isOnBreak, setIsOnBreak] = useState(false);
-  const [breakStartTime, setBreakStartTime] = useState(null);
-  const [totalBreakUsed, setTotalBreakUsed] = useState(0);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-
-  const breakTimeRemaining = Math.max(totalBreakLimit - totalBreakUsed, 0);
-
-  const startBreakTimer = () => {
-    setBreakStartTime(new Date());
-  };
-
-  const endBreak = () => {
-    if (breakStartTime) {
-      const now = new Date();
-      const diffMs = now - breakStartTime;
-      const diffMins = Math.floor(diffMs / 60000);
-      setTotalBreakUsed((prev) => Math.min(prev + diffMins, totalBreakLimit));
-    }
-    setUserStatus("Available");
-    setShowOverlay(false);
-    setIsOnBreak(false);
-    setBreakStartTime(null);
-  };
-
-  const pauseTimeTracking = () => {
-    console.log("Time tracking paused.");
-  };
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [hasEndOfShiftToday, setHasEndOfShiftToday] = useState(false);
+  const navigate = useNavigate();
 
   const [role, setRole] = useState("");
   useEffect(() => {
     const userRole = localStorage.getItem("userRole");
     setRole(userRole);
+    
+    // Check if there's already an End of Shift for today
+    const today = new Date().toISOString().split("T")[0];
+    const endOfShiftRecord = localStorage.getItem(`endOfShift_${today}`);
+    if (endOfShiftRecord) {
+      setHasEndOfShiftToday(true);
+    }
   }, []);
 
-  const handleLogout = async () => {
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+    setShowProfileDropdown(false);
+  };
+
+  const handleBreak = async () => {
     try {
+      const now = new Date();
+      const breakStartTime = now.toISOString();
+      
+      // Store break start time in localStorage
+      localStorage.setItem("currentBreakStart", breakStartTime);
+      
+      // Update attendance if needed
       const attendance = JSON.parse(localStorage.getItem("attendance"));
-      const memberId = localStorage.getItem("managerId"); // or user id key you use
+      const memberId = localStorage.getItem("managerId");
       const token = localStorage.getItem("authToken");
+      
       if (attendance?.id && memberId && token) {
-        // Prepare outTime as current time in "HH:MM AM/PM" format
-        const now = new Date();
-        const outTime = now.toLocaleTimeString("en-US", {
-          hour12: true,
-          hour: "numeric",
-          minute: "2-digit",
-        });
-        // Prepare attendanceDate in YYYY-MM-DD format
-        const attendanceDate = now.toISOString().split("T")[0];
-        // Call updateAttendance API
         await axiosInstance.patch(
           `attendance/updateAttendance/${attendance?.id}`,
           {
             memberId: parseInt(memberId, 10),
-            attendanceDate: attendanceDate,
-            status: "Present",
-            inTime: attendance?.inTime, // no change to inTime
-            outTime: outTime,
-            remarks: "Logged out",
+            attendanceDate: now.toISOString().split("T")[0],
+            status: "On Break",
+            inTime: attendance?.inTime,
+            outTime: now.toLocaleTimeString("en-US", {
+              hour12: true,
+              hour: "numeric",
+              minute: "2-digit",
+            }),
+            remarks: "Break Started",
           },
           {
             headers: {
@@ -79,23 +66,117 @@ const Navbar = ({ toggleSidebar }) => {
             },
           }
         );
-        console.log("✅ Attendance updated with outTime on logout.");
       }
-    } catch (error) {
-      console.error("⚠️ Failed to update attendance on logout:", error);
-    } finally {
-      // Clear localStorage
+      
+      // Clear localStorage and redirect to login
       localStorage.clear();
-      // Reset states if needed
-      setUserStatus("Available");
-      setShowOverlay(false);
-      setIsLoggedOut(false);
-      setShowProfileDropdown(false);
-      // Navigate to login page
-      window.location.href = "/"; // or use react-router navigate if available
+      navigate("/");
+    } catch (error) {
+      console.error("⚠️ Failed to record break:", error);
     }
   };
 
+  const handleEndOfShift = async () => {
+    try {
+      const now = new Date();
+      const today = now.toISOString().split("T")[0];
+      
+      // Mark that End of Shift has been recorded for today
+      localStorage.setItem(`endOfShift_${today}`, now.toISOString());
+      
+      // Update attendance with end of shift time
+      const attendance = JSON.parse(localStorage.getItem("attendance"));
+      const memberId = localStorage.getItem("managerId");
+      const token = localStorage.getItem("authToken");
+      
+      if (attendance?.id && memberId && token) {
+        await axiosInstance.patch(
+          `attendance/updateAttendance/${attendance?.id}`,
+          {
+            memberId: parseInt(memberId, 10),
+            attendanceDate: today,
+            status: "Present",
+            inTime: attendance?.inTime,
+            outTime: now.toLocaleTimeString("en-US", {
+              hour12: true,
+              hour: "numeric",
+              minute: "2-digit",
+            }),
+            remarks: "End of Shift",
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
+      
+      // Clear localStorage and redirect to login
+      localStorage.clear();
+      navigate("/");
+    } catch (error) {
+      console.error("⚠️ Failed to record end of shift:", error);
+    }
+  };
+
+  const handleLogin = () => {
+    // Check if there's a break start time
+    const breakStartTime = localStorage.getItem("currentBreakStart");
+    if (breakStartTime) {
+      const now = new Date();
+      const breakStart = new Date(breakStartTime);
+      const breakDuration = Math.floor((now - breakStart) / 60000); // in minutes
+      
+      // Store break duration for today
+      const today = now.toISOString().split("T")[0];
+      const existingBreaks = JSON.parse(localStorage.getItem(`breaks_${today}`) || "[]");
+      existingBreaks.push({
+        startTime: breakStartTime,
+        endTime: now.toISOString(),
+        duration: breakDuration
+      });
+      localStorage.setItem(`breaks_${today}`, JSON.stringify(existingBreaks));
+      
+      // Clear the current break start time
+      localStorage.removeItem("currentBreakStart");
+      
+      // Update attendance with break end time
+      const attendance = JSON.parse(localStorage.getItem("attendance"));
+      const memberId = localStorage.getItem("managerId");
+      const token = localStorage.getItem("authToken");
+      
+      if (attendance?.id && memberId && token) {
+        axiosInstance.patch(
+          `attendance/updateAttendance/${attendance?.id}`,
+          {
+            memberId: parseInt(memberId, 10),
+            attendanceDate: today,
+            status: "Present",
+            inTime: attendance?.inTime,
+            outTime: now.toLocaleTimeString("en-US", {
+              hour12: true,
+              hour: "numeric",
+              minute: "2-digit",
+            }),
+            remarks: `Break Ended (${breakDuration} minutes)`,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+      }
+    }
+  };
+
+  useEffect(() => {
+    // Check if user is logging in after a break
+    handleLogin();
+  }, []);
 
   return (
     <>
@@ -107,15 +188,14 @@ const Navbar = ({ toggleSidebar }) => {
               src="https://ik.imagekit.io/43o9qlnbg/Eminoids%20-%20Logo_W.png"
               alt="Logo"
               style={{
-                width: window.innerWidth >= 992 ? "150px" : "120px", // responsive width
-                height: "auto", // maintain aspect ratio
-                maxHeight: "60px", // optional: header ke andar limit lagane ke liye
+                width: window.innerWidth >= 992 ? "150px" : "120px",
+                height: "auto",
+                maxHeight: "60px",
               }}
             />
 
-            {/* Modified: Show toggle button in both mobile and desktop views */}
             <button
-              className="btn btn-link text-white p-0" // Removed d-lg-none to show in all views
+              className="btn btn-link text-white p-0"
               onClick={toggleSidebar}
               style={{ fontSize: "20px", textDecoration: "none" }}
               aria-label="Toggle Sidebar"
@@ -126,95 +206,18 @@ const Navbar = ({ toggleSidebar }) => {
 
           {/* Right Side Content */}
           <div className="d-flex align-items-center ms-auto gap-2 gap-md-3 flex-shrink-0">
-            {/* User Status - Mobile View */}
+            {/* User Name - Mobile View */}
             <div className="d-md-none d-flex align-items-center gap-2">
               <span className="text-white fw-semibold small">
-                {userFullName.split(" ")[0]}{" "}
-                {/* Show only first name on mobile */}
+                {userFullName.split(" ")[0]}
               </span>
-              <span
-                className={
-                  userStatus === "Available" ? "text-success" : "text-secondary"
-                }
-              >
-                {userStatus}
-              </span>
-              {userRole === "Team Member" && (
-                <div className="form-check form-switch m-0">
-                  <input
-                    className="form-check-input"
-                    type="checkbox"
-                    id="mobileStatusSwitch"
-                    checked={userStatus === "Available"}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        if (isOnBreak) {
-                          endBreak();
-                        } else {
-                          setUserStatus("Available");
-                          setShowOverlay(false);
-                        }
-                      } else {
-                        if (breakTimeRemaining > 0) {
-                          setShowStatusModal(true);
-                        } else {
-                          alert(
-                            "You have exhausted your break limit for today."
-                          );
-                        }
-                      }
-                    }}
-                  />
-                </div>
-              )}
             </div>
 
             {/* Desktop View - User Info */}
             <div className="d-none d-md-flex align-items-center gap-2 flex-wrap">
-              {role !== "Admin" && (
-                <>
-                  <span className="fw-semibold small text-white">
-                    {userFullName} –{" "}
-                    <span
-                      className={
-                        userStatus === "Available"
-                          ? "text-success"
-                          : "text-secondary"
-                      }
-                    >
-                      {userStatus}
-                    </span>
-                  </span>
-                  {userRole === "Team Member" && (
-                    <div className="form-check form-switch m-0">
-                      <input
-                        className="form-check-input"
-                        type="checkbox"
-                        id="statusSwitch"
-                        checked={userStatus === "Available"}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            if (isOnBreak) {
-                              endBreak();
-                            } else {
-                              setUserStatus("Available");
-                              setShowOverlay(false);
-                            }
-                          } else {
-                            if (breakTimeRemaining > 0) {
-                              setShowStatusModal(true);
-                            } else {
-                              alert(
-                                "You have exhausted your break limit for today."
-                              );
-                            }
-                          }
-                        }}
-                      />
-                    </div>
-                  )}
-                </>
-              )}
+              <span className="fw-semibold small text-white">
+                {userFullName}
+              </span>
             </div>
 
             {/* Notification Bell - Hidden on mobile */}
@@ -281,13 +284,9 @@ const Navbar = ({ toggleSidebar }) => {
                     <hr className="dropdown-divider" />
                   </li>
                   <li>
-                    {/* <Link className="dropdown-item py-2 text-danger" to="/">
-                      <i className="fa fa-sign-out-alt me-2"></i>
-                      Logout
-                    </Link> */}
                     <button
                       className="dropdown-item py-2 text-danger"
-                      onClick={handleLogout}
+                      onClick={handleLogoutClick}
                     >
                       <i className="fa fa-sign-out-alt me-2"></i>
                       Logout
@@ -300,8 +299,8 @@ const Navbar = ({ toggleSidebar }) => {
         </div>
       </nav>
 
-      {/* Status Modal */}
-      {showStatusModal && (
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
         <div
           className="modal show d-block"
           style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 3000 }}
@@ -309,139 +308,51 @@ const Navbar = ({ toggleSidebar }) => {
           <div className="modal-dialog modal-dialog-centered">
             <div className="modal-content text-black">
               <div className="modal-header">
-                <h5 className="modal-title">Set Status to Away</h5>
+                <h5 className="modal-title">Logout Options</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowLogoutModal(false)}
+                  aria-label="Close"
+                ></button>
               </div>
               <div className="modal-body">
-                <p>Please select reason:</p>
-                <button
-                  className="btn btn-primary me-2"
-                  onClick={() => {
-                    setShowStatusModal(false);
-                    setShowBreakConfirmation(true);
-                  }}
-                >
-                  Break
-                </button>
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => {
-                    setUserStatus("(away)");
-                    setIsLoggedOut(true);
-                    setShowStatusModal(false);
-                    setShowOverlay(true);
-                    pauseTimeTracking();
-                  }}
-                >
-                  Logout
-                </button>
+                <p>Please select an option:</p>
+                <div className="d-grid gap-2">
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => {
+                      setShowLogoutModal(false);
+                      handleBreak();
+                    }}
+                  >
+                    <i className="fa fa-coffee me-2"></i>
+                    Break
+                  </button>
+                  <button
+                    className="btn btn-success"
+                    onClick={() => {
+                      setShowLogoutModal(false);
+                      handleEndOfShift();
+                    }}
+                    disabled={hasEndOfShiftToday}
+                  >
+                    <i className="fa fa-clock me-2"></i>
+                    End of Shift
+                    {hasEndOfShiftToday && (
+                      <span className="ms-2 text-muted">(Already recorded today)</span>
+                    )}
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setShowLogoutModal(false)}
+                  >
+                    <i className="fa fa-times me-2"></i>
+                    Close / Cancel
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Break Confirmation Modal */}
-      {showBreakConfirmation && (
-        <div
-          className="modal show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 3000 }}
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content text-black">
-              <div className="modal-header">
-                <h5 className="modal-title">Confirm Break</h5>
-              </div>
-              <div className="modal-body">
-                {role === "Team Member" ? (
-                  <p>Remaining break time: {breakTimeRemaining} minutes</p>
-                ) : (
-                  <p>
-                    No break time limit for Managers. Your status will be
-                    visible to Admin.
-                  </p>
-                )}
-              </div>
-              <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setShowBreakConfirmation(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    setUserStatus("(away)");
-                    setIsOnBreak(true);
-                    setShowBreakConfirmation(false);
-                    setShowOverlay(true);
-                    if (role === "Team Member") {
-                      startBreakTimer();
-                    }
-                    // For Manager, no timer logic needed
-                  }}
-                >
-                  Confirm
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Gray Overlay Mask */}
-      {showOverlay && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(128, 128, 128, 0.5)",
-            zIndex: 4000,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              padding: "20px",
-              borderRadius: "8px",
-              textAlign: "center",
-              color: "black",
-              maxWidth: 320,
-              width: "90vw",
-            }}
-          >
-            <p>
-              You are currently marked away. Please mark yourself Available to
-              continue.
-            </p>
-            {isOnBreak && (
-              <>
-                <p>Break time remaining: {breakTimeRemaining} minutes</p>
-                <button className="btn btn-primary mt-2" onClick={endBreak}>
-                  End Break
-                </button>
-              </>
-            )}
-            {isLoggedOut && (
-              <Link to="/">
-                <button
-                  className="btn btn-success mt-3"
-                  onClick={() => {
-                    setUserStatus("Available");
-                    setShowOverlay(false);
-                    setIsLoggedOut(false);
-                  }}
-                >
-                  Login
-                </button>
-              </Link>
-            )}
           </div>
         </div>
       )}

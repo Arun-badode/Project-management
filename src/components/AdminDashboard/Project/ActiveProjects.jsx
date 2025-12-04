@@ -1,12 +1,17 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import BASE_URL from "../../../config";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const ActiveProjects = () => {
+const ActiveProjects = (data) => {
+  const searchQuery = data?.searchQuery || ""; 
+  console.log("data", data?.searchQuery); 
+  console.log("searchQuery", searchQuery);
   const [activeTab, setActiveTab] = useState("active");
-  const [searchQuery, setSearchQuery] = useState("");
+  // const [searchQuery, setSearchQuery] = useState("");
+
+  console.log("data in created project", searchQuery);
   const token = localStorage.getItem("authToken");
   const [expandedRow, setExpandedRow] = useState(null);
   const [projects, setProjects] = useState([]);
@@ -43,6 +48,26 @@ const ActiveProjects = () => {
   const [projectFiles, setProjectFiles] = useState([]);
 
   const [allFiles, setAllFiles] = useState([]);
+  
+  // Custom date picker states
+  const [calendarOpen, setCalendarOpen] = useState({});
+  const [selectedDate, setSelectedDate] = useState({});
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedHour, setSelectedHour] = useState(0);
+  const [selectedMinute, setSelectedMinute] = useState(0);
+  const [isAM, setIsAM] = useState(true);
+  const calendarRef = useRef(null);
+  const today = new Date();
+  const [fileDeadlines, setFileDeadlines] = useState({});
+  
+  // Constants for calendar
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
   useEffect(() => {
     const fetchFiles = async () => {
       try {
@@ -64,7 +89,6 @@ const ActiveProjects = () => {
     fetchFiles();
   }, []);
 
-
   // this is for fetching members to show in filed handler option
   const [members, setMembers] = useState([]);
 
@@ -85,6 +109,209 @@ const ActiveProjects = () => {
     fetchMembers();
   }, []);
 
+  // Helper functions for custom date picker
+  const formatDateTime = (projectId) => {
+    const projectDate = selectedDate[projectId];
+    if (projectDate === null || projectDate === undefined) {
+      return "00:00 AM 00-00-00";
+    }
+
+    // Format time: HH:MM tt
+    const hour =
+      selectedHour === 0
+        ? 12
+        : selectedHour > 12
+        ? selectedHour - 12
+        : selectedHour;
+    const time = `${hour.toString().padStart(2, "0")}:${selectedMinute
+      .toString()
+      .padStart(2, "0")} ${isAM ? "AM" : "PM"}`;
+
+    // Format date: DD-MM-YY
+    const date = `${projectDate.toString().padStart(2, "0")}-${(
+      selectedMonth + 1
+    )
+      .toString()
+      .padStart(2, "0")}-${selectedYear.toString().slice(-2)}`;
+
+    return `${time} ${date}`;
+  };
+
+  // Handle calendar navigation
+  const handleNextMonth = () => {
+    if (selectedMonth === 11) {
+      setSelectedMonth(0);
+      setSelectedYear(selectedYear + 1);
+    } else {
+      setSelectedMonth(selectedMonth + 1);
+    }
+  };
+
+  const handlePrevMonth = () => {
+    if (selectedMonth === 0) {
+      setSelectedMonth(11);
+      setSelectedYear(selectedYear - 1);
+    } else {
+      setSelectedMonth(selectedMonth - 1);
+    }
+  };
+
+  const openCalendar = (projectId) => {
+    // Initialize calendar with current deadline if exists
+    if (fileDeadlines[projectId]) {
+      const deadline = new Date(fileDeadlines[projectId]);
+      setSelectedDate(prev => ({
+        ...prev,
+        [projectId]: deadline.getDate()
+      }));
+      setSelectedMonth(deadline.getMonth());
+      setSelectedYear(deadline.getFullYear());
+      setSelectedHour(deadline.getHours() % 12 || 12);
+      setSelectedMinute(deadline.getMinutes());
+      setIsAM(deadline.getHours() < 12);
+    } else {
+      // Initialize with today's date
+      setSelectedDate(prev => ({
+        ...prev,
+        [projectId]: today.getDate()
+      }));
+      setSelectedMonth(today.getMonth());
+      setSelectedYear(today.getFullYear());
+      setSelectedHour(today.getHours() % 12 || 12);
+      setSelectedMinute(today.getMinutes());
+      setIsAM(today.getHours() < 12);
+    }
+    
+    setCalendarOpen(prev => ({
+      ...prev,
+      [projectId]: true
+    }));
+  };
+
+  const isTimeInPast = (hour, minute, isAM, date) => {
+    if (
+      !date ||
+      date !== today.getDate() ||
+      selectedMonth !== today.getMonth() ||
+      selectedYear !== today.getFullYear()
+    ) {
+      return false;
+    }
+
+    const selectedHour24 = isAM
+      ? hour === 12
+        ? 0
+        : hour
+      : hour === 12
+      ? 12
+      : hour + 12;
+    const selectedTime = new Date(
+      selectedYear,
+      selectedMonth,
+      date,
+      selectedHour24,
+      minute
+    );
+    const now = new Date();
+
+    return selectedTime < now;
+  };
+
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let i = currentYear; i <= currentYear + 10; i++) {
+      years.push(i);
+    }
+    return years;
+  };
+
+  const setDeadlineFromCalendar = (projectId) => {
+    const projectDate = selectedDate[projectId];
+    if (projectDate === null || projectDate === undefined) return;
+
+    const deadline = `${selectedYear}-${(selectedMonth + 1)
+      .toString()
+      .padStart(2, "0")}-${projectDate.toString().padStart(2, "0")}T${(isAM
+      ? selectedHour === 12
+        ? 0
+        : selectedHour
+      : selectedHour === 12
+      ? 12
+      : selectedHour + 12
+    )
+      .toString()
+      .padStart(2, "0")}:${selectedMinute.toString().padStart(2, "0")}:00`;
+
+    setFileDeadlines(prev => ({
+      ...prev,
+      [projectId]: deadline
+    }));
+
+    // Also update the readyForQcDueInput state to maintain compatibility
+    setReadyForQcDueInput(deadline);
+    setHasUnsavedChanges(true);
+
+    setCalendarOpen(prev => ({
+      ...prev,
+      [projectId]: false
+    }));
+  };
+
+  // Generate calendar days
+  const generateCalendarDays = () => {
+    const firstDayOfMonth = new Date(selectedYear, selectedMonth, 1).getDay();
+    const daysInMonth = new Date(selectedYear, selectedMonth + 1, 0).getDate();
+    const daysInPrevMonth = new Date(selectedYear, selectedMonth, 0).getDate();
+    
+    const calendarDays = [];
+    
+    // Previous month days
+    for (let i = firstDayOfMonth - 1; i >= 0; i--) {
+      calendarDays.push({
+        day: daysInPrevMonth - i,
+        isCurrentMonth: false,
+        isToday: false,
+        isPast: true
+      });
+    }
+    
+    // Current month days
+    for (let i = 1; i <= daysInMonth; i++) {
+      const isToday = 
+        i === today.getDate() && 
+        selectedMonth === today.getMonth() && 
+        selectedYear === today.getFullYear();
+      
+      const isPast = 
+        i < today.getDate() && 
+        selectedMonth <= today.getMonth() && 
+        selectedYear <= today.getFullYear();
+      
+      calendarDays.push({
+        day: i,
+        isCurrentMonth: true,
+        isToday,
+        isPast
+      });
+    }
+    
+    // Next month days to fill the calendar
+    const remainingDays = 42 - calendarDays.length; // 6 rows * 7 days = 42
+    for (let i = 1; i <= remainingDays; i++) {
+      calendarDays.push({
+        day: i,
+        isCurrentMonth: false,
+        isToday: false,
+        isPast: false
+      });
+    }
+    
+    return calendarDays;
+  };
+
+  const calendarDays = generateCalendarDays();
+
   // New function to update project files via API
   const handleUpdateProjectFiles = async () => {
     if (!selectedProject || !selectedProject.id) {
@@ -92,8 +319,11 @@ const ActiveProjects = () => {
       return;
     }
 
+    // Use the custom date picker value if available
+    const deadlineToUse = fileDeadlines[selectedProject.id] || readyForQcDueInput;
+
     // Validate required fields
-    if (!readyForQcDueInput) {
+    if (!deadlineToUse) {
       alert("Please select Ready for QC Due date and time");
       return;
     }
@@ -107,14 +337,14 @@ const ActiveProjects = () => {
 
     try {
       // Calculate QC Due Date
-      const qcDueCalculated = calculateQCDue(readyForQcDueInput, qcAllocatedHours);
+      const qcDueCalculated = calculateQCDue(deadlineToUse, qcAllocatedHours);
 
       // -----------------------------------
       // 1. Update the Project File
       // -----------------------------------
       const fileUpdateData = {
         projectId: parseInt(selectedProject.id),
-        readyForQcDue: readyForQcDueInput,
+        readyForQcDue: deadlineToUse,
         qcAllocatedHours: parseFloat(qcAllocatedHours),
         qcDue: qcDueCalculated,
         priority: priorityAll,
@@ -122,7 +352,7 @@ const ActiveProjects = () => {
       };
 
       const fileUpdateResponse = await axios.patch(
-        `https://eminoids-backend-production.up.railway.app/api/projectFiles/updateProjectFile/${selectedProject.id}`,
+        `${BASE_URL}projectFiles/updateProjectFile/${selectedProject.id}`,
         fileUpdateData,
         {
           headers: {
@@ -166,13 +396,13 @@ const ActiveProjects = () => {
         deadline: fullProject.deadline,
 
         // ✅ Updated fields (status removed)
-        readyQCDeadline: readyForQcDueInput,
+        readyQCDeadline: deadlineToUse,
         qcHrs: parseFloat(qcAllocatedHours),
         qcDueDate: qcDueCalculated,
       };
 
       const projectUpdateResponse = await axios.patch(
-        `https://eminoids-backend-production.up.railway.app/api/project/updateProject/${selectedProject.id}`,
+        `${BASE_URL}project/updateProject/${selectedProject.id}`,
         projectUpdateData,
         {
           headers: {
@@ -190,7 +420,7 @@ const ActiveProjects = () => {
         if (project.id === selectedProject.id) {
           return {
             ...project,
-            readyQCDeadline: readyForQcDueInput,
+            readyQCDeadline: deadlineToUse,
             qcHrs: qcAllocatedHours,
             qcDueDate: qcDueCalculated,
             // priority remains in file, not in project
@@ -204,7 +434,7 @@ const ActiveProjects = () => {
 
       setSelectedProject(prev => ({
         ...prev,
-        readyQCDeadline: readyForQcDueInput,
+        readyQCDeadline: deadlineToUse,
         qcHrs: qcAllocatedHours,
         qcDueDate: qcDueCalculated,
       }));
@@ -218,6 +448,7 @@ const ActiveProjects = () => {
       setIsUpdating(false);
     }
   };
+
   const handleCloseProjectView = () => {
     setExpandedRow(null);
     setSelectedProject(null);
@@ -232,20 +463,22 @@ const ActiveProjects = () => {
   };
 
   useEffect(() => {
-    if (!readyForQcDueInput) {
+    const deadlineToUse = fileDeadlines[selectedProject?.id] || readyForQcDueInput;
+    
+    if (!deadlineToUse) {
       setQcDueDelay("");
       return;
     }
 
     const updateDelay = () => {
-      const delayText = calculateTimeDiff(readyForQcDueInput);
+      const delayText = calculateTimeDiff(deadlineToUse);
       setQcDueDelay(delayText);
     };
 
     updateDelay();
     const interval = setInterval(updateDelay, 60000);
     return () => clearInterval(interval);
-  }, [readyForQcDueInput]);
+  }, [readyForQcDueInput, fileDeadlines, selectedProject]);
 
   function calculateTimeDiff(targetDateStr) {
     const now = new Date();
@@ -261,7 +494,6 @@ const ActiveProjects = () => {
     timeStr += `${minutes}m`;
     return isPast ? `Delayed by ${timeStr}` : `Due in ${timeStr}`;
   }
-
 
   const assignees = [
     { label: "Not Assigned", value: "" },
@@ -285,7 +517,7 @@ const ActiveProjects = () => {
 
   useEffect(() => {
     fetchProjects();
-  }, []);
+  }, [searchQuery]);
 
   const fetchProjects = () => {
     setLoading(true);
@@ -308,27 +540,12 @@ const ActiveProjects = () => {
       .finally(() => setLoading(false));
   };
 
-  const filteredProjects = projects.filter((project) => {
-    const matchesTab = project.status === "Active" || project.status === "Completed"?.toLowerCase() === activeTab;
-    const matchesSearch =
-      searchQuery === "" ||
-      (project.projectTitle && project.projectTitle.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (project.clientName && project.clientName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (project.country && project.country.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (project.projectManager && project.projectManager.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      project.files?.some(
-        (file) => file.name && file.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-
-    return matchesTab && matchesSearch;
-  });
-  
   // Hold project function - Updated with the new API
   const handleHoldProject = async (projectId) => {
     try {
       // Use the new API endpoint to update project status
       const response = await axios.put(
-        `https://eminoids-backend-production.up.railway.app/api/project/updateProjectStatus/${projectId}`,
+        `${BASE_URL}project/updateProjectStatus/${projectId}`,
         { status: "On hold" },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -461,7 +678,6 @@ const ActiveProjects = () => {
 
   const markAsCompleted = async (projectId) => {
     try {
-
       const res = await axios.patch(
         `${BASE_URL}project/updateProject/${projectId}`,
         { status: "Completed" },
@@ -482,7 +698,6 @@ const ActiveProjects = () => {
       alert("Error updating project status");
     }
   };
-
 
   const handleEditProject = (projectId) => {
     console.log("Editing project:", projectId);
@@ -508,6 +723,14 @@ const ActiveProjects = () => {
     setQcAllocatedHours(0.0);
     setPriorityAll("Mid");
     setQcDueDelay("");
+
+    // Initialize the custom date picker with existing deadline if available
+    if (project.readyQCDeadline) {
+      setFileDeadlines(prev => ({
+        ...prev,
+        [project.id]: project.readyQCDeadline
+      }));
+    }
 
     setExpandedRow(expandedRow === project.id ? null : project.id);
     setShowFilesDropdown(null);
@@ -608,16 +831,27 @@ const ActiveProjects = () => {
   };
 
   // Count files for each project
-// allProjectFiles should be an array of file objects with a projectId field
+  const getFileCount = (projectId) => {
+    if (!Array.isArray(allFiles)) return 0;
+    return allFiles.filter(file => file.projectId === projectId).length;
+  };
 
-const getFileCount = (projectId) => {
-  if (!Array.isArray(allFiles)) return 0;
+  // Close calendar when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (calendarRef.current && !calendarRef.current.contains(event.target)) {
+        setCalendarOpen({});
+      }
+    };
 
-  return allFiles.filter(file => file.projectId === projectId).length;
-};
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
-    <div >
+    <div>
       {loading ? (
         <div className="text-center p-4">
           <div className="spinner-border text-primary" role="status" style={{ minWidth: 900 }}>
@@ -647,28 +881,44 @@ const getFileCount = (projectId) => {
             }}
           >
             <tr className="text-center">
-              <th>S. No.</th>
-              <th>Project Title</th>
-              <th>Client Alias Name</th>
-              <th>Client</th>
-              <th>Country</th>
-              <th>Project Manager</th>
-              <th>Task</th>
-              <th>Languages</th>
-              <th>Application</th>
-              <th>Total Pages</th>
-              <th>Deadline</th>
-              <th>Ready For QC Deadline</th>
-              <th>QC Hrs</th>
-              <th>QC Due Date</th>
-              <th>Status</th>
-              <th>Progress</th>
-              <th>Files</th> {/* New column for file count */}
-              <th>Actions</th>
+              <th style={{ width: "4%" }}>S. No.</th>
+              <th style={{ width: "10%" }}>Project Title</th>
+              <th style={{ width: "8%" }}>Client Alias Name</th>
+              <th style={{ width: "8%" }}>Client</th>
+              {/* <th style={{ width: "4%" }}>Country</th> */}
+              {/* <th style={{ width: "10%" }}>Project Manager</th> */}
+              <th style={{ width: "8%" }}>Task</th>
+              <th style={{ width: "8%" }}>Languages</th>
+              <th style={{ width: "8%" }}>Application</th>
+              <th style={{ width: "4%" }}>Total Pages</th>
+              <th style={{ width: "10%" }}>Deadline</th>
+              <th style={{ width: "10%" }}>Ready For QC Deadline</th>
+              <th style={{ width: "4%" }}>QC Hrs</th>
+              <th style={{ width: "10%" }}>QC Due Date</th>
+              <th style={{ width: "7%" }}>Status</th>
+              <th style={{ width: "6%" }}>Progress</th>
+              <th style={{ width: "6%" }}>Files</th>
+              <th style={{ width: "8%" }}>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {projects.filter((p) => p.status == "Active" || p.status == "Completed")
+            {projects
+              .filter((project) => {
+                // FIRST: apply search filter
+                const query = searchQuery.toLowerCase();
+
+                const matchesSearch =
+                  searchQuery === "" ||
+                  project.projectTitle?.toLowerCase().includes(query) ||  // Fixed: changed from 'title' to 'projectTitle'
+                  project.clientName?.toLowerCase().includes(query) ||
+                  project.country?.toLowerCase().includes(query) ||
+                  project.full_name?.toLowerCase().includes(query) ||
+                  project.application_name?.toLowerCase().includes(query) ||
+                  project.task_name?.toLowerCase().includes(query) ||
+                  project.language_name?.toLowerCase().includes(query);
+
+                return matchesSearch;
+              }).filter((p) => p.status == "Active" || p.status == "Completed")
               .map((project, index) => (
                 <React.Fragment key={project.id || index}>
                   <tr
@@ -678,45 +928,68 @@ const getFileCount = (projectId) => {
                         : "text-center"
                     }
                   >
-                    <td>{index + 1}</td>
-                    <td>{project.projectTitle || "-"}</td>
-                    <td>{project.full_name || "-"}</td>
-                    <td>{project.clientName || "-"}</td>
-                    <td>{project.country || "-"}</td>
-                    <td>{project.projectManagerId || "-"}</td>
-                    <td>
+                    <td style={{ maxWidth: "4ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{index + 1}</td>
+                    <td style={{ maxWidth: "80ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{project.projectTitle || "-"}</td>
+                    <td style={{ maxWidth: "12ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{project.full_name || "-"}</td>
+                    <td style={{ maxWidth: "12ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{project.clientName || "-"}</td>
+                    {/* <td style={{ maxWidth: "3ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{project.country || "-"}</td> */}
+                    {/* <td style={{ maxWidth: "16ch", wordWrap: "break-word" }}>{project.projectManagerId || "-"}</td> */}
+                    <td style={{ maxWidth: "16ch", wordWrap: "break-word" }}>
                       <span className="badge bg-primary bg-opacity-10 text-primary">
                         {project.task_name || "-"}
                       </span>
                     </td>
-                    <td>
+                    <td style={{ maxWidth: "16ch", wordWrap: "break-word" }}>
                       <span className="badge bg-success bg-opacity-10 text-success">
                         {project.language_name || "-"}
                       </span>
                     </td>
-                    <td>
+                    <td style={{ maxWidth: "16ch", wordWrap: "break-word" }}>
                       <span className="badge bg-purple bg-opacity-10 text-purple">
                         {project.application_name || "-"}
                       </span>
                     </td>
-                    <td>{project.totalPagesLang || "-"}</td>
-                    <td>
+                    <td style={{ maxWidth: "4ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {project.totalPagesLang ? Math.floor(project.totalPagesLang) : "-"}
+                    </td>
+                    <td style={{ maxWidth: "20ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {project.deadline
-                        ? new Date(project.deadline).toLocaleDateString()
+                        ? new Date(project.deadline).toLocaleString('en-GB', { 
+                            hour: '2-digit', 
+                            minute: '2-digit',
+                            hour12: true,
+                            day: '2-digit', 
+                            month: '2-digit', 
+                            year: '2-digit' 
+                          })
                         : "-"}
                     </td>
-                    <td>
+                    <td style={{ maxWidth: "20ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {project.readyQCDeadline
-                        ? new Date(project.readyQCDeadline).toLocaleDateString()
+                        ? new Date(project.readyQCDeadline).toLocaleString('en-GB', { 
+                            hour: '2-digit', 
+                            minute: '2-digit',
+                            hour12: true,
+                            day: '2-digit', 
+                            month: '2-digit', 
+                            year: '2-digit' 
+                          })
                         : "-"}
                     </td>
-                    <td>{project.qcHrs || "-"}</td>
-                    <td>
+                    <td style={{ maxWidth: "3ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{project.qcHrs || "-"}</td>
+                    <td style={{ maxWidth: "20ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {project.qcDueDate
-                        ? new Date(project.qcDueDate).toLocaleDateString()
+                        ? new Date(project.qcDueDate).toLocaleString('en-GB', { 
+                            hour: '2-digit', 
+                            minute: '2-digit',
+                            hour12: true,
+                            day: '2-digit', 
+                            month: '2-digit', 
+                            year: '2-digit' 
+                          })
                         : "-"}
                     </td>
-                    <td>
+                    <td style={{ maxWidth: "15ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       <span
                         className={`badge ${project.status === "Completed"
                           ? "bg-success text-white"
@@ -727,9 +1000,8 @@ const getFileCount = (projectId) => {
                       >
                         {project.status || "-"}
                       </span>
-
                     </td>
-                    <td>
+                    <td style={{ maxWidth: "10ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       <div className="d-flex align-items-center">
                         <div
                           className="progress flex-grow-1 me-2"
@@ -747,7 +1019,7 @@ const getFileCount = (projectId) => {
                         </small>
                       </div>
                     </td>
-                    <td>
+                    <td style={{ maxWidth: "10ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       <div className="position-relative">
                         <button 
                           className="badge bg-info d-flex align-items-center"
@@ -770,7 +1042,7 @@ const getFileCount = (projectId) => {
                                     </div>
                                     <div className="small text-muted">
                                       Pages: {file.pages || 0} | 
-                                      Ready for QC: {file.readyForQcDue ? new Date(file.readyForQcDue).toLocaleDateString() : '-'} | 
+                                      Ready for QC: {file.readyForQcDue ? new Date(file.readyForQcDue).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '-'} | 
                                       QC Hours: {file.qcAllocatedHours || 0}
                                     </div>
                                   </div>
@@ -783,7 +1055,7 @@ const getFileCount = (projectId) => {
                         )}
                       </div>
                     </td>
-                    <td className="text-end">
+                    <td>
                       <div className="d-flex justify-content-end gap-2">
                         {/* Hold Button - Only show if not in RFD final stage */}
                         {project.status !== "RFD Final" && project.status !== "Completed" && project.status !== "On hold" && project.status !== "On Hold" && (
@@ -876,17 +1148,17 @@ const getFileCount = (projectId) => {
                               <table className="table table-sm table-striped table-hover">
                                 <thead>
                                   <tr className="text-center">
-                                    <th>
+                                    <th style={{ width: "5%" }}>
                                       <input type="checkbox" />
                                     </th>
-                                    <th>File Name</th>
-                                    <th>Pages</th>
-                                    <th>Language</th>
-                                    <th>Application</th>
-                                    <th>Handler</th>
-                                    <th>QA Reviewer</th>
-                                    <th>Status</th>
-                                    <th>Preview</th>
+                                    <th style={{ width: "20%" }}>File Name</th>
+                                    <th style={{ width: "6%" }}>Pages</th>
+                                    <th style={{ width: "10%" }}>Language</th>
+                                    <th style={{ width: "10%" }}>Application</th>
+                                    <th style={{ width: "15%" }}>Handler</th>
+                                    <th style={{ width: "15%" }}>QA Reviewer</th>
+                                    <th style={{ width: "10%" }}>Status</th>
+                                    <th style={{ width: "9%" }}>QA Report</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -902,10 +1174,10 @@ const getFileCount = (projectId) => {
                                             onChange={() => toggleFileSelection(file)}
                                           />
                                         </td>
-                                        <td>{file.fileName}</td>
-                                        <td>{file.pages}</td>
-                                        <td>{file.languageName}</td>
-                                        <td>{file.applicationName}</td>
+                                        <td style={{ maxWidth: "20ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.fileName}</td>
+                                        <td style={{ maxWidth: "6ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.pages}</td>
+                                        <td style={{ maxWidth: "10ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.languageName}</td>
+                                        <td style={{ maxWidth: "10ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.applicationName}</td>
                                         <td>
                                           <select
                                             className="form-select form-select-sm"
@@ -925,7 +1197,6 @@ const getFileCount = (projectId) => {
                                                 </option>
                                               ))}
                                           </select>
-
                                         </td>
                                         <td>
                                           <select className="form-select form-select-sm">
@@ -935,7 +1206,7 @@ const getFileCount = (projectId) => {
                                             <option value="Emily Davis">Emily Davis</option>
                                           </select>
                                         </td>
-                                        <td>{file.status || "Pending"}</td>
+                                        <td style={{ maxWidth: "10ch", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{file.status || "Pending"}</td>
                                         <td>
                                           {file.imageUrl ? (
                                             <img
@@ -954,28 +1225,279 @@ const getFileCount = (projectId) => {
                                       </tr>
                                     ))}
                                 </tbody>
-
                               </table>
                             </div>
                           </div>
 
                           {/* Footer Row Controls */}
                           <div className="row g-3 align-items-center mb-3">
-                            {/* Ready for QC Due */}
+                            {/* Ready for QC Due - Custom Date Picker */}
                             <div className="col-12 col-sm-6 col-md-3">
                               <label className="form-label">
                                 Ready for QC Due <span className="text-danger">*</span>
                               </label>
-                              <input
-                                type="datetime-local"
-                                className="form-control"
-                                value={readyForQcDueInput}
-                                onChange={(e) => {
-                                  setReadyForQcDueInput(e.target.value);
-                                  setHasUnsavedChanges(true);
-                                }}
-                                required
-                              />
+                              <div className="max-w-md mx-auto position-relative" ref={calendarRef}>
+                                <div className="relative">
+                                  <input
+                                    type="text"
+                                    value={fileDeadlines[project.id]
+                                      ? new Date(fileDeadlines[project.id]).toLocaleString('en-GB', {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: true,
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: '2-digit'
+                                      })
+                                      : formatDateTime(project.id)}
+                                    readOnly
+                                    onClick={() => openCalendar(project.id)}
+                                    className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
+                                    placeholder="00:00 AM 00-00-00"
+                                  />
+                                </div>
+
+                                {calendarOpen[project.id] && (
+                                  <div className="calendar-dropdown position-absolute" style={{ zIndex: 1, top: "100%", left: "198px" }}>
+                                    <div className="time-display">
+                                      <div className="time">
+                                        {selectedHour === 0
+                                          ? "12"
+                                          : selectedHour > 12
+                                          ? selectedHour - 12
+                                          : selectedHour.toString().padStart(2, "0")}
+                                        :{selectedMinute.toString().padStart(2, "0")}
+                                      </div>
+                                      <div className="period">{isAM ? "AM" : "PM"}</div>
+                                      <div className="date">
+                                        {selectedDate[project.id] !== null && selectedDate[project.id] !== undefined
+                                          ? `${selectedDate[project.id].toString().padStart(2, "0")}-${(
+                                            selectedMonth + 1
+                                          )
+                                            .toString()
+                                            .padStart(2, "0")}-${selectedYear
+                                              .toString()
+                                              .slice(-2)}`
+                                          : "00-00-00"}
+                                      </div>
+                                    </div>
+
+                                    <div className="time-calendar-container">
+                                      <div className="time-selector">
+                                        <div className="time-column">
+                                          <div className="time-column-label">Hour</div>
+                                          <div className="time-scroll">
+                                            <div className="time-options">
+                                              {[12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(
+                                                (hour) => {
+                                                  const isPast = isTimeInPast(
+                                                    hour,
+                                                    selectedMinute,
+                                                    isAM,
+                                                    selectedDate[project.id]
+                                                  );
+                                                  return (
+                                                    <button
+                                                      key={hour}
+                                                      onClick={() => setSelectedHour(hour)}
+                                                      className={`time-option ${
+                                                        selectedHour === hour
+                                                          ? "selected-hour"
+                                                          : ""
+                                                      } ${isPast ? "past-time" : ""}`}
+                                                      disabled={isPast}
+                                                    >
+                                                      {hour.toString().padStart(2, "0")}
+                                                    </button>
+                                                  );
+                                                }
+                                              )}
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <div className="time-column">
+                                          <div className="time-column-label">Min</div>
+                                          <div className="time-scroll">
+                                            <div className="time-options">
+                                              {[0, 15, 30, 45].map((minute) => {
+                                                const isPast = isTimeInPast(
+                                                  selectedHour,
+                                                  minute,
+                                                  isAM,
+                                                  selectedDate[project.id]
+                                                );
+                                                return (
+                                                  <button
+                                                    key={minute}
+                                                    onClick={() => setSelectedMinute(minute)}
+                                                    className={`time-option ${
+                                                      selectedMinute === minute
+                                                        ? "selected-minute"
+                                                        : ""
+                                                    } ${isPast ? "past-time" : ""}`}
+                                                    disabled={isPast}
+                                                  >
+                                                    {minute.toString().padStart(2, "0")}
+                                                  </button>
+                                                );
+                                              })}
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <div className="time-column">
+                                          <div className="time-column-label">Period</div>
+                                          <div className="period-options">
+                                            <button
+                                              onClick={() => setIsAM(true)}
+                                              className={`period-option ${
+                                                isAM ? "selected" : ""
+                                              }`}
+                                            >
+                                              AM
+                                            </button>
+                                            <button
+                                              onClick={() => setIsAM(false)}
+                                              className={`period-option ${
+                                                !isAM ? "selected" : ""
+                                              }`}
+                                            >
+                                              PM
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <div className="calendar-section">
+                                        <div className="month-nav">
+                                          <div className="month-year-dropdowns">
+                                            <select
+                                              value={selectedMonth}
+                                              onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                                              className="form-select form-select-sm"
+                                            >
+                                              {months.map((month, index) => (
+                                                <option key={index} value={index}>
+                                                  {month}
+                                                </option>
+                                              ))}
+                                            </select>
+                                            <select
+                                              value={selectedYear}
+                                              onChange={(e) => setSelectedYear(Number(e.target.value))}
+                                              className="form-select form-select-sm"
+                                            >
+                                              {generateYearOptions().map((year) => (
+                                                <option key={year} value={year}>
+                                                  {year}
+                                                </option>
+                                              ))}
+                                            </select>
+                                          </div>
+                                          <div className="nav-buttons">
+                                            <button
+                                              type="button"
+                                              onClick={handlePrevMonth}
+                                              disabled={
+                                                selectedMonth === today.getMonth() &&
+                                                selectedYear === today.getFullYear()
+                                              }
+                                            >
+                                              <i className="fas fa-chevron-left"></i>
+                                            </button>
+                                            <button type="button" onClick={handleNextMonth}>
+                                              <i className="fas fa-chevron-right"></i>
+                                            </button>
+                                          </div>
+                                        </div>
+
+                                        <div className="weekdays">
+                                          {weekDays.map((day) => (
+                                            <div key={day} className="weekday">
+                                              {day}
+                                            </div>
+                                          ))}
+                                        </div>
+
+                                        <div className="calendar-grid">
+                                          {calendarDays.map((dayObj, index) => (
+                                            <button
+                                              key={index}
+                                              type="button"
+                                              onClick={() =>
+                                                dayObj.isCurrentMonth &&
+                                                !dayObj.isPast &&
+                                                setSelectedDate(prev => ({
+                                                  ...prev,
+                                                  [project.id]: dayObj.day
+                                                }))
+                                              }
+                                              className={`calendar-day ${
+                                                dayObj.isCurrentMonth
+                                                  ? selectedDate[project.id] === dayObj.day
+                                                    ? "current-month selected"
+                                                    : dayObj.isToday
+                                                    ? "current-month today"
+                                                    : "current-month"
+                                                  : "other-month"
+                                              } ${dayObj.isPast ? "past-date" : ""}`}
+                                              disabled={dayObj.isPast}
+                                            >
+                                              {dayObj.day}
+                                            </button>
+                                          ))}
+                                        </div>
+
+                                        <div className="action-buttons">
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              setSelectedDate(prev => ({
+                                                ...prev,
+                                                [project.id]: null
+                                              }));
+                                              setSelectedHour(0);
+                                              setSelectedMinute(0);
+                                              setIsAM(true);
+                                            }}
+                                            className="action-button"
+                                          >
+                                            Clear
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              setSelectedDate(prev => ({
+                                                ...prev,
+                                                [project.id]: today.getDate()
+                                              }));
+                                              setSelectedMonth(today.getMonth());
+                                              setSelectedYear(today.getFullYear());
+                                              setSelectedHour(today.getHours() % 12 || 12);
+                                              setSelectedMinute(today.getMinutes());
+                                              setIsAM(today.getHours() < 12);
+                                            }}
+                                            className="action-button"
+                                          >
+                                            Today
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="done-section">
+                                      <button
+                                        type="button"
+                                        onClick={() => setDeadlineFromCalendar(project.id)}
+                                        className="done-button"
+                                      >
+                                        Done
+                                      </button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                               {qcDueDelay && (
                                 <small
                                   className={`text-${qcDueDelay.includes("Delayed") ? "danger" : "success"
@@ -1014,11 +1536,10 @@ const getFileCount = (projectId) => {
                                 type="text"
                                 className="form-control"
                                 placeholder="--"
-                                value={calculateQCDue(readyForQcDueInput, qcAllocatedHours)}
+                                value={calculateQCDue(fileDeadlines[project.id] || readyForQcDueInput, qcAllocatedHours)}
                                 disabled
                               />
                             </div>
-
 
                             <div className="col-12 col-sm-6 col-md-2">
                               <label className="form-label">Priority</label>
@@ -1036,13 +1557,12 @@ const getFileCount = (projectId) => {
                               </select>
                             </div>
 
-
                             {/* Action Buttons */}
                             <div className="col-12 col-md-3 d-flex flex-column flex-md-row justify-content-md-end align-items-stretch gap-2">
                               <button
                                 className="btn btn-success w-100"
                                 onClick={handleUpdateProjectFiles}
-                                disabled={isUpdating || !readyForQcDueInput || !qcAllocatedHours}
+                                disabled={isUpdating || !(fileDeadlines[project.id] || readyForQcDueInput) || !qcAllocatedHours}
                               >
                                 {isUpdating ? (
                                   <>
@@ -1134,6 +1654,9 @@ const getFileCount = (projectId) => {
           </div>
         </div>
       )}
+
+      {/* Add custom CSS for the calendar */}
+     
     </div>
   );
 };
