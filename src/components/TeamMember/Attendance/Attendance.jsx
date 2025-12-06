@@ -1816,10 +1816,12 @@ import {
   Filter,
   ChevronLeft,
   ChevronRight,
+  X,
+  Edit,
+  Save
 } from "lucide-react";
 import useSyncScroll from "../../AdminDashboard/Hooks/useSyncScroll";
 import BASE_URL from "../../../config";
-import { X, Settings } from 'lucide-react';
 
 const Attendance = () => {
   // --- STATE DECLARATIONS ---
@@ -1828,6 +1830,11 @@ const Attendance = () => {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("authToken");
+  
+  // Get current user info from localStorage
+  const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+  const userRole = currentUser.role || ""; // Assuming role is stored in currentUser
+  const userId = currentUser.id || ""; // Assuming user ID is stored in currentUser
 
   // Filter and UI states
   const [searchTerm, setSearchTerm] = useState("");
@@ -1837,14 +1844,15 @@ const Attendance = () => {
     end: "2025-05-27",   // Default Payroll Cycle End
   });
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [viewMode, setViewMode] = useState("today"); // Default to summary view
+  const [viewMode, setViewMode] = useState("today"); // Default to today view
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
   const [isEditing, setIsEditing] = useState(false); // For Details View edit mode
   const [editFormData, setEditFormData] = useState({}); 
+  
   // --- HELPER FUNCTIONS ---
- const formatDateDDMMYY = (dateString) => {
+  const formatDateDDMMYY = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, '0');
@@ -1852,8 +1860,9 @@ const Attendance = () => {
     const year = String(date.getFullYear()).slice(-2); // Last two digits of year
     return `${day}-${month}-${year}`;
   };
+  
   // Convert time string to 24-hour format
-   const convertTo24HourFormat = (timeString) => {
+  const convertTo24HourFormat = (timeString) => {
     if (!timeString) return null;
     // Check if it's already in 24-hour format (HH:MM)
     if (/^\d{1,2}:\d{2}$/.test(timeString)) {
@@ -1874,6 +1883,7 @@ const Attendance = () => {
     }
     return null; // Invalid format
   };
+  
   // Calculate net working hours from inTime and outTime
   const calculateNetHours = (inTime, outTime) => {
     if (!inTime || !outTime) return "-";
@@ -1903,7 +1913,7 @@ const Attendance = () => {
   };
 
   // Calculate attendance status based on shift details
-   const calculateAttendanceBasedOnShift = (attendance, shiftDetails) => {
+  const calculateAttendanceBasedOnShift = (attendance, shiftDetails) => {
     if (!shiftDetails) return attendance;
 
     const { shiftStartTime, shiftEndTime, isWeekOff, isHoliday } = shiftDetails;
@@ -1916,8 +1926,7 @@ const Attendance = () => {
       return { ...attendance, status: "Week Off", anomalies: "-" };
     }
 
-
-     if (attendance.status === "Leave") {
+    if (attendance.status === "Leave") {
       // Check if it's half-day leave based on remarks or other logic
       // For simplicity, assuming if remarks contain "1st Half" or "2nd Half"
       if (attendance.anomalies.includes("1st Half")) {
@@ -1940,7 +1949,7 @@ const Attendance = () => {
     }
 
     // Check for late arrival and early departure
-     let anomalies = attendance.anomalies === "-" ? "" : attendance.anomalies;
+    let anomalies = attendance.anomalies === "-" ? "" : attendance.anomalies;
     if (attendance.loginTime !== "-" && shiftStartTime) {
       const loginTime = new Date(`1970-01-01T${attendance.loginTime}:00`);
       const startTime = new Date(`1970-01-01T${shiftStartTime}:00`);
@@ -1959,54 +1968,53 @@ const Attendance = () => {
     }
 
     // Check for long break
-   const calculateBreakTime = (loginTime, logoutTime) => {
-    if (!loginTime || !logoutTime) return "-";
+    const calculateBreakTime = (loginTime, logoutTime) => {
+      if (!loginTime || !logoutTime) return "-";
 
-    const login24 = convertTo24HourFormat(loginTime);
-    const logout24 = convertTo24HourFormat(logoutTime);
+      const login24 = convertTo24HourFormat(loginTime);
+      const logout24 = convertTo24HourFormat(logoutTime);
 
-    if (!login24 || !logout24) return "-";
+      if (!login24 || !logout24) return "-";
 
-    const [loginH, loginM] = login24.split(":").map(Number);
-    const [logoutH, logoutM] = logout24.split(":").map(Number);
+      const [loginH, loginM] = login24.split(":").map(Number);
+      const [logoutH, logoutM] = logout24.split(":").map(Number);
 
-    let loginMinutes = loginH * 60 + loginM;
-    let logoutMinutes = logoutH * 60 + logoutM;
+      let loginMinutes = loginH * 60 + loginM;
+      let logoutMinutes = logoutH * 60 + logoutM;
 
-    if (logoutMinutes < loginMinutes) {
-      logoutMinutes += 24 * 60; // Handle overnight
-    }
+      if (logoutMinutes < loginMinutes) {
+        logoutMinutes += 24 * 60; // Handle overnight
+      }
 
-    // Total duration in minutes
-    const totalDuration = logoutMinutes - loginMinutes;
+      // Total duration in minutes
+      const totalDuration = logoutMinutes - loginMinutes;
 
-    // Assuming standard work hours are 8.5 hours (510 minutes) for full day.
-    // This is a simplification. You might need to adjust based on actual shift timings.
-    const standardWorkMinutes = 8.5 * 60; // 510 minutes
+      // Assuming standard work hours are 8.5 hours (510 minutes) for full day.
+      // This is a simplification. You might need to adjust based on actual shift timings.
+      const standardWorkMinutes = 8.5 * 60; // 510 minutes
 
-    // Break time = Total duration - Standard work time
-    let breakMinutes = totalDuration - standardWorkMinutes;
+      // Break time = Total duration - Standard work time
+      let breakMinutes = totalDuration - standardWorkMinutes;
 
-    // Ensure break time is not negative and doesn't exceed 60 minutes (as per requirement)
-    if (breakMinutes < 0) breakMinutes = 0;
-    if (breakMinutes > 60) breakMinutes = 60; // Cap at 60 minutes
+      // Ensure break time is not negative and doesn't exceed 60 minutes (as per requirement)
+      if (breakMinutes < 0) breakMinutes = 0;
+      if (breakMinutes > 60) breakMinutes = 60; // Cap at 60 minutes
 
-    return breakMinutes > 0 ? `${breakMinutes} mins` : "-";
-  };
+      return breakMinutes > 0 ? `${breakMinutes} mins` : "-";
+    };
 
     return { ...attendance, anomalies: anomalies || "-", breakTime: breakTime };
   };
 
-
   // Calculate salary details based on attendance and user data
-   const calculateSalaryDetails = useCallback(async (userId, userAttendance, userSalary, userDOJ, openingBalance) => {
+  const calculateSalaryDetails = useCallback(async (userId, userAttendance, userSalary, userDOJ, openingBalance) => {
     // Calculate experience in years
     const joiningDate = new Date(userDOJ);
     const currentDate = new Date();
     const experienceYears = (currentDate - joiningDate) / (1000 * 60 * 60 * 24 * 365);
 
     // Calculate leave allocation based on experience
-     let leaveAllocationPerMonth = 0;
+    let leaveAllocationPerMonth = 0;
     if (experienceYears >= 2) leaveAllocationPerMonth = 2;
     else if (experienceYears >= 1) leaveAllocationPerMonth = 1.5;
     else if (experienceYears >= 4 / 12) leaveAllocationPerMonth = 1;
@@ -2014,7 +2022,7 @@ const Attendance = () => {
 
     // Get payroll cycle details (total days, holidays, week-offs)
     // NOTE: This is a mock implementation. Replace with actual API call.
-      const totalDaysInCycle = 30; // Mock: Total days in payroll cycle
+    const totalDaysInCycle = 30; // Mock: Total days in payroll cycle
     const holidays = 2;          // Mock: Number of holidays in cycle
     const weekOffs = 8;         // Mock: Number of week-offs in cycle
 
@@ -2055,7 +2063,7 @@ const Attendance = () => {
 
     const finalPayableAmount = calculatedSalary + incentives - deductions;
 
-   return {
+    return {
       salary: userSalary,
       perDaySalary,
       paidDays,
@@ -2069,28 +2077,44 @@ const Attendance = () => {
     };
   }, []);
 
-
   // --- API EFFECTS ---
 
-  // Effect to fetch and process attendance data
-   useEffect(() => {
+  // Effect to fetch and process attendance data based on user role
+  useEffect(() => {
     const fetchAttendanceAndCalculate = async () => {
       setLoading(true);
       try {
-        // Fetch attendance data with member details
-        const attendanceResponse = await axios.get(`${BASE_URL}attendance/getAllAttendanceWithMembers`);
-        const membersData = attendanceResponse.data.data || [];
+        let membersData = [];
+        
+        // Fetch data based on user role
+        if (userRole === "Admin") {
+          // Admin sees all members' attendance
+          const attendanceResponse = await axios.get(`${BASE_URL}attendance/getAllAttendanceWithMembers`);
+          membersData = attendanceResponse.data.data || [];
+        } else if (userRole === "Manager") {
+          // Manager sees only their own attendance
+          const attendanceResponse = await axios.get(`${BASE_URL}attendance/member/${userId}`);
+          membersData = attendanceResponse.data ? [attendanceResponse.data] : [];
+        } else {
+          // Default fallback
+          const attendanceResponse = await axios.get(`${BASE_URL}attendance/getAllAttendanceWithMembers`);
+          membersData = attendanceResponse.data.data || [];
+        }
+        
         // Process each member's attendance
         const allProcessedAttendance = [];
         const allSummaryData = [];
+        
         for (const member of membersData) {
           const attendanceRecords = member.attendance || [];
           const processedRecords = [];
+          
           for (const att of attendanceRecords) {
             // Mock shift details - Replace with actual API call
             // const shiftResponse = await axios.get(`${BASE_URL}shift/getShiftDetails?userId=${member.id}&date=${att.attendanceDate}`);
             // const shiftDetails = shiftResponse.data;
             const shiftDetails = { shiftStartTime: "09:00", shiftEndTime: "18:00", isWeekOff: false, isHoliday: false }; // MOCK
+            
             // Calculate attendance based on shift
             const attendance = calculateAttendanceBasedOnShift({
               id: att.id,
@@ -2106,9 +2130,12 @@ const Attendance = () => {
               status: att.status,
               anomalies: att.remarks || "-",
             }, shiftDetails);
+            
             processedRecords.push(attendance);
           }
+          
           allProcessedAttendance.push(...processedRecords);
+          
           // Prepare summary data for this member
           const empSummary = {
             id: member.id,
@@ -2122,9 +2149,12 @@ const Attendance = () => {
             dateOfJoining: member.doj || "2022-01-15", // Use actual DOJ if available
             leaveOpeningBalance: 2, // MOCK
           };
+          
           allSummaryData.push(empSummary);
         }
+        
         setAttendanceData(allProcessedAttendance);
+        
         // Calculate summary data with salary details
         const summaryWithSalary = await Promise.all(allSummaryData.map(async (emp) => {
           const salaryDetails = await calculateSalaryDetails(
@@ -2136,15 +2166,22 @@ const Attendance = () => {
           );
           return { ...emp, salaryDetails };
         }));
+        
         setSummaryData(summaryWithSalary);
+        
+        // If manager, automatically select their own record for detailed view
+        if (userRole === "Manager" && summaryWithSalary.length > 0) {
+          setSelectedEmployee(summaryWithSalary[0].id);
+        }
       } catch (err) {
         console.error("Error fetching attendance data", err);
       } finally {
         setLoading(false);
       }
     };
+    
     fetchAttendanceAndCalculate();
-  }, [dateRange, calculateSalaryDetails]);  // Re-fetch when date range changes
+  }, [dateRange, calculateSalaryDetails, userRole, userId]); // Re-fetch when date range or user role changes
 
   // --- FILTERS AND DERIVED DATA ---
 
@@ -2181,14 +2218,13 @@ const Attendance = () => {
     setEditFormData({}); // Clear edit form data
   };
 
-
   const saveAndCloseEmployeeDetail = () => {
     // Save data logic here (send to backend)
     // For now, just close the detail view
     closeEmployeeDetail();
   };
 
-   const toggleEdit = () => {
+  const toggleEdit = () => {
     if (isEditing) {
       // Save changes
       saveAndCloseEmployeeDetail();
@@ -2204,12 +2240,13 @@ const Attendance = () => {
       }
     }
   };
-   const handleInputChange = (e) => {
+
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditFormData(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
   };
 
- const getStatusColor = (status) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case "Present": return "success";
       case "Absent": return "danger";
@@ -2226,10 +2263,7 @@ const Attendance = () => {
 
   const { scrollContainerRef, fakeScrollbarRef } = useSyncScroll(true);
 
-  // --- JSX RENDER ---
- 
- 
- const goToPreviousMonth = () => {
+  const goToPreviousMonth = () => {
     const startDate = new Date(dateRange.start);
     startDate.setMonth(startDate.getMonth() - 1);
     const endDate = new Date(dateRange.end);
@@ -2239,7 +2273,8 @@ const Attendance = () => {
       end: endDate.toISOString().split('T')[0],
     });
   };
-const goToNextMonth = () => {
+
+  const goToNextMonth = () => {
     const startDate = new Date(dateRange.start);
     startDate.setMonth(startDate.getMonth() + 1);
     const endDate = new Date(dateRange.end);
@@ -2250,7 +2285,7 @@ const goToNextMonth = () => {
     });
   };
 
-const clearFilters = () => {
+  const clearFilters = () => {
     setSearchTerm("");
     setDepartmentFilter("All");
     // Optionally reset date range to default
@@ -2259,6 +2294,8 @@ const clearFilters = () => {
       end: "2025-05-27",
     });
   };
+
+  // --- JSX RENDER ---
   return (
     <div className="container-fluid py-4">
       <div className="row mb-4">
@@ -2268,44 +2305,61 @@ const clearFilters = () => {
         </div>
       </div>
 
-      {/* Filters and Search */}
-   <div className="card mb-4 table-gradient-bg">
-        <div className="card-body">
-          <div className="row">
-            <div className="col-md-8">
-              <div className="row">
-                <div className="col-md-4 mt-4">
-                  <div className="input-group">
-                    <span className="input-group-text"><Search size={16} /></span>
-                    <input type="text" className="form-control" placeholder="Search by name or ID..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+      {/* Filters and Search - Only show for Admins */}
+      {userRole === "Admin" && (
+        <div className="card mb-4 table-gradient-bg">
+          <div className="card-body">
+            <div className="row">
+              <div className="col-md-8">
+                <div className="row">
+                  <div className="col-md-4 mt-4">
+                    <div className="input-group">
+                      <span className="input-group-text"><Search size={16} /></span>
+                      <input type="text" className="form-control" placeholder="Search by name or ID..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                    </div>
                   </div>
-                </div>
-                <div className="col-md-4 mt-4">
-                  <select className="form-select" value={departmentFilter} onChange={(e) => setDepartmentFilter(e.target.value)}>
-                    {departments.map((dept, index) => (<option key={index} value={dept}>{dept}</option>))}
-                  </select>
-                </div>
-                <div className="col-md-4">
-                  <div className="row g-2">
-                    <div className="col-6"><label className="form-label small">Start Date</label><input type="date" className="form-control" value={dateRange.start} onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} /></div>
-                    <div className="col-6"><label className="form-label small">End Date</label><input type="date" className="form-control" value={dateRange.end} onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} /></div>
+                  <div className="col-md-4 mt-4">
+                    <select className="form-select" value={departmentFilter} onChange={(e) => setDepartmentFilter(e.target.value)}>
+                      {departments.map((dept, index) => (<option key={index} value={dept}>{dept}</option>))}
+                    </select>
+                  </div>
+                  <div className="col-md-4">
+                    <div className="row g-2">
+                      <div className="col-6"><label className="form-label small">Start Date</label><input type="date" className="form-control" value={dateRange.start} onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} /></div>
+                      <div className="col-6"><label className="form-label small">End Date</label><input type="date" className="form-control" value={dateRange.end} onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} /></div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="col-md-4 text-md-end mt-3 mt-md-0">
-              <button className="btn btn-primary"><Download size={16} className="me-2" />Export Report</button>
+              <div className="col-md-4 text-md-end mt-3 mt-md-0">
+                <button className="btn btn-primary"><Download size={16} className="me-2" />Export Report</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* View Mode Tabs */}
+      {/* View Mode Tabs - Modify based on role */}
       <ul className="nav nav-tabs mb-4">
-        <li className="nav-item"><button className={`nav-link ${viewMode === "today" ? "active" : ""}`} onClick={() => setViewMode("today")}><Calendar size={16} className="me-2" />Today</button></li>
-        <li className="nav-item"><button className={`nav-link ${viewMode === "summary" ? "active" : ""}`} onClick={() => setViewMode("summary")}><Activity size={16} className="me-2" />Summary View</button></li>
-        <li className="nav-item"><button className={`nav-link ${viewMode === "detailed" ? "active" : ""}`} onClick={() => setViewMode("detailed")}><FileText size={16} className="me-2" />Details View</button></li>
+        <li className="nav-item">
+          <button className={`nav-link ${viewMode === "today" ? "active" : ""}`} onClick={() => setViewMode("today")}>
+            <Calendar size={16} className="me-2" />Today
+          </button>
+        </li>
+        {userRole === "Admin" && (
+          <li className="nav-item">
+            <button className={`nav-link ${viewMode === "summary" ? "active" : ""}`} onClick={() => setViewMode("summary")}>
+              <Activity size={16} className="me-2" />Summary View
+            </button>
+          </li>
+        )}
+        <li className="nav-item">
+          <button className={`nav-link ${viewMode === "detailed" ? "active" : ""}`} onClick={() => setViewMode("detailed")}>
+            <FileText size={16} className="me-2" />Details View
+          </button>
+        </li>
       </ul>
+
       {loading && <div className="text-center my-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
 
       {/* Today View */}
@@ -2322,9 +2376,11 @@ const clearFilters = () => {
                 <button className="btn btn-sm btn-outline-secondary" onClick={goToNextMonth}>
                   <ChevronRight size={16} />
                 </button>
-                <button className="btn btn-sm btn-outline-danger ms-2" onClick={clearFilters} disabled={!searchTerm && departmentFilter === "All"}>
-                  Clear Filter
-                </button>
+                {userRole === "Admin" && (
+                  <button className="btn btn-sm btn-outline-danger ms-2" onClick={clearFilters} disabled={!searchTerm && departmentFilter === "All"}>
+                    Clear Filter
+                  </button>
+                )}
               </div>
             </div>
             <div className="table-responsive">
@@ -2364,16 +2420,29 @@ const clearFilters = () => {
         </div>
       )}
 
-      {/* Summary View */}
-     {viewMode === "summary" && !loading && (
+      {/* Summary View - Only for Admins */}
+      {viewMode === "summary" && userRole === "Admin" && !loading && (
         <div className="card bg-card">
           <div className="card-body p-0 table-gradient-bg">
-            <div ref={fakeScrollbarRef} style={{ overflowX: "auto", overflowY: "hidden", height: 16, position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1050 }}><div style={{ width: "1200px", height: 1 }} /></div>
+            <div ref={fakeScrollbarRef} style={{ overflowX: "auto", overflowY: "hidden", height: 16, position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1050 }}>
+              <div style={{ width: "1200px", height: 1 }} />
+            </div>
             <div className="table-responsive" style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }} ref={scrollContainerRef}>
               <table className="table table-hover mb-0">
                 <thead className="table-gradient-bg table" style={{ position: "sticky", top: 0, zIndex: 0, backgroundColor: "#fff" }}>
                   <tr className="text-center">
-                    <th>Employee</th><th>Present Days</th><th>Absent Days</th><th>Late Arrivals</th><th>Early Departures</th><th>Leaves</th><th>Net Working Hours</th><th>Break Time</th><th>Task Active Time</th><th>Long Break</th><th>Payout</th><th className="text-end">Actions</th>
+                    <th>Employee</th>
+                    <th>Present Days</th>
+                    <th>Absent Days</th>
+                    <th>Late Arrivals</th>
+                    <th>Early Departures</th>
+                    <th>Leaves</th>
+                    <th>Net Working Hours</th>
+                    <th>Break Time</th>
+                    <th>Task Active Time</th>
+                    <th>Long Break</th>
+                    <th>Payout</th>
+                    <th className="text-end">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2390,7 +2459,17 @@ const clearFilters = () => {
                     const longBreakCount = employee.attendanceRecords.filter(r => r.anomalies?.includes('Long Break')).length;
                     return (
                       <tr key={employee.id} className="text-center">
-                        <td><div className="d-flex align-items-center"><div className="avatar avatar-sm rounded me-3"><span className="avatar-text">{initials}</span></div><div><div className="fw-semibold">{employee.employeeName}</div><div className="small">{employee.employeeId}</div></div></div></td>
+                        <td>
+                          <div className="d-flex align-items-center">
+                            <div className="avatar avatar-sm rounded me-3">
+                              <span className="avatar-text">{initials}</span>
+                            </div>
+                            <div>
+                              <div className="fw-semibold">{employee.employeeName}</div>
+                              <div className="small">{employee.employeeId}</div>
+                            </div>
+                          </div>
+                        </td>
                         <td><span className="badge bg-success-subtle text-success">{salary?.paidDays || 0}</span></td>
                         <td><span className="badge bg-danger-subtle text-danger">{employee.attendanceRecords.filter(r => r.status === 'Absent').length}</span></td>
                         <td><span className="badge bg-warning-subtle text-warning">{employee.attendanceRecords.filter(r => r.anomalies?.includes('Late Arrival')).length}</span></td>
@@ -2401,7 +2480,11 @@ const clearFilters = () => {
                         <td>-</td>
                         <td><span className="badge bg-danger-subtle text-danger">{longBreakCount}</span></td>
                         <td><span className="fw-bold">₹{salary?.finalPayableAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0 }) || 'N/A'}</span></td>
-                        <td className="text-center mt-2"><button onClick={() => handleEmployeeSelect(employee.id)} className="btn btn-sm btn-info"><Eye size={16} className="me-1" />View</button></td>
+                        <td className="text-center mt-2">
+                          <button onClick={() => handleEmployeeSelect(employee.id)} className="btn btn-sm btn-info">
+                            <Eye size={16} className="me-1" />View
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
@@ -2412,9 +2495,8 @@ const clearFilters = () => {
         </div>
       )}
 
-
-      {/* Detailed View - Employee Selection */}
-      {viewMode === "detailed" && !selectedEmployee && !loading && (
+      {/* Detailed View - Employee Selection (Only for Admins) */}
+      {viewMode === "detailed" && userRole === "Admin" && !selectedEmployee && !loading && (
         <div className="card bg-card">
           <div className="card-body text-center py-5">
             <div className="mb-4"><Users size={48} /></div>
@@ -2429,12 +2511,20 @@ const clearFilters = () => {
                       <div className="card-body">
                         <div className="d-flex justify-content-between align-items-center">
                           <div className="d-flex align-items-center">
-                            <div className="avatar avatar-sm rounded me-3"><span className="avatar-text">{initials}</span></div>
-                            <div><div className="fw-semibold">{employee.employeeName}</div><div className="small">{employee.employeeId}</div></div>
+                            <div className="avatar avatar-sm rounded me-3">
+                              <span className="avatar-text">{initials}</span>
+                            </div>
+                            <div>
+                              <div className="fw-semibold">{employee.employeeName}</div>
+                              <div className="small">{employee.employeeId}</div>
+                            </div>
                           </div>
                           <button onClick={() => handleEmployeeSelect(employee.id)} className="btn btn-sm btn-outline-primary">Select</button>
                         </div>
-                        <div className="row mt-3 small"><div className="col-6"><span className="fw-semibold">Department:</span> {employee.department}</div><div className="col-6"><span className="fw-semibold">Position:</span> {employee.position}</div></div>
+                        <div className="row mt-3 small">
+                          <div className="col-6"><span className="fw-semibold">Department:</span> {employee.department}</div>
+                          <div className="col-6"><span className="fw-semibold">Position:</span> {employee.position}</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2446,22 +2536,33 @@ const clearFilters = () => {
       )}
 
       {/* Detailed View - Employee Details */}
-     {viewMode === "detailed" && selectedEmployeeData && !loading && (
+      {viewMode === "detailed" && selectedEmployeeData && !loading && (
         <div className="card bg-card">
           <div className="card-body">
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
               <div className="d-flex align-items-center">
-                <div className="avatar avatar-lg rounded me-3"><span className="avatar-text fs-4">{selectedEmployeeData.employeeName?.split(" ").map((n) => n[0]).join("")}</span></div>
-                <div><h2 className="h4 mb-0">{selectedEmployeeData.employeeName}</h2><div className="text-white">{selectedEmployeeData.employeeId} • {selectedEmployeeData.department} • {selectedEmployeeData.position}</div></div>
+                <div className="avatar avatar-lg rounded me-3">
+                  <span className="avatar-text fs-4">
+                    {selectedEmployeeData.employeeName?.split(" ").map((n) => n[0]).join("")}
+                  </span>
+                </div>
+                <div>
+                  <h2 className="h4 mb-0">{selectedEmployeeData.employeeName}</h2>
+                  <div className="text-white">{selectedEmployeeData.employeeId} • {selectedEmployeeData.department} • {selectedEmployeeData.position}</div>
+                </div>
               </div>
               <div className="d-flex gap-2 align-items-center">
-                <button onClick={toggleEdit} className={`btn btn-sm ${isEditing ? 'btn-success' : 'btn-outline-secondary'}`}>
-                  {isEditing ? <Save size={16} /> : <Edit size={16} />}
-                </button>
-                <button onClick={closeEmployeeDetail} className="btn btn-sm btn-primary rounded-circle" style={{width: '32px', height: '32px', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                  <X size={16} />
-                </button>
+                {userRole === "Admin" && (
+                  <button onClick={toggleEdit} className={`btn btn-sm ${isEditing ? 'btn-success' : 'btn-outline-secondary'}`}>
+                    {isEditing ? <Save size={16} /> : <Edit size={16} />}
+                  </button>
+                )}
+                {userRole === "Admin" ? (
+                  <button onClick={closeEmployeeDetail} className="btn btn-sm btn-primary rounded-circle" style={{width: '32px', height: '32px', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    <X size={16} />
+                  </button>
+                ) : null}
               </div>
             </div>
 
@@ -2471,13 +2572,25 @@ const clearFilters = () => {
               <div className="card bg-card">
                 <div className="card-body">
                   <div className="row">
-                    <div className="col-md-3 mb-3"><div className="small text-white">Monthly Salary</div><div className="h5">₹{selectedEmployeeData.salaryDetails?.salary?.toLocaleString('en-IN') || 0}</div></div>
-                    <div className="col-md-3 mb-3"><div className="small text-white">Paid Days</div><div className="h5">{selectedEmployeeData.salaryDetails?.paidDays || 0} / {selectedEmployeeData.salaryDetails?.totalDays || 0}</div></div>
-                    <div className="col-md-3 mb-3"><div className="small text-white">Leave Balance</div><div className="h5">{selectedEmployeeData.salaryDetails?.leaveBalance || 0} days</div></div>
-                    <div className="col-md-3 mb-3"><div className="small text-white">LOP Days</div><div className="h5">{selectedEmployeeData.salaryDetails?.lopDays || 0} days</div></div>
+                    <div className="col-md-3 mb-3">
+                      <div className="small text-white">Monthly Salary</div>
+                      <div className="h5">₹{selectedEmployeeData.salaryDetails?.salary?.toLocaleString('en-IN') || 0}</div>
+                    </div>
+                    <div className="col-md-3 mb-3">
+                      <div className="small text-white">Paid Days</div>
+                      <div className="h5">{selectedEmployeeData.salaryDetails?.paidDays || 0} / {selectedEmployeeData.salaryDetails?.totalDays || 0}</div>
+                    </div>
+                    <div className="col-md-3 mb-3">
+                      <div className="small text-white">Leave Balance</div>
+                      <div className="h5">{selectedEmployeeData.salaryDetails?.leaveBalance || 0} days</div>
+                    </div>
+                    <div className="col-md-3 mb-3">
+                      <div className="small text-white">LOP Days</div>
+                      <div className="h5">{selectedEmployeeData.salaryDetails?.lopDays || 0} days</div>
+                    </div>
                     <div className="col-md-3 mb-3">
                       <div className="small text-white">Incentives</div>
-                      {isEditing ? (
+                      {userRole === "Admin" && isEditing ? (
                         <input
                           type="number"
                           name="incentives"
@@ -2491,7 +2604,7 @@ const clearFilters = () => {
                     </div>
                     <div className="col-md-3 mb-3">
                       <div className="small text-white">Deductions</div>
-                      {isEditing ? (
+                      {userRole === "Admin" && isEditing ? (
                         <input
                           type="number"
                           name="deductions"
@@ -2503,8 +2616,14 @@ const clearFilters = () => {
                         <div className="h5 text-danger">-₹{selectedEmployeeData.salaryDetails?.deductions?.toLocaleString('en-IN') || 0}</div>
                       )}
                     </div>
-                    <div className="col-md-3 mb-3"><div className="small text-white">Experience</div><div className="h5">{selectedEmployeeData.salaryDetails?.experienceYears?.toFixed(1) || 0} Years</div></div>
-                    <div className="col-md-3 mb-3"><div className="small text-white">Final Payout</div><div className="h5">₹{selectedEmployeeData.salaryDetails?.finalPayableAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0 }) || 0}</div></div>
+                    <div className="col-md-3 mb-3">
+                      <div className="small text-white">Experience</div>
+                      <div className="h5">{selectedEmployeeData.salaryDetails?.experienceYears?.toFixed(1) || 0} Years</div>
+                    </div>
+                    <div className="col-md-3 mb-3">
+                      <div className="small text-white">Final Payout</div>
+                      <div className="h5">₹{selectedEmployeeData.salaryDetails?.finalPayableAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0 }) || 0}</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2521,7 +2640,10 @@ const clearFilters = () => {
               ].map((item, idx) => (
                 <div className="col-md" key={idx}>
                   <div className={`card bg-card border-${item.color}-subtle mb-3 mb-md-0`}>
-                    <div className="card-body"><div className={`small text-${item.color}`}>{item.label}</div><div className={`h3 text-${item.color}`}>{item.value}</div></div>
+                    <div className="card-body">
+                      <div className={`small text-${item.color}`}>{item.label}</div>
+                      <div className={`h3 text-${item.color}`}>{item.value}</div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -2530,39 +2652,63 @@ const clearFilters = () => {
             {/* Daily Attendance Records */}
             <div className="mb-4">
               <h3 className="h5 mb-3">Daily Attendance Records</h3>
-              <div className="card"><div className="card-body p-0">
-                <div className="table-responsive table-gradient-bg">
-                  <table className="table table-sm mb-0">
-                    <thead className="table-gradient-bg" style={{ position: "sticky", top: 0, zIndex: 0, backgroundColor: "#fff" }}>
-                      <tr className="text-center"><th>Date</th><th>Day</th><th>Status</th><th>Check In</th><th>Check Out</th><th>Work Hours</th><th>Break Time</th><th>Task Active Time</th><th>Remarks</th></tr>
-                    </thead>
-                    <tbody>
-                      {selectedEmployeeData.attendanceRecords.map((record, index) => {
-                        const dateObj = new Date(record.date);
-                        const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
-                        return (
-                          <tr key={index} className="text-center">
-                            <td>{formatDateDDMMYY(record.date)}</td><td>{dayName}</td>
-                            <td><span className={`badge bg-${getStatusColor(record.status)}-subtle text-${getStatusColor(record.status)}`}>{record.status}</span></td>
-                            <td>{record.loginTime}</td><td>{record.logoutTime}</td>
-                            <td>{record.netWorkingHours}</td>
-                            <td>{record.breakTime}</td>
-                            <td>{record.taskActiveTime}</td>
-                            <td>{record.anomalies}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+              <div className="card">
+                <div className="card-body p-0">
+                  <div className="table-responsive table-gradient-bg">
+                    <table className="table table-sm mb-0">
+                      <thead className="table-gradient-bg" style={{ position: "sticky", top: 0, zIndex: 0, backgroundColor: "#fff" }}>
+                        <tr className="text-center">
+                          <th>Date</th>
+                          <th>Day</th>
+                          <th>Status</th>
+                          <th>Check In</th>
+                          <th>Check Out</th>
+                          <th>Work Hours</th>
+                          <th>Break Time</th>
+                          <th>Task Active Time</th>
+                          <th>Remarks</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedEmployeeData.attendanceRecords.map((record, index) => {
+                          const dateObj = new Date(record.date);
+                          const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                          return (
+                            <tr key={index} className="text-center">
+                              <td>{formatDateDDMMYY(record.date)}</td>
+                              <td>{dayName}</td>
+                              <td>
+                                <span className={`badge bg-${getStatusColor(record.status)}-subtle text-${getStatusColor(record.status)}`}>
+                                  {record.status}
+                                </span>
+                              </td>
+                              <td>{record.loginTime}</td>
+                              <td>{record.logoutTime}</td>
+                              <td>{record.netWorkingHours}</td>
+                              <td>{record.breakTime}</td>
+                              <td>{record.taskActiveTime}</td>
+                              <td>{record.anomalies}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div></div>
+              </div>
             </div>
 
-            {/* Actions */}
-            <div className="d-flex justify-content-end gap-2">
-              <button className="btn btn-outline-secondary"><FileText size={16} className="me-2" />Print Report</button>
-              <button className="btn btn-primary"><Download size={16} className="me-2" />Export Data</button>
-            </div>
+            {/* Actions - Only for Admins */}
+            {userRole === "Admin" && (
+              <div className="d-flex justify-content-end gap-2">
+                <button className="btn btn-outline-secondary">
+                  <FileText size={16} className="me-2" />Print Report
+                </button>
+                <button className="btn btn-primary">
+                  <Download size={16} className="me-2" />Export Data
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

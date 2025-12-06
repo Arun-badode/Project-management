@@ -98,6 +98,19 @@ const CreateNewProject = ({ isEditMode = false, projectId = null, projectData = 
   const [loadingManagers, setLoadingManagers] = useState(true);
   const today = new Date();
   const calendarRef = useRef(null);
+  
+  // Get user role from localStorage or authentication context
+  const [userRole, setUserRole] = useState("");
+  
+  // Check if user is Admin
+  const isAdmin = userRole === "Admin";
+  
+  // Fetch user role on component mount
+  useEffect(() => {
+    // Assuming user role is stored in localStorage
+    const role = localStorage.getItem("userRole") || "";
+    setUserRole(role);
+  }, []);
 
   // State for showing/hiding input fields
   const [showClientInput, setShowClientInput] = useState(false);
@@ -141,16 +154,16 @@ const CreateNewProject = ({ isEditMode = false, projectId = null, projectData = 
     exchangeRate: 1, // Added for INR conversion
   });
 
-
   // Add this state near the top of the component
-const [inrConversionRates, setInrConversionRates] = useState({
-  USD: 83, // Default conversion rate for USD to INR
-  EUR: 90, // Default conversion rate for EUR to INR
-  GBP: 105, // Default conversion rate for GBP to INR
-  INR: 1, // No conversion needed for INR
-  JPY: 0.60, // Default conversion rate for JPY to INR
-  CNY: 12, // Default conversion rate for CNY to INR
-});
+  const [inrConversionRates, setInrConversionRates] = useState({
+    USD: 83, // Default conversion rate for USD to INR
+    EUR: 90, // Default conversion rate for EUR to INR
+    GBP: 105, // Default conversion rate for GBP to INR
+    INR: 1, // No conversion needed for INR
+    JPY: 0.60, // Default conversion rate for JPY to INR
+    CNY: 12, // Default conversion rate for CNY to INR
+  });
+  
   // this state is for storing the file data form the ui
   const [fileList, setFileList] = useState([
     { fileName: "", pages: "", application: "" },
@@ -896,22 +909,22 @@ const [inrConversionRates, setInrConversionRates] = useState({
     }
   };
 
-
- useEffect(() => {
-  const savedRates = localStorage.getItem("customConversionRates");
-  if (savedRates) {
-    const rates = JSON.parse(savedRates);
-    const rateMap = { ...inrConversionRates }; // Start with default rates
-    
-    // Update with any custom rates from localStorage
-    rates.forEach(rate => {
-      if (rateMap.hasOwnProperty(rate.name)) {
-        rateMap[rate.name] = parseFloat(rate.rate);
-      }
-    });
-    setInrConversionRates(rateMap);
-  }
-}, []);
+  useEffect(() => {
+    const savedRates = localStorage.getItem("customConversionRates");
+    if (savedRates) {
+      const rates = JSON.parse(savedRates);
+      const rateMap = { ...inrConversionRates }; // Start with default rates
+      
+      // Update with any custom rates from localStorage
+      rates.forEach(rate => {
+        if (rateMap.hasOwnProperty(rate.name)) {
+          rateMap[rate.name] = parseFloat(rate.rate);
+        }
+      });
+      setInrConversionRates(rateMap);
+    }
+  }, []);
+  
   // Application functions
   const handleAddApplication = () => {
     setShowApplicationInput((prev) => {
@@ -1215,45 +1228,45 @@ const [inrConversionRates, setInrConversionRates] = useState({
     return years;
   };
 
-
   // Add this useEffect after the existing ones to calculate and update total pages
-useEffect(() => {
-  // Calculate total pages per language
-  const totalPagesPerLanguage = formData.files.reduce(
-    (sum, file) => sum + (file.pageCount || 0),
-    0
-  );
-  
-  // Calculate total project pages (per language × number of languages)
-  const totalProjectPages = totalPagesPerLanguage * (formData.languages.length || 1);
-  
-  // Update the form data with calculated values
-  setFormData(prev => {
-    const updatedData = {
-      ...prev,
-      totalPagespers: totalPagesPerLanguage,
-      totalPages: totalProjectPages,
-    };
+  useEffect(() => {
+    // Calculate total pages per language
+    const totalPagesPerLanguage = formData.files.reduce(
+      (sum, file) => sum + (file.pageCount || 0),
+      0
+    );
     
-    // If per page rate is selected, recalculate the cost
-    if (prev.billingMode === "perPage") {
-      const exchangeRate = inrConversionRates[prev.currency] || 1;
-      const cost = prev.rate * totalProjectPages;
+    // Calculate total project pages (per language × number of languages)
+    const totalProjectPages = totalPagesPerLanguage * (formData.languages.length || 1);
+    
+    // Update the form data with calculated values
+    setFormData(prev => {
+      const updatedData = {
+        ...prev,
+        totalPagespers: totalPagesPerLanguage,
+        totalPages: totalProjectPages,
+      };
       
-      let inrCost;
-      if (prev.currency === "INR") {
-        inrCost = cost;
-      } else {
-        inrCost = cost * exchangeRate;
+      // If per page rate is selected, recalculate the cost
+      if (prev.billingMode === "perPage") {
+        const exchangeRate = inrConversionRates[prev.currency] || 1;
+        const cost = prev.rate * totalProjectPages;
+        
+        let inrCost;
+        if (prev.currency === "INR") {
+          inrCost = cost;
+        } else {
+          inrCost = cost * exchangeRate;
+        }
+        
+        updatedData.cost = cost;
+        updatedData.inrCost = inrCost;
       }
       
-      updatedData.cost = cost;
-      updatedData.inrCost = inrCost;
-    }
-    
-    return updatedData;
-  });
-}, [formData.files, formData.languages, formData.billingMode, formData.rate, formData.currency, inrConversionRates]);
+      return updatedData;
+    });
+  }, [formData.files, formData.languages, formData.billingMode, formData.rate, formData.currency, inrConversionRates]);
+  
   return (
     <div>
       <form onSubmit={handleSubmit}>
@@ -1307,14 +1320,6 @@ useEffect(() => {
               <label htmlFor="client" className="form-label mb-0">
                 Client <span className="text-danger">*</span>
               </label>
-              {/* <button
-                  type="button"
-                  className="btn btn-outline-primary"
-                  onClick={handleAddClient}
-                  title="Add Client"
-                >
-                  {showClientInput ? "×" : "+"}
-                </button> */}
             </div>
 
             <div className="d-flex align-items-center gap-2 mt-2">
@@ -1402,47 +1407,53 @@ useEffect(() => {
             </div>
           </div>
 
-          <div className="col-md-4 ">
-            <label htmlFor="country" className="form-label">
-              Country
-            </label>
+          {/* Country - Only visible to Admin */}
+          {isAdmin && (
+            <div className="col-md-4">
+              <label htmlFor="country" className="form-label">
+                Country
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="country"
+                name="country"
+                value={formData.country}
+                onChange={handleInputChange}
+                placeholder=""
+              />
+            </div>
+          )}
 
-            <input
-              type="text"
-              className="form-control"
-              id="country"
-              name="country"
-              value={formData.country}
-              onChange={handleInputChange}
-              placeholder=""
-            />
-          </div>
-          <div className="col-md-4 ">
-            <label htmlFor="projectManager" className="form-label">
-              Project Manager
-            </label>
-            <Select
-              id="projectManager"
-              name="projectManager"
-              options={managers}
-              value={
-                managers.find((opt) => opt.value === formData.projectManager) ||
-                null
-              }
-              onChange={(opt) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  projectManager: opt ? opt.value : "",
-                }))
-              }
-              isSearchable
-              placeholder={
-                loadingManagers ? "Loading..." : "Select Project Manager"
-              }
-              styles={gradientSelectStyles}
-              isDisabled={loadingManagers}
-            />
-          </div>
+          {/* Project Manager - Only visible to Admin */}
+          {isAdmin && (
+            <div className="col-md-4">
+              <label htmlFor="projectManager" className="form-label">
+                Project Manager
+              </label>
+              <Select
+                id="projectManager"
+                name="projectManager"
+                options={managers}
+                value={
+                  managers.find((opt) => opt.value === formData.projectManager) ||
+                  null
+                }
+                onChange={(opt) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    projectManager: opt ? opt.value : "",
+                  }))
+                }
+                isSearchable
+                placeholder={
+                  loadingManagers ? "Loading..." : "Select Project Manager"
+                }
+                styles={gradientSelectStyles}
+                isDisabled={loadingManagers}
+              />
+            </div>
+          )}
         </div>
 
         {/* Task & Applications */}
@@ -1452,14 +1463,6 @@ useEffect(() => {
               <label htmlFor="task" className="form-label mb-0">
                 Task <span className="text-danger">*</span>
               </label>
-              {/* <button
-                  type="button"
-                  className="btn btn-outline-primary"
-                  onClick={handleAddTask}
-                  title="Add Task"
-                >
-                  {showTaskInput ? "×" : "+"}
-                </button> */}
             </div>
 
             <Select
@@ -1538,14 +1541,6 @@ useEffect(() => {
               <label htmlFor="application" className="form-label mb-0">
                 Applications <span className="text-danger">*</span>
               </label>
-              {/* <button
-                  type="button"
-                  className="btn btn-outline-primary"
-                  onClick={handleAddApplication}
-                  title="Add Application"
-                >
-                  {showApplicationInput ? "×" : "+"}
-                </button> */}
             </div>
 
             <Select
@@ -1621,14 +1616,6 @@ useEffect(() => {
             <label className="form-label mb-0">
               Languages <span className="text-danger">*</span>
             </label>
-            {/* <button
-                type="button"
-                className="btn btn-outline-primary"
-                onClick={handleAddLanguage}
-                title="Add Language"
-              >
-                {showLanguageInput ? "×" : "+"}
-              </button> */}
           </div>
 
           <Select
@@ -1755,7 +1742,6 @@ useEffect(() => {
               >
                 <tr className="text-center">
                   <th>
-
                     <input
                       type="checkbox"
                       checked={formData.files.every((file) => file.selected)}
@@ -1933,82 +1919,82 @@ useEffect(() => {
         {/* Total Pages */}
         <div className="mb-3">
           <div className="row g-3">
-          <div className="col-md-4">
-  <label className="form-label">Total Pages Per Lang</label>
-  <input
-    type="number"
-    className="form-control"
-    value={formData.totalPagespers}
-    onChange={(e) => {
-      const totalPagesPerLang = Number(e.target.value) || 0;
-      const totalProjectPages = totalPagesPerLang * (formData.languages.length || 1);
-      
-      setFormData((prev) => {
-        const updatedData = {
-          ...prev,
-          totalPagespers: totalPagesPerLang,
-          totalPages: totalProjectPages,
-        };
-        
-        // If per page rate is selected, recalculate the cost
-        if (prev.billingMode === "perPage") {
-          const exchangeRate = inrConversionRates[prev.currency] || 1;
-          const cost = prev.rate * totalProjectPages;
-          
-          let inrCost;
-          if (prev.currency === "INR") {
-            inrCost = cost;
-          } else {
-            inrCost = cost * exchangeRate;
-          }
-          
-          updatedData.cost = cost;
-          updatedData.inrCost = inrCost;
-        }
-        
-        return updatedData;
-      });
-    }}
-  />
-</div>
-           <div className="col-md-4">
-  <label className="form-label">Total Project Pages</label>
-  <input
-    type="number"
-    className="form-control"
-    value={formData.totalPages}
-    onChange={(e) => {
-      const totalProjectPages = Number(e.target.value) || 0;
-      const totalPagesPerLang = totalProjectPages / (formData.languages.length || 1);
-      
-      setFormData((prev) => {
-        const updatedData = {
-          ...prev,
-          totalPages: totalProjectPages,
-          totalPagespers: totalPagesPerLang,
-        };
-        
-        // If per page rate is selected, recalculate the cost
-        if (prev.billingMode === "perPage") {
-          const exchangeRate = inrConversionRates[prev.currency] || 1;
-          const cost = prev.rate * totalProjectPages;
-          
-          let inrCost;
-          if (prev.currency === "INR") {
-            inrCost = cost;
-          } else {
-            inrCost = cost * exchangeRate;
-          }
-          
-          updatedData.cost = cost;
-          updatedData.inrCost = inrCost;
-        }
-        
-        return updatedData;
-      });
-    }}
-  />
-</div>
+            <div className="col-md-4">
+              <label className="form-label">Total Pages Per Lang</label>
+              <input
+                type="number"
+                className="form-control"
+                value={formData.totalPagespers}
+                onChange={(e) => {
+                  const totalPagesPerLang = Number(e.target.value) || 0;
+                  const totalProjectPages = totalPagesPerLang * (formData.languages.length || 1);
+                  
+                  setFormData((prev) => {
+                    const updatedData = {
+                      ...prev,
+                      totalPagespers: totalPagesPerLang,
+                      totalPages: totalProjectPages,
+                    };
+                    
+                    // If per page rate is selected, recalculate the cost
+                    if (prev.billingMode === "perPage") {
+                      const exchangeRate = inrConversionRates[prev.currency] || 1;
+                      const cost = prev.rate * totalProjectPages;
+                      
+                      let inrCost;
+                      if (prev.currency === "INR") {
+                        inrCost = cost;
+                      } else {
+                        inrCost = cost * exchangeRate;
+                      }
+                      
+                      updatedData.cost = cost;
+                      updatedData.inrCost = inrCost;
+                    }
+                    
+                    return updatedData;
+                  });
+                }}
+              />
+            </div>
+            <div className="col-md-4">
+              <label className="form-label">Total Project Pages</label>
+              <input
+                type="number"
+                className="form-control"
+                value={formData.totalPages}
+                onChange={(e) => {
+                  const totalProjectPages = Number(e.target.value) || 0;
+                  const totalPagesPerLang = totalProjectPages / (formData.languages.length || 1);
+                  
+                  setFormData((prev) => {
+                    const updatedData = {
+                      ...prev,
+                      totalPages: totalProjectPages,
+                      totalPagespers: totalPagesPerLang,
+                    };
+                    
+                    // If per page rate is selected, recalculate the cost
+                    if (prev.billingMode === "perPage") {
+                      const exchangeRate = inrConversionRates[prev.currency] || 1;
+                      const cost = prev.rate * totalProjectPages;
+                      
+                      let inrCost;
+                      if (prev.currency === "INR") {
+                        inrCost = cost;
+                      } else {
+                        inrCost = cost * exchangeRate;
+                      }
+                      
+                      updatedData.cost = cost;
+                      updatedData.inrCost = inrCost;
+                    }
+                    
+                    return updatedData;
+                  });
+                }}
+              />
+            </div>
           </div>
           <div className="form-text text-white">
             Total Project Pages = Total Pages × Language Count
@@ -2180,69 +2166,75 @@ useEffect(() => {
             <div className="form-text text-white">(with only 2 decimals)</div>
           </div>
 
-          {/* Currency - Fixed to update when client is selected */}
-          <div className="col-md-2">
-            <label className="form-label">Currency</label>
-            <select
-              className="form-control"
-              value={formData.currency || "USD"}
-              onChange={(e) => {
-                const newCurrency = e.target.value;
-                setFormData((prev) => {
-                  // If switching TO INR, set Cost = Cost in INR
-                  if (newCurrency === "INR") {
-                    return {
-                      ...prev,
-                      currency: newCurrency,
-                      inrCost: prev.cost,
-                    };
-                  } else {
-                    // For foreign currencies, apply conversion
-                    const exchangeRate = inrConversionRates[newCurrency] || 1;
-                    return {
-                      ...prev,
-                      currency: newCurrency,
-                      inrCost: prev.cost * exchangeRate,
-                    };
-                  }
-                });
-              }}
-            >
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-              <option value="GBP">GBP</option>
-              <option value="INR">INR</option>
-              <option value="JPY">JPY</option>
-              <option value="CNY">CNY</option>
-            </select>
-          </div>
+          {/* Currency - Only visible to Admin */}
+          {isAdmin && (
+            <div className="col-md-2">
+              <label className="form-label">Currency</label>
+              <select
+                className="form-control"
+                value={formData.currency || "USD"}
+                onChange={(e) => {
+                  const newCurrency = e.target.value;
+                  setFormData((prev) => {
+                    // If switching TO INR, set Cost = Cost in INR
+                    if (newCurrency === "INR") {
+                      return {
+                        ...prev,
+                        currency: newCurrency,
+                        inrCost: prev.cost,
+                      };
+                    } else {
+                      // For foreign currencies, apply conversion
+                      const exchangeRate = inrConversionRates[newCurrency] || 1;
+                      return {
+                        ...prev,
+                        currency: newCurrency,
+                        inrCost: prev.cost * exchangeRate,
+                      };
+                    }
+                  });
+                }}
+              >
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="INR">INR</option>
+                <option value="JPY">JPY</option>
+                <option value="CNY">CNY</option>
+              </select>
+            </div>
+          )}
 
-          {/* Total Cost */}
+          {/* Total Cost - Only visible to Admin */}
+          {isAdmin && (
+            <div className="col-md-2">
+              <label className="form-label">Total Cost</label>
+              <input
+                type="text"
+                className="form-control"
+                value={typeof formData.cost === 'number' ? formData.cost.toFixed(2) : parseFloat(formData.cost || 0).toFixed(2)}
+                readOnly
+                placeholder="Auto Calculated"
+              />
+            </div>
+          )}
 
-          <div className="col-md-2">
-            <label className="form-label">Total Cost</label>
-            <input
-              type="text"
-              className="form-control"
-              value={typeof formData.cost === 'number' ? formData.cost.toFixed(2) : parseFloat(formData.cost || 0).toFixed(2)}
-              readOnly
-              placeholder="Auto Calculated"
-            />
-          </div>
-
-          <div className="col-md-2">
-            <label className="form-label">Cost in INR</label>
-            <input
-              type="text"
-              className="form-control"
-              value={typeof formData.inrCost === 'number' ? formData.inrCost.toFixed(2) : parseFloat(formData.inrCost || 0).toFixed(2)}
-              readOnly
-              placeholder="Auto Calculated"
-            />
-          </div>
+          {/* Cost in INR - Only visible to Admin */}
+          {isAdmin && (
+            <div className="col-md-2">
+              <label className="form-label">Cost in INR</label>
+              <input
+                type="text"
+                className="form-control"
+                value={typeof formData.inrCost === 'number' ? formData.inrCost.toFixed(2) : parseFloat(formData.inrCost || 0).toFixed(2)}
+                readOnly
+                placeholder="Auto Calculated"
+              />
+            </div>
+          )}
         </div>
 
-        {/* Save Button */}
+        {/* Save Button - Disabled for Managers in edit mode */}
         <div className="d-flex justify-content-between">
           <div className="d-flex align-items-center mt-3 gap-3">
             <label className="text-white" style={{ fontWeight: "bold" }}>
@@ -2488,7 +2480,11 @@ useEffect(() => {
               )}
             </div>
           </div>
-          <button type="submit" className="btn btn-warning fw-bold">
+          <button 
+            type="submit" 
+            className="btn btn-warning fw-bold"
+            disabled={!isAdmin && isEditMode} // Disable for Managers in edit mode
+          >
             {isEditMode ? "Update Project" : "Save changes"}
           </button>
         </div>

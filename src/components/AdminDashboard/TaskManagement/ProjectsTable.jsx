@@ -105,7 +105,7 @@ const ProjectsTable = ({
       ];
       
       for (const key of possibleKeys) {
-        const value = localStorage.getItem(key);
+        const value = localStorage.getItem(key) || sessionStorage.getItem(key);
         if (value) {
           console.log(`Found user ID with key "${key}": ${value}`);
           return value;
@@ -159,7 +159,7 @@ const ProjectsTable = ({
 
       let filteredFiles = response.data.data.filter(file => file.projectId === projectId);
       
-      if (userRole !== 'admin' && userRole !== 'manager' && userId) {
+      if (userRole !== 'admin' && userRole !== 'Manager' && userId) {
         filteredFiles = filteredFiles.filter(file => file.assignedTo === userId);
       }
       
@@ -782,16 +782,25 @@ const ProjectsTable = ({
 
   // Main useEffect to process projects data
   useEffect(() => {
+    console.log("Projects received:", projects);
+    
     if (projects && projects.length > 0) {
       // Group projects by employee for display
       const groupedByEmployee = {};
 
       projects.forEach(project => {
         // Create a mock employee structure for each project
-        const employeeId = project.assignedEmployee?.id || "EMP001";
-        const employeeName = project.assignedEmployee?.name || "John Doe";
+        const employeeId = project.assignedEmployee?.id || 
+                          project.assignedEmployee?.empId || 
+                          project.assignedTo || 
+                          "EMP001";
+        const employeeName = project.assignedEmployee?.name || 
+                            project.assignedEmployee?.fullName || 
+                            "John Doe";
         const employeeTeam = project.platform === "Adobe" ? "Adobe" :
-          project.platform === "MS Office" ? "MS Office" : "QA";
+          project.platform === "MS Office" ? "MS Office" : 
+          project.applicationName === "Adobe" ? "Adobe" :
+          project.applicationName === "MS Office" ? "MS Office" : "QA";
         const employeeDesignation = employeeTeam === "QA" ? "QA Specialist" :
           employeeTeam === "Adobe" ? "Adobe Specialist" : "MS Office Specialist";
 
@@ -807,20 +816,20 @@ const ProjectsTable = ({
         // Transform project to match expected structure
         const transformedProject = {
           id: project.id,
-          projectTitle: project.title,
-          clientName: project.client,
-          taskName: project.task,
-          languageName: project.language,
-          applicationName: project.platform,
-          totalProjectPages: project.totalPages,
-          qcDueDate: project.dueDate,
-          qcHrs: project.dueDate,
-          receiveDate: project.dueDate,
+          projectTitle: project.title || project.projectTitle,
+          clientName: project.client || project.clientName,
+          taskName: project.task || project.taskName,
+          languageName: project.language || project.languageName,
+          applicationName: project.platform || project.applicationName,
+          totalProjectPages: project.totalPages || project.totalProjectPages,
+          qcDueDate: project.dueDate || project.qcDueDate,
+          qcHrs: project.qcHrs,
+          receiveDate: project.receiveDate || project.dueDate,
           status: project.status,
           progress: project.progress,
-          description: project.handlerNote,
-          priority: "Medium",
-          startDate: new Date().toLocaleDateString(),
+          description: project.description || project.handlerNote,
+          priority: project.priority || "Medium",
+          startDate: project.startDate || new Date().toLocaleDateString(),
           files: project.files || [],
           assignedEmployee: project.assignedEmployee || null
         };
@@ -840,7 +849,7 @@ const ProjectsTable = ({
           // Adobe and MS Office teams can only see projects assigned by their manager
           employeeArray = employeeArray.map(employee => {
             const filteredProjects = employee.projects.filter(project => 
-              project.applicationName === teamFilter && 
+              (project.applicationName === teamFilter || project.platform === teamFilter) && 
               (isManager || project.assignedByManager)
             );
             
@@ -867,6 +876,8 @@ const ProjectsTable = ({
           },
         })
         .then((res) => {
+          console.log("API response for members with projects:", res.data);
+          
           // Filter employees based on team filter
           let filteredData = res.data.data;
 
@@ -878,7 +889,7 @@ const ProjectsTable = ({
               // Adobe and MS Office teams can only see projects assigned by their manager
               filteredData = res.data.data.map(employee => {
                 const filteredProjects = employee.projects.filter(project => 
-                  project.applicationName === teamFilter && 
+                  (project.applicationName === teamFilter || project.platform === teamFilter) && 
                   (isManager || project.assignedByManager)
                 );
                 
@@ -1021,8 +1032,8 @@ const ProjectsTable = ({
                               }}
                             >
                               {employee.designation?.toLowerCase().includes("qa") ? "QA" :
-                                employee.projects?.some(p => p.applicationName === "Adobe") ? "Adobe" :
-                                  employee.projects?.some(p => p.applicationName === "MS Office") ? "MS Office" : "Other"}
+                                employee.projects?.some(p => p.applicationName === "Adobe" || p.platform === "Adobe") ? "Adobe" :
+                                  employee.projects?.some(p => p.applicationName === "MS Office" || p.platform === "MS Office") ? "MS Office" : "Other"}
                             </button>
                           </div>
                           <div style={{ fontSize: "18px", fontWeight: "bold" }}>
@@ -1178,7 +1189,7 @@ const ProjectsTable = ({
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        {employee[proj.id].map((file) => (
+                                        {projectFiles[proj.id].map((file) => (
                                           <tr key={file.projectFileId || file.id}>
                                             <td>
                                               {file.fileName ? (
@@ -1240,12 +1251,20 @@ const ProjectsTable = ({
                                                       type="text"
                                                       value={fileDeadlines[proj.id] 
                                                         ? new Date(fileDeadlines[proj.id]).toLocaleString() 
-                                                        : formatDateTime()}
+                                                        : formatDateTime(proj.readyQCDeadline)}
                                                       readOnly
                                                       onClick={() => {
                                                         setCalendarOpen(!calendarOpen);
                                                         if (fileDeadlines[proj.id]) {
                                                           const deadline = new Date(fileDeadlines[proj.id]);
+                                                          setSelectedDate(deadline.getDate());
+                                                          setSelectedMonth(deadline.getMonth());
+                                                          setSelectedYear(deadline.getFullYear());
+                                                          setSelectedHour(deadline.getHours() % 12 || 12);
+                                                          setSelectedMinute(deadline.getMinutes());
+                                                          setIsAM(deadline.getHours() < 12);
+                                                        } else if (proj.readyQCDeadline) {
+                                                          const deadline = new Date(proj.readyQCDeadline);
                                                           setSelectedDate(deadline.getDate());
                                                           setSelectedMonth(deadline.getMonth());
                                                           setSelectedYear(deadline.getFullYear());
@@ -1689,27 +1708,27 @@ const ProjectsTable = ({
                           <tbody>
                             <tr>
                               <td><strong>Project Title:</strong></td>
-                              <td>{projectFullDetails.title || 'N/A'}</td>
+                              <td>{projectFullDetails.title || projectFullDetails.projectTitle || 'N/A'}</td>
                             </tr>
                             <tr>
                               <td><strong>Client:</strong></td>
-                              <td>{projectFullDetails.client || 'N/A'}</td>
+                              <td>{projectFullDetails.client || projectFullDetails.clientName || 'N/A'}</td>
                             </tr>
                             <tr>
                               <td><strong>Task:</strong></td>
-                              <td>{projectFullDetails.task || 'N/A'}</td>
+                              <td>{projectFullDetails.task || projectFullDetails.taskName || 'N/A'}</td>
                             </tr>
                             <tr>
                               <td><strong>Language:</strong></td>
-                              <td>{projectFullDetails.language || 'N/A'}</td>
+                              <td>{projectFullDetails.language || projectFullDetails.languageName || 'N/A'}</td>
                             </tr>
                             <tr>
                               <td><strong>Platform:</strong></td>
-                              <td>{projectFullDetails.platform || 'N/A'}</td>
+                              <td>{projectFullDetails.platform || projectFullDetails.applicationName || 'N/A'}</td>
                             </tr>
                             <tr>
                               <td><strong>Total Pages:</strong></td>
-                              <td>{projectFullDetails.totalPages || 'N/A'}</td>
+                              <td>{projectFullDetails.totalPages || projectFullDetails.totalProjectPages || 'N/A'}</td>
                             </tr>
                             <tr>
                               <td><strong>Status:</strong></td>

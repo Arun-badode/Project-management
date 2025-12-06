@@ -628,6 +628,78 @@ const Calendar = ({ userRole }) => {
 
   return (
     <div className="container-fluid py-4">
+      <style jsx>{`
+        .today-cell {
+          background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+          border: 3px solid #0c5460 !important;
+          box-shadow: 0 0 15px rgba(23, 162, 184, 0.6) !important;
+          position: relative;
+        }
+        .today-cell::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          border-radius: 4px;
+          animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+          0%, 100% {
+            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3);
+          }
+          50% {
+            box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5);
+          }
+        }
+        .today-cell .fw-bold {
+          color: #ffffff !important;
+          font-weight: 700 !important;
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+          font-size: 1.1em;
+        }
+        .bg-card {
+          background-color: #ffffff;
+        }
+        .gradient-heading {
+          background: linear-gradient(45deg, #3f51b5, #2196f3);
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          display: inline-block;
+        }
+        .table-gradient-bg {
+          background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+        }
+        .dropdown-item-text {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 200px;
+          display: inline-block;
+        }
+        .btn-xs {
+          padding: 0.25rem 0.5rem;
+          font-size: 0.75rem;
+          line-height: 1.5;
+          border-radius: 0.2rem;
+        }
+        .form-select-sm {
+          padding: 0.25rem 0.5rem;
+          font-size: 0.875rem;
+          line-height: 1.5;
+          height: calc(1.5em + 0.5rem + 2px);
+          border-radius: 0.2rem;
+        }
+        .tooltip-indicator {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          display: inline-block;
+          margin-right: 2px;
+        }
+      `}</style>
       <div className="row">
         <div className="p-3 rounded shadow bg-card col-8">
           <div className="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">

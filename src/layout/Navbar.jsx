@@ -27,8 +27,21 @@ const Navbar = ({ toggleSidebar }) => {
   }, []);
 
   const handleLogoutClick = () => {
-    setShowLogoutModal(true);
     setShowProfileDropdown(false);
+    
+    // Only show logout modal for manager and team-member roles
+    if (role === "manager" || role === "team-member") {
+      setShowLogoutModal(true);
+    } else {
+      // For other roles, directly logout without showing modal
+      handleDirectLogout();
+    }
+  };
+
+  const handleDirectLogout = () => {
+    // Clear localStorage and redirect to login
+    localStorage.clear();
+    navigate("/");
   };
 
   const handleBreak = async () => {
@@ -299,8 +312,8 @@ const Navbar = ({ toggleSidebar }) => {
         </div>
       </nav>
 
-      {/* Logout Confirmation Modal */}
-      {showLogoutModal && (
+      {/* Logout Confirmation Modal - Only for manager and team-member roles */}
+      {showLogoutModal && (role === "manager" || role === "team-member") && (
         <div
           className="modal show d-block"
           style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 3000 }}
