@@ -22,12 +22,13 @@ const TaskManagement = () => {
   const [error, setError] = useState(null);
   const [authToken, setAuthToken] = useState("");
   const [showEmployeeProjects, setShowEmployeeProjects] = useState(false);
-  const [myTasks, setMyTasks] = useState([]);
   const [userRole, setUserRole] = useState("");
   const [userId, setUserId] = useState("");
 
+  console.log("Active Tab:", activeProjectTab);
+  console.log("User Role:", userRole);
+  console.log("User ID:", userId);
 
-  console.log("Employee Data:", employeeData);  console.log("Projects Data:", searchTerm);
   // Handler functions
   const handleViewProject = (project) => {
     setSelectedProject(project);
@@ -70,18 +71,21 @@ const TaskManagement = () => {
                sessionStorage.getItem('userId') ||
                sessionStorage.getItem('employeeId');
 
+    console.log("User Info - Role:", role, "ID:", id);
+
     setUserRole(role);
     setUserId(id);
 
-    // Normalize role to lowercase for comparison
-    const normalizedRole = role ? role.toLowerCase() : '';
-    
     // Set states based on role
-    if (normalizedRole === 'admin') {
-      setIsManager(false);
-    } else if (normalizedRole === 'Manager') {
+    // NOTE: यहाँ हम 'Manager' (case-sensitive) check कर रहे हैं
+    if (role === 'Manager' || role === 'manager') {
       setIsManager(true);
+      setIsTeamMember(false);
+    } else if (role === 'admin' || role === 'Admin') {
+      setIsManager(false);
+      setIsTeamMember(false);
     } else {
+      // All other roles are considered team members
       setIsManager(false);
       setIsTeamMember(true);
     }
@@ -158,28 +162,13 @@ const TaskManagement = () => {
         };
 
         let response;
-        const normalizedRole = role ? role.toLowerCase() : '';
-
-        // Fetch projects based on user role
-        if (normalizedRole === 'admin') {
-          // Admin gets all projects
-          response = await axios.get(
-            `${BASE_URL}project/getAllProjects`,
-            config
-          );
-        } else if (normalizedRole === 'Manager') {
-          // Manager gets their projects
-          response = await axios.get(
-            `${BASE_URL}project/getProjectsByManagerId/${id}`,
-            config
-          );
-        } else {
-          // Other users get their assigned projects
-          response = await axios.get(
-            `${BASE_URL}project/getProjectsByUserId/${id}`,
-            config
-          );
-        }
+        
+        // ALWAYS fetch all projects for this demo
+        // In real app, you might fetch based on role
+        response = await axios.get(
+          `${BASE_URL}project/getAllProjects`,
+          config
+        );
 
         console.log("Projects API response:", response.data);
 
@@ -209,6 +198,18 @@ const TaskManagement = () => {
           }
           
           console.log("Processed projects data:", projectsData);
+          console.log("Total projects fetched:", projectsData.length);
+          
+          // Debug: Show if any projects are assigned to current user
+          if (id) {
+            const userProjects = projectsData.filter(project => {
+              return project.assignedEmployee === id || 
+                     project.assignedTo === id ||
+                     (project.assignedEmployee && project.assignedEmployee.id === id);
+            });
+            console.log("Projects assigned to current user:", userProjects.length);
+          }
+          
           setProjects(projectsData);
           setFilteredProjects(projectsData);
         } else {
@@ -228,7 +229,10 @@ const TaskManagement = () => {
 
     // Fetch both employee and project data
     Promise.all([fetchEmployeeData(), fetchProjectsData()])
-      .then(() => setLoading(false))
+      .then(() => {
+        console.log("Data loading complete");
+        setLoading(false);
+      })
       .catch(err => {
         console.error("Error in data fetching:", err);
         setLoading(false);
@@ -237,7 +241,20 @@ const TaskManagement = () => {
 
   // Filter projects based on search term, status filter, team filter, client filter and employee filter
   useEffect(() => {
-    let filtered = projects?.filter((project) => {
+    console.log("Applying filters for tab:", activeProjectTab);
+    
+    let projectsToFilter = [...projects];
+    
+    // IMPORTANT: For "My Tasks" tab, show EMPTY array (no projects)
+    if (activeProjectTab === "my") {
+      // Always return empty array for My Tasks tab
+      console.log("My Tasks tab - Showing empty projects list");
+      setFilteredProjects([]);
+      return;
+    }
+    
+    // Only apply filters for "All Projects" tab
+    let filtered = projectsToFilter.filter((project) => {
       // Search filter
       const matchesSearch = searchTerm === "" ||
         project?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -254,25 +271,21 @@ const TaskManagement = () => {
     });
 
     // Apply team-based filtering logic
-    if (teamFilter === "Adobe" || teamFilter === "MS Office") {
-      filtered = filtered?.filter(project =>
-        project?.platform === teamFilter ||
-        project?.applicationName === teamFilter
-      );
-    } else if (teamFilter === "QA") {
-      // For QA Team, show all projects
-      filtered = filtered;
-    } else if (teamFilter !== "All") {
-      filtered = filtered.filter(project => 
-        project?.platform === teamFilter ||
-        project?.applicationName === teamFilter
-      );
+    if (teamFilter !== "All") {
+      if (teamFilter === "QA") {
+        // For QA Team, show all projects
+        filtered = filtered;
+      } else {
+        filtered = filtered.filter(project => 
+          project?.platform === teamFilter ||
+          project?.applicationName === teamFilter
+        );
+      }
     }
 
     // Apply employee filter if selected
     if (employeeFilter) {
-      filtered = filtered?.filter(project => {
-        // Check different possible properties for assigned employee
+      filtered = filtered.filter(project => {
         return (
           (project?.assignedEmployee && 
           (project?.assignedEmployee === parseInt(employeeFilter) || 
@@ -283,8 +296,9 @@ const TaskManagement = () => {
       });
     }
 
+    console.log("Final filtered projects for All tab:", filtered.length);
     setFilteredProjects(filtered);
-  }, [projects, searchTerm, statusFilter, teamFilter, clientFilter, employeeFilter, isManager]);
+  }, [projects, searchTerm, statusFilter, teamFilter, clientFilter, employeeFilter, activeProjectTab]);
 
   // Get unique clients for the client filter dropdown
   const uniqueClients = [...new Set(projects?.map(project => project.client).filter(Boolean))];
@@ -314,6 +328,18 @@ const TaskManagement = () => {
       emp.role === team ||
       emp.designation === team
     );
+  };
+
+  // Handle tab change
+  const handleTabChange = (tab) => {
+    console.log("Changing tab to:", tab);
+    setActiveProjectTab(tab);
+    
+    // Reset filters when switching to My Tasks
+    if (tab === "my") {
+      setEmployeeFilter("");
+      setShowEmployeeProjects(false);
+    }
   };
 
   return (
@@ -369,6 +395,7 @@ const TaskManagement = () => {
                         className="form-select"
                         value={employeeFilter}
                         onChange={(e) => handleEmployeeSelect(e.target.value)}
+                        disabled={activeProjectTab === "my"} // Disable for My Tasks tab
                       >
                         <option value="">All Employees</option>
                         {getEmployeesByTeam(teamFilter)
@@ -390,30 +417,45 @@ const TaskManagement = () => {
                     <button
                       className={`gradient-button ${teamFilter === "All" ? "active" : ""}`}
                       onClick={() => setTeamFilter("All")}
+                      disabled={activeProjectTab === "my"} // Disable for My Tasks tab
                     >
                       All
                     </button>
                     <button
                       className={`gradient-button ${teamFilter === "MS Office" ? "active" : ""}`}
                       onClick={() => setTeamFilter("MS Office")}
+                      disabled={activeProjectTab === "my"} // Disable for My Tasks tab
                     >
                       Ms Office
                     </button>
                     <button
                       className={`gradient-button ${teamFilter === "Adobe" ? "active" : ""}`}
                       onClick={() => setTeamFilter("Adobe")}
+                      disabled={activeProjectTab === "my"} // Disable for My Tasks tab
                     >
                       Adobe
                     </button>
                     <button
                       className={`gradient-button ${teamFilter === "QA" ? "active" : ""}`}
                       onClick={() => setTeamFilter("QA")}
+                      disabled={activeProjectTab === "my"} // Disable for My Tasks tab
                     >
                       QA
                     </button>
                   </div>
                 </div>
               </div>
+            </div>
+            
+            {/* Active tab info */}
+            <div className="mt-3">
+              <small className="text-light">
+                <strong>
+                  {activeProjectTab === "all" ? "All Active Projects" : "My Tasks"}
+                </strong>
+                {activeProjectTab === "all" && ` | Showing ${filteredProjects.length} of ${projects.length} projects`}
+                {activeProjectTab === "my" && " | No tasks assigned to you"}
+              </small>
             </div>
           </div>
         </div>
@@ -423,151 +465,174 @@ const TaskManagement = () => {
           <li className="nav-item">
             <button
               className={`nav-link ${activeProjectTab === "all" ? "active" : ""}`}
-              onClick={() => setActiveProjectTab("all")}
+              onClick={() => handleTabChange("all")}
             >
               All Active Projects
             </button>
           </li>
-          {isManager && (
-            <li className="nav-item">
-              <button
-                className={`nav-link ${activeProjectTab === "my" ? "active" : ""}`}
-                onClick={() => setActiveProjectTab("my")}
-              >
-                My Tasks
-              </button>
-            </li>
-          )}
-          {isTeamMember && (
-            <li className="nav-item">
-              <button
-                className={`nav-link ${activeProjectTab === "my" ? "active" : ""}`}
-                onClick={() => setActiveProjectTab("my")}
-              >
-                My Task
-              </button>
-            </li>
-          )}
+          {/* ALWAYS show My Tasks tab for testing */}
+          <li className="nav-item">
+            <button
+              className={`nav-link ${activeProjectTab === "my" ? "active" : ""}`}
+              onClick={() => handleTabChange("my")}
+            >
+              My Tasks
+            </button>
+          </li>
         </ul>
 
         {/* Show content based on active tab */}
-        {activeProjectTab === "all" && (
+        {loading ? (
+          <div className="card bg-card">
+            <div className="card-body text-center py-5">
+              <div className="spinner-border text-light" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="text-light mt-3">Loading projects...</p>
+            </div>
+          </div>
+        ) : (
           <>
-            {showEmployeeProjects ? (
-              // Show selected employee and their projects
-              <div className="card bg-card mb-4">
-                <div className="card-body">
-                  <div className="d-flex align-items-center mb-4">
-                    <div className="me-3">
-                      <div className="avatar-circle">
-                        {getEmployeeDetailsById(employeeFilter)?.name?.charAt(0) || "U"}
+            {activeProjectTab === "all" && (
+              <>
+                {showEmployeeProjects ? (
+                  // Show selected employee and their projects
+                  <div className="card bg-card mb-4">
+                    <div className="card-body">
+                      <div className="d-flex align-items-center mb-4">
+                        <div className="me-3">
+                          <div className="avatar-circle">
+                            {getEmployeeDetailsById(employeeFilter)?.name?.charAt(0) || "U"}
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="text-light mb-1">
+                            {getEmployeeDetailsById(employeeFilter)?.name || "Unknown Employee"}
+                          </h4>
+                          <p className="text-light mb-0">
+                            {getEmployeeDetailsById(employeeFilter)?.role || "No role specified"} •
+                            {getEmployeeDetailsById(employeeFilter)?.team || "No team specified"}
+                          </p>
+                        </div>
+                        <button
+                          className="btn btn-sm btn-outline-light ms-auto"
+                          onClick={() => {
+                            setEmployeeFilter("");
+                            setShowEmployeeProjects(false);
+                          }}
+                        >
+                          Back to All Employees
+                        </button>
                       </div>
+
+                      <ProjectsTable
+                        projects={filteredProjects}
+                        teamFilter={teamFilter}
+                        isManager={isManager}
+                        employeeData={employeeData}
+                        getEmployeeNameById={getEmployeeNameById}
+                        onViewProject={handleViewProject}
+                        onMarkComplete={handleMarkComplete}
+                        onDeleteProject={handleDeleteProject}
+                        expandedRow={expandedRow}
+                        onReassign={(id) => console.log("Reassign project", id)}
+                        onViewDetails={(id) => console.log("View details", id)}
+                        userRole={userRole}
+                        userId={userId}
+                      />
                     </div>
-                    <div>
-                      <h4 className="text-light mb-1">
-                        {getEmployeeDetailsById(employeeFilter)?.name || "Unknown Employee"}
-                      </h4>
-                      <p className="text-light mb-0">
-                        {getEmployeeDetailsById(employeeFilter)?.role || "No role specified"} •
-                        {getEmployeeDetailsById(employeeFilter)?.team || "No team specified"}
+                  </div>
+                ) : (
+                  // Show all projects table when no employee is selected
+                  <div className="card bg-card">
+                    <div className="card-body">
+                      <ProjectsTable
+                        projects={filteredProjects}
+                        teamFilter={teamFilter}
+                        isManager={isManager}
+                        employeeData={employeeData}
+                        getEmployeeNameById={getEmployeeNameById}
+                        onViewProject={handleViewProject}
+                        onMarkComplete={handleMarkComplete}
+                        onDeleteProject={handleDeleteProject}
+                        expandedRow={expandedRow}
+                        onReassign={(id) => console.log("Reassign project", id)}
+                        onViewDetails={(id) => console.log("View details", id)}
+                        userRole={userRole}
+                        userId={userId}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {selectedProject && expandedRow === selectedProject.id && (
+                  <ProjectDetails
+                    project={selectedProject}
+                    teamFilter={teamFilter}
+                    employeeData={employeeData}
+                    getEmployeeNameById={getEmployeeNameById}
+                    onClose={() => setExpandedRow(null)}
+                  />
+                )}
+              </>
+            )}
+
+            {/* My Tasks Tab - Always show empty */}
+            {activeProjectTab === "my" && (
+              <div className="card bg-card">
+                <div className="card-body">
+                  <div className="text-center py-5">
+                    <div className="mb-4">
+                      <i className="fas fa-clipboard-list fa-4x text-light mb-4"></i>
+                      <h3 className="text-light mb-3">My Tasks</h3>
+                      <p className="text-light mb-2">
+                        You don't have any tasks assigned to you at the moment.
+                      </p>
+                      <p className="text-light">
+                        Check back later or contact your manager for new assignments.
                       </p>
                     </div>
-                    <button
-                      className="btn btn-sm btn-outline-light ms-auto"
-                      onClick={() => {
-                        setEmployeeFilter("");
-                        setShowEmployeeProjects(false);
-                      }}
-                    >
-                      Back to All Employees
-                    </button>
+                    
+                    <div className="d-flex justify-content-center gap-3">
+                      <button 
+                        className="btn btn-outline-light"
+                        onClick={() => handleTabChange("all")}
+                      >
+                        <i className="fas fa-arrow-left me-2"></i>
+                        View All Projects
+                      </button>
+                      
+                      <button 
+                        className="btn btn-primary"
+                        onClick={() => {
+                          // Optional: Add functionality to request tasks
+                          alert("Task request feature coming soon!");
+                        }}
+                      >
+                        <i className="fas fa-plus me-2"></i>
+                        Request New Task
+                      </button>
+                    </div>
                   </div>
-
-                  <ProjectsTable
-                    projects={filteredProjects}
-                    teamFilter={teamFilter}
-                    isManager={isManager}
-                    employeeData={employeeData}
-                    getEmployeeNameById={getEmployeeNameById}
-                    onViewProject={handleViewProject}
-                    onMarkComplete={handleMarkComplete}
-                    onDeleteProject={handleDeleteProject}
-                    expandedRow={expandedRow}
-                    onReassign={(id) => console.log("Reassign project", id)}
-                    onViewDetails={(id) => console.log("View details", id)}
-                    userRole={userRole}
-                    userId={userId}
-                  />
-                </div>
-              </div>
-            ) : (
-              // Show all projects table when no employee is selected
-              <div className="card bg-card">
-                <div className="card-body">
-                  <ProjectsTable
-                    projects={filteredProjects}
-                    teamFilter={teamFilter}
-                    isManager={isManager}
-                    employeeData={employeeData}
-                    getEmployeeNameById={getEmployeeNameById}
-                    onViewProject={handleViewProject}
-                    onMarkComplete={handleMarkComplete}
-                    onDeleteProject={handleDeleteProject}
-                    expandedRow={expandedRow}
-                    onReassign={(id) => console.log("Reassign project", id)}
-                    onViewDetails={(id) => console.log("View details", id)}
-                    userRole={userRole}
-                    userId={userId}
-                  />
-                </div>
-              </div>
-            )}
-
-            {selectedProject && expandedRow === selectedProject.id && (
-              <ProjectDetails
-                project={selectedProject}
-                teamFilter={teamFilter}
-                employeeData={employeeData}
-                getEmployeeNameById={getEmployeeNameById}
-                onClose={() => setExpandedRow(null)}
-              />
-            )}
-          </>
-        )}
-
-        {/* Show My Tasks content based on active tab */}
-        {activeProjectTab === "my" && (
-          <>
-            {isManager && (
-              <div className="card bg-card">
-                <div className="card-body text-center py-5">
-                  <h4 className="text-light">No tasks assigned to you</h4>
-                  <p className="text-light">Your assigned tasks will appear here.</p>
-                </div>
-              </div>
-            )}
-
-            {isTeamMember && (
-              <div className="card bg-card">
-                <div className="card-body">
-                  <ProjectsTable
-                    projects={filteredProjects.filter(project => 
-                      project.assignedEmployee === userId || 
-                      project.assignedTo === userId
-                    )}
-                    teamFilter={teamFilter}
-                    isManager={isManager}
-                    employeeData={employeeData}
-                    getEmployeeNameById={getEmployeeNameById}
-                    onViewProject={handleViewProject}
-                    onMarkComplete={handleMarkComplete}
-                    onDeleteProject={handleDeleteProject}
-                    expandedRow={expandedRow}
-                    onReassign={(id) => console.log("Reassign project", id)}
-                    onViewDetails={(id) => console.log("View details", id)}
-                    userRole={userRole}
-                    userId={userId}
-                  />
+                  
+                  {/* Optional: Show empty ProjectsTable for consistency */}
+                  {/* <div style={{ opacity: 0.5 }}>
+                    <ProjectsTable
+                      projects={[]}
+                      teamFilter={teamFilter}
+                      isManager={isManager}
+                      employeeData={employeeData}
+                      getEmployeeNameById={getEmployeeNameById}
+                      onViewProject={handleViewProject}
+                      onMarkComplete={handleMarkComplete}
+                      onDeleteProject={handleDeleteProject}
+                      expandedRow={expandedRow}
+                      onReassign={(id) => console.log("Reassign project", id)}
+                      onViewDetails={(id) => console.log("View details", id)}
+                      userRole={userRole}
+                      userId={userId}
+                    />
+                  </div> */}
                 </div>
               </div>
             )}

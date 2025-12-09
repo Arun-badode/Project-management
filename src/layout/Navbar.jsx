@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../components/Utilities/axiosInstance";
+import BASE_URL from "../config";
 
 const Navbar = ({ toggleSidebar }) => {
   const [isLoggedOut, setIsLoggedOut] = useState(false);
@@ -11,6 +12,9 @@ const Navbar = ({ toggleSidebar }) => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [hasEndOfShiftToday, setHasEndOfShiftToday] = useState(false);
+  const [isOnBreak, setIsOnBreak] = useState(false);
+  const [breakStartTime, setBreakStartTime] = useState(null);
+  const [breakDuration, setBreakDuration] = useState(0);
   const navigate = useNavigate();
 
   const [role, setRole] = useState("");
@@ -24,18 +28,33 @@ const Navbar = ({ toggleSidebar }) => {
     if (endOfShiftRecord) {
       setHasEndOfShiftToday(true);
     }
+    
+    // Check if user is currently on break
+    const breakStart = localStorage.getItem("currentBreakStart");
+    if (breakStart) {
+      setIsOnBreak(true);
+      setBreakStartTime(new Date(breakStart));
+    }
   }, []);
 
-  const handleLogoutClick = () => {
-    setShowProfileDropdown(false);
-    
-    // Only show logout modal for manager and team-member roles
-    if (role === "manager" || role === "team-member") {
-      setShowLogoutModal(true);
-    } else {
-      // For other roles, directly logout without showing modal
-      handleDirectLogout();
+  // Update break duration every second when on break
+  useEffect(() => {
+    let interval;
+    if (isOnBreak && breakStartTime) {
+      interval = setInterval(() => {
+        const now = new Date();
+        const duration = Math.floor((now - breakStartTime) / 1000); // in seconds
+        setBreakDuration(duration);
+      }, 1000);
     }
+    return () => clearInterval(interval);
+  }, [isOnBreak, breakStartTime]);
+
+  const handleLogoutClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowProfileDropdown(false);
+    setShowLogoutModal(true);
   };
 
   const handleDirectLogout = () => {
@@ -46,31 +65,15 @@ const Navbar = ({ toggleSidebar }) => {
 
   const handleBreak = async () => {
     try {
-      const now = new Date();
-      const breakStartTime = now.toISOString();
-      
-      // Store break start time in localStorage
-      localStorage.setItem("currentBreakStart", breakStartTime);
-      
-      // Update attendance if needed
-      const attendance = JSON.parse(localStorage.getItem("attendance"));
-      const memberId = localStorage.getItem("managerId");
+      const memberId = localStorage.getItem("managerId") || localStorage.getItem("userId");
       const token = localStorage.getItem("authToken");
       
-      if (attendance?.id && memberId && token) {
-        await axiosInstance.patch(
-          `attendance/updateAttendance/${attendance?.id}`,
+      if (memberId && token) {
+        // Call the break start API
+        await axiosInstance.post(
+          'attendance/break-start',
           {
-            memberId: parseInt(memberId, 10),
-            attendanceDate: now.toISOString().split("T")[0],
-            status: "On Break",
-            inTime: attendance?.inTime,
-            outTime: now.toLocaleTimeString("en-US", {
-              hour12: true,
-              hour: "numeric",
-              minute: "2-digit",
-            }),
-            remarks: "Break Started",
+            memberId: parseInt(memberId, 10)
           },
           {
             headers: {
@@ -79,18 +82,104 @@ const Navbar = ({ toggleSidebar }) => {
             },
           }
         );
+        
+        // Store break start time in localStorage
+        const now = new Date();
+        localStorage.setItem("currentBreakStart", now.toISOString());
+        
+        // Update state
+        setIsOnBreak(true);
+        setBreakStartTime(now);
+        setShowLogoutModal(false);
+        
+        // Don't logout the user
       }
-      
-      // Clear localStorage and redirect to login
-      localStorage.clear();
-      navigate("/");
     } catch (error) {
-      console.error("⚠️ Failed to record break:", error);
+      console.error("⚠️ Failed to start break:", error);
+    }
+  };
+
+  const handleEndBreak = async () => {
+    try {
+      const now = new Date();
+      const breakStart = new Date(breakStartTime);
+      const breakDurationMinutes = Math.floor((now - breakStart) / 60000); // in minutes
+      
+      // Store break duration for today
+      const today = now.toISOString().split("T")[0];
+      const existingBreaks = JSON.parse(localStorage.getItem(`breaks_${today}`) || "[]");
+      existingBreaks.push({
+        startTime: breakStartTime.toISOString(),
+        endTime: now.toISOString(),
+        duration: breakDurationMinutes
+      });
+      localStorage.setItem(`breaks_${today}`, JSON.stringify(existingBreaks));
+      
+      // Clear the current break start time
+      localStorage.removeItem("currentBreakStart");
+      
+      // Update state
+      setIsOnBreak(false);
+      setBreakStartTime(null);
+      setBreakDuration(0);
+      
+      // Call the break end API
+      const memberId = localStorage.getItem("managerId") || localStorage.getItem("userId");
+      const token = localStorage.getItem("authToken");
+      
+      if (memberId && token) {
+        await axiosInstance.post(
+          "attendance/break-end",
+          {
+            memberId: parseInt(memberId, 10)
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        
+        // Update attendance with break end time
+        const attendance = JSON.parse(localStorage.getItem("attendance"));
+        
+        if (attendance?.id) {
+          await axiosInstance.patch(
+            `attendance/updateAttendance/${attendance?.id}`,
+            {
+              memberId: parseInt(memberId, 10),
+              attendanceDate: today,
+              status: "Present",
+              inTime: attendance?.inTime,
+              outTime: now.toLocaleTimeString("en-US", {
+                hour12: true,
+                hour: "numeric",
+                minute: "2-digit",
+              }),
+              remarks: `Break Ended (${breakDurationMinutes} minutes)`,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+        }
+      }
+    } catch (error) {
+      console.error("⚠️ Failed to end break:", error);
     }
   };
 
   const handleEndOfShift = async () => {
     try {
+      // If user is on break, end the break first
+      if (isOnBreak) {
+        await handleEndBreak();
+      }
+      
       const now = new Date();
       const today = now.toISOString().split("T")[0];
       
@@ -99,7 +188,7 @@ const Navbar = ({ toggleSidebar }) => {
       
       // Update attendance with end of shift time
       const attendance = JSON.parse(localStorage.getItem("attendance"));
-      const memberId = localStorage.getItem("managerId");
+      const memberId = localStorage.getItem("managerId") || localStorage.getItem("userId");
       const token = localStorage.getItem("authToken");
       
       if (attendance?.id && memberId && token) {
@@ -131,58 +220,18 @@ const Navbar = ({ toggleSidebar }) => {
       navigate("/");
     } catch (error) {
       console.error("⚠️ Failed to record end of shift:", error);
+      // Even if API fails, log the user out
+      localStorage.clear();
+      navigate("/");
     }
   };
 
   const handleLogin = () => {
-    // Check if there's a break start time
+    // Check if user is returning from a break
     const breakStartTime = localStorage.getItem("currentBreakStart");
     if (breakStartTime) {
-      const now = new Date();
-      const breakStart = new Date(breakStartTime);
-      const breakDuration = Math.floor((now - breakStart) / 60000); // in minutes
-      
-      // Store break duration for today
-      const today = now.toISOString().split("T")[0];
-      const existingBreaks = JSON.parse(localStorage.getItem(`breaks_${today}`) || "[]");
-      existingBreaks.push({
-        startTime: breakStartTime,
-        endTime: now.toISOString(),
-        duration: breakDuration
-      });
-      localStorage.setItem(`breaks_${today}`, JSON.stringify(existingBreaks));
-      
-      // Clear the current break start time
-      localStorage.removeItem("currentBreakStart");
-      
-      // Update attendance with break end time
-      const attendance = JSON.parse(localStorage.getItem("attendance"));
-      const memberId = localStorage.getItem("managerId");
-      const token = localStorage.getItem("authToken");
-      
-      if (attendance?.id && memberId && token) {
-        axiosInstance.patch(
-          `attendance/updateAttendance/${attendance?.id}`,
-          {
-            memberId: parseInt(memberId, 10),
-            attendanceDate: today,
-            status: "Present",
-            inTime: attendance?.inTime,
-            outTime: now.toLocaleTimeString("en-US", {
-              hour12: true,
-              hour: "numeric",
-              minute: "2-digit",
-            }),
-            remarks: `Break Ended (${breakDuration} minutes)`,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-      }
+      setIsOnBreak(true);
+      setBreakStartTime(new Date(breakStartTime));
     }
   };
 
@@ -190,6 +239,13 @@ const Navbar = ({ toggleSidebar }) => {
     // Check if user is logging in after a break
     handleLogin();
   }, []);
+
+  // Format break duration as MM:SS
+  const formatBreakDuration = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <>
@@ -219,6 +275,20 @@ const Navbar = ({ toggleSidebar }) => {
 
           {/* Right Side Content */}
           <div className="d-flex align-items-center ms-auto gap-2 gap-md-3 flex-shrink-0">
+            {/* Break Timer - Show when on break */}
+            {isOnBreak && (
+              <div className="d-flex align-items-center gap-2 bg-warning text-dark px-3 py-1 rounded-pill">
+                <i className="fa fa-clock"></i>
+                <span className="fw-semibold small">Break: {formatBreakDuration(breakDuration)}</span>
+                <button
+                  className="btn btn-sm btn-success py-0 px-2"
+                  onClick={handleEndBreak}
+                >
+                  End Break
+                </button>
+              </div>
+            )}
+
             {/* User Name - Mobile View */}
             <div className="d-md-none d-flex align-items-center gap-2">
               <span className="text-white fw-semibold small">
@@ -232,19 +302,6 @@ const Navbar = ({ toggleSidebar }) => {
                 {userFullName}
               </span>
             </div>
-
-            {/* Notification Bell - Hidden on mobile */}
-            <a
-              className="btn btn-link text-white p-2 d-none d-md-block"
-              href="#"
-              style={{ fontSize: "22px", textDecoration: "none" }}
-              aria-label="Notifications"
-            >
-              <i
-                className="fa-regular fa-bell"
-                style={{ fontSize: "x-large" }}
-              ></i>
-            </a>
 
             {/* Profile Dropdown */}
             <div className="dropdown">
@@ -312,8 +369,8 @@ const Navbar = ({ toggleSidebar }) => {
         </div>
       </nav>
 
-      {/* Logout Confirmation Modal - Only for manager and team-member roles */}
-      {showLogoutModal && (role === "manager" || role === "team-member") && (
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
         <div
           className="modal show d-block"
           style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 3000 }}
@@ -334,13 +391,14 @@ const Navbar = ({ toggleSidebar }) => {
                 <div className="d-grid gap-2">
                   <button
                     className="btn btn-primary"
-                    onClick={() => {
-                      setShowLogoutModal(false);
-                      handleBreak();
-                    }}
+                    onClick={handleBreak}
+                    disabled={isOnBreak}
                   >
                     <i className="fa fa-coffee me-2"></i>
                     Break
+                    {isOnBreak && (
+                      <span className="ms-2 text-muted">(Already on break)</span>
+                    )}
                   </button>
                   <button
                     className="btn btn-success"

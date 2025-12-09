@@ -1425,35 +1425,112 @@ const CreateNewProject = ({ isEditMode = false, projectId = null, projectData = 
             </div>
           )}
 
-          {/* Project Manager - Only visible to Admin */}
-          {isAdmin && (
-            <div className="col-md-4">
-              <label htmlFor="projectManager" className="form-label">
-                Project Manager
-              </label>
-              <Select
-                id="projectManager"
-                name="projectManager"
-                options={managers}
-                value={
-                  managers.find((opt) => opt.value === formData.projectManager) ||
-                  null
-                }
-                onChange={(opt) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    projectManager: opt ? opt.value : "",
-                  }))
-                }
-                isSearchable
-                placeholder={
-                  loadingManagers ? "Loading..." : "Select Project Manager"
-                }
-                styles={gradientSelectStyles}
-                isDisabled={loadingManagers}
-              />
-            </div>
-          )}
+{/* Project Manager - Only visible to Admin */}
+{/* Project Manager - Only visible to Admin */}
+{isAdmin && (
+  <div className="col-md-4">
+    <label htmlFor="projectManager" className="form-label">
+      Project Manager
+    </label>
+    <Select
+      id="projectManager"
+      name="projectManager"
+      options={managers.map(manager => {
+        // Check if this manager is assigned to the selected client
+        const isAssignedToClient = formData.client && 
+          clientDetails[formData.client]?.projectManagerId === manager.value;
+        
+        return {
+          ...manager,
+          // Add custom label for assigned manager
+          label: isAssignedToClient 
+            ? `${manager.label} (Assigned to Client)`
+            : manager.label
+        };
+      })}
+      value={
+        formData.projectManager
+          ? {
+              value: formData.projectManager,
+              label: (() => {
+                // Find manager name
+                const manager = managers.find(m => m.value === formData.projectManager);
+                if (!manager) return "Select Project Manager";
+                
+                // Check if assigned to client
+                const isAssignedToClient = formData.client && 
+                  clientDetails[formData.client]?.projectManagerId === formData.projectManager;
+                
+                return isAssignedToClient 
+                  ? `${manager.label} (Assigned to Client)`
+                  : manager.label;
+              })()
+            }
+          : null
+      }
+      onChange={(opt) =>
+        setFormData((prev) => ({
+          ...prev,
+          projectManager: opt ? opt.value : "",
+        }))
+      }
+      isSearchable
+      placeholder={
+        loadingManagers ? "Loading..." : "Select Project Manager"
+      }
+      styles={{
+        ...gradientSelectStyles,
+        option: (provided, state) => {
+          const style = {
+            ...provided,
+            backgroundColor: state.isFocused ? "#293d80" : "transparent",
+            color: "white",
+          };
+          
+          // Highlight option if manager is assigned to client
+          const isAssignedToClient = formData.client && 
+            clientDetails[formData.client]?.projectManagerId === state.data.value;
+          
+          if (isAssignedToClient) {
+            return {
+              ...style,
+              backgroundColor: state.isFocused ? '#1e5f1e' : '#2e7d32',
+              fontWeight: 'bold',
+            };
+          }
+          return style;
+        },
+        singleValue: (provided, state) => {
+          const style = {
+            ...provided,
+            color: "white",
+          };
+          
+          // Check if selected manager is assigned to client
+          const isAssignedToClient = formData.client && 
+            clientDetails[formData.client]?.projectManagerId === state.data.value;
+          
+          if (isAssignedToClient) {
+            return {
+              ...style,
+              fontWeight: 'bold',
+              color: '#90ee90',
+            };
+          }
+          return style;
+        },
+      }}
+      isDisabled={loadingManagers}
+    />
+    {/* Optional: Show info message */}
+    {formData.client && clientDetails[formData.client]?.projectManagerName && 
+     !formData.projectManager && (
+      <div className="form-text text-warning">
+        Client has assigned PM: {clientDetails[formData.client].projectManagerName}
+      </div>
+    )}
+  </div>
+)}
         </div>
 
         {/* Task & Applications */}
@@ -2054,185 +2131,192 @@ const CreateNewProject = ({ isEditMode = false, projectId = null, projectData = 
         </div>
 
         {/* Financial Section */}
-        <div className="row g-3 mb-3">
-          {/* Estimated Hrs with radio */}
-          <div className="col-md-3">
-            <label className="form-label d-flex align-items-center gap-2">
-              <input
-                type="radio"
-                name="billingMode"
-                value="estimated"
-                checked={
-                  formData.billingMode === "estimated" || !formData.billingMode
-                }
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    billingMode: e.target.value,
-                    rate: e.target.value === "estimated" ? 0 : prev.rate,
-                  }))
-                }
-              />
-              Estimated Hrs
-            </label>
-            <input
-              type="number"
-              className="form-control"
-              min="0"
-              step="0.25"
-              value={formData.estimatedHrs || ""}
-              onChange={(e) => {
-                const value = parseFloat(e.target.value) || 0;
-                setFormData((prev) => ({
-                  ...prev,
-                  estimatedHrs: value,
-                  cost: value * (prev.hourlyRate || 0),
-                  inrCost:
-                    value * (prev.hourlyRate || 0) * (prev.exchangeRate || 1),
-                }));
-              }}
-              placeholder="00.00"
-              disabled={formData.billingMode !== "estimated"}
-            />
-            <div className="form-text text-white">
-              (in multiple of 0.25 only)
-            </div>
-          </div>
+     {/* Financial Section */}
+<div className="row g-3 mb-3">
+  {/* Estimated Hrs with radio */}
+  <div className="col-md-3">
+    <label className="form-label d-flex align-items-center gap-2">
+      <input
+        type="radio"
+        name="billingMode"
+        value="estimated"
+        checked={
+          formData.billingMode === "estimated" || !formData.billingMode
+        }
+        onChange={(e) =>
+          setFormData((prev) => ({
+            ...prev,
+            billingMode: e.target.value,
+            rate: e.target.value === "estimated" ? 0 : prev.rate,
+          }))
+        }
+      />
+      Estimated Hrs
+    </label>
+    <input
+      type="number"
+      className="form-control"
+      min="0"
+      step="0.25"
+      value={formData.estimatedHrs || ""}
+      onChange={(e) => {
+        const value = parseFloat(e.target.value) || 0;
+        const hourlyRate = formData.hourlyRate || 0;
+        const cost = value * hourlyRate;
+        const exchangeRate = inrConversionRates[formData.currency] || 1;
+        
+        setFormData((prev) => ({
+          ...prev,
+          estimatedHrs: value,
+          cost: cost,
+          inrCost: cost * exchangeRate,
+        }));
+      }}
+      placeholder="00.00"
+      disabled={formData.billingMode !== "estimated"}
+    />
+    <div className="form-text text-white">
+      (in multiple of 0.25 only)
+    </div>
+  </div>
 
-          {/* Hourly Rate */}
-          <div className="col-md-2">
-            <label className="form-label">Hourly Rate</label>
-            <input
-              type="number"
-              className="form-control"
-              value={formData.hourlyRate || ""}
-              onChange={(e) => {
-                const rate = parseFloat(e.target.value) || 0;
-                const exchangeRate = inrConversionRates[formData.currency] || 1;
-                setFormData((prev) => ({
-                  ...prev,
-                  hourlyRate: rate,
-                  cost: prev.estimatedHrs * rate,
-                  inrCost: prev.estimatedHrs * rate * exchangeRate,
-                }));
-              }}
-              placeholder=""
-            />
-          </div>
+  {/* Hourly Rate */}
+  <div className="col-md-2">
+    <label className="form-label">Hourly Rate</label>
+    <input
+      type="number"
+      className="form-control"
+      value={formData.hourlyRate || ""}
+      onChange={(e) => {
+        const rate = parseFloat(e.target.value) || 0;
+        const estimatedHrs = formData.estimatedHrs || 0;
+        const cost = estimatedHrs * rate;
+        const exchangeRate = inrConversionRates[formData.currency] || 1;
+        
+        setFormData((prev) => ({
+          ...prev,
+          hourlyRate: rate,
+          cost: cost,
+          inrCost: cost * exchangeRate,
+        }));
+      }}
+      placeholder=""
+    />
+  </div>
 
-          {/* Per Page Rate with radio */}
-          <div className="col-md-3">
-            <label className="form-label d-flex align-items-center gap-2">
-              <input
-                type="radio"
-                name="billingMode"
-                value="perPage"
-                checked={formData.billingMode === "perPage"}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    billingMode: e.target.value,
-                    estimatedHrs:
-                      e.target.value === "perPage" ? 0 : prev.estimatedHrs,
-                  }))
-                }
-              />
-              Per Page Rate
-            </label>
-            <input
-              type="number"
-              className="form-control"
-              min="0"
-              step="0.01"
-              value={formData.rate || ""}
-              onChange={(e) => {
-                const rate = parseFloat(e.target.value) || 0;
-                const totalPages = formData.files.reduce(
-                  (sum, file) => sum + (file.pageCount || 0),
-                  0
-                );
-                const exchangeRate = inrConversionRates[formData.currency] || 1;
-                setFormData((prev) => ({
-                  ...prev,
-                  rate: rate,
-                  cost: rate * totalPages,
-                  inrCost: rate * totalPages * exchangeRate,
-                }));
-              }}
+  {/* Per Page Rate with radio */}
+  <div className="col-md-3">
+    <label className="form-label d-flex align-items-center gap-2">
+      <input
+        type="radio"
+        name="billingMode"
+        value="perPage"
+        checked={formData.billingMode === "perPage"}
+        onChange={(e) =>
+          setFormData((prev) => ({
+            ...prev,
+            billingMode: e.target.value,
+            estimatedHrs: e.target.value === "perPage" ? 0 : prev.estimatedHrs,
+          }))
+        }
+      />
+      Per Page Rate
+    </label>
+    <input
+      type="number"
+      className="form-control"
+      min="0"
+      step="0.01"
+      value={formData.rate || ""}
+      onChange={(e) => {
+        const rate = parseFloat(e.target.value) || 0;
+        // ✅ CORRECTED: Use Total Project Pages (not Total Pages Per Lang)
+        const totalProjectPages = formData.totalPages || 0;
+        const cost = rate * totalProjectPages;
+        const exchangeRate = inrConversionRates[formData.currency] || 1;
+        
+        setFormData((prev) => ({
+          ...prev,
+          rate: rate,
+          cost: cost,
+          inrCost: cost * exchangeRate,
+        }));
+      }}
+      placeholder="00.00"
+      disabled={formData.billingMode !== "perPage"}
+    />
+    <div className="form-text text-white">(with only 2 decimals)</div>
+  </div>
 
-              placeholder="00.00"
-              disabled={formData.billingMode !== "perPage"}
-            />
-            <div className="form-text text-white">(with only 2 decimals)</div>
-          </div>
+  {/* Currency - Only visible to Admin */}
+  {isAdmin && (
+    <div className="col-md-2">
+      <label className="form-label">Currency</label>
+      <select
+        className="form-control"
+        value={formData.currency || ""}
+        onChange={(e) => {
+          const newCurrency = e.target.value;
+          const exchangeRate = inrConversionRates[newCurrency] || 1;
+          
+          setFormData((prev) => {
+            // If switching TO INR, set Cost = Cost in INR (no conversion)
+            if (newCurrency === "INR") {
+              return {
+                ...prev,
+                currency: newCurrency,
+                inrCost: prev.cost,
+              };
+            } else {
+              // For foreign currencies, apply conversion
+              return {
+                ...prev,
+                currency: newCurrency,
+                inrCost: prev.cost * exchangeRate,
+              };
+            }
+          });
+        }}
+      >
+        <option value="">Select Currency</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="GBP">GBP</option>
+        <option value="INR">INR</option>
+        <option value="JPY">JPY</option>
+        <option value="CNY">CNY</option>
+      </select>
+    </div>
+  )}
 
-          {/* Currency - Only visible to Admin */}
-          {isAdmin && (
-            <div className="col-md-2">
-              <label className="form-label">Currency</label>
-              <select
-                className="form-control"
-                value={formData.currency || "USD"}
-                onChange={(e) => {
-                  const newCurrency = e.target.value;
-                  setFormData((prev) => {
-                    // If switching TO INR, set Cost = Cost in INR
-                    if (newCurrency === "INR") {
-                      return {
-                        ...prev,
-                        currency: newCurrency,
-                        inrCost: prev.cost,
-                      };
-                    } else {
-                      // For foreign currencies, apply conversion
-                      const exchangeRate = inrConversionRates[newCurrency] || 1;
-                      return {
-                        ...prev,
-                        currency: newCurrency,
-                        inrCost: prev.cost * exchangeRate,
-                      };
-                    }
-                  });
-                }}
-              >
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-                <option value="INR">INR</option>
-                <option value="JPY">JPY</option>
-                <option value="CNY">CNY</option>
-              </select>
-            </div>
-          )}
+  {/* Total Cost - Only visible to Admin */}
+  {isAdmin && (
+    <div className="col-md-2">
+      <label className="form-label">Total Cost</label>
+      <input
+        type="text"
+        className="form-control"
+        value={formData.cost ? formData.cost.toFixed(2) : "0.00"}
+        readOnly
+        placeholder="Auto Calculated"
+      />
+    </div>
+  )}
 
-          {/* Total Cost - Only visible to Admin */}
-          {isAdmin && (
-            <div className="col-md-2">
-              <label className="form-label">Total Cost</label>
-              <input
-                type="text"
-                className="form-control"
-                value={typeof formData.cost === 'number' ? formData.cost.toFixed(2) : parseFloat(formData.cost || 0).toFixed(2)}
-                readOnly
-                placeholder="Auto Calculated"
-              />
-            </div>
-          )}
-
-          {/* Cost in INR - Only visible to Admin */}
-          {isAdmin && (
-            <div className="col-md-2">
-              <label className="form-label">Cost in INR</label>
-              <input
-                type="text"
-                className="form-control"
-                value={typeof formData.inrCost === 'number' ? formData.inrCost.toFixed(2) : parseFloat(formData.inrCost || 0).toFixed(2)}
-                readOnly
-                placeholder="Auto Calculated"
-              />
-            </div>
-          )}
-        </div>
+  {/* Cost in INR - Only visible to Admin */}
+  {isAdmin && (
+    <div className="col-md-2">
+      <label className="form-label">Cost in INR</label>
+      <input
+        type="text"
+        className="form-control"
+        value={formData.inrCost ? formData.inrCost.toFixed(2) : "0.00"}
+        readOnly
+        placeholder="Auto Calculated"
+      />
+    </div>
+  )}
+</div>
 
         {/* Save Button - Disabled for Managers in edit mode */}
         <div className="d-flex justify-content-between">

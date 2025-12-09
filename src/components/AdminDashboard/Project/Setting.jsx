@@ -618,11 +618,16 @@ export default function SettingsPage() {
   };
 
   const handleAddCurrency = () => {
-    if (newCurrency.name && newCurrency.rate) {
-      setCurrencies([...currencies, newCurrency]);
-      setNewCurrency({ name: "", rate: "" });
-    }
-  };
+  if (newCurrency.name && newCurrency.rate) {
+    const updatedCurrencies = [...currencies, newCurrency];
+    setCurrencies(updatedCurrencies);
+    
+    // ✅ Save to localStorage
+    localStorage.setItem("customConversionRates", JSON.stringify(updatedCurrencies));
+    
+    setNewCurrency({ name: "", rate: "" });
+  }
+};
 
   const [languages, setLanguages] = useState([]); // this is language state 
   useEffect(() => {
@@ -635,11 +640,14 @@ export default function SettingsPage() {
     { name: "GBP", rate: "90" },
   ]);
 
-  const handleDeleteItem = (list, setList, index) => {
-    const newList = [...list];
-    newList.splice(index, 1);
-    setList(newList);
-  };
+ const handleDeleteItem = (list, setList, index) => {
+  const newList = [...list];
+  newList.splice(index, 1);
+  setList(newList);
+  
+  // ✅ Update localStorage
+  localStorage.setItem("customConversionRates", JSON.stringify(newList));
+};
 
   const handleCurrencyChange = (e) => {
     const currency = e.target.value;
@@ -685,6 +693,14 @@ export default function SettingsPage() {
   fetchConversionRates();
 }, [token]);
 
+
+useEffect(() => {
+  const savedRates = localStorage.getItem("customConversionRates");
+  if (savedRates) {
+    const parsedRates = JSON.parse(savedRates);
+    setCurrencies(parsedRates);
+  }
+}, []);
   return (
     <div className="p-4 settings-main-unique py-4">
       <h2 className="gradient-heading mb-1">Client Management</h2>

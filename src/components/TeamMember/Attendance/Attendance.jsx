@@ -1813,7 +1813,6 @@ import {
   Activity,
   FileText,
   Calendar,
-  Filter,
   ChevronLeft,
   ChevronRight,
   X,
@@ -1827,53 +1826,74 @@ const Attendance = () => {
   // --- STATE DECLARATIONS ---
   const [attendanceData, setAttendanceData] = useState([]);
   const [summaryData, setSummaryData] = useState([]);
-  const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("authToken");
   
   // Get current user info from localStorage
   const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
-  const userRole = currentUser.role || ""; // Assuming role is stored in currentUser
-  const userId = currentUser.id || ""; // Assuming user ID is stored in currentUser
+  const userRole = currentUser.role || "Manager"; // Default to Manager
+  const userId = currentUser.id || 2; // Default to John Smith's ID
 
   // Filter and UI states
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("All");
   const [dateRange, setDateRange] = useState({
-    start: "2025-04-28", // Default Payroll Cycle Start
-    end: "2025-05-27",   // Default Payroll Cycle End
+    start: getFirstDayOfMonth(),
+    end: getLastDayOfMonth(),
   });
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [viewMode, setViewMode] = useState("today"); // Default to today view
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0]
   );
-  const [isEditing, setIsEditing] = useState(false); // For Details View edit mode
-  const [editFormData, setEditFormData] = useState({}); 
-  
+  const [isEditing, setIsEditing] = useState(false);
+  const [editFormData, setEditFormData] = useState({});
+
+  // Helper functions for date ranges
+  function getFirstDayOfMonth() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}-01`;
+  }
+
+  function getLastDayOfMonth() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const lastDay = new Date(year, date.getMonth() + 1, 0).getDate();
+    return `${year}-${month}-${String(lastDay).padStart(2, '0')}`;
+  }
+
   // --- HELPER FUNCTIONS ---
   const formatDateDDMMYY = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-    const year = String(date.getFullYear()).slice(-2); // Last two digits of year
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = String(date.getFullYear()).slice(-2);
     return `${day}-${month}-${year}`;
   };
-  
-  // Convert time string to 24-hour format
+
   const convertTo24HourFormat = (timeString) => {
-    if (!timeString) return null;
+    if (!timeString || timeString.trim() === "") return null;
+    
+    // Remove any whitespace
+    const time = timeString.trim();
+    
     // Check if it's already in 24-hour format (HH:MM)
-    if (/^\d{1,2}:\d{2}$/.test(timeString)) {
-      return timeString;
+    if (/^\d{1,2}:\d{2}$/.test(time)) {
+      const [hours, minutes] = time.split(':').map(Number);
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
+    
     // Check if it's in 12-hour format (HH:MM AM/PM)
-    const match = timeString.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    const match = time.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
     if (match) {
       let hours = parseInt(match[1]);
       const minutes = match[2];
       const period = match[3].toUpperCase();
+      
       if (period === "PM" && hours < 12) {
         hours += 12;
       } else if (period === "AM" && hours === 12) {
@@ -1881,14 +1901,13 @@ const Attendance = () => {
       }
       return `${hours.toString().padStart(2, '0')}:${minutes}`;
     }
-    return null; // Invalid format
+    
+    return null;
   };
-  
-  // Calculate net working hours from inTime and outTime
-  const calculateNetHours = (inTime, outTime) => {
-    if (!inTime || !outTime) return "-";
 
-    // Convert times to 24-hour format
+  const calculateNetHours = (inTime, outTime) => {
+    if (!inTime || !outTime || inTime === "" || outTime === "") return "-";
+
     const inTime24 = convertTo24HourFormat(inTime);
     const outTime24 = convertTo24HourFormat(outTime);
 
@@ -1900,186 +1919,136 @@ const Attendance = () => {
     let start = inH * 60 + inM;
     let end = outH * 60 + outM;
 
-    // Handle overnight shifts (when end time is earlier than start time)
+    // Handle overnight shifts
     if (end < start) {
-      end += 24 * 60; // Add 24 hours in minutes
+      end += 24 * 60;
     }
 
     const diff = end - start;
     const hours = Math.floor(diff / 60);
     const mins = diff % 60;
 
-    return `${hours}h ${mins}m`;
+    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
   };
 
-  // Calculate attendance status based on shift details
-  const calculateAttendanceBasedOnShift = (attendance, shiftDetails) => {
-    if (!shiftDetails) return attendance;
+  const calculateBreakTime = (inTime, outTime) => {
+    if (!inTime || !outTime || inTime === "" || outTime === "") return "-";
 
-    const { shiftStartTime, shiftEndTime, isWeekOff, isHoliday } = shiftDetails;
+    const inTime24 = convertTo24HourFormat(inTime);
+    const outTime24 = convertTo24HourFormat(outTime);
 
-    // Priority: Holiday > Week Off > Actual Attendance
-    if (isHoliday) {
-      return { ...attendance, status: "Holiday", anomalies: "-" };
-    }
-    if (isWeekOff) {
-      return { ...attendance, status: "Week Off", anomalies: "-" };
-    }
+    if (!inTime24 || !outTime24) return "-";
 
-    if (attendance.status === "Leave") {
-      // Check if it's half-day leave based on remarks or other logic
-      // For simplicity, assuming if remarks contain "1st Half" or "2nd Half"
-      if (attendance.anomalies.includes("1st Half")) {
-        // Adjust login time for 1st Half Leave: Login adjusted to 4.5 hrs after shift start
-        const adjustedLoginTime = new Date(`1970-01-01T${shiftStartTime}:00`);
-        adjustedLoginTime.setHours(adjustedLoginTime.getHours() + 4);
-        adjustedLoginTime.setMinutes(adjustedLoginTime.getMinutes() + 30);
-        const formattedLogin = `${adjustedLoginTime.getHours().toString().padStart(2, '0')}:${adjustedLoginTime.getMinutes().toString().padStart(2, '0')}`;
-        return { ...attendance, status: "1st Half Leave", loginTime: formattedLogin, anomalies: "1st Half Leave" };
-      } else if (attendance.anomalies.includes("2nd Half")) {
-        // Adjust logout time for 2nd Half Leave: Logout adjusted to 4.5 hrs before shift end
-        const adjustedLogoutTime = new Date(`1970-01-01T${shiftEndTime}:00`);
-        adjustedLogoutTime.setHours(adjustedLogoutTime.getHours() - 4);
-        adjustedLogoutTime.setMinutes(adjustedLogoutTime.getMinutes() - 30);
-        const formattedLogout = `${adjustedLogoutTime.getHours().toString().padStart(2, '0')}:${adjustedLogoutTime.getMinutes().toString().padStart(2, '0')}`;
-        return { ...attendance, status: "2nd Half Leave", logoutTime: formattedLogout, anomalies: "2nd Half Leave" };
-      } else {
-        return { ...attendance, status: "Leave", anomalies: "Full Day Leave" };
-      }
+    const [inH, inM] = inTime24.split(":").map(Number);
+    const [outH, outM] = outTime24.split(":").map(Number);
+
+    let start = inH * 60 + inM;
+    let end = outH * 60 + outM;
+
+    if (end < start) {
+      end += 24 * 60;
     }
 
-    // Check for late arrival and early departure
-    let anomalies = attendance.anomalies === "-" ? "" : attendance.anomalies;
-    if (attendance.loginTime !== "-" && shiftStartTime) {
-      const loginTime = new Date(`1970-01-01T${attendance.loginTime}:00`);
-      const startTime = new Date(`1970-01-01T${shiftStartTime}:00`);
-      const diffMinutes = (loginTime - startTime) / (1000 * 60);
-      if (diffMinutes > 15) { // 15 minutes grace period
-        anomalies += (anomalies ? ", " : "") + "Late Arrival";
-      }
+    const totalDuration = end - start;
+    
+    // Calculate break time: Assuming 30 mins break for every 4.5 hours of work
+    const workHours = totalDuration / 60;
+    let breakMinutes = 0;
+    
+    if (workHours >= 4.5) {
+      breakMinutes = 30;
+    } else if (workHours >= 3) {
+      breakMinutes = 15;
     }
-    if (attendance.logoutTime !== "-" && shiftEndTime) {
-      const logoutTime = new Date(`1970-01-01T${attendance.logoutTime}:00`);
-      const endTime = new Date(`1970-01-01T${shiftEndTime}:00`);
-      const diffMinutes = (endTime - logoutTime) / (1000 * 60);
-      if (diffMinutes > 15) { // 15 minutes grace period
-        anomalies += (anomalies ? ", " : "") + "Early Departure";
-      }
-    }
-
-    // Check for long break
-    const calculateBreakTime = (loginTime, logoutTime) => {
-      if (!loginTime || !logoutTime) return "-";
-
-      const login24 = convertTo24HourFormat(loginTime);
-      const logout24 = convertTo24HourFormat(logoutTime);
-
-      if (!login24 || !logout24) return "-";
-
-      const [loginH, loginM] = login24.split(":").map(Number);
-      const [logoutH, logoutM] = logout24.split(":").map(Number);
-
-      let loginMinutes = loginH * 60 + loginM;
-      let logoutMinutes = logoutH * 60 + logoutM;
-
-      if (logoutMinutes < loginMinutes) {
-        logoutMinutes += 24 * 60; // Handle overnight
-      }
-
-      // Total duration in minutes
-      const totalDuration = logoutMinutes - loginMinutes;
-
-      // Assuming standard work hours are 8.5 hours (510 minutes) for full day.
-      // This is a simplification. You might need to adjust based on actual shift timings.
-      const standardWorkMinutes = 8.5 * 60; // 510 minutes
-
-      // Break time = Total duration - Standard work time
-      let breakMinutes = totalDuration - standardWorkMinutes;
-
-      // Ensure break time is not negative and doesn't exceed 60 minutes (as per requirement)
-      if (breakMinutes < 0) breakMinutes = 0;
-      if (breakMinutes > 60) breakMinutes = 60; // Cap at 60 minutes
-
-      return breakMinutes > 0 ? `${breakMinutes} mins` : "-";
-    };
-
-    return { ...attendance, anomalies: anomalies || "-", breakTime: breakTime };
+    
+    return breakMinutes > 0 ? `${breakMinutes} mins` : "-";
   };
 
-  // Calculate salary details based on attendance and user data
-  const calculateSalaryDetails = useCallback(async (userId, userAttendance, userSalary, userDOJ, openingBalance) => {
-    // Calculate experience in years
-    const joiningDate = new Date(userDOJ);
-    const currentDate = new Date();
-    const experienceYears = (currentDate - joiningDate) / (1000 * 60 * 60 * 24 * 365);
-
-    // Calculate leave allocation based on experience
-    let leaveAllocationPerMonth = 0;
-    if (experienceYears >= 2) leaveAllocationPerMonth = 2;
-    else if (experienceYears >= 1) leaveAllocationPerMonth = 1.5;
-    else if (experienceYears >= 4 / 12) leaveAllocationPerMonth = 1;
-    else leaveAllocationPerMonth = 0;
-
-    // Get payroll cycle details (total days, holidays, week-offs)
-    // NOTE: This is a mock implementation. Replace with actual API call.
-    const totalDaysInCycle = 30; // Mock: Total days in payroll cycle
-    const holidays = 2;          // Mock: Number of holidays in cycle
-    const weekOffs = 8;         // Mock: Number of week-offs in cycle
-
-    // Calculate attendance summary
+  const calculateSalaryDetails = useCallback((employeeData) => {
+    const attendanceRecords = employeeData.attendance || [];
+    
+    // Calculate present, absent, leave, half-day counts
     let presentDays = 0;
     let absentDays = 0;
     let leaveDays = 0;
     let halfDayLeaves = 0;
-    userAttendance.forEach(record => {
-      if (record.status === "Present") presentDays++;
-      else if (record.status === "Absent") absentDays++;
-      else if (record.status === "Leave") leaveDays++;
-      else if (record.status === "1st Half Leave" || record.status === "2nd Half Leave") halfDayLeaves += 0.5;
+    let totalWorkMinutes = 0;
+
+    attendanceRecords.forEach(record => {
+      if (record.status === "Present") {
+        presentDays++;
+        // Calculate work minutes for present days
+        if (record.inTime && record.outTime) {
+          const netHours = calculateNetHours(record.inTime, record.outTime);
+          if (netHours !== "-") {
+            const [hours, mins] = netHours.replace(/[hm]/g, "").trim().split(" ").map(Number);
+            totalWorkMinutes += (hours || 0) * 60 + (mins || 0);
+          }
+        }
+      } else if (record.status === "Absent") {
+        absentDays++;
+      } else if (record.status === "Leave") {
+        leaveDays++;
+      } else if (record.status === "Half-Day") {
+        halfDayLeaves++;
+        totalWorkMinutes += 4 * 60; // 4 hours for half-day
+      }
     });
 
-    // Calculate leave balance and LOP (Loss of Pay)
-    const totalEligibleLeave = openingBalance + leaveAllocationPerMonth;
-    let leaveBalance = 0;
-    let lopDays = 0;
+    // Get employee's salary
+    const monthlySalary = parseFloat(employeeData.currentSalary) || 50000;
+    
+    // Calculate experience
+    const joiningDate = new Date(employeeData.doj);
+    const currentDate = new Date();
+    const experienceYears = (currentDate - joiningDate) / (1000 * 60 * 60 * 24 * 365.25);
 
-    if (leaveDays <= totalEligibleLeave) {
-      leaveBalance = totalEligibleLeave - leaveDays;
-    } else {
-      leaveBalance = 0;
-      lopDays = leaveDays - totalEligibleLeave;
+    // Calculate total days in current month
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    
+    // Weekends (Saturdays and Sundays)
+    let weekends = 0;
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(currentYear, currentMonth, day);
+      if (date.getDay() === 0 || date.getDay() === 6) {
+        weekends++;
+      }
     }
 
-    // Calculate paid days (LOP for Absent is 2 days)
-    const paidDays = presentDays + holidays + weekOffs + leaveDays - lopDays - (absentDays * 2) - halfDayLeaves;
-
-    // Calculate salary components
-    const perDaySalary = userSalary / totalDaysInCycle;
-    const calculatedSalary = perDaySalary * paidDays;
-
-    // Mock incentives and deductions (replace with actual data from API)
-    const incentives = userAttendance[0]?.incentives || 1000; // Placeholder, fetch from API
-    const deductions = userAttendance[0]?.deductions || 500;
-
-    const finalPayableAmount = calculatedSalary + incentives - deductions;
+    // Calculate paid days
+    const paidDays = presentDays + halfDayLeaves * 0.5 + weekends;
+    
+    // Calculate per day salary
+    const perDaySalary = monthlySalary / daysInMonth;
+    
+    // Calculate base salary
+    const baseSalary = perDaySalary * paidDays;
+    
+    // Calculate incentives and deductions (mock data - replace with actual)
+    const incentives = 1500;
+    const deductions = 750;
+    
+    const finalPayableAmount = baseSalary + incentives - deductions;
 
     return {
-      salary: userSalary,
-      perDaySalary,
+      salary: monthlySalary,
+      perDaySalary: perDaySalary.toFixed(2),
       paidDays,
-      totalDays: totalDaysInCycle,
-      leaveBalance,
-      lopDays,
+      totalDays: daysInMonth,
+      leaveBalance: 2, // Mock leave balance
+      lopDays: absentDays,
       incentives,
       deductions,
-      finalPayableAmount,
-      experienceYears
+      finalPayableAmount: Math.round(finalPayableAmount),
+      experienceYears: experienceYears.toFixed(1),
+      totalWorkHours: (totalWorkMinutes / 60).toFixed(1)
     };
   }, []);
 
   // --- API EFFECTS ---
 
-  // Effect to fetch and process attendance data based on user role
   useEffect(() => {
     const fetchAttendanceAndCalculate = async () => {
       setLoading(true);
@@ -2088,90 +2057,126 @@ const Attendance = () => {
         
         // Fetch data based on user role
         if (userRole === "Admin") {
-          // Admin sees all members' attendance
           const attendanceResponse = await axios.get(`${BASE_URL}attendance/getAllAttendanceWithMembers`);
           membersData = attendanceResponse.data.data || [];
         } else if (userRole === "Manager") {
-          // Manager sees only their own attendance
-          const attendanceResponse = await axios.get(`${BASE_URL}attendance/member/${userId}`);
-          membersData = attendanceResponse.data ? [attendanceResponse.data] : [];
+          // For manager, get their own attendance
+          const attendanceResponse = await axios.get(`${BASE_URL}attendance/getAllAttendanceWithMembers`);
+          const allData = attendanceResponse.data.data || [];
+          // Filter for current user's data
+          membersData = allData.filter(member => member.id === parseInt(userId));
         } else {
           // Default fallback
           const attendanceResponse = await axios.get(`${BASE_URL}attendance/getAllAttendanceWithMembers`);
           membersData = attendanceResponse.data.data || [];
         }
         
-        // Process each member's attendance
-        const allProcessedAttendance = [];
-        const allSummaryData = [];
+        // Process attendance data for Today View
+        const today = new Date().toISOString().split('T')[0];
+        const todayAttendanceData = [];
         
-        for (const member of membersData) {
+        membersData.forEach(member => {
+          // Find today's attendance record
+          const todayAttendance = member.attendance?.find(att => 
+            att.attendanceDate === today
+          ) || {
+            status: "Absent",
+            inTime: "-",
+            outTime: "-",
+            remarks: "No record for today"
+          };
+          
+      ;
+          const netWorkingHours = calculateNetHours(todayAttendance.inTime, todayAttendance.outTime);
+          
+          todayAttendanceData.push({
+            id: member.id,
+            employeeId: member.empId || "-",
+            employeeName: member.fullName,
+            department: member.team || "-",
+            position: member.role || "-",
+            date: today,
+            loginTime: todayAttendance.inTime || "-",
+            logoutTime: todayAttendance.outTime || "-",
+            breakTime: member.break_time || "-",
+            netWorkingHours: netWorkingHours,
+            status: todayAttendance.status,
+            anomalies: todayAttendance.remarks || "-"
+          });
+        });
+        
+        setAttendanceData(todayAttendanceData);
+        
+        // Process summary data
+        const summaryWithSalary = membersData.map(member => {
+          const salaryDetails = calculateSalaryDetails(member);
+          
+          // Calculate attendance summary from all records
           const attendanceRecords = member.attendance || [];
-          const processedRecords = [];
+          let presentDays = 0;
+          let absentDays = 0;
+          let leaveDays = 0;
+          let halfDayLeaves = 0;
+          let lateArrivals = 0;
+          let earlyDepartures = 0;
           
-          for (const att of attendanceRecords) {
-            // Mock shift details - Replace with actual API call
-            // const shiftResponse = await axios.get(`${BASE_URL}shift/getShiftDetails?userId=${member.id}&date=${att.attendanceDate}`);
-            // const shiftDetails = shiftResponse.data;
-            const shiftDetails = { shiftStartTime: "09:00", shiftEndTime: "18:00", isWeekOff: false, isHoliday: false }; // MOCK
+          attendanceRecords.forEach(record => {
+            if (record.status === "Present") presentDays++;
+            else if (record.status === "Absent") absentDays++;
+            else if (record.status === "Leave") leaveDays++;
+            else if (record.status === "Half-Day") halfDayLeaves++;
             
-            // Calculate attendance based on shift
-            const attendance = calculateAttendanceBasedOnShift({
-              id: att.id,
-              user: member.fullName,
-              employeeId: member.empId || "-",
-              department: member.team || "-",
-              position: member.role || "-",
-              date: att.attendanceDate,
-              loginTime: att.inTime || "-",
-              logoutTime: att.outTime || "-",
-              netWorkingHours: calculateNetHours(att.inTime, att.outTime),
-              taskActiveTime: "-", // Not provided in the API response
-              status: att.status,
-              anomalies: att.remarks || "-",
-            }, shiftDetails);
+            // Check for late arrivals and early departures
+            if (record.inTime && record.status === "Present") {
+              const inTime24 = convertTo24HourFormat(record.inTime);
+              if (inTime24) {
+                const [hours] = inTime24.split(":").map(Number);
+                if (hours >= 10) { // Late if after 10 AM
+                  lateArrivals++;
+                }
+              }
+            }
             
-            processedRecords.push(attendance);
-          }
+            if (record.outTime && record.status === "Present") {
+              const outTime24 = convertTo24HourFormat(record.outTime);
+              if (outTime24) {
+                const [hours] = outTime24.split(":").map(Number);
+                if (hours < 17) { // Early departure if before 5 PM
+                  earlyDepartures++;
+                }
+              }
+            }
+          });
           
-          allProcessedAttendance.push(...processedRecords);
-          
-          // Prepare summary data for this member
-          const empSummary = {
+          return {
             id: member.id,
             employeeName: member.fullName,
             employeeId: member.empId || "-",
             department: member.team || "-",
             position: member.role || "-",
-            attendanceRecords: processedRecords,
-            // Mock user details for salary calculation - Replace with actual API call
-            salary: member.currentSalary || 50000, // Use actual salary if available
-            dateOfJoining: member.doj || "2022-01-15", // Use actual DOJ if available
-            leaveOpeningBalance: 2, // MOCK
+            attendanceRecords: attendanceRecords.map(att => ({
+              ...att,
+              breakTime: member.break_time || "-",
+              netWorkingHours: calculateNetHours(att.inTime, att.outTime)
+            })),
+            summary: {
+              presentDays,
+              absentDays,
+              leaveDays,
+              halfDayLeaves,
+              lateArrivals,
+              earlyDepartures
+            },
+            salaryDetails
           };
-          
-          allSummaryData.push(empSummary);
-        }
-        
-        setAttendanceData(allProcessedAttendance);
-        
-        // Calculate summary data with salary details
-        const summaryWithSalary = await Promise.all(allSummaryData.map(async (emp) => {
-          const salaryDetails = await calculateSalaryDetails(
-            emp.id,
-            emp.attendanceRecords,
-            emp.salary,
-            emp.dateOfJoining,
-            emp.leaveOpeningBalance
-          );
-          return { ...emp, salaryDetails };
-        }));
+        });
         
         setSummaryData(summaryWithSalary);
         
-        // If manager, automatically select their own record for detailed view
+        // Auto-select current user for managers
         if (userRole === "Manager" && summaryWithSalary.length > 0) {
           setSelectedEmployee(summaryWithSalary[0].id);
+          setViewMode("detailed");
         }
       } catch (err) {
         console.error("Error fetching attendance data", err);
@@ -2181,14 +2186,12 @@ const Attendance = () => {
     };
     
     fetchAttendanceAndCalculate();
-  }, [dateRange, calculateSalaryDetails, userRole, userId]); // Re-fetch when date range or user role changes
+  }, [userRole, userId, calculateSalaryDetails]);
 
   // --- FILTERS AND DERIVED DATA ---
 
-  // Get unique departments for filter dropdown
-  const departments = ["All", ...new Set(summaryData.map((emp) => emp.department))];
+  const departments = ["All", ...new Set(summaryData.map((emp) => emp.department).filter(Boolean))];
 
-  // Apply filters to summary data
   const filteredSummaryData = summaryData.filter((employee) => {
     const matchesSearch =
       employee.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -2198,11 +2201,9 @@ const Attendance = () => {
     return matchesSearch && matchesDepartment;
   });
 
-  // Get selected employee data for detailed view
-  const selectedEmployeeData =
-    selectedEmployee !== null
-      ? summaryData.find((emp) => emp.id === selectedEmployee)
-      : null;
+  const selectedEmployeeData = selectedEmployee !== null
+    ? summaryData.find((emp) => emp.id === selectedEmployee)
+    : null;
 
   // --- EVENT HANDLERS ---
 
@@ -2213,25 +2214,17 @@ const Attendance = () => {
 
   const closeEmployeeDetail = () => {
     setSelectedEmployee(null);
-    setViewMode("summary");
-    setIsEditing(false); // Reset edit mode
-    setEditFormData({}); // Clear edit form data
-  };
-
-  const saveAndCloseEmployeeDetail = () => {
-    // Save data logic here (send to backend)
-    // For now, just close the detail view
-    closeEmployeeDetail();
+    setViewMode(userRole === "Admin" ? "summary" : "today");
+    setIsEditing(false);
+    setEditFormData({});
   };
 
   const toggleEdit = () => {
     if (isEditing) {
-      // Save changes
-      saveAndCloseEmployeeDetail();
+      // Save changes logic here
+      setIsEditing(false);
     } else {
-      // Enter edit mode
       setIsEditing(true);
-      // Initialize edit form data with current data
       if (selectedEmployeeData) {
         setEditFormData({
           incentives: selectedEmployeeData.salaryDetails?.incentives || 0,
@@ -2250,13 +2243,9 @@ const Attendance = () => {
     switch (status) {
       case "Present": return "success";
       case "Absent": return "danger";
-      case "Late Arrival": return "warning";
-      case "Early Departure": return "warning";
-      case "Leave": return "info";
-      case "1st Half Leave": return "info";
-      case "2nd Half Leave": return "info";
-      case "Week Off": return "secondary";
-      case "Holiday": return "primary";
+      case "Late": return "warning";
+      case "Half-Day": return "info";
+      case "Leave": return "primary";
       default: return "secondary";
     }
   };
@@ -2266,8 +2255,10 @@ const Attendance = () => {
   const goToPreviousMonth = () => {
     const startDate = new Date(dateRange.start);
     startDate.setMonth(startDate.getMonth() - 1);
-    const endDate = new Date(dateRange.end);
-    endDate.setMonth(endDate.getMonth() - 1);
+    const endDate = new Date(startDate);
+    endDate.setMonth(endDate.getMonth() + 1);
+    endDate.setDate(0);
+    
     setDateRange({
       start: startDate.toISOString().split('T')[0],
       end: endDate.toISOString().split('T')[0],
@@ -2277,8 +2268,10 @@ const Attendance = () => {
   const goToNextMonth = () => {
     const startDate = new Date(dateRange.start);
     startDate.setMonth(startDate.getMonth() + 1);
-    const endDate = new Date(dateRange.end);
+    const endDate = new Date(startDate);
     endDate.setMonth(endDate.getMonth() + 1);
+    endDate.setDate(0);
+    
     setDateRange({
       start: startDate.toISOString().split('T')[0],
       end: endDate.toISOString().split('T')[0],
@@ -2288,11 +2281,6 @@ const Attendance = () => {
   const clearFilters = () => {
     setSearchTerm("");
     setDepartmentFilter("All");
-    // Optionally reset date range to default
-    setDateRange({
-      start: "2025-04-28",
-      end: "2025-05-27",
-    });
   };
 
   // --- JSX RENDER ---
@@ -2301,11 +2289,13 @@ const Attendance = () => {
       <div className="row mb-4">
         <div className="col-12">
           <h2 className="h2 gradient-heading">Attendance Management</h2>
-          <p className="text-white">Cycle: {formatDateDDMMYY(dateRange.start)} - {formatDateDDMMYY(dateRange.end)}</p>
+          <p className="text-white">
+            Cycle: {formatDateDDMMYY(dateRange.start)} - {formatDateDDMMYY(dateRange.end)}
+          </p>
         </div>
       </div>
 
-      {/* Filters and Search - Only show for Admins */}
+      {/* Filters and Search - Only for Admins */}
       {userRole === "Admin" && (
         <div className="card mb-4 table-gradient-bg">
           <div className="card-body">
@@ -2315,69 +2305,130 @@ const Attendance = () => {
                   <div className="col-md-4 mt-4">
                     <div className="input-group">
                       <span className="input-group-text"><Search size={16} /></span>
-                      <input type="text" className="form-control" placeholder="Search by name or ID..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                      <input 
+                        type="text" 
+                        className="form-control" 
+                        placeholder="Search by name or ID..." 
+                        value={searchTerm} 
+                        onChange={(e) => setSearchTerm(e.target.value)} 
+                      />
                     </div>
                   </div>
                   <div className="col-md-4 mt-4">
-                    <select className="form-select" value={departmentFilter} onChange={(e) => setDepartmentFilter(e.target.value)}>
-                      {departments.map((dept, index) => (<option key={index} value={dept}>{dept}</option>))}
+                    <select 
+                      className="form-select" 
+                      value={departmentFilter} 
+                      onChange={(e) => setDepartmentFilter(e.target.value)}
+                    >
+                      {departments.map((dept, index) => (
+                        <option key={index} value={dept}>{dept}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="col-md-4">
                     <div className="row g-2">
-                      <div className="col-6"><label className="form-label small">Start Date</label><input type="date" className="form-control" value={dateRange.start} onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} /></div>
-                      <div className="col-6"><label className="form-label small">End Date</label><input type="date" className="form-control" value={dateRange.end} onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} /></div>
+                      <div className="col-6">
+                        <label className="form-label small">Start Date</label>
+                        <input 
+                          type="date" 
+                          className="form-control" 
+                          value={dateRange.start} 
+                          onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })} 
+                        />
+                      </div>
+                      <div className="col-6">
+                        <label className="form-label small">End Date</label>
+                        <input 
+                          type="date" 
+                          className="form-control" 
+                          value={dateRange.end} 
+                          onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })} 
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
               <div className="col-md-4 text-md-end mt-3 mt-md-0">
-                <button className="btn btn-primary"><Download size={16} className="me-2" />Export Report</button>
+                <button className="btn btn-primary">
+                  <Download size={16} className="me-2" />Export Report
+                </button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* View Mode Tabs - Modify based on role */}
+      {/* View Mode Tabs */}
       <ul className="nav nav-tabs mb-4">
         <li className="nav-item">
-          <button className={`nav-link ${viewMode === "today" ? "active" : ""}`} onClick={() => setViewMode("today")}>
+          <button 
+            className={`nav-link ${viewMode === "today" ? "active" : ""}`} 
+            onClick={() => setViewMode("today")}
+          >
             <Calendar size={16} className="me-2" />Today
           </button>
         </li>
         {userRole === "Admin" && (
           <li className="nav-item">
-            <button className={`nav-link ${viewMode === "summary" ? "active" : ""}`} onClick={() => setViewMode("summary")}>
+            <button 
+              className={`nav-link ${viewMode === "summary" ? "active" : ""}`} 
+              onClick={() => setViewMode("summary")}
+            >
               <Activity size={16} className="me-2" />Summary View
             </button>
           </li>
         )}
         <li className="nav-item">
-          <button className={`nav-link ${viewMode === "detailed" ? "active" : ""}`} onClick={() => setViewMode("detailed")}>
+          <button 
+            className={`nav-link ${viewMode === "detailed" ? "active" : ""}`} 
+            onClick={() => {
+              if (userRole === "Admin" && !selectedEmployee) {
+                setViewMode("detailed");
+              } else if (userRole === "Manager") {
+                setViewMode("detailed");
+              }
+            }}
+          >
             <FileText size={16} className="me-2" />Details View
           </button>
         </li>
       </ul>
 
-      {loading && <div className="text-center my-5"><div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div></div>}
+      {loading && (
+        <div className="text-center my-5">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      )}
 
       {/* Today View */}
       {viewMode === "today" && !loading && (
         <div className="card table-gradient-bg">
           <div className="card-body">
             <div className="d-flex justify-content-between align-items-center mb-4">
-              <h3 className="h5 mb-0">Today's Attendance</h3>
+              <h3 className="h5 mb-0">Today's Attendance ({formatDateDDMMYY(selectedDate)})</h3>
               <div className="d-flex align-items-center gap-2">
+                <input 
+                  type="date" 
+                  className="form-control" 
+                  value={selectedDate} 
+                  onChange={(e) => setSelectedDate(e.target.value)} 
+                  style={{ width: "auto" }} 
+                />
                 <button className="btn btn-sm btn-outline-secondary" onClick={goToPreviousMonth}>
                   <ChevronLeft size={16} />
                 </button>
-                <span>{new Date(dateRange.start).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</span>
                 <button className="btn btn-sm btn-outline-secondary" onClick={goToNextMonth}>
                   <ChevronRight size={16} />
                 </button>
                 {userRole === "Admin" && (
-                  <button className="btn btn-sm btn-outline-danger ms-2" onClick={clearFilters} disabled={!searchTerm && departmentFilter === "All"}>
+                  <button 
+                    className="btn btn-sm btn-outline-danger ms-2" 
+                    onClick={clearFilters} 
+                    disabled={!searchTerm && departmentFilter === "All"}
+                  >
                     Clear Filter
                   </button>
                 )}
@@ -2398,21 +2449,33 @@ const Attendance = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {attendanceData.filter(r => r.date === selectedDate).map((record) => (
-                    <tr key={record.id} className="text-center">
-                      <td>{record.employeeId}</td>
-                      <td>
-                        <div>{record.user}</div>
-                        <div className="small">{record.position}</div>
+                  {attendanceData.length > 0 ? (
+                    attendanceData.map((record) => (
+                      <tr key={record.id} className="text-center">
+                        <td>{record.employeeId}</td>
+                        <td>
+                          <div className="fw-semibold">{record.employeeName}</div>
+                          <div className="small text-muted">{record.position}</div>
+                        </td>
+                        <td>{record.department}</td>
+                        <td>{record.loginTime}</td>
+                        <td>{record.logoutTime}</td>
+                        <td>{record.breakTime}</td>
+                        <td>
+                          <span className={`badge bg-${getStatusColor(record.status)}-subtle text-${getStatusColor(record.status)}`}>
+                            {record.status}
+                          </span>
+                        </td>
+                        <td>{record.anomalies}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="8" className="text-center py-4">
+                        No attendance records found for today.
                       </td>
-                      <td>{record.department}</td>
-                      <td>{record.loginTime}</td>
-                      <td>{record.logoutTime}</td>
-                      <td>{record.breakTime}</td>
-                      <td><span className={`badge bg-${getStatusColor(record.status)}-subtle text-${getStatusColor(record.status)}`}>{record.status}</span></td>
-                      <td>{record.anomalies}</td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
@@ -2424,10 +2487,23 @@ const Attendance = () => {
       {viewMode === "summary" && userRole === "Admin" && !loading && (
         <div className="card bg-card">
           <div className="card-body p-0 table-gradient-bg">
-            <div ref={fakeScrollbarRef} style={{ overflowX: "auto", overflowY: "hidden", height: 16, position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1050 }}>
+            <div ref={fakeScrollbarRef} style={{ 
+              overflowX: "auto", 
+              overflowY: "hidden", 
+              height: 16, 
+              position: "fixed", 
+              bottom: 0, 
+              left: 0, 
+              right: 0, 
+              zIndex: 1050 
+            }}>
               <div style={{ width: "1200px", height: 1 }} />
             </div>
-            <div className="table-responsive" style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }} ref={scrollContainerRef}>
+            <div 
+              className="table-responsive" 
+              style={{ maxHeight: "400px", overflowY: "auto", overflowX: "auto" }} 
+              ref={scrollContainerRef}
+            >
               <table className="table table-hover mb-0">
                 <thead className="table-gradient-bg table" style={{ position: "sticky", top: 0, zIndex: 0, backgroundColor: "#fff" }}>
                   <tr className="text-center">
@@ -2437,51 +2513,79 @@ const Attendance = () => {
                     <th>Late Arrivals</th>
                     <th>Early Departures</th>
                     <th>Leaves</th>
+                    <th>Half Days</th>
                     <th>Net Working Hours</th>
-                    <th>Break Time</th>
-                    <th>Task Active Time</th>
-                    <th>Long Break</th>
                     <th>Payout</th>
                     <th className="text-end">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredSummaryData.map((employee) => {
-                    const initials = employee.employeeName?.split(" ").map((n) => n[0]).join("");
+                    const initials = employee.employeeName
+                      ?.split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
+                      .substring(0, 2);
+                    
+                    const summary = employee.summary;
                     const salary = employee.salaryDetails;
-                    // Calculate total net working hours
-                    const totalNetHours = employee.attendanceRecords.reduce((sum, record) => {
-                      if (record.netWorkingHours === "-") return sum;
-                      const [hours, minutes] = record.netWorkingHours.replace(/[hm]/g, "").split(" ").map(Number);
-                      return sum + (hours || 0) + (minutes || 0) / 60;
-                    }, 0);
-                    // Calculate total long breaks
-                    const longBreakCount = employee.attendanceRecords.filter(r => r.anomalies?.includes('Long Break')).length;
+                    
                     return (
                       <tr key={employee.id} className="text-center">
                         <td>
                           <div className="d-flex align-items-center">
-                            <div className="avatar avatar-sm rounded me-3">
+                            <div className="avatar avatar-sm rounded-circle me-3 bg-primary text-white d-flex align-items-center justify-content-center" style={{ width: '36px', height: '36px' }}>
                               <span className="avatar-text">{initials}</span>
                             </div>
                             <div>
                               <div className="fw-semibold">{employee.employeeName}</div>
-                              <div className="small">{employee.employeeId}</div>
+                              <div className="small text-muted">{employee.employeeId}</div>
+                              <div className="small">{employee.department}</div>
                             </div>
                           </div>
                         </td>
-                        <td><span className="badge bg-success-subtle text-success">{salary?.paidDays || 0}</span></td>
-                        <td><span className="badge bg-danger-subtle text-danger">{employee.attendanceRecords.filter(r => r.status === 'Absent').length}</span></td>
-                        <td><span className="badge bg-warning-subtle text-warning">{employee.attendanceRecords.filter(r => r.anomalies?.includes('Late Arrival')).length}</span></td>
-                        <td><span className="badge bg-warning-subtle text-warning">{employee.attendanceRecords.filter(r => r.anomalies?.includes('Early Departure')).length}</span></td>
-                        <td><span className="badge bg-info-subtle text-info">{employee.attendanceRecords.filter(r => r.status === 'Leave' || r.status === '1st Half Leave' || r.status === '2nd Half Leave').length}</span></td>
-                        <td>{totalNetHours.toFixed(1)} hrs</td>
-                        <td>30 mins avg</td>
-                        <td>-</td>
-                        <td><span className="badge bg-danger-subtle text-danger">{longBreakCount}</span></td>
-                        <td><span className="fw-bold">₹{salary?.finalPayableAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0 }) || 'N/A'}</span></td>
-                        <td className="text-center mt-2">
-                          <button onClick={() => handleEmployeeSelect(employee.id)} className="btn btn-sm btn-info">
+                        <td>
+                          <span className="badge bg-success-subtle text-success">
+                            {summary.presentDays}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="badge bg-danger-subtle text-danger">
+                            {summary.absentDays}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="badge bg-warning-subtle text-warning">
+                            {summary.lateArrivals}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="badge bg-warning-subtle text-warning">
+                            {summary.earlyDepartures}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="badge bg-info-subtle text-info">
+                            {summary.leaveDays}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="badge bg-primary-subtle text-primary">
+                            {summary.halfDayLeaves}
+                          </span>
+                        </td>
+                        <td>{salary?.totalWorkHours || 0} hrs</td>
+                        <td>
+                          <span className="fw-bold">
+                            ₹{salary?.finalPayableAmount?.toLocaleString('en-IN') || '0'}
+                          </span>
+                        </td>
+                        <td className="text-center">
+                          <button 
+                            onClick={() => handleEmployeeSelect(employee.id)} 
+                            className="btn btn-sm btn-info"
+                          >
                             <Eye size={16} className="me-1" />View
                           </button>
                         </td>
@@ -2499,37 +2603,58 @@ const Attendance = () => {
       {viewMode === "detailed" && userRole === "Admin" && !selectedEmployee && !loading && (
         <div className="card bg-card">
           <div className="card-body text-center py-5">
-            <div className="mb-4"><Users size={48} /></div>
+            <div className="mb-4">
+              <Users size={48} className="text-muted" />
+            </div>
             <h3 className="h4 mb-3">Select an Employee</h3>
-            <p>Please select an employee to view their detailed attendance records.</p>
+            <p className="text-muted">Please select an employee to view their detailed attendance records.</p>
             <div className="row mt-4">
-              {filteredSummaryData.length > 0 ? filteredSummaryData.map((employee) => {
-                const initials = employee.employeeName?.split(" ").map((n) => n[0]).join("");
-                return (
-                  <div key={employee.id} className="col-md-4 mb-3">
-                    <div className="card border h-100 bg-card">
-                      <div className="card-body">
-                        <div className="d-flex justify-content-between align-items-center">
-                          <div className="d-flex align-items-center">
-                            <div className="avatar avatar-sm rounded me-3">
-                              <span className="avatar-text">{initials}</span>
+              {filteredSummaryData.length > 0 ? (
+                filteredSummaryData.map((employee) => {
+                  const initials = employee.employeeName
+                    ?.split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                    .substring(0, 2);
+                  
+                  return (
+                    <div key={employee.id} className="col-md-4 mb-3">
+                      <div className="card border h-100 bg-card">
+                        <div className="card-body">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div className="d-flex align-items-center">
+                              <div className="avatar avatar-sm rounded-circle me-3 bg-primary text-white d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
+                                <span className="avatar-text">{initials}</span>
+                              </div>
+                              <div>
+                                <div className="fw-semibold">{employee.employeeName}</div>
+                                <div className="small text-muted">{employee.employeeId}</div>
+                              </div>
                             </div>
-                            <div>
-                              <div className="fw-semibold">{employee.employeeName}</div>
-                              <div className="small">{employee.employeeId}</div>
+                            <button 
+                              onClick={() => handleEmployeeSelect(employee.id)} 
+                              className="btn btn-sm btn-outline-primary"
+                            >
+                              Select
+                            </button>
+                          </div>
+                          <div className="row mt-3 small">
+                            <div className="col-6">
+                              <span className="fw-semibold">Department:</span> {employee.department}
+                            </div>
+                            <div className="col-6">
+                              <span className="fw-semibold">Position:</span> {employee.position}
                             </div>
                           </div>
-                          <button onClick={() => handleEmployeeSelect(employee.id)} className="btn btn-sm btn-outline-primary">Select</button>
-                        </div>
-                        <div className="row mt-3 small">
-                          <div className="col-6"><span className="fw-semibold">Department:</span> {employee.department}</div>
-                          <div className="col-6"><span className="fw-semibold">Position:</span> {employee.position}</div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                );
-              }) : <div className="text-muted">No employees found</div>}
+                  );
+                })
+              ) : (
+                <div className="text-muted">No employees found</div>
+              )}
             </div>
           </div>
         </div>
@@ -2542,27 +2667,38 @@ const Attendance = () => {
             {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
               <div className="d-flex align-items-center">
-                <div className="avatar avatar-lg rounded me-3">
+                <div className="avatar avatar-lg rounded-circle me-3 bg-primary text-white d-flex align-items-center justify-content-center" style={{ width: '60px', height: '60px' }}>
                   <span className="avatar-text fs-4">
-                    {selectedEmployeeData.employeeName?.split(" ").map((n) => n[0]).join("")}
+                    {selectedEmployeeData.employeeName
+                      ?.split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
+                      .substring(0, 2)}
                   </span>
                 </div>
                 <div>
                   <h2 className="h4 mb-0">{selectedEmployeeData.employeeName}</h2>
-                  <div className="text-white">{selectedEmployeeData.employeeId} • {selectedEmployeeData.department} • {selectedEmployeeData.position}</div>
+                  <div className="text-muted">
+                    {selectedEmployeeData.employeeId} • {selectedEmployeeData.department} • {selectedEmployeeData.position}
+                  </div>
                 </div>
               </div>
               <div className="d-flex gap-2 align-items-center">
                 {userRole === "Admin" && (
-                  <button onClick={toggleEdit} className={`btn btn-sm ${isEditing ? 'btn-success' : 'btn-outline-secondary'}`}>
+                  <button 
+                    onClick={toggleEdit} 
+                    className={`btn btn-sm ${isEditing ? 'btn-success' : 'btn-outline-secondary'}`}
+                  >
                     {isEditing ? <Save size={16} /> : <Edit size={16} />}
                   </button>
                 )}
-                {userRole === "Admin" ? (
-                  <button onClick={closeEmployeeDetail} className="btn btn-sm btn-primary rounded-circle" style={{width: '32px', height: '32px', padding: '0', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                    <X size={16} />
-                  </button>
-                ) : null}
+                <button 
+                  onClick={closeEmployeeDetail} 
+                  className="btn btn-sm btn-outline-secondary"
+                >
+                  <X size={16} className="me-1" /> Back
+                </button>
               </div>
             </div>
 
@@ -2573,23 +2709,31 @@ const Attendance = () => {
                 <div className="card-body">
                   <div className="row">
                     <div className="col-md-3 mb-3">
-                      <div className="small text-white">Monthly Salary</div>
-                      <div className="h5">₹{selectedEmployeeData.salaryDetails?.salary?.toLocaleString('en-IN') || 0}</div>
+                      <div className="small text-muted">Monthly Salary</div>
+                      <div className="h5">
+                        ₹{selectedEmployeeData.salaryDetails?.salary?.toLocaleString('en-IN') || '0'}
+                      </div>
                     </div>
                     <div className="col-md-3 mb-3">
-                      <div className="small text-white">Paid Days</div>
-                      <div className="h5">{selectedEmployeeData.salaryDetails?.paidDays || 0} / {selectedEmployeeData.salaryDetails?.totalDays || 0}</div>
+                      <div className="small text-muted">Paid Days</div>
+                      <div className="h5">
+                        {selectedEmployeeData.salaryDetails?.paidDays || 0} / {selectedEmployeeData.salaryDetails?.totalDays || 0}
+                      </div>
                     </div>
                     <div className="col-md-3 mb-3">
-                      <div className="small text-white">Leave Balance</div>
-                      <div className="h5">{selectedEmployeeData.salaryDetails?.leaveBalance || 0} days</div>
+                      <div className="small text-muted">Leave Balance</div>
+                      <div className="h5">
+                        {selectedEmployeeData.salaryDetails?.leaveBalance || 0} days
+                      </div>
                     </div>
                     <div className="col-md-3 mb-3">
-                      <div className="small text-white">LOP Days</div>
-                      <div className="h5">{selectedEmployeeData.salaryDetails?.lopDays || 0} days</div>
+                      <div className="small text-muted">LOP Days</div>
+                      <div className="h5">
+                        {selectedEmployeeData.salaryDetails?.lopDays || 0} days
+                      </div>
                     </div>
                     <div className="col-md-3 mb-3">
-                      <div className="small text-white">Incentives</div>
+                      <div className="small text-muted">Incentives</div>
                       {userRole === "Admin" && isEditing ? (
                         <input
                           type="number"
@@ -2599,11 +2743,13 @@ const Attendance = () => {
                           className="form-control bg-dark text-white border-light"
                         />
                       ) : (
-                        <div className="h5 text-success">+₹{selectedEmployeeData.salaryDetails?.incentives?.toLocaleString('en-IN') || 0}</div>
+                        <div className="h5 text-success">
+                          +₹{selectedEmployeeData.salaryDetails?.incentives?.toLocaleString('en-IN') || '0'}
+                        </div>
                       )}
                     </div>
                     <div className="col-md-3 mb-3">
-                      <div className="small text-white">Deductions</div>
+                      <div className="small text-muted">Deductions</div>
                       {userRole === "Admin" && isEditing ? (
                         <input
                           type="number"
@@ -2613,16 +2759,22 @@ const Attendance = () => {
                           className="form-control bg-dark text-white border-light"
                         />
                       ) : (
-                        <div className="h5 text-danger">-₹{selectedEmployeeData.salaryDetails?.deductions?.toLocaleString('en-IN') || 0}</div>
+                        <div className="h5 text-danger">
+                          -₹{selectedEmployeeData.salaryDetails?.deductions?.toLocaleString('en-IN') || '0'}
+                        </div>
                       )}
                     </div>
                     <div className="col-md-3 mb-3">
-                      <div className="small text-white">Experience</div>
-                      <div className="h5">{selectedEmployeeData.salaryDetails?.experienceYears?.toFixed(1) || 0} Years</div>
+                      <div className="small text-muted">Experience</div>
+                      <div className="h5">
+                        {selectedEmployeeData.salaryDetails?.experienceYears || '0'} Years
+                      </div>
                     </div>
                     <div className="col-md-3 mb-3">
-                      <div className="small text-white">Final Payout</div>
-                      <div className="h5">₹{selectedEmployeeData.salaryDetails?.finalPayableAmount?.toLocaleString('en-IN', { maximumFractionDigits: 0 }) || 0}</div>
+                      <div className="small text-muted">Final Payout</div>
+                      <div className="h5">
+                        ₹{selectedEmployeeData.salaryDetails?.finalPayableAmount?.toLocaleString('en-IN') || '0'}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -2632,15 +2784,40 @@ const Attendance = () => {
             {/* Attendance Summary */}
             <div className="row mb-4">
               {[
-                { label: "Present Days", value: selectedEmployeeData.attendanceRecords.filter(r => r.status === 'Present').length, color: "success" },
-                { label: "Absent Days", value: selectedEmployeeData.attendanceRecords.filter(r => r.status === 'Absent').length, color: "danger" },
-                { label: "Late Arrivals", value: selectedEmployeeData.attendanceRecords.filter(r => r.anomalies?.includes('Late Arrival')).length, color: "warning" },
-                { label: "Early Departures", value: selectedEmployeeData.attendanceRecords.filter(r => r.anomalies?.includes('Early Departure')).length, color: "warning" },
-                { label: "Leaves Taken", value: selectedEmployeeData.attendanceRecords.filter(r => r.status === 'Leave' || r.status === '1st Half Leave' || r.status === '2nd Half Leave').length, color: "info" },
+                { 
+                  label: "Present Days", 
+                  value: selectedEmployeeData.summary?.presentDays || 0, 
+                  color: "success" 
+                },
+                { 
+                  label: "Absent Days", 
+                  value: selectedEmployeeData.summary?.absentDays || 0, 
+                  color: "danger" 
+                },
+                { 
+                  label: "Late Arrivals", 
+                  value: selectedEmployeeData.summary?.lateArrivals || 0, 
+                  color: "warning" 
+                },
+                { 
+                  label: "Early Departures", 
+                  value: selectedEmployeeData.summary?.earlyDepartures || 0, 
+                  color: "warning" 
+                },
+                { 
+                  label: "Leaves Taken", 
+                  value: selectedEmployeeData.summary?.leaveDays || 0, 
+                  color: "info" 
+                },
+                { 
+                  label: "Half Days", 
+                  value: selectedEmployeeData.summary?.halfDayLeaves || 0, 
+                  color: "primary" 
+                },
               ].map((item, idx) => (
-                <div className="col-md" key={idx}>
+                <div className="col-md-4 col-lg-2" key={idx}>
                   <div className={`card bg-card border-${item.color}-subtle mb-3 mb-md-0`}>
-                    <div className="card-body">
+                    <div className="card-body text-center">
                       <div className={`small text-${item.color}`}>{item.label}</div>
                       <div className={`h3 text-${item.color}`}>{item.value}</div>
                     </div>
@@ -2665,29 +2842,28 @@ const Attendance = () => {
                           <th>Check Out</th>
                           <th>Work Hours</th>
                           <th>Break Time</th>
-                          <th>Task Active Time</th>
                           <th>Remarks</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {selectedEmployeeData.attendanceRecords.map((record, index) => {
-                          const dateObj = new Date(record.date);
+                        {selectedEmployeeData.attendanceRecords?.map((record, index) => {
+                          const dateObj = new Date(record.attendanceDate);
                           const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+                          
                           return (
                             <tr key={index} className="text-center">
-                              <td>{formatDateDDMMYY(record.date)}</td>
+                              <td>{formatDateDDMMYY(record.attendanceDate)}</td>
                               <td>{dayName}</td>
                               <td>
                                 <span className={`badge bg-${getStatusColor(record.status)}-subtle text-${getStatusColor(record.status)}`}>
                                   {record.status}
                                 </span>
                               </td>
-                              <td>{record.loginTime}</td>
-                              <td>{record.logoutTime}</td>
-                              <td>{record.netWorkingHours}</td>
-                              <td>{record.breakTime}</td>
-                              <td>{record.taskActiveTime}</td>
-                              <td>{record.anomalies}</td>
+                              <td>{record.inTime || "-"}</td>
+                              <td>{record.outTime || "-"}</td>
+                              <td>{record.netWorkingHours || "-"}</td>
+                              <td>{record.breakTime || "-"}</td>
+                              <td>{record.remarks || "-"}</td>
                             </tr>
                           );
                         })}

@@ -7,11 +7,8 @@ import axios from "axios";
 import CreateNewProject from "../Project/CreateNewProject";
 import EditModal from "./EditModal";
 import BASE_URL from "../../../config";
-import useSyncScroll from "../Hooks/useSyncScroll";
 import { FiChevronLeft as ChevronLeft, FiChevronRight as ChevronRight } from "react-icons/fi";
 import ReactDOM from "react-dom";
-
-
 
 const ActiveProject = () => {
   const [projects, setProjects] = useState([]);
@@ -29,11 +26,6 @@ const ActiveProject = () => {
   // File handlers state - tracks assigned handlers for each file
   const [fileHandlers, setFileHandlers] = useState({});
 
-  const {
-    scrollContainerRef: scrollContainerRef1,
-    fakeScrollbarRef: fakeScrollbarRef1,
-  } = useSyncScroll(activeTab === "created");
-
   // this state variables is for storing the files details and storing them in database using api 
   const [allFiles, setAllFiles] = useState([]);
   const [fileStatuses, setFileStatuses] = useState({});
@@ -44,7 +36,10 @@ const ActiveProject = () => {
   const fakeScrollbarRef = useRef(null);
   const isSyncingScroll = useRef(false);
   const datePickerInputRef = useRef(null);
-  const [dropdownPos, setDropdownPos] = useState(null); // Add this ref at the top with other refs
+  const [dropdownPos, setDropdownPos] = useState(null);
+  const [tableScrollWidth, setTableScrollWidth] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [showFakeScrollbar, setShowFakeScrollbar] = useState(false);
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -225,10 +220,9 @@ const ActiveProject = () => {
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   // Function to format the selected date and time for display
-  const formatDateTime = () => {
-    if (!readyForQcDueInput) return "";
-
-    const date = new Date(readyForQcDueInput);
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
     return date.toLocaleString();
   };
 
@@ -449,7 +443,7 @@ const ActiveProject = () => {
     // Apply dropdown filters
     if (clientFilter) {
       result = result.filter((project) =>
-        project.clientId && project.clientId.toString() === clientFilter
+        project.clientName && project.clientName.toString() === clientFilter
       );
     }
     if (taskFilter) {
@@ -474,48 +468,123 @@ const ActiveProject = () => {
     setFilteredProjects(result);
   }, [projects, activeTab, activeButton, clientFilter, taskFilter, languageFilter, selectedApplications, allFiles, fileHandlers]);
 
+  // Calculate scrollbar dimensions
+  useEffect(() => {
+    const updateScrollbarDimensions = () => {
+      const mainTableContainer = mainTableContainerRef.current;
+      const filesTableContainer = filesTableContainerRef.current;
+      
+      if (!mainTableContainer) return;
+
+      // Use the appropriate table container based on expanded row
+      const activeContainer = expandedRow && filesTableContainer ? filesTableContainer : mainTableContainer;
+      
+      if (activeContainer) {
+        // Find the table inside the container
+        const table = activeContainer.querySelector('table');
+        if (table) {
+          const scrollWidth = table.scrollWidth;
+          const clientWidth = activeContainer.clientWidth;
+          
+          setTableScrollWidth(scrollWidth);
+          setContainerWidth(clientWidth);
+          setShowFakeScrollbar(scrollWidth > clientWidth);
+          
+          // Update fake scrollbar inner width
+          const fakeScrollbar = fakeScrollbarRef.current;
+          if (fakeScrollbar) {
+            const innerDiv = fakeScrollbar.querySelector('div');
+            if (innerDiv) {
+              innerDiv.style.width = `${scrollWidth}px`;
+            }
+          }
+        }
+      }
+    };
+
+    // Initial update
+    updateScrollbarDimensions();
+    
+    // Update on window resize and when expanded row changes
+    window.addEventListener('resize', updateScrollbarDimensions);
+    
+    // Use MutationObserver to detect table changes
+    const observer = new MutationObserver(updateScrollbarDimensions);
+    
+    if (mainTableContainerRef.current) {
+      observer.observe(mainTableContainerRef.current, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+      });
+    }
+    
+    if (filesTableContainerRef.current) {
+      observer.observe(filesTableContainerRef.current, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+      });
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateScrollbarDimensions);
+      observer.disconnect();
+    };
+  }, [expandedRow, filteredProjects]);
+
   // Setup scroll synchronization
   useEffect(() => {
     const mainTableContainer = mainTableContainerRef.current;
     const filesTableContainer = filesTableContainerRef.current;
     const fakeScrollbar = fakeScrollbarRef.current;
 
-    if (!fakeScrollbar) return;
+    if (!fakeScrollbar || !showFakeScrollbar) return;
 
     // Function to handle table scroll
     const handleTableScroll = (e) => {
       if (isSyncingScroll.current) return;
+      
       isSyncingScroll.current = true;
       const activeContainer = expandedRow && filesTableContainer ? filesTableContainer : mainTableContainer;
+      
       if (activeContainer && fakeScrollbar) {
         fakeScrollbar.scrollLeft = activeContainer.scrollLeft;
       }
+      
       isSyncingScroll.current = false;
     };
 
     // Function to handle fake scrollbar scroll
     const handleFakeScroll = (e) => {
       if (isSyncingScroll.current) return;
+      
       isSyncingScroll.current = true;
       const activeContainer = expandedRow && filesTableContainer ? filesTableContainer : mainTableContainer;
+      
       if (activeContainer && fakeScrollbar) {
         activeContainer.scrollLeft = fakeScrollbar.scrollLeft;
       }
+      
       isSyncingScroll.current = false;
     };
 
-    // Add event listeners to both tables
+    // Add event listeners
     if (mainTableContainer) {
       mainTableContainer.addEventListener('scroll', handleTableScroll);
     }
+    
     if (filesTableContainer) {
       filesTableContainer.addEventListener('scroll', handleTableScroll);
     }
+    
     fakeScrollbar.addEventListener('scroll', handleFakeScroll);
 
     // Set initial scroll position
     const activeContainer = expandedRow && filesTableContainer ? filesTableContainer : mainTableContainer;
-    if (activeContainer) {
+    if (activeContainer && fakeScrollbar) {
       fakeScrollbar.scrollLeft = activeContainer.scrollLeft;
     }
 
@@ -523,58 +592,16 @@ const ActiveProject = () => {
       if (mainTableContainer) {
         mainTableContainer.removeEventListener('scroll', handleTableScroll);
       }
+      
       if (filesTableContainer) {
         filesTableContainer.removeEventListener('scroll', handleTableScroll);
       }
-      fakeScrollbar.removeEventListener('scroll', handleFakeScroll);
-    };
-  }, [expandedRow]);
-
-  // Update fake scrollbar width when tables change
-  useEffect(() => {
-    const updateFakeScrollbarWidth = () => {
-      const fakeScrollbar = fakeScrollbarRef.current;
-      const mainTableContainer = mainTableContainerRef.current;
-      const filesTableContainer = filesTableContainerRef.current;
-
+      
       if (fakeScrollbar) {
-        // Find the actual table element
-        const mainTable = mainTableContainer?.querySelector("table");
-        const filesTable = filesTableContainer?.querySelector("table");
-        const activeTable = expandedRow && filesTable ? filesTable : mainTable;
-
-        if (activeTable) {
-          const scrollWidth = activeTable.scrollWidth;
-          const innerDiv = fakeScrollbar.querySelector('div');
-          if (innerDiv) {
-            innerDiv.style.width = `${scrollWidth}px`;
-          }
-        }
+        fakeScrollbar.removeEventListener('scroll', handleFakeScroll);
       }
     };
-
-    // Initial update
-    updateFakeScrollbarWidth();
-
-    // Update on window resize
-    window.addEventListener('resize', updateFakeScrollbarWidth);
-
-    // Update when filtered projects change
-    const observer = new MutationObserver(updateFakeScrollbarWidth);
-    if (mainTableContainerRef.current) {
-      observer.observe(mainTableContainerRef.current, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        characterData: true
-      });
-    }
-
-    return () => {
-      window.removeEventListener('resize', updateFakeScrollbarWidth);
-      observer.disconnect();
-    };
-  }, [expandedRow, filteredProjects]);
+  }, [expandedRow, showFakeScrollbar]);
 
   const handleDeleteProject = async (id) => {
     const project = projects.find((p) => p.id === id);
@@ -1000,8 +1027,8 @@ const ActiveProject = () => {
   const getClientOptions = () => {
     const uniqueClients = new Set();
     projects.forEach(project => {
-      if (project.clientId) {
-        uniqueClients.add(project.clientId.toString());
+      if (project.clientName) {
+        uniqueClients.add(project.clientName.toString());
       }
     });
     return Array.from(uniqueClients).map(client => ({
@@ -1048,8 +1075,6 @@ const ActiveProject = () => {
     });
   };
 
- 
-
   // Function to format cost
   const formatCost = (cost, currency) => {
     if (!cost && cost !== 0) return '';
@@ -1058,796 +1083,802 @@ const ActiveProject = () => {
   };
 
   return (
-    <div className="container-fluid py-4">
-      {/* Edit Project Modal */}
-      {showEditModal && editedProject && (
-        <div
-          className="modal fade show custom-modal-dark"
-          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
-        >
-          <div className="modal-dialog modal-lg">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Edit Project</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowEditModal(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                <EditModal project={editedProject} setProject={setEditedProject} />
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowEditModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={handleSaveProjectEdit}
-                >
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Create Project Modal */}
-      {showCreateModal && (
-        <div
-          className="modal fade show d-block custom-modal-dark"
-          tabIndex="-1"
-          aria-modal="true"
-          role="dialog"
-        >
-          <div className="modal-dialog modal-lg">
-            <div className="modal-content">
-              <div className="modal-header d-flex justify-content-between">
-                <div>
-                  <h5 className="modal-title">Create New Project</h5>
-                </div>
-                <div>
+    <>
+      <div className="container-fluid py-4">
+        {/* Edit Project Modal */}
+        {showEditModal && editedProject && (
+          <div
+            className="modal fade show custom-modal-dark"
+            style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+          >
+            <div className="modal-dialog modal-lg">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Edit Project</h5>
                   <button
                     type="button"
                     className="btn-close"
-                    onClick={() => setShowCreateModal(false)}
+                    onClick={() => setShowEditModal(false)}
                   ></button>
                 </div>
+                <div className="modal-body">
+                  <EditModal project={editedProject} setProject={setEditedProject} />
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setShowEditModal(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSaveProjectEdit}
+                  >
+                    Save Changes
+                  </button>
+                </div>
               </div>
-              <div className="modal-body">
-                <CreateNewProject
-                  onClose={() => setShowCreateModal(false)}
-                  onProjectCreated={(newProject) => {
-                    // Add progress percentage to new project
-                    const projectWithProgress = {
-                      ...newProject,
-                      progress: getProgressPercentage(newProject.status)
-                    };
-                    setProjects([...projects, projectWithProgress]);
-                    setShowCreateModal(false);
-                  }}
+            </div>
+          </div>
+        )}
+
+        {/* Create Project Modal */}
+        {showCreateModal && (
+          <div
+            className="modal fade show d-block custom-modal-dark"
+            tabIndex="-1"
+            aria-modal="true"
+            role="dialog"
+          >
+            <div className="modal-dialog modal-lg">
+              <div className="modal-content">
+                <div className="modal-header d-flex justify-content-between">
+                  <div>
+                    <h5 className="modal-title">Create New Project</h5>
+                  </div>
+                  <div>
+                    <button
+                      type="button"
+                      className="btn-close"
+                      onClick={() => setShowCreateModal(false)}
+                    ></button>
+                  </div>
+                </div>
+                <div className="modal-body">
+                  <CreateNewProject
+                    onClose={() => setShowCreateModal(false)}
+                    onProjectCreated={(newProject) => {
+                      // Add progress percentage to new project
+                      const projectWithProgress = {
+                        ...newProject,
+                        progress: getProgressPercentage(newProject.status)
+                      };
+                      setProjects([...projects, projectWithProgress]);
+                      setShowCreateModal(false);
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Header with action buttons */}
+        {CreateProjectPermission === 1 && <div className="row mb-4">
+          <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+            <h2 className="gradient-heading">Active Projects</h2>
+            <div className="d-flex flex-column flex-sm-row gap-2">
+              <Button
+                className="gradient-button"
+                onClick={handleCreateNewProject}
+              >
+                <i className="fas fa-plus me-2"></i> Create New Project
+              </Button>
+            </div>
+          </div>
+        </div>}
+
+        {/* Filters */}
+        <div className="row mb-4 gy-3">
+          {/* Buttons Section */}
+          <div className="col-12 col-lg-6">
+            <div className="d-flex flex-wrap gap-2 justify-content-start">
+              {["all", "nearDue", "overdue", "Adobe", "MSOffice"].map((btn) => (
+                <button
+                  key={btn}
+                  className={`gradient-button ${activeButton === btn ? "active-filter" : ""
+                    }`}
+                  onClick={() => handleCardFilter(btn)}
+                >
+                  {btn === "all"
+                    ? "All"
+                    : btn === "nearDue"
+                      ? "Near Due"
+                      : btn === "overdue"
+                        ? "Over Due"
+                        : btn === "Adobe"
+                          ? "Adobe"
+                          : "MS Office"}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Filter Dropdowns Section */}
+          <div className="col-12 col-lg-6">
+            <div className="row g-2">
+              {/* Client Filter */}
+              <div className="col-12 col-sm-6 col-md-3">
+                <select
+                  className="form-select"
+                  value={clientFilter}
+                  onChange={(e) => setClientFilter(e.target.value)}
+                >
+                  <option value="">All Clients</option>
+                  {getClientOptions().map((client, index) => (
+                    <option key={index} value={client.value}>
+                      {client.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Task Filter */}
+              <div className="col-12 col-sm-6 col-md-3">
+                <select
+                  className="form-select"
+                  value={taskFilter}
+                  onChange={(e) => setTaskFilter(e.target.value)}
+                >
+                  <option value="">All Tasks</option>
+                  {getTaskOptions().map((task, index) => (
+                    <option key={index} value={task.value}>
+                      {task.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Status/Language Filter */}
+              <div className="col-12 col-sm-6 col-md-3">
+                <select
+                  className="form-select"
+                  value={languageFilter}
+                  onChange={(e) => setLanguageFilter(e.target.value)}
+                >
+                  {statuses.map((status, index) => (
+                    <option key={index} value={status.key}>
+                      {status.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Application (Select component) */}
+              <div className="col-12 col-sm-6 col-md-3">
+                <Select
+                  options={applicationsOptions}
+                  isMulti={false}
+                  classNamePrefix="select"
+                  value={selectedApplications}
+                  placeholder="Select App"
+                  onChange={(selected) => setSelectedApplications(selected)}
                 />
               </div>
             </div>
           </div>
-
         </div>
-      )}
 
-      {/* Header with action buttons */}
-      {CreateProjectPermission === 1 && <div className="row mb-4">
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-          <h2 className="gradient-heading">Active Projects</h2>
-          <div className="d-flex flex-column flex-sm-row gap-2">
-            <Button
-              className="gradient-button"
-              onClick={handleCreateNewProject}
+        {/* Tabs */}
+        <ul className="nav nav-tabs mb-4">
+          <li className="nav-item">
+            <button
+              className={`nav-link ${activeTab === "all" ? "active" : ""}`}
+              onClick={() => setActiveTab("all")}
             >
-              <i className="fas fa-plus me-2"></i> Create New Project
-            </Button>
-          </div>
-        </div>
-      </div>}
-
-      {/* Filters */}
-      <div className="row mb-4 gy-3">
-        {/* Buttons Section */}
-        <div className="col-12 col-lg-6">
-          <div className="d-flex flex-wrap gap-2 justify-content-start">
-            {["all", "nearDue", "overdue", "Adobe", "MSOffice"].map((btn) => (
-              <button
-                key={btn}
-                className={`gradient-button ${activeButton === btn ? "active-filter" : ""
-                  }`}
-                onClick={() => handleCardFilter(btn)}
-              >
-                {btn === "all"
-                  ? "All"
-                  : btn === "nearDue"
-                    ? "Near Due"
-                    : btn === "overdue"
-                      ? "Over Due"
-                      : btn === "Adobe"
-                        ? "Adobe"
-                        : "MS Office"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Filter Dropdowns Section */}
-        <div className="col-12 col-lg-6">
-          <div className="row g-2">
-            {/* Client Filter */}
-            <div className="col-12 col-sm-6 col-md-3">
-              <select
-                className="form-select"
-                value={clientFilter}
-                onChange={(e) => setClientFilter(e.target.value)}
-              >
-                <option value="">All Clients</option>
-                {getClientOptions().map((client, index) => (
-                  <option key={index} value={client.value}>
-                    {client.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Task Filter */}
-            <div className="col-12 col-sm-6 col-md-3">
-              <select
-                className="form-select"
-                value={taskFilter}
-                onChange={(e) => setTaskFilter(e.target.value)}
-              >
-                <option value="">All Tasks</option>
-                {getTaskOptions().map((task, index) => (
-                  <option key={index} value={task.value}>
-                    {task.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Status/Language Filter */}
-            <div className="col-12 col-sm-6 col-md-3">
-              <select
-                className="form-select"
-                value={languageFilter}
-                onChange={(e) => setLanguageFilter(e.target.value)}
-              >
-                {statuses.map((status, index) => (
-                  <option key={index} value={status.key}>
-                    {status.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Application (Select component) */}
-            <div className="col-12 col-sm-6 col-md-3">
-              <Select
-                options={applicationsOptions}
-                isMulti={false}
-                classNamePrefix="select"
-                value={selectedApplications}
-                placeholder="Select App"
-                onChange={(selected) => setSelectedApplications(selected)}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabs */}
-      <ul className="nav nav-tabs mb-4">
-        <li className="nav-item">
-          <button
-            className={`nav-link ${activeTab === "all" ? "active" : ""}`}
-            onClick={() => setActiveTab("all")}
-          >
-            All Active Projects
-          </button>
-        </li>
-        <li className="nav-item">
-          <button
-            className={`nav-link ${activeTab === "unhandled" ? "active" : ""}`}
-            onClick={() => setActiveTab("unhandled")}
-          >
-            Unhandled Projects ({projects.filter(
-              (project) => {
-                const projectFiles = allFiles.filter(file => file.projectId === project.id);
-                return projectFiles.length > 0 && projectFiles.some(file => !fileHandlers[file.id]);
-              }
-            ).length})
-          </button>
-        </li>
-      </ul>
-
-      <div className="card">
-        {/* Projects Table */}
-        <div
-          ref={fakeScrollbarRef1}
-          style={{
-            overflowX: "auto",
-            overflowY: "hidden",
-            height: 16,
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: 1050,
-          }}
-        >
-          <div style={{ width: "2500px", height: 1 }} />
-        </div>
-      <div className="table-responsive"
-          ref={scrollContainerRef1}
-          style={{
-            maxHeight: "500px",
-            overflowX: "auto",
-            scrollbarWidth: "none", // Firefox
-            msOverflowStyle: "none", // IE/Edge
-          }}>
-          <table
-            className="table-gradient-bg align-middle mt-0 table table-bordered table-hover"
-            style={{ minWidth: "900px" }} // <-- Increase this value as per total columns width
-          >
-            <thead
-              className="table-gradient-bg table"
-              style={{
-                position: "sticky",
-                top: "0",
-                zIndex: "10",
-                backgroundColor: "#fff",
-              }}
+              All Active Projects
+            </button>
+          </li>
+          <li className="nav-item">
+            <button
+              className={`nav-link ${activeTab === "unhandled" ? "active" : ""}`}
+              onClick={() => setActiveTab("unhandled")}
             >
-              <tr className="text-center">
-                <th style={{ width: "4%" }}>S. No.</th>
-                <th style={{ width: "8%" }}>Project Title</th>
-                <th style={{ width: "5%" }}>Client</th>
-                <th style={{ width: "3%" }}>Country</th>
-                <th style={{ width: "8%" }}>Project Manager</th>
-                <th style={{ width: "6%" }}>Task</th>
-                <th style={{ width: "6%" }}>Languages</th>
-                <th style={{ width: "6%" }}>Application</th>
-                <th style={{ width: "4%" }}>Total Pages</th>
-                <th style={{ width: "6%" }}>Received Date</th>
-                <th style={{ width: "5%" }}>Estimated Hrs</th>
-                {/* <th style={{ width: "5%" }}>Actual Hrs</th> */}
-                {/* <th style={{ width: "5%" }}>Efficiency</th> */}
-                <th style={{ width: "7%" }}>Deadline</th>
-                <th style={{ width: "7%" }}>Ready For QC Deadline</th>
-                <th style={{ width: "3%" }}>QC Hrs</th>
-                <th style={{ width: "7%" }}>QC Due Date</th>
-                <th style={{ width: "5%" }}>Status</th>
-                <th style={{ width: "5%" }}>Progress</th>
-                <th style={{ width: "5%" }}>Cost</th>
-                {/* <th style={{ width: "6%" }}>Cost in INR</th> */}
-                <th style={{ width: "5%" }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProjects.length > 0 ? (
-                filteredProjects.map((project, index) => (
-                  <React.Fragment key={project.id}>
-                    <tr
-                      className={
-                        expandedRow === project.id
-                          ? "table-active text-center"
-                          : ""
-                      }
-                    >
-                      <td style={{ width: "4%" }}>{index + 1}</td>
-                      <td style={{ width: "8%" }} title={project.projectTitle}>{truncateText(project.projectTitle, 80)}</td>
-                      <td style={{ width: "5%" }} title={project.clientName}>{truncateText(project.clientName, 12)}</td>
-                      <td style={{ width: "3%" }} title={project.country}>{truncateText(project.country, 3)}</td>
-                      <td style={{ width: "8%" }} title={project.full_name}>{truncateText(project.full_name, 16)}</td>
-                      <td style={{ width: "6%" }} title={project.task_name}>{truncateText(project.task_name, 16)}</td>
-                      <td style={{ width: "6%" }} title={project.language_name}>{truncateText(project.language_name, 16)}</td>
-                      <td style={{ width: "6%" }} title={project.application_name}>{truncateText(project.application_name, 16)}</td>
-                      <td style={{ width: "4%" }}>{project.totalProjectPages ? Math.round(project.totalProjectPages) : 0}</td>
-                      <td style={{ width: "6%" }}>{formatDate(project.receiveDate)}</td>
-                      <td style={{ width: "5%" }}>{project.estimatedHours}</td>
-                      {/* <td style={{ width: "5%" }}>{project.actualHours}</td> */}
-                      {/* <td style={{ width: "5%" }}>{project.efficiency}</td> */}
-                      <td style={{ width: "7%" }}>{formatDateTime(project.deadline)}</td>
-                      <td style={{ width: "7%" }}>{formatDateTime(project.readyQCDeadline)}</td>
-                      <td style={{ width: "3%" }}>{project.qcHrs}</td>
-                      {/* <td style={{ width: "7%" }}>{formatDateTime(project.qcDueDate)}</td> */}
-                      <td style={{ width: "5%" }}>{truncateText(project.status, 15)}</td>
-                      <td style={{ width: "5%" }}>
-                        <div
-                          className="progress cursor-pointer"
-                          style={{ height: "24px" }}
-                          onClick={() => handleViewProject(project)}
-                        >
+              Unhandled Projects ({projects.filter(
+                (project) => {
+                  const projectFiles = allFiles.filter(file => file.projectId === project.id);
+                  return projectFiles.length > 0 && projectFiles.some(file => !fileHandlers[file.id]);
+                }
+              ).length})
+            </button>
+          </li>
+        </ul>
+
+        <div className="card">
+          {/* Projects Table */}
+          <div className="table-responsive"
+            ref={mainTableContainerRef}
+            style={{
+              maxHeight: "500px",
+              overflowX: "auto",
+              overflowY: "auto",
+              scrollbarWidth: "none", // Firefox
+              msOverflowStyle: "none", // IE/Edge
+              position: 'relative'
+            }}>
+            <table
+              className="table-gradient-bg align-middle mt-0 table table-bordered table-hover"
+              style={{ minWidth: "1800px" }} // Adjust based on your total columns
+            >
+              <thead
+                className="table-gradient-bg table"
+                style={{
+                  position: "sticky",
+                  top: "0",
+                  zIndex: "10",
+                  backgroundColor: "#fff",
+                }}
+              >
+                <tr className="text-center">
+                  <th style={{ width: "4%" }}>S. No.</th>
+                  <th style={{ width: "8%" }}>Project Title</th>
+                  <th style={{ width: "5%" }}>Client</th>
+                  <th style={{ width: "3%" }}>Country</th>
+                  <th style={{ width: "8%" }}>Project Manager</th>
+                  <th style={{ width: "6%" }}>Task</th>
+                  <th style={{ width: "6%" }}>Languages</th>
+                  <th style={{ width: "6%" }}>Application</th>
+                  <th style={{ width: "4%" }}>Total Pages</th>
+                  <th style={{ width: "6%" }}>Received Date</th>
+                  <th style={{ width: "5%" }}>Estimated Hrs</th>
+                  {/* <th style={{ width: "5%" }}>Actual Hrs</th> */}
+                  {/* <th style={{ width: "5%" }}>Efficiency</th> */}
+                  <th style={{ width: "7%" }}>Deadline</th>
+                  <th style={{ width: "7%" }}>Ready For QC Deadline</th>
+                  <th style={{ width: "3%" }}>QC Hrs</th>
+                  <th style={{ width: "7%" }}>QC Due Date</th>
+                  <th style={{ width: "5%" }}>Status</th>
+                  <th style={{ width: "5%" }}>Progress</th>
+                  <th style={{ width: "5%" }}>Cost</th>
+                  {/* <th style={{ width: "6%" }}>Cost in INR</th> */}
+                  <th style={{ width: "5%" }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredProjects.length > 0 ? (
+                  filteredProjects.map((project, index) => (
+                    <React.Fragment key={project.id}>
+                      <tr
+                        className={
+                          expandedRow === project.id
+                            ? "table-active text-center"
+                            : ""
+                        }
+                      >
+                        <td style={{ width: "4%" }}>{index + 1}</td>
+                        <td style={{ width: "8%" }} title={project.projectTitle}>{truncateText(project.projectTitle, 80)}</td>
+                        <td style={{ width: "5%" }} title={project.clientName}>{truncateText(project.clientName, 12)}</td>
+                        <td style={{ width: "3%" }} title={project.country}>{truncateText(project.country, 3)}</td>
+                        <td style={{ width: "8%" }} title={project.full_name}>{truncateText(project.full_name, 16)}</td>
+                        <td style={{ width: "6%" }} title={project.task_name}>{truncateText(project.task_name, 16)}</td>
+                        <td style={{ width: "6%" }} title={project.language_name}>{truncateText(project.language_name, 16)}</td>
+                        <td style={{ width: "6%" }} title={project.application_name}>{truncateText(project.application_name, 16)}</td>
+                        <td style={{ width: "4%" }}>{project.totalProjectPages ? Math.round(project.totalProjectPages) : 0}</td>
+                        <td style={{ width: "6%" }}>{formatDate(project.receiveDate)}</td>
+                        <td style={{ width: "5%" }}>{project.estimatedHours}</td>
+                        {/* <td style={{ width: "5%" }}>{project.actualHours}</td> */}
+                        {/* <td style={{ width: "5%" }}>{project.efficiency}</td> */}
+                        <td style={{ width: "7%" }}>{formatDateTime(project.deadline)}</td>
+                        <td style={{ width: "7%" }}>{formatDateTime(project.readyQCDeadline)}</td>
+                        <td style={{ width: "3%" }}>{project.qcHrs}</td>
+                        <td style={{ width: "7%" }}>{formatDateTime(project.qcDueDate)}</td>
+                        <td style={{ width: "5%" }}>{truncateText(project.status, 15)}</td>
+                        <td style={{ width: "5%" }}>
                           <div
-                            className={`progress-bar 
-                            ${project.progress < 30
-                                ? "bg-danger"
-                                : project.progress < 70
-                                  ? "bg-warning"
-                                  : "bg-success"
-                              }`}
-                            role="progressbar"
-                            style={{ width: `${project.progress}%` }}
-                            aria-valuenow={project.progress}
-                            aria-valuemin={0}
-                            aria-valuemax={100}
-                          >
-                            {project.progress}%
-                          </div>
-                        </div>
-                      </td>
-                      <td style={{ width: "5%" }}>{formatCost(project.totalCost, project.currency)}</td>
-                      <td style={{ width: "6%" }}>{formatCost(project.inrCost, "INR")}</td>
-                      <td style={{ width: "5%" }}>
-                        <div className="d-flex gap-2">
-                          <button
-                            className="btn btn-sm btn-primary"
+                            className="progress cursor-pointer"
+                            style={{ height: "24px" }}
                             onClick={() => handleViewProject(project)}
                           >
-                            <i
-                              className={`fas ${expandedRow === project.id
-                                ? "fa-chevron-up"
-                                : "fa-eye"
+                            <div
+                              className={`progress-bar 
+                              ${project.progress < 30
+                                  ? "bg-danger"
+                                  : project.progress < 70
+                                    ? "bg-warning"
+                                    : "bg-success"
                                 }`}
-                            ></i>
-                          </button>
-                          {UpdateProjectPermission === 1 && <button
-                            className="btn btn-sm btn-secondary"
-                            onClick={() => handleEditProject(project)}
-                          >
-                            <i className="fas fa-edit"></i>
-                          </button>}
-                          {project.progress === 100 && (
-                            <button
-                              className="btn btn-sm btn-success"
-                              onClick={() => handleMarkComplete(project.id)}
+                              role="progressbar"
+                              style={{ width: `${project.progress}%` }}
+                              aria-valuenow={project.progress}
+                              aria-valuemin={0}
+                              aria-valuemax={100}
                             >
-                              <i className="fas fa-check"></i>
+                              {project.progress}%
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ width: "5%" }}>{formatCost(project.totalCost, project.currency)}</td>
+                        <td style={{ width: "5%" }}>
+                          <div className="d-flex gap-2">
+                            <button
+                              className="btn btn-sm btn-primary"
+                              onClick={() => handleViewProject(project)}
+                            >
+                              <i
+                                className={`fas ${expandedRow === project.id
+                                  ? "fa-chevron-up"
+                                  : "fa-eye"
+                                  }`}
+                              ></i>
                             </button>
-                          )}
-                          {DeleteProjectPermission === 1 && <button
-                            className="btn btn-sm btn-danger"
-                            onClick={() => handleDeleteProject(project.id)}
-                          >
-                            <i className="fas fa-trash"></i>
-                          </button>}
-                        </div>
-                      </td>
-                    </tr>
-
-                    {expandedRow === project.id && (
-                      <tr>
-                        <td colSpan={22} className="p-0 border-top-0">
-                          <div className="p-4">
-                            {/* Unsaved Changes Warning */}
-                            {hasUnsavedChanges && (
-                              <div className="alert alert-warning mb-3">
-                                <i className="fas fa-exclamation-triangle me-2"></i>
-                                You have unsaved changes. Please save or discard them.
-                              </div>
-                            )}
-
-                            {/* Project Files Header */}
-                            <div className="mb-4">
-                              <div className="d-flex justify-content-between align-items-center mb-3">
-                                <h5 className="mb-0">Project Files</h5>
-                                {selectedFiles.length > 0 && (
-                                  <span className="badge bg-primary">
-                                    {selectedFiles.length} files selected
-                                  </span>
-                                )}
-                              </div>
-
-                              {/* Files Table */}
-                              <div
-                                className="table-responsive"
-                                style={{
-                                  maxHeight: "300px",
-                                  overflowX: "auto",
-                                  scrollbarWidth: "none",
-                                  msOverflowStyle: "none",
-                                }}
-                                ref={filesTableContainerRef}
+                            {UpdateProjectPermission === 1 && <button
+                              className="btn btn-sm btn-secondary"
+                              onClick={() => handleEditProject(project)}
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>}
+                            {project.progress === 100 && (
+                              <button
+                                className="btn btn-sm btn-success"
+                                onClick={() => handleMarkComplete(project.id)}
                               >
-                                <table className="table table-sm table-striped table-hover" style={{ minWidth: "1300px" }}>
-                                  <thead>
-                                    <tr className="text-center">
-                                      <th>
-                                        <input type="checkbox" />
-                                      </th>
-                                      <th>File Name</th>
-                                      <th>Pages</th>
-                                      <th>Language</th>
-                                      <th>Application</th>
-                                      <th>Handler</th>
-                                      <th>QA Reviewer</th>
-                                      <th>Status</th>
-                                      <th>Preview</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {allFiles
-                                      .filter((file) => file.projectId === project.id)
-                                      .map((file) => (
-                                        <tr key={file.id}>
-                                          <td>
-                                            <input
-                                              type="checkbox"
-                                              className="form-check-input"
-                                              checked={selectedFiles.some((f) => f.id === file.id)}
-                                              onChange={() => toggleFileSelection(file)}
-                                            />
-                                          </td>
-                                          <td>{file.fileName}</td>
-                                          <td>{file.pages}</td>
-                                          <td>{file.languageName}</td>
-                                          <td>{file.applicationName}</td>
-                                          <td>
-                                            <select
-                                              className="form-select form-select-sm"
-                                              value={fileHandlers[file.id] || ""}
-                                              onChange={(e) => handleHandlerChange(file.id, e.target.value)}
-                                            >
-                                              <option value="">Not Assigned</option>
-                                              {members && members.length > 0 ? (
-                                                members.map((member) => (
-                                                  <option key={member.id} value={member.fullName}>
-                                                    {member.fullName}
-                                                  </option>
-                                                ))
-                                              ) : (
-                                                <option disabled>Loading members...</option>
-                                              )}
-                                            </select>
-                                          </td>
-                                          <td>
-                                            <select className="form-select form-select-sm">
-                                              <option value="">Not Assigned</option>
-                                              <option value="Sarah Williams">Sarah Williams</option>
-                                              <option value="David Brown">David Brown</option>
-                                              <option value="Emily Davis">Emily Davis</option>
-                                            </select>
-                                          </td>
-                                          <td>{file.status || "Pending"}</td>
-                                          <td>
-                                            {file.imageUrl ? (
-                                              <img
-                                                src={file.imageUrl}
-                                                alt={file.fileName}
-                                                style={{
-                                                  width: "60px",
-                                                  height: "40px",
-                                                  objectFit: "cover",
-                                                }}
-                                              />
-                                            ) : (
-                                              <span>No Preview</span>
-                                            )}
-                                          </td>
-                                        </tr>
-                                      ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-
-                            {/* Footer Row Controls */}
-                            <div className="row g-3 align-items-start mb-3">
-                              {/* Ready for QC Due */}
-                              <div className="col-12 col-sm-6 col-md-3">
-                                <label className="form-label">
-                                  Ready for QC Due <span className="text-danger">*</span>
-                                </label>
-
-                                {/* Custom Date Time Picker */}
-                                <div className="max-w-md mx-auto">
-                                  <div className="relative">
-                                    <input
-                                      ref={datePickerInputRef}
-                                      type="text"
-                                      value={formatDateTime()}
-                                      readOnly
-                                      onClick={() => {
-                                        if (!isOpen && datePickerInputRef.current) {
-                                          const rect = datePickerInputRef.current.getBoundingClientRect();
-                                          setDropdownPos({
-                                            top: rect.bottom + window.scrollY,
-                                            left: rect.left + window.scrollX,
-                                            width: rect.width,
-                                          });
-                                        }
-                                        setIsOpen((prev) => !prev);
-                                      }}
-                                      className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer form-control"
-                                      placeholder="Select date and time"
-                                    />
-                                  </div>
-
-                                  {isOpen && dropdownPos &&
-                                    ReactDOM.createPortal(
-                                      <div
-                                        className="calendar-dropdown"
-                                        style={{
-                                          position: "absolute",
-                                          top: dropdownPos.top,
-                                          left: dropdownPos.left,
-                                          zIndex: 2000,
-                                          width: dropdownPos.width,
-                                        }}
-                                      >
-                                        <div className="time-display">
-                                          <div className="time">
-                                            {selectedHour.toString().padStart(2, "0")}:
-                                            {selectedMinute.toString().padStart(2, "0")}
-                                          </div>
-                                          <div className="period">{isAM ? "AM" : "PM"}</div>
-                                          <div className="date">
-                                            {months[selectedMonth].substring(0, 3)}, {selectedYear}
-                                          </div>
-                                        </div>
-
-                                        <div className="time-calendar-container">
-                                          <div className="time-selector">
-                                            <div className="time-column">
-                                              <div className="time-column-label">Hour</div>
-                                              <div className="time-scroll">
-                                                <div className="time-options">
-                                                  {[
-                                                    12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-                                                  ].map((hour) => (
-                                                    <button
-                                                      key={hour}
-                                                      onClick={() => setSelectedHour(hour)}
-                                                      className={`time-option ${selectedHour === hour ? "selected-hour" : ""}`}
-                                                    >
-                                                      {hour.toString().padStart(2, "0")}
-                                                    </button>
-                                                  ))}
-                                                </div>
-                                              </div>
-                                            </div>
-
-                                            <div className="time-column">
-                                              <div className="time-column-label">Min</div>
-                                              <div className="time-scroll">
-                                                <div className="time-options">
-                                                  {[0, 15, 30, 45].map((minute) => (
-                                                    <button
-                                                      key={minute}
-                                                      onClick={() => setSelectedMinute(minute)}
-                                                      className={`time-option ${selectedMinute === minute ? "selected-minute" : ""}`}
-                                                    >
-                                                      {minute.toString().padStart(2, "0")}
-                                                    </button>
-                                                  ))}
-                                                </div>
-                                              </div>
-                                            </div>
-
-                                            <div className="time-column">
-                                              <div className="time-column-label">Period</div>
-                                              <div className="period-options">
-                                                <button onClick={() => setIsAM(true)} className={`period-option ${isAM ? "selected" : ""}`}>
-                                                  AM
-                                                </button>
-                                                <button onClick={() => setIsAM(false)} className={`period-option ${!isAM ? "selected" : ""}`}>
-                                                  PM
-                                                </button>
-                                              </div>
-                                            </div>
-                                          </div>
-
-                                          <div className="calendar-section">
-                                            <div className="month-nav">
-                                              <button onClick={handlePrevMonth}>
-                                                <ChevronLeft size={20} />
-                                              </button>
-                                              <h3>
-                                                {months[selectedMonth]}, {selectedYear}
-                                              </h3>
-                                              <button onClick={handleNextMonth}>
-                                                <ChevronRight size={20} />
-                                              </button>
-                                            </div>
-
-                                            <div className="weekdays">
-                                              {weekDays.map((day) => (
-                                                <div key={day} className="weekday">
-                                                  {day}
-                                                </div>
-                                              ))}
-                                            </div>
-
-                                            <div className="calendar-grid">
-                                              {calendarDays.map((dayObj, index) => (
-                                                <button
-                                                  key={index}
-                                                  onClick={() => dayObj.isCurrentMonth && setSelectedDate(dayObj.day)}
-                                                  className={`calendar-day ${dayObj.isCurrentMonth ? (selectedDate === dayObj.day ? "current-month selected" : "current-month") : "other-month"}`}
-                                                >
-                                                  {dayObj.day}
-                                                </button>
-                                              ))}
-                                            </div>
-
-                                            <div className="action-buttons">
-                                              <button
-                                                onClick={() => {
-                                                  setSelectedDate(new Date().getDate());
-                                                  setSelectedMonth(new Date().getMonth());
-                                                  setSelectedYear(new Date().getFullYear());
-                                                }}
-                                                className="action-button"
-                                              >
-                                                Clear
-                                              </button>
-                                              <button
-                                                onClick={() => {
-                                                  const today = new Date();
-                                                  setSelectedDate(today.getDate());
-                                                  setSelectedMonth(today.getMonth());
-                                                  setSelectedYear(today.getFullYear());
-                                                }}
-                                                className="action-button"
-                                              >
-                                                Today
-                                              </button>
-                                            </div>
-                                          </div>
-                                        </div>
-
-                                        <div className="done-section">
-                                          <button
-                                            onClick={() => {
-                                              const formattedDateTime = formatSelectedDateTime();
-                                              setReadyForQcDueInput(formattedDateTime);
-                                              setHasUnsavedChanges(true);
-                                              setIsOpen(false);
-                                            }}
-                                            className="done-button"
-                                          >
-                                            Done
-                                          </button>
-                                        </div>
-                                      </div>,
-                                      document.body
-                                    )}
-                                </div>
-
-                                {qcDueDelay && (
-                                  <small
-                                    className={`text-${qcDueDelay.includes("Delayed") ? "danger" : "success"}`}
-                                  >
-                                    {qcDueDelay}
-                                  </small>
-                                )}
-                              </div>
-
-                              {/* QC Allocated Hours */}
-                              <div className="col-12 col-sm-6 col-md-2">
-                                <label className="form-label">
-                                  QC Allocated Hours <span className="text-danger">*</span>
-                                </label>
-                                <input
-                                  type="number"
-                                  min="0"
-                                  step="0.25"
-                                  className="form-control"
-                                  placeholder="0"
-                                  value={qcAllocatedHours}
-                                  onChange={(e) => {
-                                    setQcAllocatedHours(e.target.value);
-                                    setHasUnsavedChanges(true);
-                                  }}
-                                  required
-                                />
-                                <div className="form-text">(in multiple of 0.25 only)</div>
-                              </div>
-
-                              {/* QC Due */}
-                              <div className="col-12 col-sm-6 col-md-2">
-                                <label className="form-label">QC Due</label>
-                                <input
-                                  type="text"
-                                  className="form-control"
-                                  placeholder="--"
-                                  value={calculateQCDue(readyForQcDueInput, qcAllocatedHours)}
-                                  disabled
-                                />
-                              </div>
-
-                              {/* Priority */}
-                              <div className="col-12 col-sm-6 col-md-2">
-                                <label className="form-label">Priority</label>
-                                <select
-                                  className="form-select"
-                                  value={priorityAll}
-                                  onChange={(e) => {
-                                    setPriorityAll(e.target.value);
-                                    setHasUnsavedChanges(true);
-                                  }}
-                                >
-                                  <option value="Low">Low</option>
-                                  <option value="Mid">Mid</option>
-                                  <option value="High">High</option>
-                                </select>
-                              </div>
-
-                              {/* Action Buttons */}
-                              <div className="col-12 col-md-3 d-flex flex-column flex-md-row justify-content-md-end align-items-stretch gap-2">
-                                <button
-                                  className="btn btn-success w-100"
-                                  onClick={handleUpdateProjectFiles}
-                                  disabled={isUpdating || !readyForQcDueInput || !qcAllocatedHours}
-                                >
-                                  {isUpdating ? (
-                                    <>
-                                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                                      Saving...
-                                    </>
-                                  ) : (
-                                    <>
-                                      <i className="fas fa-save me-2"></i>
-                                      Save
-                                    </>
-                                  )}
-                                </button>
-                                <button
-                                  className="btn btn-secondary w-100"
-                                  onClick={handleCloseProjectView}
-                                  disabled={isUpdating}
-                                >
-                                  <i className="fas fa-times me-2"></i>
-                                  Close
-                                </button>
-                              </div>
-                            </div>
-
-
-                            {/* Additional Info Section */}
-                            {hasUnsavedChanges && (
-                              <div className="row">
-                                <div className="col-12">
-                                  <div className="alert alert-info">
-                                    <i className="fas fa-info-circle me-2"></i>
-                                    <strong>Note:</strong> Make sure to save your changes before closing or switching to another project.
-                                  </div>
-                                </div>
-                              </div>
+                                <i className="fas fa-check"></i>
+                              </button>
                             )}
+                            {DeleteProjectPermission === 1 && <button
+                              className="btn btn-sm btn-danger"
+                              onClick={() => handleDeleteProject(project.id)}
+                            >
+                              <i className="fas fa-trash"></i>
+                            </button>}
                           </div>
                         </td>
                       </tr>
-                    )}
-                  </React.Fragment>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={22} className="text-center py-4">
-                    No projects found matching your criteria
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+
+                      {expandedRow === project.id && (
+                        <tr>
+                          <td colSpan={20} className="p-0 border-top-0">
+                            <div className="p-4">
+                              {/* Unsaved Changes Warning */}
+                              {hasUnsavedChanges && (
+                                <div className="alert alert-warning mb-3">
+                                  <i className="fas fa-exclamation-triangle me-2"></i>
+                                  You have unsaved changes. Please save or discard them.
+                                </div>
+                              )}
+
+                              {/* Project Files Header */}
+                              <div className="mb-4">
+                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                  <h5 className="mb-0">Project Files</h5>
+                                  {selectedFiles.length > 0 && (
+                                    <span className="badge bg-primary">
+                                      {selectedFiles.length} files selected
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Files Table */}
+                                <div
+                                  className="table-responsive"
+                                  style={{
+                                    maxHeight: "300px",
+                                    overflowX: "auto",
+                                    overflowY: "auto",
+                                    scrollbarWidth: "none",
+                                    msOverflowStyle: "none",
+                                  }}
+                                  ref={filesTableContainerRef}
+                                >
+                                  <table className="table table-sm table-striped table-hover" style={{ minWidth: "1300px" }}>
+                                    <thead>
+                                      <tr className="text-center">
+                                        <th>
+                                          <input type="checkbox" />
+                                        </th>
+                                        <th>File Name</th>
+                                        <th>Pages</th>
+                                        <th>Language</th>
+                                        <th>Application</th>
+                                        <th>Handler</th>
+                                        <th>QA Reviewer</th>
+                                        <th>Status</th>
+                                        <th>Preview</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {allFiles
+                                        .filter((file) => file.projectId === project.id)
+                                        .map((file) => (
+                                          <tr key={file.id}>
+                                            <td>
+                                              <input
+                                                type="checkbox"
+                                                className="form-check-input"
+                                                checked={selectedFiles.some((f) => f.id === file.id)}
+                                                onChange={() => toggleFileSelection(file)}
+                                              />
+                                            </td>
+                                            <td>{file.fileName}</td>
+                                            <td>{file.pages}</td>
+                                            <td>{file.languageName}</td>
+                                            <td>{file.applicationName}</td>
+                                            <td>
+                                              <select
+                                                className="form-select form-select-sm"
+                                                value={fileHandlers[file.id] || ""}
+                                                onChange={(e) => handleHandlerChange(file.id, e.target.value)}
+                                              >
+                                                <option value="">Not Assigned</option>
+                                                {members && members.length > 0 ? (
+                                                  members.map((member) => (
+                                                    <option key={member.id} value={member.fullName}>
+                                                      {member.fullName}
+                                                    </option>
+                                                  ))
+                                                ) : (
+                                                  <option disabled>Loading members...</option>
+                                                )}
+                                              </select>
+                                            </td>
+                                            <td>
+                                              <select className="form-select form-select-sm">
+                                                <option value="">Not Assigned</option>
+                                                <option value="Sarah Williams">Sarah Williams</option>
+                                                <option value="David Brown">David Brown</option>
+                                                <option value="Emily Davis">Emily Davis</option>
+                                              </select>
+                                            </td>
+                                            <td>{file.status || "Pending"}</td>
+                                            <td>
+                                              {file.imageUrl ? (
+                                                <img
+                                                  src={file.imageUrl}
+                                                  alt={file.fileName}
+                                                  style={{
+                                                    width: "60px",
+                                                    height: "40px",
+                                                    objectFit: "cover",
+                                                  }}
+                                                />
+                                              ) : (
+                                                <span>No Preview</span>
+                                              )}
+                                            </td>
+                                          </tr>
+                                        ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+
+                              {/* Footer Row Controls */}
+                              <div className="row g-3 align-items-start mb-3">
+                                {/* Ready for QC Due */}
+                                <div className="col-12 col-sm-6 col-md-3">
+                                  <label className="form-label">
+                                    Ready for QC Due <span className="text-danger">*</span>
+                                  </label>
+
+                                  {/* Custom Date Time Picker */}
+                                  <div className="max-w-md mx-auto">
+                                    <div className="relative">
+                                      <input
+                                        ref={datePickerInputRef}
+                                        type="text"
+                                        value={formatDateTime(readyForQcDueInput)}
+                                        readOnly
+                                        onClick={() => {
+                                          if (!isOpen && datePickerInputRef.current) {
+                                            const rect = datePickerInputRef.current.getBoundingClientRect();
+                                            setDropdownPos({
+                                              top: rect.bottom + window.scrollY,
+                                              left: rect.left + window.scrollX,
+                                              width: rect.width,
+                                            });
+                                          }
+                                          setIsOpen((prev) => !prev);
+                                        }}
+                                        className="bg-card w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer form-control"
+                                        placeholder="Select date and time"
+                                      />
+                                    </div>
+
+                                    {isOpen && dropdownPos &&
+                                      ReactDOM.createPortal(
+                                        <div
+                                          className="calendar-dropdown"
+                                          style={{
+                                            position: "absolute",
+                                            top: dropdownPos.top,
+                                            left: dropdownPos.left,
+                                            zIndex: 2000,
+                                            width: dropdownPos.width,
+                                          }}
+                                        >
+                                          <div className="time-display">
+                                            <div className="time">
+                                              {selectedHour.toString().padStart(2, "0")}:
+                                              {selectedMinute.toString().padStart(2, "0")}
+                                            </div>
+                                            <div className="period">{isAM ? "AM" : "PM"}</div>
+                                            <div className="date">
+                                              {months[selectedMonth].substring(0, 3)}, {selectedYear}
+                                            </div>
+                                          </div>
+
+                                          <div className="time-calendar-container">
+                                            <div className="time-selector">
+                                              <div className="time-column">
+                                                <div className="time-column-label">Hour</div>
+                                                <div className="time-scroll">
+                                                  <div className="time-options">
+                                                    {[
+                                                      12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+                                                    ].map((hour) => (
+                                                      <button
+                                                        key={hour}
+                                                        onClick={() => setSelectedHour(hour)}
+                                                        className={`time-option ${selectedHour === hour ? "selected-hour" : ""}`}
+                                                      >
+                                                        {hour.toString().padStart(2, "0")}
+                                                      </button>
+                                                    ))}
+                                                  </div>
+                                                </div>
+                                              </div>
+
+                                              <div className="time-column">
+                                                <div className="time-column-label">Min</div>
+                                                <div className="time-scroll">
+                                                  <div className="time-options">
+                                                    {[0, 15, 30, 45].map((minute) => (
+                                                      <button
+                                                        key={minute}
+                                                        onClick={() => setSelectedMinute(minute)}
+                                                        className={`time-option ${selectedMinute === minute ? "selected-minute" : ""}`}
+                                                      >
+                                                        {minute.toString().padStart(2, "0")}
+                                                      </button>
+                                                    ))}
+                                                  </div>
+                                                </div>
+                                              </div>
+
+                                              <div className="time-column">
+                                                <div className="time-column-label">Period</div>
+                                                <div className="period-options">
+                                                  <button onClick={() => setIsAM(true)} className={`period-option ${isAM ? "selected" : ""}`}>
+                                                    AM
+                                                  </button>
+                                                  <button onClick={() => setIsAM(false)} className={`period-option ${!isAM ? "selected" : ""}`}>
+                                                    PM
+                                                  </button>
+                                                </div>
+                                              </div>
+                                            </div>
+
+                                            <div className="calendar-section">
+                                              <div className="month-nav">
+                                                <button onClick={handlePrevMonth}>
+                                                  <ChevronLeft size={20} />
+                                                </button>
+                                                <h3>
+                                                  {months[selectedMonth]}, {selectedYear}
+                                                </h3>
+                                                <button onClick={handleNextMonth}>
+                                                  <ChevronRight size={20} />
+                                                </button>
+                                              </div>
+
+                                              <div className="weekdays">
+                                                {weekDays.map((day) => (
+                                                  <div key={day} className="weekday">
+                                                    {day}
+                                                  </div>
+                                                ))}
+                                              </div>
+
+                                              <div className="calendar-grid">
+                                                {calendarDays.map((dayObj, index) => (
+                                                  <button
+                                                    key={index}
+                                                    onClick={() => dayObj.isCurrentMonth && setSelectedDate(dayObj.day)}
+                                                    className={`calendar-day ${dayObj.isCurrentMonth ? (selectedDate === dayObj.day ? "current-month selected" : "current-month") : "other-month"}`}
+                                                  >
+                                                    {dayObj.day}
+                                                  </button>
+                                                ))}
+                                              </div>
+
+                                              <div className="action-buttons">
+                                                <button
+                                                  onClick={() => {
+                                                    setSelectedDate(new Date().getDate());
+                                                    setSelectedMonth(new Date().getMonth());
+                                                    setSelectedYear(new Date().getFullYear());
+                                                  }}
+                                                  className="action-button"
+                                                >
+                                                  Clear
+                                                </button>
+                                                <button
+                                                  onClick={() => {
+                                                    const today = new Date();
+                                                    setSelectedDate(today.getDate());
+                                                    setSelectedMonth(today.getMonth());
+                                                    setSelectedYear(today.getFullYear());
+                                                  }}
+                                                  className="action-button"
+                                                >
+                                                  Today
+                                                </button>
+                                              </div>
+                                            </div>
+                                          </div>
+
+                                          <div className="done-section">
+                                            <button
+                                              onClick={() => {
+                                                const formattedDateTime = formatSelectedDateTime();
+                                                setReadyForQcDueInput(formattedDateTime);
+                                                setHasUnsavedChanges(true);
+                                                setIsOpen(false);
+                                              }}
+                                              className="done-button"
+                                            >
+                                              Done
+                                            </button>
+                                          </div>
+                                        </div>,
+                                        document.body
+                                      )}
+                                  </div>
+
+                                  {qcDueDelay && (
+                                    <small
+                                      className={`text-${qcDueDelay.includes("Delayed") ? "danger" : "success"}`}
+                                    >
+                                      {qcDueDelay}
+                                    </small>
+                                  )}
+                                </div>
+
+                                {/* QC Allocated Hours */}
+                                <div className="col-12 col-sm-6 col-md-2">
+                                  <label className="form-label">
+                                    QC Allocated Hours <span className="text-danger">*</span>
+                                  </label>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="0.25"
+                                    className="form-control"
+                                    placeholder="0"
+                                    value={qcAllocatedHours}
+                                    onChange={(e) => {
+                                      setQcAllocatedHours(e.target.value);
+                                      setHasUnsavedChanges(true);
+                                    }}
+                                    required
+                                  />
+                                  <div className="form-text">(in multiple of 0.25 only)</div>
+                                </div>
+
+                                {/* QC Due */}
+                                <div className="col-12 col-sm-6 col-md-2">
+                                  <label className="form-label">QC Due</label>
+                                  <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="--"
+                                    value={calculateQCDue(readyForQcDueInput, qcAllocatedHours)}
+                                    disabled
+                                  />
+                                </div>
+
+                                {/* Priority */}
+                                <div className="col-12 col-sm-6 col-md-2">
+                                  <label className="form-label">Priority</label>
+                                  <select
+                                    className="form-select"
+                                    value={priorityAll}
+                                    onChange={(e) => {
+                                      setPriorityAll(e.target.value);
+                                      setHasUnsavedChanges(true);
+                                    }}
+                                  >
+                                    <option value="Low">Low</option>
+                                    <option value="Mid">Mid</option>
+                                    <option value="High">High</option>
+                                  </select>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="col-12 col-md-3 d-flex flex-column flex-md-row justify-content-md-end align-items-stretch gap-2">
+                                  <button
+                                    className="btn btn-success w-100"
+                                    onClick={handleUpdateProjectFiles}
+                                    disabled={isUpdating || !readyForQcDueInput || !qcAllocatedHours}
+                                  >
+                                    {isUpdating ? (
+                                      <>
+                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Saving...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <i className="fas fa-save me-2"></i>
+                                        Save
+                                      </>
+                                    )}
+                                  </button>
+                                  <button
+                                    className="btn btn-secondary w-100"
+                                    onClick={handleCloseProjectView}
+                                    disabled={isUpdating}
+                                  >
+                                    <i className="fas fa-times me-2"></i>
+                                    Close
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Additional Info Section */}
+                              {hasUnsavedChanges && (
+                                <div className="row">
+                                  <div className="col-12">
+                                    <div className="alert alert-info">
+                                      <i className="fas fa-info-circle me-2"></i>
+                                      <strong>Note:</strong> Make sure to save your changes before closing or switching to another project.
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={20} className="text-center py-4">
+                      No projects found matching your criteria
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      {/* Fake scrollbar - positioned at the bottom of the webpage */}
-
-    </div>
+      {/* Fixed Fake Scrollbar at the bottom of the viewport */}
+      {showFakeScrollbar && (
+        <div
+          ref={fakeScrollbarRef}
+          style={{
+            position: 'fixed',
+            bottom: '0',
+            left: '290px',
+            right: '3px',
+            height: '16px',
+            backgroundColor: '#f5f5f5',
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            borderTop: '1px solid #dee2e6',
+            zIndex: 1050,
+            cursor: 'pointer'
+          }}
+        >
+          <div style={{ height: '1px' }}></div>
+        </div>
+      )}
+    </>
   );
 };
 

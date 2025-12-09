@@ -17,21 +17,40 @@ const useSyncScroll = () => {
     const fakeScrollbar = fakeScrollbarRef.current;
 
     if (scrollContainer && fakeScrollbar) {
-      fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
-
-      const syncScroll = () => {
-        fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
+      // Set fake scrollbar width to match scroll container
+      fakeScrollbar.style.width = `${scrollContainer.offsetWidth}px`;
+      
+      const updateFakeScrollbarWidth = () => {
+        if (scrollContainer && fakeScrollbar) {
+          fakeScrollbar.style.width = `${scrollContainer.offsetWidth}px`;
+        }
       };
+
+      // Sync scroll from table to fake scrollbar
+      const syncScroll = () => {
+        if (fakeScrollbar) {
+          fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
+        }
+      };
+      
+      // Sync scroll from fake scrollbar to table
       const syncFakeScroll = () => {
-        scrollContainer.scrollLeft = fakeScrollbar.scrollLeft;
+        if (scrollContainer) {
+          scrollContainer.scrollLeft = fakeScrollbar.scrollLeft;
+        }
       };
 
       scrollContainer.addEventListener("scroll", syncScroll);
       fakeScrollbar.addEventListener("scroll", syncFakeScroll);
+      window.addEventListener("resize", updateFakeScrollbarWidth);
+
+      // Initial sync
+      fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
 
       return () => {
         scrollContainer.removeEventListener("scroll", syncScroll);
         fakeScrollbar.removeEventListener("scroll", syncFakeScroll);
+        window.removeEventListener("resize", updateFakeScrollbarWidth);
       };
     }
   }, []);
@@ -46,17 +65,48 @@ const MainDashboard = () => {
   const [activeFilter, setActiveFilter] = useState(null);
   const [projects, setProjects] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
+  const [scrollKey, setScrollKey] = useState(Date.now()); // Force re-render when table changes
 
-  // Only one instance for all tables
-  const {
-    scrollContainerRef,
-    fakeScrollbarRef,
-  } = useSyncScroll();
+  // Create a new ref instance for each table
+  const scrollContainerRef = useRef(null);
+  const fakeScrollbarRef = useRef(null);
 
   useEffect(() => {
     setProjects(ProjectsData);
     setFilteredProjects(ProjectsData);
   }, []);
+
+  // Re-initialize sync scroll when activeFilter changes
+  useEffect(() => {
+    if (activeFilter && scrollContainerRef.current && fakeScrollbarRef.current) {
+      const scrollContainer = scrollContainerRef.current;
+      const fakeScrollbar = fakeScrollbarRef.current;
+
+      // Set fake scrollbar width
+      fakeScrollbar.style.width = `${scrollContainer.offsetWidth}px`;
+      
+      // Sync scroll from table to fake scrollbar
+      const syncScroll = () => {
+        fakeScrollbar.scrollLeft = scrollContainer.scrollLeft;
+      };
+      
+      // Sync scroll from fake scrollbar to table
+      const syncFakeScroll = () => {
+        scrollContainer.scrollLeft = fakeScrollbar.scrollLeft;
+      };
+
+      scrollContainer.addEventListener("scroll", syncScroll);
+      fakeScrollbar.addEventListener("scroll", syncFakeScroll);
+
+      // Update scroll key to force re-render
+      setScrollKey(Date.now());
+
+      return () => {
+        scrollContainer.removeEventListener("scroll", syncScroll);
+        fakeScrollbar.removeEventListener("scroll", syncFakeScroll);
+      };
+    }
+  }, [activeFilter]);
 
   const handleView = (project) => {
     setSelectedProject(project);
@@ -300,6 +350,46 @@ const MainDashboard = () => {
           .hide-scrollbar::-webkit-scrollbar {
             display: none;
           }
+          
+          /* Fake scrollbar styles */
+          .fake-scrollbar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            height: 16px;
+            z-index: 1050;
+            background: #2a2a3a;
+            border-top: 1px solid #444;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+          }
+          
+          .fake-scrollbar-track {
+            height: 100%;
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+          }
+          
+          .fake-scrollbar-track::-webkit-scrollbar {
+            height: 12px;
+          }
+          
+          .fake-scrollbar-track::-webkit-scrollbar-track {
+            background: #3a3a4a;
+            border-radius: 10px;
+          }
+          
+          .fake-scrollbar-track::-webkit-scrollbar-thumb {
+            background: #6c757d;
+            border-radius: 10px;
+            min-width: 100px;
+          }
+          
+          .fake-scrollbar-track::-webkit-scrollbar-thumb:hover {
+            background: #5a6268;
+          }
         `}
       </style>
 
@@ -329,26 +419,28 @@ const MainDashboard = () => {
         ))}
       </Row>
 
-      {/* Fake scrollbar - only render once */}
+      {/* Fake scrollbar - positioned fixed at bottom */}
       <div
         ref={fakeScrollbarRef}
+        className="fake-scrollbar"
         style={{
-          overflowX: "auto",
-          overflowY: "hidden",
-          height: 16,
-          position: "fixed",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1050,
-          display: activeFilter ? "block" : "none", // Only show when a table is visible
+          display: activeFilter ? "block" : "none",
+          width: scrollContainerRef.current ? `${scrollContainerRef.current.offsetWidth}px` : "100%",
+          maxWidth: "calc(100% - 2rem)",
         }}
       >
-        <div style={{ width: "2000px", height: 1 }} />
+        <div className="fake-scrollbar-track">
+          <div style={{ 
+            width: scrollContainerRef.current ? `${scrollContainerRef.current.scrollWidth}px` : "2000px", 
+            height: "1px" 
+          }} />
+        </div>
       </div>
 
+      {/* Tables with scroll sync */}
       {activeFilter === "active" && (
         <ProjectTables
+          key={`active-${scrollKey}`}
           filteredProjects={filteredProjects}
           handleView={handleView}
           title="Active Projects"
@@ -358,6 +450,7 @@ const MainDashboard = () => {
 
       {activeFilter === "nearDue" && (
         <ProjectTables
+          key={`nearDue-${scrollKey}`}
           filteredProjects={filteredProjects}
           handleView={handleView}
           title="Near Due Projects (Next 30 Minutes)"
@@ -367,6 +460,7 @@ const MainDashboard = () => {
 
       {activeFilter === "overdue" && (
         <ProjectTables
+          key={`overdue-${scrollKey}`}
           filteredProjects={filteredProjects}
           handleView={handleView}
           title="Overdue Projects"
