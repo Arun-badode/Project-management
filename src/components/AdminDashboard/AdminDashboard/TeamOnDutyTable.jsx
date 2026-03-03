@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import BASE_URL from "../../../config";
 
 const TeamOnDutyTable = ({ scrollContainerRef }) => {
   const [teamData, setTeamData] = useState([]);
@@ -25,7 +26,7 @@ const TeamOnDutyTable = ({ scrollContainerRef }) => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "https://eminoids-backend-production.up.railway.app/api/adminDashboard/getAdminDashboardData",
+          `${BASE_URL}adminDashboard/getAdminDashboardData`,
           {
             headers: {
               "Authorization": `Bearer ${token}`

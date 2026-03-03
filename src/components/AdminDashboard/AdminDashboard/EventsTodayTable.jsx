@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import BASE_URL from "../../../config";
 
 const EventsTodayTable = ({ scrollContainerRef }) => {
   const [events, setEvents] = useState([]);
@@ -13,7 +14,7 @@ const EventsTodayTable = ({ scrollContainerRef }) => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "https://eminoids-backend-production.up.railway.app/api/adminDashboard/getAdminDashboardData",
+          `${BASE_URL}adminDashboard/getAdminDashboardData`,
           {
             headers: {
               "Authorization": `Bearer ${token}`
