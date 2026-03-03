@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, Spinner } from "react-bootstrap";
 import axios from "axios";
+import BASE_URL from "../../../config";
 
 const ProjectCards = ({
   key,
@@ -20,8 +21,8 @@ const ProjectCards = ({
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "https://eminoids-backend-production.up.railway.app/api/adminDashboard/getAdminDashboardData"
-          , {
+          `${BASE_URL}adminDashboard/getAdminDashboardData`,
+          {
             headers: {
               "Authorization": `Bearer ${token}`
             }
